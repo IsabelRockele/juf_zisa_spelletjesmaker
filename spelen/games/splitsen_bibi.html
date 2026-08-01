@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Splitsen met Bibi</title>
+  <link rel="stylesheet" href="splitsen_bibi.css" />
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="pijl-links-boven">
+      <button onclick="location.href='splits_spelletjes.html'" class="btn-actie btn-terug">
+        <img src="tafels_afbeeldingen/pijl.png" alt="pijl" style="height: 24px;" />
+        Terug
+      </button>
+    </div>
+
+    <div class="keuze-blok">
+      <img src="leerjaar1_afbeeldingen/splitsspel.png" alt="Splitsspel" class="zisa-afbeelding" />
+      <h2>Kies een splitsing</h2>
+      <div class="aanduiding" id="meldingSplitsing">Nog niet gekozen</div>
+      <div class="opties">
+        <button class="keuze" data-max="5">Splitsen tot 5</button>
+        <button class="keuze" data-max="6">Splitsen tot 6</button>
+        <button class="keuze" data-max="7">Splitsen tot 7</button>
+        <button class="keuze" data-max="8">Splitsen tot 8</button>
+        <button class="keuze" data-max="9">Splitsen tot 9</button>
+        <button class="keuze" data-max="10">Splitsen tot 10</button>
+      </div>
+
+      <div class="start-blok">
+        <button id="startSpel" disabled>Maak eerst een keuze</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="splitsen_bibi.js"></script>
+  <script src="force-start.js"></script>
+</body>
+</html>

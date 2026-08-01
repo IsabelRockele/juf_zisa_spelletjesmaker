@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bibi's Honingpot Vullen Spel</title>
+    <link rel="stylesheet" href="honingpot_vullen_spel.css">
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div id="game-screen">
+            <div class="spel-boven-links">
+                <div class="spel-knoppen">
+                    <a id="opnieuw-knop" class="btn-actie btn-opnieuw">Opnieuw</a>
+                    <a href="honingpot_vullen_keuze.html" class="btn-actie btn-terug">Terug</a>
+                </div>
+                <div class="oefening-sectie">
+                    <div id="oefening"></div>
+                    <input type="number" id="antwoord-input" placeholder="Antwoord" inputmode="numeric" /> 
+                    <div class="toetsenbord">
+                        <button data-value="1">1</button>
+                        <button data-value="2">2</button>
+                        <button data-value="3">3</button>
+                        <button data-value="4">4</button>
+                        <button data-value="5">5</button>
+                        <button data-value="6">6</button>
+                        <button data-value="7">7</button>
+                        <button data-value="8">8</button>
+                        <button data-value="9">9</button>
+                        <button data-value="0">0</button>
+                        <button data-value="delete" class="delete-button">Wissen</button>
+                        <button data-value="enter" class="enter-button">OK</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="honingpot-container">
+                <img src="leerjaar1_afbeeldingen/volle_honingpot.png" alt="Volle Honingpot" id="volle-pot-img" />
+                <img src="leerjaar1_afbeeldingen/lege_honingpot.png" alt="Lege Honingpot Overlay" id="lege-pot-overlay-img" />
+            </div>
+            
+            <div id="honingdruppel-container"></div>
+
+            <div id="fout-spreekballon" class="feedback-popup hidden">
+                <p></p>
+            </div>
+
+            <div id="juf-bibi-popup" class="feedback-popup hidden">
+                <img src="leerjaar1_afbeeldingen/juf_bibi.png" alt="Juf Bibi" />
+                <p></p>
+            </div>
+            </div>
+
+        <div id="feedback-screen" class="hidden">
+            <div class="feedback-content">
+                <p id="feedback-message"></p>
+                <img src="" alt="Feedback Afbeelding" id="feedback-image" />
+                <button id="feedback-restart-button">Nog eens proberen!</button>
+                <button id="feedback-menu-button" class="btn-actie btn-terug" style="margin-top: 15px;">Naar menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="honingpot_vullen_spel.js"></script>
+</body>
+</html>

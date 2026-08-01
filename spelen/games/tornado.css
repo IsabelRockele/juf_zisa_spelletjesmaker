@@ -1,0 +1,285 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: url('leerjaar3_afbeeldingen/achtergrond_woestijn.png') no-repeat center center fixed;
+  background-size: cover;
+  font-family: sans-serif;
+  overflow: hidden;
+  position: relative; /* Behoud deze om spel-container relatief te maken */
+}
+
+.spel-container {
+  position: relative; /* Belangrijk voor z-index en layout */
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.oefening {
+  font-size: 2rem;
+  font-weight: bold;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-left: 20px;
+  min-width: 200px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.tornado-zone {
+  position: relative;
+  width: 60%;
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 600px;
+}
+
+.karl {
+  width: 300px;
+  position: absolute; /* Nu absoluut binnen zijn container */
+  left: 70%;
+  top: 60%;
+  transform: translate(-50%, -50%); /* Centreer Karl in cactus-container */
+  z-index: 100; /* Karl's nieuwe z-index, boven/onder cactussen */
+  pointer-events: none;
+  transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+
+#cactus-container {
+  position: absolute;
+  width: 400px; /* Grootte van de cirkel */
+  height: 400px; /* Grootte van de cirkel */
+  left: 50%; /* Terug naar 50% en de JS zal de offset toevoegen voor verplaatsing */
+  top: 40%;  /* Terug naar 50% en de JS zal de offset toevoegen voor verplaatsing */
+  transform: translate(-50%, -50%); /* Houdt het element gecentreerd t.o.v. de nieuwe left/top */
+  pointer-events: none;
+  z-index: 50; /* Deze z-index maakt niet meer uit voor de stapelvolgorde tussen Karl en cactussen, want Karl zit erin */
+}
+
+.cactus {
+  position: absolute;
+  /* BELANGRIJK: We verwijderen left/top hier en laten JS de absolute pixels bepalen.
+     De transform: translate(-50%, -50%) HIER is om de *inhoud* (afbeelding en tekst)
+     van de cactus div te centreren binnen die div, voordat de JS-positie erbij komt. */
+  transform: translate(-50%, -50%); /* Houdt de inhoud van de cactus div gecentreerd */
+  width: 160px; /* Grootte van individuele cactussen */
+  height: 160px; /* Grootte van individuele cactussen */
+  background: url('leerjaar3_afbeeldingen/cactus_woestijn.png') no-repeat center/contain;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.8rem;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  /* transition: transform 0.1s ease-out; // Deze kan blijven voor hover of verdere animaties */
+  user-select: none;
+}
+
+.cactus:hover {
+    transform: scale(1.1) rotate(5deg) !important;
+}
+
+
+/* Nieuwe UI elementen */
+.hidden {
+    display: none !important;
+}
+
+.game-ui {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.knoppen-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-actie {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-actie:active {
+    transform: translateY(2px);
+}
+
+.btn-opnieuw {
+    background-color: #2e7d32;
+}
+
+.btn-opnieuw:hover {
+    background-color: #388e3c;
+}
+
+.btn-terug {
+    background-color: #c62828;
+}
+
+.btn-terug:hover {
+    background-color: #d32f2f;
+}
+
+#scorebord {
+    display: flex;
+    gap: 20px;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.score-kolom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.score-kolom img {
+    width: 50px;
+    height: auto;
+}
+
+#scoreJuist {
+    color: #2e7d32;
+}
+
+#scoreFout {
+    color: #c62828;
+}
+
+/* Karl's Speech Bubble - NU POSITION: FIXED */
+#speech-bubble {
+    position: fixed; /* AANGEPAST NAAR FIXED */
+    background-color: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 2px solid black;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: black;
+    z-index: 200; /* Hoger dan andere elementen */
+    white-space: nowrap;
+    animation: fadeInOut 2s forwards;
+    /* Belangrijk: Geen initial left/top hier, wordt door JS gezet */
+}
+
+#speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 20%;
+    transform: translateX(-50%);
+    border-width: 10px 8px 0 8px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}
+
+#speech-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: -7px;
+    left: 20%;
+    transform: translateX(-50%);
+    border-width: 8px 6px 0 6px;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+    z-index: 1;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+
+/* Eind-feedback scherm */
+#eind-feedback {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 250; /* Nog hoger dan speech bubble */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.feedback-content {
+   text-align: center;
+    background-color: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    max-width: 600px;
+    
+    /* NIEUWE TOEVOEGING: VERPLAATS INHOUD NAAR BENEDEN */
+    transform: translateY(60%); /* Verschuif de content 15% van zijn EIGEN hoogte naar beneden */
+    /* Pas het percentage aan naar wens (bijv. 20%, 30% voor nog lager) */
+}
+
+#feedback-afbeelding {
+    max-width: 300px;
+    height: auto;
+    margin-bottom: -50px;
+}
+
+#feedback-tekst {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+#eind-feedback .knoppen-container {
+    flex-direction: row;
+    justify-content: center;
+}
+
+/* Karl animaties */
+@keyframes fly-away-karl {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(150vw, -100vh) scale(0.1); opacity: 0; } /* Vliegt weg naar rechtsboven vanaf gecentreerd punt */
+}
+
+@keyframes cactus-shake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-5px, -5px); }
+    50% { transform: translate(5px, 5px); }
+    75% { transform: translate(-5px, 5px); }
+}
+
+.cactus.shake {
+    animation: cactus-shake 0.2s ease-in-out 3;
+}

@@ -1,0 +1,153 @@
+/* =================================================================== */
+/* memory.css - OPGESCHOONDE VERSIE                */
+/* =================================================================== */
+
+/* --- BASISSTIJLEN --- */
+
+.speler {
+  padding: 8px;
+  border-radius: 12px;
+  margin-bottom: 40px;
+  font-size: 2.2em;
+  background-color: #f1f1f1;
+  transition: background-color 0.3s ease;
+  border: 2px solid #ccc;
+  width: 240px;
+  box-shadow: 3px 3px 10px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.speler-1 { background-color: #ffe3e3; }
+.speler-2 { background-color: #e3f7ff; }
+
+.speler.actief {
+  background-color: #ffb3b3 !important;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+}
+
+#score-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  position: fixed;
+  right: 40px;
+  top: 160px;
+  gap: 20px;
+  z-index: 10;
+}
+
+.kaart-stapel {
+  position: relative;
+  height: 80px;
+  margin-top: 10px;
+}
+
+.kaart-stapel .kaartje {
+  width: 40px;
+  height: 60px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateY(var(--offset));
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+button {
+  background-color: #ccc;
+  color: #fff;
+  cursor: not-allowed;
+  transition: background-color 0.3s;
+}
+button:enabled { background-color: #00b4d8; cursor: pointer; }
+button:hover:enabled, button:active:enabled { background-color: #0099c4; }
+button.keuze, button.tafel, button.spelers { background-color: #00b4d8; color: white; cursor: pointer; }
+button.keuze.active, button.tafel.active, button.spelers.active { background-color: #0077b6; }
+button.btn-opnieuw { background-color: #2e7d32 !important; color: #fff !important; cursor: pointer; }
+button.btn-opnieuw:hover, button.btn-opnieuw:focus { background-color: #219150 !important; }
+button.btn-terug { background-color: #b71c1c !important; color: #fff !important; cursor: pointer; }
+button.btn-terug:hover, button.btn-terug:focus { background-color: #e53935 !important; }
+
+
+/* =================================================================== */
+/* MEDIA QUERIES - GESTRUCTUREERD                     */
+/* =================================================================== */
+
+
+/* --- Regel voor Portretmodus of smalle schermen (< 1024px) --- */
+@media screen and (max-width: 1023px) {
+  #score-container {
+    position: absolute !important;
+    top: 120px !important;
+    left: 10px !important;
+    right: auto !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 15px !important;
+  }
+  .speler {
+    text-align: left !important;
+  }
+}
+
+
+/* --- Regel voor Landscape Tablets (Galaxy Tab, oudere iPads) --- */
+/* Breedte: 1024px, Hoogte: lager dan 800px */
+@media screen and (width: 1024px) and (max-height: 799px) and (orientation: landscape) {
+  .spelbord {
+    position: absolute !important;
+    left: 200px !important;
+    top: -40px !important;
+  }
+  #score-container {
+    position: absolute !important;
+    left: -40px !important;
+    top: 20px !important;
+    right: auto !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}
+
+
+/* --- Regel voor iPad Mini & Air (en vergelijkbare) --- */
+/* Breedte: tussen 1100px en 1280px */
+@media screen and (min-width: 1100px) and (max-width: 1280px) and (orientation: landscape) {
+  .spelbord {
+    position: absolute !important;
+    left: 200px !important;
+    top: -50px !important;
+  }
+  #score-container {
+    position: absolute !important;
+    left: -80px !important;
+    top: 50px !important;
+    right: auto !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}
+
+/* --- Regel voor de grote iPad Pro (12.9 inch) --- */
+/* Breedte: groter dan 1300px */
+@media screen and (min-width: 1300px) and (orientation: landscape) {
+  .spelbord {
+    position: absolute !important;
+    left: 120px !important;
+    top: 20px !important;
+  }
+  #score-container {
+    position: absolute !important;
+    left: -200px !important;
+    top: 40px !important;
+    right: auto !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}

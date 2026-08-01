@@ -1,0 +1,681 @@
+/* honingpot_vullen_spel.css */
+
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f7e0a8; /* Lichte honingkleur achtergrond */
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, #f7e0a8 0%, #edd88b 100%); /* Zachte overgang voor achtergrond */
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column; /* Houdt selectie/game scherm in het midden */
+    align-items: center;
+    justify-content: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* --- Algemene Knoppen & UI Stijlen (voor zowel keuze- als speelscherm) --- */
+.btn-actie {
+    padding: 12px 25px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    white-space: nowrap;
+    width: 150px; /* Vaste breedte voor knoppen */
+}
+
+.btn-actie:active {
+    transform: translateY(2px);
+}
+
+.btn-opnieuw {
+    background-color: #2e7d32; /* Groen */
+}
+
+.btn-terug {
+    background-color: #b71c1c; /* Rood */
+}
+
+.btn-opnieuw:hover {
+    background-color: #388e3c;
+}
+
+.btn-terug:hover {
+    background-color: #d32f2f;
+}
+
+/* --- Keuzescherm specifieke stijlen --- */
+#selection-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.keuze-blok {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.menu-afbeelding {
+    max-width: 200px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
+
+.opties {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.keuze {
+    padding: 15px 25px;
+    font-size: 1.2em;
+    color: #333;
+    background-color: #FFEBCD;
+    border: 2px solid #D2B48C;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+}
+
+.keuze:hover {
+    background-color: #FFEFD5;
+    transform: translateY(-3px);
+    border-color: #8B4513;
+}
+
+.keuze.active {
+    background-color: #F4A460;
+    color: white;
+    border-color: #CD853F;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.start-blok {
+    margin-top: 30px;
+}
+
+#start-spel-knop {
+    padding: 15px 40px;
+    font-size: 1.4em;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+#start-spel-knop:hover:not(:disabled) {
+    background-color: #45a049;
+    transform: translateY(-3px);
+}
+
+#start-spel-knop:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+
+/* --- SPELSCHERM STIJLEN - BASIS (Desktop Large) --- */
+#game-screen {
+    display: flex;
+    flex-direction: row; /* UI links, Pot rechts */
+    align-items: flex-start; /* Lijn bovenaan uit */
+    justify-content: space-between; /* Ruimte tussen UI en Pot */
+    width: 100%;
+    height: 100%;
+    position: relative; /* Belangrijk voor absolute positionering van pop-ups en pot */
+    padding: 40px;
+    box-sizing: border-box;
+    --druppel-offset-x: 0px; /* Standaard geen offset */
+}
+
+.spel-boven-links {
+    display: flex;
+    flex-direction: column; /* Knoppen en oefening onder elkaar */
+    align-items: flex-start; /* Alles binnen deze sectie links uitlijnen */
+    gap: 30px;
+    z-index: 100; /* Zorg dat de UI boven de pot ligt */
+}
+
+.spel-knoppen {
+    display: flex;
+    flex-direction: column; /* Knoppen onder elkaar */
+    gap: 15px;
+}
+
+.honingpot-container {
+    position: absolute; /* Pot zweeft over achtergrond */
+    top: 56%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 650px;
+    height: 866px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    overflow: hidden;
+    z-index: 50; /* Onder UI, boven achtergrond */
+}
+
+/* Algemene stijl voor potafbeeldingen in de container */
+#volle-pot-img, #lege-pot-overlay-img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    bottom: 0;
+    left: 0;
+}
+
+#volle-pot-img {
+    z-index: 1;
+}
+
+#lege-pot-overlay-img {
+    z-index: 2;
+    height: 100%;
+    transition: clip-path 0.8s ease-out; /* Animatie voor het bijsnijden */
+}
+
+/* Oefening en toetsenbord */
+.oefening-sectie {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Standaard gecentreerd binnen de sectie */
+}
+
+#oefening {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+#antwoord-input {
+    padding: 10px 15px;
+    font-size: 1.8em;
+    width: 150px;
+    text-align: center;
+    border: 2px solid #D2B48C;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    -moz-appearance: textfield;
+}
+
+#antwoord-input::-webkit-outer-spin-button,
+#antwoord-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.toetsenbord {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 200px;
+}
+
+.toetsenbord button {
+    padding: 10px;
+    font-size: 1.2em;
+    background-color: #E0BBE4;
+    color: #333;
+    border: 1px solid #957DAD;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.toetsenbord button:hover {
+    background-color: #C0A0D0;
+}
+
+.toetsenbord button:active {
+    transform: translateY(1px);
+}
+
+.toetsenbord .enter-button, .toetsenbord .delete-button {
+    grid-column: span 3;
+    background-color: #8B4513;
+    color: white;
+}
+
+.toetsenbord .delete-button {
+    background-color: #DC143C;
+}
+
+.toetsenbord .enter-button:hover, .toetsenbord .delete-button:hover {
+    background-color: #A0522D;
+}
+
+.toetsenbord .delete-button:hover {
+    background-color: #FF4500;
+}
+
+/* Honingdruppel animatie */
+#honingdruppel-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 150;
+    overflow: hidden;
+}
+
+.honingdruppel {
+    position: absolute;
+    width: 80px;
+    height: auto;
+    opacity: 0;
+    transform: translateY(-100px);
+    z-index: 1;
+}
+
+/* --- Feedback Pop-ups (niet het volledige feedback scherm) --- */
+.feedback-popup {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    text-align: center;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8); /* Basis schaal */
+}
+
+#fout-spreekballon {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #b71c1c;
+    white-space: nowrap;
+}
+
+#juf-bibi-popup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    max-width: 300px;
+}
+
+#juf-bibi-popup img {
+    max-width: 150px;
+    height: auto;
+}
+
+#juf-bibi-popup p {
+    font-size: 1.3em;
+    color: #333;
+    margin: 0;
+}
+
+.feedback-popup.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1); /* Terug naar normale schaal */
+}
+
+/* Feedback scherm stijlen (voor einde spel) */
+#feedback-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.feedback-content {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+}
+
+#feedback-message {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+#feedback-image {
+    max-width: 250px;
+    height: auto;
+    margin-bottom: 30px;
+}
+
+#feedback-restart-button {
+    padding: 15px 30px;
+    font-size: 1.5em;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#feedback-restart-button:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+
+/* --- Responsive aanpassingen --- */
+
+/* Breakpoint 1: Tablets Landscape / Kleine Laptops (max-width: 1200px) */
+@media (max-width: 1200px) {
+    #game-screen {
+        padding: 30px;
+    }
+    .honingpot-container {
+        width: 500px;
+        height: 666px;
+    }
+}
+
+/* Breakpoint 2: Tablets Portrait / Grotere Telefoons Landscape (max-width: 1024px) */
+/* Vangt iPad Air/Pro portrait, en grotere telefoons liggend */
+@media (max-width: 1024px) {
+    #game-screen {
+        flex-direction: column; /* Stapel UI en Pot verticaal */
+        align-items: center; /* Centreer horizontaal */
+        justify-content: flex-start; /* Lijn bovenaan uit */
+        padding: 20px;
+    }
+
+    .spel-boven-links {
+        /* Zal gecentreerd zijn door ouder (#game-screen) */
+        margin-bottom: 30px; /* Ruimte onder deze sectie */
+        align-items: center; /* Centreer de inhoud (knoppen, oefening) */
+        width: auto;
+        padding-left: 0; /* Reset padding indien eerder gezet */
+    }
+
+    .spel-knoppen {
+        flex-direction: row; /* Knoppen naast elkaar */
+        justify-content: center;
+        width: 100%;
+        gap: 15px;
+    }
+    
+    .btn-actie {
+        width: auto; /* Automatische breedte voor knoppen */
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+
+    .honingpot-container {
+        position: static; /* Komt in de normale flow onder .spel-boven-links */
+        transform: none; /* Reset transformatie */
+        margin-top: 0;
+        width: 400px; /* Kleinere pot */
+        height: 533px;
+        top: auto;
+        left: auto;
+    }
+
+    .oefening-sectie {
+        width: auto;
+        max-width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 15px;
+        align-items: center; /* Centreer inhoud */
+        text-align: center; /* Centreer tekst */
+    }
+}
+
+/* Breakpoint 3: iPad Mini Portrait / Telefoons Landscape (max-width: 768px) */
+/* Dit vangt iPad Mini portrait, en veel telefoons liggend */
+@media (max-width: 768px) {
+    #game-screen {
+        padding: 15px;
+    }
+
+    .spel-boven-links {
+        /* Nog steeds statisch en gecentreerd, maar nu buttons/exercise links uitlijnen */
+        align-items: flex-start; /* Knoppen en oefening links uitlijnen binnen deze container */
+        padding-left: 15px; /* Extra padding aan de linkerkant */
+        margin-bottom: 20px;
+    }
+
+    .spel-knoppen {
+        flex-direction: column; /* Knoppen weer onder elkaar */
+        align-items: flex-start; /* Links uitlijnen */
+        width: auto;
+        margin-bottom: 15px;
+        gap: 10px;
+    }
+    .btn-actie {
+        width: 120px; /* Vaste breedte voor gestapelde knoppen */
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+
+    .honingpot-container {
+        width: 300px; /* Kleinere pot voor mini */
+        height: 400px;
+        margin-top: 15px;
+    }
+
+    .oefening-sectie {
+        align-items: flex-start; /* Inhoud links uitlijnen */
+        text-align: left;
+        max-width: 250px;
+        padding: 10px;
+        font-size: 0.9em;
+    }
+
+    #oefening {
+        font-size: 1.5em;
+    }
+    #antwoord-input {
+        font-size: 1em;
+        width: 80px;
+    }
+    .toetsenbord {
+        width: 160px;
+        gap: 6px;
+    }
+    .toetsenbord button {
+        padding: 10px;
+        font-size: 1em;
+    }
+    /* Feedback popups en andere algemene aanpassingen voor kleinere schermen */
+    #fout-spreekballon, #juf-bibi-popup {
+        font-size: 1em;
+        padding: 10px;
+    }
+}
+
+/* Breakpoint 4: iPad Mini Landscape (specifiekere aanpassing voor hoogte) */
+/* Breakpoint 4: iPad Mini Landscape (specifiekere aanpassing voor hoogte) */
+@media (max-height: 768px) and (orientation: landscape) {
+    #game-screen {
+        flex-direction: row !important; /* Dwing horizontale lay-out af */
+        align-items: center !important; /* Centreer verticaal */
+        justify-content: flex-start !important; /* PLAATS CONTENT AAN DE START (LINKS) */
+        padding: 20px !important;
+        --druppel-offset-x: -40px; /* Definieer de offset hier */
+    }
+
+    .spel-boven-links {
+        padding-left: 0 !important;
+        margin-right: 40px !important; /* Meer ruimte tussen UI en pot */
+        margin-bottom: 0 !important;
+        align-items: flex-start !important;
+        width: auto !important;
+        flex-shrink: 0 !important; /* Voorkom dat deze sectie te klein wordt */
+    }
+
+    .spel-knoppen {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        width: auto !important;
+        gap: 8px !important;
+    }
+    .btn-actie {
+        width: 100px !important;
+        padding: 8px 12px !important;
+        font-size: 0.85em !important;
+    }
+
+    .honingpot-container {
+        width: 400px !important; /* Honingpot KLEINER maken */
+        height: 500px !important;
+        position: absolute !important; /* FORSEER absolute positionering hier */
+        top: 70% !important; /* Stel een vaste top/left in */
+        left: 70% !important; /* Verplaats nog verder naar rechts */
+        transform: translate(-50%, -50%) !important; /* Centreer ten opzichte van zijn nieuwe plek */
+        margin: 0 !important; /* Verwijder alle marges die kunnen conflicteren */
+        z-index: 50 !important; /* Zorg voor correcte stapelvolgorde */
+    }
+
+    .oefening-sectie {
+        align-items: flex-start !important;
+        text-align: left !important;
+        max-width: 250px !important;
+        padding: 15px !important;
+        font-size: 1em !important;
+        flex-shrink: 0 !important; /* Voorkom dat deze sectie te klein wordt */
+    }
+    #oefening {
+        font-size: 1.8em !important;
+    }
+    #antwoord-input {
+        font-size: 1.2em !important;
+        width: 90px !important;
+    }
+    .toetsenbord {
+        width: 180px !important;
+        gap: 8px !important;
+    }
+    .toetsenbord button {
+        padding: 12px !important;
+        font-size: 1.1em !important;
+    }
+}
+
+
+/* Breakpoint 5: Zeer kleine telefoons (max-width: 480px) */
+@media (max-width: 480px) {
+    #game-screen {
+        flex-direction: column; /* Alles onder elkaar */
+        align-items: center; /* Horizontaal centreren */
+        padding: 10px;
+    }
+
+    .spel-boven-links {
+        position: static;
+        margin-bottom: 15px;
+        align-items: center; /* Alles in het midden */
+        padding-left: 0;
+    }
+
+    .spel-knoppen {
+        flex-direction: row; /* Knoppen naast elkaar */
+        justify-content: center;
+        width: 100%;
+        gap: 5px;
+    }
+    .btn-actie {
+        width: auto;
+        padding: 6px 10px;
+        font-size: 0.8em;
+    }
+
+    .honingpot-container {
+        width: 200px;
+        height: 266px;
+        margin-top: 10px;
+    }
+
+    .oefening-sectie {
+        align-items: center; /* Alles in het midden */
+        text-align: center;
+        max-width: 90%;
+        padding: 8px;
+        font-size: 0.85em;
+    }
+    #oefening {
+        font-size: 1.2em;
+    }
+    #antwoord-input {
+        font-size: 0.9em;
+        width: 70px;
+    }
+    .toetsenbord {
+        width: 140px;
+        gap: 4px;
+    }
+    .toetsenbord button {
+        padding: 8px;
+        font-size: 0.8em;
+    }
+}

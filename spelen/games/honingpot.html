@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bibi's Honingpot Spel</title>
+    <link rel="stylesheet" href="honingpot.css">
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div id="selection-screen">
+            <a href="splits_spelletjes.html" class="btn-actie btn-terug" style="position:absolute; top:40px; left:40px;">Terug</a>
+            <div class="keuze-blok">
+                <img src="leerjaar1_afbeeldingen/honingpotspel.png" alt="Honingpot Spel" class="menu-afbeelding" />
+                <h2>Kies welke splitsing je wil oefenen</h2>
+                <div class="opties" id="level-options">
+                    <button class="keuze" data-level="5">Splitsen tot 5</button>
+                    <button class="keuze" data-level="6">Splitsen tot 6</button>
+                    <button class="keuze" data-level="7">Splitsen tot 7</button>
+                    <button class="keuze" data-level="8">Splitsen tot 8</button>
+                    <button class="keuze" data-level="9">Splitsen tot 9</button>
+                    <button class="keuze" data-level="10">Splitsen tot 10</button>
+                </div>
+                <div class="start-blok">
+                    <button id="start-spel-knop" disabled>Kies eerst een splitsing</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-container-spel" class="hidden">
+            <div class="game-ui">
+                <div class="knoppen-container">
+                    <button id="btn-opnieuw" class="btn-actie btn-opnieuw">Opnieuw</button>
+                    <button id="btn-terug" class="btn-actie btn-terug">Terug</button>
+                </div>
+                <div id="scorebord">
+                    <div class="score-kolom">
+                        <img src="leerjaar1_afbeeldingen/bibi_blij.png" alt="Juist">
+                        <span id="scoreJuist">0</span>
+                    </div>
+                    <div class="score-kolom">
+                        <img src="leerjaar1_afbeeldingen/bibi_droevig.png" alt="Fout">
+                        <span id="scoreFout">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="game-area">
+                <div id="splitsing-container"></div>
+                <div id="player-container">
+                    <img src="leerjaar1_afbeeldingen/bibi_zak.png" id="player" alt="Bibi">
+                    <div id="speech-bubble" class="hidden">Joepie!</div>
+                </div>
+            </div>
+
+            <div id="movement-controls">
+                <button id="btn-links" class="move-btn">&#9664;</button>
+                <button id="btn-rechts" class="move-btn">&#9654;</button>
+            </div>
+        </div>
+        
+        <div id="eind-feedback" class="hidden">
+             <div class="feedback-content">
+                <img id="feedback-afbeelding" src="" alt="Feedback">
+                <p id="feedback-tekst"></p>
+                <div class="knoppen-container">
+                    <button id="eind-opnieuw" class="btn-actie btn-opnieuw">Opnieuw Spelen</button>
+                    <button id="eind-terug" class="btn-actie btn-terug">Menu</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="honingpot.js"></script>
+</body>
+</html>

@@ -1,0 +1,655 @@
+/* Algemene body styling */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-image: url('leerjaar3_afbeeldingen/achtergrond_sombrero.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1200px;
+    background-color: transparent;
+    border-radius: 15px;
+    box-shadow: none;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+header h1 {
+    text-align: center;
+    color: #003049;
+    font-size: 2.2em;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+/* Knoppen van tafels.css */
+.btn-actie {
+    padding: 16px 32px;
+    font-size: 1.6em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #fff;
+    font-family: inherit;
+    margin: 10px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+.btn-opnieuw {
+    background-color: #2e7d32;
+}
+.btn-opnieuw:hover,
+.btn-opnieuw:focus {
+    background-color: #219150;
+}
+.btn-terug {
+    background-color: #b71c1c;
+}
+.btn-terug:hover,
+.btn-terug:focus {
+    background-color: #e53935;
+}
+
+/* Spel specifieke lay-out */
+.spel-links {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 100;
+}
+
+.spel-links button {
+    font-size: 1.4em;
+    padding: 14px 24px;
+}
+
+/* Nieuwe stijl voor de container van de timer en scorebord */
+.score-timer-container {
+    background-color: #ffffff; /* Witte achtergrond */
+    border-radius: 15px; /* Afgeronde hoeken */
+    padding: 15px; /* Ruimte binnen de container */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Zachte schaduw */
+    margin-top: 20px; /* Ruimte boven de container */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+
+/* Klok en Scorebord (from tafels.css) */
+#klokzone {
+    position: relative;
+    width: 160px; /* Blijft 160px voor desktop */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: 0; /* Reset margin, container heeft al padding */
+}
+#timer {
+    font-size: 2em;
+    font-weight: bold;
+    background: url('tafels_afbeeldingen/stopwatch.png') no-repeat left center;
+    background-size: 30px 30px;
+    padding-left: 8%;
+    margin-bottom: 8px;
+    width: 100%;
+    text-align: center;
+    color: #003049;
+}
+#visueleTimerContainer {
+    margin-top: 10px;
+    position: relative;
+    width: 160px; /* Blijft 160px voor desktop */
+    height: 160px; /* Blijft 160px voor desktop */
+    margin-top: 6px;
+    z-index: 1;
+}
+#klok-afbeelding {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+#timer-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+#scorebord {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+    margin: 0; /* Reset margin, container heeft al padding */
+}
+.score-kolom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #003049;
+}
+.score-kolom img {
+    width: 50px;
+    height: auto;
+    margin-bottom: 6px;
+}
+#scoreJuist {
+    color: green;
+}
+#scoreFout {
+    color: red;
+}
+
+.spel-gebied {
+    position: relative;
+    flex-grow: 1;
+    margin-left: 200px;
+    min-height: 700px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background-color: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+}
+
+/* Hoeden */
+#hoedenContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px 50px;
+    width: 100%;
+    max-width: 900px;
+    margin-top: 50px;
+    padding: 20px;
+    box-sizing: border-box;
+    position: relative;
+    min-height: 250px;
+}
+
+.hoed {
+    position: absolute;
+    width: 200px; /* Basisgrootte voor desktop */
+    height: 130px; /* Basisgrootte voor desktop */
+    background-image: url('leerjaar3_afbeeldingen/sombrero_hoed.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8em; /* Basis lettergrootte voor desktop */
+    color: #fff;
+    font-weight: bold;
+    cursor: grab;
+    z-index: 50;
+    touch-action: none;
+    transition: transform 0.2s ease-out, top 0.2s ease-out, left 0.2s ease-out;
+}
+
+.hoed-vraag {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+/* Cactussen */
+#cactussenContainer {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    min-height: 250px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.cactus {
+    position: relative;
+    width: 180px; /* Basisgrootte voor desktop */
+    height: 200px; /* Basisgrootte voor desktop */
+    background-image: url('leerjaar3_afbeeldingen/cactus_woestijn.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom center;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    z-index: 10;
+}
+
+.cactus-antwoord-vak {
+    position: absolute;
+    top: 80px; /* Basispositie voor desktop */
+    width: 45px;
+    height: 40px;
+    background-color: white;
+    border: 2px solid #003049;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.4em; /* Basis lettergrootte voor desktop */
+    color: #003049;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Visuele feedback voor slepen */
+.hoed.dragging {
+    opacity: 0.7;
+    cursor: grabbing;
+    z-index: 100;
+}
+
+/* Feedback container */
+#feedbackContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    text-align: center;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 500px;
+}
+
+#feedbackContainer img {
+    max-width: 200px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+#feedbackText {
+    font-size: 1.6em;
+    color: #003049;
+    margin-bottom: 20px;
+}
+
+#feedbackContainer button {
+    width: 80%;
+    max-width: 300px;
+}
+
+/* Media Queries for Responsiveness */
+
+/* Nieuwe Media Query voor grotere tablets zoals Galaxy Tab S4 (landschap) en andere schermen tussen 1025px en 1600px */
+@media (max-width: 1600px) {
+    .spel-gebied {
+        min-height: 600px; /* Verhoog deze indien nodig om scrollen te verminderen */
+        justify-content: space-around; /* Helpt bij verticale verdeling */
+        padding-bottom: 20px;
+    }
+
+    #hoedenContainer {
+        margin-top: 30px;
+        gap: 15px 30px;
+    }
+
+    .hoed {
+        width: 180px; /* Iets kleiner dan desktop */
+        height: 115px;
+        font-size: 1.6em;
+    }
+
+    #cactussenContainer {
+        position: relative; /* Belangrijk: zet naar relatief om margin-top te gebruiken */
+        bottom: auto;
+        left: auto;
+        margin-top: 30px; /* PAS DEZE AAN OM DE CACTUSSEN OMHOOG TE BRENGEN (lagere waarde = hoger) */
+        padding-bottom: 10px; /* Extra padding onderaan als nodig */
+    }
+
+    .cactus {
+        width: 160px; /* Iets kleiner dan desktop */
+        height: 180px;
+    }
+
+    .cactus-antwoord-vak {
+        top: 70px; /* Pas deze aan om het antwoordvak te centreren op de cactus */
+        font-size: 1.3em;
+    }
+
+    #klok-en-scorezone {
+        margin-top: 15px;
+        padding: 10px;
+    }
+    #klokzone {
+        width: 140px;
+    }
+    #timer {
+        font-size: 1.6em;
+    }
+    #visueleTimerContainer {
+        width: 120px; /* Aangepast voor dit bereik */
+        height: 120px;
+    }
+}
+
+
+/* Tablets (e.g., iPad, iPad Air) and larger phones */
+/* Note: iPad Mini often falls into this range. Adjustments here are key. */
+@media (max-width: 1024px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    header h1 {
+        font-size: 1.8em;
+        margin-bottom: 20px;
+    }
+
+    .spel-links {
+        /* Adjusted positioning to be fixed and take less space */
+        position: fixed; /* Changed from static */
+        top: 10px;
+        left: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        width: auto;
+        max-width: 180px; /* Constrain width */
+        box-sizing: border-box;
+        background-color: rgba(255, 255, 255, 0.9); /* Add background for visibility */
+        border-radius: 8px;
+        padding: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+
+    .spel-links button {
+        font-size: 1em;
+        padding: 8px 16px;
+        width: 100%; /* Make buttons fill available width */
+        margin: 0; /* Remove extra margin */
+    }
+
+    .score-timer-container {
+        /* Positioned inside .spel-links, so relative to it */
+        margin-top: 15px; /* Space from buttons */
+        padding: 8px; /* Reduced padding */
+        flex-direction: column;
+        align-items: flex-start; /* Align contents to left */
+        gap: 10px;
+        background-color: transparent; /* Already white from .spel-links background */
+        box-shadow: none; /* No extra shadow */
+        width: 100%; /* Take full width of parent .spel-links */
+        box-sizing: border-box;
+    }
+
+    #klokzone {
+        width: 100%;
+        flex-direction: column; /* <-- VERANDERD NAAR COLUMN */
+        justify-content: center; /* <-- Zorgt voor horizontale centrering */
+        align-items: center;    /* <-- Zorgt voor verticale centrering */
+        margin: 0;
+    }
+    #timer {
+        font-size: 1.3em;
+        background-size: 20px 20px;
+        padding-left: 0; /* <-- Haal deze padding weg als je de icon niet meer gebruikt*/
+        background: none; /* <-- Optioneel: verberg de achtergrond stopwatch hier als de visuele timer de hoofdrol speelt */
+        text-align: center; /* <-- Centreer de tekst */
+    }
+    #visueleTimerContainer {
+        width: 100px; /* Aangepast voor dit bereik */
+        height: 100px; /* Zorg dat deze gelijk zijn voor een cirkel */
+        margin-top: 5px; /* Voeg wat ruimte toe onder de digitale timer */
+        margin-left: auto; /* <-- Haal deze weg als je wilt centreren */
+        margin-right: auto; /* <-- Voeg deze toe om te centreren */
+    }
+    /* Klok-afbeelding en timer-canvas blijven 100% van hun parent */
+
+    #scorebord {
+        width: 100%; /* Take full width of parent */
+        justify-content: flex-start; /* Align score columns to left */
+        margin-top: 10px; /* Margin below timer */
+        gap: 10px;
+    }
+    .score-kolom {
+        font-size: 1.1em;
+    }
+    .score-kolom img {
+        width: 30px; /* Smaller score icons */
+    }
+
+    .spel-gebied {
+        margin-left: 0; /* Remove left margin as .spel-links is now fixed */
+        padding-top: 180px; /* Create space for fixed .spel-links + .score-timer-container */
+        min-height: 500px;
+        align-items: center; /* Center main game content */
+    }
+
+    #hoedenContainer {
+        flex-direction: row;
+        gap: 20px 40px; /* Adjusted gaps for larger hoeden */
+        margin-top: 10px;
+        max-width: 600px; /* Increased max-width for hoeden to use more space */
+        min-height: 200px;
+        padding: 10px;
+    }
+    
+    .hoed {
+        /* Added !important to ensure these values apply over generic .hoed rules */
+        width: 160px; /* Aangepast voor dit bereik */
+        height: 105px;
+        font-size: 1.3em; /* VERKLEIN DIT LETTERTYPE voor iPad Mini (landschap) */
+    }
+
+    #cactussenContainer {
+        position: relative; /* Keep relative */
+        bottom: auto;
+        left: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 20px; /* Increased gap for cactuses */
+        padding: 10px;
+        min-height: 200px; /* Increased height for cactuses */
+        margin-top: 40px; /* PAS DEZE AAN OM DE CACTUSSEN OMHOOG TE BRENGEN (lagere waarde = hoger) */
+        width: 100%;
+    }
+
+    .cactus {
+        width: 140px; /* Made cactus larger for iPad Mini */
+        height: 160px; /* Proportional height */
+    }
+    .cactus-antwoord-vak {
+        top: 65px; /* Adjust top position for larger cactus */
+        width: 45px; /* Larger answer box */
+        height: 30px;
+        font-size: 1.2em; /* Larger font */
+    }
+
+    .hoed-vraag {
+        font-size: 1.1em;
+    }
+
+    #feedbackContainer {
+        padding: 15px;
+        max-width: 90%;
+        width: auto;
+    }
+    #feedbackContainer img {
+        max-width: 100px;
+    }
+    #feedbackText {
+        font-size: 1.1em;
+    }
+    #feedbackContainer button {
+        font-size: 1.1em;
+        padding: 10px 20px;
+    }
+}
+
+/* Very small screens (e.g., portrait phones) */
+@media (max-width: 768px) {
+    body {
+        padding: 5px;
+    }
+
+    .container {
+        padding: 5px;
+    }
+
+    header h1 {
+        font-size: 1.4em;
+        margin-bottom: 10px;
+    }
+
+    .spel-links {
+        top: 5px;
+        left: 5px;
+        padding: 5px;
+        gap: 5px;
+        max-width: 150px; /* Even smaller max-width */
+    }
+
+    .spel-links button {
+        font-size: 0.9em;
+        padding: 6px 12px;
+    }
+
+    .score-timer-container {
+        margin-top: 10px;
+        padding: 5px;
+        gap: 8px;
+    }
+
+    #klokzone {
+        flex-direction: column; /* <-- VERANDERD NAAR COLUMN */
+        justify-content: center;
+        align-items: center;
+    }
+    #timer {
+        font-size: 1.2em;
+        padding-left: 0;
+        background: none; /* Hide stopwatch icon on very small screens */
+    }
+    #visueleTimerContainer {
+        width: 80px; /* Aangepast voor dit bereik */
+        height: 80px; /* Zorg dat deze gelijk zijn */
+    }
+    #klok-afbeelding {
+        display: none; /* Ensure stopwatch image is hidden */
+    }
+
+    #scorebord {
+        flex-direction: column; /* Stack score columns vertically */
+        gap: 5px;
+        justify-content: center;
+        align-items: center;
+    }
+    .score-kolom {
+        font-size: 1em;
+    }
+    .score-kolom img {
+        width: 25px;
+    }
+
+    .spel-gebied {
+        padding-top: 150px; /* Adjust padding for fixed elements */
+        min-height: 350px;
+    }
+
+    #hoedenContainer {
+        flex-direction: column; /* Stack hoeden vertically */
+        gap: 15px; /* Increased gap */
+        margin-top: 10px;
+        padding: 5px;
+        min-height: 140px; /* Increased min-height */
+    }
+
+    .hoed {
+        /* Added !important to ensure these values apply over generic .hoed rules */
+        width: 120px; /* Aangepast voor dit bereik */
+        height: 80px;
+        font-size: 1.0em;
+    }
+
+    #cactussenContainer {
+        flex-direction: column; /* Stack cactuses vertically */
+        gap: 10px; /* Increased gap */
+        padding: 5px;
+        min-height: 140px; /* Increased min-height */
+        margin-top: 20px; /* PAS DEZE AAN OM DE CACTUSSEN OMHOOG TE BRENGEN (lagere waarde = hoger) */
+    }
+
+    .cactus {
+        width: 110px; /* Adjusted cactus size for very small screens */
+        height: 120px;
+    }
+    .cactus-antwoord-vak {
+        top: 35px; /* Adjust top position for smaller cactus */
+        width: 40px;
+        height: 22px;
+        font-size: 0.9em;
+    }
+
+    #feedbackContainer {
+        padding: 10px;
+        max-width: 95%;
+    }
+    #feedbackContainer img {
+        max-width: 80px;
+    }
+    #feedbackText {
+        font-size: 0.9em;
+    }
+    #feedbackContainer button {
+        font-size: 0.9em;
+        padding: 6px 12px;
+    }
+}

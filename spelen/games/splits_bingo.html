@@ -1,0 +1,627 @@
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bibi's bingo</title>
+    <style>
+        :root { --board-gap: 1.5vmin; }
+        body { background-color: #fefae0; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .pijl-links-boven { position: fixed; top: 20px; left: 20px; z-index: 1000; }
+        #game-container { width: 100%; max-width: 1400px; margin: auto; }
+        .hidden { display: none !important; }
+        
+        /* Keuzeblok */
+        .keuze-blok { background-color: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 20px auto; max-width: 650px; text-align: center; }
+        .keuze-blok h2 { margin-top: 0; margin-bottom: 10px; }
+        .bingo-afbeelding { max-width: 160px; margin: 0 auto 15px; display: block; }
+        .opties { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
+        button.keuze { padding: 10px 20px; font-size: 1em; border: none; border-radius: 10px; background-color: #90e0ef; cursor: pointer; transition: background-color 0.3s; }
+        button.keuze:hover, button.keuze.active { background-color: #0077b6; color: white; }
+        .start-blok { margin-top: 20px; }
+        #start-spel-knop { padding: 14px 28px; font-size: 1.4em; color: white; border: none; border-radius: 12px; cursor: pointer; background-color: #2e7d32; }
+        #start-spel-knop:disabled { background-color: #aaa; cursor: not-allowed; }
+        
+        /* Spelbord */
+        #game-board-container { display: flex; align-items: center; justify-content: flex-start; gap: 20px; width: 100%; margin-left: 120px; }
+        .game-actions { position: fixed; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
+        #game-board { max-width: 80vw; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(6, 1fr); gap: var(--board-gap); height: 85vh; max-height: 700px; aspect-ratio: 10 / 6; flex-grow: 1; position: relative; }
+        .player-area { background-color: rgba(255, 255, 255, 0.8); padding: 1.5vmin; border-radius: 15px; text-align: center; grid-row: 2 / 5; transition: box-shadow 0.3s ease-in-out; display: flex; flex-direction: column; }
+        .player-area h2 { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 2em; }
+        .header-pawn { height: 1.5em; width: auto; }
+        /* AANPASSING: Centrering van de elementen */
+        #player1-area { grid-column: 3 / 5; }
+        .wheel-container { grid-area: 2 / 5 / 5 / 7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+        #player2-area { grid-column: 7 / 9; }
+        #controls { grid-column: 2 / 10; grid-row: 5 / 6; display: flex; align-items: center; justify-content: center; }
+        .player1-active { box-shadow: 0 0 15px 5px #e53935; }
+        .player2-active { box-shadow: 0 0 15px 5px #0077b6; }
+        .btn-actie { padding: 10px 20px; font-size: 1.2em; border: none; border-radius: 12px; cursor: pointer; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+        .terug-pijl { height: 20px; width: auto; }
+        .btn-opnieuw { background-color: #2e7d32; }
+        .btn-terug { background-color: #c62828; }
+        .honeycomb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5vmin; flex-grow: 1; align-content: center; }
+        .cell { width: 6vmin; height: 6.9vmin; background-color: #ffc107; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); display: flex; justify-content: center; align-items: center; font-size: 2.8vmin; font-weight: bold; margin: 0 auto; transition: background-color 0.3s; }
+        .cell.covered-player1 { background-color: #e53935; color: #fff; }
+        .cell.covered-player2 { background-color: #0077b6; color: #fff; }
+        .track-space { border-radius: 50%; display: flex; text-align:center; justify-content: center; align-items: center; position: relative; font-weight: bold; font-size: 2vmin; color: #333; padding: 4px; box-sizing: border-box; line-height: 1.1; }
+        .flower { background-color: #f8b3c9; border: 3px dashed #e91e63; }
+        .special-space { background-color: #87CEEB; border: 3px solid #4682B4; }
+        .player-pawn { position: absolute; width: 6vmin; transition: all 0.5s ease-in-out; z-index: 10; }
+        .player-pawn img { width: 100%; height: auto; filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.4)); }
+        #pawn-1 { top: -0.8vmin; left: -0.8vmin; }
+        #pawn-2 { bottom: 0.8vmin; right: -0.8vmin; }
+        #feedback-area { padding: 10px; background-color: #fff9c4; border: 2px solid #fbc02d; border-radius: 10px; min-height: 40px; text-align: center; width: 100%; max-width: 400px; }
+        .wheel-arrow { width: 3vmin; z-index: 11; transform: translateY(1vmin); }
+        .wheel { width: 12vmin; height: 12vmin; transition: transform 4s cubic-bezier(.24,.99,.64,1); }
+        .spin-btn-style { padding: 8px 16px; font-size: 1em; color: #fff; background: #4CAF50; border-radius: 8px; cursor: pointer; border: none; }
+        .spin-btn-style:disabled { background: #aaa; }
+        .exercise-text { position: relative; z-index: 12; }
+        
+        /* Modals en Overlays */
+        #exercise-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+        .modal-content { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.4); max-width: 450px; width: 90%; transform: scale(1); pointer-events: auto; }
+        #modal-question { font-size: 3.5em; margin-bottom: 15px; color: #333; }
+        #modal-answer-display { width: 100%; height: 50px; font-size: 2.5em; text-align: center; border: 2px solid #ccc; border-radius: 10px; margin-bottom: 15px; }
+        .numeric-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .keypad-btn { padding: 15px; font-size: 1.5em; border-radius: 10px; border: 1px solid #ddd; background-color: #f9f9f9; cursor: pointer; }
+        .keypad-btn:hover { background-color: #e0e0e0; }
+        .keypad-btn.ok-btn { grid-column: span 2; background-color: #4CAF50; color: white; }
+        .keypad-btn.clear-btn { background-color: #f44336; color: white; }
+        .keypad-btn { touch-action: manipulation; }
+        #exercise-modal:not(.hidden) .modal-content { animation: fadeInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        #win-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 3000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        .win-content { text-align: center; position: relative; z-index: 3001; }
+        #win-image { max-height: 60vh; max-width: 70vw; margin-bottom: 20px; }
+        .win-buttons { display: flex; justify-content: center; gap: 20px; }
+        #fireworks-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
+        .firework { position: absolute; width: 5px; height: 5px; border-radius: 50%; opacity: 1; }
+        .firework.red::before { background: radial-gradient(circle, #ff5252, transparent); box-shadow: 0 0 15px #ff5252; }
+        .firework.blue::before { background: radial-gradient(circle, #448aff, transparent); box-shadow: 0 0 15px #448aff; }
+        .firework::before { content: ''; position: absolute; left: -150px; top: -150px; width: 300px; height: 300px; opacity: 0; border-radius: 50%; animation: explode 1.5s ease-out forwards; }
+        
+        /* Animaties */
+        .winning-cell-player1 { animation: flash-red 0.5s 4; }
+        .winning-cell-player2 { animation: flash-blue 0.5s 4; }
+        
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes explode {
+            0% { transform: scale(0.1); opacity: 1; }
+            70% { opacity: 0.8; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        @keyframes flash-red {
+            0%, 100% { background-color: #e53935; color: white; transform: scale(1.05); }
+            50% { background-color: #ff8a80; transform: scale(1); }
+        }
+        @keyframes flash-blue {
+            0%, 100% { background-color: #0077b6; color: white; transform: scale(1.05); }
+            50% { background-color: #82b1ff; transform: scale(1); }
+        }
+
+        @media (max-width: 1024px) {
+            #game-board-container { margin-left: 0; justify-content: center; padding: 50px 10px 0 10px;  }
+            #game-board { max-width: 95vw; height: auto; --board-gap: 1vmin; }
+            .track-space { font-size: 1.8vmin; }
+            .player-area h2 { font-size: 1.5em; }
+        }
+    </style>
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+    <div class="pijl-links-boven">
+        <a href="splits_spelletjes.html" class="btn-actie btn-terug">
+            <img src="tafels_afbeeldingen/pijl.png" alt="Pijl" class="terug-pijl"> Terug
+        </a>
+    </div>
+
+    <div id="game-container">
+        <div id="selection-screen">
+            <div class="keuze-blok">
+                <img src="leerjaar1_afbeeldingen/bingo.png" alt="Bingo" class="bingo-afbeelding" />
+                
+                <h2>Aantal Spelers</h2>
+                <div class="opties" id="player-count-options">
+                    <button class="keuze" data-players="1">1 Speler</button>
+                    <button class="keuze" data-players="2">2 Spelers</button>
+                </div>
+                
+                <hr style="margin: 20px 0; border: 1px solid #eee;">
+
+                <h2>Kies welke splitsing je wil oefenen</h2>
+                <div class="opties" id="level-options">
+                    <button class="keuze" data-level="5">Splitsen tot 5</button>
+                    <button class="keuze" data-level="6">Splitsen tot 6</button>
+                    <button class="keuze" data-level="7">Splitsen tot 7</button>
+                    <button class="keuze" data-level="8">Splitsen tot 8</button>
+                    <button class="keuze" data-level="9">Splitsen tot 9</button>
+                    <button class="keuze" data-level="10">Splitsen tot 10</button>
+                </div>
+                <div class="start-blok">
+                    <button id="start-spel-knop" disabled>Kies eerst spelers en een splitsing</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-board-container" class="hidden">
+            <div class="game-actions">
+                <button id="btn-opnieuw" class="btn-actie btn-opnieuw">Opnieuw</button>
+                <button id="btn-terug" class="btn-actie btn-terug">
+                    <img src="tafels_afbeeldingen/pijl.png" alt="Pijl" class="terug-pijl"> Terug
+                </button>
+            </div>
+            <div id="game-board"></div>
+        </div>
+
+        <div id="win-screen" class="hidden">
+            <div id="fireworks-container"></div>
+            <div class="win-content">
+                <img id="win-image" src="" alt="Winnaar!">
+                <div class="win-buttons">
+                    <button id="win-play-again" class="btn-actie btn-opnieuw">Opnieuw spelen</button>
+                    <button id="win-back-to-menu" class="btn-actie btn-terug">Terug naar keuze</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="exercise-modal" class="hidden">
+            <div class="modal-content">
+                <h2 id="modal-question">? + 3 = 10</h2>
+                <input type="text" id="modal-answer-display"
+       readonly inputmode="none"
+       autocomplete="off" autocorrect="off" autocapitalize="off"
+       enterkeyhint="done">
+
+                <div class="numeric-keypad">
+                    <button class="keypad-btn" data-key="1">1</button> <button class="keypad-btn" data-key="2">2</button> <button class="keypad-btn" data-key="3">3</button>
+                    <button class="keypad-btn" data-key="4">4</button> <button class="keypad-btn" data-key="5">5</button> <button class="keypad-btn" data-key="6">6</button>
+                    <button class="keypad-btn" data-key="7">7</button> <button class="keypad-btn" data-key="8">8</button> <button class="keypad-btn" data-key="9">9</button>
+                    <button class="keypad-btn clear-btn" data-key="DEL">&#9003;</button> 
+                    <button class="keypad-btn" data-key="0">0</button>
+                    <button class="keypad-btn ok-btn" data-key="OK">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<script>
+    let currentRotation = 0;
+    document.addEventListener('DOMContentLoaded', () => {
+        const selectionScreen = document.getElementById('selection-screen');
+        const gameBoardContainer = document.getElementById('game-board-container');
+        const gameBoard = document.getElementById('game-board');
+        const vasteTerugKnop = document.querySelector('.pijl-links-boven');
+        const playerCountButtons = document.querySelectorAll('[data-players]');
+        const levelButtons = document.querySelectorAll('[data-level]');
+        const startSpelKnop = document.getElementById('start-spel-knop');
+        const exerciseModal = document.getElementById('exercise-modal');
+        const modalQuestion = document.getElementById('modal-question');
+        const modalAnswerDisplay = document.getElementById('modal-answer-display');
+        const keypadButtons = document.querySelectorAll('.keypad-btn');
+        const winScreen = document.getElementById('win-screen');
+        const winImage = document.getElementById('win-image');
+        const winPlayAgainBtn = document.getElementById('win-play-again');
+        const winBackToMenuBtn = document.getElementById('win-back-to-menu');
+        const fireworksContainer = document.getElementById('fireworks-container');
+        
+        let targetNumber = null, currentPlayer = 1, requiredAnswer = null, gameActive = false;
+        let playerCount = null;
+        let playerPositions = { 1: 0, 2: 0 };
+        const pathOrder = [ 50, 40, 30, 20, 10, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 19, 29, 39, 49, 59, 58, 57, 56, 55, 54, 53, 52, 51 ];
+        const specialSpaces = { 7: { type: 'forward', value: 3, text: 'Energie! 3 vooruit'}, 14: { type: 'back', value: 3, text: 'Oeps! 3 terug'}, 21: { type: 'again', text: 'Nog eens draaien!'} };
+
+        function checkCanStart() {
+            if (playerCount && targetNumber) {
+                startSpelKnop.disabled = false;
+                startSpelKnop.textContent = "Start het spel!";
+            }
+        }
+
+        playerCountButtons.forEach(knop => {
+            knop.addEventListener('click', () => {
+                playerCountButtons.forEach(k => k.classList.remove('active'));
+                knop.classList.add('active');
+                playerCount = parseInt(knop.dataset.players);
+                checkCanStart();
+            });
+        });
+
+        levelButtons.forEach(knop => {
+            knop.addEventListener('click', () => {
+                levelButtons.forEach(k => k.classList.remove('active'));
+                knop.classList.add('active');
+                targetNumber = parseInt(knop.dataset.level);
+                checkCanStart();
+            });
+        });
+
+        startSpelKnop.addEventListener('click', () => { if (playerCount && targetNumber) startGame(); });
+        keypadButtons.forEach(btn => {
+  btn.addEventListener('pointerup', (e) => {
+    e.preventDefault();                  // voorkomt “synthetic click” op iOS
+    handleKeypad(btn.dataset.key);
+  }, { passive: false });
+});
+        
+        winPlayAgainBtn.addEventListener('click', () => {
+            winScreen.classList.add('hidden');
+            fireworksContainer.innerHTML = '';
+            startGame();
+        });
+
+        winBackToMenuBtn.addEventListener('click', () => {
+            winScreen.classList.add('hidden');
+            fireworksContainer.innerHTML = '';
+            goBackToMenu();
+        });
+
+        function startGame() {
+            selectionScreen.classList.add('hidden');
+            winScreen.classList.add('hidden');
+            fireworksContainer.innerHTML = '';
+            gameBoardContainer.classList.remove('hidden');
+            vasteTerugKnop.classList.add('hidden');
+            buildGameBoard();
+            resetGame();
+        }
+
+        function buildGameBoard() {
+            gameBoard.innerHTML = ''; 
+            const player2Name = playerCount === 1 ? 'Computer' : 'Speler 2';
+            const boardContent = `
+                <div class="player-area" id="player1-area">
+                    <h2>Speler 1 <img src="leerjaar1_afbeeldingen/pion1.png" class="header-pawn" alt="Pion 1"></h2>
+                    <div class="honeycomb-grid" id="grid-player1"></div>
+                </div>
+                <div class="player-area" id="player2-area">
+                    <h2>${player2Name} <img src="leerjaar1_afbeeldingen/pion2.png" class="header-pawn" alt="Pion 2"></h2>
+                    <div class="honeycomb-grid" id="grid-player2"></div>
+                </div>
+                <div class="wheel-container">
+                    <img src="leerjaar1_afbeeldingen/pijl_rad.png" alt="Pijl" class="wheel-arrow">
+                    <img src="leerjaar1_afbeeldingen/rad.png" alt="Draaiwiel" class="wheel" id="wheel">
+                    <button id="spin-btn" class="spin-btn-style">Draai</button>
+                </div>
+                <div id="controls"><div id="feedback-area"></div></div>`;
+            gameBoard.innerHTML = boardContent;
+            
+            const pawn1 = document.createElement('div');
+            pawn1.id = 'pawn-1';
+            pawn1.className = 'player-pawn';
+            pawn1.innerHTML = `<img src="leerjaar1_afbeeldingen/pion1.png" alt="Pion 1">`;
+
+            const pawn2 = document.createElement('div');
+            pawn2.id = 'pawn-2';
+            pawn2.className = 'player-pawn';
+            pawn2.innerHTML = `<img src="leerjaar1_afbeeldingen/pion2.png" alt="Pion 2">`;
+
+            gameBoard.appendChild(pawn1);
+            gameBoard.appendChild(pawn2);
+
+            const { trackData, availableAnswers } = generateTrackData();
+            renderTrack(trackData);
+            renderGrid(gameBoard.querySelector('#grid-player1'), generateGridNumbers(availableAnswers, 9));
+            renderGrid(gameBoard.querySelector('#grid-player2'), generateGridNumbers(availableAnswers, 9));
+            
+            gameBoardContainer.querySelector('#btn-opnieuw').addEventListener('click', startGame);
+            gameBoardContainer.querySelector('#btn-terug').addEventListener('click', goBackToMenu);
+            gameBoard.querySelector('#spin-btn').addEventListener('click', spinWheel);
+        }
+        
+        function goBackToMenu() {
+            gameBoardContainer.classList.add('hidden');
+            selectionScreen.classList.remove('hidden');
+            vasteTerugKnop.classList.remove('hidden');
+            gameActive = false;
+
+            playerCount = null;
+            targetNumber = null;
+            playerCountButtons.forEach(k => k.classList.remove('active'));
+            levelButtons.forEach(k => k.classList.remove('active'));
+            startSpelKnop.disabled = true;
+            startSpelKnop.textContent = 'Kies eerst spelers en een splitsing';
+        }
+
+       function generateTrackData() {
+            const trackData = [];
+            const availableAnswers = [];
+            pathOrder.forEach((domIndex, pathIndex) => {
+                let spaceData = { domIndex };
+                if (specialSpaces[pathIndex]) {
+                    spaceData = {...spaceData, ...specialSpaces[pathIndex] };
+                } else { 
+                    const total = Math.floor(Math.random() * (targetNumber - 1)) + 2; 
+                    const given = Math.floor(Math.random() * (total + 1)); 
+                    const answer = total - given;
+                    spaceData = {...spaceData, type: 'flower', question: `${given} + ? = ${total}`, answer: answer };
+                    availableAnswers.push(answer);
+                }
+                trackData.push(spaceData);
+            });
+            return { trackData, availableAnswers };
+        }
+
+        function renderTrack(trackData) {
+            const numCols = 10;
+            const getGridArea = (index) => `${Math.floor(index / numCols) + 1} / ${(index % numCols) + 1}`;
+            trackData.forEach(data => {
+                const space = document.createElement('div');
+                space.dataset.id = data.domIndex;
+                space.style.gridArea = getGridArea(data.domIndex);
+
+                if (data.type === 'forward' || data.type === 'back' || data.type === 'again') {
+                    space.className = 'track-space special-space';
+                    space.innerHTML = data.text; 
+                    space.dataset.action = data.type;
+                    space.dataset.value = data.value || 0;
+                } else { 
+                    space.className = 'track-space flower';
+                    space.innerHTML = `<span class="exercise-text">${data.question}</span>`; 
+                    space.dataset.question = data.question;
+                    space.dataset.answer = data.answer; 
+                }
+                gameBoard.appendChild(space);
+            });
+        }
+        
+        function resetGame() {
+            currentPlayer = 1;
+            playerPositions = { 1: 0, 2: 0 };
+            gameActive = true;
+            document.querySelectorAll('.cell').forEach(c => c.classList.remove('covered-player1', 'covered-player2', 'winning-cell-player1', 'winning-cell-player2'));
+            const spinBtn = gameBoard.querySelector('#spin-btn');
+            if(spinBtn) spinBtn.disabled = false;
+            const feedbackArea = gameBoard.querySelector('#feedback-area');
+            if(feedbackArea) feedbackArea.textContent = `Speler 1 is aan de beurt. Draai aan het rad!`;
+            updateActivePlayerHighlight();
+            movePawn(1, true);
+            movePawn(2, true);
+        }
+        
+        function spinWheel() {
+            const spinBtn = gameBoard.querySelector('#spin-btn');
+            const wheel = gameBoard.querySelector('#wheel');
+            if (!gameActive || !spinBtn || !wheel) return;
+            spinBtn.disabled = true;
+            const segments = [ { value: 1, angle: 240 }, { value: 2, angle: 180 }, { value: 3, angle: 120 }, { value: 4, angle: 60 }, { value: 5, angle: 0 }, { value: 6, angle: 300 }];
+            const winningSegment = segments[Math.floor(Math.random() * segments.length)];
+            const steps = winningSegment.value;
+            currentRotation += (5 * 360) + winningSegment.angle - (currentRotation % 360);
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+            setTimeout(() => {
+                const feedbackArea = gameBoard.querySelector('#feedback-area');
+                if(feedbackArea) feedbackArea.textContent = `Je mag ${steps} stappen vooruit!`;
+                setTimeout(() => {
+                    playerPositions[currentPlayer] += steps;
+                    movePawn(currentPlayer);
+                    handleTurn();
+                }, 1000);
+            }, 4100);
+        }
+        
+        function movePawn(player, isReset = false) {
+            const pawn = document.getElementById(`pawn-${player}`);
+            if (!pawn) return;
+            if (!isReset) playerPositions[player] %= pathOrder.length;
+            const targetDomId = pathOrder[playerPositions[player]];
+            const targetSpace = gameBoard.querySelector(`[data-id="${targetDomId}"]`);
+            if (targetSpace) targetSpace.appendChild(pawn);
+        }
+        
+        function handleTurn() {
+            const stepIndex = playerPositions[currentPlayer];
+            const targetSpace = gameBoard.querySelector(`[data-id="${pathOrder[stepIndex]}"]`);
+
+            if (playerCount === 1 && currentPlayer === 2) {
+                if (targetSpace && targetSpace.dataset.action) {
+                    handleSpecialSpace(targetSpace);
+                } else if (targetSpace && targetSpace.dataset.answer) {
+                    requiredAnswer = parseInt(targetSpace.dataset.answer);
+                    handleAITurn();
+                } else {
+                    setTimeout(() => switchPlayer(), 2000);
+                }
+            } else {
+                if (targetSpace && targetSpace.dataset.action) {
+                    handleSpecialSpace(targetSpace);
+                } else if (targetSpace && targetSpace.dataset.answer) {
+                    requiredAnswer = parseInt(targetSpace.dataset.answer);
+                    showExerciseModal(targetSpace.dataset.question);
+                } else {
+                    gameBoard.querySelector('#feedback-area').textContent = `Veilig! Geen opdracht hier.`;
+                    setTimeout(() => switchPlayer(), 2000);
+                }
+            }
+        }
+        
+        function handleAITurn() {
+            gameBoard.querySelector('#feedback-area').textContent = 'De computer denkt na...';
+            setTimeout(() => {
+                const isCorrect = Math.random() < 0.85;
+                let computerAnswer = isCorrect ? requiredAnswer : (requiredAnswer + 1) % (targetNumber + 1);
+                if (!isCorrect && computerAnswer === requiredAnswer) computerAnswer = (computerAnswer + 1) % (targetNumber + 1);
+                checkAnswer(computerAnswer);
+            }, 2000);
+        }
+
+        function showExerciseModal(question) {
+  modalQuestion.textContent = question;
+  modalAnswerDisplay.value = '';
+  modalAnswerDisplay.blur();            // extra zekerheid: nooit toetsenbord
+  exerciseModal.classList.remove('hidden');
+}
+
+
+        function handleKeypad(key) {
+            if (key === 'OK') {
+                exerciseModal.classList.add('hidden');
+                const userAnswer = modalAnswerDisplay.value === '' ? null : parseInt(modalAnswerDisplay.value);
+                checkAnswer(userAnswer);
+            } else if (key === 'DEL') {
+                modalAnswerDisplay.value = modalAnswerDisplay.value.slice(0, -1);
+            } else if (modalAnswerDisplay.value.length < 2) {
+                modalAnswerDisplay.value += key;
+            }
+        }
+
+        function checkAnswer(userAnswer) {
+            const feedbackArea = gameBoard.querySelector('#feedback-area');
+            if (userAnswer === requiredAnswer) {
+                const grid = gameBoard.querySelector(`#grid-player${currentPlayer}`);
+                const cellOnGrid = grid.querySelector(`.cell[data-number="${requiredAnswer}"]`);
+                if (cellOnGrid) {
+                    feedbackArea.textContent = `Goed zo! ${requiredAnswer} staat op de kaart!`;
+                    coverCell(currentPlayer, requiredAnswer);
+                    checkWin(currentPlayer);
+                } else {
+                    feedbackArea.textContent = `Goed opgelost! Maar ${requiredAnswer} staat niet op de bingokaart.`;
+                }
+            } else {
+                feedbackArea.textContent = `Oeps. Het juiste antwoord was ${requiredAnswer}.`;
+            }
+            if (gameActive) setTimeout(() => switchPlayer(), 2500);
+        }
+        
+        function coverCell(player, number) {
+            const gridContainer = gameBoard.querySelector(`#grid-player${player}`);
+            if (!gridContainer) return;
+            const cellToCover = gridContainer.querySelector(`.cell[data-number="${number}"]:not(.covered-player1):not(.covered-player2)`);
+            if (cellToCover) {
+                cellToCover.classList.add(`covered-player${player}`);
+            }
+        }
+
+        function handleSpecialSpace(space) {
+            const { action, value } = space.dataset;
+            const feedbackArea = gameBoard.querySelector('#feedback-area');
+            feedbackArea.textContent = space.textContent;
+            
+            if (action === 'again') {
+                setTimeout(() => { 
+                    if (playerCount === 1 && currentPlayer === 2) {
+                        feedbackArea.textContent = 'De computer draait nog eens!';
+                        setTimeout(() => spinWheel(), 1000);
+                    } else {
+                        gameBoard.querySelector('#spin-btn').disabled = false; 
+                        feedbackArea.textContent = 'Draai nog eens!';
+                    }
+                }, 1500);
+            } else if (action === 'forward' || action === 'back') {
+                setTimeout(() => {
+                    let newPos = playerPositions[currentPlayer] + (action === 'forward' ? parseInt(value) : -parseInt(value));
+                    if (newPos < 0) newPos = pathOrder.length + newPos;
+                    playerPositions[currentPlayer] = newPos;
+                    movePawn(currentPlayer);
+                    feedbackArea.textContent = '...en daar ga je!';
+                    setTimeout(() => handleTurn(), 1500); 
+                }, 1500);
+            }
+        }
+        
+        function checkWin(player) {
+            if (!gameActive) return;
+            const grid = gameBoard.querySelector(`#grid-player${player}`);
+            const allCells = grid.querySelectorAll('.cell');
+            const coveredIndices = new Set();
+            allCells.forEach((cell, index) => {
+                if (cell.classList.contains(`covered-player${player}`)) {
+                    coveredIndices.add(index);
+                }
+            });
+            const winningCombinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
+            ];
+            for (const combo of winningCombinations) {
+                if (combo.every(index => coveredIndices.has(index))) {
+                    gameActive = false;
+                    gameBoard.querySelector('#spin-btn').disabled = true;
+
+                    const winningCells = combo.map(index => allCells[index]);
+                    const winningClass = player === 1 ? 'winning-cell-player1' : 'winning-cell-player2';
+                    winningCells.forEach(cell => cell.classList.add(winningClass));
+
+                    setTimeout(() => {
+                        winningCells.forEach(cell => cell.classList.remove(winningClass));
+                        showWinScreen(player);
+                    }, 2000);
+                    
+                    return;
+                }
+            }
+        }
+
+        function showWinScreen(player) {
+            winImage.src = player === 1 ? 'leerjaar1_afbeeldingen/bibi_rood.png' : 'leerjaar1_afbeeldingen/bibi_blauw.png';
+            winScreen.classList.remove('hidden');
+            createFireworks(player);
+        }
+
+        function createFireworks(player) {
+            fireworksContainer.innerHTML = '';
+            const colorClass = player === 1 ? 'red' : 'blue';
+            for (let i = 0; i < 30; i++) {
+                const fw = document.createElement('div');
+                fw.className = `firework ${colorClass}`;
+                fw.style.left = `${Math.random() * 100}%`;
+                fw.style.top = `${Math.random() * 100}%`;
+                const randomDelay = Math.random() * 2.5;
+                fw.style.animationDelay = `${randomDelay}s`;
+                fw.addEventListener('animationend', () => fw.remove());
+                fireworksContainer.appendChild(fw);
+            }
+        }
+        
+        function switchPlayer() {
+            if (!gameActive) return;
+            requiredAnswer = null;
+            currentPlayer = (currentPlayer === 1) ? 2 : 1;
+            const spinBtn = gameBoard.querySelector('#spin-btn');
+            
+            if (playerCount === 1 && currentPlayer === 2) {
+                gameBoard.querySelector('#feedback-area').textContent = 'De computer is aan de beurt.';
+                spinBtn.disabled = true;
+                setTimeout(() => spinWheel(), 1500);
+            } else {
+                gameBoard.querySelector('#feedback-area').textContent = `Speler 1 is aan de beurt. Draai aan het rad!`;
+                spinBtn.disabled = false;
+            }
+            updateActivePlayerHighlight();
+        }
+        
+        function updateActivePlayerHighlight() {
+            const p1 = gameBoard.querySelector('#player1-area');
+            const p2 = gameBoard.querySelector('#player2-area');
+            if (!p1 || !p2) return;
+            p1.classList.toggle('player1-active', gameActive && currentPlayer === 1);
+            p2.classList.toggle('player2-active', gameActive && currentPlayer === 2);
+        }
+        
+        function renderGrid(gridContainer, gridData) {
+            if (!gridContainer) return;
+            gridContainer.innerHTML = '';
+            gridData.forEach(num => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.textContent = num;
+                cell.dataset.number = num;
+                gridContainer.appendChild(cell);
+            });
+        }
+        
+        function generateGridNumbers(availableAnswers, count) {
+            if (availableAnswers.length === 0) {
+                const emergencyAnswers = [];
+                for(let i = 0; i < count; i++) { emergencyAnswers.push(i % (targetNumber + 1)); }
+                return emergencyAnswers;
+            }
+            const bingoNumbers = [];
+            for (let i = 0; i < count; i++) {
+                const randomIndex = Math.floor(Math.random() * availableAnswers.length);
+                bingoNumbers.push(availableAnswers[randomIndex]);
+            }
+            return bingoNumbers;
+        }
+    });
+</script>
+</body>
+</html>

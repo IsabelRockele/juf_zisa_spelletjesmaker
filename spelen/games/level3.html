@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level 3 – Gemengde oefeningen</title>
+  <link rel="stylesheet" href="tafels.css" />
+  <style>
+    /* === UNIFORME KNOPSTIJL === */
+    .btn-actie {
+      padding: 16px 32px;
+      font-size: 1.6em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: #fff;
+      font-family: inherit;
+      margin: 10px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: background 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-opnieuw { background-color: #2e7d32; }
+    .btn-opnieuw:hover, .btn-opnieuw:focus { background-color: #219150; }
+    .btn-terug { background-color: #b71c1c; }
+    .btn-terug:hover, .btn-terug:focus { background-color: #e53935; }
+
+    /* === REST VAN JE CSS === */
+    body { font-family: Arial, sans-serif; background-color: #fefae0; margin: 0; padding: 0; }
+    #layout { display: flex; }
+    #knoppen-links { display: flex; flex-direction: column; padding: 20px; gap: 15px; }
+    .container { flex-grow: 1; text-align: center; padding: 20px; }
+    #bord-container { position: relative; display: inline-block; margin-top: -30px; margin-bottom: 20px; }
+    #bord { width: 650px; }
+    #juf { position: absolute; right: -180px; top: 210px; width: 320px; }
+    #opgave {
+      position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 3em; color: white;
+    }
+    #invoerveld {
+      position: absolute; top: 400px; left: 50%; transform: translateX(-50%);
+      font-size: 2em; width: 100px; height: 60px; text-align: center; display: none;
+    }
+    #toetsenbord {
+      position: fixed;
+      top: 250px;
+      left: 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 60px);
+      gap: 12px;
+      z-index: 20;
+      background-color: #fefae0;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .toets {
+      width: 60px; height: 60px; font-size: 1.4em;
+      border-radius: 10px; background-color: white; border: 2px solid #999; cursor: pointer;
+      /* iOS: snelle, stabiele tik zonder synthetic click */
+      touch-action: manipulation;
+    }
+    #start-knop {
+      position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 2em; padding: 14px 30px; background-color: #90e0ef; border: none; border-radius: 12px; cursor: pointer; z-index: 10;
+    }
+    #feedback { max-width: 700px; margin: 20px auto; text-align: center; font-size: 1.5em; color: #003049; }
+    #vuurwerk {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; display: none; z-index: 5;
+    }
+    .vuurwerk-bol {
+      position: absolute; width: 30px; height: 30px; border-radius: 50%;
+      background: radial-gradient(circle, #ff0, #f00, #00f); animation: knal 1s ease-out forwards; pointer-events: none; z-index: 6;
+    }
+    @keyframes knal { 0% { opacity: 1; transform: scale(0); } 100% { opacity: 0; transform: scale(2); } }
+
+    /* === DIAGNOSTISCHE CSS VOOR KLOKZONE EN SCOREBORD === */
+    #klokzone, #scorebord {
+      display: flex !important; align-items: center; visibility: visible !important; opacity: 1 !important;
+      position: fixed !important; z-index: 2000 !important; min-width: 60px !important; min-height: 40px !important;
+      padding: 8px !important; color: black !important;
+    }
+    #klokzone { top: 15px !important; right: 15px !important; justify-content: space-between; }
+    #scorebord { top: 550px !important; left: 75px !important; gap: 10px; }
+
+    @media (max-width: 900px) {
+      #bord { max-width: 90vw; height: auto; }
+      #juf { position: static; margin-top: 20px; width: 60vw; }
+      #invoerveld { position: static; margin: 20px auto; display: block; }
+      #start-knop { position: static; margin: 20px auto; display: block; }
+      #bord-container { margin-top: 0; }
+      #toetsenbord { position: static; margin: 20px auto; display: grid; justify-content: center; }
+      #scorebord { position: static !important; display: flex; justify-content: center; margin-top: 20px; }
+      #klokzone { position: static !important; display: flex; justify-content: center; margin-top: 20px; }
+    }
+  </style>
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+  <div id="layout">
+    <div id="knoppen-links">
+      <button onclick="opnieuwOefenen()" class="btn-actie btn-opnieuw">Opnieuw</button>
+      <button onclick="gaTerug()" class="btn-actie btn-terug">
+        <img src="tafels_afbeeldingen/pijl.png" alt="Terug" style="width: 40px; height: 40px;" />
+        Terug
+      </button>
+    </div>
+
+    <div class="container">
+      <h1>Level 3 – Gemengde oefeningen</h1>
+      <div id="bord-container">
+        <img id="bord" src="tafels_afbeeldingen/bord.png" alt="schoolbord" />
+        <img id="juf" src="tafels_afbeeldingen/tafeljuf_zisa.png" alt="wijsjuf" />
+
+        <div id="opgave"></div>
+
+        <!-- AANGEPAST: readonly + iPad geen toetsenbord -->
+        <input
+          id="invoerveld"
+          type="text"
+          readonly
+          inputmode="none"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          enterkeyhint="done"
+        />
+
+        <div id="toetsenbord"></div>
+
+        <p id="instructie-zin" style="position: absolute; top: 23%; left: 50%; transform: translateX(-50%); font-size: 1.6em; color: white; max-width: 600px; text-align: center; z-index: 10;"></p>
+        <button id="start-knop" onclick="startLevel3()">Start</button>
+        <div id="feedback"></div>
+      </div>
+      <div id="vuurwerk"></div>
+    </div>
+  </div>
+
+  <div id="klokzone">
+    <div id="timer">00:00</div>
+    <div id="visueleTimerContainer">
+      <img id="klok-afbeelding" src="tafels_afbeeldingen/stopwatch.png" />
+      <canvas id="timer-canvas"></canvas>
+    </div>
+  </div>
+
+  <div id="scorebord">
+    <div class="score-kolom">
+      <img src="tafels_afbeeldingen/blij.png" alt="Blij" />
+      <div id="scoreJuist">0</div>
+    </div>
+    <div class="score-kolom">
+      <img src="tafels_afbeeldingen/droevig.png" alt="Droevig" />
+      <div id="scoreFout">0</div>
+    </div>
+  </div>
+
+  <script src="level3.js"></script>
+  <script src="force-start.js"></script>
+</body>
+</html>

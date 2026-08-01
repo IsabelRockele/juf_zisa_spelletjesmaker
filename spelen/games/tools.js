@@ -1,0 +1,1 @@
+// Logica is tijdelijk verwijderd voor herstructurering. Nieuwe functionaliteit wordt stap voor stap toegevoegd.

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>4 op een rij met tafels</title>
+  <link href="vierop1rij.css" rel="stylesheet"/>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const isIPadMini = /iPad/.test(navigator.userAgent) &&
+                         window.devicePixelRatio === 2 &&
+                         ((screen.width === 768 && screen.height === 1024) ||
+                          (screen.width === 1024 && screen.height === 768));
+      if (isIPadMini) {
+        document.body.classList.add("ipad-mini");
+      }
+    });
+  </script>
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+<div class="pijl-links-boven">
+ <!-- NIEUWE, robuuste versie -->
+<a class="btn-actie btn-terug"
+   href="tafel_spelletjes.html"
+   role="button"
+   style="display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;">
+  <img src="tafels_afbeeldingen/pijl.png" alt="pijl" style="height:24px;"/> Terug
+</a>
+</div>
+
+<div class="container" id="keuzeScherm">
+  <header><h1>4 op een rij met tafels!</h1></header>
+  <div class="kies-scherm">
+    <img class="zisa-afbeelding" src="tafels_afbeeldingen/zisa_4opeenrij.png" alt="Juf Zisa 4 op een rij"/>
+    <div class="keuze-blok">
+      <h2>Kies soort oefeningen</h2>
+      <div class="aanduiding" id="meldingType" style="color:red;">Nog niet gekozen</div>
+      <div class="opties">
+        <button class="keuze" data-type="maal">Maal</button>
+        <button class="keuze" data-type="delen">Delen</button>
+        <button class="keuze" data-type="beide">Beide</button>
+      </div>
+    </div>
+    <div class="keuze-blok">
+      <h2>Kies tafels</h2>
+      <div class="aanduiding" id="meldingTafels" style="color:red;">Nog niet gekozen</div>
+      <div class="tafels-selectie">
+        <button class="tafel" data-tafel="0">0</button><button class="tafel" data-tafel="1">1</button><button class="tafel" data-tafel="2">2</button><button class="tafel" data-tafel="3">3</button><button class="tafel" data-tafel="4">4</button><button class="tafel" data-tafel="5">5</button><button class="tafel" data-tafel="6">6</button><button class="tafel" data-tafel="7">7</button><button class="tafel" data-tafel="8">8</button><button class="tafel" data-tafel="9">9</button><button class="tafel" data-tafel="10">10</button>
+      </div>
+    </div>
+    <div class="keuze-blok">
+      <h2>Speel je alleen of met twee?</h2>
+      <div class="aanduiding" id="meldingSpelers" style="color:red;">Nog niet gekozen</div>
+      <div class="opties">
+        <button class="spelers" data-aantal="1">1 speler</button>
+        <button class="spelers" data-aantal="2">2 spelers</button>
+      </div>
+    </div>
+    <div class="start-blok">
+      <button id="startSpel" disabled>Maak eerst je keuzes</button>
+    </div>
+  </div>
+</div>
+
+<div class="spel-scherm" id="spelScherm" style="display:none; position:relative;">
+  <div class="spel-links">
+    <button class="btn-actie btn-opnieuw" id="btn-opnieuw">Opnieuw</button>
+    <button class="btn-actie btn-terug" id="btn-terug-spel">
+      <img src="tafels_afbeeldingen/pijl.png" alt="Terug" style="height:30px;"/> Terug
+    </button>
+  </div>
+  <div class="container">
+    <header><h1>4 op een rij met tafels!</h1></header>
+    <div class="spel-inhoud" style="display:flex; gap:30px; justify-content:center; align-items:flex-start;">
+      <div id="speler1Zone" style="background-color:#fff3b0; padding:20px; border-radius:12px; min-width:260px; text-align:center;">
+        <h3>Speler 1</h3>
+        <div class="zisa-feedback"><img class="zisa-img" style="display:none; height:60px;" src=""/><div class="zisa-tekst" style="font-weight:bold;"></div></div>
+        <div class="fiche-cirkel" style="width:80px; height:80px; border-radius:50%; background:white; margin:20px auto; position:relative;"></div>
+        <div class="toetsenbord" style="margin-top:10px;"></div>
+      </div>
+
+      <div>
+        <div id="oefeningContainer" style="font-size:2em; margin-bottom:20px; text-align:center; height: 50px;">Oefening komt hier</div>
+        <div style="text-align:center; margin-bottom:20px;">
+          <!-- input blijft iPad-proof -->
+          <input id="antwoordInput" maxlength="3"
+                 type="text" readonly inputmode="none"
+                 autocomplete="off" autocorrect="off" autocapitalize="off" enterkeyhint="done"
+                 style="font-size:1.4em; padding:6px 10px; width:80px; text-align:center; border-radius:10px; border:2px solid #ccc;"/>
+          <button id="controleerBtn" style="margin-left:10px; padding:10px 20px; font-size:1.1em; border-radius:10px; background-color:#8bc34a; color:white; border:none; cursor:pointer;">Controleer</button>
+        </div>
+
+        <div id="kolomKnoppen" style="display:grid; grid-template-columns:repeat(7, 60px); justify-content:center; gap:8px; margin-bottom:10px;">
+          <button class="kolom-knop">↓</button><button class="kolom-knop">↓</button><button class="kolom-knop">↓</button><button class="kolom-knop">↓</button><button class="kolom-knop">↓</button><button class="kolom-knop">↓</button><button class="kolom-knop">↓</button>
+        </div>
+
+        <!-- HERSTELD: 42 vakjes expliciet -->
+        <div id="bordContainer" style="background-color:#003f88; display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; padding:12px; border-radius:12px; width:fit-content; margin:auto;">
+          <!-- 6 rijen × 7 kolommen -->
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+          <div class="vakje"></div>
+        </div>
+      </div>
+
+      <div id="speler2Zone" style="background-color:#ffd6d6; padding:20px; border-radius:12px; min-width:260px; text-align:center;">
+        <h3>Speler 2</h3>
+        <div class="zisa-feedback"><img class="zisa-img" style="display:none; height:60px;" src=""/><div class="zisa-tekst" style="font-weight:bold;"></div></div>
+        <div class="fiche-cirkel" style="width:80px; height:80px; border-radius:50%; background:white; margin:20px auto; position:relative;"></div>
+        <div class="toetsenbord" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="vierop1rij_fixed.js"></script>
+<script src="force-start.js"></script>
+<script>
+  if (navigator.userAgent.includes("iPad") && screen.width === 768 && screen.height === 1024 && window.devicePixelRatio === 2) {
+    document.body.classList.add("ipad-mini");
+  }
+</script>
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const isIPadMini = /iPad/.test(navigator.userAgent) &&
+                       window.devicePixelRatio === 2 &&
+                       Math.min(screen.width, screen.height) === 768 &&
+                       Math.max(screen.width, screen.height) === 1024;
+    if (isIPadMini) {
+      document.body.classList.add("ipad-mini");
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Level 1 – Tafel van 2</title>
+  <link rel="stylesheet" href="tafels.css">
+  <style>
+    html {
+  touch-action: manipulation;
+    width: 100%;
+    min-height: 100vh;
+overflow-x: hidden;
+    overflow: hidden; /* Voorkom scrollen op het html-niveau */
+    margin: 0;        /* Reset voor de zekerheid */
+    padding: 0;       /* Reset voor de zekerheid */
+}
+    /* === UNIFORME KNOPSTIJL === */
+    .btn-actie {
+      padding: 16px 32px;
+      font-size: 1.6em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: #fff;
+      font-family: inherit;
+      margin: 10px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: background 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-opnieuw {
+      background-color: #2e7d32;
+    }
+    .btn-opnieuw:hover,
+    .btn-opnieuw:focus {
+      background-color: #219150;
+    }
+    .btn-terug {
+      background-color: #b71c1c;
+    }
+    .btn-terug:hover,
+    .btn-terug:focus {
+      background-color: #e53935;
+    }
+    /* === REST VAN JE CSS BLIJFT ONGEWIJZIGD === */
+    body {
+  touch-action: manipulation;
+    font-family: Arial, sans-serif;
+    background-color: #fefae0;
+    margin: 0; /* Had je al */
+    padding: 0; /* Had je al */
+    width: 100%; /* Nieuw: zorg dat body de volledige breedte inneemt */
+    min-height: 100vh;
+overflow-x: hidden; /* Nieuw: zorg dat body de volledige hoogte inneemt */
+    overflow: hidden; /* Nieuw: voorkom scrollen op het body-niveau */
+}
+    #layout {
+      display: flex;
+    }
+    #knoppen-links {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 15px;
+    }
+    .container {
+      flex-grow: 1;
+      text-align: center;
+      padding: 20px;
+    }
+    #bord-container {
+      position: relative;
+      display: inline-block;
+      margin-top: -30px;
+      margin-bottom: 20px;
+    }
+    #bord {
+    width: 100%;
+    max-width: 650px;
+    height: auto;
+    display: block;
+    /* z-index: 1; Optioneel, basislaag */
+  }
+    #juf {
+      position: absolute;
+      right: -180px;
+      top: 210px;
+      width: 320px;
+    }
+    #ballon {
+      position: absolute;
+      right: -60px;
+      top: 230px;
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 1.2em;
+      width: 220px;
+      display: none;
+    }
+    #opgave {
+    position: absolute;
+    top: 45%; /* Probeer een waarde die de opgave mooi in het midden bovenaan het bord plaatst */
+    left: 50%;
+    transform: translate(-50%, -50%); /* Essentieel om correct te centreren */
+    color: white; /* Goed leesbare kleur op een donker bord */
+    font-size: 2.8em; /* Maak de opgave duidelijk leesbaar */
+    text-align: center;
+    width: 80%; /* Geef het wat breedte om tekstomloop te beheren */
+    z-index: 2; /* Zorg dat het boven het bord en andere elementen staat */
+    padding: 5px;
+  }
+    /* Stijl voor het invulvakje in de opgave voor consistentie */
+  #opgave .dropvak {
+    display: inline-block;
+    background-color: rgba(255, 255, 255, 0.15); /* Subtiele achtergrond */
+    color: white;
+    padding: 5px 12px;
+    border-radius: 6px;
+    margin-left: 8px;
+    min-width: 45px;
+    text-align: center;
+    font-size: 0.9em; /* Iets kleiner dan de opgavetekst zelf */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+    #antwoorden {
+    position: absolute;
+    bottom: 30%; /* Positioneer de antwoorden onderaan het bord */
+    left: 50%;
+    transform: translateX(-50%); /* Centreer de container horizontaal */
+    text-align: center; /* Centreer de inline-block antwoordvakken binnen deze container */
+    width: 90%; /* Zorg voor voldoende breedte voor de antwoorden */
+    z-index: 2; /* Boven het bord */
+    padding: 5px;
+  }
+
+  .antwoord {
+    display: inline-block; /* Laat antwoorden naast elkaar staan */
+    background-color: #90e0ef;
+    padding: 12px 25px; /* Iets aangepaste padding voor een goede grootte */
+    font-size: 1.8em; /* Duidelijke lettergrootte voor antwoorden */
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    margin: 0 8px; /* Ruimte tussen de antwoordvakken */
+    min-width: 50px; /* Minimale breedte */
+    text-align: center; /* Tekst centreren binnen elk antwoordvak */
+  }
+  
+    #feedback {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 1.8em;
+      text-align: center;
+      z-index: 4;
+    }
+    #feedback img {
+      display: none;
+    }
+    .tafelbadge {
+      background-color: #ffe8b5;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 2px solid #ffcc80;
+      font-weight: bold;
+      font-size: 1.3em;
+      min-width: 40px;
+    }
+    .tafelbadge::after {
+      content: '';
+    }
+    @keyframes knal {
+      0% { opacity: 1; transform: scale(0); }
+      100% { opacity: 0; transform: scale(2); }
+    }
+
+    .vuurwerk-bol {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ff0, #f00, #00f);
+      animation: knal 1s ease-out forwards;
+      pointer-events: none;
+    }
+  
+/* Media query voor iPad-achtige schermen */
+@media (max-width: 1024px) {
+  #juf {
+    right: -140px;
+    top: 180px;
+    width: 240px;
+  }
+
+  #opgave {
+    font-size: 2.2em;
+  }
+
+  .antwoord {
+    font-size: 1.6em;
+    padding: 10px 20px;
+  }
+
+  #knoppen-links {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .btn-actie {
+    font-size: 1.4em;
+    padding: 12px 24px;
+  }
+}
+@media (max-height: 768px) {
+  #bord-container {
+    margin-top: -60px;
+  }
+
+  #juf {
+    top: 140px;
+  }
+
+  #opgave {
+    top: 35%;
+    font-size: 2em;
+  }
+
+  #antwoorden {
+    bottom: 38%;
+  }
+
+  #feedback {
+    top: 32%;
+    font-size: 1.6em;
+  }
+
+  #level2-button-container {
+    top: -40px !important; /* minder negatieve top */
+  }
+}
+
+</style>
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+  <div id="layout">
+    <div id="knoppen-links">
+      <button onclick="opnieuwOefenen()" class="btn-actie btn-opnieuw">
+        Opnieuw
+      </button>
+      <button onclick="gaTerug()" class="btn-actie btn-terug">
+        <img src="tafels_afbeeldingen/pijl.png" alt="Terug" style="width: 38px; height: 38px;">
+        Terug
+      </button>
+    </div>
+
+    <div class="container">
+      <h1>Level 1 – Oefen de tafel van 2</h1>
+      <div id="tafel-label" style="font-size: 1.4em; margin-bottom: 10px; font-weight: bold;"></div>
+      <div id="bord-container">
+        <img src="tafels_afbeeldingen/bord.png" id="bord" alt="schoolbord">
+        <img src="tafels_afbeeldingen/tafeljuf_zisa.png" id="juf" alt="wijsjuf">
+        <div id="ballon"></div>
+        <div id="opgave"></div>
+        <div id="antwoorden"></div>
+        <div id="knop-level2"></div>
+        <div id="feedback"></div>
+      </div>
+      <div id="vuurwerk" style="position: absolute; top: 0; left: 0; width: 100%; min-height: 100vh;
+overflow-x: hidden; pointer-events: none; display: none; z-index: 5;"></div>
+    </div>
+  </div>
+
+  <div id="tafels-overzicht" style="position: fixed; bottom: 20px; left: 20px; width: 200px; background-color: #ffefd5; border: 2px solid #e0a96d; border-radius: 12px; padding: 14px; font-size: 1.2em; z-index: 10; box-shadow: 3px 3px 8px rgba(0,0,0,0.1);">
+    <h4 style="margin-top: 0; text-align: center;">Mijn tafels</h4>
+    <div id="tafels-lijst" style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+      <!-- Wordt dynamisch gevuld -->
+    </div>
+  </div>
+
+  <script src="level1.js"></script>
+  <script src="force-start.js"></script>
+</body>
+</html>
+

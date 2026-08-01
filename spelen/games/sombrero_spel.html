@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sombrero Spel</title>
+    <link rel="stylesheet" href="sombrero_spel.css">
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Oefen je tafels met het Sombrero Spel!</h1>
+        </header>
+
+        <div class="spel-links">
+            <button id="knopOpnieuw" class="btn-actie btn-opnieuw">Opnieuw</button>
+            <button id="knopKiezen" class="btn-actie btn-terug">
+                <img src="tafels_afbeeldingen/pijl.png" alt="pijl" style="height: 24px;" />
+                Terug
+            </button>
+
+            <div id="klok-en-scorezone" class="score-timer-container">
+                <div id="klokzone">
+                    <div id="timer">02:00</div>
+                    <div id="visueleTimerContainer">
+                        <img src="tafels_afbeeldingen/stopwatch.png" id="klok-afbeelding" />
+                        <canvas id="timer-canvas"></canvas>
+                    </div>
+                </div>
+                <div id="scorebord">
+                    <div class="score-kolom">
+                        <img src="leerjaar3_afbeeldingen/karl_blij.png" alt="Blij" />
+                        <div id="scoreJuist">0</div>
+                    </div>
+                    <div class="score-kolom">
+                        <img src="leerjaar3_afbeeldingen/karl_droevig.png" alt="Droevig" />
+                        <div id="scoreFout">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="spel-gebied">
+            <div id="hoedenContainer"></div>
+            <div id="cactussenContainer"></div>
+            <div id="feedbackContainer" style="display: none;">
+                <img id="feedbackImage" src="" alt="Feedback afbeelding" />
+                <p id="feedbackText"></p>
+                <button id="speelOpnieuwFeedback" class="btn-actie btn-opnieuw">Speel Opnieuw</button>
+                <button id="kiesOpnieuwFeedback" class="btn-actie btn-terug">Kies Nieuwe Tafels</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="sombrero_spel.js"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Splitsen bijenkorf</title>
+  <link rel="stylesheet" href="splits_bijenkorf.css" />
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+  <div class="spel-container">
+    <div class="spel-links">
+      <button id="btn-opnieuw" class="btn-actie btn-opnieuw">Opnieuw</button>
+      <a id="btn-terug" href="splitsen_bibi.html" class="btn-actie btn-terug">
+  <img src="tafels_afbeeldingen/pijl.png" alt="Terug" style="height: 24px;" />
+  Terug
+</a>
+    </div>
+
+    <div class="spelzone">
+      <div class="splits-container">
+        <img src="leerjaar1_afbeeldingen/bijenkorf.png" alt="Bijenkorf" class="bijenkorf" />
+        <div id="splitsing"></div>
+      </div>
+
+      <div id="bijenrij" class="bijen-container"></div>
+
+      <div id="scorebord">
+        <div class="score-kolom">
+          <img src="leerjaar1_afbeeldingen/bibi_blij.png" alt="Juist" />
+          <div id="scoreJuist">0</div>
+        </div>
+        <div class="score-kolom">
+          <img src="leerjaar1_afbeeldingen/bibi_droevig.png" alt="Fout" />
+          <div id="scoreFout">0</div>
+        </div>
+      </div>
+
+      <div id="feedbackContainer" style="display: none;">
+        <img id="feedbackAfbeelding" src="tafels_afbeeldingen/juf_zisa.png" alt="Feedback" />
+        <p id="feedbackText"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="splits_bijenkorf.js"></script>
+
+</body>
+</html>

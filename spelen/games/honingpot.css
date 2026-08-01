@@ -1,0 +1,154 @@
+/* honingpot.css */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #fefae0;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden { display: none !important; }
+
+/* --- Keuzescherm --- */
+#selection-screen { width: 100%; }
+.keuze-blok { background-color: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; max-width: 650px; margin: 0 auto; }
+.keuze-blok h2 { margin-top: 0; margin-bottom: 10px; }
+.menu-afbeelding { max-width: 200px; margin: 0 auto 15px; display: block; }
+.opties { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
+button.keuze { padding: 10px 20px; font-size: 1em; border: none; border-radius: 10px; background-color: #90e0ef; cursor: pointer; transition: background-color 0.3s; }
+button.keuze:hover, button.keuze.active { background-color: #0077b6; color: white; }
+.start-blok { margin-top: 20px; }
+#start-spel-knop { padding: 14px 28px; font-size: 1.4em; color: white; border: none; border-radius: 12px; cursor: pointer; background-color: #2e7d32; }
+#start-spel-knop:disabled { background-color: #aaa; cursor: not-allowed; }
+
+/* --- Spel Scherm --- */
+#game-container-spel {
+    width: 100%;
+    height: 100%;
+    background: url('leerjaar1_afbeeldingen/achtergrond_honingpotspel.png') no-repeat center bottom;
+    background-size: cover;
+    border: 5px solid #d4a373;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.game-ui { position: absolute; top: 20px; left: 20px; z-index: 100; display: flex; flex-direction: column; gap: 15px; }
+.knoppen-container { display: flex; flex-direction: column; gap: 10px; }
+.btn-actie { padding: 10px 20px; font-size: 1.2em; border: none; border-radius: 12px; cursor: pointer; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.btn-actie:active { transform: translateY(2px); }
+.btn-opnieuw { background-color: #2e7d32; }
+.btn-terug { background-color: #c62828; }
+
+#scorebord { display: flex; gap: 20px; background-color: rgba(255, 255, 255, 0.7); padding: 10px; border-radius: 10px; }
+.score-kolom { display: flex; align-items: center; gap: 8px; font-size: 1.5em; font-weight: bold; }
+.score-kolom img { width: 50px; height: auto; }
+#scoreJuist { color: #2e7d32; }
+#scoreFout { color: #c62828; }
+
+#game-area { width: 100%; height: 100%; position: relative; }
+#splitsing-container { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; flex-direction: column; align-items: center; font-size: 1.5em; font-weight: bold; }
+.bovengetal { background-color: rgba(255, 255, 255, 0.9); padding: 8px 20px; border-radius: 12px; box-shadow: 0 0 5px rgba(0,0,0,0.2); font-size: 2em; }
+.lijnen { display: flex; justify-content: space-between; width: 120px; height: 40px; margin-top: 10px; }
+.lijn { width: 8px; height: 40px; background-color: #333; transform-origin: top; }
+.lijn-links { transform: rotate(35deg); }
+.lijn-rechts { transform: rotate(-35deg); }
+.benen { display: flex; justify-content: center; gap: 80px; margin-top: 10px; }
+.been { background-color: white; padding: 10px 20px; border-radius: 12px; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+
+/* AANGEPAST: Player is nu een container */
+#player-container {
+    position: absolute;
+    width: 160px; /* Breedte van de afbeelding */
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: left 0.1s linear;
+    z-index: 20;
+}
+#player {
+    width: 100%;
+    display: block;
+}
+#player.fout { filter: sepia(1) saturate(4) hue-rotate(-50deg); }
+#player.shake { animation: shake-player 0.4s; }
+
+/* AANGEPAST: Nieuwe spreekballon */
+#speech-bubble {
+    position: absolute;
+    top: -40px; /* Boven de speler */
+    left: 70px; /* Rechts van de speler */
+    background-color: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 2px solid black;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: black;
+    z-index: 25;
+}
+#speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -12px; /* Onderkant van de ballon */
+    left: 20px;
+    border-width: 12px 12px 0 0;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}
+#speech-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 21px;
+    border-width: 10px 10px 0 0;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+    z-index: 1;
+}
+
+.falling-object { position: absolute; width: 80px; text-align: center; z-index: 10; }
+.falling-object img { width: 100%; height: auto; }
+.falling-object .getal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.8em; font-weight: bold; color: #582f0e; text-shadow: 0 0 3px white; }
+
+#movement-controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 100px; z-index: 100; opacity: 0.8; }
+.move-btn {
+    width: 80px;
+    height: 80px;
+    font-size: 2.5em;
+    font-weight: bold;
+    line-height: 80px;
+    padding: 0;
+    text-align: center;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    background-color: #f39c12; 
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: background-color 0.2s;
+}
+.move-btn:hover { background-color: #e67e22; }
+
+/* Eind-feedback scherm */
+#eind-feedback { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(254, 250, 224, 0.9); z-index: 200; display: flex; justify-content: center; align-items: center; }
+.feedback-content { text-align: center; background-color: white; padding: 40px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+#feedback-afbeelding { max-width: 250px; height: auto; margin-bottom: 20px; }
+#feedback-tekst { font-size: 1.8em; font-weight: bold; color: #582f0e; margin-bottom: 30px; }
+#eind-feedback .knoppen-container { flex-direction: row; }
+
+@keyframes fall { from { top: -100px; } to { top: 110vh; } }
+@keyframes shake-player { /* Naam aangepast om conflicten te vermijden */
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-15px); }
+    75% { transform: translateX(15px); }
+}

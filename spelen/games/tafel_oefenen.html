@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tafels oefenen met Zisa</title>
+<link href="tafels.css" rel="stylesheet"/>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fefae0;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2em;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .zisa-afbeelding {
+      max-width: 200px;
+      margin: 10px auto;
+      display: block;
+    }
+    .kies-scherm {
+      background-color: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .keuze-blok {
+      margin: 20px 0;
+    }
+    .keuze-blok h2 {
+      margin-bottom: 10px;
+    }
+    .aanduiding {
+      color: red;
+      font-size: 0.9em;
+      height: 16px;
+      margin-bottom: 6px;
+    }
+    .opties, .tafels-selectie {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 10px;
+      background-color: #ccc;
+      cursor: not-allowed;
+      transition: background-color 0.3s;
+    }
+    button:hover,
+    button:active {
+      background-color: #00b4d8;
+      color: white;
+    }
+    button.keuze.active,
+    button.tafel.active,
+    button.level.active {
+      background-color: #0077b6;
+      color: white;
+    }
+    button.actief {
+      background-color: #90e0ef;
+      cursor: pointer;
+    }
+    .start-blok {
+      margin: 30px 0;
+    }
+    .navigatie-knoppen {
+      margin-top: 20px;
+    }
+    button.keuze,
+    button.tafel,
+    button.level {
+      background-color: #00b4d8;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button.keuze:hover,
+    button.tafel:hover,
+    button.level:hover {
+      background-color: #0099c4;
+    }
+    button.keuze.active,
+    button.tafel.active,
+    button.level.active {
+      background-color: #0077b6;
+      color: white;
+    }
+    /* Uniforme Terug-knop */
+    .btn-actie {
+      padding: 16px 32px;
+      font-size: 1.6em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: #fff;
+      font-family: inherit;
+      margin: 10px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: background 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-terug {
+      background-color: #b71c1c;
+    }
+    .btn-terug:hover,
+    .btn-terug:focus {
+      background-color: #e53935;
+    }
+    .pijl-links-boven {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+    }
+</style>
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+<div class="pijl-links-boven">
+  <button id="btn-terug" class="btn-actie btn-terug">
+    <img src="tafels_afbeeldingen/pijl.png" alt="pijl" style="height: 24px;" />
+    Terug
+  </button>
+</div>
+<div class="container">
+<header>
+<h1>Oefen je tafels met juf Zisa</h1>
+</header>
+<div class="kies-scherm" id="keuzeScherm">
+<img alt="Juf Zisa oefentafels" class="zisa-afbeelding" src="tafels_afbeeldingen/oefen_zisa.png"/>
+<div class="keuze-blok">
+<h2>Kies soort oefeningen</h2>
+<div class="aanduiding" id="meldingType">Nog niet gekozen</div>
+<div class="opties">
+<button class="keuze" data-type="maal">Maal</button>
+<button class="keuze" data-type="delen">Delen</button>
+<button class="keuze" data-type="beide">Beide</button>
+</div>
+</div>
+<div class="keuze-blok">
+<h2>Kies tafels</h2>
+<div class="aanduiding" id="meldingTafels">Nog niet gekozen</div>
+<div class="tafels-selectie">
+<button class="tafel" data-tafel="0">0</button>
+<button class="tafel" data-tafel="1">1</button>
+<button class="tafel" data-tafel="2">2</button>
+<button class="tafel" data-tafel="3">3</button>
+<button class="tafel" data-tafel="4">4</button>
+<button class="tafel" data-tafel="5">5</button>
+<button class="tafel" data-tafel="6">6</button>
+<button class="tafel" data-tafel="7">7</button>
+<button class="tafel" data-tafel="8">8</button>
+<button class="tafel" data-tafel="9">9</button>
+<button class="tafel" data-tafel="10">10</button>
+</div>
+</div>
+<div class="keuze-blok">
+<h2>Kies je startniveau</h2>
+<div class="aanduiding" id="meldingLevel">Nog niet gekozen</div>
+<div class="opties">
+<button class="level" data-level="1">Level 1: In volgorde</button>
+<button class="level" data-level="2">Level 2: Gemengd</button>
+<button class="level" data-level="3">Level 3: Tempo</button>
+</div>
+</div>
+<div class="start-blok">
+<button id="startOefening">Maak eerst je keuzes</button>
+</div>
+<script src="tafel_oefenen.js"></script>
+<script src="force-start.js"></script>
+</div>
+</div>
+</body>
+</html>

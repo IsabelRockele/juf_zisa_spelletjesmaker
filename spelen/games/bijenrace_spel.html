@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bijenrace Spel</title>
+    <link rel="stylesheet" href="bijenrace_spel.css">
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+    <div class="game-container">
+        <div class="controls">
+            <button id="restartButton" class="game-button">Opnieuw</button>
+            <button id="backButton" class="game-button back-button-style">Terug</button>
+        </div>
+
+        <div class="game-area">
+            <img src="leerjaar1_afbeeldingen/finish_bijenrace.png" alt="Finish" class="finish-line">
+
+            <img src="leerjaar1_afbeeldingen/bijenrace_rood.png" alt="Rode Bij" id="redBee" class="bee red-bee">
+            <img src="leerjaar1_afbeeldingen/bijenrace_blauw.png" alt="Blauwe Bij" id="blueBee" class="bee blue-bee">
+
+            <div id="redFlowers"></div>
+            <div id="blueFlowers"></div>
+        </div>
+
+        <div id="turnIndicatorScreen" class="turn-indicator-screen">
+            <p id="turnIndicatorText"></p>
+            <img id="turnIndicatorImage" src="" alt="Speler is aan de beurt">
+        </div>
+
+        <div id="questionContainer" class="question-container">
+            <p id="questionText"></p>
+            <div id="numpad" class="numpad">
+                <button class="num-button" data-value="1">1</button>
+                <button class="num-button" data-value="2">2</button>
+                <button class="num-button" data-value="3">3</button>
+                <button class="num-button" data-value="4">4</button>
+                <button class="num-button" data-value="5">5</button>
+                <button class="num-button" data-value="6">6</button>
+                <button class="num-button" data-value="7">7</button>
+                <button class="num-button" data-value="8">8</button>
+                <button class="num-button" data-value="9">9</button>
+                <button class="num-button" data-value="C">&#x2190;</button>
+                <button class="num-button" data-value="0">0</button>
+                <button class="num-button" data-value="Enter">OK</button>
+            </div>
+            <p id="feedbackText" class="feedback-text"></p>
+        </div>
+
+        <div id="winnerScreen" class="winner-screen">
+            <img id="winnerImage" src="" alt="Winnaar">
+            <button id="winnerRestartButton" class="game-button">Nog een keer!</button>
+        </div>
+    </div>
+
+    <script src="bijenrace_spel.js"></script>
+</body>
+</html>

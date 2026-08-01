@@ -1,0 +1,71 @@
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Comic Sans MS', sans-serif;
+  background-color: #6fa6e2;
+  text-align: center;
+}
+
+h1 {
+  color: #1a237e;
+  margin-top: 20px;
+  font-size: 2.5em;
+}
+
+.leerjaar-raster {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 60px 40px;
+  padding: 10px 0;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+footer.copyright {
+  text-align: center;
+  font-size: 0.9em;
+  color: #666;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 10px 0;
+  margin-top: auto;
+}
+
+body.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
+}
+
+.leerjaar-knop {
+  background-color: #ffe5cc;
+  border-radius: 30px;
+  padding: 20px;
+  border: none;
+  width: 160px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.leerjaar-knop:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.leerjaar-knop:hover:not(:disabled),
+.leerjaar-knop:active:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.leerjaar-knop img {
+  width: 100%;
+  height: auto;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}

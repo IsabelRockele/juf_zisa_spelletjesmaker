@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Woestijnjacht</title>
+    <link rel="stylesheet" href="woestijnjacht_spel.css">
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+    <div class="spel-links">
+        <button id="knopOpnieuw" class="btn-actie btn-opnieuw">Opnieuw</button>
+        <button id="knopTerugKeuze" class="btn-actie btn-terug">Terug</button>
+
+        <div id="klok-en-scorezone">
+            <div id="timer">02:00</div>
+            
+            <div id="visueleTimerContainer">
+                <img src="tafels_afbeeldingen/stopwatch.png" id="klok-afbeelding" alt="Stopwatch" />
+                <canvas id="timer-canvas"></canvas>
+            </div>
+            
+            <div id="scorebord">
+                <div class="score-kolom">
+                    <img src="leerjaar3_afbeeldingen/karl_blij.png" alt="Juist" />
+                    <div id="scoreJuist">0</div>
+                </div>
+                <div class="score-kolom">
+                    <img src="leerjaar3_afbeeldingen/karl_droevig.png" alt="Fout" />
+                    <div id="scoreFout">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="spel-gebied">
+        <div id="vraagContainer" class="vraag-vak"></div>
+        <div id="cactussenContainer"></div>
+    </div>
+
+    <div id="feedbackContainer" class="feedback-container hidden">
+        <img id="feedbackImage" src="" alt="Feedback afbeelding" class="feedback-image" />
+        <p id="feedbackText"></p>
+        <button id="feedbackOpnieuwKnop" class="btn-actie btn-opnieuw">Opnieuw Spelen</button>
+        <button id="feedbackTerugKnop" class="btn-actie btn-terug">Terug naar Keuze</button>
+    </div>
+
+    <script src="woestijnjacht_spel.js"></script>
+</body>
+</html>

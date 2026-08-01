@@ -1,0 +1,394 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Hulpschema +</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+  <div id="sidebar">
+    <button id="reset" class="knop reset">Opnieuw</button>
+    <button id="terug" class="knop terug" onclick="window.location.href='index.html'">Ander schema</button>
+  </div>
+
+  <div id="main">
+    <h1>Hulpschema +</h1>
+    <div id="toolbar">
+      <button id="blokjes">Blokjes</button>
+      <button id="schijfjes">Schijfjes</button>
+      <div class="tool geel-blok" draggable="true" id="kubus" style="display: none;"></div>
+      <div class="tool staaf-groen" draggable="true" id="staaf" style="display: none;">
+        <div class="verdeling">
+          <div class="lijn" style="left: 20px;"></div><div class="lijn" style="left: 40px;"></div>
+          <div class="lijn" style="left: 60px;"></div><div class="lijn" style="left: 80px;"></div>
+          <div class="lijn" style="left: 100px;"></div><div class="lijn" style="left: 120px;"></div>
+          <div class="lijn" style="left: 140px;"></div><div class="lijn" style="left: 160px;"></div>
+          <div class="lijn" style="left: 180px;"></div>
+        </div>
+      </div>
+      <div class="tool schijf geel" draggable="true" id="schijf-geel" style="display: none;"><span>1</span></div>
+      <div class="tool schijf groen" draggable="true" id="schijf-groen" style="display: none;"><span>10</span></div>
+    </div>
+
+    <div id="schema" style="display: block;">
+      <div class="schema-header">
+        <div class="label-t">T</div>
+        <div class="label-e">E</div>
+      </div>
+      <div class="schema-light">
+        <div class="light-t"></div>
+        <div class="light-e"></div>
+      </div>
+      <div class="schema-body">
+        <div class="vak wit"></div>
+        <div class="vak wit">
+          <div class="doel-vak">
+            <svg class="svg-pijl" viewBox="0 0 100 100">
+              <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                        refX="0" refY="3.5" orient="auto">
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#0077cc"/>
+                </marker>
+              </defs>
+              <line x1="95" y1="95" x2="10" y2="10" stroke="#0077cc" stroke-width="5" marker-end="url(#arrowhead)" />
+            </svg>
+            <div class="cirkelrij">
+              <div class="cirkel"></div><div class="cirkel"></div><div class="cirkel"></div><div class="cirkel"></div><div class="cirkel"></div>
+            </div>
+            <div class="cirkelrij">
+              <div class="cirkel"></div><div class="cirkel"></div><div class="cirkel"></div><div class="cirkel"></div><div class="cirkel"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="schema-body">
+        <div class="vak wit"></div>
+        <div class="vak wit"></div>
+      </div>
+    </div>
+
+  
+  <script>
+document.addEventListener("DOMContentLoaded", function() {
+function disableKnoppen(except) {
+  const blokjesBtn = document.getElementById('blokjes');
+  const schijfjesBtn = document.getElementById('schijfjes');
+  if (except === 'blokjes') {
+    schijfjesBtn.disabled = true;
+  } else if (except === 'schijfjes') {
+    blokjesBtn.disabled = true;
+  }
+}
+
+function enableKnoppen() {
+  document.getElementById('blokjes').disabled = false;
+  document.getElementById('schijfjes').disabled = false;
+}
+
+let dragOffset = { x: 0, y: 0 };
+
+function maakSleepbaar(element) {
+    element.addEventListener('dragstart', function(e) {
+    const rect = element.getBoundingClientRect();
+    dragOffset.x = e.clientX - rect.left;
+    dragOffset.y = e.clientY - rect.top;
+    e.dataTransfer.setData('text/plain', element.id);
+    e.dataTransfer.effectAllowed = 'move';
+    if ((element.classList.contains('schijf') || element.classList.contains('geel-blok'))) {
+  const rect = element.getBoundingClientRect();
+  const cirkel = element.closest('.cirkel');
+  if (cirkel && cirkel.contains(element)) {
+    cirkel.innerHTML = '';
+    document.body.appendChild(element);
+    element.style.position = 'absolute';
+    element.style.left = rect.left + 'px';
+    element.style.top = rect.top + 'px';
+    element.style.transform = 'none';
+    element.style.visibility = 'visible';
+  }
+      const img = element.cloneNode(true);
+      img.style.position = 'absolute';
+      img.style.top = '-1000px';
+      img.style.left = '-1000px';
+      document.body.appendChild(img);
+      e.dataTransfer.setDragImage(img, dragOffset.x, dragOffset.y);
+      setTimeout(() => img.remove(), 0);
+    }
+
+    const cirkel = element.closest('.cirkel');
+    if (cirkel && cirkel.contains(element)) {
+      cirkel.innerHTML = '';
+      document.body.appendChild(element);
+      element.style.position = 'absolute';
+      element.style.left = rect.left + 'px';
+      element.style.top = rect.top + 'px';
+      element.style.transform = 'none';
+      element.style.visibility = 'visible';
+    }
+  });
+}
+
+document.querySelectorAll('.tool').forEach(tool => {
+  maakSleepbaar(tool);
+});
+
+document.querySelectorAll('.vak, .doel-vak, .wissel-vak, .cirkel').forEach(zone => {
+  zone.style.position = 'relative';
+
+  zone.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  });
+
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData('text/plain');
+    const origineel = document.getElementById(id);
+    if (!origineel) return;
+    if (origineel.classList.contains('staaf-groen')) {
+      const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+      const cirkel = dropTarget && dropTarget.classList.contains('cirkel') ? dropTarget : dropTarget.closest('.cirkel');
+      if (cirkel) return;
+    }
+
+    const isInSchema = !origineel.closest('#toolbar');
+
+    let toolElement;
+    if (isInSchema) {
+      toolElement = origineel;
+    } else {
+      toolElement = origineel.cloneNode(true);
+      toolElement.id = id + '-clone-' + Date.now();
+      toolElement.classList.add('tool');
+      toolElement.setAttribute('draggable', 'true');
+      maakSleepbaar(toolElement);
+    }
+
+    toolElement.style.position = 'absolute';
+    toolElement.style.visibility = 'hidden';
+    toolElement.style.left = '0px';
+    toolElement.style.top = '0px';
+    zone.appendChild(toolElement);
+
+    // Detecteer of eerste tool blokje of schijfje is en vergrendel keuze
+    if (toolElement.classList.contains('geel-blok') || toolElement.classList.contains('staaf-groen')) {
+      disableKnoppen('blokjes');
+    }
+    if (toolElement.classList.contains('schijf') && (toolElement.classList.contains('geel') || toolElement.classList.contains('groen'))) {
+      disableKnoppen('schijfjes');
+    }
+
+    const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+    const cirkel = dropTarget && dropTarget.classList.contains('cirkel') ? dropTarget : dropTarget.closest('.cirkel');
+
+    if (cirkel) {
+      cirkel.innerHTML = '';
+      cirkel.appendChild(toolElement);
+      toolElement.style.position = 'absolute';
+      toolElement.style.top = '50%';
+      toolElement.style.left = '50%';
+      toolElement.style.transform = 'translate(-50%, -50%)';
+      toolElement.style.visibility = 'visible';
+
+      setTimeout(controleerCirkels, 0);
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const rect = zone.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left - dragOffset.x;
+        const offsetY = e.clientY - rect.top - dragOffset.y;
+        toolElement.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        toolElement.style.visibility = 'visible';
+      });
+    });
+  });
+});
+
+document.querySelectorAll('.wissel-vak').forEach(zone => {
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData('text/plain');
+    const origineel = document.getElementById(id);
+    if (!origineel) return;
+    if (origineel.classList.contains('staaf-groen')) {
+      const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+      const cirkel = dropTarget && dropTarget.classList.contains('cirkel') ? dropTarget : dropTarget.closest('.cirkel');
+      if (cirkel) return;
+    }
+
+    const isInToolbar = origineel.closest('#toolbar');
+
+    let groeneSchijf;
+    if (isInToolbar) {
+      groeneSchijf = origineel.cloneNode(true);
+      groeneSchijf.id = id + '-clone-' + Date.now();
+      groeneSchijf.classList.add('tool');
+      groeneSchijf.setAttribute('draggable', 'true');
+      maakSleepbaar(groeneSchijf);
+    } else {
+      groeneSchijf = origineel;
+    }
+
+    groeneSchijf.remove();
+
+    const cirkels = document.querySelectorAll('#schema-min .cirkel');
+    let count = 0;
+    for (let cirkel of cirkels) {
+      if (count >= 10) break;
+      const geleSchijf = document.createElement('div');
+      geleSchijf.classList.add('schijf', 'geel', 'geel-schijf');
+      geleSchijf.textContent = '1';
+      geleSchijf.setAttribute('draggable', 'true');
+      geleSchijf.id = 'gele-' + Date.now() + '-' + count;
+      geleSchijf.classList.add('tool');
+      maakSleepbaar(geleSchijf);
+      geleSchijf.style.position = 'absolute';
+      geleSchijf.style.top = '50%';
+      geleSchijf.style.left = '50%';
+      geleSchijf.style.transform = 'translate(-50%, -50%)';
+      cirkel.innerHTML = '';
+      cirkel.appendChild(geleSchijf);
+      count++;
+    }
+  });
+});
+
+function controleerCirkels() {
+  const cirkels = document.querySelectorAll('#schema .cirkel');
+  let alleGevuld = true;
+
+  for (let cirkel of cirkels) {
+    if (
+      cirkel.children.length !== 1 ||
+      !cirkel.firstElementChild.classList.contains('schijf') ||
+      !cirkel.firstElementChild.classList.contains('geel')
+    ) {
+      alleGevuld = false;
+      break;
+    }
+  }
+
+  let kubusCirkels = Array.from(cirkels).filter(cirkel =>
+    cirkel.children.length === 1 &&
+    cirkel.firstElementChild.classList.contains('geel-blok')
+  );
+  const heeft10Kubussen = kubusCirkels.length === 10;
+
+  if (heeft10Kubussen) {
+    kubusCirkels.forEach(cirkel => (cirkel.innerHTML = ''));
+
+    const lightVak = document.querySelector('.light-t');
+    if (lightVak) {
+      const groeneStaaf = document.createElement('div');
+      groeneStaaf.classList.add('staaf-groen');
+      groeneStaaf.style.position = 'absolute';
+      groeneStaaf.style.top = '50%';
+      groeneStaaf.style.left = '50%';
+      groeneStaaf.style.transform = 'translate(-50%, -50%)';
+
+      lightVak.innerHTML = '';
+      groeneStaaf.innerHTML = `
+        <div class="verdeling">
+          <div class="lijn" style="left: 20px;"></div>
+          <div class="lijn" style="left: 40px;"></div>
+          <div class="lijn" style="left: 60px;"></div>
+          <div class="lijn" style="left: 80px;"></div>
+          <div class="lijn" style="left: 100px;"></div>
+          <div class="lijn" style="left: 120px;"></div>
+          <div class="lijn" style="left: 140px;"></div>
+          <div class="lijn" style="left: 160px;"></div>
+          <div class="lijn" style="left: 180px;"></div>
+        </div>
+      `;
+      lightVak.appendChild(groeneStaaf);
+    }
+  }
+
+  if (alleGevuld) {
+    cirkels.forEach(cirkel => (cirkel.innerHTML = ''));
+
+    const lightVak = document.querySelector('.light-t');
+    if (!lightVak) return;
+
+    const groeneSchijf = document.createElement('div');
+    groeneSchijf.classList.add('tool', 'schijf', 'groen', 'groen-schijf');
+    groeneSchijf.setAttribute('draggable', 'true');
+    groeneSchijf.style.position = 'absolute';
+    groeneSchijf.style.top = '50%';
+    groeneSchijf.style.left = '50%';
+    groeneSchijf.style.transform = 'translate(-50%, -50%)';
+
+    const span = document.createElement('span');
+    span.textContent = '10';
+    groeneSchijf.appendChild(span);
+
+    lightVak.innerHTML = '';
+    lightVak.appendChild(groeneSchijf);
+
+    const audio = new Audio('ringtone.mp3');
+    audio.play();
+  }
+}
+
+// Knoppenwerking
+document.getElementById('plus100').addEventListener('click', () => {
+  document.getElementById('schema').style.display = 'block';
+  document.getElementById('schema-min').style.display = 'none';
+});
+
+document.getElementById('min100').addEventListener('click', () => {
+  document.getElementById('schema').style.display = 'none';
+  document.getElementById('schema-min').style.display = 'block';
+});
+
+document.getElementById('reset').addEventListener('click', () => {
+  // Verwijder alle tools
+  document.querySelectorAll('body > .tool').forEach(el => el.remove());
+  document.querySelectorAll('.cirkel .tool').forEach(el => el.remove());
+  document.querySelectorAll('#schema .tool').forEach(el => el.remove());
+  document.querySelectorAll('#schema .cirkel').forEach(c => c.innerHTML = '');
+  const lightVak = document.querySelector('.light-t');
+  if (lightVak) lightVak.innerHTML = '';
+  document.querySelectorAll('#schema-min .tool').forEach(el => el.remove());
+  document.querySelectorAll('#schema-min .cirkel').forEach(c => c.innerHTML = '');
+  const wisselvak = document.querySelector('#schema-min .wissel-vak');
+  if (wisselvak) while (wisselvak.firstChild) wisselvak.removeChild(wisselvak.firstChild);
+  // Verberg alle toolweergave
+  document.getElementById('kubus').style.display = 'none';
+  const staafEl = document.getElementById('staaf');
+if (staafEl) staafEl.style.display = 'none';
+  document.getElementById('schijf-geel').style.display = 'none';
+  document.getElementById('schijf-groen').style.display = 'none';
+  // Zet knoppen opnieuw actief
+  enableKnoppen();
+});
+document.getElementById('terug').addEventListener('click', () => {
+  window.location.href = 'start.html';
+});
+});
+</script>
+
+<script src="drop_plus100.js"></script>
+<script src="wissel_plus.js"></script>
+<script src="app_plus100.js"></script> <!-- bevat reset en knopwerking -->
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    const terugLink = params.get("terug") || "index.html";
+
+    const knopTerug = document.getElementById("terug");
+    if (knopTerug) {
+      knopTerug.addEventListener("click", () => {
+        window.location.href = terugLink;
+      });
+    }
+  });
+</script>
+<script src="force-start.js"></script>
+</body>
+</html>

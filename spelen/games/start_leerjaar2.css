@@ -1,0 +1,110 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fefae0;
+}
+
+#keuzeScherm {
+    text-align: center;
+    padding: 20px;
+}
+
+.zisa-afbeelding {
+    max-width: 200px;
+    margin: 10px auto;
+    display: block;
+}
+
+.pijl-links-boven {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+}
+
+.btn-actie {
+    padding: 16px 32px;
+    font-size: 1.6em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #fff;
+    font-family: inherit;
+    margin: 10px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-terug {
+    background-color: #b71c1c;
+}
+
+.btn-terug:hover {
+    background-color: #e53935;
+}
+
+/* Keuzeblokken in wit vak met schaduw */
+.keuze-blok {
+    background-color: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #90e0ef;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #00b4d8;
+}
+
+/* Actieve knoppen styling */
+button.active {
+    background-color: #0077b6;
+    color: white;
+}
+
+/* Keuze knoppen stijl */
+button.keuze.active,
+button.tafel.active,
+button.spelers.active {
+    background-color: #0077b6;
+    color: white;
+}
+
+/* Meldingstekst voor niet gemaakte keuzes */
+.aanduiding {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* Startknop onderaan */
+.start-blok {
+    margin-top: 30px;
+}
+footer.copyright {
+  text-align: center;
+  font-size: 0.9em;
+  color: #666;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 10px 0;
+  margin-top: 40px;
+}
+body.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+main {
+  flex: 1;
+}

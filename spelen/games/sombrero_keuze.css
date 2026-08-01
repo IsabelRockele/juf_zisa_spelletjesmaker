@@ -1,0 +1,137 @@
+/* Algemene styling voor het keuzescherm */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #fefae0; /* Zachte crème achtergrondkleur */
+    min-height: 100vh; /* Zorg dat de body minstens de hele viewport hoogte vult */
+    overflow-y: auto; /* Sta verticaal scrollen toe indien nodig */
+    padding: 20px; /* Voeg overal padding toe, zodat de knop ook 20px van de rand is */
+    box-sizing: border-box; /* Zorg dat padding in de totale breedte/hoogte zit */
+}
+
+/* De container zelf moet nu de centrering van de hoofdinhoud regelen */
+.container {
+    width: 100%;
+    max-width: 800px; /* Maximale breedte van de centrale container */
+    box-sizing: border-box;
+    margin: 0 auto; /* Centreer de container binnen de body */
+}
+
+.hidden {
+    display: none !important; /* Voor het verbergen van elementen */
+}
+
+/* Styling voor de terugknop in het keuzescherm */
+.keuze-links-fixed {
+    position: fixed; /* Gebruik 'fixed' om de knop aan de viewport vast te zetten */
+    top: 20px; /* Afstand vanaf de bovenkant van het scherm (gelijk aan body padding) */
+    left: 20px; /* Afstand vanaf de linkerkant van het scherm (gelijk aan body padding) */
+    z-index: 1000; /* Zorg dat het boven andere elementen ligt */
+}
+
+.btn-actie {
+    padding: 14px 28px;
+    font-size: 1.4em;
+    color: #fff;
+    font-family: inherit;
+    margin: 0;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+}
+.btn-opnieuw {
+    background-color: #2e7d32;
+}
+.btn-terug {
+    background-color: #b71c1c;
+}
+
+
+/* Stijl voor het centrale blok met keuzes */
+.keuze-blok {
+    background-color: #fff; /* Witte achtergrond voor het blok */
+    border-radius: 15px; /* Afgeronde hoeken */
+    padding: 30px; /* Ruimte binnen het blok */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* Zachte schaduw */
+    text-align: center;
+    margin-top: 0; /* Terug naar 0, padding van body zorgt voor afstand */
+}
+
+.keuze-blok h2 {
+    margin-top: 0;
+    margin-bottom: 20px; /* Ruimte onder de titels */
+    color: #003049; /* Donkerblauwe tekstkleur */
+    font-size: 1.4em;
+}
+
+/* Stijl voor de afbeelding in het menu */
+.menu-afbeelding {
+    max-width: 180px; /* Maximale breedte van de afbeelding */
+    height: auto;
+    margin: 0 auto 25px; /* Centreer en geef ruimte eronder */
+    display: block;
+}
+
+/* Algemene stijl voor de groepen opties (tafels, soort, spelers) */
+.opties {
+    display: flex;
+    flex-wrap: wrap; /* Laat knoppen doorlopen naar volgende regel */
+    justify-content: center; /* Centreer knoppen horizontaal */
+    gap: 12px;
+    margin-top: 15px;
+    margin-bottom: 30px;
+}
+
+/* Stijl voor individuele keuzeknoppen (tafels, soort) */
+button.keuze {
+    padding: 10px 20px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 10px;
+    background-color: #90e0ef; /* Lichtblauwe achtergrond */
+    color: #003049;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+button.keuze:hover {
+    background-color: #008cba; /* Donkerder blauw bij hover */
+    color: white;
+    transform: translateY(-2px); /* Licht omhoog bij hover */
+}
+
+button.keuze.active {
+    background-color: #0077b6; /* Actieve kleur */
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+}
+
+/* Stijl voor het startknop gedeelte */
+.start-blok {
+    margin-top: 30px;
+}
+
+#start-spel-knop {
+    padding: 10px 20px;
+    font-size: 1.4em;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    background-color: #2e7d32; /* Groene kleur */
+    transition: background-color 0.3s, transform 0.1s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+#start-spel-knop:hover:not(:disabled) {
+    background-color: #388e3c; /* Donkerder groen bij hover */
+    transform: translateY(-2px);
+}
+
+#start-spel-knop:disabled {
+    background-color: #aaa; /* Grijze kleur als knop uitgeschakeld is */
+    cursor: not-allowed;
+    box-shadow: none;
+}

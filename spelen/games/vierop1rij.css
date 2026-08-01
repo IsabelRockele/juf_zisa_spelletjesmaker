@@ -1,0 +1,263 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #fefae0;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+  text-align: center;
+}
+header h1 {
+  font-size: 2em;
+  color: #333;
+  margin-bottom: 20px;
+}
+.zisa-afbeelding {
+  max-width: 200px;
+  margin: 10px auto;
+  display: block;
+}
+.kies-scherm {
+  background-color: #fff;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  position: relative;
+}
+.keuze-blok {
+  margin: 20px 0;
+}
+.keuze-blok h2 {
+  margin-bottom: 10px;
+}
+.opties, .tafels-selectie {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+button {
+  padding: 10px 20px;
+  font-size: 1.1em;
+  border: none;
+  border-radius: 10px;
+  background-color: #90e0ef;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+button:hover,
+button:active {
+  background-color: #00b4d8;
+  color: white;
+}
+button.keuze.active,
+button.tafel.active,
+button.spelers.active {
+  background-color: #0077b6;
+  color: white;
+}
+.start-blok {
+  margin: 30px 0;
+  text-align: center;
+}
+.btn-actie {
+  padding: 16px 32px;
+  font-size: 1.6em;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #fff;
+  font-family: inherit;
+  margin: 10px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.btn-opnieuw {
+  background-color: #2e7d32;
+}
+.btn-opnieuw:hover,
+.btn-opnieuw:focus {
+  background-color: #219150;
+}
+.btn-terug {
+  background-color: #b71c1c;
+}
+.btn-terug:hover,
+.btn-terug:focus {
+  background-color: #e53935;
+}
+.pijl-links-boven {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
+
+/* Compactere spel-layout */
+.spel-scherm .container {
+  margin-top: 30px;
+}
+.spel-inhoud {
+  margin-top: 20px;
+}
+.spel-links {
+  top: 20px;
+  left: 20px;
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zisa-feedback {
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.zisa-feedback img {
+  height: 60px;
+}
+.zisa-feedback .zisa-tekst {
+  font-weight: bold;
+}
+
+
+#speler1Zone, #speler2Zone {
+  width: 260px;
+  flex-shrink: 0;
+  margin-top: 100px;
+}
+
+
+@keyframes flitsen {
+  0% { box-shadow: 0 0 0px white; }
+  100% { box-shadow: 0 0 12px 4px white; }
+}
+
+
+.vakje {
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  border-radius: 50%;
+  position: relative; /* cruciaal voor centreren van absolute elementen */
+  overflow: hidden;   /* optioneel: als je geen overloop wil */
+}
+
+.vakje .kleur-fiche {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+.fiche-cirkel {
+  position: relative;
+}
+.fiche-cirkel .kleur-fiche {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -45%);
+}
+
+.vallende-fiche {
+  position: fixed;
+  top: -60px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  animation: val 5s linear infinite;
+  z-index: 1000;
+}
+
+@keyframes val {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(110vh); opacity: 0; }
+}
+
+
+body.ipad-mini .spel-inhoud {
+  gap: 0px !important;
+}
+body.ipad-mini #speler1Zone {
+  transform: translateX(10px);
+}
+body.ipad-mini #speler2Zone {
+  transform: translateX(-10px);
+}
+body.ipad-mini {
+  background-color: pink !important;
+}
+@media only screen and (device-width: 1024px) and (device-height: 768px) and (orientation: landscape) and (-webkit-min-device-pixel-ratio: 2) {
+  #speler1Zone {
+    margin-left: 30px; /* schuift naar rechts */
+  }
+
+  #speler2Zone {
+    margin-right: 30px; /* schuift naar links */
+  }
+}
+/* iPad Mini in landscape mode */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2) {
+  body {
+    background-color: pink; /* tijdelijk om te testen */
+  }
+
+  #speler1Zone {
+    transform: translateX(20px);
+  }
+
+  #speler2Zone {
+    transform: translateX(-20px);
+  }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2) {
+  /* Verwijder testkleur */
+  body {
+    background-color: #fefae0;
+  }
+
+  /* Spelersvakken opschuiven */
+  #speler1Zone {
+    transform: translateX(30px); /* schuif meer naar rechts */
+  }
+
+  #speler2Zone {
+    transform: translateX(-30px); /* schuif meer naar links */
+  }
+}
+@media screen and (max-height: 800px) and (orientation: landscape) {
+  .spel-scherm .container {
+    margin-top: 0px !important;
+  }
+
+  .spel-inhoud {
+    margin-top: 5px !important;
+  }
+
+  #bordContainer {
+    margin-bottom: 5px !important;
+  }
+}
+@media (max-height: 750px) {
+  .spel-inhoud {
+    transform: scale(0.9);
+    transform-origin: top;
+  }
+
+  .spel-scherm {
+    overflow-y: auto;
+  }
+}

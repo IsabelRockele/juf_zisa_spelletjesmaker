@@ -1,9 +1,7 @@
-﻿{
+{
   "functions": [
     {
-      "source": "pro_backend",
       "codebase": "default",
-      "runtime": "nodejs20",
       "ignore": [
         "node_modules",
         ".git",
@@ -13,11 +11,25 @@
       ],
       "predeploy": [
         "npm --prefix \"$RESOURCE_DIR\" run build"
+      ],
+      "source": "pro_backend",
+      "runtime": "nodejs22"
+    },
+    {
+      "source": "vraagstukken",
+      "codebase": "vraagstukken",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
       ]
     }
   ],
   "emulators": {
-    "functions": { "port": 5001 }
+    "functions": {
+      "port": 5001
+    }
   }
 }
-

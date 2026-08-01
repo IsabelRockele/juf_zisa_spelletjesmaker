@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Visuele Timer</title>
+  <link rel="stylesheet" href="timer.css">
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+  <div style="text-align:center; margin-top:30px;">
+    <div id="timer">02:00</div>
+    <div id="visueleTimerContainer">
+      <img src="tafels_afbeeldingen/stopwatch.png" id="klok-afbeelding" alt="stopwatch" />
+      <canvas id="timer-canvas"></canvas>
+    </div>
+    <button onclick="startVisueleTimer()">Start visuele timer</button>
+  </div>
+  <script src="timer.js"></script>
+</body>
+</html>

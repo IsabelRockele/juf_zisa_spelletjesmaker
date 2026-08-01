@@ -20,6 +20,7 @@ import { getAuth } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
 import type { Request, Response } from "express";
 import PDFDocument from "pdfkit";
+import { createHash, randomBytes } from "crypto";
 
 // ------------------------------ Init -----------------------------------------
 const REGION = "europe-west1";
@@ -61,6 +62,10 @@ const PRICE_EUR_WAITLIST = "35.00";
 const PRICE_EUR_MONTH    = "6.00";
 const DEVICE_LIMIT       = 2;
 const ENTITLEMENT_ID     = "zisa-pro-1y";
+const PLAY_DEVICE_LIMIT  = 50;
+const PLAY_ACTIVE_LIMIT  = 30;
+const PLAY_ACTIVE_MS     = 5 * 60 * 1000;
+const PLAY_DEVICE_TTL_MS = 60 * 24 * 60 * 60 * 1000;
 
 // ------- SCHOOL ADMIN: wie mag schoollicenties aanmaken? --------------------
 const SCHOOL_ADMIN_EMAILS = new Set<string>([
@@ -1228,6 +1233,180 @@ export const proLink = onRequest({ region: REGION }, async (req, res) => {
     logger.error("proLink error", { error: e?.message || String(e) });
     res.status(500).send("Interne fout.");
   }
+});
+
+// ===== Zisa Spelen: vaste leerling-QR gekoppeld aan PRO ======================
+
+type PlayDevice = {
+  registeredAt: FirebaseFirestore.Timestamp;
+  lastSeen: FirebaseFirestore.Timestamp;
+};
+
+function makePlayCode(): string {
+  return randomBytes(12).toString("base64url");
+}
+
+function playDeviceKey(raw: unknown): string {
+  const value = String(raw || "").trim();
+  if (value.length < 12 || value.length > 200) {
+    throw new HttpsError("invalid-argument", "Ongeldig toestel-ID.");
+  }
+  return createHash("sha256").update(value).digest("hex").slice(0, 32);
+}
+
+async function activePlayLicense(uid: string): Promise<{ expiresAt: Timestamp; owner: boolean } | null> {
+  const user = await auth.getUser(uid);
+  const email = String(user.email || "").toLowerCase();
+  if (OWNER_EMAILS.has(email)) {
+    return { expiresAt: Timestamp.fromDate(new Date("2099-12-31T23:59:59Z")), owner: true };
+  }
+  const lic = pickLatestValid(await fetchLicensesBy("uid", uid), Date.now());
+  const expiresAt = lic?.expiresAt as Timestamp | undefined;
+  return expiresAt ? { expiresAt, owner: false } : null;
+}
+
+function normalisePlayConfig(value: any) {
+  return {
+    grade1: value?.grade1 !== false,
+    grade2: value?.grade2 !== false,
+    grade3: value?.grade3 !== false,
+  };
+}
+
+async function ensurePlayClass(uid: string) {
+  const license = await activePlayLicense(uid);
+  if (!license) throw new HttpsError("failed-precondition", "Geen actief PRO-abonnement gevonden.");
+  const ref = db.collection("playClasses").doc(uid);
+  const snap = await ref.get();
+  if (!snap.exists) {
+    await ref.set({
+      uid,
+      code: makePlayCode(),
+      config: normalisePlayConfig({}),
+      devices: {},
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    });
+  }
+  return { ref, license, snap: await ref.get() };
+}
+
+function playAdminPayload(data: FirebaseFirestore.DocumentData, expiresAt: Timestamp) {
+  const now = Date.now();
+  const devices = (data.devices || {}) as Record<string, PlayDevice>;
+  const deviceList = Object.entries(devices)
+    .map(([id, item]) => ({
+      id,
+      label: `Toestel ${id.slice(0, 6).toUpperCase()}`,
+      registeredAt: item.registeredAt?.toDate?.()?.toISOString?.() || null,
+      lastSeen: item.lastSeen?.toDate?.()?.toISOString?.() || null,
+      active: (item.lastSeen?.toMillis?.() || 0) >= now - PLAY_ACTIVE_MS,
+    }))
+    .sort((a, b) => String(b.lastSeen).localeCompare(String(a.lastSeen)));
+  const code = String(data.code || "");
+  return {
+    code,
+    url: `${FRONTEND_REPO}/spelen/?code=${encodeURIComponent(code)}`,
+    config: normalisePlayConfig(data.config),
+    registeredCount: deviceList.length,
+    activeCount: deviceList.filter((d) => d.active).length,
+    registeredLimit: PLAY_DEVICE_LIMIT,
+    activeLimit: PLAY_ACTIVE_LIMIT,
+    expiresAt: expiresAt.toDate().toISOString(),
+    devices: deviceList,
+  };
+}
+
+export const getPlayClass = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const { license, snap } = await ensurePlayClass(req.auth.uid);
+  return playAdminPayload(snap.data()!, license.expiresAt);
+});
+
+export const updatePlayClass = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const { ref, license } = await ensurePlayClass(req.auth.uid);
+  await ref.set({ config: normalisePlayConfig(req.data?.config), updatedAt: Timestamp.now() }, { merge: true });
+  return playAdminPayload((await ref.get()).data()!, license.expiresAt);
+});
+
+export const rotatePlayClassCode = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const { ref, license } = await ensurePlayClass(req.auth.uid);
+  await ref.set({ code: makePlayCode(), devices: {}, updatedAt: Timestamp.now() }, { merge: true });
+  return playAdminPayload((await ref.get()).data()!, license.expiresAt);
+});
+
+export const clearPlayClassDevices = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const { ref, license } = await ensurePlayClass(req.auth.uid);
+  await ref.set({ devices: {}, updatedAt: Timestamp.now() }, { merge: true });
+  return playAdminPayload((await ref.get()).data()!, license.expiresAt);
+});
+
+export const removePlayClassDevice = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const id = String(req.data?.id || "");
+  if (!/^[a-f0-9]{32}$/.test(id)) throw new HttpsError("invalid-argument", "Ongeldig toestel.");
+  const { ref, license } = await ensurePlayClass(req.auth.uid);
+  await ref.update({ [`devices.${id}`]: FieldValue.delete(), updatedAt: Timestamp.now() });
+  return playAdminPayload((await ref.get()).data()!, license.expiresAt);
+});
+
+export const joinPlayClass = onCall({ region: REGION, cors: true }, async (req) => {
+  const code = String(req.data?.code || "").trim();
+  if (!/^[A-Za-z0-9_-]{12,40}$/.test(code)) {
+    throw new HttpsError("not-found", "Deze leerling-QR is niet geldig.");
+  }
+  const deviceKey = playDeviceKey(req.data?.deviceId);
+  const query = await db.collection("playClasses").where("code", "==", code).limit(1).get();
+  if (query.empty) throw new HttpsError("not-found", "Deze leerling-QR is niet geldig.");
+
+  const classRef = query.docs[0].ref;
+  const uid = query.docs[0].id;
+  const license = await activePlayLicense(uid);
+  if (!license) throw new HttpsError("permission-denied", "Het PRO-abonnement van de leerkracht is niet actief.");
+
+  const now = Timestamp.now();
+  const result = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(classRef);
+    const data = snap.data() || {};
+    if (data.code !== code) throw new HttpsError("not-found", "Deze leerling-QR is vernieuwd.");
+
+    const rawDevices = (data.devices || {}) as Record<string, PlayDevice>;
+    const devices: Record<string, PlayDevice> = {};
+    for (const [id, item] of Object.entries(rawDevices)) {
+      const lastMs = item.lastSeen?.toMillis?.() || 0;
+      if (lastMs >= now.toMillis() - PLAY_DEVICE_TTL_MS) devices[id] = item;
+    }
+
+    const existing = devices[deviceKey];
+    if (!existing && Object.keys(devices).length >= PLAY_DEVICE_LIMIT) {
+      throw new HttpsError("resource-exhausted", "De 50 gekoppelde leerlingentoestellen zijn bereikt.");
+    }
+    const activeKeys = Object.entries(devices)
+      .filter(([, item]) => (item.lastSeen?.toMillis?.() || 0) >= now.toMillis() - PLAY_ACTIVE_MS)
+      .map(([id]) => id);
+    if (!activeKeys.includes(deviceKey) && activeKeys.length >= PLAY_ACTIVE_LIMIT) {
+      throw new HttpsError("resource-exhausted", "Er oefenen momenteel al 30 leerlingen. Probeer zo meteen opnieuw.");
+    }
+
+    devices[deviceKey] = { registeredAt: existing?.registeredAt || now, lastSeen: now };
+    tx.update(classRef, { devices, lastActivityAt: now });
+    return {
+      config: normalisePlayConfig(data.config),
+      registeredCount: Object.keys(devices).length,
+      activeCount: new Set([...activeKeys, deviceKey]).size,
+    };
+  });
+
+  return {
+    allowed: true,
+    ...result,
+    registeredLimit: PLAY_DEVICE_LIMIT,
+    activeLimit: PLAY_ACTIVE_LIMIT,
+    expiresAt: license.expiresAt.toDate().toISOString(),
+  };
 });
 
 // ──────────────────────────────────────────────────────────────────────────

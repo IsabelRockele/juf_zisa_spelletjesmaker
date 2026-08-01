@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tornado - Keuze</title>
+    <link rel="stylesheet" href="woestijnjacht_keuze.css">
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+    <div class="keuze-links-fixed">
+        <button id="knopTerugKeuze" class="btn-actie btn-terug">Terug</button>
+    </div>
+
+    <div class="container">
+        <div class="keuze-blok">
+            <img src="leerjaar3_afbeeldingen/karl_tornado.png" alt="Tornado Spel" class="menu-afbeelding" />
+            <h2>Welke tafels wil je oefenen?</h2>
+            <div class="opties" id="tafel-opties">
+                <button class="keuze" data-tafel="2">Tafel van 2</button>
+                <button class="keuze" data-tafel="3">Tafel van 3</button>
+                <button class="keuze" data-tafel="4">Tafel van 4</button>
+                <button class="keuze" data-tafel="5">Tafel van 5</button>
+                <button class="keuze" data-tafel="6">Tafel van 6</button>
+                <button class="keuze" data-tafel="7">Tafel van 7</button>
+                <button class="keuze" data-tafel="8">Tafel van 8</button>
+                <button class="keuze" data-tafel="9">Tafel van 9</button>
+                <button class="keuze" data-tafel="10">Tafel van 10</button>
+                <button class="keuze" data-tafel="alle">Alle tafels</button>
+            </div>
+
+            <h2>Welke soort oefening?</h2>
+            <div class="opties" id="soort-opties">
+                <button class="keuze" data-soort="maal">Maal</button>
+                <button class="keuze" data-soort="delen">Delen</button>
+                <button class="keuze" data-soort="beide">Beide</button>
+            </div>
+
+            <div class="start-blok">
+                <button id="start-spel-knop" disabled>Kies eerst je tafels</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="tornado_keuze.js"></script>
+</body>
+</html>

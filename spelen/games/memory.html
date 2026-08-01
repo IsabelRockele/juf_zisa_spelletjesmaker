@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Memoryspel Tafels</title>
+<link href="tafels.css" rel="stylesheet"/>
+<link href="memory.css" rel="stylesheet"/>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fefae0;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2em;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .zisa-afbeelding {
+      max-width: 140px;
+      margin: 10px auto;
+      display: block;
+    }
+    .kies-scherm {
+      background-color: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .keuze-blok {
+      margin: 20px 0;
+    }
+    .keuze-blok h2 {
+      margin-bottom: 10px;
+    }
+    .opties, .tafels-selectie {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 10px;
+      background-color: #90e0ef;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover,
+    button:active {
+      background-color: #00b4d8;
+      color: white;
+    }
+    button.keuze.active,
+    button.tafel.active,
+    button.spelers.active {
+      background-color: #0077b6;
+      color: white;
+    }
+    .start-blok {
+      margin: 30px 0;
+      text-align: center;
+    }
+    .navigatie-knoppen {
+      margin-top: 20px;
+    }
+    /* Uniforme actieknoppen */
+    .btn-actie {
+      padding: 16px 32px;
+      font-size: 1.6em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: #fff;
+      font-family: inherit;
+      margin: 10px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: background 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-opnieuw {
+      background-color: #2e7d32;
+    }
+    .btn-opnieuw:hover,
+    .btn-opnieuw:focus {
+      background-color: #219150;
+    }
+    .btn-terug {
+      background-color: #b71c1c;
+    }
+    .btn-terug:hover,
+    .btn-terug:focus {
+      background-color: #e53935;
+    }
+    .pijl-links-boven {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+    }
+    .spel-links {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+    .spelbord {
+      display: grid;
+      grid-template-columns: repeat(5, 160px);
+      gap: 30px;
+      justify-content: center;
+      margin: 60px auto;
+    }
+    .kaart {
+      width: 140px;
+      height: 140px;
+      perspective: 1000px;
+      position: relative;
+      cursor: pointer;
+    }
+    .kaart .kant {
+      width: 100%;
+      height: 100%;
+      border-radius: 15px;
+      position: absolute;
+      backface-visibility: hidden;
+      transition: transform 0.6s ease;
+    }
+    .kaart .voorkant {
+      background-color: #fff;
+      border: 2px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      transform: rotateY(180deg);
+    }
+    .kaart .achterkant {
+      background-image: url('tafels_afbeeldingen/memory_zisa.png');
+      background-size: cover;
+      background-position: center;
+      transform: rotateY(0deg);
+    }
+    .kaart.omgedraaid .voorkant {
+      transform: rotateY(0deg);
+    }
+    .kaart.omgedraaid .achterkant {
+      transform: rotateY(180deg);
+    }
+
+    /* --- NIEUWE CSS VOOR DE KAARTSTAPEL --- */
+    .kaart-stapel {
+      position: relative;
+      width: 80px;
+      min-height: 100px;
+      margin: 10px auto 0;
+    }
+    .kaartje-in-stapel {
+      position: absolute;
+      width: 70px;
+      height: 90px;
+      background-image: url('tafels_afbeeldingen/memory_zisa.png');
+      background-size: cover;
+      background-position: center;
+      border: 2px solid white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+</style>
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>Memory oefenen met juf Zisa</h1>
+</header>
+<div class="kies-scherm" id="keuzeScherm">
+  <div class="pijl-links-boven">
+  <button onclick="location.href='tafel_spelletjes.html'" class="btn-actie btn-terug">
+    <img src="tafels_afbeeldingen/pijl.png" alt="pijl" style="height: 24px;" />
+    Terug
+  </button>
+</div>
+  <img alt="Juf Zisa memory" class="zisa-afbeelding" src="tafels_afbeeldingen/memory_spel.png"/>
+  <div class="keuze-blok">
+    <h2>Kies soort oefeningen</h2>
+    <div class="aanduiding" id="meldingType" style="color: red;">Nog niet gekozen</div>
+    <div class="opties">
+      <button class="keuze" data-type="maal">Maal</button>
+      <button class="keuze" data-type="delen">Delen</button>
+      <button class="keuze" data-type="beide">Beide</button>
+    </div>
+  </div>
+  <div class="keuze-blok">
+    <h2>Kies tafels</h2>
+    <div class="aanduiding" id="meldingTafels" style="color: red;">Nog niet gekozen</div>
+    <div class="tafels-selectie">
+      <button class="tafel" data-tafel="0">0</button>
+      <button class="tafel" data-tafel="1">1</button>
+      <button class="tafel" data-tafel="2">2</button>
+      <button class="tafel" data-tafel="3">3</button>
+      <button class="tafel" data-tafel="4">4</button>
+      <button class="tafel" data-tafel="5">5</button>
+      <button class="tafel" data-tafel="6">6</button>
+      <button class="tafel" data-tafel="7">7</button>
+      <button class="tafel" data-tafel="8">8</button>
+      <button class="tafel" data-tafel="9">9</button>
+      <button class="tafel" data-tafel="10">10</button>
+    </div>
+  </div>
+  <div class="keuze-blok">
+    <h2>Speel je alleen of met twee?</h2>
+    <div class="aanduiding" id="meldingSpelers" style="color: red;">Nog niet gekozen</div>
+    <div class="opties">
+      <button class="spelers" data-aantal="1">1 speler</button>
+      <button class="spelers" data-aantal="2">2 spelers</button>
+    </div>
+  </div>
+  <div class="start-blok">
+    <button id="startSpel" disabled>Maak eerst je keuzes</button>
+  </div>
+</div>
+<div class="spel-scherm" id="spelScherm" style="display: none; position: relative;">
+  <div class="spel-links">
+    <button id="btn-opnieuw" class="btn-actie btn-opnieuw">Opnieuw</button>
+    <button onclick="terugNaarKeuzeScherm()" class="btn-actie btn-terug">
+      <img alt="Terug" src="tafels_afbeeldingen/pijl.png" style="height: 30px;"/>
+      Terug
+    </button>
+  </div>
+  <div id="feedback" style="display: none; text-align: center;">
+    <img alt="Juf Zisa" src="start_afbeeldingen/juf_zisa.png" style="max-width: 200px; display: block; margin: 20px auto;"/>
+    <div id="feedback-tekst" style="font-size: 1.4em; color: #003049;"></div>
+  </div>
+  <div class="spelbord" id="spelbord"></div>
+  <div id="score-container"></div>
+</div>
+</div>
+<script src="memory.js"></script>
+<script src="force-start.js"></script>
+</body>
+</html>

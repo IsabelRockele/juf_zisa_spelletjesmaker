@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bibi's Bloemenweide</title>
+    <link rel="stylesheet" href="bloemenweide_spel.css">
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="game-ui-controls"> 
+            <div class="knoppen-container">
+                <button id="btn-opnieuw" class="btn-actie btn-opnieuw">Opnieuw</button>
+                <a href="bloemenweide_keuze.html" class="btn-actie btn-terug">
+                    <img src="tafels_afbeeldingen/pijl.png" alt="Terug" style="height: 24px;">
+                    Terug
+                </a>
+            </div>
+            <div id="score-timer-container">
+                <div id="timer-display-text"> 
+                    <img src="tafels_afbeeldingen/stopwatch.png" alt="Timer" style="height: 40px; vertical-align: middle;">
+                    <span id="tijdOver">02:00</span>
+                </div>
+                <div id="visueleTimerContainer">
+                    <img src="tafels_afbeeldingen/stopwatch.png" id="klok-afbeelding" alt="Stopwatch" />
+                    <canvas id="timer-canvas"></canvas>
+                </div>
+                <div id="scorebord">
+                    <div class="score-kolom">
+                        <img src="leerjaar1_afbeeldingen/bibi_blij.png" alt="Juist">
+                        <span id="scoreJuist">0</span>
+                    </div>
+                    <div class="score-kolom">
+                        <img src="leerjaar1_afbeeldingen/bibi_droevig.png" alt="Fout">
+                        <span id="scoreFout">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-area">
+            <div id="instructie">Klik op de juiste bloem.</div>
+            <div id="oefening-display"></div>
+            <img src="leerjaar1_afbeeldingen/bibi_vliegt.png" id="bibi-vliegt" alt="Bibi vliegt">
+            <div id="bloemen-container">
+            </div>
+        </div>
+    </div> <div id="eind-feedback" class="hidden">
+        <div class="feedback-content">
+            <img id="feedback-afbeelding" src="" alt="Feedback">
+            <p id="feedback-tekst"></p>
+            <div class="knoppen-container">
+                <button id="eind-opnieuw" class="btn-actie btn-opnieuw">Opnieuw Spelen</button>
+                <button id="eind-terug" class="btn-actie btn-terug">Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="bloemenweide_spel.js"></script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kies leerjaar</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="start_afbeeldingen/Reken_met_Zisa_1024x1024.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="start_afbeeldingen/Reken_met_Zisa_512x512.png">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Reken met Zisa">
+   <!-- NIEUWE regel voor bredere compatibiliteit -->
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <link rel="stylesheet" href="start.css">
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body class="layout">
+<main>
+  <h1>Kies het juiste leerjaar</h1>
+
+  <div class="leerjaar-raster">
+    <button class="leerjaar-knop" data-url="start_leerjaar1.html" disabled>
+      <img src="start_afbeeldingen/bibi_leerjaar1.png" alt="Eerste leerjaar">
+    </button>
+    <button class="leerjaar-knop" data-url="start_leerjaar2.html" disabled>
+      <img src="start_afbeeldingen/zisa_leerjaar2.png" alt="Tweede leerjaar">
+    </button>
+    <button class="leerjaar-knop" data-url="start_leerjaar3.html" disabled>
+      <img src="start_afbeeldingen/karl_leerjaar3.png" alt="Derde leerjaar">
+    </button>
+    <button class="leerjaar-knop" onclick="toonNogInWerking(event)" disabled>
+      <img src="start_afbeeldingen/lana_leerjaar4.png" alt="Vierde leerjaar">
+    </button>
+    <button class="leerjaar-knop" onclick="toonNogInWerking(event)" disabled>
+      <img src="start_afbeeldingen/leon_leerjaar5.png" alt="Vijfde leerjaar">
+    </button>
+    <button class="leerjaar-knop" onclick="toonNogInWerking(event)" disabled>
+      <img src="start_afbeeldingen/dex_leerjaar6.png" alt="Zesde leerjaar">
+    </button>
+  </div>
+</main>
+
+<div id="draai-melding" style="visibility: hidden; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #fff3cd; color: #856404; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px;">
+  <div style="font-size: 1.8em; max-width: 90vw;">
+    📱 Kantel je iPad naar de zijkant (landscape) om verder te gaan.
+  </div>
+  <img src="start_afbeeldingen/kantel_ipad.png" alt="Kantel uitleg" style="max-width: 300px; margin-top: 25px;">
+</div>
+
+<footer class="copyright">
+  © Isabel Rockelé, 2025. Alle rechten voorbehouden.
+</footer>
+
+<script>
+  function checkOriëntatie() {
+    const melding = document.getElementById("draai-melding");
+    if (window.innerHeight > window.innerWidth) {
+      melding.style.visibility = "visible";
+    } else {
+      melding.style.visibility = "hidden";
+    }
+  }
+
+  function toonNogInWerking(event) {
+    event.preventDefault();
+    alert("Hier wordt nog aan gewerkt.");
+  }
+
+  function activeerKnoppen() {
+  const knoppen = document.querySelectorAll(".leerjaar-knop");
+  knoppen.forEach(knop => {
+    knop.disabled = false;
+    knop.addEventListener("click", () => {
+      const url = knop.getAttribute("data-url");
+      if (url) {
+        // Zet leerjaar in localStorage
+        if (url.includes("leerjaar1")) localStorage.setItem("leerjaar", "1");
+        if (url.includes("leerjaar2")) localStorage.setItem("leerjaar", "2");
+        if (url.includes("leerjaar3")) localStorage.setItem("leerjaar", "3");
+        if (url.includes("leerjaar4")) localStorage.setItem("leerjaar", "4");
+        if (url.includes("leerjaar5")) localStorage.setItem("leerjaar", "5");
+        if (url.includes("leerjaar6")) localStorage.setItem("leerjaar", "6");
+
+        // Markeer sessie als gestart, zodat force-start.js niet redirect
+        sessionStorage.setItem("zisa_session_started", "true");
+
+        // Navigeer naar het gekozen leerjaar
+        window.location.href = url;
+      }
+    });
+  });
+}
+
+  window.addEventListener("load", () => {
+    checkOriëntatie();
+    setTimeout(activeerKnoppen, 300);
+  });
+
+  window.addEventListener("resize", checkOriëntatie);
+  window.addEventListener("orientationchange", checkOriëntatie);
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tornado Tafels</title>
+  <link rel="stylesheet" href="tornado.css">
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+  <div class="spel-container">
+    <div class="game-ui">
+        <div class="knoppen-container">
+            <button id="btn-opnieuw" class="btn-actie btn-opnieuw">Opnieuw</button>
+            <button id="btn-terug" class="btn-actie btn-terug">Terug</button>
+        </div>
+        <div id="scorebord">
+            <div class="score-kolom">
+                <img src="leerjaar3_afbeeldingen/karl_blij.png" alt="Juist">
+                <span id="scoreJuist">0</span>
+            </div>
+            <div class="score-kolom">
+                <img src="leerjaar3_afbeeldingen/karl_droevig.png" alt="Fout">
+                <span id="scoreFout">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="tornado-zone">
+      <div id="cactus-container">
+        <img src="leerjaar3_afbeeldingen/karl_cactus.png" alt="Karl" class="karl" id="karl-afbeelding">
+      </div>
+      </div>
+    <div class="oefening" id="oefening-tekst">3 × 4 = ?</div>
+  </div>
+
+  <div id="speech-bubble" class="hidden"></div>
+
+
+  <div id="eind-feedback" class="hidden">
+     <div class="feedback-content">
+        <img id="feedback-afbeelding" src="" alt="Feedback">
+        <p id="feedback-tekst"></p>
+        <div class="knoppen-container">
+            <button id="eind-opnieuw" class="btn-actie btn-opnieuw">Opnieuw Spelen</button>
+            <button id="eind-terug" class="btn-actie btn-terug">Menu</button>
+        </div>
+    </div>
+  </div>
+
+  <script src="tornado.js"></script>
+</body>
+</html>

@@ -1,0 +1,920 @@
+body {
+  font-family: sans-serif;
+  background-color: #eef;
+  padding: 20px;
+}
+h1 {
+  margin-bottom: 20px;
+}
+#toolbar {
+  display: flex;
+  gap: 30px;
+  padding: 15px;
+  background-color: #fff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+.tool {
+  user-select: none;
+  cursor: grab;
+  position: relative;
+}
+.geel-blok {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(to bottom right, #ffeb3b, #f57f17);
+  border-radius: 6px;
+  border: 2px solid #a67c00;
+}
+.staaf-groen {
+  width: 200px;
+  height: 40px;
+  margin right: 40px;
+  background: linear-gradient(to bottom right, #66bb6a, #2e7d32);
+  border-radius: 6px;
+  border: 2px solid #1b5e20;
+}
+.verdeling {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+.lijn {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #004400;
+}
+#schema {
+  width: 100%;
+  max-width: 950px;
+  /* margin-left: auto; */  /* TIJDELIJK UITGECOMMENTARIEERD voor test */
+  /* margin-right: auto; */ /* TIJDELIJK UITGECOMMENTARIEERD voor test */
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 2px solid #ccc;
+  background: white;      /* Zorg dat het een achtergrond heeft voor zichtbaarheid */
+  border-radius: 10px;    /* Behoud je andere bestaande stijlen */
+}
+.schema-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.label-t, .label-e {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+}
+.label-t {
+  background-color: #4caf50;
+  color: white;
+}
+.label-e {
+  background-color: #fdd835;
+  color: black;
+}
+.schema-light {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.light-t {
+  position: relative;
+  background-color: #c8e6c9;
+  height: 70px;
+}
+.light-e {
+  background-color: #fff9c4;
+  height: 70px;
+}
+.schema-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.vak {
+  min-height: 200px;
+  padding: 10px;
+  background: white;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+.doel-vak {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 10px 15px;
+  border: 2px solid #0077cc;
+  border-radius: 15px;
+  background-color: #f9f9f9;
+  box-sizing: border-box;
+}
+.cirkelrij {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+.cirkel {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #0077cc;
+  margin: 0 5px;
+  box-sizing: border-box;
+  position: relative; /* ✅ toegevoegd voor centreren */
+}
+.pijl {
+  position: absolute;
+  transform: rotate(-45deg) translate(-20px, -40px);
+  top: 50%;
+  left: -40px;
+  font-size: 32px;
+  color: #0077cc;
+  transform: translateY(-50%);
+}
+
+.svg-pijl {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  top: -30px;
+  left: -90px;
+  overflow: visible;
+}
+
+
+.staaf-groen {
+  width: 200px;
+  height: 20px;
+  background-color: #4CAF50;
+  position: relative;
+  border-radius: 4px;
+  margin: 10px;
+}
+
+.verdeling {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.verdeling .lijn {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #004400;
+}
+
+
+#sidebar button {
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+
+#sidebar button.knop {
+  padding: 12px 18px;
+  font-size: 22px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  margin-bottom: 8px;
+  transition: transform 0.2s;
+}
+#sidebar button.knop:hover {
+  transform: scale(1.05);
+}
+.knop.plus { background-color: #2196f3; }
+.knop.min { background-color: #ff9800; }
+.knop.reset { background-color: #4caf50; }
+.knop.terug { background-color: #f44336; }
+
+/* Schema - tot 100 (aftrekken) specifieke stijlen */
+#schema-min {
+  /* Oude vaste breedte en marge verwijderen of als commentaar zetten */
+  /* width: 950px; */
+  /* margin-left: 40px; */
+
+  width: 100%;            /* NIEUW: Schema neemt 100% breedte van zijn container */
+  max-width: 950px;       /* NIEUW: Maximale breedte (oorspronkelijke vaste breedte) */
+  margin-left: auto;      /* NIEUW: Centreer horizontaal */
+  margin-right: auto;     /* NIEUW: Centreer horizontaal */
+  box-sizing: border-box; /* NIEUW: Essentieel voor correcte afmetingen met padding/border */
+
+  background: white;      /* Bestaande stijl */
+  border-radius: 10px;    /* Bestaande stijl */
+  overflow: hidden;       /* Bestaande stijl (goed!) */
+  border: 2px solid #ccc; /* Bestaande stijl */
+  margin-top: 40px;       /* Bestaande stijl (kan blijven als je die verticale marge wilt) */
+}
+
+#schema-min .schema-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+#schema-min .label-t, #schema-min .label-e {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+}
+
+#schema-min .label-t {
+  background-color: #4caf50;
+  color: white;
+}
+#schema-min .label-e {
+  background-color: #fdd835;
+  color: black;
+}
+
+#schema-min .schema-light {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+#schema-min .light-t,
+#schema-min .light-e {
+  height: 60px;
+  background-color: transparent;
+}
+
+#schema-min .schema-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 300px;
+}
+
+#schema-min .vak {
+  border: 1px solid #ccc;
+  position: relative;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+#schema-min .wissel-vak {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  right: 15px;
+  height: 60px;
+  border: 2px solid #ccc;
+  border-radius: 15px;
+  background-color: #f9f9f9;
+}
+
+#schema-min .doel-vak {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  right: 15px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+#schema-min .cirkelrij {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+#schema-min .cirkel {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px dashed #aaa;
+  position: relative;
+}
+
+/* Vaste plaatsing binnen de vakken, niet absoluut */
+#schema-min .vak {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#schema-min .wissel-vak {
+  height: 60px;
+  border: 2px solid #ccc;
+  border-radius: 15px;
+  background-color: #f9f9f9;
+  margin: 10px 20px;
+}
+
+#schema-min .doel-vak {
+  margin: 10px 20px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+#schema-min .cirkelrij {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+#schema-min .cirkel {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px dashed #aaa;
+  position: relative;
+}
+
+/* Verwijder witruimte onder T/E */
+#schema-min .schema-light {
+  display: none;
+}
+
+/* Zorg dat .vak volledige ruimte gebruikt binnen schema-body */
+#schema-min .schema-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 300px;
+}
+
+#schema-min .vak {
+  height: 100%;
+}
+
+#schema-min .schema-body {
+  height: 400px; /* verhoogd */
+}
+
+#schema-min .vak {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* alles onderaan */
+  padding-bottom: 20px;
+}
+
+#schema-min .wissel-vak,
+#schema-min .doel-vak {
+  margin: 0 20px;
+}
+
+
+
+#vuilbak-container {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  text-align: center;
+  display: none;
+  z-index: 10;
+}
+
+#vuilbak {
+  width: 160px;
+  height: auto;
+  cursor: pointer;
+}
+
+#vuilbak-teller {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1.6em;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+#vuilbak-teller div {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+}
+
+.t-label {
+  color: green;
+  width: 30px;
+  text-align: center;
+  display: inline-block;
+}
+
+.e-label {
+  color: goldenrod;
+  width: 30px;
+  text-align: center;
+  display: inline-block;
+}
+
+/* Toegevoegd voor onderverdeling van staaf bij inwisselen */
+.staaf-groen {
+  position: relative;
+}
+
+.verdeling {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.lijn {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #004400;
+}
+
+#toolbar {
+  display: flex;
+  gap: 20px;
+  padding: 15px;
+  background-color: #fff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  justify-content: center; /* Zorgt dat knoppen goed uitgelijnd worden */
+}
+
+#toolbar button {
+  padding: 12px 18px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background-color: #2196f3; /* Blauw zoals de andere knoppen */
+  transition: transform 0.2s;
+  text-align: center; /* Zorgt ervoor dat tekst goed gecentreerd is */
+}
+
+#toolbar button:hover {
+  transform: scale(1.05);
+}
+
+/* Specifieke stijl voor de blokjes en schijfjes knoppen */
+#toolbar button.blokjes, #toolbar button.schijfjes {
+  padding: 12px 18px;
+  font-size: 22px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background-color: #2196f3;
+  transition: transform 0.2s;
+}
+
+#toolbar button.blokjes:hover, #toolbar button.schijfjes:hover {
+  background-color: #1976d2; /* Donkerder blauw */
+}
+
+#toolbar {
+  display: flex;
+  gap: 20px;
+  padding: 15px;
+  background-color: #fff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  justify-content: center; /* Zorgt dat knoppen goed uitgelijnd worden */
+  flex-wrap: wrap; /* Zorgt dat knoppen niet buiten de toolbar vallen */
+}
+
+#toolbar button {
+  padding: 12px 18px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background-color: #2196f3; /* Blauw zoals de andere knoppen */
+  transition: transform 0.2s;
+  text-align: center; /* Zorgt ervoor dat tekst goed gecentreerd is */
+}
+
+#toolbar button:hover {
+  transform: scale(1.05);
+}
+
+/* Specifieke stijl voor de blokjes en schijfjes knoppen */
+#toolbar button.blokjes, #toolbar button.schijfjes {
+  padding: 12px 18px;
+  font-size: 22px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background-color: #2196f3;
+  transition: transform 0.2s;
+}
+
+#toolbar button.blokjes:hover, #toolbar button.schijfjes:hover {
+  background-color: #1976d2; /* Donkerder blauw */
+}
+
+/* Styling voor de knoppen in de toolbar */
+#toolbar {
+  display: flex;
+  gap: 30px;
+  padding: 15px;
+  background-color: #fff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  justify-content: center; /* Zorgt dat knoppen goed uitgelijnd worden */
+}
+
+#toolbar button {
+  padding: 12px 18px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background-color: #2196f3; /* Blauw zoals de andere knoppen */
+  transition: transform 0.2s;
+  text-align: center; /* Zorgt ervoor dat tekst goed gecentreerd is */
+}
+
+#toolbar button:hover {
+  transform: scale(1.05);
+}
+
+#toolbar button.blokjes, #toolbar button.schijfjes {
+  padding: 12px 18px;
+  font-size: 22px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background-color: #2196f3;
+  transition: transform 0.2s;
+}
+
+#toolbar button.blokjes:hover, #toolbar button.schijfjes:hover {
+  background-color: #1976d2; /* Donkerder blauw */
+}
+.geel-schijf, .groen-schijf {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 18px; /* Pas de grootte van de tekst aan */
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #ffeb3b; /* Geel voor de gele schijf */
+  border: 2px solid #a67c00;
+}
+
+.groen-schijf {
+  background-color: #66bb6a; /* Groen voor de groene schijf */
+  border: 2px solid #2e7d32;
+}
+
+.geel-schijf span, .groen-schijf span {
+  display: inline-block;
+  text-align: center;
+  line-height: 40px; /* Zorgt ervoor dat de tekst gecentreerd wordt */
+  font-size: 18px; /* Pas de tekstgrootte aan */
+  margin: 0; /* Zorgt ervoor dat er geen extra ruimte rondom de tekst zit */
+}
+/* Gele schijf */
+.tool.schijf.geel, .tool.schijf.groen {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  font-size: 18px; /* Tekstgrootte van het getal */
+  font-weight: bold;
+  text-align: center;
+  position: relative;
+}
+
+.tool.schijf.geel {
+  background-color: #ffeb3b;
+  border: 2px solid #f57f17;
+}
+
+.tool.schijf.groen {
+  background-color: #66bb6a;
+  border: 2px solid #2e7d32;
+}
+
+/* Zorg ervoor dat de getallen binnen de schijven gecentreerd worden */
+.tool.schijf.geel span, .tool.schijf.groen span {
+  position: absolute;
+  top: 50%; /* Centraal van de schijf */
+  left: 50%;
+  transform: translate(-50%, -50%); /* Zorgt voor perfecte centrering */
+  font-size: 18px; /* Verklein het nummer iets */
+}
+
+/* Specifieke aanpassingen voor de groene schijf */
+.tool.schijf.groen span {
+  top: 48%; /* Verlaag iets om het getal beter te positioneren */
+}
+
+/* Specifieke aanpassingen voor de gele schijf */
+.tool.schijf.geel span {
+  top: 49%; /* Verhoog iets om het getal beter te positioneren */
+}
+
+#toolbar {
+  display: flex;
+  gap: 30px;
+  padding: 15px;
+  background-color: #fff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  justify-content: center;
+  flex-wrap: wrap; /* Zorgt dat knoppen niet buiten de toolbar vallen */
+}
+
+#toolbar button {
+  padding: 12px 18px;
+  font-size: 22px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background-color: #2196f3;
+  transition: transform 0.2s;
+}
+
+#toolbar button:hover {
+  background-color: #1976d2; /* Donkerder blauw */
+}
+.tool {
+    display: inline-block;
+    margin: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+}
+.kubus {
+    background-color: gold;
+    width: 40px;
+    height: 40px;
+}
+.staaf {
+    background-color: green;
+    color: white;
+    width: 40px;
+    height: 80px;
+}
+.schijf {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+}
+.schijf.geel {
+    background-color: gold;
+    color: white;
+}
+.schijf.groen {
+    background-color: green;
+    color: white;
+}
+#toolbar .tool {
+  padding: 0;
+  margin: 0 10px;
+  font-size: initial;
+}
+
+#toolbar .tool.schijf {
+  border-radius: 50%;
+}
+.tool {
+  padding: 0 !important;
+  font-size: 16px !important;
+  margin: 5px;
+  box-sizing: border-box;
+}
+
+/* Specifiek voor schijfjes: behouden ronde vorm */
+.tool.schijf {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tool.schijf span {
+  font-size: 18px;
+}
+
+/* Specifiek voor kubus */
+.tool.geel-blok {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+}
+
+/* Specifiek voor staaf */
+.tool.staaf-groen {
+  width: 200px;
+  height: 20px;
+  border-radius: 4px;
+}
+.cirkel .tool {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+}
+.tool.schijf {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50%;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tool.schijf span {
+  font-size: 18px;
+}
+
+/* visuele aanduiding voor uitgeschakelde knoppen */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+#container {
+  display: flex;
+}
+
+#sidebar {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+#main {
+  flex-grow: 1;
+  padding-left: 20px;
+}
+
+/* === FIXED LAYOUT VOOR SIDEBAR & MAIN === */
+
+body {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#sidebar {
+  width: 200px;
+  background-color: #eef;
+  padding: 20px;
+  box-sizing: border-box; /* << VOEG DEZE REGEL TOE */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  top: auto;
+  left: auto;
+  margin-top: 200px;
+}
+
+#main {
+  flex-grow: 1;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-x: hidden; /* << VOEG DEZE REGEL HIER TOE */
+}
+.wissel-knop {
+  background-color: #007BFF; /* Blauw voor de wisselknop */
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  position: absolute;
+  bottom: 10px;  /* Plaats de knop aan de onderkant van het wisselvak */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000; /* Zorg ervoor dat de knop boven de tool verschijnt */
+}
+
+.wissel-knop:hover {
+  background-color: #0056b3; /* Donkerder blauw bij hover */
+}
+@media (max-width: 900px) {
+  /* === TOEGEVOEGD/AANGEPAST === */
+  body {
+    flex-direction: column; /* Dit is de belangrijkste toevoeging */
+  }
+
+  #main {
+    order: 1;
+    padding-left: 0; /* Deze had je al */
+    width: 100%; /* Zorg ervoor dat main de volledige breedte inneemt */
+    box-sizing: border-box; /* Goede gewoonte, voorkomt problemen met padding */
+  }
+
+  #sidebar {
+    width: 100%; /* Deze had je al */
+    margin-top: 0; /* Deze had je al */
+    order: 2; /* Deze had je al */
+    box-sizing: border-box; /* Goede gewoonte */
+  }
+  #schema,
+  #schema-min {
+    width: 100%;
+    max-width: calc(100vw - 20px);
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+  }
+
+  #sidebar {
+    width: 100%;
+    margin-top: 0;
+    order: 2;
+  }
+
+  #main {
+    order: 1;
+    padding-left: 0;
+  }
+
+  #vuilbak-container {
+    position: relative !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin-top: 20px;
+    text-align: left;
+    width: 180px;
+    display: block !important;
+  }
+
+  .svg-pijl {
+    width: 40px;
+    height: 40px;
+    top: -15px;
+    left: -40px;
+  }
+}
+
+/* Extra aanpassingen voor iPad mini, iPad Air en vergelijkbare schermen */
+@media (max-width: 850px) {
+  #schema,
+  #schema-min {
+    max-width: calc(100vw - 20px);
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+  }
+
+  #main {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  #sidebar {
+    width: 100%;
+    margin-top: 10px;
+    order: 2;
+  }
+}
+
+@media (max-width: 650px) {
+  #schema,
+  #schema-min {
+    max-width: calc(100vw - 10px);
+    width: 100%;
+  }
+
+  #main {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}

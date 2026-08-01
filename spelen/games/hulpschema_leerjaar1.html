@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta charset="UTF-8">
+  <title>Rekenapp Start</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+  font-family: sans-serif;
+  background-image: url('start_afbeeldingen/achtergrond_bibi.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  flex: 1; /* neemt beschikbare ruimte */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  padding-top: 5vh;
+  width: 100%;
+}
+
+    h1 {
+      font-size: 2.5em;
+      color: #333;
+    }
+
+    .keuzescherm {
+      display: flex;
+      justify-content: center;
+      gap: 4em;
+      margin-top: 6em;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .keuzeblok {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1em;
+    }
+
+    .zisa-icoon {
+      width: 230px;
+      height: auto;
+    }
+
+    .knop {
+      font-size: 1.8em;
+      padding: 0.8em 1.5em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .plus {
+      background-color: #1e90ff;
+      color: white;
+    }
+
+    .min {
+      background-color: orange;
+      color: white;
+    }
+
+    /* Uniforme Terug-knop */
+    .btn-actie {
+      padding: 16px 32px;
+      font-size: 1.6em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: #fff;
+      font-family: inherit;
+      margin: 10px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: background 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-terug {
+      background-color: #b71c1c;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+    }
+    .btn-terug:hover,
+    .btn-terug:focus {
+      background-color: #e53935;
+    }
+
+    .knop:hover {
+      opacity: 0.9;
+    }
+
+    footer.copyright {
+      text-align: center;
+      font-size: 0.9em;
+      color: #666;
+      background-color: rgba(255, 255, 255, 0.8); /* wit vakje */
+      padding: 10px 0;
+      margin-top: 40px;
+    }
+
+  </style>
+  <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+  <!-- Uniforme terugknop -->
+  <button class="btn-actie btn-terug" onclick="window.location.href='start_leerjaar1.html'">
+    <img src="tafels_afbeeldingen/pijl.png" alt="pijl" style="height: 24px;" />
+    Terug
+  </button>
+
+  <div class="container">
+    <h1>Kies hier je schema</h1>
+
+    <div class="keuzescherm">
+      <div class="keuzeblok">
+        <img src="start_afbeeldingen/bibi_plus.png" alt="Zisa plus" class="zisa-icoon">
+        <button class="knop plus" onclick="window.location.href='plus100.html?terug=hulpschema_leerjaar1.html'">+ tot 20</button>
+      </div>
+      <div class="keuzeblok">
+        <img src="start_afbeeldingen/bibi_min.png" alt="Zisa min" class="zisa-icoon">
+        <button class="knop min" onclick="window.location.href='min100.html?terug=hulpschema_leerjaar1.html'">– tot 20</button>
+      </div>
+    </div>
+  </div>
+  <footer class="copyright">
+  © Isabel Rockelé, 2025. Alle rechten voorbehouden.
+</footer>
+</body>
+</html>
+

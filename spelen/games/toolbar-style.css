@@ -1,0 +1,54 @@
+
+#toolbar {
+  display: flex;
+  justify-content: center; /* Zorgt ervoor dat de knoppen gecentreerd blijven */
+  gap: 30px;
+  padding: 15px;
+  background-color: #fff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  position: relative; /* Zorg ervoor dat de schijven absoluut kunnen worden geplaatst */
+}
+
+/* Styling voor de knoppen */
+#toolbar button {
+  padding: 12px 18px;
+  font-size: 22px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background-color: #2196f3; /* Blauw zoals de andere knoppen */
+  transition: transform 0.2s;
+}
+
+#toolbar button:hover {
+  transform: scale(1.05);
+}
+
+/* Aparte stijl voor de knoppen Blokjes en Schijfjes in de toolbar */
+#toolbar button.blokjes, #toolbar button.schijfjes {
+  padding: 12px 18px;
+  font-size: 22px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background-color: #2196f3; /* Blauw zoals de andere knoppen */
+  transition: transform 0.2s;
+}
+
+#toolbar button.blokjes:hover, #toolbar button.schijfjes:hover {
+  background-color: #1976d2; /* Donkerder blauw */
+}
+
+/* Zorg ervoor dat de schijven zichtbaar blijven en goed worden gepositioneerd */
+#schijf-container {
+  position: absolute;
+  top: 60px; /* Zorg ervoor dat de schijven iets boven de knoppen komen */
+  left: 50%;
+  transform: translateX(-50%); /* Zorg ervoor dat ze horizontaal gecentreerd worden */
+  display: flex;
+  gap: 20px;
+}S

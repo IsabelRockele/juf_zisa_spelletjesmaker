@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bibi's Bloemenweide Spel</title>
+    <link rel="stylesheet" href="honingpot.css">   <script type="module" src="./zisa-play-guard.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div id="selection-screen">
+            <a href="spelletjes_hoofdrekenen1.html" class="btn-actie btn-terug" style="position:absolute; top:40px; left:40px;">Terug</a>
+            <div class="keuze-blok">
+                <img src="leerjaar1_afbeeldingen/bibi_bloemenweide.png" alt="Bloemenweide Spel" class="menu-afbeelding" />
+                <h2>Kies welke hoofdrekenen je wil oefenen</h2>
+                <div class="opties" id="level-options">
+                    <button class="keuze" data-level="10">Hoofdrekenen tot 10</button>
+                    <button class="keuze" data-level="20">Hoofdrekenen tot 20</button>
+                </div>
+                <div class="opties" id="operation-options" style="margin-top: 15px;">
+                    <button class="keuze" data-operation="plus">Optellen</button>
+                    <button class="keuze" data-operation="min">Aftrekken</button>
+                    <button class="keuze" data-operation="both">Beide</button>
+                </div>
+                <div class="start-blok">
+                    <button id="start-spel-knop" disabled>Kies eerst een splitsing en bewerking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="bloemenweide_keuze.js"></script> </body>
+</html>

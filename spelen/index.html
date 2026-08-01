@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Zisa Spelen</title>
+  <link rel="stylesheet" href="./spelen.css">
+</head>
+<body>
+  <main class="play-shell">
+    <header class="play-header">
+      <div class="brand-mark" aria-hidden="true">🦓</div>
+      <div><span class="eyebrow">JUF ZISA PRO</span><h1>Zisa Spelen</h1></div>
+    </header>
+
+    <section class="state-card" id="loadingState">
+      <div class="loader" aria-hidden="true"></div>
+      <h2>Je speelomgeving wordt geopend…</h2>
+      <p>Even controleren of de QR-code nog actief is.</p>
+    </section>
+
+    <section class="state-card error-card" id="errorState" hidden>
+      <span class="state-icon" aria-hidden="true">🔒</span>
+      <h2 id="errorTitle">Deze speelomgeving is niet beschikbaar</h2>
+      <p id="errorMessage">Vraag je leerkracht om de leerlingentoegang na te kijken.</p>
+      <button type="button" id="retryButton">Opnieuw proberen</button>
+    </section>
+
+    <section id="gameMenu" hidden>
+      <div class="welcome-card">
+        <div><span class="eyebrow">KIES EN OEFEN</span><h2>Waarmee wil je spelen?</h2><p>Kies je leerjaar. Daarna kan je zelf een oefenspel openen.</p></div>
+        <div class="online-pill"><span></span> Toegang actief</div>
+      </div>
+      <div class="grade-grid" id="gradeGrid"></div>
+      <p class="device-note" id="deviceNote"></p>
+    </section>
+  </main>
+  <script type="module" src="./spelen.js"></script>
+</body>
+</html>

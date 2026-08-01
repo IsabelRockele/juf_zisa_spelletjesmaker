@@ -1,0 +1,20 @@
+{
+  "name": "Reken met Zisa",
+  "short_name": "Zisa",
+  "start_url": "start.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "start_afbeeldingen/Reken_met_Zisa_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "start_afbeeldingen/Reken_met_Zisa_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

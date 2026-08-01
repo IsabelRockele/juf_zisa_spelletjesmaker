@@ -1,0 +1,172 @@
+/* tafels.css */
+
+header h1 {
+  font-size: 2em;
+  color: #333;
+  margin: 0;
+  text-align: center;
+}
+
+#vraagContainer {
+  position: relative;
+  margin: 40px auto 20px auto;
+  font-size: 2.4em;
+  color: #003049;
+  background: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 10;
+  display: inline-block;
+  text-align: center;
+  left: 0;
+  right: 0;
+}
+
+/* De container van de bel, nu ZONDER visuele eigenschappen */
+.bel {
+  position: absolute;
+  bottom: -80px;
+  width: 120px;
+  height: 120px;
+  background: none;
+  border-radius: 0;
+  text-align: center;
+  line-height: 80px;
+  font-size: 2.4em;
+  color: #003049;
+  cursor: pointer;
+  animation: zweef 10s linear forwards;
+  box-shadow: none; /* AANGEPAST */
+  transition: transform 0.3s ease-out, opacity 0.3s, background-color 0.3s;
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.bel img {
+    width: 100%;
+    height: 100%;
+    transition: filter 0.3s, opacity 0.2s, transform 0.2s;
+}
+
+.bel .getal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2em;
+    color: #003049;
+    font-weight: normal;
+    text-shadow: 0 0 5px white;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+/* Animatie voor als de bel correct is */
+.bel.correct .getal,
+.bel.correct img {
+  opacity: 0;
+  transform: scale(0);
+  transition-duration: 0.4s;
+}
+
+.spetter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 15px;
+    height: 15px;
+    background: radial-gradient(circle, #87ceeb, #add8e6);
+    border-radius: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+}
+
+.bel.correct .spetter {
+    animation: splash 0.6s ease-out forwards;
+}
+
+.bel.correct .spetter:nth-child(3) { animation-delay: 0s; }
+.bel.correct .spetter:nth-child(4) { animation-delay: 0.05s; }
+.bel.correct .spetter:nth-child(5) { animation-delay: 0.1s; }
+.bel.correct .spetter:nth-child(6) { animation-delay: 0.15s; }
+
+/* AANGEPAST: De foute regel is weg, deze is nu correct */
+.bel.fout img {
+  filter: brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5);
+}
+
+##feedbackContainer {
+  /* Centreert de box perfect in het midden van het scherm */
+  position: fixed; /* 'Fixed' zodat het ook werkt als je scrollt */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 500px; /* Zorgt dat de box niet te breed wordt op grote schermen */
+
+  /* Vormgeving als een moderne pop-up */
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  z-index: 100; /* Zorgt dat het boven alle andere elementen verschijnt */
+
+  /* Centreert de inhoud (afbeelding en tekst) in de box */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px; /* Creëert ruimte tussen de afbeelding en de tekst */
+
+  /* De bestaande teksteigenschappen */
+  font-size: 1.6em;
+  color: #003049;
+}
+
+@keyframes zweef {
+  to { transform: translateY(-110vh); }
+}
+@keyframes splash {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5) translate(calc(var(--x, 0) * 120px), calc(var(--y, 0) * 120px));
+    }
+}
+
+
+.bad-onderaan {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 5;
+  pointer-events: none;
+}
+.spel-gebied {
+  position: relative;
+}
+#klokzone { position: relative; margin-top: 10px; width: 180px; margin-left: auto; margin-right: auto; display: flex; flex-direction: column; align-items: center; text-align: center; }
+#timer { font-size: 2em; font-weight: bold; background: url('tafels_afbeeldingen/stopwatch.png') no-repeat left center; background-size: 30px 30px; padding-left: 8%; margin-bottom: 8px; width: 100%; text-align: center; }
+#visueleTimerContainer { margin-top: 10px; position: relative; width: 160px; height: 160px; margin-top: 6px; z-index: 1; }
+#klok-afbeelding { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; }
+#timer-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+#scorebord { position: relative; margin-top: 10px; display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 12px; z-index: 10; }
+.score-kolom { display: flex; flex-direction: column; align-items: center; font-size: 1.4em; font-weight: bold; color: #003049; }
+.score-kolom img { width: 50px; height: auto; margin-bottom: 6px; }
+#scoreJuist { color: green; }
+#scoreFout { color: red; }
+button { padding: 10px 20px; font-size: 1.1em; border: none; border-radius: 10px; background-color: #ccc; color: #fff; transition: background-color 0.3s; cursor: not-allowed; }
+button:disabled { background-color: #ccc; color: #fff; cursor: not-allowed; }
+button:enabled { background-color: #00b4d8; color: #fff; cursor: pointer; }
+button:hover:enabled, button:active:enabled { background-color: #0099c4; color: #fff; }
+button.keuze, button.tafel { background-color: #00b4d8; color: white; cursor: pointer; }
+button.keuze.active, button.tafel.active { background-color: #0077b6; color: white; }
+button.btn-opnieuw { background-color: #2e7d32 !important; color: #fff !important; cursor: pointer; }
+button.btn-opnieuw:hover, button.btn-opnieuw:focus { background-color: #219150 !important; }
+button.btn-terug { background-color: #b71c1c !important; color: #fff !important; cursor: pointer; }
+button.btn-terug:hover, button.btn-terug:focus { background-color: #e53935 !important; }
+#klok-en-scorezone { display: flex; flex-direction: column; align-items: center; margin-top: 20px; }
+#score-container { display: flex; justify-content: space-around; margin-top: 140px; margin-bottom: 20px; gap: 60px; }
+.stapel.speler { width: 180px; font-size: 1.5em; padding: 6px; margin-bottom: 20px; text-align: center; }
+@media screen and (max-width: 768px) and (min-device-pixel-ratio: 2) { .bel { left: 100px !important; } }
+@media (max-width: 768px) { #score-container { flex-direction: column; align-items: center; gap: 30px; } }

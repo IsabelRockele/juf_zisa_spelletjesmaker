@@ -1,0 +1,391 @@
+/* Algemene styling voor de body en achtergrond */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0; /* Fallback kleur */
+    background-image: url('leerjaar3_afbeeldingen/achtergrond_woestijn.png');
+    background-size: cover;
+    background-position: center bottom; /* Zorgt dat het zand altijd onderaan is */
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Start bovenaan */
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden; /* Verberg scrollbalken */
+}
+
+/* Algemene styling voor actieknoppen */
+.btn-actie {
+    padding: 14px 28px;
+    font-size: 1.4em;
+    color: #fff;
+    font-family: inherit;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+    display: flex; /* Zodat iconen naast tekst kunnen staan indien nodig */
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-opnieuw {
+    background-color: #2e7d32;
+}
+.btn-opnieuw:hover {
+    background-color: #219150;
+}
+
+.btn-terug {
+    background-color: #b71c1c;
+}
+.btn-terug:hover {
+    background-color: #e53935;
+}
+
+/* Knoppen linksboven - vaste positie */
+.spel-links {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 1000; /* Zorg dat ze bovenaan liggen */
+}
+
+/* AANGEPAST: Klok en Scorebord container */
+#klok-en-scorezone {
+    display: flex;
+    flex-direction: column; /* Nu staan elementen weer onder elkaar */
+    align-items: center; /* Horizontaal centreren van de kinderen */
+    justify-content: flex-start; /* Kinderen bovenaan in het vak */
+    margin-top: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    padding: 15px 25px; /* Padding binnen het vak */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: fit-content; /* Zorgt dat de breedte zich aanpast aan de inhoud */
+    /* Geen gap meer hier, want items staan onder elkaar */
+}
+
+/* Digitale timertekst */
+#timer {
+    font-size: 2em;
+    font-weight: bold;
+    color: #003049;
+    margin-bottom: 5px; /* Ruimte onder de timertekst en boven stopwatch */
+    text-align: center; /* Zorg dat de tekst netjes centreert */
+}
+
+/* Visuele timer container (stopwatch afbeelding en canvas) */
+#visueleTimerContainer {
+    position: relative;
+    width: 150px; /* Vaste breedte voor de visuele component */
+    height: 150px; /* Vaste hoogte voor de visuele component */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px; /* Ruimte onder de stopwatch en boven het scorebord */
+}
+
+#klok-afbeelding {
+    position: absolute;
+    width: 100%; /* Afbeelding vult de container */
+    height: 100%;
+    display: block;
+    z-index: 1; /* Onder de taartvorm */
+}
+
+#timer-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2; /* Boven de klokafbeelding */
+}
+
+/* AANGEPAST: Scorebord styling - Juist en fout naast elkaar */
+#scorebord {
+    display: flex; /* Maak het een flex-container */
+    flex-direction: row; /* Iconen en scores naast elkaar */
+    align-items: flex-start; /* Zorg dat ze aan de bovenkant uitlijnen als ze verschillende hoogtes hebben */
+    justify-content: center; /* Horizontaal centreren van de kolommen */
+    gap: 25px; /* Ruimte tussen "Juist" en "Fout" kolom */
+    width: 100%; /* Zorg dat scorebord de beschikbare breedte vult in het vak */
+}
+
+.score-kolom {
+    display: flex;
+    flex-direction: column; /* Blij en droevig onder elkaar */
+    align-items: center;
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #003049;
+    white-space: nowrap; /* Voorkomt afbreken van tekst */
+}
+
+.score-kolom img {
+    width: 40px; /* Vaste breedte voor score-iconen */
+    height: auto;
+    margin-bottom: 5px;
+}
+
+#scoreJuist {
+    color: green;
+}
+
+#scoreFout {
+    color: red;
+}
+
+/* Spelgebied en vraag */
+.spel-gebied {
+    position: absolute; /* Absolute positionering over de achtergrond */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Zorgt dat de vraag bovenaan begint */
+    padding-top: 15vh; /* Ruimte voor de vraag boven de cactussen */
+    z-index: 1; /* Onder de knoppen en feedback */
+    pointer-events: none; /* Zodat muisklikken doorgaan naar cactussen */
+}
+
+#vraagContainer {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 25px 40px;
+    border-radius: 20px;
+    font-size: 2.8em;
+    font-weight: bold;
+    color: #4A2B14; /* Donkerbruin voor woestijnthema */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    z-index: 10; /* Zorg dat de vraag boven de cactussen staat */
+    pointer-events: auto; /* Zodat de vraag klikbaar is */
+}
+
+/* Cactussen container en individuele cactussen */
+#cactussenContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none; /* Laat de klikken door naar de cactussen zelf */
+}
+
+.cactus-optie {
+    position: absolute;
+    width: 180px; /* Breedte van de cactus afbeelding */
+    height: 250px; /* Hoogte van de cactus afbeelding */
+    background-image: url('leerjaar3_afbeeldingen/cactus_woestijn.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease-out, filter 0.3s;
+    pointer-events: auto; /* Zorg dat de cactussen klikbaar zijn */
+}
+
+.cactus-getal {
+    position: relative;
+    top: -5%; /* Aangepast! Beweeg het getal minder ver omhoog */
+    font-size: 2.2em; /* Kan nodig zijn om aan te passen */
+    font-weight: bold;
+    color: #4A2B14; /* Donkerbruin */
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.7);
+    z-index: 2;
+}
+
+/* Cactus animaties */
+.cactus-optie.correct {
+    animation: correctPopFadeOutUp 0.8s ease-out forwards; /* Nieuwe animatie voor correct */
+}
+
+.cactus-optie.fout {
+    filter: brightness(0.7) saturate(2) hue-rotate(-30deg); /* Maak hem roder en donkerder */
+    animation: wrongShakeReturn 0.8s ease-in-out forwards; /* Nieuwe animatie voor fout */
+}
+
+@keyframes correctPopFadeOutUp {
+    0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    30% { transform: translate(-50%, -60%) scale(1.1) rotate(5deg); opacity: 1; /* Pop omhoog en iets groter */ }
+    100% { transform: translate(-50%, -150%) scale(0.2) rotate(20deg); opacity: 0; /* Beweeg omhoog, krimp, en vervaag */ }
+}
+
+@keyframes wrongShakeReturn {
+    0%, 100% { transform: translate(-50%, -50%) rotate(var(--initial-rotate, 0deg)); filter: brightness(1) saturate(1) hue-rotate(0deg); } /* Terug naar oorspronkelijke staat */
+    15%, 45%, 75% { transform: translate(calc(-50% + 15px), calc(-50% + 10px)) rotate(calc(var(--initial-rotate, 0deg) + 5deg)); } /* Schud rechts-beneden */
+    30%, 60%, 90% { transform: translate(calc(-50% - 15px), calc(-50% - 10px)) rotate(calc(var(--initial-rotate, 0deg) - 5deg)); } /* Schud links-boven */
+}
+
+/* Feedback container */
+.feedback-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    text-align: center;
+    z-index: 2000; /* Boven alles */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    color: #4A2B14;
+}
+
+.feedback-container.hidden {
+    display: none;
+}
+
+.feedback-image {
+    max-width: 250px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.feedback-container p {
+    font-size: 1.6em;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .spel-links {
+        top: 10px;
+        left: 10px;
+        gap: 10px;
+    }
+
+    .btn-actie {
+        padding: 10px 20px;
+        font-size: 1.2em;
+    }
+
+    #klok-en-scorezone {
+        padding: 10px;
+        margin-top: 10px;
+        flex-direction: column; /* Hieronder elkaar op kleinere schermen */
+        gap: 10px;
+    }
+
+    /* .timer-kolom is nu overbodig in HTML, dus deze regel is ook overbodig */
+    /* min-width: 120px; */ 
+
+    #visueleTimerContainer {
+        width: 120px;
+        height: 120px;
+    }
+
+    #timer {
+        font-size: 1.6em;
+    }
+
+    #scorebord {
+        flex-direction: row; /* Scores naast elkaar op kleinere schermen */
+        gap: 15px;
+    }
+
+    .score-kolom {
+        font-size: 1.2em;
+    }
+
+    .score-kolom img {
+        width: 30px;
+    }
+
+    #vraagContainer {
+        font-size: 2em;
+        padding: 20px 30px;
+        margin-top: 80px; /* Meer ruimte voor de vaste elementen */
+    }
+
+    .cactus-optie {
+        width: 120px;
+        height: 180px;
+    }
+
+    .cactus-getal {
+        font-size: 1.8em;
+    }
+
+    .feedback-container {
+        padding: 20px;
+    }
+
+    .feedback-image {
+        max-width: 180px;
+    }
+
+    .feedback-container p {
+        font-size: 1.3em;
+    }
+}
+
+@media (max-width: 480px) {
+    .spel-links {
+        flex-direction: row; /* Knoppen naast elkaar op kleine schermen */
+        width: calc(100% - 40px); /* Neem padding in acht */
+        justify-content: space-around;
+        top: 10px;
+        left: 20px;
+        right: 20px;
+    }
+    #klok-en-scorezone {
+        position: static; /* Niet meer fixed */
+        width: auto;
+        margin: 70px auto 10px auto; /* Ruimte onder knoppen */
+        flex-direction: column; /* Hier weer onder elkaar */
+        gap: 10px;
+    }
+
+    /* .timer-kolom is nu overbodig in HTML, dus deze regel is ook overbodig */
+    /* min-width: 100px; */
+
+    #visueleTimerContainer { /* Gebruik deze selector */
+        width: 100px;
+        height: 100px;
+    }
+
+    #timer {
+        font-size: 1.4em;
+    }
+
+    #scorebord {
+        flex-direction: row; /* Scores naast elkaar */
+        gap: 10px;
+    }
+
+    .score-kolom {
+        font-size: 1em;
+    }
+
+    .cactus-optie {
+        width: 90px;
+        height: 130px;
+    }
+
+    .cactus-getal {
+        font-size: 1.5em;
+    }
+}
