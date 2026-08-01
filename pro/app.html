@@ -629,6 +629,7 @@
     .play-nav-link{display:flex;align-items:center;gap:10px;margin:7px 15px;padding:13px 14px;border-radius:12px;background:linear-gradient(135deg,#1768ac,#14805e);color:#fff;text-decoration:none;font-family:inherit;font-size:.84rem;font-weight:800;box-shadow:0 5px 15px rgba(23,104,172,.22)}.play-nav-link:hover{filter:brightness(1.06);transform:translateY(-1px)}
   </style>
   <link rel="stylesheet" href="./consent.css">
+<style>a.img-link.live-board-tool:before{content:'↗ Opent apart';position:absolute;z-index:3;left:8px;top:8px;padding:4px 7px;border-radius:999px;background:#173f73;color:#fff;font-size:.58rem;font-weight:900;box-shadow:0 3px 9px rgba(23,63,115,.2)}</style>
 </head>
 <body>
 
@@ -985,11 +986,11 @@
       <img alt="Opvolging huistaken" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/huistaken.webp" loading="lazy"/>
       <span class="img-label">Opvolging huistaken</span>
     </a>
-     <a class="img-link" href="#" onclick="navigeerMetConsent(event, './Takenbord_v2/welkomstbord.html')">
+     <a class="img-link" href="#" onclick="navigeerMetConsent(event, './Takenbord_v2/welkomstbord.html', true)">
       <img alt="Takenbord" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/takenbord.webp" loading="lazy"/>
       <span class="img-label">Takenbord</span>
     </a>
-     <a class="img-link" href="#" onclick="navigeerMetConsent(event, './planbord/index.html')">
+     <a class="img-link" href="#" onclick="navigeerMetConsent(event, './planbord/index.html', true)">
       <img alt="Planbord" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/planbord.webp" loading="lazy"/>
       <span class="img-label">Planbord</span>
     </a>
@@ -1096,20 +1097,23 @@
   import { checkAndShowConsent } from "./consent.js";
 
   // Navigeer naar een Klasmanagement-tool maar check eerst consent
-  window.navigeerMetConsent = async function(event, url) {
+  window.navigeerMetConsent = async function(event, url, nieuwVenster = false) {
     event.preventDefault();
+    const apartVenster = nieuwVenster ? window.open('about:blank', '_blank') : null;
+    if (apartVenster) apartVenster.document.write('<title>Even openen…</title><p style="font:18px Arial;padding:30px;color:#17324d">Het klasscherm wordt geopend…</p>');
     if (!window._zisaUser) {
       // Gebruiker nog niet geladen — gewoon navigeren
-      location.href = url;
+      if (apartVenster) apartVenster.location.href = url; else location.href = url;
       return;
     }
     // Check consent — als al gegeven: meteen navigeren
     // Als niet gegeven: popup tonen en na akkoord navigeren
     window._navigeerNaConsent = url;
+    window._navigeerVensterNaConsent = apartVenster;
     await checkAndShowConsent(window._zisaUser);
     // Als consent al gegeven was, navigeer dan meteen
     if (!document.getElementById("zisa-consent-overlay")) {
-      location.href = url;
+      if (apartVenster) apartVenster.location.href = url; else location.href = url;
     } else {
       // Wacht op akkoord — consent.js navigeert daarna
       window._navigeerNaConsent = url;
@@ -1335,6 +1339,17 @@
     closeButton.addEventListener('click', () => {
       notice.classList.remove('visible');
       try { sessionStorage.setItem(sessionKey, '1'); } catch {}
+    });
+  })();
+</script>
+<script>
+  (()=>{
+    const liveTools=new Set(['Loopspel','Galgje','Bingo','Vier op een rij','Rad','Timer','Takenbord','Planbord']);
+    document.querySelectorAll('a.img-link').forEach(link=>{
+      const label=link.querySelector('.img-label')?.textContent.trim();
+      if(!liveTools.has(label))return;
+      link.classList.add('live-board-tool');
+      if(!link.hasAttribute('onclick')){link.target='_blank';link.rel='noopener'}
     });
   })();
 </script>

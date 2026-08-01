@@ -155,6 +155,8 @@ function toonConsentPopup(user, consentRef) {
 
   // "Niet nu" — sluit popup en ga terug naar vorige categorie
   document.getElementById("zisa-consent-niet-nu").addEventListener("click", () => {
+    if (window._navigeerVensterNaConsent && !window._navigeerVensterNaConsent.closed) window._navigeerVensterNaConsent.close();
+    window._navigeerVensterNaConsent = null;
     // Popup sluiten
     overlay.remove();
     document.body.style.overflow = "";
@@ -216,7 +218,10 @@ async function slaConsentOp(user, consentRef, overlay) {
     if (window._navigeerNaConsent) {
       const url = window._navigeerNaConsent;
       window._navigeerNaConsent = null;
-      location.href = url;
+      const apartVenster = window._navigeerVensterNaConsent;
+      window._navigeerVensterNaConsent = null;
+      if (apartVenster && !apartVenster.closed) apartVenster.location.href = url;
+      else location.href = url;
     }
 
   } catch (err) {

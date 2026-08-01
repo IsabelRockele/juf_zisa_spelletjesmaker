@@ -61,7 +61,7 @@
     const call=name=>httpsCallable(fns,name);const el=id=>document.getElementById(id);
     function dateText(iso){return new Intl.DateTimeFormat('nl-BE',{day:'numeric',month:'long',year:'numeric'}).format(new Date(iso))}
     function feedback(t){el('feedback').textContent=t;setTimeout(()=>{if(el('feedback').textContent===t)el('feedback').textContent=''},3000)}
-    function render(data){current=data;el('grade1').checked=!!data.config.grade1;el('grade2').checked=!!data.config.grade2;el('grade3').checked=!!data.config.grade3;el('registeredCount').textContent=data.registeredCount;el('activeCount').textContent=data.activeCount;el('playUrl').textContent=data.url;const teacherUrl=new URL(data.url,location.href);teacherUrl.searchParams.set('teacher','1');el('openPlay').href=teacherUrl.href;el('licensePill').textContent=`Actief tot ${dateText(data.expiresAt)}`;el('qrBox').replaceChildren();new QRCode(el('qrBox'),{text:data.url,width:220,height:220,colorDark:'#17324d',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});const list=el('deviceList');list.replaceChildren();if(!data.devices.length){list.innerHTML='<p class="muted">Nog geen leerlingentoestellen gekoppeld.</p>'}else data.devices.forEach(d=>{const row=document.createElement('div');row.className='device-row';row.innerHTML=`<div><b><span class="dot ${d.active?'active':''}"></span>${d.label}</b><small>Laatst gebruikt: ${d.lastSeen?new Date(d.lastSeen).toLocaleString('nl-BE'):'onbekend'}</small></div><button type="button">Verwijder</button>`;row.querySelector('button').onclick=async()=>render((await call('removePlayClassDevice')({id:d.id})).data);list.append(row)})}
+    function render(data){current=data;el('grade1').checked=!!data.config.grade1;el('grade2').checked=!!data.config.grade2;el('grade3').checked=!!data.config.grade3;el('registeredCount').textContent=data.registeredCount;el('activeCount').textContent=data.activeCount;el('playUrl').textContent=data.url;el('openPlay').href=new URL('../spelen/?teacher=1',location.href).href;el('licensePill').textContent=`Actief tot ${dateText(data.expiresAt)}`;el('qrBox').replaceChildren();new QRCode(el('qrBox'),{text:data.url,width:220,height:220,colorDark:'#17324d',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});const list=el('deviceList');list.replaceChildren();if(!data.devices.length){list.innerHTML='<p class="muted">Nog geen leerlingentoestellen gekoppeld.</p>'}else data.devices.forEach(d=>{const row=document.createElement('div');row.className='device-row';row.innerHTML=`<div><b><span class="dot ${d.active?'active':''}"></span>${d.label}</b><small>Laatst gebruikt: ${d.lastSeen?new Date(d.lastSeen).toLocaleString('nl-BE'):'onbekend'}</small></div><button type="button">Verwijder</button>`;row.querySelector('button').onclick=async()=>render((await call('removePlayClassDevice')({id:d.id})).data);list.append(row)})}
     async function load(){render((await call('getPlayClass')({})).data)}
     async function save(){const config={grade1:el('grade1').checked,grade2:el('grade2').checked,grade3:el('grade3').checked};if(!Object.values(config).some(Boolean)){feedback('Activeer minstens één leerjaar.');render(current);return}if(localPreview){current.config=config;feedback('Voorbeeld aangepast — er wordt lokaal niets opgeslagen.');return}render((await call('updatePlayClass')({config})).data);feedback('Je keuzes zijn opgeslagen.')}
     ['grade1','grade2','grade3'].forEach(id=>el(id).addEventListener('change',save));el('copyUrl').onclick=async()=>{await navigator.clipboard.writeText(current.url);feedback('De veilige leerlinglink is gekopieerd. Deze geeft geen toegang tot PRO.')};el('printQr').onclick=()=>window.print();el('clearDevices').onclick=async()=>{if(confirm('Alle gekoppelde leerlingentoestellen wissen? Ze kunnen daarna opnieuw via de QR aansluiten.'))render((await call('clearPlayClassDevices')({})).data)};el('rotateQr').onclick=async()=>{if(confirm('Een nieuwe QR maken? De oude QR stopt onmiddellijk en alle leerlingentoestellen worden losgekoppeld.'))render((await call('rotatePlayClassCode')({})).data)};
@@ -78,5 +78,15 @@
     }
   </script>
   <script src="./device-id.js"></script>
+  <script>
+    // Een leerkrachtvoorbeeld krijgt bewust géén leerlingcode mee. Zelfs als
+    // een controle fout loopt, kan deze knop daardoor nooit als leerling of
+    // als gekoppeld leerlingtoestel geregistreerd worden.
+    document.getElementById('openPlay').addEventListener('click', event => {
+      event.preventDefault();
+      const teacherPreviewUrl = new URL('../spelen/?teacher=1', location.href);
+      window.open(teacherPreviewUrl.href, '_blank', 'noopener');
+    });
+  </script>
 </body>
 </html>
