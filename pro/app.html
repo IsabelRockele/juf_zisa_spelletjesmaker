@@ -390,6 +390,40 @@
     .status.warn { border-color: #ffd6a8; background: #fff7ec; color: #a05000; }
     .status.err  { border-color: #f1c0c0; background: #fff5f5; color: #a02020; }
 
+    /* Tijdelijke zomerboodschap: automatisch verborgen vanaf 1 september 2026 */
+    .summer-notice {
+      display: none;
+      align-items: flex-start;
+      gap: 11px;
+      position: relative;
+      margin-bottom: 16px;
+      padding: 13px 44px 13px 15px;
+      border: 1px solid #b9d8ed;
+      border-radius: 14px;
+      background: #eef8ff;
+      color: #28556f;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    .summer-notice.visible { display: flex; }
+    .summer-notice-icon { font-size: 1.25rem; flex: 0 0 auto; }
+    .summer-notice strong { display: block; color: #174b69; margin-bottom: 2px; }
+    .summer-notice-close {
+      position: absolute;
+      top: 8px;
+      right: 9px;
+      width: 28px;
+      height: 28px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #5f7f91;
+      font: inherit;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .summer-notice-close:hover { background: #dceef8; color: #174b69; }
+
     /* Updates-balk */
     /* Updates knop */
     .updates-knop {
@@ -660,6 +694,15 @@
 
 <!-- ═══ HOOFDINHOUD ═══ -->
 <main class="main" id="content">
+
+  <aside class="summer-notice" id="summerNotice" aria-label="Tijdelijke mededeling">
+    <span class="summer-notice-icon" aria-hidden="true">🛠️</span>
+    <div>
+      <strong>Zisa wordt deze zomer stap voor stap vernieuwd</strong>
+      In augustus verbeteren we het overzicht en de vormgeving van PRO. Daardoor kan een scherm er tussendoor iets anders uitzien. De tools blijven gewoon bruikbaar. Zie je toch iets vreemds? Ververs dan eerst de pagina of meld het via <strong style="display:inline">💡 Suggestie insturen</strong> in de linkerbalk.
+    </div>
+    <button class="summer-notice-close" id="summerNoticeClose" type="button" aria-label="Melding sluiten">✕</button>
+  </aside>
 
   <!-- UPDATES KNOP - wordt alleen getoond zolang er een actieve update is -->
   <button class="updates-knop" id="updatesKnop" style="display:none;" onclick="document.getElementById('updatesOverlay').classList.add('open')">
@@ -1218,6 +1261,27 @@
     document.querySelectorAll('img.drukknop-afbeelding').forEach(img=>{const naam=(img.getAttribute('src').split('/').pop()||'').replace(/\.webp$/,'');if(vernieuwd.has(naam))img.src=`../drukknop_afbeeldingen_v3/${naam}.png`});
     const orden={puzzels:['Sudoku','Doolhof','Zoek de verschillen','Slangendoolhof','Hexagonaal raster','Schaduw'],creatief:['Pixelart','Coderen','Punttekening','Blokkenbouwsels','Bouwplaten','Plattegrond'],klasmanagement:['Planbord','Takenbord','Opvolging huistaken']};
     Object.entries(orden).forEach(([categorie,namen])=>{const grid=document.querySelector(`#panel-${categorie} .button-grid`);if(!grid)return;const links=[...grid.querySelectorAll(':scope > a.img-link')];namen.forEach(naam=>{const link=links.find(item=>item.querySelector('.img-label')?.textContent.trim()===naam);if(link)grid.appendChild(link)})});
+  })();
+</script>
+<script>
+  (() => {
+    const notice = document.getElementById('summerNotice');
+    const closeButton = document.getElementById('summerNoticeClose');
+    if (!notice || !closeButton) return;
+
+    const cutoff = new Date(2026, 8, 1); // 1 september 2026, lokale tijd
+    const sessionKey = 'zisa-summer-notice-august-2026-closed';
+    let closedThisSession = false;
+    try { closedThisSession = sessionStorage.getItem(sessionKey) === '1'; } catch {}
+
+    if (new Date() < cutoff && !closedThisSession) {
+      notice.classList.add('visible');
+    }
+
+    closeButton.addEventListener('click', () => {
+      notice.classList.remove('visible');
+      try { sessionStorage.setItem(sessionKey, '1'); } catch {}
+    });
   })();
 </script>
 </body>
