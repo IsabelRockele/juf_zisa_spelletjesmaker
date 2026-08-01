@@ -198,20 +198,71 @@ function updateLijstTitel() {
   const sel = document.getElementById("lijstTitelType");
   const custom = document.getElementById("customLijstTitel");
   if (sel && custom) {
-    custom.style.display = sel.value === "custom" ? "block" : "none";
+    custom.hidden = sel.value !== "custom";
   }
 }
+function getSelectedExerciseMode() {
+  if (document.getElementById("taalMode").value === "single") return "single";
+  return document.querySelector('input[name="pairPuzzleSide"]:checked')?.value || "linksInPuzzel";
+}
+
+function updateModeExplanation() {
+  const selectedMode = getSelectedExerciseMode();
+  const explanation = document.getElementById("modeExplanation");
+  if (!explanation) return;
+  if (selectedMode === "single") {
+    explanation.innerHTML = "<b>Gewone woordzoeker:</b> de woorden die je invoert, worden in het rooster verstopt én staan onderaan in de zoeklijst.";
+  } else if (selectedMode === "linksInPuzzel") {
+    explanation.innerHTML = "<b>Voorbeeld:</b> woord <strong>maison</strong> + vertaling <strong>huis</strong>.<br><strong>MAISON</strong> wordt verstopt in het rooster. <strong>huis</strong> staat onderaan als hint.";
+  } else {
+    explanation.innerHTML = "<b>Voorbeeld:</b> woord <strong>maison</strong> + vertaling <strong>huis</strong>.<br><strong>HUIS</strong> wordt verstopt in het rooster. <strong>maison</strong> staat onderaan als hint.";
+  }
+}
+
+function readPairInputs() {
+  return [...document.querySelectorAll(".pair-row")].map(row => {
+    const left = row.querySelector(".pair-word-input").value.trim();
+    const right = row.querySelector(".pair-hint-input").value.trim();
+    return [left, right];
+  }).filter(([left, right]) => left && right);
+}
+
+function addPairRow() {
+  const container = document.getElementById("pairRowsContainer");
+  if (!container || container.children.length >= 20) return;
+  const examples = [
+    ["bv. maison", "bv. huis"], ["bv. bonjour", "bv. goedendag"],
+    ["bv. école", "bv. school"], ["Typ een woord", "Typ de bijbehorende hint"],
+    ["Typ een woord", "Typ de bijbehorende hint"], ["Typ een woord", "Typ de bijbehorende hint"]
+  ];
+  const index = container.children.length;
+  const [wordExample, hintExample] = examples[index] || ["Typ een woord", "Typ de bijbehorende hint"];
+  const row = document.createElement("div");
+  row.className = "pair-row";
+  row.innerHTML = `<span class="pair-number">${index + 1}</span><input class="pair-word-input" type="text" maxlength="30" placeholder="${wordExample}" aria-label="Woord ${index + 1}"><input class="pair-hint-input" type="text" maxlength="55" placeholder="${hintExample}" aria-label="Omschrijving of vertaling ${index + 1}">${index >= 6 ? '<button type="button" class="remove-pair-row" aria-label="Verwijder dit woordpaar">×</button>' : '<span class="pair-row-spacer"></span>'}`;
+  container.appendChild(row);
+  document.getElementById("addPairRowBtn").disabled = container.children.length >= 20;
+}
+
 function updateModeUI() {
   const mode = document.getElementById("taalMode").value;
   const singleGrp = document.getElementById("singleInputGroup");
   const pairGrp = document.getElementById("pairInputGroup");
   if (mode === "single") {
-    singleGrp.style.display = "";
-    pairGrp.style.display = "none";
+    singleGrp.hidden = false;
+    pairGrp.hidden = true;
   } else {
-    singleGrp.style.display = "none";
-    pairGrp.style.display = "";
+    singleGrp.hidden = true;
+    pairGrp.hidden = false;
   }
+  updateModeExplanation();
+}
+
+function updateWorksheetText() {
+  const title = (document.getElementById("werkbladTitel")?.value || "").trim() || "Woordzoeker";
+  const instruction = (document.getElementById("opdrachtzin")?.value || "").trim() || "Zoek alle woorden in het letterrooster.";
+  document.getElementById("previewTitel").textContent = title;
+  document.getElementById("previewOpdracht").textContent = instruction;
 }
 
 // ===== Tellers in de UI =====
@@ -248,7 +299,7 @@ function updatePairCountMessage(count) {
 
 // ===== Hoofdfunctie =====
 function genereerWoordzoeker() {
-  const mode = document.getElementById("taalMode").value;
+  const mode = getSelectedExerciseMode();
 
   let puzzleWords = [];       // gesaneerde woorden die in het raster komen
   let displayPairs = [];      // voor paren: [{puzzleSan, shownRaw}] zodat we na plaatsing kunnen filteren
@@ -292,16 +343,13 @@ function genereerWoordzoeker() {
 
   } else {
     // Parenmodus
-    const lines = document.getElementById("parenInput").value.split("\n");
-    let pairs = lines
-      .map(line => line.split(";").map(s => s.trim()))
-      .filter(parts => parts.length === 2 && parts[0] && parts[1]);
+    let pairs = readPairInputs();
 
     updatePairCountMessage(pairs.length);
 
     if (pairs.length < MIN_WORDS) {
       meldingContainer.style.color = "red";
-      meldingContainer.innerHTML = `Voer minimaal ${MIN_WORDS} geldige paren in (links; rechts).`;
+      meldingContainer.innerHTML = `Vul minimaal ${MIN_WORDS} volledige rijen in: links een woord en rechts de bijbehorende omschrijving of vertaling.`;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       document.getElementById("woordenLijst").innerHTML = "";
       return;
@@ -374,7 +422,9 @@ function genereerWoordzoeker() {
   currentPuzzleState = {
     grid: result.grid,
     gridSize: gridSize,
-    wordLocations: result.wordLocations
+    wordLocations: result.wordLocations,
+    title: (document.getElementById("werkbladTitel").value || "Woordzoeker").trim() || "Woordzoeker",
+    instruction: (document.getElementById("opdrachtzin").value || "Zoek alle woorden in het letterrooster.").trim() || "Zoek alle woorden in het letterrooster."
   };
   solutionVisible = false;
   document.getElementById("toonOplossingBtn").textContent = "Toon Oplossing";
@@ -417,28 +467,44 @@ function genereerWoordzoeker() {
 
   woordenLijstDiv.appendChild(ul);
   updateLijstTitel();
+  updateWorksheetText();
+  document.getElementById("worksheet-preview").classList.remove("preview-empty");
 }
 
 // ===== Events =====
 document.addEventListener("DOMContentLoaded", () => {
-  // Init
+  for (let index = 0; index < 6; index++) addPairRow();
   updateModeUI();
   updateLijstTitel();
-  genereerWoordzoeker();
+  updateWorksheetText();
 
   document.getElementById("genereerBtn").addEventListener("click", genereerWoordzoeker);
   document.getElementById("toonOplossingBtn").addEventListener("click", toggleSolution);
 
-  // Inputs
-  document.getElementById("woordenInput").addEventListener("input", genereerWoordzoeker);
-  document.getElementById("parenInput").addEventListener("input", genereerWoordzoeker);
-  document.getElementById("rasterFormaat").addEventListener("change", genereerWoordzoeker);
-  document.querySelectorAll('input[name="richting"]').forEach(cb => cb.addEventListener("change", genereerWoordzoeker));
+  document.getElementById("woordenInput").addEventListener("input", event => {
+    const count = event.target.value.split("\n").map(value => sanitizeWord(value.trim())).filter(Boolean).length;
+    updateWordCountMessageSingle(count);
+  });
+  document.getElementById("pairRowsContainer").addEventListener("input", () => updatePairCountMessage(readPairInputs().length));
+  document.getElementById("pairRowsContainer").addEventListener("click", event => {
+    const removeButton = event.target.closest(".remove-pair-row");
+    if (!removeButton) return;
+    removeButton.closest(".pair-row").remove();
+    [...document.querySelectorAll(".pair-row")].forEach((row, index) => {
+      row.querySelector(".pair-number").textContent = index + 1;
+    });
+    document.getElementById("addPairRowBtn").disabled = false;
+    updatePairCountMessage(readPairInputs().length);
+  });
+  document.getElementById("addPairRowBtn").addEventListener("click", addPairRow);
+  document.getElementById("werkbladTitel").addEventListener("input", updateWorksheetText);
+  document.getElementById("opdrachtzin").addEventListener("input", updateWorksheetText);
 
-  // Modus- & titelkeuze
   document.getElementById("taalMode").addEventListener("change", () => {
     updateModeUI();
-    genereerWoordzoeker();
+  });
+  document.querySelectorAll('input[name="pairPuzzleSide"]').forEach(radio => {
+    radio.addEventListener("change", updateModeExplanation);
   });
   const sel = document.getElementById("lijstTitelType");
   const custom = document.getElementById("customLijstTitel");
@@ -447,7 +513,16 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ===== Downloads =====
+function hasPuzzle() {
+  if (currentPuzzleState.grid) return true;
+  const message = document.getElementById("meldingContainer");
+  message.style.color = "#9b2c2c";
+  message.textContent = "Maak eerst een woordzoeker voordat je een bestand downloadt.";
+  return false;
+}
+
 document.getElementById("downloadPngBtn").addEventListener("click", () => {
+  if (!hasPuzzle()) return;
   const wasVisible = solutionVisible;
   if (wasVisible) toggleSolution();
 
@@ -462,66 +537,65 @@ document.getElementById("downloadPngBtn").addEventListener("click", () => {
   if (wasVisible) toggleSolution();
 });
 
-document.getElementById("downloadPdfBtn").addEventListener("click", async () => {
+function createWorksheetPdf(withSolution) {
+  if (!hasPuzzle()) return;
   const wasVisible = solutionVisible;
-  if (wasVisible) toggleSolution();
-
+  if (solutionVisible !== withSolution) toggleSolution();
   const dataURL = canvas.toDataURL("image/png");
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF("p", "mm", "a4");
   const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
+  const title = (document.getElementById("werkbladTitel")?.value || "").trim() || "Woordzoeker";
+  const instruction = (document.getElementById("opdrachtzin")?.value || "").trim() || "Zoek alle woorden in het letterrooster.";
 
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.setTextColor(25, 42, 55);
+  doc.text("Naam:", 16, 15);
+  doc.line(29, 15.5, 88, 15.5);
+  doc.text("Datum:", 121, 15);
+  doc.line(136, 15.5, 194, 15.5);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.setTextColor(0, 64, 128);
-  doc.text("Woordzoeker", pageWidth / 2, 20, { align: "center" });
+  doc.setFontSize(20);
+  doc.setTextColor(20, 79, 128);
+  doc.text(withSolution ? `${title} — oplossing` : title, pageWidth / 2, 27, { align: "center" });
+  doc.setDrawColor(119, 174, 216);
+  doc.setFillColor(242, 248, 253);
+  doc.roundedRect(16, 33, 178, 12, 2, 2, "FD");
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(10.5);
+  doc.setTextColor(38, 76, 104);
+  const instructionLines = doc.splitTextToSize(instruction, 168);
+  doc.text(instructionLines, 21, 40.5);
 
-  const imgWidth = canvas.width, imgHeight = canvas.height;
-  const ratio = imgWidth / imgHeight;
-  let pdfImgWidth = pageWidth * 0.8;
-  let pdfImgHeight = pdfImgWidth / ratio;
-  if (pdfImgHeight > pageHeight * 0.55) {
-    pdfImgHeight = pageHeight * 0.55;
-    pdfImgWidth = pdfImgHeight * ratio;
-  }
+  const pdfImgWidth = 132;
+  const pdfImgHeight = 132;
   const xPosImg = (pageWidth - pdfImgWidth) / 2;
-  const yPosImg = 30;
+  const yPosImg = 50;
   doc.addImage(dataURL, "PNG", xPosImg, yPosImg, pdfImgWidth, pdfImgHeight);
 
   const woorden = Array.from(document.querySelectorAll("#woordenLijst li")).map(li => li.textContent);
-  const listTitleFontSize = 16, wordFontSize = 12, lineHeight = 7, listMarginTop = 10;
-  let listStartY = yPosImg + pdfImgHeight + listMarginTop;
-  const estimatedListHeight = listTitleFontSize / doc.internal.scaleFactor + (Math.ceil(woorden.length / 3) * lineHeight) + 10;
-  if (listStartY + estimatedListHeight > pageHeight) {
-    doc.addPage();
-    listStartY = 20;
-  }
-
-  doc.setFontSize(listTitleFontSize);
-  doc.setTextColor(0, 64, 128);
-  const lijstTitelTekst = getSelectedLijstTitel();
-  doc.text(lijstTitelTekst + ":", 20, listStartY);
-
-  listStartY += listTitleFontSize / 2 + 5;
-  doc.setFontSize(wordFontSize);
+  const listStartY = 198;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(20, 79, 128);
+  doc.text(`${getSelectedLijstTitel()}:`, 18, listStartY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11.5);
   doc.setTextColor(0, 0, 0);
-
-  const outerMargin = 20, columnGap = 20, bulletRadius = 2.5, bulletTextGap = 2, columnPadding = 5;
-  const totalContentWidth = pageWidth - (2 * outerMargin);
-  const singleColumnWidth = (totalContentWidth - (2 * columnGap)) / 3;
-  let itemsPerColumn = Math.ceil(woorden.length / 3);
-  if (itemsPerColumn === 0) itemsPerColumn = 1;
-
+  const itemsPerColumn = Math.max(1, Math.ceil(woorden.length / 3));
+  const columnWidth = 58;
   for (let i = 0; i < woorden.length; i++) {
-    const word = woorden[i];
     const colIndex = Math.floor(i / itemsPerColumn);
-    let y = listStartY + (i % itemsPerColumn) * lineHeight;
-    let x = outerMargin + colIndex * (singleColumnWidth + columnGap);
-    doc.circle(x + bulletRadius + columnPadding, y - lineHeight / 2 + (wordFontSize / doc.internal.scaleFactor / 2), bulletRadius, "D");
-    doc.text(word, x + bulletRadius * 2 + bulletTextGap + columnPadding, y);
+    const rowIndex = i % itemsPerColumn;
+    const x = 18 + colIndex * columnWidth;
+    const y = listStartY + 10 + rowIndex * 8;
+    doc.circle(x + 2, y - 1.2, 1.8, "S");
+    doc.text(woorden[i], x + 7, y);
   }
-  doc.save("woordzoeker.pdf");
+  doc.save(withSolution ? "woordzoeker-oplossing.pdf" : "woordzoeker-werkblad.pdf");
+  if (solutionVisible !== wasVisible) toggleSolution();
+}
 
-  if (wasVisible) toggleSolution();
-});
+document.getElementById("downloadPdfBtn").addEventListener("click", () => createWorksheetPdf(false));
+document.getElementById("downloadSolutionPdfBtn").addEventListener("click", () => createWorksheetPdf(true));

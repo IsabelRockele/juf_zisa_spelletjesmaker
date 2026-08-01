@@ -1,0 +1,214 @@
+.mode-explanation {
+  margin-top: 2px;
+  padding: 10px 11px;
+  border: 1px solid #c8dfef;
+  border-radius: 9px;
+  background: #f2f8fd;
+  color: #365a72;
+  font-size: .76rem;
+  line-height: 1.45;
+}
+
+.pair-own-words {
+  margin: 10px 0 5px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: #fff8df;
+  color: #6d5314;
+  font-size: .75rem;
+  line-height: 1.4;
+}
+
+.pair-column-headings {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 8px;
+  padding: 0 34px 0 29px;
+  color: #38556b;
+  font-size: .74rem;
+  font-weight: 800;
+}
+
+.pair-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 5px;
+}
+
+.pair-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1.25fr) 24px;
+  gap: 7px;
+  align-items: center;
+  padding: 7px;
+  border: 1px solid #d7e4ec;
+  border-radius: 10px;
+  background: #f9fcfe;
+}
+
+.pair-row input[type="text"] {
+  min-width: 0;
+  height: 40px;
+  margin: 0;
+  padding: 8px;
+  background: #fff;
+}
+
+.pair-row input::placeholder {
+  color: #9aaab5;
+  font-style: italic;
+}
+
+.pair-number {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e3f2fc;
+  color: #1d6fad;
+  font-size: .7rem;
+  font-weight: 900;
+}
+
+.remove-pair-row {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fbe9e9;
+  color: #a33;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.add-pair-button {
+  align-self: flex-start;
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border: 1px solid #a9cbe2;
+  border-radius: 8px;
+  background: #f0f8fd;
+  color: #155985;
+  font-size: .76rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.add-pair-button:disabled {
+  opacity: .5;
+  cursor: default;
+}
+
+.pair-input-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 8px;
+}
+
+.pair-input-grid > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pair-input-grid textarea {
+  min-height: 160px;
+  resize: vertical;
+}
+
+.pair-placement {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.pair-placement legend {
+  margin-bottom: 3px;
+  color: #38556b;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.pair-placement label {
+  position: relative;
+  margin: 0;
+}
+
+.pair-placement input {
+  position: absolute;
+  opacity: 0;
+}
+
+.pair-placement span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 11px;
+  border: 1.5px solid #cbdbe6;
+  border-radius: 9px;
+  background: #fff;
+  color: #52697a;
+  cursor: pointer;
+}
+
+.pair-placement small {
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.pair-placement input:checked + span {
+  border-color: #1d6fad;
+  background: #e7f4fd;
+  color: #125889;
+  box-shadow: inset 4px 0 #1d6fad;
+}
+
+@media (max-width: 420px) {
+  .pair-input-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pair-column-headings {
+    display: none;
+  }
+
+  .pair-row {
+    grid-template-columns: 22px 1fr 24px;
+  }
+
+  .pair-row .pair-hint-input {
+    grid-column: 2;
+  }
+}
+
+/* Ruimere woordenlijst onder het letterrooster. */
+#woordenLijstContainer {
+  margin-top: 5%;
+}
+
+#woordenLijstContainer h3 {
+  margin-bottom: 2.2%;
+}
+
+#woordenLijst ul {
+  column-gap: 6%;
+  row-gap: 9px;
+}
+
+#woordenLijst li {
+  gap: 8px;
+  font-size: clamp(.58rem, 1.15vw, .92rem);
+  line-height: 1.35;
+}
+
+#woordenLijst li::before {
+  width: 13px;
+  height: 13px;
+}

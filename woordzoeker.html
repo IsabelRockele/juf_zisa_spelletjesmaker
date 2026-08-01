@@ -1,70 +1,57 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="utf-8"/>
-<title>Woordzoeker Generator</title>
-<link href="woordzoeker.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Woordzoeker Generator</title>
+  <link href="woordzoeker.css" rel="stylesheet">
+  <link href="woordzoeker-pairs.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-<header>
-<button id="menuBtn" onclick="window.location.href='index.html'">Keuzemenu</button>
-<h1>Woordzoeker Generator</h1>
-</header>
+  <header class="tool-header">
+    <button id="menuBtn" onclick="window.location.href='index.html'">← Keuzemenu</button>
+    <div><h1>Woordzoeker Generator</h1><p>Maak een duidelijke woordzoeker met je eigen woorden of woordparen.</p></div>
+  </header>
 
-<div id="main-content">
-  <div id="left-panel">
-    <div id="controls">
-
-      <!-- OEFENMODUS -->
-      <div class="control-group">
-        <label for="taalMode">Oefenmodus:</label>
+  <main id="main-content">
+    <aside id="left-panel">
+      <div class="step-card">
+        <div class="step-title"><span>1</span><div><strong>Inhoud</strong><small>Wat wil je laten zoeken?</small></div></div>
+        <label for="taalMode">Soort oefening</label>
         <select id="taalMode">
-          <option value="single" selected>Gewoon (1 lijst woorden)</option>
-          <option value="linksInPuzzel">Woorden links komen in puzzel, woorden rechts onderaan</option>
-          <option value="rechtsInPuzzel">Woorden rechts komen in puzzel, woorden links onderaan</option>
+          <option value="single" selected>Gewone woordzoeker — één woordenlijst</option>
+          <option value="pairs">Woordparen — werken met woorden en hints</option>
         </select>
+        <div id="modeExplanation" class="mode-explanation"></div>
+        <div id="singleInputGroup">
+          <p class="pair-own-words"><strong>Vul hier je eigen woorden in.</strong> De lichte woorden in het vak zijn alleen voorbeelden.</p>
+          <label for="woordenInput">Woorden — één per regel</label>
+          <textarea id="woordenInput" rows="9" placeholder="boekentas&#10;brooddoos&#10;klas&#10;lijm&#10;potlood&#10;school"></textarea>
+          <div id="woordAantalMelding" class="input-feedback">Voer 6 tot 20 woorden in.</div>
+        </div>
+        <div id="pairInputGroup" hidden>
+          <p class="pair-own-words"><strong>Vul hier je eigen woorden in.</strong> De lichte tekst in de vakken is alleen een voorbeeld.</p>
+          <div class="pair-column-headings"><span>Woord</span><span>Omschrijving of vertaling</span></div>
+          <div id="pairRowsContainer" class="pair-rows"></div>
+          <button type="button" id="addPairRowBtn" class="add-pair-button">＋ Nog een woordpaar</button>
+          <p class="field-help">Ieder kader vormt één woordpaar. Vul beide vakken in.</p>
+          <div id="paarAantalMelding" class="input-feedback">Voer 6 tot 20 woordparen in.</div>
+          <fieldset class="pair-placement">
+            <legend>Wat wil je waar tonen?</legend>
+            <label><input type="radio" name="pairPuzzleSide" value="linksInPuzzel" checked><span><b>Woorden in het rooster</b><small>Omschrijvingen of vertalingen staan onderaan</small></span></label>
+            <label><input type="radio" name="pairPuzzleSide" value="rechtsInPuzzel"><span><b>Omschrijvingen of vertalingen in het rooster</b><small>De woorden staan onderaan als hint</small></span></label>
+          </fieldset>
+        </div>
       </div>
 
-      <!-- SINGLE-LIJST INPUT -->
-      <div class="control-group" id="singleInputGroup">
-        <label for="woordenInput">Woorden (één per regel):</label>
-        <textarea id="woordenInput" rows="10" placeholder="Typ hier je woorden (min. 6, max. 20 woorden, elk max. 12 letters lang)"></textarea>
-        <div id="woordAantalMelding" style="font-size: 0.9em; color: #555; margin-top: 5px;"></div>
-      </div>
-
-      <!-- PAREN-INPUT -->
-      <div class="control-group" id="pairInputGroup" style="display:none;">
-        <label for="parenInput">Woordparen (één woordpaar per regel + scheiden met ; )</label>
-        <textarea id="parenInput" rows="10" placeholder="bijv. maison; huis&#10;bonjour; goedendag&#10;..."></textarea>
-        <div id="paarAantalMelding" style="font-size: 0.9em; color: #555; margin-top: 5px;"></div>
-      </div>
-
-      <!-- RASTER & RICHTING -->
-      <div class="control-group">
-        <label for="rasterFormaat">Raster formaat:</label>
-        <select id="rasterFormaat">
-          <option value="auto">Automatisch</option>
-          <option value="6x6">6 x 6</option>
-          <option value="8x8">8 x 8</option>
-          <option value="10x10">10 x 10</option>
-          <option value="12x12">12 x 12</option>
-          <option value="15x15">15 x 15</option>
-          <option value="20x20">20 x 20</option>
-          <option value="25x25">25 x 25</option>
-        </select>
-      </div>
-
-      <div class="control-group">
-        <label>Richting:</label>
-        <label><input type="checkbox" name="richting" value="horizontaal" checked/> Horizontaal</label>
-        <label><input type="checkbox" name="richting" value="verticaal" checked/> Verticaal</label>
-        <label><input type="checkbox" name="richting" value="diagonaal" checked/> Diagonaal</label>
-      </div>
-
-      <!-- TITEL BOVEN LIJST -->
-      <div class="control-group">
-        <label for="lijstTitelType">Titel boven woordenlijst:</label>
+      <div class="step-card">
+        <div class="step-title"><span>2</span><div><strong>Werkblad</strong><small>Titel en opdracht</small></div></div>
+        <label for="werkbladTitel">Titel</label>
+        <input id="werkbladTitel" type="text" value="Woordzoeker" maxlength="55">
+        <label for="opdrachtzin">Opdrachtzin</label>
+        <input id="opdrachtzin" type="text" value="Zoek alle woorden in het letterrooster." maxlength="110">
+        <label for="lijstTitelType">Titel boven de woordenlijst</label>
         <select id="lijstTitelType">
           <option value="default" selected>Woorden om te vinden</option>
           <option value="vertaling">Zoek de vertaling</option>
@@ -73,34 +60,56 @@
           <option value="rijmwoord">Zoek het rijmwoord</option>
           <option value="custom">Eigen titel…</option>
         </select>
-        <input type="text" id="customLijstTitel" placeholder="Typ hier je eigen titel" style="display:none;">
+        <input type="text" id="customLijstTitel" placeholder="Typ je eigen titel" hidden>
       </div>
 
-      <div id="meldingContainer" style="color: #004080; margin-top: 15px; font-weight: bold; min-height: 80px;"></div>
-      <button id="genereerBtn">Genereer Woordzoeker</button>
-    </div>
-  </div>
+      <div class="step-card">
+        <div class="step-title"><span>3</span><div><strong>Moeilijkheid</strong><small>Raster en zoekrichtingen</small></div></div>
+        <label for="rasterFormaat">Rasterformaat</label>
+        <select id="rasterFormaat">
+          <option value="auto">Automatisch aanbevolen</option>
+          <option value="6x6">6 × 6</option><option value="8x8">8 × 8</option>
+          <option value="10x10">10 × 10</option><option value="12x12">12 × 12</option>
+          <option value="15x15">15 × 15</option><option value="20x20">20 × 20</option>
+          <option value="25x25">25 × 25</option>
+        </select>
+        <fieldset class="direction-choice">
+          <legend>Woorden mogen staan</legend>
+          <label><input type="checkbox" name="richting" value="horizontaal" checked><span>→ Horizontaal</span></label>
+          <label><input type="checkbox" name="richting" value="verticaal" checked><span>↓ Verticaal</span></label>
+          <label><input type="checkbox" name="richting" value="diagonaal" checked><span>↘ Diagonaal</span></label>
+        </fieldset>
+      </div>
 
-  <div id="center-panel">
-    <div id="right-panel">
-      <canvas id="mainCanvas" width="512" height="512"></canvas>
-    </div>
+      <div id="meldingContainer" role="status"></div>
+      <button id="genereerBtn" class="primary-action">▶ Maak mijn woordzoeker</button>
+    </aside>
 
-    <div id="woordenLijstContainer">
-      <h2 id="woordenLijstTitel">Woorden om te vinden</h2>
-      <div id="woordenLijst" class="kolommen"></div>
-    </div>
-  </div>
-
-  <div id="right-panel-buttons">
-    <div class="control-group">
-      <button id="toonOplossingBtn">Toon Oplossing</button>
-      <button id="downloadPngBtn">Download als PNG</button>
-      <button id="downloadPdfBtn">Download als PDF</button>
-    </div>
-  </div>
-</div>
-
-<script src="woordzoeker.js"></script>
+    <section class="preview-panel">
+      <div class="preview-toolbar">
+        <div><span class="eyebrow">Live voorbeeld</span><strong>Zo ziet het werkblad eruit</strong></div>
+        <div class="toolbar-actions">
+          <button id="toonOplossingBtn">👁 Toon oplossing</button>
+          <button id="downloadPngBtn">PNG</button>
+          <button id="downloadPdfBtn" class="download">↓ PDF werkblad</button>
+          <button id="downloadSolutionPdfBtn" class="solution-download">↓ PDF oplossing</button>
+        </div>
+      </div>
+      <div class="preview-stage">
+        <article id="worksheet-preview" class="worksheet-sheet preview-empty">
+          <div class="worksheet-identity"><span>Naam: <i></i></span><span>Datum: <i></i></span></div>
+          <h2 id="previewTitel">Woordzoeker</h2>
+          <p id="previewOpdracht" class="worksheet-instruction">Zoek alle woorden in het letterrooster.</p>
+          <div id="right-panel"><canvas id="mainCanvas" width="720" height="720"></canvas></div>
+          <div id="woordenLijstContainer">
+            <h3 id="woordenLijstTitel">Woorden om te vinden</h3>
+            <div id="woordenLijst"></div>
+          </div>
+          <div class="empty-message"><strong>Je woordzoeker verschijnt hier.</strong><span>Vul links minstens 6 woorden in en klik op ‘Maak mijn woordzoeker’.</span></div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <script src="woordzoeker.js"></script>
 </body>
 </html>
