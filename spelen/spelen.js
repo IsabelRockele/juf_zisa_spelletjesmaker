@@ -6,10 +6,10 @@ const firebaseConfig={apiKey:"AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",authDomai
 const app=getApps().length?getApp():initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const joinPlayClass=httpsCallable(getFunctions(app,"europe-west1"),"joinPlayClass");
-// Gebruik voor de leerkrachtweergave dezelfde, reeds bestaande PRO-opvraag als
-// op de beheerpagina. Die controleert de login en het abonnement, maar voegt
-// nooit een leerlingtoestel toe.
-const getTeacherPlayClass=httpsCallable(getFunctions(app,"europe-west1"),"getPlayClass");
+// De speciale voorbeeldfunctie controleert de PRO-login en het abonnement,
+// maar vereist geen App Check-token van de aparte speelpagina en registreert
+// de leerkracht nooit als leerlingtoestel.
+const getTeacherPlayClass=httpsCallable(getFunctions(app,"europe-west1"),"previewPlayClass");
 const loading=document.getElementById("loadingState"),error=document.getElementById("errorState"),device=document.getElementById("deviceState"),menu=document.getElementById("gameMenu"),grid=document.getElementById("gradeGrid");
 const params=new URLSearchParams(location.search);
 const explicitTeacherPreview=params.get('teacher')==='1';
