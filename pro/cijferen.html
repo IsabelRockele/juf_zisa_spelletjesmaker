@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Cijferen – Werkblad-generator (PRO)</title>
+  <script>location.replace('./rekenbundel/index.html?mode=cijferen');</script>
 
   <meta name="google" content="notranslate">
   <link rel="manifest" href="manifest-pro.json">
@@ -358,6 +359,7 @@
         top:auto;
       }
     }
+    .keuze-uitleg{font-size:.78rem;color:#667085;line-height:1.4;margin:-2px 0 10px}.optie-paneel{border:1px solid #dbe5ef;border-radius:12px;background:#f8fbff;padding:12px}.optie-paneel h4{margin:0 0 9px;color:#174a73}.verborgen{display:none!important}.radio-rij{display:flex;flex-wrap:wrap;gap:8px}.radio-rij label{display:flex;align-items:center;gap:5px;background:#fff;border:1px solid #cbd8e6;border-radius:9px;padding:7px 9px;font-size:.8rem;cursor:pointer}.cijfer-grid-nieuw{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.cijfer-kaart-nieuw{margin:0;min-width:0}.cijfer-kaart-nieuw .schema{margin-inline:auto}.mini-pijl{display:block;font-size:10px;line-height:8px}.komma-kop,.komma-cel{width:10px;text-align:center;font-weight:700}.deel-schema{width:100%;padding:8px 5px}.deel-boven{display:grid;grid-template-columns:1fr auto 34px auto 1fr;gap:5px;align-items:end;font-weight:700;border-bottom:2px solid #333;padding-bottom:5px}.deel-antwoord{height:22px;border-bottom:1px solid #777}.deel-stap{display:flex;height:25px;align-items:end}.deel-stap span{width:42%;border-bottom:1px solid #aaa}.deel-stap i{flex:1;border-bottom:1px solid #d0d0d0;margin-left:10px}.cijfer-pagina-nieuw .cijfer-opdracht{margin:4px 0 16px;padding:7px 10px;background:#edf5ff;border:1px solid #9ec5ef;border-radius:7px;color:#164b77;font-weight:600}@media(max-width:1200px){.cijfer-grid-nieuw{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:700px){.cijfer-grid-nieuw{grid-template-columns:repeat(2,minmax(0,1fr))}}@media print{.cijfer-grid-nieuw{grid-template-columns:repeat(4,minmax(0,1fr))}}
   </style>
 </head>
 <body>
@@ -378,22 +380,27 @@
           <div class="setting-item">
             <label for="type">Soort som:</label>
             <select id="type">
-              <option value="plus">+</option>
-              <option value="min">-</option>
-              <option value="gemengd">Gemengd</option>
+              <option value="optellen">Optellen</option>
+              <option value="aftrekken">Aftrekken</option>
+              <option value="gemengd">Gemengd +/−</option>
+              <option value="vermenigvuldigen">Vermenigvuldigen</option>
+              <option value="delen">Delen</option>
+              <option value="komma">Kommagetallen</option>
             </select>
           </div>
 
-          <div class="setting-item">
+          <div class="setting-item" id="brug-rij">
             <label for="brug">Brug:</label>
             <select id="brug">
               <option value="beide">Beide</option>
-              <option value="met">Met brug</option>
               <option value="zonder">Zonder brug</option>
+              <option value="met_een">Met één brug</option>
+              <option value="meer_dan_een">Meer dan één brug</option>
+              <option value="over_nul">Brug over nul</option>
             </select>
           </div>
 
-          <div class="setting-item">
+          <div class="setting-item" id="bereik-rij">
             <label for="invulling">Schema:</label>
             <select id="invulling">
               <option value="ingevuld">Ingevuld</option>
@@ -416,6 +423,7 @@
             <select id="bereik">
               <option value="100" selected>tot 100</option>
               <option value="1000">tot 1000</option>
+              <option value="10000">tot 10.000</option>
             </select>
           </div>
 
@@ -432,14 +440,22 @@
         </div>
 
         <div class="control-group">
-          <h4>Kies Oefentypes (meerdere mogelijk)</h4>
+          <h4>Duidelijk per onderdeel</h4>
+          <p class="keuze-uitleg">Kies eerst een bewerking. Alleen de passende keuzes worden getoond.</p>
+          <div class="optie-paneel" id="plusmin-opties"><h4>Optellen en aftrekken</h4><p class="keuze-uitleg">Kies bovenaan tot 100, tot 1.000 of tot 10.000 en bepaal hoeveel bruggen je wilt.</p></div>
+          <div class="optie-paneel verborgen" id="verm-opties"><h4>Vermenigvuldigen</h4><div class="radio-rij">
+            <label><input type="radio" name="cijfer-verm-type" value="TxE" checked>T × E</label><label><input type="radio" name="cijfer-verm-type" value="TExE">TE × E</label><label><input type="radio" name="cijfer-verm-type" value="beide">Beide</label>
+          </div><p class="keuze-uitleg" style="margin-top:10px">Brug:</p><div class="radio-rij"><label><input type="radio" name="cijfer-verm-brug" value="zonder" checked>Zonder</label><label><input type="radio" name="cijfer-verm-brug" value="E">Over E</label><label><input type="radio" name="cijfer-verm-brug" value="T">Over T</label><label><input type="radio" name="cijfer-verm-brug" value="ET">Over E en T</label><label><input type="radio" name="cijfer-verm-brug" value="met">Alle met brug</label></div></div>
+          <div class="optie-paneel verborgen" id="deel-opties"><h4>Delen</h4><div class="radio-rij"><label><input type="radio" name="cijfer-deel-type" value="TE:E" checked>TE ÷ E</label><label><input type="radio" name="cijfer-deel-type" value="HTE:E">HTE ÷ E</label></div><p class="keuze-uitleg" style="margin-top:10px">Rest:</p><div class="radio-rij"><label><input type="radio" name="cijfer-deel-rest" value="nee" checked>Zonder rest</label><label><input type="radio" name="cijfer-deel-rest" value="ja">Met rest</label></div></div>
+          <div class="optie-paneel verborgen" id="komma-opties"><h4>Kommagetallen</h4><div class="radio-rij"><label><input type="radio" name="cijfer-komma-type" value="Et_plus_Et" checked>E,t + E,t</label><label><input type="radio" name="cijfer-komma-type" value="Et_min_Et">E,t − E,t</label><label><input type="radio" name="cijfer-komma-type" value="Et_gemengd">Gemengd</label></div><p class="keuze-uitleg" style="margin-top:10px">Brug:</p><div class="radio-rij"><label><input type="radio" name="cijfer-komma-brug" value="beide" checked>Beide</label><label><input type="radio" name="cijfer-komma-brug" value="met">Met brug</label><label><input type="radio" name="cijfer-komma-brug" value="zonder">Zonder brug</label></div></div>
+          <h4 class="gerichte-titel">Gerichte getalvormen <small>(optioneel, meerdere mogelijk)</small></h4>
           <div class="oefentype-lijst">
             <div>
               <input type="checkbox" id="E_E" name="oefentype" value="E_E">
               <label for="E_E">E &pm; E</label>
             </div>
             <div>
-              <input type="checkbox" id="TE_E" name="oefentype" value="TE_E" checked>
+              <input type="checkbox" id="TE_E" name="oefentype" value="TE_E">
               <label for="TE_E">TE &pm; E</label>
             </div>
             <div>
@@ -857,7 +873,7 @@ if (bereik === 1000 && currentType === 'plus' && tussenResultaat > 999) {
       `;
     }
 
-    window.onload = genereerWerkblad;
+    // De uitgebreide gedeelde cijfergenerator start het werkblad na het laden.
   </script>
 </body>
 </html>
