@@ -46,7 +46,7 @@
   function loop(now){const dt=Math.min((now-last)/1000||0,.033);last=now;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
 
   const showChallengeBase=showChallenge;
-  showChallenge=()=>{showChallengeBase();const challenge=document.getElementById('challenge');const falling=game.level===1;challenge.classList.toggle('falling-mode',falling);if(falling){challenge.style.setProperty('--fall-time',`${LEVEL_TIME[game.level]}s`);document.getElementById('feedback').textContent='Tik het juiste antwoord aan vóór het de grond raakt.'}}
+  showChallenge=()=>{showChallengeBase();const challenge=document.getElementById('challenge');const falling=game.level===1;challenge.classList.toggle('falling-mode',falling);if(falling){challenge.style.setProperty('--fall-time',`${LEVEL_TIME[game.level]}s`);challenge.style.setProperty('--fall-start',`${Math.ceil(challenge.getBoundingClientRect().bottom+10)}px`);document.getElementById('feedback').textContent='Tik de juiste regendruppel aan vóór hij de grond raakt.'}}
 
   document.getElementById('startButton').onclick=()=>{game.mode=document.querySelector('input[name="mode"]:checked').value;document.getElementById('intro').hidden=true;game.level=0;startLevel()};
   document.getElementById('nextButton').onclick=()=>{game.level++;startLevel()};

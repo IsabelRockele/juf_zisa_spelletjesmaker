@@ -31,8 +31,10 @@
 @media(max-width:720px){.mode-picker{grid-template-columns:1fr}}
 
 .stop-game { position:fixed; z-index:12; left:14px; top:82px; padding:10px 14px; border-radius:999px; background:#173f73; color:#fff; text-decoration:none; font-weight:900; box-shadow:0 6px 18px #102c4655; }
+#zisaNavButton,#zisaNavPanel{display:none!important}
 .falling-mode .answers { height:0; }
-.falling-mode .answer-core { position:fixed; z-index:9; top:330px; left:var(--fall-left); width:min(210px,25vw); animation:fallAnswer var(--fall-time) linear forwards; }
-.falling-mode .answer-core:nth-child(1){--fall-left:22%}.falling-mode .answer-core:nth-child(2){--fall-left:50%}.falling-mode .answer-core:nth-child(3){--fall-left:78%}
-@keyframes fallAnswer { from{transform:translate(-50%,0) rotate(-2deg)} 50%{transform:translate(-50%,calc(41vh - 200px)) rotate(2deg)} to{transform:translate(-50%,calc(82vh - 400px)) rotate(-2deg)} }
-@media(max-width:720px){.stop-game{top:132px}.falling-mode .answer-core{top:315px;width:28vw;font-size:1.15rem}}
+.falling-mode .answer-core { position:fixed; z-index:9; top:var(--fall-start,320px); left:var(--fall-left); width:118px; min-height:132px; padding:25px 8px 12px; border:4px solid #bdefff; border-radius:56% 56% 58% 18%; background:linear-gradient(145deg,#d9f8ff 5%,#49c6ed 52%,#147ab9); color:#073c67; box-shadow:inset 12px 14px 18px #ffffff88,0 10px 22px #073f7066; animation:fallAnswer var(--fall-time) linear forwards; }
+.falling-mode .answer-core::before{content:'💧';display:block;margin:0 0 4px;font-size:1.8rem}
+.falling-mode .answer-core:nth-child(1){--fall-left:15%}.falling-mode .answer-core:nth-child(2){--fall-left:50%}.falling-mode .answer-core:nth-child(3){--fall-left:85%}
+@keyframes fallAnswer { from{transform:translate(-50%,0)} 35%{transform:translate(-50%,calc(29vh - 145px))} 70%{transform:translate(-50%,calc(58vh - 290px))} to{transform:translate(-50%,calc(82vh - 410px))} }
+@media(max-width:720px){.stop-game{top:132px}.falling-mode .answer-core{width:92px;min-height:108px;font-size:1.15rem}.falling-mode .answer-core:nth-child(1){--fall-left:17%}.falling-mode .answer-core:nth-child(3){--fall-left:83%}}
