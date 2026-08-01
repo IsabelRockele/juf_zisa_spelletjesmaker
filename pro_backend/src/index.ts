@@ -1353,6 +1353,24 @@ export const removePlayClassDevice = onCall({ region: REGION, enforceAppCheck: t
   return playAdminPayload((await ref.get()).data()!, license.expiresAt);
 });
 
+// Leerkrachtvoorbeeld: controleert login en abonnement, maar registreert nooit
+// een leerlingentoestel en telt ook niet mee als actieve leerling.
+export const previewPlayClass = onCall({ region: REGION, cors: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login als PRO-leerkracht vereist.");
+  const { license, snap } = await ensurePlayClass(req.auth.uid);
+  const data = snap.data() || {};
+  return {
+    allowed: true,
+    teacherPreview: true,
+    config: normalisePlayConfig(data.config),
+    registeredCount: Object.keys(data.devices || {}).length,
+    activeCount: 0,
+    registeredLimit: PLAY_DEVICE_LIMIT,
+    activeLimit: PLAY_ACTIVE_LIMIT,
+    expiresAt: license.expiresAt.toDate().toISOString(),
+  };
+});
+
 export const joinPlayClass = onCall({ region: REGION, cors: true }, async (req) => {
   const code = String(req.data?.code || "").trim();
   if (!/^[A-Za-z0-9_-]{12,40}$/.test(code)) {

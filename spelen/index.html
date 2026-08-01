@@ -10,8 +10,9 @@
 <body>
   <main class="play-shell">
     <header class="play-header">
-      <div class="brand-mark" aria-hidden="true">🦓</div>
+      <div class="brand-mark"><img src="../start_afbeeldingen/zisa.png" alt="Juf Zisa"></div>
       <div><span class="eyebrow">JUF ZISA PRO</span><h1>Zisa Spelen</h1></div>
+      <a class="teacher-exit" id="teacherExit" href="../pro/zisa-spelen.html" hidden>← Terug naar PRO</a>
     </header>
 
     <section class="state-card" id="loadingState">
@@ -25,6 +26,12 @@
       <h2 id="errorTitle">Deze speelomgeving is niet beschikbaar</h2>
       <p id="errorMessage">Vraag je leerkracht om de leerlingentoegang na te kijken.</p>
       <button type="button" id="retryButton">Opnieuw proberen</button>
+    </section>
+
+    <section class="state-card device-card" id="deviceState" hidden>
+      <span class="state-icon" aria-hidden="true">💻</span>
+      <h2>Open Zisa Spelen op een groter scherm</h2>
+      <p>Deze rekenspellen zijn gemaakt voor een iPad, tablet of computer. Op een gsm is het speelveld te klein om prettig te oefenen.</p>
     </section>
 
     <section id="gameMenu" hidden>

@@ -109,6 +109,54 @@ function toonBijen(juisteAntwoord) {
   });
 }
 
+function vliegBijNaarKorf(bijElement) {
+  const korf = document.querySelector('.bijenkorf');
+  if (!korf) {
+    bijElement.classList.add('vlieg-naar-korf');
+    return;
+  }
+
+  const start = bijElement.getBoundingClientRect();
+  const korfRect = korf.getBoundingClientRect();
+  // De donkere opening staat ongeveer in het midden en op 55% van de afbeelding.
+  const doelX = korfRect.left + korfRect.width * 0.5;
+  const doelY = korfRect.top + korfRect.height * 0.55;
+  const startX = start.left + start.width * 0.5;
+  const startY = start.top + start.height * 0.5;
+  const dx = doelX - startX;
+  const dy = doelY - startY;
+
+  const vliegendeBij = bijElement.cloneNode(true);
+  vliegendeBij.classList.remove('fout', 'vlieg-naar-korf');
+  Object.assign(vliegendeBij.style, {
+    position: 'fixed', left: `${start.left}px`, top: `${start.top}px`,
+    width: `${start.width}px`, height: `${start.height}px`, margin: '0',
+    zIndex: '2147482500', pointerEvents: 'none', transformOrigin: 'center'
+  });
+  document.body.appendChild(vliegendeBij);
+  bijElement.style.visibility = 'hidden';
+
+  const bocht = Math.max(55, Math.min(120, Math.abs(dx) * 0.28));
+  const controlX = dx * 0.42;
+  const controlY = Math.min(0, dy) - bocht;
+  const duur = 1400;
+  const begonnen = performance.now();
+  function frame(nu) {
+    const tijd = Math.min(1, (nu - begonnen) / duur);
+    const t = 1 - Math.pow(1 - tijd, 2.4);
+    const omgekeerd = 1 - t;
+    const x = 2 * omgekeerd * t * controlX + t * t * dx;
+    const y = 2 * omgekeerd * t * controlY + t * t * dy;
+    const schaal = 1 - 0.88 * Math.pow(t, 2.2);
+    const draai = Math.sin(t * Math.PI * 5) * (1 - t) * 9;
+    vliegendeBij.style.transform = `translate(${x}px,${y}px) rotate(${draai}deg) scale(${schaal})`;
+    vliegendeBij.style.opacity = String(t < .86 ? 1 : Math.max(.12, 1 - (t - .86) / .14));
+    if (tijd < 1) requestAnimationFrame(frame);
+    else vliegendeBij.remove();
+  }
+  requestAnimationFrame(frame);
+}
+
 function controleerAntwoord(bijElement, juist, juisteAntwoord) {
   const container = document.getElementById("bijenrij");
   container.querySelectorAll(".bij").forEach(b => b.style.pointerEvents = "none");
@@ -116,7 +164,7 @@ function controleerAntwoord(bijElement, juist, juisteAntwoord) {
   const huidige = oefeningen[huidigeOefening];
 
   if (juist) {
-    bijElement.classList.add("vlieg-naar-korf");
+    vliegBijNaarKorf(bijElement);
     scoreJuist++;
     document.getElementById("scoreJuist").textContent = scoreJuist;
   } else {
@@ -136,7 +184,7 @@ function controleerAntwoord(bijElement, juist, juisteAntwoord) {
   setTimeout(() => {
     huidigeOefening++;
     toonVolgendeOefening();
-  }, juist ? 1000 : 1300);
+  }, juist ? 1500 : 1300);
 }
 
 function toonFeedback() {
