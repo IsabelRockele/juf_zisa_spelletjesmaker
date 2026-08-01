@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewBody = document.getElementById('preview-body');
     const closePreviewBtn = document.getElementById('close-preview-btn');
     const downloadPdfBtn = document.getElementById('download-pdf-btn');
+    const getTargetTotal = () => parseInt(document.querySelector('input[name="targetTotal"]:checked').value,10);
     
     // --- Spel logica ---
     let currentNumber, correctAnswer, mistakes, isLocked = false;
@@ -26,14 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
         feedbackEl.textContent = ''; 
         targetZone.classList.remove('drag-over'); 
         targetZone.style.border = '3px dashed #f8bbd0'; 
-        currentNumber = Math.floor(Math.random() * 9) + 1; 
-        correctAnswer = 10 - currentNumber; 
+        const targetTotal=getTargetTotal(),step=targetTotal===100?10:1;
+        currentNumber = (Math.floor(Math.random() * 9) + 1)*step;
+        correctAnswer = targetTotal - currentNumber;
         const targetHeart = createHeartHalf(currentNumber, 'left-half'); 
         targetZone.appendChild(targetHeart); 
         let options = [correctAnswer]; 
         while (options.length < 3) { 
-            const wrongAnswer = Math.floor(Math.random() * 9) + 1; 
-            if (!options.includes(wrongAnswer) && wrongAnswer + currentNumber !== 10) { 
+            const wrongAnswer = (Math.floor(Math.random() * 9) + 1)*step;
+            if (!options.includes(wrongAnswer) && wrongAnswer + currentNumber !== targetTotal) {
                 options.push(wrongAnswer); 
             } 
         } 
@@ -118,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const fullHeartContainer = document.createElement('div'); 
         fullHeartContainer.className = 'full-heart-container'; 
         const numberTen = document.createElement('span'); 
-        numberTen.textContent = '10'; 
+        numberTen.textContent = getTargetTotal();
         fullHeartContainer.appendChild(numberTen); 
         targetZone.appendChild(fullHeartContainer); 
         setTimeout(() => { newExercise(); }, 2000); 
@@ -146,49 +148,132 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Logica voor het werkblad met preview (ongewijzigd) ---
     werkbladButton.addEventListener('click', generateWorksheetPreview);
     closePreviewBtn.addEventListener('click', () => { previewModal.style.display = 'none'; previewBody.innerHTML = ''; });
-    downloadPdfBtn.addEventListener('click', () => {
-        const pageToDownload = previewBody.querySelector('.werkblad-pagina');
-        if (pageToDownload) {
-            downloadPdfBtn.textContent = 'Bezig met downloaden...';
-            downloadPdfBtn.disabled = true;
+    downloadPdfBtn.addEventListener('click', async () => {
+        const pages = [...previewBody.querySelectorAll('.werkblad-pagina')];
+        if (!pages.length) return;
+        downloadPdfBtn.textContent = 'Bezig met downloaden...';
+        downloadPdfBtn.disabled = true;
+        try {
             const { jsPDF } = window.jspdf;
-            html2canvas(pageToDownload, { scale: 3 }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
-                pdf.save('werkblad-verliefde-harten.pdf');
-                downloadPdfBtn.textContent = 'Download als PDF';
-                downloadPdfBtn.disabled = false;
-                previewModal.style.display = 'none';
-                previewBody.innerHTML = '';
-            });
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            for (let index = 0; index < pages.length; index++) {
+                const canvas = await html2canvas(pages[index], { scale: 3, backgroundColor: '#ffffff' });
+                if (index > 0) pdf.addPage();
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, 297);
+            }
+            pdf.save(pages.length > 1 ? 'bundel-verliefde-harten.pdf' : 'werkblad-verliefde-harten.pdf');
+            previewModal.style.display = 'none';
+            previewBody.innerHTML = '';
+        } finally {
+            downloadPdfBtn.textContent = 'Download als PDF';
+            downloadPdfBtn.disabled = false;
         }
     });
 
     function generateWorksheetPreview() {
         previewBody.innerHTML = '';
+        const selectedTypes = [...document.querySelectorAll('input[name="heartWorksheetType"]:checked')].map(input => input.value);
+        if (!selectedTypes.length) {
+            alert('Kies minstens één oefenvorm voor je werkblad.');
+            return;
+        }
+        const targetTotal = getTargetTotal();
+        selectedTypes.forEach(type => previewBody.appendChild(createWorksheetPage(type, targetTotal)));
+        previewModal.style.display = 'flex';
+    }
+
+    function getWorksheetPairs(targetTotal) {
+        return targetTotal === 100
+            ? [[0,100],[10,90],[20,80],[30,70],[40,60],[50,50]]
+            : [[1,9],[2,8],[3,7],[4,6],[5,5],[0,10]];
+    }
+
+    function createWorksheetPage(type, targetTotal) {
         const page = document.createElement('div');
-        page.className = 'werkblad-pagina';
+        page.className = `werkblad-pagina werkblad-${type}`;
+        const identity = document.createElement('div');
+        identity.className = 'werkblad-identiteit';
+        identity.innerHTML = '<span>Naam: <i></i></span><span>Datum: <i></i></span>';
         const title = document.createElement('h2');
         title.textContent = 'Verliefde Harten';
         const instruction = document.createElement('p');
         instruction.className = 'opdracht';
-        instruction.textContent = 'Kleur de twee helften die samen 10 vormen in dezelfde kleur.';
+        const instructions = {
+            zoeken: `Kleur de twee helften die samen ${targetTotal} vormen in dezelfde kleur.`,
+            verbinden: `Verbind elke linkerhelft met de rechterhelft die samen ${targetTotal} vormt.`,
+            invullen: `Vul het ontbrekende getal in. Samen vormen de twee helften ${targetTotal}.`,
+            knippen: `Knip de helften uit. Zoek de paren die samen ${targetTotal} vormen en plak ze bij elkaar.`
+        };
+        instruction.textContent = instructions[type];
+        const content = document.createElement('div');
+        content.className = 'werkblad-inhoud';
+        page.appendChild(identity);
         page.appendChild(title);
         page.appendChild(instruction);
-        const pairs = [[1, 9], [2, 8], [3, 7], [4, 6], [5, 5], [0, 10]];
+        page.appendChild(content);
+        const pairs = getWorksheetPairs(targetTotal);
+
+        if (type === 'zoeken' || type === 'knippen') {
+            addScatteredHearts(content, pairs, type === 'knippen');
+        } else if (type === 'verbinden') {
+            addConnectingExercise(content, pairs);
+        } else if (type === 'invullen') {
+            addFillExercise(content, pairs, targetTotal);
+        }
+        return page;
+    }
+
+    function addScatteredHearts(content, pairs, cutVersion) {
         const heartElements = [];
         pairs.forEach(pair => {
             const rotation = Math.random() * 50 - 25;
             const leftHalf = createWorksheetHeart(pair[0], 'left-half', rotation);
-            heartElements.push(leftHalf);
             const rightHalf = createWorksheetHeart(pair[1], 'right-half', rotation);
-            heartElements.push(rightHalf);
+            if (cutVersion) {
+                [leftHalf, rightHalf].forEach(heart => {
+                    const cutBox = document.createElement('div');
+                    cutBox.className = 'knip-vak';
+                    cutBox.appendChild(heart);
+                    heartElements.push(cutBox);
+                });
+            } else {
+                heartElements.push(leftHalf, rightHalf);
+            }
         });
         heartElements.sort(() => Math.random() - 0.5);
-        heartElements.forEach(heartEl => { page.appendChild(heartEl); });
-        previewBody.appendChild(page);
-        previewModal.style.display = 'flex';
+        heartElements.forEach(heartEl => content.appendChild(heartEl));
+    }
+
+    function addConnectingExercise(content, pairs) {
+        const leftColumn = document.createElement('div');
+        const rightColumn = document.createElement('div');
+        leftColumn.className = 'verbind-kolom';
+        rightColumn.className = 'verbind-kolom';
+        const leftHearts = pairs.map(pair => createWorksheetHeart(pair[0], 'left-half', 0)).sort(() => Math.random() - 0.5);
+        const rightHearts = pairs.map(pair => createWorksheetHeart(pair[1], 'right-half', 0)).sort(() => Math.random() - 0.5);
+        leftHearts.forEach(heart => leftColumn.appendChild(heart));
+        rightHearts.forEach(heart => rightColumn.appendChild(heart));
+        content.append(leftColumn, rightColumn);
+    }
+
+    function addFillExercise(content, pairs, targetTotal) {
+        const exercises = [...pairs].sort(() => Math.random() - 0.5);
+        exercises.forEach((pair, index) => {
+            const missingLeft = index % 2 === 0;
+            const card = document.createElement('div');
+            card.className = 'invul-opgave';
+            const hearts = document.createElement('div');
+            hearts.className = 'invul-harten';
+            hearts.append(
+                createWorksheetHeart(missingLeft ? '' : pair[0], 'left-half', 0),
+                createWorksheetHeart(missingLeft ? pair[1] : '', 'right-half', 0)
+            );
+            const equation = document.createElement('div');
+            equation.className = 'invul-som';
+            equation.textContent = `${missingLeft ? '____' : pair[0]} + ${missingLeft ? pair[1] : '____'} = ${targetTotal}`;
+            card.append(hearts, equation);
+            content.appendChild(card);
+        });
     }
 
     function createWorksheetHeart(number, side, rotation) {

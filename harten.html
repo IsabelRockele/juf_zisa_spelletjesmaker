@@ -12,7 +12,21 @@
         <div class="panel">
             <a href="index.html" class="menu-btn">Keuzemenu</a>
             <h1>Verliefde Harten</h1>
-            <p>Speel het spel of maak een werkblad om de vriendjes van 10 te oefenen!</p>
+            <p>Speel het spel of maak een werkblad met getallen die samen 10 of 100 vormen.</p>
+            <div class="target-choice" role="group" aria-label="Kies het doelgetal">
+                <label><input type="radio" name="targetTotal" value="10" checked><span>Samen 10</span></label>
+                <label><input type="radio" name="targetTotal" value="100"><span>Samen 100<br><small>enkel tientallen</small></span></label>
+            </div>
+            <div class="worksheet-choice-box">
+                <strong>Werkblad of gemengde bundel</strong>
+                <p>Kies één of meer oefenvormen.</p>
+                <div class="worksheet-choice-grid">
+                    <label><input type="checkbox" name="heartWorksheetType" value="zoeken" checked><span>Zoek de paren</span></label>
+                    <label><input type="checkbox" name="heartWorksheetType" value="verbinden"><span>Verbind de helften</span></label>
+                    <label><input type="checkbox" name="heartWorksheetType" value="invullen"><span>Vul de helft in</span></label>
+                    <label><input type="checkbox" name="heartWorksheetType" value="knippen"><span>Knip en plak</span></label>
+                </div>
+            </div>
             <div class="button-group">
                 <button id="start-btn" class="start-button">Start Spel</button>
                 <button id="werkblad-btn" class="start-button secondary">Maak Werkblad</button>
