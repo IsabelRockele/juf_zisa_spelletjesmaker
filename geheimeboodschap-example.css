@@ -1,0 +1,25 @@
+.start-example {
+  display: grid;
+  grid-template-columns: minmax(220px, .8fr) minmax(320px, 1.2fr);
+  gap: 22px;
+  align-items: center;
+  max-width: 850px;
+  margin: 0 auto 20px;
+  padding: 18px;
+  border: 1px solid #d4e3ec;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #f4faff, #fffaf0);
+}
+.example-label { display:inline-block; padding:4px 8px; border-radius:999px; background:#dff1fc; color:#176295; font-size:.66rem; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
+.example-copy h3 { margin:8px 0 6px; color:#173f61; }
+.example-copy p { margin:0; color:#627989; font-size:.84rem; line-height:1.5; }
+.example-sheet { padding:14px; border:1px solid #bacbd7; border-radius:10px; background:#fff; box-shadow:0 5px 14px #173f6114; }
+.mini-key { display:flex; justify-content:center; gap:14px; padding-bottom:10px; border-bottom:1px solid #dce5eb; }
+.mini-key span { display:flex; align-items:center; gap:5px; font-size:.72rem; }
+.mini-key img { width:34px; height:30px; object-fit:contain; }
+.mini-message { display:flex; justify-content:center; gap:5px; margin:12px 0 8px; }
+.mini-message span { display:flex; flex-direction:column; }
+.mini-message img { width:48px; height:42px; padding:4px; border:1px solid #4c6577; object-fit:contain; }
+.mini-message i { width:48px; height:24px; border:1px solid #4c6577; border-top:0; background:#fafafa; }
+.example-sheet>small { display:block; text-align:center; color:#6d7e89; font-size:.68rem; }
+@media(max-width:700px){.start-example{grid-template-columns:1fr}.example-copy{text-align:center}}

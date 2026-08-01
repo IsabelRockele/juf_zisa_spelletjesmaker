@@ -1,0 +1,35 @@
+/* Behoud altijd de oorspronkelijke verhouding van de themafiguren. */
+.afbeelding-hokje {
+  padding: 3px;
+  overflow: hidden;
+}
+
+.afbeelding-hokje img {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+#puzzel-sleutel-container .sleutel-item {
+  min-width: 0;
+  overflow: hidden;
+}
+
+#puzzel-sleutel-container .sleutel-item img {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 30px !important;
+  margin: 0 auto !important;
+}
+
+@media print {
+  .afbeelding-hokje img {
+    object-fit: contain !important;
+  }
+}

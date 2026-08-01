@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- STATE ---
     const sleutel = new Map();
+    let laatstePuzzel = { type: null, teksten: [] };
+    let oplossingZichtbaar = false;
 
     // --- DOM ELEMENTEN ---
     const setupScherm = document.getElementById('setup-scherm');
@@ -42,12 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const schrijflijnToggle = document.getElementById('schrijflijn-toggle-checkbox');
     const genereerKnop = document.getElementById('genereer-knop');
     const opnieuwBeginnenKnop = document.getElementById('opnieuw-beginnen-knop');
+    const werkbladTitel = document.getElementById('werkblad-titel');
+    const werkbladOpdracht = document.getElementById('werkblad-opdracht');
 
     // Preview
     const puzzelContentContainer = document.getElementById('puzzel-content-container');
     const puzzelSleutelContainer = document.getElementById('puzzel-sleutel-container');
     const printKnop = document.getElementById('print-knop');
     const downloadPdfKnop = document.getElementById('download-pdf-knop');
+    const downloadOplossingPdfKnop = document.getElementById('download-oplossing-pdf-knop');
+    const toonOplossingKnop = document.getElementById('toon-oplossing-knop');
     const sluitPreviewKnop = document.getElementById('sluit-preview-knop');
 
     // --- FUNCTIES ---
@@ -186,8 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     themaKnoppen.forEach(button => {
         button.addEventListener('click', (event) => {
+            themaKnoppen.forEach(knop => knop.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
             themaAfbeeldingenPreview.classList.remove('verborgen');
-            laadThemaAfbeeldingen(event.target.dataset.thema);
+            laadThemaAfbeeldingen(event.currentTarget.dataset.thema);
         });
     });
 
@@ -216,14 +224,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const results = await Promise.all(imageLoadPromises);
-        const success = results.some(res => res === true);
+        const success = results.every(res => res === true) && sleutel.size === AANTAL_LETTERS;
 
         if (success) {
             themaLaadStatus.textContent = `Thema '${thema}' succesvol geladen!`;
             themaLaadStatus.style.color = 'green';
             naarGeneratorKnopThema.disabled = false;
         } else {
-            themaLaadStatus.textContent = `Fout: Kon geen enkele afbeelding voor thema '${thema}' vinden.`;
+            themaLaadStatus.textContent = `Dit thema is niet volledig geladen. Kies een ander thema of probeer opnieuw.`;
             themaLaadStatus.style.color = 'red';
             naarGeneratorKnopThema.disabled = true;
         }
@@ -268,44 +276,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     genereerKnop.addEventListener('click', () => {
         const puzzelType = document.querySelector('input[name="puzzeltype"]:checked').value;
-        let puzzelContentHTML = '';
-        let hasContent = false;
-
-        puzzelContentContainer.classList.remove('schrijflijnen-verborgen');
-
+        let teksten = [];
         if (puzzelType === 'zin') {
-            const boodschap = boodschapInput.value;
-            if (boodschap.trim() !== '') {
-                puzzelContentHTML = `<div class="zin-output">${maakPuzzelHTML(boodschap)}</div>`;
-                hasContent = true;
-            }
+            if (boodschapInput.value.trim()) teksten = [boodschapInput.value.trim()];
         } else {
-            if (!schrijflijnToggle.checked) {
-                puzzelContentContainer.classList.add('schrijflijnen-verborgen');
-            }
-
-            puzzelContentHTML = '<div class="woorden-output-grid">';
-            let woordenGevonden = 0;
-            document.querySelectorAll('.woord-input').forEach(input => {
-                if (input.value.trim() !== '') {
-                    woordenGevonden++;
-                    puzzelContentHTML += `<div class="woord-input-groep-preview">${maakPuzzelHTML(input.value)}<div class="schrijflijn-container"><i class="fas fa-pencil-alt"></i><div class="schrijflijn"></div></div></div>`;
-                }
-            });
-            puzzelContentHTML += '</div>';
-            if (woordenGevonden > 0) hasContent = true;
+            teksten = [...document.querySelectorAll('.woord-input')].map(input => input.value.trim()).filter(Boolean);
         }
-
-        if (!hasContent) {
+        if (!teksten.length) {
             alert('Typ eerst een zin of een of meerdere woorden.');
             return;
         }
+        laatstePuzzel = { type: puzzelType, teksten };
+        oplossingZichtbaar = false;
+        toonOplossingKnop.textContent = '👁 Toon oplossing';
         populateSleutelOverzicht(puzzelSleutelContainer);
-        puzzelContentContainer.innerHTML = puzzelContentHTML;
+        document.getElementById('print-hoofdtitel').textContent = werkbladTitel.value.trim() || 'Geheime boodschap';
+        document.getElementById('print-opdracht').textContent = werkbladOpdracht.value.trim() || 'Gebruik de geheime sleutel en ontcijfer de boodschap.';
+        renderLaatstePuzzel(false);
         showScreen(puzzelPreviewScherm);
     });
 
-    const maakPuzzelHTML = (tekst) => {
+    const renderLaatstePuzzel = (toonAntwoorden) => {
+        puzzelContentContainer.classList.toggle('schrijflijnen-verborgen', laatstePuzzel.type === 'woorden' && !schrijflijnToggle.checked);
+        if (laatstePuzzel.type === 'zin') {
+            puzzelContentContainer.innerHTML = `<div class="zin-output">${maakPuzzelHTML(laatstePuzzel.teksten[0], toonAntwoorden)}</div>`;
+        } else {
+            puzzelContentContainer.innerHTML = `<div class="woorden-output-grid">${laatstePuzzel.teksten.map(tekst => `<div class="woord-input-groep-preview">${maakPuzzelHTML(tekst, toonAntwoorden)}<div class="schrijflijn-container"><span>✏️</span><div class="schrijflijn"></div></div></div>`).join('')}</div>`;
+        }
+    };
+
+    const maakPuzzelHTML = (tekst, toonAntwoorden = false) => {
         let html = '';
         const woorden = tekst.split(/(\s+)/);
         woorden.forEach(woord => {
@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for (const char of woord) {
                 const upperChar = char.toUpperCase();
                 if (sleutel.has(upperChar)) {
-                    html += `<div class="letter-wrapper"><div class="hokje afbeelding-hokje"><img src="${sleutel.get(upperChar)}" alt="${upperChar}"></div><div class="hokje leeg-hokje"></div></div>`;
+                    html += `<div class="letter-wrapper"><div class="hokje afbeelding-hokje"><img src="${sleutel.get(upperChar)}" alt="${upperChar}"></div><div class="hokje leeg-hokje${toonAntwoorden ? ' antwoord-hokje' : ''}">${toonAntwoorden ? upperChar : ''}</div></div>`;
                 } else if (char.match(/[a-zA-Z]/)) {
                      html += `<div class="letter-wrapper"><div class="hokje leeg-hokje" style="border-top:1px solid #333; font-size:1.5em; font-weight:bold;">${char}</div></div>`;
                 } else {
@@ -336,10 +336,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     printKnop.addEventListener('click', () => window.print());
     sluitPreviewKnop.addEventListener('click', () => showScreen(generatorScherm));
+    toonOplossingKnop.addEventListener('click', () => {
+        oplossingZichtbaar = !oplossingZichtbaar;
+        renderLaatstePuzzel(oplossingZichtbaar);
+        toonOplossingKnop.textContent = oplossingZichtbaar ? 'Verberg oplossing' : '👁 Toon oplossing';
+    });
+    downloadOplossingPdfKnop.addEventListener('click', () => {
+        downloadPdfKnop.dataset.solution = 'true';
+        downloadPdfKnop.click();
+        downloadPdfKnop.dataset.solution = 'false';
+    });
 
     downloadPdfKnop.addEventListener('click', () => {
         const printContainer = document.getElementById('print-container');
         const actionButtons = document.querySelector('.preview-acties');
+        const metOplossing = downloadPdfKnop.dataset.solution === 'true';
+        const vorigeWeergave = oplossingZichtbaar;
+        renderLaatstePuzzel(metOplossing);
 
         actionButtons.style.display = 'none'; // Verberg de knoppen tijdens screenshot
 
@@ -378,13 +391,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // BELANGRIJK: Plaats de afbeelding
             pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
-            pdf.save('geheime_boodschap.pdf');
+            pdf.save(metOplossing ? 'geheime-boodschap-oplossing.pdf' : 'geheime-boodschap-werkblad.pdf');
 
             actionButtons.style.display = 'flex'; // Toon de knoppen weer
+            renderLaatstePuzzel(vorigeWeergave);
         }).catch(error => {
             console.error("Fout bij genereren PDF:", error);
             alert("Er is een fout opgetreden bij het genereren van de PDF. Controleer de console voor details.");
             actionButtons.style.display = 'flex'; // Toon de knoppen weer, zelfs bij fouten
+            renderLaatstePuzzel(vorigeWeergave);
         });
     });
 
