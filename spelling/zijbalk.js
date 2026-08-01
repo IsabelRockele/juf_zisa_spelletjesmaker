@@ -24,21 +24,25 @@ window.SpellingZijbalk = (function() {
   const OEFENVORMEN = [
     {
       id: "ov01", label: "📷 Schrijf bij het plaatje",
+      korteUitleg: "Bekijken, herkennen en schrijven",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 9
     },
     {
       id: "ov02", label: "✏️ Woord 3× overschrijven",
+      korteUitleg: "Inoefenen door herhaald schrijven",
       niveaus: [],
       defaultAantal: 8
     },
     {
       id: "ov03", label: "🔀 Letters door elkaar",
+      korteUitleg: "Letters ordenen tot het juiste woord",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 8
     },
     {
       id: "ov04", label: "🎨 Klanken sorteren",
+      korteUitleg: "Woorden vergelijken en in groepen plaatsen",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 12,
       // OV4 heeft eigen runtime-detectie van klank-paren. Alleen zichtbaar
@@ -49,6 +53,7 @@ window.SpellingZijbalk = (function() {
     },
     {
       id: "ov05", label: "⭕ Klank kiezen",
+      korteUitleg: "De ontbrekende klank herkennen",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 8,
       // Werkt enkel voor specifieke klank-paren (ei/ij, au/ou, aai/ooi/oei,
@@ -58,29 +63,34 @@ window.SpellingZijbalk = (function() {
     },
     {
       id: "ov06", label: "📝 Gebruik in zinnen",
+      korteUitleg: "Woorden begrijpen en toepassen in context",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 6
     },
     {
       id: "ov07", label: "🧸 Oefenvorm enkel voor verkleinwoorden",
+      korteUitleg: "Verkleinwoorden stap voor stap toepassen",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 8,
       enkelVoor: ["verkleinwoorden"]  // toon OV alleen als deze categorie-groep aangevinkt is
     },
     {
       id: "ov08", label: "🔢 Oefenvorm enkel voor meervouden",
+      korteUitleg: "Meervouden herkennen en schrijven",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 8,
       enkelVoor: ["meervouden"]
     },
     {
       id: "ov09", label: "🦹 Klinkerdief: verdubbelen & verenkelen",
+      korteUitleg: "De verdubbel- en verenkelregel toepassen",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 8,
       enkelVoor: ["stukjeswoorden"]
     },
     {
       id: "ov10", label: "🧩 Samenstellingen oefenen",
+      korteUitleg: "Twee woorddelen correct samenvoegen",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 6,
       enkelVoor: ["samenstellingen"]
@@ -91,10 +101,10 @@ window.SpellingZijbalk = (function() {
   ];
 
   const NIVEAU_LABELS = {
-    basis: "⭐ Oefenen",
-    kern: "⭐⭐ Toepassen",
-    verdieping: "⭐⭐⭐ Verdiepen",
-    uitbreiding: "⭐⭐⭐⭐ Uitbreiden"
+    basis: "Met veel hulp",
+    kern: "Met een beetje hulp",
+    verdieping: "Zelfstandig",
+    uitbreiding: "Extra uitdaging"
   };
 
   /* Pedagogische uitleg per (OV, niveau). Wordt onder de pil getoond zodat
@@ -144,9 +154,9 @@ window.SpellingZijbalk = (function() {
       uitbreiding: "Genummerde invul-zinnen + kind schrijft zelf 3 zinnen met meervouden. Toepassing in context."
     },
     ov09: {
-      basis: "Plaatje + 2 radio-keuzes (verdubbeld vs verenkeld). Kind kiest welk woord juist is.",
-      kern: "Plaatje + lijn. Kind schrijft zelf het juiste woord met of zonder verdubbeling.",
-      verdieping: "3×3 plaatjes-grid + 3 sorteerkolommen. Kind sorteert volgens de regel.",
+      basis: "Prent of grondwoord + 2 keuzes. Kind kiest welke schrijfwijze juist is.",
+      kern: "Prent of grondwoord + lijn. Kind schrijft zelf de juiste vorm.",
+      verdieping: "Prenten en woordkaarten + 3 sorteerkolommen. Kind sorteert volgens de regel.",
       uitbreiding: "Kind streept de fout door en schrijft de juiste zin over. Volledige toepassing in context."
     },
     ov10: {
@@ -272,6 +282,11 @@ window.SpellingZijbalk = (function() {
     container.querySelectorAll("details.zb-hoofdgroep[open]").forEach(d => {
       if (d.dataset.hoofdgroep) wasOpen.add(d.dataset.hoofdgroep);
     });
+    const wasGroepOpen = new Set();
+    container.querySelectorAll("details.zb-groep[open]").forEach(d => {
+      const hoofdgroep = d.closest("details.zb-hoofdgroep")?.dataset.hoofdgroep;
+      if (hoofdgroep && d.dataset.groep) wasGroepOpen.add(`${hoofdgroep}::${d.dataset.groep}`);
+    });
     
     const wb = window.SpellingWoordenbibliotheek;
     if (!wb || !wb.graadHeeftWoorden(actieveGraad)) {
@@ -300,22 +315,21 @@ window.SpellingZijbalk = (function() {
         }
       }
       
-      const allesAan = aanCount === totaal && totaal > 0;
-      const someAan = aanCount > 0 && aanCount < totaal;
-      const isOpen = wasOpen.has(hgId);
+      // Zodra de leerkracht zelf een map heeft geopend, bewaren we precies
+      // die map. Andere mappen met oudere keuzes mogen niet plots overnemen.
+      const isOpen = wasOpen.size > 0 ? wasOpen.has(hgId) : aanCount > 0;
       
       html += `
         <details class="zb-hoofdgroep" data-hoofdgroep="${hgId}" ${isOpen ? 'open' : ''}>
           <summary class="zb-hg-titel">
-            <input type="checkbox" class="zb-hg-master" data-hoofdgroep="${hgId}" 
-                   ${allesAan ? 'checked' : ''} 
-                   ${someAan ? 'data-indeterminate="true"' : ''}>
             <span class="zb-hg-label">${hgLabel}</span>
-            <span class="zb-hg-teller">${aanCount}/${totaal}</span>
+            <span class="zb-hg-hint">open en kies</span>
+            <span class="zb-hg-teller">${aanCount > 0 ? `${aanCount} gekozen` : `${totaal} ${totaal === 1 ? 'keuze' : 'keuzes'}`}</span>
           </summary>
           <div class="zb-hg-uitleg">${hgUitleg}</div>
           <div class="zb-hg-inhoud">`;
       
+      let eersteGekozenGroepGeopend = false;
       for (const [groepId, cats] of Object.entries(groepen)) {
         const groepLabel = wb.groepLabels[groepId] || groepId;
         // Bepaal of alle/sommige cats van deze groep aangevinkt zijn
@@ -323,15 +337,24 @@ window.SpellingZijbalk = (function() {
         for (const cat of cats) if (aangevinkt.has(cat.id)) groepAan++;
         const groepAlles = groepAan === cats.length && cats.length > 0;
         const groepSome = groepAan > 0 && groepAan < cats.length;
+        const groepSleutel = `${hgId}::${groepId}`;
+        const groepOpen = wasGroepOpen.has(groepSleutel)
+          || (wasGroepOpen.size === 0 && groepAan > 0 && !eersteGekozenGroepGeopend);
+        if (groepOpen && groepAan > 0) eersteGekozenGroepGeopend = true;
         
-        html += `<div class="zb-groep">
-          <label class="zb-groep-titel">
-            <input type="checkbox" class="zb-groep-master" data-groep="${groepId}" 
-                   ${groepAlles ? 'checked' : ''} 
-                   ${groepSome ? 'data-indeterminate="true"' : ''}>
+        html += `<details class="zb-groep" data-groep="${groepId}" ${groepOpen ? 'open' : ''}>
+          <summary class="zb-groep-titel">
             <span>${groepLabel}</span>
-          </label>
-          <div class="zb-cat-rij">`;
+            <span class="zb-groep-teller">${groepAan > 0 ? `${groepAan} gekozen` : `${cats.length} ${cats.length === 1 ? 'keuze' : 'keuzes'}`}</span>
+          </summary>
+          <div class="zb-groep-keuzes">
+            <label class="zb-groep-alles">
+              <input type="checkbox" class="zb-groep-master" data-groep="${groepId}"
+                     ${groepAlles ? 'checked' : ''}
+                     ${groepSome ? 'data-indeterminate="true"' : ''}>
+              <span>Hele groep kiezen</span>
+            </label>
+            <div class="zb-cat-rij">`;
         for (const cat of cats) {
           const checked = aangevinkt.has(cat.id);
           html += `
@@ -342,7 +365,7 @@ window.SpellingZijbalk = (function() {
               <span class="zb-cat-aantal">(${cat.woorden.length})</span>
             </label>`;
         }
-        html += `</div></div>`;
+        html += `</div></div></details>`;
       }
       
       html += `</div></details>`;
@@ -350,15 +373,34 @@ window.SpellingZijbalk = (function() {
     
     container.innerHTML = html;
     
-    container.querySelectorAll('.zb-hg-master[data-indeterminate]').forEach(el => {
-      el.indeterminate = true;
-    });
     container.querySelectorAll('.zb-groep-master[data-indeterminate]').forEach(el => {
       el.indeterminate = true;
     });
     
     updateCategorieTeller();
+    updateKeuzeSamenvatting();
     updateWoordenkiezerKnop();
+  }
+
+  function updateKeuzeSamenvatting() {
+    const vak = document.querySelector("#zb-keuze-samenvatting");
+    if (!vak) return;
+    const gekozenIds = getAangevinkteCats();
+    if (gekozenIds.size === 0) {
+      vak.className = "zb-keuze-samenvatting leeg";
+      vak.innerHTML = `<strong>Nog geen spellingdoel gekozen</strong><span>Open bijvoorbeeld Hoorwoorden en kies daarna een klank.</span>`;
+      return;
+    }
+
+    const data = window.SpellingWoordenbibliotheek?.[`graad${actieveGraad}`] || {};
+    const namen = [...gekozenIds].map(id => data[id]?.naam || id);
+    const getoond = namen.slice(0, 6);
+    const extra = namen.length - getoond.length;
+    const woordAantal = (window._weekdictee_gekozenWoorden || []).length;
+    vak.className = "zb-keuze-samenvatting gekozen";
+    vak.innerHTML = `
+      <div class="zb-keuze-kop"><strong>Jouw spellingdoel${namen.length === 1 ? '' : 'en'}</strong><span>${woordAantal} woorden klaar</span></div>
+      <div class="zb-keuze-tags">${getoond.map(n => `<span>${n}</span>`).join("")}${extra > 0 ? `<span>+${extra} meer</span>` : ""}</div>`;
   }
 
   function updateCategorieTeller() {
@@ -402,10 +444,10 @@ window.SpellingZijbalk = (function() {
     }
     if (info) {
       if (aangevinkt.size === 0) {
-        info.textContent = "Kies eerst categorieën hierboven.";
+        info.textContent = "Kies eerst een categorie. Zisa selecteert daarna automatisch passende woorden.";
         info.style.color = "#888";
       } else if (aantalActief === 0 && aantalVerborgen === 0) {
-        info.textContent = "Klik op de knop om woorden te kiezen.";
+        info.textContent = "Er zijn nog geen woorden gevonden. Open de woordenlijst om je keuze te controleren.";
         info.style.color = "#555";
       } else {
         let html = `<strong>${aantalActief}</strong> woord${aantalActief === 1 ? '' : 'en'} actief ✓`;
@@ -544,8 +586,8 @@ window.SpellingZijbalk = (function() {
     
     // Generieke OV (geen enkelVoor): toon ALLEEN als er minstens één
     // generieke cat aangevinkt is (anders is er geen woordpool voor OV01-06).
-    // Als er helemaal niets aangevinkt is, ook tonen (default-toestand).
-    if (!ietsAangevinkt) return true;
+    // Zonder gekozen spellingdoel tonen we nog geen oefeningen.
+    if (!ietsAangevinkt) return false;
     return soorten.heeftGenerieke;
   }
   
@@ -577,7 +619,7 @@ window.SpellingZijbalk = (function() {
         <details class="zb-oefenvorm ${aan ? 'aan' : ''}" data-oef="${oef.id}" ${aan ? 'open' : ''}>
           <summary class="zb-oef-titel">
             <input type="checkbox" class="zb-oef-checkbox" data-oef="${oef.id}" ${aan ? 'checked' : ''}>
-            <span class="zb-oef-label">${oef.label}</span>
+            <span class="zb-oef-tekst"><span class="zb-oef-label">${oef.label}</span><span class="zb-oef-kort">${oef.korteUitleg || ''}</span></span>
           </summary>
           <div class="zb-oef-instel">`;
       
@@ -695,6 +737,9 @@ window.SpellingZijbalk = (function() {
       html += `</div></details>`;
     }
     
+    if (!html) {
+      html = `<div class="zb-oef-leeg"><strong>Kies eerst een spellingdoel</strong><span>Daarna toont Zisa alleen de oefeningen die daarbij passen.</span></div>`;
+    }
     container.innerHTML = html;
     updateOefenvormTeller();
   }
@@ -734,6 +779,7 @@ window.SpellingZijbalk = (function() {
           legacy.classList.add("actief");
         }
         bewaarState();
+        selecteerWoordenVoorHuidigeKeuze();
         renderHoofdgroepSelector();
         renderOefenvormen();  // OV07 in/uit bij graad-wissel
       });
@@ -745,6 +791,7 @@ window.SpellingZijbalk = (function() {
         const set = getAangevinkteCats();
         if (e.target.checked) set.add(catId);
         else set.delete(catId);
+        window.SpellingWoordenkiezer?.selecteerCategorieenAutomatisch?.(set, actieveGraad);
         bewaarState();
         renderHoofdgroepSelector();
         renderOefenvormen();  // OV07 in/uit op basis van verkleinwoord-cats
@@ -761,6 +808,7 @@ window.SpellingZijbalk = (function() {
             else set.delete(cat.id);
           }
         }
+        window.SpellingWoordenkiezer?.selecteerCategorieenAutomatisch?.(set, actieveGraad);
         bewaarState();
         renderHoofdgroepSelector();
         renderOefenvormen();
@@ -781,11 +829,28 @@ window.SpellingZijbalk = (function() {
             else set.delete(cat.id);
           }
         }
+        window.SpellingWoordenkiezer?.selecteerCategorieenAutomatisch?.(set, actieveGraad);
         bewaarState();
         renderHoofdgroepSelector();
         renderOefenvormen();
       }
     });
+
+    // Compacte accordeon: houd per niveau maar één keuzemap open. Zo blijft
+    // de zijbalk kort, ook bij de uitgebreide hoorwoordencategorieën.
+    document.querySelector("#hoofdgroep-selector")?.addEventListener("toggle", (e) => {
+      const geopend = e.target;
+      if (!(geopend instanceof HTMLDetailsElement) || !geopend.open) return;
+      if (geopend.classList.contains("zb-hoofdgroep")) {
+        document.querySelectorAll("#hoofdgroep-selector > details.zb-hoofdgroep[open]").forEach(d => {
+          if (d !== geopend) d.open = false;
+        });
+      } else if (geopend.classList.contains("zb-groep")) {
+        geopend.parentElement?.querySelectorAll(":scope > details.zb-groep[open]").forEach(d => {
+          if (d !== geopend) d.open = false;
+        });
+      }
+    }, true);
     
     document.querySelector("#open-woordenkiezer")?.addEventListener("click", () => {
       if (window.SpellingWoordenkiezer) {
@@ -799,6 +864,15 @@ window.SpellingZijbalk = (function() {
         const oefId = e.target.dataset.oef;
         const state = _getOrCreateState(oefId);
         if (state) {
+          // Een volledig werkblad vertrekt vanuit één oefenvorm. Binnen die
+          // oefenvorm kan de leerkracht wel meerdere niveaus tegelijk kiezen
+          // voor een differentiatiepakket. In een werkboekje blijven meerdere
+          // korte oefenvormen tegelijk mogelijk.
+          if (e.target.checked && document.body.classList.contains("modus-actief-werkblad")) {
+            oefenvormState.forEach(s => {
+              if (s.id !== oefId) s.aangevinkt = false;
+            });
+          }
           state.aangevinkt = e.target.checked;
           bewaarState();
           renderOefenvormen();
@@ -885,6 +959,22 @@ window.SpellingZijbalk = (function() {
         }
       }
     });
+
+    // Bewaar het woordenaantal in een werkboekje onmiddellijk tijdens het
+    // typen. Zo gaat een waarde zoals 3 niet verloren wanneer de leerkracht
+    // meteen op "Voeg korte oefening toe" klikt.
+    document.querySelector("#oefenvorm-selector")?.addEventListener("input", (e) => {
+      if (!e.target.matches(".zb-niveau-aantal")) return;
+      const oefId = e.target.dataset.oef;
+      const niveau = e.target.dataset.niveau;
+      const state = _getOrCreateState(oefId);
+      if (!state || !niveau) return;
+      if (!state.aantalPerNiveau) state.aantalPerNiveau = {};
+      const v = parseInt(e.target.value, 10);
+      if (v && v > 0) state.aantalPerNiveau[niveau] = v;
+      else delete state.aantalPerNiveau[niveau];
+      bewaarState();
+    });
     
     // Reset-knop voor OV4 kleuren (click ipv change)
     document.querySelector("#oefenvorm-selector")?.addEventListener("click", (e) => {
@@ -946,6 +1036,10 @@ window.SpellingZijbalk = (function() {
     return [...getAangevinkteCats()];
   }
 
+  function selecteerWoordenVoorHuidigeKeuze() {
+    window.SpellingWoordenkiezer?.selecteerCategorieenAutomatisch?.(getAangevinkteCats(), actieveGraad);
+  }
+
   function init() {
     laadState();
     
@@ -957,6 +1051,7 @@ window.SpellingZijbalk = (function() {
       document.querySelector('.graad-tab[data-graad="1"]')?.classList.add("actief");
     }
     
+    selecteerWoordenVoorHuidigeKeuze();
     renderHoofdgroepSelector();
     renderOefenvormen();
     bedraadEvents();
@@ -976,6 +1071,7 @@ window.SpellingZijbalk = (function() {
     document.querySelectorAll(".graad-tab").forEach(t => t.classList.remove("actief"));
     document.querySelector(`.graad-tab[data-graad="${actieveGraad}"]`)?.classList.add("actief");
     
+    selecteerWoordenVoorHuidigeKeuze();
     renderHoofdgroepSelector();
     renderOefenvormen();
     syncLegacyCatKnop();
@@ -994,6 +1090,19 @@ window.SpellingZijbalk = (function() {
     updateWoordenkiezerKnop();
   }
 
+  /* Een nieuw volledig werkblad start met een bewuste oefenkeuze.
+     Categorieën en woorden blijven behouden; alleen oude oefenvormen verdwijnen. */
+  function wisOefenkeuze() {
+    oefenvormState = OEFENVORMEN.map(_defaultStateVoor);
+    oefenvormState.forEach(state => {
+      state.aangevinkt = false;
+      state.niveaus = new Set();
+    });
+    bewaarState();
+    renderOefenvormen();
+    syncLegacyCatKnop();
+  }
+
   return {
     init,
     herlaad,
@@ -1003,6 +1112,7 @@ window.SpellingZijbalk = (function() {
     getOefenvormState,
     getAantalVoorNiveau,
     getAangevinkteCategorieIds,
+    wisOefenkeuze,
     updateWoordenkiezerKnop
   };
 

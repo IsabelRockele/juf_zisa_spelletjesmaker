@@ -344,7 +344,8 @@ window.SpellingBundel = {
       preview.innerHTML = `
         <div class="preview-leeg">
           <h3>👋 Welkom!</h3>
-          <p>Stel een werkblad in en klik op <strong>"➕ Voeg toe aan bundel"</strong> om te beginnen.</p>
+          <p>Kies links een spellingdoel en oefening. Klik daarna op <strong>"📋 Maak volledig werkblad"</strong>.</p>
+          <p class="preview-leeg-tip">Zisa gebruikt automatisch het passende aantal woorden om de A4-pagina te vullen.</p>
         </div>`;
       return;
     }
@@ -586,9 +587,54 @@ window.SpellingBundel = {
   },
 
   /* === PDF-export === */
+  _toonPDFVoortgang: function(metAntwoorden) {
+    document.querySelector("#pdf-maak-loader")?.remove();
+    const loader = document.createElement("div");
+    loader.id = "pdf-maak-loader";
+    loader.setAttribute("role", "status");
+    loader.setAttribute("aria-live", "polite");
+    loader.innerHTML = `
+      <div class="pdf-maak-box">
+        <div class="pdf-maak-icoon">${metAntwoorden ? "✅" : "📄"}</div>
+        <h3>${metAntwoorden ? "Oplossingen" : "Werkbladen"} worden gemaakt…</h3>
+        <p class="pdf-maak-status">Pagina's voorbereiden</p>
+        <div class="pdf-maak-balk" aria-hidden="true"><span></span></div>
+        <strong class="pdf-maak-procent">10%</strong>
+        <small>Even geduld. De download start automatisch.</small>
+      </div>`;
+    document.body.appendChild(loader);
+
+    const balk = loader.querySelector(".pdf-maak-balk span");
+    const procent = loader.querySelector(".pdf-maak-procent");
+    const status = loader.querySelector(".pdf-maak-status");
+    let waarde = 10;
+    const timer = setInterval(() => {
+      waarde = Math.min(88, waarde + (waarde < 55 ? 7 : 3));
+      balk.style.width = `${waarde}%`;
+      procent.textContent = `${waarde}%`;
+      if (waarde >= 55) status.textContent = "Pdf netjes opmaken";
+    }, 260);
+    return { loader, balk, procent, status, timer };
+  },
+
+  _sluitPDFVoortgang: function(voortgang, gelukt) {
+    if (!voortgang) return;
+    clearInterval(voortgang.timer);
+    if (!gelukt) {
+      voortgang.loader.remove();
+      return;
+    }
+    voortgang.balk.style.width = "100%";
+    voortgang.procent.textContent = "100%";
+    voortgang.status.textContent = "Klaar — download wordt geopend";
+    voortgang.loader.classList.add("pdf-klaar");
+    setTimeout(() => voortgang.loader.remove(), 650);
+  },
+
   _exporteerPDF: function(bundelHTML, niveauFilter, metAntwoorden) {
     const preview = document.querySelector("#preview");
     if (!preview) return;
+    const voortgang = this._toonPDFVoortgang(metAntwoorden);
     
     // Knop disablen
     const knoppen = document.querySelectorAll(".download-knop, .download-niveau-knop");
@@ -644,17 +690,19 @@ window.SpellingBundel = {
           pagebreak: {
             mode: "css",
             before: ".pagina-break-voor",
-            avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid", ".ov02-rij", ".ov03-cel"]
+            avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-rooster", ".ov09-verdieping-afbeeldingen", ".ov09-verdieping-kolommen", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid", ".ov02-rij", ".ov03-cel"]
           }
         };
 
         html2pdf().set(pdfOpties).from(kloon).save().then(() => {
           tijdelijk.remove();
           knoppen.forEach(k => k.disabled = false);
+          this._sluitPDFVoortgang(voortgang, true);
         }).catch(err => {
           console.error("PDF-export mislukt:", err);
           tijdelijk.remove();
           knoppen.forEach(k => k.disabled = false);
+          this._sluitPDFVoortgang(voortgang, false);
           alert("PDF-export mislukt. Probeer opnieuw.");
         });
         }, 200);

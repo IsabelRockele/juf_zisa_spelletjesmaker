@@ -88,7 +88,7 @@ window.SpellingHerhalingsbundel = (function() {
 
   /* ----- State ----- */
   let state = {
-    titel: "Mijn herhalingsbundel",
+    titel: "Mijn werkboekje",
     titelGecentreerd: false,
     items: [],
     huidigePagina: 1
@@ -104,13 +104,13 @@ window.SpellingHerhalingsbundel = (function() {
       const raw = _storage().getItem(LS_KEY);
       if (raw) {
         const obj = JSON.parse(raw);
-        state.titel = obj.titel || "Mijn herhalingsbundel";
+        state.titel = obj.titel || "Mijn werkboekje";
         state.titelGecentreerd = obj.titelGecentreerd === true;
         state.items = Array.isArray(obj.items) ? obj.items : [];
         state.huidigePagina = obj.huidigePagina || 1;
       } else {
         // Reset state — anders blijft vorige modus zijn data
-        state.titel = "Mijn herhalingsbundel";
+        state.titel = "Mijn werkboekje";
         state.titelGecentreerd = false;
         state.items = [];
         state.huidigePagina = 1;
@@ -552,9 +552,9 @@ window.SpellingHerhalingsbundel = (function() {
       container.innerHTML = `
         <div class="hb-leeg">
           <div class="hb-leeg-icoon">📖</div>
-          <h3>Je herhalingsbundel is nog leeg</h3>
-          <p>Vink in de zijbalk categorieën aan, kies een oefenvorm + niveau,
-          en klik op <strong>"➕ Voeg toe aan bundel"</strong> om je eerste oefening toe te voegen.</p>
+          <h3>Je werkboekje is nog leeg</h3>
+          <p>Kies in de zijbalk een spellingdoel, oefenvorm en ondersteuningsniveau.
+          Bepaal hoeveel woorden je wilt en klik op <strong>"➕ Voeg korte oefening toe"</strong>.</p>
         </div>`;
       _updateNavigatie(0, 0);
       return;
@@ -604,7 +604,7 @@ window.SpellingHerhalingsbundel = (function() {
     const titelEl = document.querySelector("#hb-titel-editable");
     if (titelEl) {
       titelEl.addEventListener("blur", () => {
-        const nieuwe = titelEl.textContent.trim() || "Mijn herhalingsbundel";
+        const nieuwe = titelEl.textContent.trim() || "Mijn werkboekje";
         if (nieuwe !== state.titel) {
           state.titel = nieuwe;
           bewaar();
@@ -934,7 +934,7 @@ window.SpellingHerhalingsbundel = (function() {
   }
 
   function setBoekjeTitel(titel) {
-    state.titel = titel || "Mijn herhalingsbundel";
+    state.titel = titel || "Mijn werkboekje";
     bewaar();
   }
 
@@ -1031,12 +1031,25 @@ window.SpellingHerhalingsbundel = (function() {
     loader.id = "hb-pdf-loader";
     loader.innerHTML = `
       <div class="hb-pdf-loader-box">
-        <div class="hb-pdf-loader-spinner"></div>
+        <div class="pdf-maak-icoon">${metOplossingen ? "✅" : "📚"}</div>
         <h3>PDF wordt gemaakt…</h3>
-        <p>Even geduld.</p>
+        <p class="hb-pdf-status">Pagina's voorbereiden</p>
+        <div class="pdf-maak-balk" aria-hidden="true"><span></span></div>
+        <strong class="pdf-maak-procent">10%</strong>
+        <small>Even geduld. De download start automatisch.</small>
       </div>
     `;
     document.body.appendChild(loader);
+    const voortgangBalk = loader.querySelector(".pdf-maak-balk span");
+    const voortgangProcent = loader.querySelector(".pdf-maak-procent");
+    const voortgangStatus = loader.querySelector(".hb-pdf-status");
+    let voortgangWaarde = 10;
+    const voortgangTimer = setInterval(() => {
+      voortgangWaarde = Math.min(88, voortgangWaarde + (voortgangWaarde < 55 ? 7 : 3));
+      voortgangBalk.style.width = `${voortgangWaarde}%`;
+      voortgangProcent.textContent = `${voortgangWaarde}%`;
+      if (voortgangWaarde >= 55) voortgangStatus.textContent = "Werkboekje netjes opmaken";
+    }, 260);
     
     const bewerkAanWas = document.body.classList.contains("hb-bewerk-aan");
     if (bewerkAanWas) document.body.classList.remove("hb-bewerk-aan");
@@ -1063,7 +1076,7 @@ window.SpellingHerhalingsbundel = (function() {
       
       await window.SpellingHerhalingsbundelPDF.download({
         items: itemsMetOpl,
-        titel: state.titel || "Mijn herhalingsbundel",
+        titel: state.titel || "Mijn werkboekje",
         titelGecentreerd: state.titelGecentreerd === true,
         metOplossingen: metOplossingen,
         bestandsnaam: bestand
@@ -1072,11 +1085,16 @@ window.SpellingHerhalingsbundel = (function() {
       console.error("PDF-export fout:", e);
       alert("Er ging iets mis bij PDF-export: " + e.message);
     } finally {
+      clearInterval(voortgangTimer);
       // Herstel de originele metAntwoorden vlaggen en her-render
       // zodat de preview weer het kale werkblad toont.
       state.items.forEach((i, j) => { i.metAntwoorden = origMetAntw[j]; });
       await renderPreview();
       
+      voortgangBalk.style.width = "100%";
+      voortgangProcent.textContent = "100%";
+      voortgangStatus.textContent = "Klaar — download wordt geopend";
+      await new Promise(r => setTimeout(r, 500));
       loader.remove();
       if (bewerkAanWas) document.body.classList.add("hb-bewerk-aan");
       if (knop) {

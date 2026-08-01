@@ -5835,7 +5835,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     const state = maakState(pdf);
     
     // Doc-header op pagina 1
-    tekenDocHeader(state, opties.titel || "Mijn herhalingsbundel", {
+    tekenDocHeader(state, opties.titel || "Mijn werkboekje", {
       titelGecentreerd: opties.titelGecentreerd !== false  // default true
     });
     

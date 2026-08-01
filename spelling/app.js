@@ -990,14 +990,14 @@
         <div class="hb-hervat-modal-inhoud">
           <div class="hb-hervat-icoon">📚</div>
           <h2>Welkom terug!</h2>
-          <p>Je hebt nog een herhalingsbundel openstaan van je vorige sessie${heeftBundelItems ? ` (${hb.getItems().length} oefening${hb.getItems().length === 1 ? '' : 'en'})` : ''}.</p>
+          <p>Je hebt nog een werkboekje openstaan van je vorige sessie${heeftBundelItems ? ` (${hb.getItems().length} oefening${hb.getItems().length === 1 ? '' : 'en'})` : ''}.</p>
           <p>Wat wil je doen?</p>
           <div class="hb-hervat-knoppen">
             <button id="hb-hervat-verder" class="primair primair-groot" type="button">
-              ✓ Verder gaan met vorige bundel
+              ✓ Verder gaan met vorig werkboekje
             </button>
             <button id="hb-hervat-nieuw" class="secundair" type="button">
-              🔄 Nieuwe bundel starten
+              🔄 Nieuw werkboekje starten
             </button>
           </div>
         </div>
@@ -1010,11 +1010,11 @@
         window.SpellingModusStorage?.wisModus("herhaling");
         window.SpellingZijbalk?.reset();
         window.SpellingWoordenkiezer?.reset();
-        const hbState = { titel: "Mijn herhalingsbundel", items: [], huidigePagina: 1 };
+        const hbState = { titel: "Mijn werkboekje", items: [], huidigePagina: 1 };
         window.SpellingModusStorage?.setItem("spelling-herhalingsbundel-v1", JSON.stringify(hbState));
         if (window.SpellingHerhalingsbundel) window.SpellingHerhalingsbundel.init();
         const titelInput = document.querySelector("#hb-boekje-titel");
-        if (titelInput) titelInput.value = "Mijn herhalingsbundel";
+        if (titelInput) titelInput.value = "Mijn werkboekje";
         modal.remove();
       });
     }
@@ -1198,36 +1198,36 @@
   /* Inhoud per modus voor de uitleg-modal. */
   const UITLEG_INHOUD = {
     werkblad: {
-      titel: "📋 Werkbladen — uitleg",
+      titel: "📋 Volledig werkblad — uitleg",
       html: `
-        <p><strong>Wat zijn werkbladen?</strong></p>
-        <p>Losse oefenbladen per categorie en oefenvorm. Je kiest één oefenvorm (bv. "Schrijf bij het plaatje" of "Letters door elkaar"), en welke niveaus daarvoor moeten verschijnen. Voor elke aangevinkte combinatie maakt het systeem één blad.</p>
+        <p><strong>Wat maak je hier?</strong></p>
+        <p>Je maakt een volledig A4-werkblad rond één oefenvorm. Zisa gebruikt automatisch het aantal woorden dat goed op de pagina past.</p>
         
         <p><strong>Hoe gebruik je dit?</strong></p>
         <ol>
-          <li><strong>Kies categorieën</strong> in stap 1 (links): welke spellingsregel of klank wil je oefenen?</li>
-          <li><strong>Bekijk en kies de woorden</strong> in stap 2: klik op "Open woordenkiezer" om te zien welke woorden er bij die categorieën horen. Je kan woorden in of uit vinken. Dit zijn de woorden die in de werkbladen verschijnen.</li>
-          <li><strong>Kies oefenvorm + niveau</strong> in stap 3: je kan meerdere niveaus aanvinken voor differentiatie. Onder elke ster-keuze staat een korte uitleg over wat het kind doet en voor wie het past.</li>
-          <li><strong>Stel de schrijflijn in</strong> in stap 4 (geldt voor alle werkbladen).</li>
-          <li><strong>Download</strong> alle werkbladen als één PDF, of preview eerst rechts.</li>
+          <li><strong>Kies de graad en het spellingdoel</strong>: welke spellingsregel of klank wil je oefenen?</li>
+          <li><strong>Laat Zisa de woorden klaarzetten</strong>: passende woorden worden automatisch geselecteerd. In stap 2 kan je ze optioneel bekijken of aanpassen.</li>
+          <li><strong>Kies hoe je wilt oefenen</strong>: selecteer een oefening en bepaal hoeveel hulp het kind krijgt.</li>
+          <li><strong>Maak het werkblad</strong>: Zisa vult automatisch een volledige pagina. Je kan meerdere volledige werkbladen na elkaar maken.</li>
+          <li><strong>Pas eventueel de opmaak aan</strong> en download daarna de leerlingversie of oplossingen.</li>
         </ol>
         
-        <p><strong>Tip voor differentiatie:</strong> vink ⭐ Oefenen aan voor zwakkere lezers, ⭐⭐ Toepassen voor de meeste kinderen, en ⭐⭐⭐ Verdiepen of ⭐⭐⭐⭐ Uitbreiden voor sterke spellers. Iedereen werkt aan dezelfde categorie, maar elk op eigen niveau.</p>
+        <p><strong>Tip voor differentiatie:</strong> maak van hetzelfde spellingdoel verschillende bladen met veel hulp, een beetje hulp, zelfstandig werk of extra uitdaging.</p>
         ${WOORDEN_SUGGESTIE_HTML}
       `
     },
     herhaling: {
-      titel: "📚 Herhalingsbundel — uitleg",
+      titel: "📚 Werkboekje samenstellen — uitleg",
       html: `
-        <p><strong>Wat is een herhalingsbundel?</strong></p>
-        <p>Eén bundel met <em>meerdere</em> oefenvormen door elkaar — ideaal voor toetsweken, themapakketten of als afsluiter van een spellingblok. Het kind krijgt afwisseling: plaatjes, letters door elkaar, zinnen aanvullen, verbindlijnen...</p>
+        <p><strong>Wat is een werkboekje?</strong></p>
+        <p>Een bundel met meerdere korte oefenvormen door elkaar. Per oefening kies je zelf hoeveel woorden je wilt gebruiken, bijvoorbeeld 3, 5 of 8. Zo combineer je verschillende opdrachten in één boekje.</p>
         
         <p><strong>Hoe gebruik je dit?</strong></p>
         <ol>
           <li><strong>Kies categorieën</strong> die in de bundel mogen voorkomen.</li>
           <li><strong>Bekijk en kies de woorden</strong>: klik op "Open woordenkiezer" om te bepalen welke woorden meedoen. Bv. enkel de moeilijkste woorden voor herhaling, of een specifieke selectie per thema.</li>
           <li><strong>Klik op een oefenvorm</strong> in de zijbalk om hem open te klappen. Vink de gewenste niveaus aan en geef per niveau aan hoeveel woorden je wil (bv. max 9). De lege placeholder toont het maximum dat past op de pagina.</li>
-          <li><strong>Klik op "+ Voeg toe aan bundel"</strong> om je selectie toe te voegen. Je kan meerdere keren op dezelfde oefenvorm klikken om verschillende niveaus toe te voegen.</li>
+          <li><strong>Klik op "+ Voeg korte oefening toe"</strong> om je selectie aan het werkboekje toe te voegen. Je kan meerdere oefenvormen en aantallen combineren.</li>
           <li><strong>Bewerk in de preview rechts</strong>: titel, instructies, woorden, antwoorden — alles is aanpasbaar. Volgorde wijzigen met de pijl-knoppen.</li>
           <li><strong>Download</strong> het hele boekje als één PDF, eventueel ook met oplossingen.</li>
         </ol>

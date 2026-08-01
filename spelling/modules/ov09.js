@@ -29,12 +29,12 @@
     /* Maximum aantal woorden per niveau dat comfortabel op 1 A4 past.
        ⭐ basis = 6 (afbeelding + 2 keuzes naast elkaar + schrijflijn per rij)
        ⭐⭐ kern = 9 (compactere rijen, afbeelding + schrijflijn)
-       ⭐⭐⭐ verdieping = 6 (2 kolommen, om beurten kolom leeg)
+       ⭐⭐⭐ verdieping = 8 (4 prenten per rij, maximaal 2 rijen)
        ⭐⭐⭐⭐ uitbreiding = 5 (vast 5 zinnen uit zinnenbib) */
     _maxPerNiveau: {
       basis: 6,
       kern: 9,
-      verdieping: 6,
+      verdieping: 8,
       uitbreiding: 5
     },
 
@@ -91,21 +91,8 @@
         return this._lege();
       }
 
-      // Plaatje-filter: alle OV09-niveaus tonen afbeeldingen.
-      // Woorden zonder afbeelding=true vallen weg. Lege pool → pop-up + lege HTML.
-      if (window.SpellingDedup) {
-        const metAfb = window.SpellingDedup.filterMetAfbeelding(beschikbaar);
-        if (metAfb.length === 0) {
-          window.SpellingDedup.toonGeenPlaatjesMelding("Stukjeswoord / Klinkerdief");
-          return `<div class="werkblad ov09-blad">
-            <div class="weekdictee-empty">
-              <h3>🖼️ Geen woorden met plaatje</h3>
-              <p>Deze oefenvorm toont in alle niveaus afbeeldingen. Kies woorden met 🖼️ in de woordenkiezer.</p>
-            </div>
-          </div>`;
-        }
-        beschikbaar = metAfb;
-      }
+      // Afbeeldingen zijn ondersteunend, niet verplicht. Voor woorden zonder
+      // betrouwbare prent tonen we het grondwoord duidelijk als woordkaart.
 
       const titel = this._titel(niveau);
       const opdrachtStappen = this._opdracht(niveau);
@@ -145,8 +132,9 @@
         const werkWoorden = this._kiesWoorden(beschikbaar, aantal);
         html += this._renderKern(werkWoorden, cfg, metAntwoorden);
       } else if (niveau === "verdieping") {
-        // 9 woorden, idealiter met afbeelding, gemixt uit 3 cats
-        const werkWoorden = this._kiesVerdiepingsWoorden(beschikbaar, 9);
+        // Acht woorden passen in twee compacte rijen van vier. Zo blijft er
+        // voldoende plaats over voor de sorteerkolommen op dezelfde A4.
+        const werkWoorden = this._kiesVerdiepingsWoorden(beschikbaar, aantal);
         html += this._renderVerdieping(werkWoorden, cfg, metAntwoorden);
       } else if (niveau === "uitbreiding") {
         const werkWoorden = this._kiesWoorden(beschikbaar, aantal);
@@ -177,9 +165,7 @@
         const markeer1 = (metAntwoorden && juisteIsOptie1) ? "ov09-keuze-juist" : "";
         const markeer2 = (metAntwoorden && !juisteIsOptie1) ? "ov09-keuze-juist" : "";
 
-        const afbHTML = helper
-          ? helper.html(w, { grootte: 90, klas: "ov09-afb" })
-          : `<span class="ov09-afb-fallback">${w.tekst}</span>`;
+        const afbHTML = this._visueleSteun(w, helper, 90);
 
         const canvas = sl
           ? sl.htmlCanvas(cfg.lijntype, cfg.lijnhoogte, 220)
@@ -215,9 +201,7 @@
       let rijenHTML = "";
       woorden.forEach((w, idx) => {
         const meervoud = this._geefMeervoud(w);
-        const afbHTML = helper
-          ? helper.html(w, { grootte: 90, klas: "ov09-afb" })
-          : `<span class="ov09-afb-fallback">${w.tekst}</span>`;
+        const afbHTML = this._visueleSteun(w, helper, 90);
         const canvas = sl
           ? sl.htmlCanvas(cfg.lijntype, cfg.lijnhoogte, 220)
           : `<div class="ov07-fallback-lijn ov09-fallback-lijn"></div>`;
@@ -247,9 +231,7 @@
       let afbHTML = "";
       const dezesWoorden = this._schud([...woorden]);
       for (const w of dezesWoorden) {
-        const afbHTML2 = helper 
-          ? helper.html(w, { grootte: 100, klas: "ov09-afb" })
-          : `<span class="ov09-afb-fallback">${w.tekst}</span>`;
+        const afbHTML2 = this._visueleSteun(w, helper, 100);
         afbHTML += `
           <div class="ov09-verdieping-cel" data-woord="${w.tekst}">
             <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord" type="button">✕</button>
@@ -257,16 +239,18 @@
           </div>`;
       }
 
-      // Render 3 kolommen onderaan
-      const regelTypes = ["stukjes-verdubbelen", "stukjes-verenkelen", "stukjes-geen-regel"];
-      let kolomHTML = "";
-      
       // Tel hoeveel woorden per cat in deze 9
       const perCat = {};
       for (const w of dezesWoorden) {
         perCat[w.categorie] = (perCat[w.categorie] || 0) + 1;
       }
-      // Max aantal regels per kolom = max van de 3 counts (voor visueel evenwicht)
+      // Toon uitsluitend kolommen van categorieën die de leerkracht koos.
+      // 'Schrijf wat je hoort' verschijnt dus alleen wanneer die categorie
+      // werkelijk woorden aan deze oefening levert.
+      const regelTypes = this.CAT_TOEGESTAAN.filter(cat => perCat[cat] > 0);
+      let kolomHTML = "";
+
+      // Max aantal regels per zichtbare kolom (voor visueel evenwicht)
       const maxRegels = Math.max(...Object.values(perCat), 3);
 
       for (const regelType of regelTypes) {
@@ -298,7 +282,7 @@
       return `
         <div class="ov09-verdieping-rooster">
           <div class="ov09-verdieping-afbeeldingen">${afbHTML}</div>
-          <div class="ov09-verdieping-kolommen">${kolomHTML}</div>
+          <div class="ov09-verdieping-kolommen" style="grid-template-columns:repeat(${regelTypes.length}, minmax(0, 1fr));">${kolomHTML}</div>
         </div>`;
     },
 
@@ -355,7 +339,14 @@
           ? zinMetFout.replace(fout, `<span class="ov09-uitbreiding-fout">${fout}</span>`)
           : zinMetFout;
 
+        // Bij vijf zinnen starten de laatste twee bewust op een vervolgpagina.
+        // Zo bepaalt html2pdf de breuk niet midden in een oefening en kunnen
+        // we bovenaan de nieuwe pagina een veilige afdrukmarge voorzien.
+        const vervolgSpatie = idx === 3
+          ? '<div class="pagina-break-voor ov09-uitbreiding-pagina-spatie" aria-hidden="true"></div>'
+          : "";
         zinnenHTML += `
+          ${vervolgSpatie}
           <div class="ov09-uitbreiding-rij" data-woord="${item.grondwoord}">
             <button class="rij-verwijder-knop" data-woord="${item.grondwoord}" title="Verwijder dit woord" type="button">✕</button>
             <div class="ov09-uitbreiding-nr">${idx + 1}.</div>
@@ -371,6 +362,18 @@
     },
 
     /* ---------- HELPERS ---------- */
+
+    _visueleSteun: function (woord, helper, grootte) {
+      const woordLabel = `<span class="ov09-grondwoord">${woord.tekst}</span>`;
+      if (!woord.afbeelding || !helper) {
+        return `<span class="ov09-woordkaart">${woordLabel}</span>`;
+      }
+      // Een prent staat bewust alleen: het grondwoord zou de spelling van
+      // bijvoorbeeld "kikker", "emmer" of "lepel" al verklappen.
+      return `<span class="ov09-woordkaart ov09-woordkaart-met-afbeelding">
+        ${helper.html(woord, { grootte, klas: "ov09-afb" })}
+      </span>`;
+    },
 
     _haalActieveWoorden: function () {
       const wb = window.SpellingWoordenbibliotheek;
@@ -524,15 +527,25 @@
 
     /* Voor ⭐⭐⭐: probeer 3 per cat te halen + bij voorkeur met afbeelding */
     _kiesVerdiepingsWoorden: function (pool, aantalTotaal) {
-      const perCat = Math.floor(aantalTotaal / 3);  // 3 per cat
+      const actieveCats = this.CAT_TOEGESTAAN.filter(catId =>
+        pool.some(w => w.categorie === catId)
+      );
+      if (actieveCats.length === 0) return [];
+
+      // Verdeel de beschikbare plaatsen over de werkelijk gekozen
+      // categorieën. Bij twee categorieën krijgen die dus elk ongeveer de
+      // helft; een niet-gekozen derde categorie wordt nooit aangevuld.
+      const basisAantal = Math.floor(aantalTotaal / actieveCats.length);
+      let rest = aantalTotaal % actieveCats.length;
       const uit = [];
-      for (const catId of this.CAT_TOEGESTAAN) {
+      for (const catId of actieveCats) {
+        const gewenst = basisAantal + (rest-- > 0 ? 1 : 0);
         const catPool = pool.filter(w => w.categorie === catId);
         // Prefereer woorden met afbeelding=true
         const metAfb = catPool.filter(w => w.afbeelding);
         const zonderAfb = catPool.filter(w => !w.afbeelding);
         const gesorteerd = [...this._schud([...metAfb]), ...this._schud([...zonderAfb])];
-        for (let i = 0; i < perCat && i < gesorteerd.length; i++) {
+        for (let i = 0; i < gewenst && i < gesorteerd.length; i++) {
           uit.push(gesorteerd[i]);
         }
       }
@@ -570,17 +583,17 @@
     _opdracht: function (niveau) {
       const map = {
         basis: [
-          "Kijk naar de afbeelding.",
+          "Kijk naar de prent of lees het grondwoord.",
           "Welke schrijfwijze is juist?",
           "Kruis het juiste antwoord aan en schrijf het woord op de lijn."
         ],
         kern: [
-          "Kijk naar de afbeelding.",
+          "Kijk naar de prent of lees het grondwoord.",
           "Klap het woord.",
           "Schrijf het juist op de lijn."
         ],
         verdieping: [
-          "Kijk naar elke prent.",
+          "Kijk naar elke prent of lees het grondwoord.",
           "Klap het woord.",
           "Schrijf het woord in de juiste kolom."
         ],

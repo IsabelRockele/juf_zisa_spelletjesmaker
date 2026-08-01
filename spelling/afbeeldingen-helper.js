@@ -2,7 +2,7 @@
    spelling/afbeeldingen-helper.js
    
    Bepaalt het pad naar een afbeelding voor een woord.
-   Map-structuur: /afbeeldingen/graad{N}/stukjes/{woord}.png
+   Map-structuur: /afbeeldingen/graad{N}/{categorie}/{woord}.png
    
    Bevat fallback: als een woord afbeelding=false heeft of het
    bestand niet bestaat, valt het terug op een emoji uit
@@ -19,7 +19,8 @@
       if (!woord || !woord.tekst) return null;
       if (!woord.afbeelding) return null;
       graad = graad || woord.leerjaar || 1;
-      return `afbeeldingen/graad${graad}/stukjes/${woord.tekst}.png`;
+      const map = woord.categorie || "stukjes";
+      return `afbeeldingen/graad${graad}/${map}/${woord.tekst}.png`;
     },
 
     /* Geeft HTML voor de afbeelding van een woord, met fallback.

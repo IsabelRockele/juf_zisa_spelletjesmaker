@@ -110,8 +110,8 @@ window.SpellingModus = (function() {
   }
 
   const modusLabels = {
-    "werkblad": "📋 Werkbladen per categorie",
-    "herhaling": "📚 Herhalingsbundel",
+    "werkblad": "📋 Volledig werkblad",
+    "herhaling": "📚 Werkboekje samenstellen",
     "weekdictee": "📅 Weekdictee"
   };
 

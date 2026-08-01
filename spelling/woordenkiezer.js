@@ -369,8 +369,11 @@ window.SpellingWoordenkiezer = (function() {
       updateSidebarInfo();
       // Notificeer zijbalk dat woorden gewijzigd zijn
       window.dispatchEvent(new Event("spelling:woorden-gewijzigd"));
-      // Trigger preview ververs
-      if (window.SpellingPreview) window.SpellingPreview.ververs();
+      // In de stap-voor-staproute blijft de preview leeg tot de leerkracht
+      // in stap 3 zelf een oefening kiest. Andere routes behouden live preview.
+      if (!document.body.classList.contains("modus-actief-werkblad") && window.SpellingPreview) {
+        window.SpellingPreview.ververs();
+      }
     });
 
     // Klik buiten modal-inhoud → sluiten
@@ -553,6 +556,39 @@ window.SpellingWoordenkiezer = (function() {
     syncActieveWoorden();
   }
 
+  /* Kies standaard alle woorden uit de categorieën die de leerkracht
+     aanvinkt. De woordenkiezer blijft beschikbaar om die automatische
+     selectie nadien te verfijnen. Uitgevinkte categorieën worden meteen
+     opgeruimd, zodat oude woorden niet ongemerkt blijven meedoen. */
+  function selecteerCategorieenAutomatisch(categorieIds, leerjaar) {
+    const ids = categorieIds instanceof Set ? categorieIds : new Set(categorieIds || []);
+    const graad = Number(leerjaar) || 1;
+    const wb = window.SpellingWoordenbibliotheek;
+    const data = wb?.[`graad${graad}`];
+    if (!data) return;
+
+    gekozen = gekozen.filter(w => w.leerjaar !== graad || ids.has(w.categorie));
+
+    for (const catId of ids) {
+      const cat = data[catId];
+      if (!cat || !Array.isArray(cat.woorden)) continue;
+      for (const w of cat.woorden) {
+        const id = `${graad}|${catId}|${w.tekst}`;
+        if (gekozen.some(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` === id)) continue;
+        gekozen.push({
+          tekst: w.tekst,
+          lidwoord: w.lidwoord || null,
+          afbeelding: w.afbeelding === true,
+          synoniemGroep: w.synoniemGroep || null,
+          categorie: catId,
+          leerjaar: graad
+        });
+      }
+    }
+
+    bewaar();
+  }
+
   /* ----- Public API ----- */
   return {
     init,
@@ -563,6 +599,7 @@ window.SpellingWoordenkiezer = (function() {
     ruimUitgevinkteOp,              // verwijder woorden uit uitgevinkte cats uit ruwe lijst (permanent)
     herlaad,                         // herlaad uit (nieuwe) storage-namespace
     reset,                           // wis alle gekozen woorden
+    selecteerCategorieenAutomatisch,// standaardselectie na categoriekeuze
     getGekozen: () => gekozen,       // alle woorden (ruwe lijst, ook verborgen)
     getActieveWoorden,               // alleen woorden uit aangevinkte categorieën
     getVerborgenAantal               // hoeveel woorden zijn er momenteel verborgen
