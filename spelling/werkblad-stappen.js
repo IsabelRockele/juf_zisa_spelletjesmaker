@@ -149,6 +149,7 @@
       }
     });
     window.addEventListener("spelling:woorden-gewijzigd", updateKnoppen);
+    window.addEventListener("spelling:doel-gewijzigd", updateKnoppen);
 
     // Capture draait vóór de bestaande generator-handler en bewaart dus het
     // echte aantal bladen van vóór deze klik.

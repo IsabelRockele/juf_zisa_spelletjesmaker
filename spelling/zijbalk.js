@@ -782,6 +782,7 @@ window.SpellingZijbalk = (function() {
         selecteerWoordenVoorHuidigeKeuze();
         renderHoofdgroepSelector();
         renderOefenvormen();  // OV07 in/uit bij graad-wissel
+        window.dispatchEvent(new CustomEvent("spelling:doel-gewijzigd"));
       });
     });
     
@@ -795,6 +796,7 @@ window.SpellingZijbalk = (function() {
         bewaarState();
         renderHoofdgroepSelector();
         renderOefenvormen();  // OV07 in/uit op basis van verkleinwoord-cats
+        window.dispatchEvent(new CustomEvent("spelling:doel-gewijzigd"));
       }
       else if (e.target.matches(".zb-hg-master")) {
         const hgId = e.target.dataset.hoofdgroep;
@@ -812,6 +814,7 @@ window.SpellingZijbalk = (function() {
         bewaarState();
         renderHoofdgroepSelector();
         renderOefenvormen();
+        window.dispatchEvent(new CustomEvent("spelling:doel-gewijzigd"));
       }
       // Nieuwe handler: groep-master vinkje (bv. "Korte klanken", "Tweeklanken")
       // togglet alle categorieën van die groep tegelijk.
@@ -833,6 +836,7 @@ window.SpellingZijbalk = (function() {
         bewaarState();
         renderHoofdgroepSelector();
         renderOefenvormen();
+        window.dispatchEvent(new CustomEvent("spelling:doel-gewijzigd"));
       }
     });
 
