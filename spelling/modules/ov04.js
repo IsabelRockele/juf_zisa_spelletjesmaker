@@ -273,6 +273,34 @@ window.SpellingModules.ov04 = {
           minimumPerKolom: true
         };
       }
+    },
+    {
+      id: "verlengen-dt-g2",
+      titel: "Verlengingsregel: t of d",
+      trigger: (cats) => {
+        if (!cats.includes("verlengen-td-g2")) return null;
+        return {
+          kolommen: [
+            { titel: "eindigt op -d", kleur: "#E53935", symbool: "▲", filter: w => w.categorie === "verlengen-td-g2" && /d$/i.test(w.tekst), klankRegex: /d$/i },
+            { titel: "eindigt op -t", kleur: "#43A047", symbool: "◆", filter: w => w.categorie === "verlengen-td-g2" && /t$/i.test(w.tekst), klankRegex: /t$/i }
+          ],
+          minimumPerKolom: true
+        };
+      }
+    },
+    {
+      id: "verlengen-bp-g2",
+      titel: "Verlengingsregel: p of b",
+      trigger: (cats) => {
+        if (!cats.includes("verlengen-pb-g2")) return null;
+        return {
+          kolommen: [
+            { titel: "eindigt op -b", kleur: "#1E88E5", symbool: "▲", filter: w => w.categorie === "verlengen-pb-g2" && /b$/i.test(w.tekst), klankRegex: /b$/i },
+            { titel: "eindigt op -p", kleur: "#FB8C00", symbool: "◆", filter: w => w.categorie === "verlengen-pb-g2" && /p$/i.test(w.tekst), klankRegex: /p$/i }
+          ],
+          minimumPerKolom: true
+        };
+      }
     }
   ],
 

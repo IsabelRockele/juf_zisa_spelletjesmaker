@@ -679,6 +679,13 @@ window.SpellingHerhalingsbundel = (function() {
     
     const docHoogte = doc.offsetHeight;
     const docTop = doc.offsetTop;
+    // De PDF-engine respecteert expliciete .pagina-break-voor-elementen.
+    // Neem precies dezelfde grenzen over in de preview, anders kan de
+    // berekende marker door een oefening lopen terwijl de PDF wel goed is.
+    const explicieteBreuken = [...doc.querySelectorAll(".pagina-break-voor")]
+      .map(el => el.offsetTop + _getParentTopOffset(el, doc))
+      .filter(y => y > 0)
+      .sort((a, b) => a - b);
     
     let aantalPaginas = 1;
     let huidigePaginaOnder = PAGINA_HOOGTE_PX;
@@ -691,19 +698,28 @@ window.SpellingHerhalingsbundel = (function() {
       
       // Vind alle niet-splitsbare elementen die de grens kruisen
       const elementen = doc.querySelectorAll(NIET_SPLITSBAAR);
-      let kleinsteTopBoven = breakPositie;
+      const paginaBoven = huidigePaginaOnder - PAGINA_HOOGTE_PX;
+      const explicieteBreuk = explicieteBreuken.find(y =>
+        y > paginaBoven + 4 && y <= huidigePaginaOnder
+      );
+      let kleinsteTopBoven = explicieteBreuk ?? breakPositie;
       
-      elementen.forEach(el => {
-        const elTop = el.offsetTop + _getParentTopOffset(el, doc);
-        const elBottom = elTop + el.offsetHeight;
-        // Element kruist de grens?
-        if (elTop < breakPositie && elBottom > breakPositie) {
-          // Schuif marker naar BOVEN dit element
-          if (elTop < kleinsteTopBoven) {
-            kleinsteTopBoven = elTop;
+      // Bij een expliciete PDF-breuk staat de juiste positie al vast.
+      // Alleen een natuurlijke hoogtebreuk moet nog rond volledige rijen
+      // en opdrachtblokken worden geschoven.
+      if (explicieteBreuk == null) {
+        elementen.forEach(el => {
+          const elTop = el.offsetTop + _getParentTopOffset(el, doc);
+          const elBottom = elTop + el.offsetHeight;
+          // Element kruist de grens?
+          if (elTop < breakPositie && elBottom > breakPositie) {
+            // Schuif marker naar BOVEN dit element
+            if (elTop < kleinsteTopBoven) {
+              kleinsteTopBoven = elTop;
+            }
           }
-        }
-      });
+        });
+      }
       
       // Veilig stel marker positie in
       const markerY = kleinsteTopBoven - 4;

@@ -158,6 +158,36 @@ window.SpellingModules.ov05 = {
           minimumPerKolom: true
         };
       }
+    },
+    {
+      id: "verlengen-dt-g2",
+      titel: "Verleng en kies t of d",
+      isVerlenging: true,
+      trigger: (cats) => {
+        if (!cats.includes("verlengen-td-g2")) return null;
+        return {
+          kolommen: [
+            { titel: "-d", kleur: "#E53935", filter: w => w.categorie === "verlengen-td-g2" && /d$/i.test(w.tekst) },
+            { titel: "-t", kleur: "#43A047", filter: w => w.categorie === "verlengen-td-g2" && /t$/i.test(w.tekst) }
+          ],
+          minimumPerKolom: true
+        };
+      }
+    },
+    {
+      id: "verlengen-bp-g2",
+      titel: "Verleng en kies p of b",
+      isVerlenging: true,
+      trigger: (cats) => {
+        if (!cats.includes("verlengen-pb-g2")) return null;
+        return {
+          kolommen: [
+            { titel: "-b", kleur: "#1E88E5", filter: w => w.categorie === "verlengen-pb-g2" && /b$/i.test(w.tekst) },
+            { titel: "-p", kleur: "#FB8C00", filter: w => w.categorie === "verlengen-pb-g2" && /p$/i.test(w.tekst) }
+          ],
+          minimumPerKolom: true
+        };
+      }
     }
   ],
 
@@ -175,7 +205,8 @@ window.SpellingModules.ov05 = {
       resultaat.push({
         id: paar.id,
         titel: paar.titel,
-        kolommen: detectie.kolommen
+        kolommen: detectie.kolommen,
+        isVerlenging: !!paar.isVerlenging
       });
     }
     return resultaat;
@@ -286,9 +317,9 @@ window.SpellingModules.ov05 = {
         continue;
       }
       for (const niveau of niveaus) {
-        const metPlaatje = (niveau === "basis")
+        const metPlaatje = !paar.isVerlenging && ((niveau === "basis")
           || (niveau === "kern" && plaatjeKern)
-          || ((niveau === "verdieping" || niveau === "uitbreiding") && plaatjeVerdieping);
+          || ((niveau === "verdieping" || niveau === "uitbreiding") && plaatjeVerdieping));
         
         // Plaatje-filter alleen toepassen als dit niveau effectief plaatjes toont.
         let poolDitNiveau = passend;
@@ -345,7 +376,9 @@ window.SpellingModules.ov05 = {
       const plaatjeHtml = metPlaatje ? this._plaatjeHtml(w) : "";
       const plaatjeCel = metPlaatje
         ? `<div class="ov05-plaatje">${plaatjeHtml}</div>`
-        : `<div class="ov05-plaatje-leeg"></div>`;
+        : (paar.isVerlenging
+          ? `<div class="ov05-plaatje-leeg"><strong>${w.verlengd || "verleng het woord"}</strong></div>`
+          : `<div class="ov05-plaatje-leeg"></div>`);
 
       // Bouw keuze-hokjes voor basis en kern via afleiders (hele-woord keuze)
       // Voor woorden met prefix ('hij ligt', 'ik heb'): toon alleen kern in hokjes
@@ -396,7 +429,17 @@ window.SpellingModules.ov05 = {
 
     // Opdracht-tekst per niveau
     let opdrachtTekst = "";
-    if (niveau === "basis") {
+    if (paar.isVerlenging && niveau === "basis") {
+      opdrachtTekst = `<div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Lees het langere woord. Daar hoor je de laatste letter.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Omcirkel het juiste korte woord en schrijf het over.</span></div>`;
+    } else if (paar.isVerlenging && niveau === "kern") {
+      opdrachtTekst = `<div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Verleng het woord, kies de juiste eindletter en schrijf het woord.</span></div>`;
+    } else if (paar.isVerlenging && niveau === "verdieping") {
+      opdrachtTekst = `<div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Gebruik het langere woord als hulp. Schrijf zelf het korte woord.</span></div>`;
+    } else if (paar.isVerlenging && niveau === "uitbreiding") {
+      opdrachtTekst = `<div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Verleng in je hoofd en schrijf het korte woord correct.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Maak daarna een goede zin met één woord.</span></div>`;
+    } else if (niveau === "basis") {
       opdrachtTekst = `
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kijk naar het plaatje.</span></div>
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Omcirkel het juiste woord.</span></div>
@@ -425,7 +468,7 @@ window.SpellingModules.ov05 = {
             <span class="ov01-lijn-datum"></span>
           </div>
           <h2 class="ov01-titel" data-bewerk-id="titel-${niveau}-${paar.id}">
-            Klank kiezen: ${paar.titel}
+            ${paar.isVerlenging ? paar.titel : `Klank kiezen: ${paar.titel}`}
             <span class="ov01-niveau-badge ov01-niveau-${niveau}">${niveauLabel}</span>
             ${oplBadge}
           </h2>

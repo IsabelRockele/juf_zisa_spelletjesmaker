@@ -39,13 +39,26 @@
     },
 
     /* Categorieën waaruit OV09 zijn woorden mag halen. */
-    CAT_TOEGESTAAN: ["stukjes-verdubbelen", "stukjes-verenkelen", "stukjes-geen-regel"],
+    CAT_PER_GRAAD: {
+      1: ["stukjes-verdubbelen", "stukjes-verenkelen", "stukjes-geen-regel"],
+      2: ["stukjes-verdubbelaars-g2", "stukjes-verenkelaars-g2", "stukjes-kort-2mk-g2", "stukjes-lang-2mk-g2"]
+    },
+
+    CAT_NAAR_REGEL: {
+      "stukjes-verdubbelen": "verdubbelen",
+      "stukjes-verdubbelaars-g2": "verdubbelen",
+      "stukjes-verenkelen": "verenkelen",
+      "stukjes-verenkelaars-g2": "verenkelen",
+      "stukjes-geen-regel": "hoort",
+      "stukjes-kort-2mk-g2": "hoort",
+      "stukjes-lang-2mk-g2": "hoort"
+    },
 
     /* Mapping categorie → regel-naam + kleur */
     REGEL_INFO: {
-      "stukjes-verdubbelen": { naam: "verdubbel", label: "Verdubbelen", kleur: "#E53935", emoji: "🔴" },
-      "stukjes-verenkelen":  { naam: "verenkel",  label: "Verenkelen",  kleur: "#FB8C00", emoji: "🟠" },
-      "stukjes-geen-regel":  { naam: "hoort",     label: "Schrijf wat je hoort", kleur: "#43A047", emoji: "🟢" }
+      verdubbelen: { naam: "verdubbel", label: "Verdubbelen", kleur: "#E53935", emoji: "🔴" },
+      verenkelen:  { naam: "verenkel",  label: "Verenkelen",  kleur: "#FB8C00", emoji: "🟠" },
+      hoort:       { naam: "hoort",     label: "Schrijf wat je hoort", kleur: "#43A047", emoji: "🟢" }
     },
 
     /* ----- PUBLIC ----- */
@@ -240,23 +253,24 @@
       }
 
       // Tel hoeveel woorden per cat in deze 9
-      const perCat = {};
+      const perRegel = {};
       for (const w of dezesWoorden) {
-        perCat[w.categorie] = (perCat[w.categorie] || 0) + 1;
+        const regel = this._regelType(w);
+        perRegel[regel] = (perRegel[regel] || 0) + 1;
       }
       // Toon uitsluitend kolommen van categorieën die de leerkracht koos.
       // 'Schrijf wat je hoort' verschijnt dus alleen wanneer die categorie
       // werkelijk woorden aan deze oefening levert.
-      const regelTypes = this.CAT_TOEGESTAAN.filter(cat => perCat[cat] > 0);
+      const regelTypes = ["verdubbelen", "verenkelen", "hoort"].filter(regel => perRegel[regel] > 0);
       let kolomHTML = "";
 
       // Max aantal regels per zichtbare kolom (voor visueel evenwicht)
-      const maxRegels = Math.max(...Object.values(perCat), 3);
+      const maxRegels = Math.max(...Object.values(perRegel), 3);
 
       for (const regelType of regelTypes) {
         const info = this.REGEL_INFO[regelType];
         // Verzamel woorden die in deze kolom horen
-        const woordenInKol = dezesWoorden.filter(w => w.categorie === regelType);
+        const woordenInKol = dezesWoorden.filter(w => this._regelType(w) === regelType);
         
         let lijnenHTML = "";
         for (let i = 0; i < maxRegels; i++) {
@@ -302,7 +316,26 @@
         zinSet = zb.willekeurigeSet(woorden, aantalZinnen, () => this._random());
       }
 
-      // Fallback als bib geen zinnen heeft voor deze woorden
+      // Vul ontbrekende zinnen aan voor de ruimere woordbank van graad 2.
+      if (zinSet.length < aantalZinnen) {
+        const reeds = new Set(zinSet.map(item => item.grondwoord));
+        const aanvullingen = woorden
+          .filter(w => !reeds.has(w.tekst))
+          .slice(0, aantalZinnen - zinSet.length)
+          .map((w, idx) => {
+            const juist = this._geefMeervoud(w);
+            const templates = [
+              `De leerkracht schrijft ${juist} op het bord.`,
+              `Ik schrijf ${juist} in mijn schrift.`,
+              `In deze oefening gebruik ik het woord ${juist}.`,
+              `Noor leest het woord ${juist} hardop.`,
+              `We zoeken samen de juiste spelling van ${juist}.`
+            ];
+            return { grondwoord: w.tekst, stukjeswoord: juist, categorie: w.categorie, zin: templates[idx % templates.length] };
+          });
+        zinSet = [...zinSet, ...aanvullingen];
+      }
+
       if (zinSet.length === 0) {
         return `<div class="ov09-lege-tekst">
           Geen zinnen beschikbaar voor de gekozen stukjeswoorden.
@@ -375,9 +408,25 @@
       </span>`;
     },
 
+    _actieveGraad: function () {
+      return window.SpellingZijbalk?.getActieveGraad?.() || 1;
+    },
+
+    _categorieenVoorGraad: function (graad) {
+      return this.CAT_PER_GRAAD[graad] || this.CAT_PER_GRAAD[1];
+    },
+
+    _regelType: function (woordOfCategorie) {
+      const categorie = typeof woordOfCategorie === "string"
+        ? woordOfCategorie
+        : woordOfCategorie?.categorie;
+      return this.CAT_NAAR_REGEL[categorie] || "hoort";
+    },
+
     _haalActieveWoorden: function () {
       const wb = window.SpellingWoordenbibliotheek;
-      const cats = this.CAT_TOEGESTAAN;
+      const graad = this._actieveGraad();
+      const cats = this._categorieenVoorGraad(graad);
       const _ruwePool = window._weekdictee_gekozenWoorden || [];
       // Vangnet-laag: ontdubbel pool (kip/hen + tekst-dups)
       const pool = window.SpellingDedup
@@ -385,30 +434,33 @@
         : _ruwePool;
       return pool
         .filter(w => w.categorie && cats.includes(w.categorie))
-        .map(w => this._verrijk(w, wb));
+        .map(w => this._verrijk(w, wb, graad));
     },
 
     _haalAlleStukjesWoorden: function () {
       const wb = window.SpellingWoordenbibliotheek;
-      if (!wb || !wb.graad1) return [];
+      const graad = this._actieveGraad();
+      const graadData = wb?.[`graad${graad}`];
+      if (!graadData) return [];
       const uit = [];
-      for (const catId of this.CAT_TOEGESTAAN) {
-        const cat = wb.graad1[catId];
+      for (const catId of this._categorieenVoorGraad(graad)) {
+        const cat = graadData[catId];
         if (!cat || !cat.woorden) continue;
         for (const w of cat.woorden) {
-          uit.push({ ...w, categorie: catId });
+          uit.push({ ...w, categorie: catId, leerjaar: graad });
         }
       }
       return uit;
     },
 
     /* Verrijk een woord uit de pool met categorie-data uit de bibliotheek */
-    _verrijk: function (w, wb) {
-      if (!wb || !wb.graad1 || !wb.graad1[w.categorie]) return w;
-      const cat = wb.graad1[w.categorie];
+    _verrijk: function (w, wb, graad) {
+      const graadData = wb?.[`graad${graad}`];
+      if (!graadData || !graadData[w.categorie]) return { ...w, leerjaar: graad };
+      const cat = graadData[w.categorie];
       const match = (cat.woorden || []).find(x => x.tekst === w.tekst);
-      if (!match) return w;
-      return { ...match, ...w, categorie: w.categorie };
+      if (!match) return { ...w, leerjaar: graad };
+      return { ...match, ...w, categorie: w.categorie, leerjaar: graad };
     },
 
     /* Geef de meervoud-vorm (of stukjesvorm bij werkwoorden).
@@ -424,14 +476,14 @@
     /* Geeft een typische FOUTE schrijfwijze (= de regel niet toepassen). */
     _geefFouteSchrijfwijze: function (w) {
       const juist = this._geefMeervoud(w);
-      const cat = w.categorie;
-      if (cat === "stukjes-verdubbelen") {
+      const regel = this._regelType(w);
+      if (regel === "verdubbelen") {
         // Fout: niet verdubbelen (1 medeklinker ipv 2)
         return this._maakNietVerdubbeld(juist);
-      } else if (cat === "stukjes-verenkelen") {
+      } else if (regel === "verenkelen") {
         // Fout: niet verenkelen (klinker dubbel laten staan)
         return this._maakNietVerenkeld(w.tekst, juist);
-      } else if (cat === "stukjes-geen-regel") {
+      } else if (regel === "hoort") {
         // Fout: onnodig verdubbelen
         return this._maakOnnodigVerdubbeld(juist);
       }
@@ -475,15 +527,15 @@
 
     /* Past de regel toe op enkelvoud → meervoud (fallback voor _geefMeervoud) */
     _pasRegelToe: function (w) {
-      const cat = w.categorie;
+      const regel = this._regelType(w);
       const tekst = w.tekst;
-      if (cat === "stukjes-verdubbelen") {
+      if (regel === "verdubbelen") {
         // Korte klank + 1 medeklinker → verdubbel medeklinker + en
         return tekst + tekst.slice(-1) + "en";
-      } else if (cat === "stukjes-verenkelen") {
+      } else if (regel === "verenkelen") {
         // Lange klank → verenkel + en
         return tekst.replace(/([aeiou])\1/, "$1") + "en";
-      } else if (cat === "stukjes-geen-regel") {
+      } else if (regel === "hoort") {
         return tekst + "en";
       }
       return tekst + "en";
@@ -491,25 +543,25 @@
 
     /* Maak een korte foute zin */
     _maakFouteZin: function (w, fouteVorm) {
-      const cat = w.categorie;
+      const regel = this._regelType(w);
       const templates = {
-        "stukjes-verdubbelen": [
+        verdubbelen: [
           `De ${fouteVorm} lopen in de tuin.`,
           `Ik zie veel ${fouteVorm}.`,
           `Twee ${fouteVorm} spelen samen.`
         ],
-        "stukjes-verenkelen": [
+        verenkelen: [
           `Er staan drie ${fouteVorm} in de tuin.`,
           `De ${fouteVorm} zijn hoog.`,
           `Sam telt vijf ${fouteVorm}.`
         ],
-        "stukjes-geen-regel": [
+        hoort: [
           `Op tafel liggen ${fouteVorm}.`,
           `Ik zie veel ${fouteVorm}.`,
           `Drie ${fouteVorm} zijn weg.`
         ]
       };
-      const t = templates[cat] || templates["stukjes-verdubbelen"];
+      const t = templates[regel] || templates.verdubbelen;
       const idx = this._intRandom(t.length, 0);
       return t[idx];
     },
@@ -527,20 +579,20 @@
 
     /* Voor ⭐⭐⭐: probeer 3 per cat te halen + bij voorkeur met afbeelding */
     _kiesVerdiepingsWoorden: function (pool, aantalTotaal) {
-      const actieveCats = this.CAT_TOEGESTAAN.filter(catId =>
-        pool.some(w => w.categorie === catId)
+      const actieveRegels = ["verdubbelen", "verenkelen", "hoort"].filter(regel =>
+        pool.some(w => this._regelType(w) === regel)
       );
-      if (actieveCats.length === 0) return [];
+      if (actieveRegels.length === 0) return [];
 
       // Verdeel de beschikbare plaatsen over de werkelijk gekozen
       // categorieën. Bij twee categorieën krijgen die dus elk ongeveer de
       // helft; een niet-gekozen derde categorie wordt nooit aangevuld.
-      const basisAantal = Math.floor(aantalTotaal / actieveCats.length);
-      let rest = aantalTotaal % actieveCats.length;
+      const basisAantal = Math.floor(aantalTotaal / actieveRegels.length);
+      let rest = aantalTotaal % actieveRegels.length;
       const uit = [];
-      for (const catId of actieveCats) {
+      for (const regel of actieveRegels) {
         const gewenst = basisAantal + (rest-- > 0 ? 1 : 0);
-        const catPool = pool.filter(w => w.categorie === catId);
+        const catPool = pool.filter(w => this._regelType(w) === regel);
         // Prefereer woorden met afbeelding=true
         const metAfb = catPool.filter(w => w.afbeelding);
         const zonderAfb = catPool.filter(w => !w.afbeelding);

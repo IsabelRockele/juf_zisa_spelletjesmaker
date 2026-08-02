@@ -205,6 +205,18 @@ window.SpellingAfleiders = (function() {
       const idx = woord.lastIndexOf(match[1]);
       const fout = woord.slice(0, idx) + flipped + woord.slice(idx + 1);
       return [fout];  // Slechts 1 zinvolle afleider (b↔p of d↔t)
+    },
+    "verlengen-td-g2": (woord) => {
+      const match = woord.match(/([dt])(\W*)$/i);
+      if (!match) return [];
+      const vervanging = match[1].toLowerCase() === "d" ? "t" : "d";
+      return [woord.slice(0, match.index) + vervanging + match[2]];
+    },
+    "verlengen-pb-g2": (woord) => {
+      const match = woord.match(/([pb])(\W*)$/i);
+      if (!match) return [];
+      const vervanging = match[1].toLowerCase() === "b" ? "p" : "b";
+      return [woord.slice(0, match.index) + vervanging + match[2]];
     }
   };
 
@@ -237,7 +249,7 @@ window.SpellingAfleiders = (function() {
       let aantalFouten;
       if (typeof aantal === "number") {
         aantalFouten = aantal - 1;
-      } else if (categorie === "verlengingsregel") {
+      } else if (["verlengingsregel", "verlengen-td-g2", "verlengen-pb-g2"].includes(categorie)) {
         aantalFouten = 1;
       } else {
         aantalFouten = 2;
@@ -283,7 +295,7 @@ window.SpellingAfleiders = (function() {
       // Aantal afleiders:
       // - tweeklanken: 2 (zodat we 3 opties krijgen met het juiste)
       // - verlengingsregel: 1 (2 opties totaal)
-      const aantalFouten = (cat === "verlengingsregel") ? 1 : 2;
+      const aantalFouten = (["verlengingsregel", "verlengen-td-g2", "verlengen-pb-g2"].includes(cat)) ? 1 : 2;
       return fouten.slice(0, aantalFouten);
     },
     

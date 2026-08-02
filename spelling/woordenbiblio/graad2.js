@@ -566,7 +566,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "straat", lidwoord: "de", meervoud: "straten", afbeelding: false },
       { tekst: "boot", lidwoord: "de", meervoud: "boten", afbeelding: false },
       { tekst: "smaak", lidwoord: "de", meervoud: "smaken", afbeelding: false },
-      { tekst: "stoof", lidwoord: "de", meervoud: "stoven", afbeelding: false },
+      { tekst: "knoop", lidwoord: "de", meervoud: "knopen", afbeelding: false },
       { tekst: "staaf", lidwoord: "de", meervoud: "staven", afbeelding: false },
       { tekst: "zaag", lidwoord: "de", meervoud: "zagen", afbeelding: false },
       { tekst: "raam", lidwoord: "het", meervoud: "ramen", afbeelding: false }
@@ -664,7 +664,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     naam: "Verlengen: t of d?",
     groep: "verlengen-tdpb",
     hoofdgroep: "regelwoord",
-    beschrijving: "Verleng om te weten of je t of d schrijft: paart → paarden (paard), hont → honden (hond).",
+    beschrijving: "Verleng om te horen of je op het einde t of d schrijft: paard → paarden, hond → honden.",
     woorden: [
       // Behouden uit G1
       { tekst: "hand", lidwoord: "de", verlengd: "handen", twijfel: "t-d", afbeelding: false },
@@ -697,7 +697,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     naam: "Verlengen: p of b?",
     groep: "verlengen-tdpb",
     hoofdgroep: "regelwoord",
-    beschrijving: "Verleng om te weten of je p of b schrijft: rip → ribben (rib), krap → krabben (krab).",
+    beschrijving: "Verleng om te horen of je op het einde p of b schrijft: rib → ribben, krab → krabben.",
     woorden: [
       // Behouden uit G1
       { tekst: "krab", lidwoord: "de", verlengd: "krabben", twijfel: "p-b", afbeelding: false },

@@ -1,7 +1,7 @@
 (() => {
   const doelen = window.LEESBOOSTER_DOELEN;
   const $ = s => document.querySelector(s);
-  const state = { family:'combinaties', vorm:'woorden', selectedGoals:[], blocks:[], nonce:0, storySequence:0 };
+  const state = { family:'combinaties', vorm:'woorden', selectedGoals:[], blocks:[], nonce:0, storySequence:0, groupByLevel:false };
   const vormen = [
     ['woorden','Woordenrijen'],['zoek','Zoek het leesstuk'],['piramide','Leespiramide'],
     ['zinnen','Zinnen lezen'],['tekst','Korte leestekst'],['verhaal','Verhaal + vragen']
@@ -346,11 +346,12 @@
     if(!state.blocks.length){$('#pages').innerHTML='<div class="empty-state"><div>📚</div><h1>Klaar voor een leesbooster?</h1><p>Kies links een leesdoel, oefenvorm en ondersteuning. Voeg daarna je eerste oefenblok toe.</p></div>';setButtons(false);return}
     let html='',pageNo=1,regular=[];
     const flush=()=>{if(!regular.length)return;const items=regular;const evaluation=items.length>1?`<div class="self-eval"><strong>Hoe ging het lezen vandaag?</strong><small>Kleur het gezichtje bij de zin die het best bij jou past.</small><span class="eval-choice">${evalFace('rustig')}<b>★ Ik las rustig met hulp.</b></span><span class="eval-choice">${evalFace('goed')}<b>★★ Ik las de woorden zelf.</b></span><span class="eval-choice">${evalFace('vlot')}<b>★★★ Ik las alles mooi door.</b></span></div>`:'';html+=`<article class="paper">${paperHeader('Gericht oefenen op leesmoeilijkheden',items[0].b.naamDatum?'Naam: ____________________<br>Datum: ____________________':'')}${items.map(x=>blockHtml(x.b,x.i)).join('')}${evaluation}<footer class="page-footer"><span>Elke stap vooruit telt!</span><span>pagina ${pageNo++}</span></footer></article>`;regular=[]};
-    state.blocks.forEach((b,i)=>{if(b.vorm==='verhaal'){flush();for(const group of chunk(b.doelen,4)){const storySet=storyPages({...b,doelen:group},pageNo,i);html+=storySet.html;pageNo+=storySet.count}}else{regular.push({b,i});if(regular.length===3)flush()}});flush();
+    const order={steun:0,basis:1,vlot:2};const blocks=state.blocks.map((b,i)=>({b,i}));if(state.groupByLevel)blocks.sort((a,c)=>order[a.b.niveau]-order[c.b.niveau]||a.i-c.i);
+    let currentLevel=null;blocks.forEach(({b,i})=>{if(state.groupByLevel&&currentLevel!==null&&b.niveau!==currentLevel)flush();currentLevel=b.niveau;if(b.vorm==='verhaal'){flush();for(const group of chunk(b.doelen,4)){const storySet=storyPages({...b,doelen:group},pageNo,i);html+=storySet.html;pageNo+=storySet.count}}else{regular.push({b,i});if(regular.length===3)flush()}});flush();
     $('#pages').innerHTML=html;setButtons(true);
   }
   function chunk(a,size){const out=[];for(let i=0;i<a.length;i+=size)out.push(a.slice(i,i+size));return out}
-  function setButtons(on){['#printPdf','#printPdf2','#downloadPdf','#downloadPdf2','#vernieuw'].forEach(s=>$(s).disabled=!on);$('#blokTeller').textContent=`${state.blocks.length} oefenblok${state.blocks.length===1?'':'ken'}`}
+  function setButtons(on){['#printPdf','#printPdf2','#downloadPdf','#downloadPdf2','#vernieuw','#groepeerNiveau'].forEach(s=>$(s).disabled=!on);$('#blokTeller').textContent=`${state.blocks.length} oefenblok${state.blocks.length===1?'':'ken'}`}
   function add(){
     const levels=[...document.querySelectorAll('#niveauKeuzes input:checked')].map(x=>x.value);
     if(!levels.length){$('#melding').textContent='Kies minstens één vorm van ondersteuning.';return}
@@ -372,6 +373,7 @@
   $('#alleNiveaus').addEventListener('click',()=>document.querySelectorAll('#niveauKeuzes label:not([hidden]) input').forEach(x=>x.checked=true));
   $('#wisAlles').addEventListener('click',()=>{if(!state.blocks.length){$('#melding').textContent='De preview is al leeg.';return}if(confirm('Wil je de volledige preview leegmaken? Alle toegevoegde oefeningen en verhalen worden verwijderd.')){state.blocks=[];$('#melding').textContent='De preview is helemaal leeggemaakt.';renderPages()}});
   $('#vernieuw').addEventListener('click',()=>{state.nonce++;$('#melding').textContent='De woorden in de toegevoegde woordoefeningen zijn vervangen.';renderPages()});
+  $('#groepeerNiveau').addEventListener('click',e=>{state.groupByLevel=!state.groupByLevel;e.currentTarget.setAttribute('aria-pressed',String(state.groupByLevel));e.currentTarget.textContent=state.groupByLevel?'✓ Gegroepeerd per niveau':'⇅ Groepeer per niveau';$('#melding').textContent=state.groupByLevel?'De bundel staat nu per niveau. Elk niveau start op een nieuwe pagina.':'De bundel staat weer in de volgorde waarin je de oefeningen toevoegde.';renderPages()});
   async function downloadPdf(){
     if(!window.html2canvas||!window.jspdf?.jsPDF){alert('De PDF-module is nog niet geladen. Controleer je internetverbinding en probeer opnieuw.');return}
     const pages=[...document.querySelectorAll('#pages .paper')];if(!pages.length)return;
