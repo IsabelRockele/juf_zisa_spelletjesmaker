@@ -81,7 +81,25 @@
     cadeau:{start:['Op het bureau ligt alleen een leeg lint.','Het cadeau voor de school is verdwenen.','Noor vindt een kaartje met een aanwijzing.','Ze volgt het spoor door de lange gang.','Daar hoort ze muziek uit een kleine radio.','Achter een tableau vindt ze het laatste briefje.','Het briefje wijst naar een kast.'],end:['Noor brengt het cadeau snel naar de feestzaal omdat de presentatie bijna begint.','Ze komt precies op tijd aan.']}
   };
   const supportBits={
-    'wr':'Op een briefje leest Noor: wrak, wrikken en wrijven.','th':'Op een briefje leest Noor: thema, theater en thermos.','i-ie':'Op een briefje leest Noor: taxi, studio en diploma.','au-ou':'Op een briefje leest Noor: auto, gebouw en applaus.','ei-ij':'Op een briefje leest Noor: trein, plein en vijver.','aai-ooi-oei':'Op een briefje leest Noor: kraai, kooi en groeien.','eeuw-ieuw-uw':'Op een briefje leest Noor: meeuw, nieuw en ruw.','ng-nk':'Op een briefje leest Noor: ring, bank en winkel.','ch-g':'Op een briefje leest Noor: lachen, vogel en kachel.','cht-gt':'Op een briefje leest Noor: nacht, bocht en vliegt.','oo-ch':'Op een briefje leest Noor: goochelaar, goocheltruc en hoog.','kort-open-ch':'Op een briefje leest Noor: echo, lachen en kachel.','ds':'Op een briefje leest Noor: gids, loods en sinds.','teit-heid':'Op een briefje leest Noor: kwaliteit, veiligheid en mogelijkheid.','uitgangen':'Op een briefje leest Noor: officieel, praktisch en speciaal.','gesloten':'Op een briefje leest Noor: bommen, tassen en flessen.','open':'Op een briefje leest Noor: bomen, rozen en tafel.','politie':'Op een briefje leest Noor: politie, informatie en actie.','eau':'Op een briefje leest Noor: bureau, cadeau en tableau.'
+    'wr':['Noor ziet het wrak van een kapot schip.','Ze wrikt een plank los en wrijft het zand eraf.'],
+    'th':['In het theater ziet Noor een voorstelling met de zee als thema.','Een acteur vertelt dat therapie mensen kan helpen om zich beter te voelen.'],
+    'i-ie':['In een studio neemt iemand muziek en geluid op.','Aan de muur hangt een diploma en op tafel staat een fles van één liter.'],
+    'au-ou':['Noor loopt een groot gebouw binnen en neemt even pauze.','Na de voorstelling klapt het publiek luid: wat een applaus!'],
+    'ei-ij':['Een reiziger is onderweg met de trein.','Bij een vijver ziet Noor kinderen oefenen voor een wedstrijd.'],
+    'aai-ooi-oei':['Een koe begint luid te loeien in de wei.','Een vos zoekt een prooi en de jonge planten blijven groeien.'],
+    'eeuw-ieuw-uw':['De ruwe plank voelt niet glad aan.','Noor waarschuwt haar vriend voor een gat en probeert de sprong opnieuw.'],
+    'ng-nk':['Een flinke jongen durft als eerste naar binnen.','Hij bedankt de koning voor zijn hulp.'],
+    'ch-g':['Een goochelaar toont trucs aan het publiek.','Bij de warme kachel laat hij plots een duif verschijnen.'],
+    'cht-gt':['De weg maakt een scherpe bocht naar links.','Noor moet het licht volgen en hoort daarna een zachte stem.'],
+    'oo-ch':['Een goochelaar voert een wonderlijke goocheltruc uit.','De kaart lijkt te verdwijnen, maar Noor begrijpt hoe de truc werkt.'],
+    'kort-open-ch':['Noor hoort een echo: haar stem kaatst terug.','Bij de warme kachel begint een kind vriendelijk te glimlachen.'],
+    'ds':['Een gids toont Noor de weg en geeft uitleg.','Sinds vandaag bewaart hij spullen in een grote loods.'],
+    'teit-heid':['Noor controleert de kwaliteit en kijkt hoe goed de kaart is gemaakt.','Voor haar veiligheid kiest ze de mogelijkheid zonder gevaar.'],
+    'uitgangen':['Een officiële gids werkt volgens de regels.','Op de tentoonstelling gebruikt hij een praktisch, handig toestel.'],
+    'gesloten':['De boswachter zorgt elke dag voor het bos.','Ondertussen ontdekt Noor iets wat ze nog niet kende.'],
+    'open':['Deze spannende tocht is een echt avontuur.','In de vakantie vertellen de buren wat zij hebben gezien.'],
+    'politie':['De politie geeft Noor informatie over wat er is gebeurd.','Daarna komt iedereen in actie en begint Noor haar presentatie.'],
+    'eau':['Op het bureau ligt een kleurrijk tableau.','Daarnaast staat een plateau op een hoger niveau.']
   };
 
   function shuffle(a, salt=0){
@@ -155,8 +173,7 @@
     if(niveau==='steun'){
       const themeId=Object.keys(storyThemes).find(id=>storyThemes[id]===theme);
       const easy=supportThemes[themeId];
-      const clueStarts=['Op een briefje','Op de achterkant','Bij het volgende spoor'];
-      const clues=ds.map((d,i)=>supportBits[d.id].replace('Op een briefje',clueStarts[i]));
+      const clues=ds.flatMap(d=>supportBits[d.id]);
       return [...easy.start,...clues,...easy.end];
     }
     const story=[...theme.base];
@@ -164,13 +181,12 @@
     ds.forEach((d,i)=>{
       const transition=theme.transitions[i%theme.transitions.length];
       story.push(transition);usedTransitions.add(transition);
-      const bits=storyBits[d.id];
-      story.push(bits[0]);
-      if(ds.length<3) story.push(bits[1]);
+      const bits=supportBits[d.id];
+      story.push(bits[0],bits[1]);
     });
     theme.transitions.forEach(line=>{if(!usedTransitions.has(line))story.push(line)});
     if(ds.length===1){story.push('Noor bekijkt de aanwijzing nog eens heel nauwkeurig.','Pas wanneer ze alles begrijpt, verschijnt het volgende deel van de route.');}
-    if(niveau==='vlot')story.push('Noor vergelijkt alle aanwijzingen en ontdekt dat ze samen één duidelijke boodschap vormen.','Vol vertrouwen volgt ze het spoor verder, ook wanneer de opdracht plots moeilijker wordt.');
+    if(niveau==='vlot'&&ds.length<3)story.push('Noor vergelijkt alle aanwijzingen en ontdekt dat ze samen één duidelijke boodschap vormen.','Vol vertrouwen volgt ze het spoor verder, ook wanneer de opdracht plots moeilijker wordt.');
     story.push(...theme.end);
     const lines=story.slice(0,15);
     return lines;
