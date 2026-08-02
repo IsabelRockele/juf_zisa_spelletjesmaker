@@ -1,0 +1,25 @@
+.quick-modes{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  width:min(1120px,100%);
+  margin:0 auto 12px;
+}
+.quick-modes button{
+  padding:11px 8px;
+  border:2px solid #ffffffcc;
+  border-radius:14px;
+  background:#ffffffdd;
+  color:#173f62;
+  font:900 .92rem Arial,sans-serif;
+  cursor:pointer;
+  box-shadow:0 5px 14px #82511d20;
+}
+.quick-modes button:hover,.quick-modes button:focus{
+  border-color:#ef7125;
+  background:#fff;
+}
+@media(max-width:800px){
+  .quick-modes{grid-template-columns:1fr 1fr;gap:6px}
+  .quick-modes button{padding:9px 5px;font-size:.8rem}
+}

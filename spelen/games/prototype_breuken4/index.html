@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <title>De Breukenbakkerij</title>
-  <link rel="stylesheet" href="game.css?v=20260802c">
+  <link rel="stylesheet" href="game.css?v=20260802d">
+  <link rel="stylesheet" href="quick-modes.css?v=20260802d">
 </head>
 <body>
 <main class="game-shell">
@@ -14,6 +15,13 @@
     <div><small>BREUKENBAKKERIJ</small><h1 id="gameTitle">Verdeel, tik en ontdek</h1></div>
     <div class="progress"><button id="menuButton" type="button">Spel kiezen</button><span id="roundText">Opdracht 1 van 6</span><b id="scoreText">★ 0</b></div>
   </header>
+
+  <nav class="quick-modes" aria-label="Kies een breukenspel">
+    <button data-mode="parts">🍕 Verdeel & tik</button>
+    <button data-mode="choose">🔎 Welke klopt?</button>
+    <button data-mode="drag">🖐️ Sleep naar de breuk</button>
+    <button data-mode="line">📏 Op de getallenas</button>
+  </nav>
 
   <section class="task-card">
     <div class="instruction"><small id="modeLabel">PIZZA</small><h2 id="instructionText">Tik <span>3/4</span> van het geheel aan.</h2><p id="helperText"></p></div>
@@ -43,6 +51,6 @@
   </section>
 </main>
 <script type="module" src="../zisa-play-guard.js?v=20260802b"></script>
-<script src="game.js?v=20260802c"></script>
+<script src="game.js?v=20260802d"></script>
 </body>
 </html>
