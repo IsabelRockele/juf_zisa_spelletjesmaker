@@ -728,6 +728,10 @@
       <button class="updates-modal-close" onclick="document.getElementById('updatesOverlay').classList.remove('open')">✕</button>
       <h3>🆕 Laatste updates</h3>
       <ul>
+        <li data-datum="2026-08-02" data-tot="2026-11-01">
+          <span class="update-datum">augustus 2026</span>
+          <span><span class="update-tool">Leesbooster</span> - Nieuwe tool voor gericht technisch lezen. Maak gedifferentieerde werkbladen en verhalen of oefen klassikaal met het automatische smartboardspel en verrassende beweegboosts.</span>
+        </li>
         <li data-datum="2026-07-20" data-tot="2026-10-01">
           <span class="update-datum">juli 2026</span>
           <span><span class="update-tool">Bundel getallen</span> - De getallenbundel is uitgebreid met een vernieuwde bovenbouwmodule voor 4de, 5de en 6de leerjaar. Je vindt er nu extra oefeningen rond kommagetallen, breuken, percenten, Romeinse cijfers en negatieve getallen. De keuzepagina kreeg ook een duidelijker overzicht met onderbouw en bovenbouw apart.</span>
@@ -797,6 +801,7 @@
       <div class="section-bar" style="background:#2980b9"></div>
     </div>
     <div class="button-grid">
+      <a class="img-link" href="./leesbooster/index.html"><img alt="Leesbooster technisch lezen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/leesbooster.png" loading="eager"/><span class="img-label">Leesbooster</span><span class="tool-description">Maak leeswerkbladen, verhalen en een klassikaal smartboardspel.</span></a>
       <a class="img-link" href="./Leeskaartjes/leeskaartjes.html"><img alt="Leeskaartjes per AVI" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/leeskaartjes.png" loading="eager"/><span class="img-label">Leeskaartjes per AVI</span></a>
       <a class="img-link" href="./lees.html"><img alt="Lezen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/lees.png" loading="lazy"/><span class="img-label">Lezen</span></a>
       <a class="img-link" href="./schrijfgenerator.html"><img alt="Handschrift" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/handschrift.png" loading="lazy"/><span class="img-label">Handschrift</span></a>
@@ -1012,12 +1017,14 @@
 <script>
   const proToolDescriptions={'Rekenvierkant':'Vul het rooster aan met de juiste bewerkingen.','Rekenweg':'Maak een rekenpad met opdrachten op maat.','Rekenpiramide':'Oefen verbanden tussen getallen in een piramide.','Rekenrooster':'Combineer getallen en bewerkingen in een rooster.','Rekendriehoek':'Oefen splitsingen en getalfamilies.','Rekencirkel':'Reken vanuit het midden naar buiten.','MAB en schema':'Visualiseer getallen met MAB-materiaal en schema’s.','Verliefde harten':'Oefen getallenparen die samen een geheel vormen.','Lettercode':'Ontcijfer woorden met letters en symbolen.','Geheime boodschap':'Maak een gecodeerde taalopdracht.','Lettertetris':'Bouw woorden met vallende lettervormen.','Hexagonaal raster':'Maak opdrachten in een zeshoekig speelraster.','Schaduw':'Zoek of maak de passende schaduwvorm.','Punttekening':'Verbind punten tot een figuur.','Plattegrond':'Oefen plaats, richting en ruimtelijk inzicht.','Coderen':'Volg codes om een figuur te maken.','Blokkenbouwsels':'Bouw en bekijk constructies met blokken.','QR-generator':'Maak een QR-code voor tekst of een link.','Opvolging huistaken':'Volg gemaakte huistaken overzichtelijk op.','Takenbord':'Verdeel en toon klastaken.','Planbord':'Maak een visuele planning voor de klas.'};
   document.querySelectorAll('a.img-link').forEach((link,index)=>{const img=link.querySelector('.drukknop-afbeelding');if(img&&!img.parentElement.classList.contains('tool-image-stage')){const stage=document.createElement('span');stage.className='tool-image-stage';img.parentNode.insertBefore(stage,img);stage.appendChild(img)}const label=link.querySelector('.img-label')?.textContent.trim()||img?.alt||`tool-${index}`;const category=link.closest('.section-panel')?.id.replace('panel-','');if(category)link.querySelector('.tool-image-stage')?.classList.add(`stage-${category}`);if(proToolDescriptions[label]){const description=document.createElement('span');description.className='tool-description';description.textContent=proToolDescriptions[label];link.appendChild(description)}link.dataset.toolId=label.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase();const star=document.createElement('button');star.type='button';star.className='favorite-toggle';star.textContent='☆';star.setAttribute('aria-label','Toevoegen aan favorieten');star.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();window.toggleZisaFavorite?.(link.dataset.toolId)});link.appendChild(star)});
+  proToolDescriptions.Leesbooster='Maak leeswerkbladen, verhalen en een klassikaal smartboardspel.';
   const proToolSearch=document.getElementById('proToolSearch');
   const proSearchCount=document.getElementById('proSearchCount');
   const proStartWelcome=document.getElementById('proStartWelcome');
   const categoryBack=document.getElementById('categoryBack');
   const proNoResults=document.getElementById('proNoResults');
   const proMain=document.querySelector('.main');
+  let proUserNavigated=false;
 
   function setProNavActive(target){
     document.querySelectorAll('.nav-btn').forEach(button=>button.classList.toggle('active',button.dataset.target===target));
@@ -1037,6 +1044,7 @@
   window.showProCategory=target=>{
     const panel=document.getElementById('panel-'+target);
     if(!panel)return;
+    proUserNavigated=true;
     proMain.classList.add('category-open');
     proMain.classList.remove('search-open');
     document.querySelectorAll('.section-panel').forEach(item=>{item.classList.remove('active');item.style.display=''});
@@ -1221,7 +1229,7 @@
   // Start na iedere nieuwe login rustig op het persoonlijke overzicht.
   // Een categorie wordt pas geopend nadat de leerkracht er bewust voor kiest.
   window.addEventListener('load', () => {
-    window.showProOverview?.();
+    if(!proUserNavigated)window.showProOverview?.();
   });
 </script>
 
