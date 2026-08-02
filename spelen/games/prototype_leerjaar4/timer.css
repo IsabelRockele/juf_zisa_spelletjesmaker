@@ -50,7 +50,6 @@
   border-radius:50%;
   background:radial-gradient(circle,#d8c6a2 0 18%,#7f6b57 19% 24%,#322b2a 25% 28%,transparent 29%);
   box-shadow:inset 0 0 0 5px #baa27d,0 12px 28px #17110d66;
-  animation:runeWheel var(--rune-speed,6s) linear infinite;
 }
 .rune-mode .answer-core {
   position:absolute;
@@ -64,16 +63,10 @@
   background:linear-gradient(145deg,#effcff,#58cce9 58%,#227aa8);
   color:#092f4e;
   box-shadow:inset 0 0 16px #fff,0 0 22px #62dfffaa;
-  animation:runeOne var(--rune-speed,6s) linear infinite reverse;
+  transition:box-shadow .15s,background .15s,border-color .15s;
 }
 .rune-mode .answer-core::before{content:'◇';display:block;margin:0;font-size:1.25rem;line-height:.8}
-.rune-mode .answer-core:nth-child(1){transform:translateX(105px)}
-.rune-mode .answer-core:nth-child(2){transform:rotate(120deg) translateX(105px) rotate(-120deg)}
-.rune-mode .answer-core:nth-child(3){transform:rotate(240deg) translateX(105px) rotate(-240deg)}
-.rune-mode.answer-found .answers,.rune-mode.answer-found .answer-core{animation-play-state:paused}
-@keyframes runeWheel{to{transform:rotate(360deg)}}
-@keyframes runeOne{to{rotate:360deg}}
-@media(max-width:520px){.rune-mode .answers{width:230px;height:230px}.rune-mode .answer-core{width:72px;min-height:58px;margin:-29px 0 0 -36px}.rune-mode .answer-core:nth-child(1){transform:translateX(88px)}.rune-mode .answer-core:nth-child(2){transform:rotate(120deg) translateX(88px) rotate(-120deg)}.rune-mode .answer-core:nth-child(3){transform:rotate(240deg) translateX(88px) rotate(-240deg)}}
+@media(max-width:520px){.rune-mode .answers{width:230px;height:230px}.rune-mode .answer-core{width:72px;min-height:58px;margin:-29px 0 0 -36px}}
 
 /* Level 5: de uitkomst staat vast; het kind zoekt de ene passende oefening. */
 .reverse-mode .answer-core{background:linear-gradient(145deg,#f4edff,#c5a7ff);border-color:#8659c7;color:#352052}
