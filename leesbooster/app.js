@@ -27,7 +27,7 @@
     'gesloten':[['boswachter','iemand die voor het bos zorgt'],['ontdekken','iets vinden dat je nog niet kende'],['ondertussen','in de tijd dat iets anders gebeurt']],
     'open':[['avontuur','een spannende belevenis'],['vakantie','een periode waarin je niet naar school of werk hoeft'],['buren','mensen die dicht bij je wonen']],
     'politie':[['informatie','uitleg of gegevens die je iets vertellen'],['actie','iets wat iemand doet om een doel te bereiken'],['presentatie','een uitleg die je aan een groep geeft']],
-    'eau':[['tableau','een afbeelding of schilderstuk'],['plateau','een hoog en vlak stuk grond'],['niveau','een trap of moeilijkheidsgraad']]
+    'eau':[['tableau','een groot schilderij of een grote afbeelding'],['plateau','een hoog en vlak stuk grond'],['niveau','een trap of moeilijkheidsgraad']]
   };
   const storyBits = {
     'wr':['Bij een oud wrak wriemelt iets dat zich tussen twee planken wringt.','Noor wrikt een plank los en wrijft het natte zand van een klein gouden slot.'],
@@ -62,7 +62,7 @@
     dierenpark:{focus:['aai-ooi-oei','eeuw-ieuw-uw','ng-nk','ei-ij'],title:'Het geheim van het dierenpark',image:'afbeeldingen/verhalen/het-geheim-van-het-dierenpark.png',base:['Noor volgt een kraai door het dierenpark.','Bij de mooie vijver loeit een koe terwijl jonge planten langs het water groeien.','Een flinke verzorger waarschuwt Noor dat een nieuw dierenverblijf nog gesloten is.'],transitions:['De kraai vliegt naar een kooi bij de weide.','Een konijn springt langs de linkse oever.','Bij een ruwe bank vindt Noor een ring.','De prooi van de leeuw blijkt een speelgoedmuis te zijn.'],end:['Achter het houten hek ontdekt Noor een veilig nest met jonge dieren.','De koning van het dierenpark, een oude leeuw, brult haar vriendelijk gedag.']},
     goochelwedstrijd:{focus:['ch-g','cht-gt','oo-ch','kort-open-ch'],title:'De magische goochelwedstrijd',image:'afbeeldingen/verhalen/de-magische-goochelwedstrijd.png',base:['In de nacht volgt Noor een zacht licht naar een goochelwedstrijd.','Een goochelaar staat bij een warme kachel en laat een vogel verschijnen.','Noor begint te lachen wanneer zijn hoge hoed plots verdwijnt.'],transitions:['Een lichtstraal vliegt door een scherpe bocht.','In de gang hoort Noor een echo terugkaatsen.','Na de goocheltruc verschijnt een gouden kaart.','Noor begrijpt dat ze de vogel moet volgen.'],end:['De vogel landt op de kist met de hoofdprijs.','De goochelaar glimlacht en geeft Noor de geheime kaart.']},
     stadsraadsel:{focus:['th','i-ie','au-ou','ei-ij','ds'],title:'Het raadsel van de oude stad',image:'afbeeldingen/verhalen/het-raadsel-van-de-stad.png',base:['Een taxi brengt Noor van het station naar een oud plein.','Naast het theater staat een groot gebouw met een kleine studio.','Een gids toont een kaart waarop de bibliotheek en een vijver zijn getekend.'],transitions:['Een reiziger wijst naar de trein achter het gordijn.','Tijdens de pauze drinkt Noor uit een thermos.','In een loods vindt ze een video en een diploma.','Sinds gisteren wacht daar een blauwe auto.'],end:['Het thema van de route blijkt een reis door de stad te zijn.','De gids krijgt applaus wanneer Noor het laatste spoor vindt.']},
-    uitvindersbeurs:{focus:['teit-heid','uitgangen','politie','eau'],title:'De geheime uitvindersbeurs',image:'afbeeldingen/verhalen/de-geheime-uitvindersbeurs.png',base:['Noor bezoekt een officiële tentoonstelling vol bijzondere uitvindingen.','Op een bureau staan een gouden radio, een cadeau en een kleurrijk tableau.','Een praktische machine controleert de kwaliteit en veiligheid van elke uitvinding.'],transitions:['De politie geeft informatie over een verdwenen toestel.','Noor onderzoekt elke mogelijkheid op een digitaal plateau.','Een speciale actie brengt de machine naar een hoger niveau.','De officiële gids start daarna zijn presentatie.'],end:['In de machine vindt Noor het verdwenen toestel veilig terug.','De uitvinder bedankt haar en geeft haar het cadeau.']}
+    uitvindersbeurs:{focus:['teit-heid','uitgangen','politie','eau'],title:'De geheime uitvindersbeurs',image:'afbeeldingen/verhalen/de-geheime-uitvindersbeurs.png',base:['Noor bezoekt een officiële tentoonstelling vol bijzondere uitvindingen.','Op een bureau staan een gouden radio en een cadeau.','Aan de muur hangt een kleurrijk tableau van een uitvinding.','Een praktische machine controleert de kwaliteit en veiligheid van elke uitvinding.'],transitions:['De politie geeft informatie over een verdwenen toestel.','Noor onderzoekt elke mogelijkheid op een digitaal plateau.','Een speciale actie brengt de machine naar een hoger niveau.','De officiële gids start daarna zijn presentatie.'],end:['In de machine vindt Noor het verdwenen toestel veilig terug.','De uitvinder bedankt haar en geeft haar het cadeau.']}
   };
   const storyQuestions = {
     wrak:{q1:'Waar vindt Noor de geheimzinnige kaart?',a1:['in een kistje bij het wrak','in haar boekentas','onder een strandstoel'],q2:'Wat helpt Noor om de route te volgen?',a2:['het spoor op de kaart','een bord op het strand','een bericht op haar telefoon'],q3:'Waarom wil Noor de volgende dag terugkomen?',a3:['om het volgende geheim te ontdekken','om haar jas te zoeken','om te gaan zwemmen']},
@@ -111,11 +111,16 @@
     'gesloten':['De boswachter zorgt elke dag voor het bos.','Ondertussen ontdekt Noor iets wat ze nog niet kende.'],
     'open':['Deze spannende tocht is een echt avontuur.','In de vakantie vertellen de buren wat zij hebben gezien.'],
     'politie':['De politie geeft Noor informatie over wat er is gebeurd.','Daarna komt iedereen in actie en begint Noor haar presentatie.'],
-    'eau':['Op het bureau ligt een kleurrijk tableau.','Daarnaast staat een plateau op een hoger niveau.']
+    'eau':['Aan de muur hangt een kleurrijk tableau van een schip op zee.','Op het bureau ligt een cadeau naast een klein plateau.']
+  };
+  const pictureVocabulary={
+    cadeau:{image:'afbeeldingen/verhalen/het-museum-na-sluitingstijd.png',items:[['luchtballon',14,17],['zeilschip',7,43],['skelet',78,27],['wereldbol',91,70],['sleutel',46,82]]},
+    uitvindersbeurs:{image:'afbeeldingen/verhalen/de-geheime-uitvindersbeurs.png',items:[['machine',55,45],['radio',69,78],['cadeau',87,79],['vulkaan',7,70]]},
+    wrak:{image:'afbeeldingen/verhalen/het-geheim-van-het-wrak.png',items:[['wrak',72,29],['kistje',48,69],['meeuw',67,53],['schelp',15,86]]}
   };
 
   function shuffle(a, salt=0){
-    const x=[...a]; let seed=(Date.now()+salt+state.nonce*997)%2147483647;
+    const x=[...a]; let seed=(123457+salt*101+state.nonce*997)%2147483647;
     for(let i=x.length-1;i>0;i--){seed=seed*16807%2147483647;const j=seed%(i+1);[x[i],x[j]]=[x[j],x[i]]}return x;
   }
   function renderDoelen(){
@@ -249,13 +254,17 @@
     if(niveau==='basis')return multi('1. '+q.q1,q.a1)+truth+order+open('4. '+q.q2,2)+open('5. '+q.q3,3);
     return open('1. '+q.q1,3)+open('2. '+q.q2,3)+open('3. '+q.q3,3)+open('4. Welke aanwijzing vond jij het belangrijkst? Waarom?',3)+open('5. Bedenk een andere passende titel voor het verhaal.',2);
   }
-  function vocabularyTasksHtml(ds,niveau){
+  function pictureVocabularyHtml(themeId){
+    const set=pictureVocabulary[themeId];if(!set)return'';
+    return `<section class="vocab-task picture-vocab"><h2>3. Zet het juiste nummer in de cirkel</h2><p>Bekijk de woorden en zoek elk voorwerp in de afbeelding.</p><div class="picture-word-list">${set.items.map((x,i)=>`<span><b>${i+1}.</b> ${x[0]}</span>`).join('')}</div><div class="picture-scene" style="background-image:url('${set.image}')">${set.items.map(x=>`<span class="picture-number" style="left:${x[1]}%;top:${x[2]}%"></span>`).join('')}</div></section>`;
+  }
+  function vocabularyTasksHtml(ds,niveau,includeThird=true){
     const items=[];for(let round=0;items.length<3;round++)for(const d of ds){const pair=vocab[d.id][round%vocab[d.id].length];items.push({d,word:pair[0],meaning:pair[1]});if(items.length===3)break}
     const context=x=>{const stem=x.word.toLowerCase().slice(0,Math.max(4,x.word.length-3));return supportBits[x.d.id].find(s=>s.toLowerCase().includes(stem))||`In het verhaal staat het woord ${x.word}.`};
     const match=`<section class="vocab-task"><h2>1. Verbind woord en betekenis</h2><div class="vocab-match"><div>${items.map((x,i)=>`<span>${i+1}. <b>${x.word}</b></span>`).join('')}</div><div>${[...items].reverse().map((x,i)=>`<span>${String.fromCharCode(65+i)}. ${x.meaning}</span>`).join('')}</div></div></section>`;
     const use=`<section class="vocab-task"><h2>2. Kies de juiste zin</h2><p>In welke zin wordt <b>${items[0].word}</b> juist gebruikt?</p><div class="vocab-usage"><label><span class="answer-box"></span><span>${context(items[0])}</span></label><label><span class="answer-box"></span><span>Ik ${items[0].word} elke ochtend naar school.</span></label><label><span class="answer-box"></span><span>De boterham smaakt heel ${items[0].word}.</span></label></div></section>`;
     const third=niveau==='steun'?`<section class="vocab-task"><h2>3. Kies de juiste betekenis</h2><p>Wat betekent <b>${items[1].word}</b>?</p><div class="answers"><label><span class="answer-box"></span><span>${items[1].meaning}</span></label><label><span class="answer-box"></span><span>${items[2].meaning}</span></label></div></section>`:niveau==='basis'?`<section class="vocab-task"><h2>3. Vul het juiste woord in</h2><p class="word-box">Kies uit: ${items.map(x=>x.word).join(' · ')}</p><p>${context(items[1]).replace(new RegExp(items[1].word.slice(0,Math.max(4,items[1].word.length-3))+'[\\p{L}’\'-]*','iu'),'________________')}</p><div class="answer-line"></div></section>`:`<section class="vocab-task"><h2>3. Leg uit en gebruik</h2><p>Leg <b>${items[1].word}</b> uit in je eigen woorden.</p><div class="answer-line"></div><div class="answer-line"></div><p>Schrijf daarna een goede zin met <b>${items[2].word}</b>.</p><div class="answer-line"></div><div class="answer-line"></div></section>`;
-    return match+use+third;
+    return match+use+(includeThird?third:'');
   }
   function writingTasksHtml(theme,niveau){
     const scramble=s=>{const words=s.replace(/[.!?]/g,'').split(' ');return [...words.slice(2),...words.slice(0,2)].join(' · ')};
@@ -284,9 +293,11 @@
     const remove=`<button class="remove-story" data-remove="${blockIndex}" title="Verwijder dit volledige verhaal met vragen">🗑 Verwijder verhaal + vragen</button>`;
     const page1=`<article class="paper story-page story-level-${b.niveau}">${remove}${paperHeader('Samen groeien in lezen',b.naamDatum?'Naam: ____________________<br>Datum: ____________________':'')}<h1 class="story-title">${title}</h1><p class="story-instruction">${b.niveau==='steun'?'★ Lees eerst de woorden en daarna het verhaal.':b.niveau==='basis'?'★★ Lees eerst de woorden en daarna het verhaal.':'★★★ Lees het verhaal meteen mooi door.'}</p>${wordBank}<div class="story-image" role="img" aria-label="Illustratie bij ${theme.title}" style="background-image:url('${theme.image}')"></div><div class="story-text">${story}</div><footer class="page-footer"><span>${lines.length} zinnen · ${ds.map(d=>d.label).join(' · ')}</span><span>pagina ${startPage}</span></footer></article>`;
     const page2=`<article class="paper question-page reading-page question-level-${b.niveau}">${remove}${paperHeader('Begrijpend lezen',b.naamDatum?'Naam: ____________________':'')}<p class="question-kicker">Begrijpend lezen · ${niveauNaam[b.niveau]}</p><h1 class="question-story-title">${title}</h1>${readingTasksHtml(b.verhaalThema,b.niveau,ds)}<footer class="page-footer"><span>Lees terug in de tekst als je twijfelt.</span><span>pagina ${startPage+1}</span></footer></article>`;
-    const page3=`<article class="paper question-page vocabulary-page question-level-${b.niveau}">${remove}${paperHeader('Woordenschat',b.naamDatum?'Naam: ____________________':'')}<p class="question-kicker">Drie woordenschatopdrachten · ${niveauNaam[b.niveau]}</p><h1 class="question-story-title">${title}</h1>${vocabularyTasksHtml(ds,b.niveau)}<footer class="page-footer"><span>Zoek de woorden opnieuw in het verhaal.</span><span>pagina ${startPage+2}</span></footer></article>`;
-    const page4=`<article class="paper question-page writing-page question-level-${b.niveau}">${remove}${paperHeader('Zinnen maken en schrijven',b.naamDatum?'Naam: ____________________':'')}<p class="question-kicker">Schrijven bij het verhaal · ${niveauNaam[b.niveau]}</p><h1 class="question-story-title">${title}</h1>${writingTasksHtml(theme,b.niveau)}<p class="writing-reminder">Controleer elke zin: hoofdletter · goede woordvolgorde · leesteken.</p><footer class="page-footer"><span>Lees je zinnen nog eens na.</span><span>pagina ${startPage+3}</span></footer></article>`;
-    return {html:page1+page2+page3+page4,count:4};
+    const hasPicture=!!pictureVocabulary[b.verhaalThema]&&b.niveau!=='vlot';
+    const page3=`<article class="paper question-page vocabulary-page question-level-${b.niveau}">${remove}${paperHeader('Woordenschat',b.naamDatum?'Naam: ____________________':'')}<p class="question-kicker">Drie woordenschatopdrachten · ${niveauNaam[b.niveau]}</p><h1 class="question-story-title">${title}</h1>${vocabularyTasksHtml(ds,b.niveau,!hasPicture)}<footer class="page-footer"><span>Zoek de woorden opnieuw in het verhaal.</span><span>pagina ${startPage+2}</span></footer></article>`;
+    const picturePage=hasPicture?`<article class="paper question-page vocabulary-page picture-vocabulary-page question-level-${b.niveau}">${remove}${paperHeader('Woordenschat met een afbeelding',b.naamDatum?'Naam: ____________________':'')}<p class="question-kicker">Derde woordenschatopdracht · ${niveauNaam[b.niveau]}</p><h1 class="question-story-title">${title}</h1>${pictureVocabularyHtml(b.verhaalThema)}<footer class="page-footer"><span>Kijk goed naar elk voorwerp.</span><span>pagina ${startPage+3}</span></footer></article>`:'';
+    const writingPageNo=startPage+(hasPicture?4:3);const page4=`<article class="paper question-page writing-page question-level-${b.niveau}">${remove}${paperHeader('Zinnen maken en schrijven',b.naamDatum?'Naam: ____________________':'')}<p class="question-kicker">Schrijven bij het verhaal · ${niveauNaam[b.niveau]}</p><h1 class="question-story-title">${title}</h1>${writingTasksHtml(theme,b.niveau)}<p class="writing-reminder">Controleer elke zin: hoofdletter · goede woordvolgorde · leesteken.</p><footer class="page-footer"><span>Lees je zinnen nog eens na.</span><span>pagina ${writingPageNo}</span></footer></article>`;
+    return {html:page1+page2+page3+picturePage+page4,count:hasPicture?5:4};
   }
   function balancedWords(ds,aantal,salt,niveau){
     const pools=ds.map((d,i)=>{const pool=shuffle(d.words,salt+i*97);if(niveau==='steun')pool.sort((a,b)=>a.length-b.length);if(niveau==='vlot')pool.sort((a,b)=>b.length-a.length);return pool}); const result=[];
@@ -342,7 +353,7 @@
   $('#voegToe').addEventListener('click',add);
   $('#alleNiveaus').addEventListener('click',()=>document.querySelectorAll('#niveauKeuzes label:not([hidden]) input').forEach(x=>x.checked=true));
   $('#wisAlles').addEventListener('click',()=>{if(!state.blocks.length){$('#melding').textContent='De preview is al leeg.';return}if(confirm('Wil je de volledige preview leegmaken? Alle toegevoegde oefeningen en verhalen worden verwijderd.')){state.blocks=[];$('#melding').textContent='De preview is helemaal leeggemaakt.';renderPages()}});
-  $('#vernieuw').addEventListener('click',()=>{state.nonce++;renderPages()});
+  $('#vernieuw').addEventListener('click',()=>{state.nonce++;$('#melding').textContent='De woorden in de toegevoegde woordoefeningen zijn vervangen.';renderPages()});
   async function downloadPdf(){
     if(!window.html2canvas||!window.jspdf?.jsPDF){alert('De PDF-module is nog niet geladen. Controleer je internetverbinding en probeer opnieuw.');return}
     const pages=[...document.querySelectorAll('#pages .paper')];if(!pages.length)return;
@@ -354,7 +365,8 @@
       for(let i=0;i<pages.length;i++){
         label.textContent=`Pagina ${i+1} van ${pages.length} wordt klaargemaakt`;bar.style.width=`${Math.round(8+(i/pages.length)*82)}%`;
         const canvas=await html2canvas(pages[i],{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0});
-        if(i)pdf.addPage('a4','portrait');pdf.addImage(canvas.toDataURL('image/jpeg',.94),'JPEG',0,0,210,297,undefined,'FAST');
+        const sourceRatio=canvas.width/canvas.height,pageRatio=210/297;let pdfWidth=210,pdfHeight=297,pdfX=0,pdfY=0;if(sourceRatio>pageRatio){pdfHeight=210/sourceRatio;pdfY=(297-pdfHeight)/2}else{pdfWidth=297*sourceRatio;pdfX=(210-pdfWidth)/2}
+        if(i)pdf.addPage('a4','portrait');pdf.addImage(canvas.toDataURL('image/jpeg',.94),'JPEG',pdfX,pdfY,pdfWidth,pdfHeight,undefined,'FAST');
         bar.style.width=`${Math.round(8+((i+1)/pages.length)*82)}%`;await new Promise(resolve=>setTimeout(resolve,30));
       }
       label.textContent='De download wordt gestart';bar.style.width='100%';pdf.save(`Leesbooster-${new Date().toISOString().slice(0,10)}.pdf`);await new Promise(resolve=>setTimeout(resolve,450));

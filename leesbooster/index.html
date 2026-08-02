@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Leesbooster – gericht technisch lezen</title>
-  <link rel="stylesheet" href="style.css?v=20260802-2">
+  <link rel="stylesheet" href="style.css?v=20260802-3">
   <script defer src="vendor/html2canvas.min.js"></script>
   <script defer src="vendor/jspdf.umd.min.js"></script>
 </head>
@@ -94,7 +94,7 @@
     <section class="preview-zone">
       <div class="preview-toolbar">
         <div><strong>📄 Bundelpreview</strong><span>Alles binnen de witte pagina komt op papier.</span></div>
-        <button class="shuffle-btn" id="vernieuw" disabled>↻ Nieuwe woorden</button>
+        <button class="shuffle-btn" id="vernieuw" title="Vervang de woorden in alle reeds toegevoegde woordoefeningen" disabled>↻ Andere woorden kiezen</button>
         <button class="download-btn" id="downloadPdf2" disabled>↓ PDF downloaden</button>
         <button class="print-btn" id="printPdf2" disabled>🖨 Afdrukken</button>
       </div>
@@ -125,7 +125,7 @@
   </main>
   <div class="pdf-progress" id="pdfProgress" hidden role="status" aria-live="polite"><div><h2>Je PDF wordt gemaakt…</h2><p id="pdfProgressText">Pagina's voorbereiden</p><div class="pdf-progress-track"><span id="pdfProgressBar"></span></div><small>Laat dit scherm even open. De download start vanzelf.</small></div></div>
   <script src="woorden.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=20260802-4"></script>
   <script src="game.js"></script>
 </body>
 </html>
