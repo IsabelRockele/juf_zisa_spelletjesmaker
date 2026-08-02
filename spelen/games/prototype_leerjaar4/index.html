@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <title>De Rekenkern — tafelavontuur met Lana</title>
   <link rel="stylesheet" href="game.css?v=20260802c">
-  <link rel="stylesheet" href="timer.css?v=20260802h">
+  <link rel="stylesheet" href="timer.css?v=20260802i">
 </head>
 <body>
 <main id="gameShell">
@@ -87,12 +87,20 @@
   </section>
 
   <section id="gameOver" class="overlay" hidden>
-    <article class="card complete-card">
-      <div class="core-win">⚡</div>
-      <span class="badge">DE REKENKERN IS HERSTELD</span>
-      <h1>Alle vijf gebieden voltooid!</h1>
-      <p>Deze spelbeurt is klaar. Er werd geen persoonlijk geheugen opgeslagen.</p>
-      <button id="againButton" type="button">Opnieuw spelen</button>
+    <article class="card complete-card victory-card">
+      <div class="victory-confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="victory-scene">
+        <div class="restored-core"><span>⚡</span></div>
+        <img src="assets/lana-full.png" alt="Lana viert de overwinning">
+      </div>
+      <span class="badge">DE REKENKERN STRAALT WEER</span>
+      <h1>Geweldig, alle vijf werelden zijn gered!</h1>
+      <p>Je oefende 50 tafels en bracht de energie terug naar De Rekenkern.</p>
+      <div class="victory-levels" aria-label="Vijf voltooide levels"><span>✓ 1</span><span>✓ 2</span><span>✓ 3</span><span>✓ 4</span><span>✓ 5</span></div>
+      <div class="victory-actions">
+        <button id="againButton" type="button">↻ Opnieuw spelen</button>
+        <a class="end-menu" href="../start_leerjaar4.html">■ Stoppen — ander spel kiezen</a>
+      </div>
     </article>
   </section>
 </main>
