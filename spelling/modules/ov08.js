@@ -14,6 +14,45 @@
 (function () {
   "use strict";
 
+  const GRAAD2_MEERVOUDTEKSTEN = [
+    {
+      uitgangen: ["en", "s", "'s", "eren"],
+      titel: "Drukte in de winkel",
+      enkelvoud: "In de winkel staat een stoel bij de deur. Op de stoel ligt een boek. Een moeder komt binnen met een kind. Buiten staat een auto te wachten.",
+      meervoud: "In de winkels staan stoelen bij de deuren. Op de stoelen liggen boeken. Moeders komen binnen met kinderen. Buiten staan auto's te wachten."
+    },
+    {
+      uitgangen: ["en", "s", "'s"],
+      titel: "Een bezoek aan het park",
+      enkelvoud: "Een vader wandelt door het park. Bij een boom ziet hij een vlinder. Op het pad staat een kleuter met een paraplu. Naast het hek staat een fiets.",
+      meervoud: "Vaders wandelen door de parken. Bij bomen zien zij vlinders. Op de paden staan kleuters met paraplu's. Naast de hekken staan fietsen."
+    },
+    {
+      uitgangen: ["en"],
+      titel: "In de straat",
+      enkelvoud: "In de straat staat een huis. Voor het huis groeit een plant. Bij de deur staat een stoel. Op de stoel ligt een boek.",
+      meervoud: "In de straten staan huizen. Voor de huizen groeien planten. Bij de deuren staan stoelen. Op de stoelen liggen boeken."
+    },
+    {
+      uitgangen: ["s"],
+      titel: "In de winkel",
+      enkelvoud: "In de winkel werkt een bakker. De bakker praat met een moeder. Haar kleuter kijkt naar een vlinder. Bij de deur wacht een vader.",
+      meervoud: "In de winkels werken bakkers. De bakkers praten met moeders. Hun kleuters kijken naar vlinders. Bij de deuren wachten vaders."
+    },
+    {
+      uitgangen: ["'s"],
+      titel: "Op de foto",
+      enkelvoud: "Op de foto staat een baby bij een koala. Naast de baby staat een opa met een paraplu. Achter hen staat een auto.",
+      meervoud: "Op de foto's staan baby's bij koala's. Naast de baby's staan opa's met paraplu's. Achter hen staan auto's."
+    },
+    {
+      uitgangen: ["eren"],
+      titel: "Op de boerderij",
+      enkelvoud: "Een kind draagt een ei naar de schuur. In de wei loopt een kalf. Het kind kijkt door het hek naar het kalf.",
+      meervoud: "Kinderen dragen eieren naar de schuur. In de wei lopen kalveren. De kinderen kijken door het hek naar de kalveren."
+    }
+  ];
+
   const OV08 = {
     naam: "ov08",
     graad: 1,
@@ -50,7 +89,10 @@
 
     /* Categorieën waaruit OV08 zijn woorden mag halen.
        Alle 4 meervoud-categorieën — leerkracht kiest zelf welke. */
-    CAT_TOEGESTAAN: ["meervoud-en", "meervoud-s", "meervoud-verdubbel", "meervoud-verenkel"],
+    CAT_TOEGESTAAN: [
+      "meervoud-en", "meervoud-s", "meervoud-verdubbel", "meervoud-verenkel",
+      "meervoud-en-g2", "meervoud-s-g2", "meervoud-apostrof-g2", "meervoud-eren-g2"
+    ],
 
     /* Voorbeeldverhaaltjes voor ⭐⭐⭐⭐ Uitbreiden.
        Elk verhaal: 5 zinnen waarin gemarkeerde zn's (tussen *sterretjes*)
@@ -151,7 +193,9 @@
       const cfg = {
         lijntype: o.lijntype || "type3",
         lijnhoogte: o.lijnhoogte || "middel",
-        verhaalIdx: o.verhaalIdx || 0
+        verhaalIdx: o.verhaalIdx || 0,
+        isGraad2: parseInt(opties?.graad || 1, 10) === 2,
+        uitgangen: (o.uitgangen && o.uitgangen.length) ? o.uitgangen : ["en", "s", "'s", "eren"]
       };
 
       // Niveau-specifieke seed-offset zodat dezelfde woorden niet altijd
@@ -161,7 +205,7 @@
       // Haal woorden op
       let beschikbaar = this._haalActieveWoorden();
       if (beschikbaar.length === 0) {
-        beschikbaar = this._haalAlleMeervoudswoorden();
+        beschikbaar = this._haalAlleMeervoudswoorden(cfg.isGraad2 ? 2 : 1);
       }
       if (beschikbaar.length === 0) {
         return `
@@ -205,7 +249,7 @@
 
         <div class="ov01-stappen">
           <div class="ov01-stappen-label">Opdracht:</div>
-          ${this._renderOpdrachtTekst(niveau)}
+          ${this._renderOpdrachtTekst(niveau, cfg)}
         </div>`;
 
       let inhoudHTML = "";
@@ -236,17 +280,17 @@
       }[niveau] || "";
     },
 
-    _renderOpdrachtTekst: function (niveau) {
+    _renderOpdrachtTekst: function (niveau, cfg) {
       const stappen = {
         basis: [
           "Lees het grondwoord.",
-          "Kies of er -en of -s achter komt.",
+          cfg.isGraad2 ? "Omcirkel het correct geschreven meervoud." : "Kies of er -en of -s achter komt.",
           "Schrijf het meervoud op de lijn."
         ],
         kern: [
           "Lees het woord voor de pijl.",
           "Schrijf het meervoud achter de pijl.",
-          "Let op of er -en of -s achter moet."
+          cfg.isGraad2 ? "Pas de juiste meervoudsregel toe." : "Let op of er -en of -s achter moet."
         ],
         verdieping: [
           "Kijk goed: welk vakje is leeg?",
@@ -254,9 +298,9 @@
           "Schrijf het in het lege vakje."
         ],
         uitbreiding: [
-          "Lees elke zin goed.",
-          "Vul het meervoud in op de lijn.",
-          "Schrijf onderaan zelf 3 zinnen met een meervoud."
+          cfg.isGraad2 ? "Lees het tekstje in het enkelvoud." : "Lees elke zin goed.",
+          cfg.isGraad2 ? "Schrijf het volledige tekstje opnieuw in het meervoud." : "Vul het meervoud in op de lijn.",
+          cfg.isGraad2 ? "Pas ook lidwoorden, voornaamwoorden en werkwoorden aan." : "Schrijf onderaan zelf 3 zinnen met een meervoud."
         ]
       }[niveau] || [];
 
@@ -272,15 +316,17 @@
       let rijenHTML = "";
       for (const w of woorden) {
         const juiste = this._uitgangVan(w);
-        const keuzes = ["en", "s"].map(uit => {
-          const isJuist = (uit === juiste);
+        const meervoud = this._meervoudVan(w);
+        const mogelijkeKeuzes = cfg.isGraad2
+          ? this._maakMeervoudKeuzes(w, meervoud, cfg.uitgangen)
+          : ["en", "s"];
+        const keuzes = mogelijkeKeuzes.map(keuze => {
+          const isJuist = cfg.isGraad2 ? keuze === meervoud : keuze === juiste;
           const klasse = (metAntwoorden && isJuist)
             ? "ov07-uitgang-keuze ov08-uitgang-keuze ov07-uitgang-juist ov08-uitgang-juist"
             : "ov07-uitgang-keuze ov08-uitgang-keuze";
-          return `<span class="${klasse}">-${uit}</span>`;
+          return `<span class="${klasse}">${cfg.isGraad2 ? keuze : `-${keuze}`}</span>`;
         }).join("");
-
-        const meervoud = w.meervoud || (w.tekst + juiste);
 
         const antwoord = metAntwoorden
           ? `<span class="ov07-lijn-antwoord ov08-lijn-antwoord">${meervoud}</span>`
@@ -294,7 +340,7 @@
           <div class="ov07-cel ov08-cel ov07-cel-basis ov08-cel-basis" data-woord="${w.tekst}">
             <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord" type="button">✕</button>
             <div class="ov07-grondwoord ov08-grondwoord">${w.tekst}</div>
-            <div class="ov07-uitgang-keuzes ov08-uitgang-keuzes">${keuzes}</div>
+            <div class="ov07-uitgang-keuzes ov08-uitgang-keuzes${cfg.isGraad2 ? " ov07-hele-woord-keuzes" : ""}">${keuzes}</div>
             <div class="ov07-lijn-cel ov08-lijn-cel">${antwoord}${canvas}</div>
           </div>`;
       }
@@ -309,7 +355,7 @@
       let rijenHTML = "";
       woorden.forEach((w, idx) => {
         const juiste = this._uitgangVan(w);
-        const meervoud = w.meervoud || (w.tekst + juiste);
+        const meervoud = this._meervoudVan(w);
 
         // Telwoord-keuze afhankelijk van grondwoord-lengte:
         // - Korte grondwoorden (≤4 letters): alle telwoorden mogen
@@ -354,7 +400,7 @@
       let rijenHTML = "";
       woorden.forEach((w, idx) => {
         const juiste = this._uitgangVan(w);
-        const meervoud = w.meervoud || (w.tekst + juiste);
+        const meervoud = this._meervoudVan(w);
         const richting = richtingen[idx];
 
         let kol1HTML, kol2HTML;
@@ -401,6 +447,9 @@
     /* ⭐⭐⭐⭐ UITBREIDEN — invul-zinnen met (grondwoord) + lijn ernaast,
        + onderaan opdracht "Schrijf zelf 3 zinnen met meervoud". */
     _renderUitbreiding: function (cfg, metAntwoorden) {
+      if (cfg.isGraad2) {
+        return this._renderUitbreidingGraad2(cfg, metAntwoorden);
+      }
       const sl = window.SpellingSchrijflijnen;
       const zb = window.SpellingMeervoudZinnen;
       const self = this;
@@ -470,6 +519,34 @@
           ${eigenHTML}
         </div>`;
     },
+
+    _renderUitbreidingGraad2: function (cfg, metAntwoorden) {
+      const sl = window.SpellingSchrijflijnen;
+      const gekozen = new Set(cfg.uitgangen || []);
+      const passende = GRAAD2_MEERVOUDTEKSTEN
+        .filter(t => t.uitgangen.every(uitgang => gekozen.has(uitgang)))
+        .sort((a, b) => b.uitgangen.length - a.uitgangen.length);
+      const tekst = passende[0] || GRAAD2_MEERVOUDTEKSTEN[2];
+
+      const schrijfregels = Array.from({ length: 7 }, () => {
+        const lijn = sl
+          ? sl.htmlCanvas(cfg.lijntype, cfg.lijnhoogte, 650)
+          : `<div class="ov07-fallback-lijn ov08-fallback-lijn"></div>`;
+        return `<div class="ov07-verhaal-lijn ov08-verhaal-lijn ov08-meervoudtekst-lijn">${lijn}</div>`;
+      }).join("");
+
+      return `
+        <div class="ov07-uitbreiding-container ov08-uitbreiding-container ov08-meervoudtekst">
+          <div class="ov07-verhaal-origineel">
+            <div class="ov07-verhaal-titel">${tekst.titel}</div>
+            <div class="ov08-meervoudtekst-bron">${tekst.enkelvoud}</div>
+          </div>
+          <div class="ov08-eigen-titel">Schrijf het hele tekstje opnieuw. Zet alles wat nodig is in het meervoud.</div>
+          ${metAntwoorden
+            ? `<div class="ov07-verhaal-zinnen-oplossing ov08-meervoudtekst-oplossing">${tekst.meervoud}</div>`
+            : `<div class="ov07-verhaal-schrijf">${schrijfregels}</div>`}
+        </div>`;
+    },
     
     _escapeRe: function(str) {
       return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -478,6 +555,7 @@
     /* ---------- HELPERS ---------- */
 
     _uitgangVan: function (w) {
+      if (w.uitgang) return w.uitgang;
       // Bepaal of het meervoud -en of -s krijgt (gebaseerd op meervoud-veld).
       if (!w.meervoud) return "en";
       if (w.meervoud.endsWith("en")) return "en";
@@ -517,29 +595,51 @@
         .map(w => {
           if (w.meervoud) return w;
           // Zoek het meervoud op in de woordenbibliotheek
-          if (wb && wb.graad1 && wb.graad1[w.categorie]) {
-            const cat = wb.graad1[w.categorie];
+          const data = wb?.["graad" + (w.leerjaar || 1)];
+          if (data && data[w.categorie]) {
+            const cat = data[w.categorie];
             const match = (cat.woorden || []).find(x => x.tekst === w.tekst);
             if (match && match.meervoud) {
-              return { ...w, meervoud: match.meervoud };
+              return { ...w, meervoud: match.meervoud, uitgang: match.uitgang };
             }
           }
           return w;
         });
     },
 
-    _haalAlleMeervoudswoorden: function () {
+    _haalAlleMeervoudswoorden: function (graad = 1) {
       const wb = window.SpellingWoordenbibliotheek;
-      if (!wb || !wb.graad1) return [];
+      const data = wb?.["graad" + graad];
+      if (!data) return [];
       const uit = [];
       for (const catId of this.CAT_TOEGESTAAN) {
-        const cat = wb.graad1[catId];
+        const cat = data[catId];
         if (!cat || !cat.woorden) continue;
         for (const w of cat.woorden) {
-          uit.push({ ...w, categorie: catId, leerjaar: 1 });
+          uit.push({ ...w, categorie: catId, leerjaar: graad });
         }
       }
       return uit;
+    },
+
+    _meervoudVan: function (w) {
+      if (w.meervoud) return w.meervoud;
+      const wb = window.SpellingWoordenbibliotheek;
+      const data = wb?.["graad" + (w.leerjaar || 1)];
+      const bron = data?.[w.categorie]?.woorden?.find(item => item.tekst === w.tekst);
+      return bron?.meervoud || (w.tekst + this._uitgangVan(w));
+    },
+
+    _maakMeervoudKeuzes: function (w, juist, gekozenUitgangen) {
+      const toegestaan = (gekozenUitgangen && gekozenUitgangen.length)
+        ? gekozenUitgangen : ["en", "s", "'s", "eren"];
+      const kandidaten = toegestaan
+        .map(uitgang => w.tekst + uitgang)
+        .filter((vorm, index, lijst) => vorm !== juist && lijst.indexOf(vorm) === index);
+      this._schud(kandidaten);
+      const keuzes = [juist, ...kandidaten.slice(0, 2)];
+      this._schud(keuzes);
+      return keuzes;
     },
 
     _kiesWoorden: function (pool, aantal) {

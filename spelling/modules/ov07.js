@@ -459,7 +459,7 @@ window.SpellingModules.ov07 = {
       const juiste = this._uitgangVan(w);
       const verkleinwoord = this._verkleinwoordVan(w);
       const mogelijkeKeuzes = cfg.isGraad2
-        ? this._maakVerkleinwoordKeuzes(w, verkleinwoord)
+        ? this._maakVerkleinwoordKeuzes(w, verkleinwoord, cfg.uitgangen)
         : ["je", "tje", "pje"];
       const keuzes = mogelijkeKeuzes.map(keuze => {
         const isJuist = cfg.isGraad2 ? keuze === verkleinwoord : keuze === juiste;
@@ -671,15 +671,26 @@ window.SpellingModules.ov07 = {
     return this._zoekVerkleinwoord(w.tekst);
   },
 
-  _maakVerkleinwoordKeuzes: function(w, juist) {
+  _maakVerkleinwoordKeuzes: function(w, juist, gekozenUitgangen) {
     const grondwoord = w.tekst;
-    const kandidaten = [
-      grondwoord + "etje",
-      grondwoord + "tje",
-      grondwoord + "je",
-      grondwoord + "kje",
-      grondwoord + "pje"
-    ].filter((vorm, index, lijst) => vorm !== juist && lijst.indexOf(vorm) === index);
+    const toegestaan = (gekozenUitgangen && gekozenUitgangen.length > 0)
+      ? gekozenUitgangen
+      : ["je", "tje", "pje", "etje", "kje"];
+
+    // Bouw alleen afleiders met regels die de leerkracht heeft geselecteerd.
+    // Ook de 'naïeve' vorm van de juiste regel blijft bruikbaar als fout:
+    // kam + etje = kametje, terwijl het correct kammetje is.
+    const kandidaten = toegestaan
+      .map(uitgang => grondwoord + uitgang)
+      .filter((vorm, index, lijst) => vorm !== juist && lijst.indexOf(vorm) === index);
+
+    // Meng eerst de foutregels, zodat bij een brede selectie niet telkens
+    // alleen -je/-tje/-etje terugkomen maar ook -pje en -kje rouleren.
+    for (let i = kandidaten.length - 1; i > 0; i--) {
+      const j = Math.floor(this._random() * (i + 1));
+      [kandidaten[i], kandidaten[j]] = [kandidaten[j], kandidaten[i]];
+    }
+
     const keuzes = [juist, ...kandidaten.slice(0, 2)];
     for (let i = keuzes.length - 1; i > 0; i--) {
       const j = Math.floor(this._random() * (i + 1));

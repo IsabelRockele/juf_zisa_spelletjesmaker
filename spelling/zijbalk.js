@@ -94,6 +94,13 @@ window.SpellingZijbalk = (function() {
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 6,
       enkelVoor: ["samenstellingen"]
+    },
+    {
+      id: "ov11", label: "🔎 Doffe klank in woorddelen",
+      korteUitleg: "Voor- en achtervoegsels herkennen en correct schrijven",
+      niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
+      defaultAantal: 8,
+      enkelVoor: ["doffe-klank-voorvoegsel", "doffe-klank-achtervoegsel"]
     }
     // Weekdictee staat NIET meer in de oefenvormen-lijst van de werkbladen-modus.
     // Hij heeft zijn eigen modus-knop op het startscherm en zijn eigen paneel
@@ -164,6 +171,12 @@ window.SpellingZijbalk = (function() {
       kern: "Twee plaatjes (deel + deel = samenstelling). Kind plakt de woorden aan elkaar zonder spatie en schrijft op.",
       verdieping: "Twee kolommen woorden. Kind trekt lijntjes tussen passende delen en schrijft de samenstellingen op.",
       uitbreiding: "Beschrijving lezen en zelf het samengesteld woord bedenken. Werkt aan woordenschat én spelling tegelijk."
+    },
+    ov11: {
+      basis: "Kind kiest de juiste schrijfwijze uit drie woorden en schrijft het correcte woord over.",
+      kern: "Een voor- of achtervoegsel ontbreekt. Kind kiest het juiste woorddeel en schrijft het hele woord.",
+      verdieping: "Kind sorteert de gekozen woorden volgens hun voor- of achtervoegsel.",
+      uitbreiding: "Kind spoort fout geschreven woorden in zinnen op en schrijft elke zin correct over."
     }
   };
 
@@ -562,6 +575,19 @@ window.SpellingZijbalk = (function() {
         );
       }
 
+      if (oef.id === "ov08") {
+        return gekozen.length > 0 && gekozen.every(id =>
+          window.SpellingWoordenbibliotheek?.graad2?.[id]?.groep === "meervouden"
+        );
+      }
+
+      if (oef.id === "ov11") {
+        return gekozen.length > 0 && gekozen.every(id => {
+          const groep = window.SpellingWoordenbibliotheek?.graad2?.[id]?.groep;
+          return groep === "doffe-klank-voorvoegsel" || groep === "doffe-klank-achtervoegsel";
+        });
+      }
+
       if (oef.id === "ov04" || oef.id === "ov05") {
         // De verlengingsoefeningen zijn de eerste volledig afgewerkte
         // nieuwe oefenlijn. Andere graad-2-doelen worden later vrijgegeven.
@@ -644,6 +670,7 @@ window.SpellingZijbalk = (function() {
       }
       
       const aan = state.aangevinkt || false;
+      const beschikbareNiveaus = oef.niveaus;
       
       html += `
         <details class="zb-oefenvorm ${aan ? 'aan' : ''}" data-oef="${oef.id}" ${aan ? 'open' : ''}>
@@ -653,7 +680,7 @@ window.SpellingZijbalk = (function() {
           </summary>
           <div class="zb-oef-instel">`;
       
-      if (oef.niveaus.length > 0) {
+      if (beschikbareNiveaus.length > 0) {
         // Check of we in herhalings-modus zijn (dan: aantal-input per niveau,
         // ipv één globale aantal-input voor de hele OV)
         const inHerhalingsModus = document.querySelector("#modus-herhaling")?.style.display !== "none"
@@ -663,7 +690,7 @@ window.SpellingZijbalk = (function() {
         const maxPerNiveau = window.SpellingModules?.[oef.id]?._maxPerNiveau || {};
         
         html += `<div class="zb-oef-rij"><label>Niveau(s):</label><div class="zb-oef-niveaus">`;
-        for (const niv of oef.niveaus) {
+        for (const niv of beschikbareNiveaus) {
           const ningevinkt = state.niveaus && state.niveaus.has(niv);
           
           // Aantal-input alleen in herhalings-modus + alleen als niveau aangevinkt

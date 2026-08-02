@@ -183,6 +183,37 @@ window.SpellingBundel = {
     if (oef.id === "ov02") {
       subOpties.metPlaatje = oef.metPlaatje === true;
     }
+
+    // OV07: gebruik exact de uitgangen die de leerkracht bij het doel koos.
+    // Dezelfde selectie begrenst ook de foutieve antwoorden.
+    if (oef.id === "ov07") {
+      const uitgangPerCategorie = {
+        "verklein-je": "je", "verklein-je-g2": "je",
+        "verklein-tje": "tje", "verklein-tje-g2": "tje",
+        "verklein-pje": "pje", "verklein-pje-g2": "pje",
+        "verklein-etje-g2": "etje", "verklein-kje-g2": "kje"
+      };
+      const gekozenCats = zb?.getAangevinkteCategorieIds?.() || [];
+      subOpties.uitgangen = [...new Set(
+        gekozenCats.map(id => uitgangPerCategorie[id]).filter(Boolean)
+      )];
+    }
+
+    // OV08: ook de antwoordmogelijkheden volgen exact de gekozen
+    // meervoudstypes. Niet-aangevinkte uitgangen worden niet als afleider gebruikt.
+    if (oef.id === "ov08") {
+      const uitgangPerCategorie = {
+        "meervoud-en": "en", "meervoud-en-g2": "en",
+        "meervoud-s": "s", "meervoud-s-g2": "s",
+        "meervoud-apostrof-g2": "'s",
+        "meervoud-eren-g2": "eren",
+        "meervoud-verdubbel": "en", "meervoud-verenkel": "en"
+      };
+      const gekozenCats = zb?.getAangevinkteCategorieIds?.() || [];
+      subOpties.uitgangen = [...new Set(
+        gekozenCats.map(id => uitgangPerCategorie[id]).filter(Boolean)
+      )];
+    }
     
     return {
       categorie: oef.id,
