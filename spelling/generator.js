@@ -90,7 +90,7 @@ window.SpellingGenerator = {
       });
       ov07 = {
         niveaus: niveaus.length > 0 ? niveaus : ["basis"],
-        uitgangen: uitgangen.length > 0 ? uitgangen : ["je", "tje", "pje"],
+        uitgangen: uitgangen.length > 0 ? uitgangen : (graad === 2 ? ["je", "tje", "pje", "etje", "kje"] : ["je", "tje", "pje"]),
         aantalWoorden: parseInt(document.querySelector("#ov07-aantal-woorden")?.value || "8", 10),
         verhaalIdx: parseInt(document.querySelector("#ov07-verhaal-keuze")?.value || "0", 10),
         lijnhoogte: globaalLijnhoogte,

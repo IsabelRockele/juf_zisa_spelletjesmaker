@@ -342,11 +342,12 @@ window.SpellingBundel = {
 
     if (this.items.length === 0) {
       preview.innerHTML = `
-        <div class="preview-leeg">
+        <div class="preview-leeg" style="width:min(720px, 100%);max-width:720px;margin:0 auto;">
           <h3>👋 Welkom!</h3>
           <p>Kies links een spellingdoel en oefening. Klik daarna op <strong>"📋 Maak volledig werkblad"</strong>.</p>
           <p class="preview-leeg-tip">Zisa gebruikt automatisch het passende aantal woorden om de A4-pagina te vullen.</p>
         </div>`;
+      window.SpellingPreviewSchaal?.pasAan(preview);
       return;
     }
 
@@ -396,6 +397,7 @@ window.SpellingBundel = {
     if (window.SpellingSchrijflijnen) {
       window.SpellingSchrijflijnen.tekenAlle(preview);
     }
+    window.SpellingPreviewSchaal?.pasAan(preview);
 
     // Verwijder-knoppen koppelen
     preview.querySelectorAll(".bundel-item-verwijder-knop").forEach(btn => {

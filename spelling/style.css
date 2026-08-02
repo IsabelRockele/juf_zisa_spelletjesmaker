@@ -60,6 +60,8 @@ body {
   max-width: none;
   padding: 16px 24px;
   margin: 0;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 @media (max-width: 1250px) and (min-width: 901px) {
@@ -555,6 +557,9 @@ body {
   text-align: center;
   padding: 60px 30px;
   color: #666;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
 }
 .preview-leeg h3 {
   margin-bottom: 12px;
@@ -1397,6 +1402,23 @@ body.bewerk-aan [data-bewerk-id]:focus {
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   min-height: 600px;
+  min-width: 0;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+#preview {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Vangnet voordat JavaScript de exacte schaal berekent. Zo verschijnt een
+   A4 nooit eerst op ware grootte of gedeeltelijk buiten beeld. */
+.preview-modus > .bundel-item-wrap {
+  transform: scale(0.82);
+  transform-origin: top center;
 }
 
 /* ===== OPLOSSINGEN-MODUS ===== */
@@ -3568,6 +3590,44 @@ body.bewerk-aan [data-bewerk-id]:focus {
   gap: 6px;
   justify-content: center;
   margin-bottom: 4px;
+}
+
+/* Graad 2 gebruikt vijf mogelijke uitgangen. Verdeel ze binnen de cel,
+   zodat ze de vaste A4-breedte van de preview nooit kunnen openrekken. */
+.ov07-cel-basis .ov07-uitgang-keuzes.ov07-vijf-keuzes {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px 4px;
+  width: 100%;
+}
+.ov07-cel-basis .ov07-vijf-keuzes .ov07-uitgang-keuze {
+  min-width: 0;
+  grid-column: span 2;
+  padding: 4px 5px;
+  font-size: 0.95rem;
+  text-align: center;
+  white-space: nowrap;
+}
+.ov07-cel-basis .ov07-vijf-keuzes .ov07-uitgang-keuze:nth-child(4) {
+  grid-column: 2 / span 2;
+}
+.ov07-cel-basis .ov07-vijf-keuzes .ov07-uitgang-keuze:nth-child(5) {
+  grid-column: 4 / span 2;
+}
+
+/* In graad 2 moet het kind ook verdubbelen of de g van -ing weglaten.
+   Daarom tonen we volledige woordvormen in plaats van losse achtervoegsels. */
+.ov07-cel-basis .ov07-uitgang-keuzes.ov07-hele-woord-keuzes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3px;
+  width: 100%;
+}
+.ov07-cel-basis .ov07-hele-woord-keuzes .ov07-uitgang-keuze {
+  width: 100%;
+  padding: 3px 8px;
+  font-size: 0.9rem;
+  text-align: center;
 }
 .ov07-cel-basis .ov07-lijn-cel {
   width: 100%;

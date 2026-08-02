@@ -68,7 +68,7 @@ window.SpellingZijbalk = (function() {
       defaultAantal: 6
     },
     {
-      id: "ov07", label: "🧸 Oefenvorm enkel voor verkleinwoorden",
+      id: "ov07", label: "🧸 Verkleinwoorden maken",
       korteUitleg: "Verkleinwoorden stap voor stap toepassen",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 8,
@@ -544,6 +544,36 @@ window.SpellingZijbalk = (function() {
   function _isOefenvormZichtbaar(oef) {
     const soorten = _detecteerCategorieSoorten();
     const ietsAangevinkt = soorten.heeftGenerieke || soorten.specifiekeGroepen.size > 0;
+
+    /* Graad 2 wordt doel per doel afgewerkt. Toon hier uitsluitend vormen
+       die inhoudelijk klaar zijn; zo kan een bewaarde keuze uit graad 1 of
+       een nog onafgewerkte categorie nooit een leeg/verkeerd blad maken. */
+    if (actieveGraad === 2) {
+      const gekozen = [...getAangevinkteCats()];
+      const verlengDoelen = new Set(["verlengen-td-g2", "verlengen-pb-g2"]);
+
+      if (oef.id === "ov09") {
+        return soorten.specifiekeGroepen.has("stukjeswoorden");
+      }
+
+      if (oef.id === "ov07") {
+        return gekozen.length > 0 && gekozen.every(id =>
+          window.SpellingWoordenbibliotheek?.graad2?.[id]?.groep === "verkleinwoorden"
+        );
+      }
+
+      if (oef.id === "ov04" || oef.id === "ov05") {
+        // De verlengingsoefeningen zijn de eerste volledig afgewerkte
+        // nieuwe oefenlijn. Andere graad-2-doelen worden later vrijgegeven.
+        if (gekozen.length === 0 || !gekozen.every(id => verlengDoelen.has(id))) {
+          return false;
+        }
+        // Ga hieronder nog door de bestaande paar-detectie, zodat de vorm
+        // alleen verschijnt als de gekozen woorden werkelijk bruikbaar zijn.
+      } else {
+        return false;
+      }
+    }
     
     // Weekdictee: zichtbaar zodra er iets aangevinkt is (anders heeft het geen woorden)
     if (oef.id === "weekdictee") {
@@ -738,7 +768,10 @@ window.SpellingZijbalk = (function() {
     }
     
     if (!html) {
-      html = `<div class="zb-oef-leeg"><strong>Kies eerst een spellingdoel</strong><span>Daarna toont Zisa alleen de oefeningen die daarbij passen.</span></div>`;
+      const heeftDoel = getAangevinkteCats().size > 0;
+      html = heeftDoel
+        ? `<div class="zb-oef-leeg"><strong>Voor dit spellingdoel is nog geen oefening beschikbaar</strong><span>Zisa toont een oefenvorm pas wanneer die volledig is afgewerkt en getest.</span></div>`
+        : `<div class="zb-oef-leeg"><strong>Kies eerst een spellingdoel</strong><span>Daarna toont Zisa alleen de oefeningen die daarbij passen.</span></div>`;
     }
     container.innerHTML = html;
     updateOefenvormTeller();

@@ -44,7 +44,12 @@ window.SpellingModules.ov07 = {
   CAT_NAAR_UITGANG: {
     "verklein-je":  "je",
     "verklein-tje": "tje",
-    "verklein-pje": "pje"
+    "verklein-pje": "pje",
+    "verklein-je-g2": "je",
+    "verklein-tje-g2": "tje",
+    "verklein-pje-g2": "pje",
+    "verklein-etje-g2": "etje",
+    "verklein-kje-g2": "kje"
   },
 
   /* Voorbeeldverhaaltjes voor ⭐⭐⭐⭐ Uitbreiden.
@@ -115,6 +120,39 @@ window.SpellingModules.ov07 = {
         "Daarachter rijdt een *trein* voorbij.",
         "Pim hoort ook een *kraan* op de werf.",
         "Hij houdt zijn *duim* in de lucht."
+      ]
+    }
+  ],
+
+  VERHALEN_GRAAD2: [
+    {
+      titel: "Een kleine tentoonstelling",
+      zinnen: [
+        "Op tafel ligt een *boek* naast een *bel*.",
+        "Bij het raam staat een *stoel* met een *bloem*.",
+        "Aan de muur hangt een tekening van een *koning*.",
+        "Naast de deur staat een *kast*.",
+        "Alles in de tentoonstelling is heel klein."
+      ]
+    },
+    {
+      titel: "De miniatuurtuin",
+      zinnen: [
+        "Mila bouwt een kleine tuin rond een *boom*.",
+        "Ze maakt een pad naar een *woning*.",
+        "Op het pad ligt een *bal*.",
+        "Voor het huis staat een *plant* in een pot.",
+        "Aan het hek hangt een kleine *bel*."
+      ]
+    },
+    {
+      titel: "In de speelgoedwinkel",
+      zinnen: [
+        "In de etalage staat een *trein* naast een *auto*.",
+        "Een pop houdt een *boek* in haar *hand*.",
+        "Op de grond ligt een *bal*.",
+        "Aan de kassa hangt een gouden *ketting*.",
+        "Noor kiest een pop met een *riem*."
       ]
     }
   ],
@@ -202,6 +240,20 @@ window.SpellingModules.ov07 = {
               <small>boom → boompje</small>
             </div>
           </label>
+          <label class="ov-niveau-vink actief">
+            <input type="checkbox" data-uitgang="etje" checked>
+            <div class="ov-niveau-vink-tekst">
+              <strong>-etje</strong>
+              <small>bal → balletje</small>
+            </div>
+          </label>
+          <label class="ov-niveau-vink actief">
+            <input type="checkbox" data-uitgang="kje" checked>
+            <div class="ov-niveau-vink-tekst">
+              <strong>-kje</strong>
+              <small>koning → koninkje</small>
+            </div>
+          </label>
         </div>
       </div>
 
@@ -261,7 +313,9 @@ window.SpellingModules.ov07 = {
   genereerBlad: function(opties, metAntwoorden = false) {
     const o = opties.ov07 || {};
     const niveaus = (o.niveaus && o.niveaus.length > 0) ? o.niveaus : ["basis"];
-    const uitgangen = (o.uitgangen && o.uitgangen.length > 0) ? o.uitgangen : ["je", "tje", "pje"];
+    const isGraad2 = parseInt(opties.graad || 1, 10) === 2;
+    const standaardUitgangen = isGraad2 ? ["je", "tje", "pje", "etje", "kje"] : ["je", "tje", "pje"];
+    const uitgangen = (o.uitgangen && o.uitgangen.length > 0) ? o.uitgangen : standaardUitgangen;
     const verhaalIdx = parseInt(o.verhaalIdx || 0, 10);
     const lijntype = o.lijntype || "type3";
     const lijnhoogte = o.lijnhoogte || "middel";
@@ -275,7 +329,7 @@ window.SpellingModules.ov07 = {
     let beschikbaar = this._filterVerkleinwoorden(gekozen);
     
     if (beschikbaar.length === 0) {
-      beschikbaar = this._haalAlleVerkleinwoorden();
+      beschikbaar = this._haalAlleVerkleinwoorden(isGraad2 ? 2 : 1);
     }
 
     if (beschikbaar.length === 0) {
@@ -310,7 +364,7 @@ window.SpellingModules.ov07 = {
     return niveaus.map(niveau => {
       this._seed = (basisSeed + (SEED_OFFSET[niveau] || 0)) & 0xFFFFFFFF;
       return this._renderEenBlad(niveau, beschikbaar, {
-        uitgangen, aantalWoorden: aantalVoor(niveau), verhaalIdx, lijntype, lijnhoogte, ondertitel
+        uitgangen, aantalWoorden: aantalVoor(niveau), verhaalIdx, lijntype, lijnhoogte, ondertitel, isGraad2
       }, metAntwoorden);
     }).join("");
   },
@@ -336,7 +390,7 @@ window.SpellingModules.ov07 = {
       inhoudHTML = this._renderBasis(werkWoorden, cfg, metAntwoorden);
       opdrachtTekst = `
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Lees het woord.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Omcirkel de juiste uitgang: -je, -tje of -pje.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>${cfg.isGraad2 ? "Omcirkel het correct geschreven verkleinwoord." : "Omcirkel de juiste uitgang: -je, -tje of -pje."}</span></div>
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het hele verkleinwoord op de lijn.</span></div>`;
     } else if (niveau === "kern") {
       inhoudHTML = this._renderKern(werkWoorden, cfg, metAntwoorden);
@@ -403,15 +457,17 @@ window.SpellingModules.ov07 = {
     let rijenHTML = "";
     for (const w of woorden) {
       const juiste = this._uitgangVan(w);
-      const keuzes = ["je", "tje", "pje"].map(uit => {
-        const isJuist = (uit === juiste);
+      const verkleinwoord = this._verkleinwoordVan(w);
+      const mogelijkeKeuzes = cfg.isGraad2
+        ? this._maakVerkleinwoordKeuzes(w, verkleinwoord)
+        : ["je", "tje", "pje"];
+      const keuzes = mogelijkeKeuzes.map(keuze => {
+        const isJuist = cfg.isGraad2 ? keuze === verkleinwoord : keuze === juiste;
         const klasse = (metAntwoorden && isJuist)
           ? "ov07-uitgang-keuze ov07-uitgang-juist"
           : "ov07-uitgang-keuze";
-        return `<span class="${klasse}">-${uit}</span>`;
+        return `<span class="${klasse}">${cfg.isGraad2 ? keuze : `-${keuze}`}</span>`;
       }).join("");
-
-      const verkleinwoord = w.verklein || (w.tekst + juiste);
 
       const antwoord = metAntwoorden
         ? `<span class="ov07-lijn-antwoord">${verkleinwoord}</span>`
@@ -426,7 +482,7 @@ window.SpellingModules.ov07 = {
         <div class="ov07-cel ov07-cel-basis" data-woord="${w.tekst}">
           <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord" type="button">✕</button>
           <div class="ov07-grondwoord">${w.tekst}</div>
-          <div class="ov07-uitgang-keuzes">${keuzes}</div>
+          <div class="ov07-uitgang-keuzes${cfg.isGraad2 ? " ov07-hele-woord-keuzes" : ""}">${keuzes}</div>
           <div class="ov07-lijn-cel">${antwoord}${canvas}</div>
         </div>`;
     }
@@ -441,7 +497,7 @@ window.SpellingModules.ov07 = {
     let rijenHTML = "";
     for (const w of woorden) {
       const juiste = this._uitgangVan(w);
-      const verkleinwoord = w.verklein || (w.tekst + juiste);
+      const verkleinwoord = this._verkleinwoordVan(w);
 
       const antwoord = metAntwoorden
         ? `<span class="ov07-lijn-antwoord">${verkleinwoord}</span>`
@@ -479,7 +535,7 @@ window.SpellingModules.ov07 = {
     let rijenHTML = "";
     woorden.forEach((w, idx) => {
       const juiste = this._uitgangVan(w);
-      const verkleinwoord = w.verklein || (w.tekst + juiste);
+      const verkleinwoord = this._verkleinwoordVan(w);
       const richting = richtingen[idx];
 
       let kol1HTML, kol2HTML;
@@ -521,7 +577,8 @@ window.SpellingModules.ov07 = {
   /* ⭐⭐⭐⭐ UITBREIDEN */
   _renderUitbreiding: function(cfg, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
-    const verhaal = this.VERHALEN[cfg.verhaalIdx] || this.VERHALEN[0];
+    const verhalen = cfg.isGraad2 ? this.VERHALEN_GRAAD2 : this.VERHALEN;
+    const verhaal = verhalen[cfg.verhaalIdx % verhalen.length] || verhalen[0];
 
     let origineelHTML = `<div class="ov07-verhaal-origineel">`;
     origineelHTML += `<div class="ov07-verhaal-titel">${verhaal.titel}</div>`;
@@ -573,7 +630,7 @@ window.SpellingModules.ov07 = {
     }
     if (w.verklein && w.tekst) {
       const verschil = w.verklein.slice(w.tekst.length);
-      if (verschil === "je" || verschil === "tje" || verschil === "pje") {
+      if (["je", "tje", "pje", "etje", "kje"].includes(verschil)) {
         return verschil;
       }
     }
@@ -586,11 +643,14 @@ window.SpellingModules.ov07 = {
   _zoekVerkleinwoord: function(grondwoord) {
     const wb = window.SpellingWoordenbibliotheek;
     const lower = grondwoord.toLowerCase();
-    if (wb && wb.graad1) {
-      for (const [catId, cat] of Object.entries(wb.graad1)) {
-        if (!cat.woorden) continue;
-        for (const w of cat.woorden) {
-          if (w.tekst === lower && w.verklein) return w.verklein;
+    if (wb) {
+      for (const graadData of [wb.graad2, wb.graad1]) {
+        if (!graadData) continue;
+        for (const cat of Object.values(graadData)) {
+          if (!cat.woorden) continue;
+          for (const w of cat.woorden) {
+            if (w.tekst === lower && w.verklein) return w.verklein;
+          }
         }
       }
     }
@@ -598,19 +658,50 @@ window.SpellingModules.ov07 = {
     return lower + uit;
   },
 
+  /* De woordenkiezer bewaart bewust alleen de basisgegevens van een woord.
+     Zoek daarom de officiële verkleinvorm opnieuw op in de bibliotheek.
+     Dit is noodzakelijk voor -etje en vooral -kje: zending → zendinkje,
+     niet zendingkje. */
+  _verkleinwoordVan: function(w) {
+    if (w.verklein) return w.verklein;
+    const wb = window.SpellingWoordenbibliotheek;
+    const data = wb?.["graad" + (w.leerjaar || 1)];
+    const bron = data?.[w.categorie]?.woorden?.find(item => item.tekst === w.tekst);
+    if (bron?.verklein) return bron.verklein;
+    return this._zoekVerkleinwoord(w.tekst);
+  },
+
+  _maakVerkleinwoordKeuzes: function(w, juist) {
+    const grondwoord = w.tekst;
+    const kandidaten = [
+      grondwoord + "etje",
+      grondwoord + "tje",
+      grondwoord + "je",
+      grondwoord + "kje",
+      grondwoord + "pje"
+    ].filter((vorm, index, lijst) => vorm !== juist && lijst.indexOf(vorm) === index);
+    const keuzes = [juist, ...kandidaten.slice(0, 2)];
+    for (let i = keuzes.length - 1; i > 0; i--) {
+      const j = Math.floor(this._random() * (i + 1));
+      [keuzes[i], keuzes[j]] = [keuzes[j], keuzes[i]];
+    }
+    return keuzes;
+  },
+
   _filterVerkleinwoorden: function(woorden) {
     return woorden.filter(w => w.categorie && this.CAT_NAAR_UITGANG[w.categorie]);
   },
 
-  _haalAlleVerkleinwoorden: function() {
+  _haalAlleVerkleinwoorden: function(graad = 1) {
     const wb = window.SpellingWoordenbibliotheek;
-    if (!wb || !wb.graad1) return [];
+    const data = wb?.["graad" + graad];
+    if (!data) return [];
     const uit = [];
     for (const catId of Object.keys(this.CAT_NAAR_UITGANG)) {
-      const cat = wb.graad1[catId];
+      const cat = data[catId];
       if (!cat || !cat.woorden) continue;
       for (const w of cat.woorden) {
-        uit.push({ ...w, categorie: catId, leerjaar: 1 });
+        uit.push({ ...w, categorie: catId, leerjaar: graad });
       }
     }
     return uit;

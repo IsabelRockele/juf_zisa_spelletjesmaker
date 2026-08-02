@@ -220,6 +220,19 @@ window.SpellingAfleiders = (function() {
     }
   };
 
+  // Dezelfde spellingmoeilijkheden hebben in graad 2 duidelijkere
+  // categorie-id's. Laat ze dezelfde beproefde afleiderregels gebruiken.
+  const GRAAD2_ALIASES = {
+    "ei-g2": "tw-ei", "ij-g2": "tw-ij",
+    "au-g2": "tw-au", "ou-g2": "tw-ou",
+    "aai-g2": "tw-aai", "ooi-g2": "tw-ooi", "oei-g2": "tw-oei",
+    "eeuw-g2": "tw-eeuw", "ieuw-g2": "tw-ieuw",
+    "ng-g2": "ng-woorden", "nk-g2": "nk-woorden"
+  };
+  Object.entries(GRAAD2_ALIASES).forEach(([nieuw, bestaand]) => {
+    REGELS[nieuw] = REGELS[bestaand];
+  });
+
   function _kies2(opties) {
     const k = [...opties];
     // willekeurig 2 selecteren

@@ -67,11 +67,13 @@ window.SpellingModules.ov05 = {
       id: "ei-ij",
       titel: "ei vs ij",
       trigger: (aangevinkteCats) => {
-        if (!(aangevinkteCats.includes("tw-ei") && aangevinkteCats.includes("tw-ij"))) return null;
+        const eiCat = aangevinkteCats.includes("ei-g2") ? "ei-g2" : "tw-ei";
+        const ijCat = aangevinkteCats.includes("ij-g2") ? "ij-g2" : "tw-ij";
+        if (!(aangevinkteCats.includes(eiCat) && aangevinkteCats.includes(ijCat))) return null;
         return {
           kolommen: [
-            { titel: "ei", kleur: "#E53935", filter: w => w.categorie === "tw-ei" },
-            { titel: "ij", kleur: "#1E88E5", filter: w => w.categorie === "tw-ij" }
+            { titel: "ei", kleur: "#E53935", filter: w => w.categorie === eiCat },
+            { titel: "ij", kleur: "#1E88E5", filter: w => w.categorie === ijCat }
           ]
         };
       }
@@ -80,11 +82,13 @@ window.SpellingModules.ov05 = {
       id: "au-ou",
       titel: "au vs ou",
       trigger: (aangevinkteCats) => {
-        if (!(aangevinkteCats.includes("tw-au") && aangevinkteCats.includes("tw-ou"))) return null;
+        const auCat = aangevinkteCats.includes("au-g2") ? "au-g2" : "tw-au";
+        const ouCat = aangevinkteCats.includes("ou-g2") ? "ou-g2" : "tw-ou";
+        if (!(aangevinkteCats.includes(auCat) && aangevinkteCats.includes(ouCat))) return null;
         return {
           kolommen: [
-            { titel: "au", kleur: "#FB8C00", filter: w => w.categorie === "tw-au" },
-            { titel: "ou", kleur: "#8E24AA", filter: w => w.categorie === "tw-ou" }
+            { titel: "au", kleur: "#FB8C00", filter: w => w.categorie === auCat },
+            { titel: "ou", kleur: "#8E24AA", filter: w => w.categorie === ouCat }
           ]
         };
       }
@@ -94,9 +98,10 @@ window.SpellingModules.ov05 = {
       titel: "aai / ooi / oei",
       trigger: (aangevinkteCats) => {
         const k = [];
-        if (aangevinkteCats.includes("tw-aai")) k.push({ titel: "aai", kleur: "#E53935", filter: w => w.categorie === "tw-aai" });
-        if (aangevinkteCats.includes("tw-ooi")) k.push({ titel: "ooi", kleur: "#4CAF50", filter: w => w.categorie === "tw-ooi" });
-        if (aangevinkteCats.includes("tw-oei")) k.push({ titel: "oei", kleur: "#1E88E5", filter: w => w.categorie === "tw-oei" });
+        [["tw-aai", "aai-g2", "aai", "#E53935"], ["tw-ooi", "ooi-g2", "ooi", "#4CAF50"], ["tw-oei", "oei-g2", "oei", "#1E88E5"]].forEach(([oud, nieuw, titel, kleur]) => {
+          const cat = aangevinkteCats.includes(nieuw) ? nieuw : oud;
+          if (aangevinkteCats.includes(cat)) k.push({ titel, kleur, filter: w => w.categorie === cat });
+        });
         if (k.length < 2) return null;
         return { kolommen: k };
       }
@@ -105,11 +110,13 @@ window.SpellingModules.ov05 = {
       id: "eeuw-ieuw",
       titel: "eeuw / ieuw",
       trigger: (aangevinkteCats) => {
-        if (!(aangevinkteCats.includes("tw-eeuw") && aangevinkteCats.includes("tw-ieuw"))) return null;
+        const eeuwCat = aangevinkteCats.includes("eeuw-g2") ? "eeuw-g2" : "tw-eeuw";
+        const ieuwCat = aangevinkteCats.includes("ieuw-g2") ? "ieuw-g2" : "tw-ieuw";
+        if (!(aangevinkteCats.includes(eeuwCat) && aangevinkteCats.includes(ieuwCat))) return null;
         return {
           kolommen: [
-            { titel: "eeuw", kleur: "#E53935", filter: w => w.categorie === "tw-eeuw" },
-            { titel: "ieuw", kleur: "#1E88E5", filter: w => w.categorie === "tw-ieuw" }
+            { titel: "eeuw", kleur: "#E53935", filter: w => w.categorie === eeuwCat },
+            { titel: "ieuw", kleur: "#1E88E5", filter: w => w.categorie === ieuwCat }
           ]
         };
       }
@@ -118,11 +125,13 @@ window.SpellingModules.ov05 = {
       id: "ng-nk",
       titel: "ng vs nk",
       trigger: (aangevinkteCats) => {
-        if (!(aangevinkteCats.includes("ng-woorden") && aangevinkteCats.includes("nk-woorden"))) return null;
+        const ngCat = aangevinkteCats.includes("ng-g2") ? "ng-g2" : "ng-woorden";
+        const nkCat = aangevinkteCats.includes("nk-g2") ? "nk-g2" : "nk-woorden";
+        if (!(aangevinkteCats.includes(ngCat) && aangevinkteCats.includes(nkCat))) return null;
         return {
           kolommen: [
-            { titel: "ng", kleur: "#9C27B0", filter: w => w.categorie === "ng-woorden" },
-            { titel: "nk", kleur: "#00897B", filter: w => w.categorie === "nk-woorden" }
+            { titel: "ng", kleur: "#9C27B0", filter: w => w.categorie === ngCat },
+            { titel: "nk", kleur: "#00897B", filter: w => w.categorie === nkCat }
           ]
         };
       }
