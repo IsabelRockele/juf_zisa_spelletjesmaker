@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Leesbooster – gericht technisch lezen</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20260802-2">
   <script defer src="vendor/html2canvas.min.js"></script>
   <script defer src="vendor/jspdf.umd.min.js"></script>
 </head>
@@ -60,11 +60,8 @@
           <div class="story-options" id="verhaalOpties" hidden>
             <label class="field-label" for="verhaalThema">Onderwerp van het verhaal</label>
             <select id="verhaalThema"><option value="verrassing" selected>Verras mij</option><option value="wrak">Het geheim van het wrak</option><option value="theater">Het geheim achter het doek</option><option value="bos">De deur in de oude boom</option><option value="museum">Het museum na sluitingstijd</option></select>
-            <label class="field-label" for="vraagType">Vragen bij het verhaal</label>
-            <select id="vraagType"><option value="mix" selected>Mix van meerkeuze en schrijven</option><option value="open">Drie open vragen</option><option value="meerkeuze">Drie meerkeuzevragen</option></select>
-            <label class="field-label" for="woordenschatType">Woordenschat</label>
-            <select id="woordenschatType"><option value="verbinden" selected>Woord met verklaring verbinden</option><option value="gebruik">Kies de juiste zin</option></select>
-            <p class="tip">Een verhaal bestaat altijd uit twee bladzijden: verhaal + afbeelding, daarna vragen + woordenschat.</p>
+            <input type="hidden" id="vraagType" value="niveau"><input type="hidden" id="woordenschatType" value="afwisselend">
+            <p class="tip story-auto-tasks"><b>Opdrachten op maat:</b> elk niveau krijgt vier ruime bladzijden: verhaal, begrijpend lezen, woordenschat en zinnen schrijven.</p>
           </div>
         </section>
 
