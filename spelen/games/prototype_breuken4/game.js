@@ -41,7 +41,17 @@
 
   function drawDrag(){const r=round(),img=foods[r.food];if(!img.complete)return;trayRects=[];const gap=12,tw=(W-gap*4)/3,ty=H-105;for(let i=0;i<3;i++){const x=gap+(tw+gap)*i,rect={x,y:ty,w:tw,h:82};trayRects.push(rect);roundRect(x,ty,tw,82,18,true,droppedTray===i?'#dff7e8':'#fff');ctx.strokeStyle=droppedTray===i?'#249764':'#c7dce7';ctx.lineWidth=3;roundRect(x,ty,tw,82,18,false);ctx.fillStyle='#173f62';ctx.font='900 27px Arial';ctx.textAlign='center';ctx.fillText(`${r.labels[i].num}/${r.labels[i].den}`,x+tw/2,ty+51)}const p=dragPos||{x:W/2,y:H*.37};dragPos=p;const radius=Math.min(W,H)*.2;foodRect={x:p.x-radius,y:p.y-radius,w:radius*2,h:radius*2};ctx.save();ctx.shadowColor='#173f6255';ctx.shadowBlur=dragging?22:12;ctx.shadowOffsetY=8;drawMissingFood(img,p.x,p.y,radius,r.num,r.den);ctx.restore();ctx.fillStyle='#557183';ctx.font='800 17px Arial';ctx.textAlign='center';ctx.fillText('Houd vast en sleep naar het juiste kaartje',W/2,ty-18)}
 
-  function drawLine(){const r=round(),left=W*.1,right=W*.9,y=H*.58;lineGeom={left,right,y};ctx.strokeStyle='#173f62';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();for(let i=0;i<=r.den;i++){const x=left+(right-left)*i/r.den;ctx.beginPath();ctx.moveTo(x,y-15);ctx.lineTo(x,y+15);ctx.strokeStyle='#173f62';ctx.lineWidth=4;ctx.stroke();if(i===0||i===r.den){ctx.fillStyle='#173f62';ctx.font='900 24px Arial';ctx.textAlign='center';ctx.fillText(i===0?'0':'1',x,y+49)}}const x=tokenX??W/2;tokenX=x;ctx.save();ctx.shadowColor='#173f6255';ctx.shadowBlur=15;roundRect(x-58,H*.18,116,78,18,true,'#ef7125');ctx.restore();ctx.fillStyle='#fff';ctx.font='900 31px Arial';ctx.textAlign='center';ctx.fillText(`${r.num}/${r.den}`,x,H*.18+50);ctx.strokeStyle='#ef7125';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x,H*.18+79);ctx.lineTo(x,y-25);ctx.stroke();ctx.beginPath();ctx.arc(x,y,12,0,Math.PI*2);ctx.fillStyle='#ef7125';ctx.fill();ctx.fillStyle='#557183';ctx.font='800 18px Arial';ctx.fillText('Sleep de breuk naar de juiste plaats op de lijn.',W/2,H*.82)}
+  function drawLine(){
+    const r=round(),left=W*.1,right=W*.9,y=H*.62;lineGeom={left,right,y};
+    ctx.strokeStyle='#173f62';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();
+    for(let i=0;i<=r.den;i++){const x=left+(right-left)*i/r.den;ctx.beginPath();ctx.moveTo(x,y-15);ctx.lineTo(x,y+15);ctx.strokeStyle='#173f62';ctx.lineWidth=4;ctx.stroke();if(i===0||i===r.den){ctx.fillStyle='#173f62';ctx.font='900 24px Arial';ctx.textAlign='center';ctx.fillText(i===0?'0':'1',x,y+49)}}
+    const x=lineTouched?tokenX:W*.18,cardY=H*.16;
+    ctx.save();ctx.shadowColor='#173f6255';ctx.shadowBlur=15;roundRect(x-58,cardY,116,78,18,true,'#ef7125');ctx.restore();
+    ctx.fillStyle='#fff';ctx.font='900 31px Arial';ctx.textAlign='center';ctx.fillText(`${r.num}/${r.den}`,x,cardY+50);
+    if(lineTouched){ctx.strokeStyle='#ef7125';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x,cardY+79);ctx.lineTo(x,y-25);ctx.stroke();ctx.beginPath();ctx.arc(x,y,12,0,Math.PI*2);ctx.fillStyle='#ef7125';ctx.fill()}
+    else{ctx.fillStyle='#ef7125';ctx.font='900 18px Arial';ctx.fillText('PAK MIJ EN SLEEP',x,cardY+108)}
+    ctx.fillStyle='#557183';ctx.font='800 18px Arial';ctx.fillText('Sleep het losse kaartje naar de juiste plaats.',W/2,H*.84)
+  }
 
   function point(e){const b=canvas.getBoundingClientRect();return{x:(e.clientX-b.left)*W/b.width,y:(e.clientY-b.top)*H/b.height}}
   function inRect(p,r){return p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h}
