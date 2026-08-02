@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <title>De Rekenkern — tafelavontuur met Lana</title>
   <link rel="stylesheet" href="game.css?v=20260802c">
-  <link rel="stylesheet" href="timer.css?v=20260802g">
+  <link rel="stylesheet" href="timer.css?v=20260802h">
 </head>
 <body>
 <main id="gameShell">
@@ -34,7 +34,7 @@
       <div>
         <span class="badge">4DE LEERJAAR · NIEUWE SPELVERSIE</span>
         <h1>De Rekenkern</h1>
-        <p>Lana loopt vanzelf. Voor elke energiekern verschijnt de tafelsom al duidelijk in beeld.</p>
+        <p>Lana reist door vijf werelden. Elk level oefent dezelfde tafels op een andere manier.</p>
         <fieldset class="mode-picker">
           <legend>Wat wil je oefenen?</legend>
           <label><input type="radio" name="mode" value="multiply"> <span>Alleen maaltafels</span></label>
@@ -42,8 +42,8 @@
           <label><input type="radio" name="mode" value="mixed" checked> <span>Maal en deel door elkaar</span></label>
         </fieldset>
         <div class="how-grid">
-          <div><span>1</span><b>Bekijk de tafel</b><small>De wereld stopt even.</small></div>
-          <div><span>2</span><b>Kies een antwoord</b><small>Tik op één van de drie kernen.</small></div>
+          <div><span>1</span><b>Bekijk de uitleg</b><small>Voor elk level zie je eerst een voorbeeld.</small></div>
+          <div><span>2</span><b>Oefen de tafels</b><small>Ieder gebied heeft een andere spelvorm.</small></div>
           <div><span>3</span><b>Word steeds sneller</b><small>Elk level geeft iets minder tijd.</small></div>
         </div>
         <button id="startButton" type="button">▶ Start level 1</button>
@@ -59,6 +59,20 @@
       <h1 id="completeTitle">Het Energiebos straalt weer!</h1>
       <p id="completeText">Je hebt vijf tafelkernen verzameld.</p>
       <button id="nextButton" type="button">Naar level 2 →</button>
+    </article>
+  </section>
+
+  <section id="levelTutorial" class="overlay" hidden>
+    <article class="card tutorial-card">
+      <span id="tutorialBadge" class="badge">LEVEL 1 · ENERGIEBOS</span>
+      <h1 id="tutorialTitle">Tik de juiste energiekern</h1>
+      <p id="tutorialText">Bekijk de oefening en tik het juiste antwoord aan.</p>
+      <div id="tutorialDemo" class="tutorial-demo" aria-label="Bewegend voorbeeld"></div>
+      <div class="tutorial-actions">
+        <button id="tutorialStart" type="button">Start level 1 →</button>
+        <button id="tutorialSkip" class="tutorial-skip" type="button" hidden>Uitleg overslaan</button>
+      </div>
+      <small>De tijd begint pas nadat je op start drukt.</small>
     </article>
   </section>
 
@@ -83,6 +97,6 @@
   </section>
 </main>
 <script type="module" src="../zisa-play-guard.js"></script>
-<script src="game.js?v=20260802g"></script>
+<script src="game.js?v=20260802h"></script>
 </body>
 </html>
