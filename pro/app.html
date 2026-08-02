@@ -803,7 +803,7 @@
     <div class="button-grid">
       <a class="img-link" href="./leesbooster/index.html"><img alt="Leesbooster technisch lezen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/leesbooster.png" loading="eager"/><span class="img-label">Leesbooster</span><span class="tool-description">Maak leeswerkbladen, verhalen en een klassikaal smartboardspel.</span></a>
       <a class="img-link" href="./Leeskaartjes/leeskaartjes.html"><img alt="Leeskaartjes per AVI" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/leeskaartjes.png" loading="eager"/><span class="img-label">Leeskaartjes per AVI</span></a>
-      <a class="img-link" href="./lees.html"><img alt="Lezen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/lees.png" loading="lazy"/><span class="img-label">Lezen</span></a>
+      <a class="img-link" href="./lees.html"><img alt="Leesspel met eigen woorden voor het smartboard" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/lees.png" loading="lazy"/><span class="img-label">Leesspel – eigen woorden</span><span class="tool-description">Voer zelf woorden in en laat ze automatisch flitsen op het smartboard, met bewegingen tussendoor.</span></a>
       <a class="img-link" href="./schrijfgenerator.html"><img alt="Handschrift" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/handschrift.png" loading="lazy"/><span class="img-label">Handschrift</span></a>
       <a class="img-link" href="./woordzoeker.html"><img alt="Woordzoeker" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/woordzoeker.png" loading="lazy"/><span class="img-label">Woordzoeker</span></a>
       <a class="img-link" href="./kruiswoordpuzzel.html"><img alt="Kruiswoordpuzzel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/kruiswoordpuzzel.png" loading="lazy"/><span class="img-label">Kruiswoordpuzzel</span></a>
@@ -1352,7 +1352,7 @@
 </script>
 <script>
   (()=>{
-    const liveTools=new Set(['Loopspel','Galgje','Bingo','Vier op een rij','Rad','Timer','Takenbord','Planbord']);
+    const liveTools=new Set(['Loopspel','Leesspel – eigen woorden','Galgje','Bingo','Vier op een rij','Rad','Timer','Takenbord','Planbord']);
     document.querySelectorAll('a.img-link').forEach(link=>{
       const label=link.querySelector('.img-label')?.textContent.trim();
       if(!liveTools.has(label))return;

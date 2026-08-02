@@ -61,14 +61,27 @@
     cadeau:{families:['uitspraak'],title:'Het verdwenen cadeau',image:'afbeeldingen/verhalen/het-museum-na-sluitingstijd.png',base:['Op het bureau van de directeur ligt alleen nog een leeg lint.','Het cadeau voor de school is vlak voor de presentatie verdwenen.','Noor vindt naast het lint een kaartje met een vreemde aanwijzing.'],transitions:['Het eerste spoor leidt naar de lange gang.','Bij het station op de kaart staat een nieuw teken.','Daarna hoort Noor muziek uit een kleine radio.','Achter een tableau vindt ze het laatste briefje.'],end:['In een kast ontdekt Noor het cadeau veilig onder een doek.','Net op tijd brengt ze het naar de feestzaal voor de presentatie.']}
   };
   const storyQuestions = {
-    wrak:{q1:'Waar vindt Noor de geheimzinnige kaart?',a1:['in een kistje bij het wrak','in haar boekentas','onder een strandstoel'],q2:'Wat helpt Noor om de route te volgen?',q3:'Waarom wil Noor de volgende dag terugkomen?'},
-    theater:{q1:'Wat vindt Noor tussen de kostuums?',a1:['een gouden kaartje','een zaklamp','een oud boek'],q2:'Waardoor weet Noor waar ze moet zoeken?',q3:'Waarom legt Noor alles voorzichtig terug?'},
-    bos:{q1:'Waar leiden de lichtgevende tekens Noor naartoe?',a1:['naar een oude boom','naar een station','naar het strand'],q2:'Welke dieren helpen Noor de sporen te volgen?',q3:'Waarom neemt Noor de kaart mee naar huis?'},
-    museum:{q1:'Wat begint in de glazen kast te gloeien?',a1:['een oude kaart','een schilderij','een kroon'],q2:'Waar eindigt het laatste teken?',q3:'Waarom bewaart de gids de sleutel veilig?'},
-    winterbos:{q1:'Waar leiden de sporen Noor naartoe?',a1:['naar een houten hut','naar het station','naar een winkel'],q2:'Wat moet Noor met de woorden op het briefje doen?',q3:'Wat wacht er in de hut?'},
-    boomhut:{q1:'Wat vindt Noor op de tafel?',a1:['een boek en een sleuteltje','een radio en een beker','een jas en een kaart'],q2:'Waar vindt Noor een tweede briefje?',q3:'Wat zit er in de kist?'},
-    radiostudio:{q1:'Wat staat er naast de microfoon?',a1:['een pakje zonder naam','een vaas met bloemen','een stapel kranten'],q2:'Waar hoort Noor de eerste aanwijzing?',q3:'Wat mag Noor de volgende dag doen?'},
-    cadeau:{q1:'Wat ligt er nog op het bureau?',a1:['een leeg lint','een gouden sleutel','een boek'],q2:'Waar vindt Noor het laatste briefje?',q3:'Waarom brengt Noor het cadeau snel naar de feestzaal?'}
+    wrak:{q1:'Waar vindt Noor de geheimzinnige kaart?',a1:['in een kistje bij het wrak','in haar boekentas','onder een strandstoel'],q2:'Wat helpt Noor om de route te volgen?',a2:['het spoor op de kaart','een bord op het strand','een bericht op haar telefoon'],q3:'Waarom wil Noor de volgende dag terugkomen?',a3:['om het volgende geheim te ontdekken','om haar jas te zoeken','om te gaan zwemmen']},
+    theater:{q1:'Wat vindt Noor tussen de kostuums?',a1:['een gouden kaartje','een zaklamp','een oud boek'],q2:'Waardoor weet Noor waar ze moet zoeken?',a2:['door een fonkelende ster op het kaartje','door een brief van de conciërge','door een pijl op de vloer'],q3:'Waarom legt Noor alles voorzichtig terug?',a3:['omdat de conciërge eraan komt','omdat de voorstelling begint','omdat ze het kaartje niet mooi vindt']},
+    bos:{q1:'Waar leiden de lichtgevende tekens Noor naartoe?',a1:['naar een oude boom','naar een station','naar het strand'],q2:'Welke dieren helpen Noor de sporen te volgen?',a2:['een uil en een konijn','een hond en een poes','een vos en een beer'],q3:'Waarom neemt Noor de kaart mee naar huis?',a3:['omdat het bos nog meer geheimen heeft','omdat de kaart van haar is','omdat ze de kaart wil verkopen']},
+    museum:{q1:'Wat begint in de glazen kast te gloeien?',a1:['een oude kaart','een schilderij','een kroon'],q2:'Waar eindigt het laatste teken?',a2:['bij een kleine deur in de muur','bij de ingang van het museum','onder een schilderij'],q3:'Waarom bewaart de gids de sleutel veilig?',a3:['zodat niemand hem kwijtraakt','omdat hij niet meer werkt','omdat Noor hem niet mooi vindt']},
+    winterbos:{q1:'Waar leiden de sporen Noor naartoe?',a1:['naar een houten hut','naar het station','naar een winkel'],q2:'Wat moet Noor met de woorden op het briefje doen?',a2:['ze hardop lezen','ze overschrijven','ze in haar jas stoppen'],q3:'Wat wacht er in de hut?',a3:['warme chocolademelk en een brief','een gouden kroon en een kaart','een slapende beer']},
+    boomhut:{q1:'Wat vindt Noor op de tafel?',a1:['een boek en een sleuteltje','een radio en een beker','een jas en een kaart'],q2:'Waar vindt Noor een tweede briefje?',a2:['onder een kussen','in haar jaszak','onder de ladder'],q3:'Wat zit er in de kist?',a3:['oude verhalen','speelgoedauto’s','potten verf']},
+    radiostudio:{q1:'Wat staat er naast de microfoon?',a1:['een pakje zonder naam','een vaas met bloemen','een stapel kranten'],q2:'Waar hoort Noor de eerste aanwijzing?',a2:['door de grote koptelefoon','uit haar telefoon','bij de deur'],q3:'Wat mag Noor de volgende dag doen?',a3:['zelf iets vertellen','een lied zingen op het podium','het cadeau naar huis brengen']},
+    cadeau:{q1:'Wat ligt er nog op het bureau?',a1:['een leeg lint','een gouden sleutel','een boek'],q2:'Waar vindt Noor het laatste briefje?',a2:['achter een tableau','onder het bureau','in de feestzaal'],q3:'Waarom brengt Noor het cadeau snel naar de feestzaal?',a3:['omdat de presentatie bijna begint','omdat ze naar huis wil','omdat het cadeau te zwaar is']}
+  };
+  const supportThemes={
+    wrak:{start:['Noor wandelt op het strand.','Ze ziet een oud wrak bij het water.','Onder een losse plank vindt ze een klein kistje.','In het kistje ligt een geheimzinnige kaart.','Op de kaart staat een duidelijk spoor.','Noor volgt het spoor langs de planken.','Zo vindt ze stap voor stap de juiste weg.'],end:['Noor legt de kaart veilig terug in het kistje.','Morgen komt ze terug om het volgende geheim te ontdekken.']},
+    theater:{start:['Noor is in een oud theater.','Ze kijkt achter het rode doek.','Tussen de kostuums vindt ze een gouden kaartje.','Op het kaartje staat een fonkelende ster.','De ster wijst naar een oude koffer.','Noor opent de koffer.','Daar vindt ze een nieuw spoor.'],end:['De conciërge komt eraan en Noor legt alles terug.','Bij de volgende repetitie wil ze verder zoeken.']},
+    bos:{start:['Noor wandelt in het bos.','Op het pad ziet ze lichtgevende tekens.','De tekens leiden naar een oude boom.','In de boom zit een klein deurtje.','Een uil wijst Noor de weg.','Bij het volgende spoor wacht een konijn.','Naast het deurtje vindt Noor een kaart.'],end:['Noor neemt de kaart mee naar huis.','Het bos heeft nog meer geheimen.']},
+    museum:{start:['Noor is na sluitingstijd in het museum.','In een glazen kast begint een oude kaart te gloeien.','Naast de kaart ligt een kleine sleutel.','Het spoor loopt door verschillende zalen.','Noor volgt elk teken op de kaart.','Het laatste teken wijst naar een kleine deur in de muur.','De sleutel past precies op die deur.'],end:['De gids bergt de sleutel veilig op zodat niemand hem kwijtraakt.','Morgen openen Noor en de gids samen de deur.']},
+    winterbos:{start:['Noor wandelt door een wit winterbos.','In de sneeuw ziet ze vreemde sporen.','De sporen leiden naar een houten hut.','Op de deur hangt een briefje.','Op het briefje staan moeilijke woorden.','Noor moet de woorden hardop lezen.','Na elk woord verschijnt een nieuwe pijl.'],end:['Na het laatste woord gaat de deur open.','In de hut wachten warme chocolademelk en een brief.']},
+    boomhut:{start:['Noor ziet een ladder tegen een oude boom.','Boven in de boom staat een boomhut.','Noor klimt voorzichtig naar boven.','Op de tafel liggen een boek en een sleuteltje.','In het boek staat een korte aanwijzing.','Onder een kussen vindt Noor een tweede briefje.','Het briefje wijst naar een kleine kist.'],end:['In de kist zitten oude verhalen.','Noor kiest een boek en begint te lezen.']},
+    radiostudio:{start:['Noor bezoekt een echte radiostudio.','Op het bureau staat een microfoon.','Naast de microfoon ligt een pakje zonder naam.','Dan gaat het rode licht aan.','Noor zet de grote koptelefoon op.','Door de koptelefoon hoort ze de eerste aanwijzing.','Ze volgt de boodschap op het scherm.'],end:['In het pakje vindt Noor een gouden radio.','Morgen mag ze zelf iets vertellen op de radio.']},
+    cadeau:{start:['Op het bureau ligt alleen een leeg lint.','Het cadeau voor de school is verdwenen.','Noor vindt een kaartje met een aanwijzing.','Ze volgt het spoor door de lange gang.','Daar hoort ze muziek uit een kleine radio.','Achter een tableau vindt ze het laatste briefje.','Het briefje wijst naar een kast.'],end:['Noor brengt het cadeau snel naar de feestzaal omdat de presentatie bijna begint.','Ze komt precies op tijd aan.']}
+  };
+  const supportBits={
+    'wr':'Op een briefje leest Noor: wrak, wrikken en wrijven.','th':'Op een briefje leest Noor: thema, theater en thermos.','i-ie':'Op een briefje leest Noor: taxi, studio en diploma.','au-ou':'Op een briefje leest Noor: auto, gebouw en applaus.','ei-ij':'Op een briefje leest Noor: trein, plein en vijver.','aai-ooi-oei':'Op een briefje leest Noor: kraai, kooi en groeien.','eeuw-ieuw-uw':'Op een briefje leest Noor: meeuw, nieuw en ruw.','ng-nk':'Op een briefje leest Noor: ring, bank en winkel.','ch-g':'Op een briefje leest Noor: lachen, vogel en kachel.','cht-gt':'Op een briefje leest Noor: nacht, bocht en vliegt.','oo-ch':'Op een briefje leest Noor: goochelaar, goocheltruc en hoog.','kort-open-ch':'Op een briefje leest Noor: echo, lachen en kachel.','ds':'Op een briefje leest Noor: gids, loods en sinds.','teit-heid':'Op een briefje leest Noor: kwaliteit, veiligheid en mogelijkheid.','uitgangen':'Op een briefje leest Noor: officieel, praktisch en speciaal.','gesloten':'Op een briefje leest Noor: bommen, tassen en flessen.','open':'Op een briefje leest Noor: bomen, rozen en tafel.','politie':'Op een briefje leest Noor: politie, informatie en actie.','eau':'Op een briefje leest Noor: bureau, cadeau en tableau.'
   };
 
   function shuffle(a, salt=0){
@@ -139,17 +152,28 @@
     s=s.replace(/[.!?]*$/,'.').trim();return s.charAt(0).toUpperCase()+s.slice(1);
   }
   function storySentences(ds,theme,niveau='basis'){
+    if(niveau==='steun'){
+      const themeId=Object.keys(storyThemes).find(id=>storyThemes[id]===theme);
+      const easy=supportThemes[themeId];
+      const clueStarts=['Op een briefje','Op de achterkant','Bij het volgende spoor'];
+      const clues=ds.map((d,i)=>supportBits[d.id].replace('Op een briefje',clueStarts[i]));
+      return [...easy.start,...clues,...easy.end];
+    }
     const story=[...theme.base];
+    const usedTransitions=new Set();
     ds.forEach((d,i)=>{
-      story.push(theme.transitions[i%theme.transitions.length]);
+      const transition=theme.transitions[i%theme.transitions.length];
+      story.push(transition);usedTransitions.add(transition);
       const bits=storyBits[d.id];
       story.push(bits[0]);
       if(ds.length<3) story.push(bits[1]);
     });
+    theme.transitions.forEach(line=>{if(!usedTransitions.has(line))story.push(line)});
     if(ds.length===1){story.push('Noor bekijkt de aanwijzing nog eens heel nauwkeurig.','Pas wanneer ze alles begrijpt, verschijnt het volgende deel van de route.');}
     if(niveau==='vlot')story.push('Noor vergelijkt alle aanwijzingen en ontdekt dat ze samen één duidelijke boodschap vormen.','Vol vertrouwen volgt ze het spoor verder, ook wanneer de opdracht plots moeilijker wordt.');
     story.push(...theme.end);
-    const lines=story.slice(0,15);return niveau==='steun'?lines.map(shortenStorySentence).filter((line,i,a)=>line.length>2&&a.indexOf(line)===i).slice(0,12):lines;
+    const lines=story.slice(0,15);
+    return lines;
   }
   function storyWordBank(ds,niveau){
     if(niveau==='vlot')return '';
@@ -162,7 +186,7 @@
     const open=(nr,q,lines=2)=>`<div class="question"><b>${nr}. ${q}</b>${'<div class="answer-line"></div>'.repeat(lines)}</div>`;
     const multi=(nr,q,opts)=>`<div class="question"><b>${nr}. ${q}</b><div class="answers">${opts.map((x,i)=>`<label><span class="answer-box"></span><span>${String.fromCharCode(65+i)}. ${x}</span></label>`).join('')}</div></div>`;
     if(type==='open') return open(1,q.q1)+open(2,q.q2)+open(3,q.q3,3);
-    if(type==='meerkeuze') return multi(1,q.q1,q.a1)+multi(2,q.q2,['het spoor op de kaart','een bericht op haar telefoon','een bord met een pijl'])+multi(3,q.q3,['om het geheim verder te onderzoeken','om haar jas te zoeken','om haar huiswerk te maken']);
+    if(type==='meerkeuze') return multi(1,q.q1,q.a1)+multi(2,q.q2,q.a2)+multi(3,q.q3,q.a3);
     return multi(1,q.q1,q.a1)+open(2,q.q2)+open(3,q.q3,3);
   }
   function vocabHtml(ds,type){
@@ -184,7 +208,7 @@
     const lines=storySentences(ds,theme,b.niveau); const story=lines.map(s=>b.niveau==='steun'?ds.reduce((out,d)=>markeer(out,d),s):s).join(' ');const wordBank=storyWordBank(ds,b.niveau);
     const remove=`<button class="remove-story" data-remove="${blockIndex}" title="Verwijder dit volledige verhaal met vragen">🗑 Verwijder verhaal + vragen</button>`;
     const page1=`<article class="paper story-page story-level-${b.niveau}">${remove}${paperHeader('Samen groeien in lezen',b.naamDatum?'Naam: ____________________<br>Datum: ____________________':'')}<h1 class="story-title">${title}</h1><p class="story-instruction">${b.niveau==='steun'?'★ Lees eerst de woorden en daarna het verhaal.':b.niveau==='basis'?'★★ Lees eerst de woorden en daarna het verhaal.':'★★★ Lees het verhaal meteen mooi door.'}</p>${wordBank}<img class="story-image" src="${theme.image}" alt="Illustratie bij ${theme.title}"><div class="story-text">${story}</div><footer class="page-footer"><span>${lines.length} zinnen · ${ds.map(d=>d.label).join(' · ')}</span><span>pagina ${startPage}</span></footer></article>`;
-    const page2=`<article class="paper question-page">${remove}${paperHeader('Begrijpend lezen en woordenschat',b.naamDatum?'Naam: ____________________':'')}<h1 class="story-title">Vragen bij het verhaal</h1><p class="story-instruction">${title}</p>${questionHtml(b.vraagType,b.verhaalThema)}<section class="vocab-section">${vocabHtml(ds,b.woordenschatType)}</section><footer class="page-footer"><span>Lees terug in de tekst als je twijfelt.</span><span>pagina ${startPage+1}</span></footer></article>`;
+    const page2=`<article class="paper question-page">${remove}${paperHeader('Begrijpend lezen en woordenschat',b.naamDatum?'Naam: ____________________':'')}<p class="question-kicker">Vragen bij het verhaal</p><h1 class="question-story-title">${title}</h1>${questionHtml(b.vraagType,b.verhaalThema)}<section class="vocab-section">${vocabHtml(ds,b.woordenschatType)}</section><footer class="page-footer"><span>Lees terug in de tekst als je twijfelt.</span><span>pagina ${startPage+1}</span></footer></article>`;
     return page1+page2;
   }
   function balancedWords(ds,aantal,salt,niveau){

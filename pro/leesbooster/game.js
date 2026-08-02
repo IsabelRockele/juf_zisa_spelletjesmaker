@@ -3,10 +3,15 @@
   const $=s=>document.querySelector(s);
   const families=[['combinaties','Lettercombinaties'],['lettergrepen','Lettergrepen'],['uitspraak','Andere uitspraak']];
   const moves=[
-    ['springen','Spring 5 keer!'],['stappen','Stap flink ter plaatse!'],['klappen','Klap 6 keer in je handen!'],['draaien','Draai rustig één keer rond!'],
-    ['uitrekken','Maak je zo groot mogelijk!'],['hurken','Maak je zo klein mogelijk!'],['schouders','Tik links en rechts je schouder aan!'],['balanceren','Sta als een flamingo op één been!']
+    ['springen','Spring 5 keer!','springen'],['stappen','Stap ter plaatse!','stappen'],['klappen','Klap 6 keer!','klappen'],['draaien','Draai 2 keer rond!','draaien'],
+    ['uitrekken','Maak je heel groot!','uitrekken'],['hurken','Maak je heel klein!','hurken'],['schouders','Tik beide schouders aan!','schouders'],['balanceren','Sta op één been!','balanceren'],
+    ['boe','Roep samen: BOE!','boe'],['hand','Schud iemand naast je de hand!','handen-schudden']
   ];
-  const game={family:'combinaties',goals:[],words:[],events:[],index:0,timer:null,remaining:0,paused:false,currentDuration:0,currentStart:0,lastConfig:null};
+  const game={family:'combinaties',goals:[],moves:['springen','klappen','draaien','boe'],words:[],events:[],index:0,timer:null,remaining:0,paused:false,currentDuration:0,currentStart:0,lastConfig:null};
+  const storageKey='zisaLeesboosterLaatsteSpel';
+
+  function savedGame(){try{return JSON.parse(localStorage.getItem(storageKey)||'null')}catch{return null}}
+  function updateQuickButton(){$('#quickGame').hidden=!savedGame()}
 
   function shuffle(list){
     const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;
@@ -19,6 +24,9 @@
     const chosen=game.goals.map(id=>doelen.find(d=>d.id===id)).filter(Boolean);
     $('#gameChoiceSummary').textContent=chosen.length?`Gekozen: ${chosen.map(d=>d.label).join(' · ')}`:'Kies minstens één leesmoeilijkheid.';
   }
+  function renderMoves(){
+    $('#gameMoveChoices').innerHTML=moves.map(move=>`<label class="${game.moves.includes(move[0])?'selected':''}"><input type="checkbox" value="${move[0]}" ${game.moves.includes(move[0])?'checked':''}><img src="afbeeldingen/bewegen/${move[2]}.png" alt=""><span>${move[1]}</span></label>`).join('');
+  }
   function pickWords(count,difficulty){
     let pool=game.goals.flatMap(id=>{const d=doelen.find(x=>x.id===id);return d?d.words.map(word=>({word,goal:d.label})):[]});
     pool=[...new Map(pool.map(x=>[x.word,x])).values()].sort((a,b)=>a.word.length-b.word.length);
@@ -29,7 +37,7 @@
     return result;
   }
   function movePositions(count){
-    if(!$('#gameMoves').checked||count<6)return [];
+    if(!game.moves.length||count<6)return [];
     const wanted=count>=24?4:count>=15?3:2;const positions=[];let cursor=2+Math.floor(Math.random()*3);
     while(positions.length<wanted&&cursor<count-1){positions.push(cursor);const left=count-cursor;const slots=wanted-positions.length;cursor+=Math.max(3,Math.floor(left/(slots+1)))+Math.floor(Math.random()*2)}
     return positions.slice(0,wanted);
@@ -37,9 +45,11 @@
   function buildGame(){
     const count=+$('#gameWordCount').value,seconds=+$('#gameSeconds').value,difficulty=$('#gameDifficulty').value;
     if(!game.goals.length){$('#gameMessage').textContent='Kies eerst minstens één leesmoeilijkheid.';return false}
-    const words=pickWords(count,difficulty),positions=movePositions(count),moveBag=shuffle(moves);
-    game.events=[];words.forEach((item,i)=>{game.events.push({type:'word',...item,number:i+1,total:count,duration:seconds*1000});if(positions.includes(i+1))game.events.push({type:'move',move:moveBag.pop(),duration:10000})});
-    game.index=0;game.paused=false;game.lastConfig={count,seconds,difficulty};$('#gameMessage').textContent='';return true;
+    const words=pickWords(count,difficulty),positions=movePositions(count),moveBag=shuffle(moves.filter(move=>game.moves.includes(move[0])));let moveIndex=0;
+    game.events=[];words.forEach((item,i)=>{game.events.push({type:'word',...item,number:i+1,total:count,duration:seconds*1000});if(positions.includes(i+1))game.events.push({type:'move',move:moveBag[moveIndex++%moveBag.length],duration:6000})});
+    game.index=0;game.paused=false;game.lastConfig={count,seconds,difficulty};$('#gameMessage').textContent='';
+    try{localStorage.setItem(storageKey,JSON.stringify({family:game.family,goals:game.goals,moves:game.moves,count,seconds,difficulty}))}catch{}
+    updateQuickButton();return true;
   }
   function setBar(duration){
     const bar=$('#gameTimerBar');bar.style.transition='none';bar.style.width='100%';void bar.offsetWidth;bar.style.transition=`width ${duration}ms linear`;bar.style.width='0%';
@@ -51,7 +61,7 @@
     if(event.type==='word'){
       $('#wordStage').hidden=false;$('#moveStage').hidden=true;$('#flashWord').textContent=event.word;$('#gameProgress').textContent=`Woord ${event.number} van ${event.total}`;$('#gameGoalLabel').textContent=event.goal;
     }else{
-      $('#wordStage').hidden=true;$('#moveStage').hidden=false;$('#moveImage').src=`afbeeldingen/bewegen/${event.move[0]}.png`;$('#moveImage').alt=`Zisa: ${event.move[1]}`;$('#moveText').textContent=event.move[1];$('#gameProgress').textContent='Beweegboost';$('#gameGoalLabel').textContent='Even bewegen en dan weer lezen';
+      $('#wordStage').hidden=true;$('#moveStage').hidden=false;$('#moveImage').src=`afbeeldingen/bewegen/${event.move[2]}.png`;$('#moveImage').alt=`Zisa: ${event.move[1]}`;$('#moveText').textContent=event.move[1];$('#gameProgress').textContent='Beweegboost';$('#gameGoalLabel').textContent='Doe meteen mee met Zisa';
     }
     $('#gamePause').textContent='Pauze';setBar(event.duration);
   }
@@ -71,13 +81,21 @@
   function showLauncher(){
     clearTimeout(game.timer);game.paused=false;$('#boosterLauncher').hidden=false;$('.app-layout').hidden=true;$('#gameApp').hidden=true;$('.header-actions').hidden=true;$('#homeButton').hidden=true;$('#currentMode').hidden=true;$('#gameStage').hidden=true;$('#gameSetup').hidden=false;
   }
+  function quickStart(){
+    const saved=savedGame();if(!saved)return;
+    game.family=saved.family||'combinaties';game.goals=(saved.goals||[]).filter(id=>doelen.some(d=>d.id===id));game.moves=(saved.moves||[]).filter(id=>moves.some(move=>move[0]===id));
+    $('#gameWordCount').value=String(saved.count||15);$('#gameSeconds').value=String(saved.seconds||4);$('#gameDifficulty').value=saved.difficulty||'mix';
+    renderFamilies();renderGoals();renderMoves();openMode('spel');start();
+  }
 
   document.addEventListener('click',e=>{
     const mode=e.target.closest('[data-open-mode]');if(mode)openMode(mode.dataset.openMode);
     const family=e.target.closest('[data-game-family]');if(family){game.family=family.dataset.gameFamily;renderFamilies();renderGoals()}
   });
   $('#gameGoals').addEventListener('change',e=>{if(!e.target.matches('input'))return;const id=e.target.value;if(e.target.checked&&!game.goals.includes(id))game.goals.push(id);if(!e.target.checked)game.goals=game.goals.filter(x=>x!==id);renderGoals()});
+  $('#gameMoveChoices').addEventListener('change',e=>{if(!e.target.matches('input'))return;const id=e.target.value;if(e.target.checked&&!game.moves.includes(id))game.moves.push(id);if(!e.target.checked)game.moves=game.moves.filter(x=>x!==id);renderMoves()});
   $('#gameStart').addEventListener('click',start);$('#gamePause').addEventListener('click',pause);$('#gameStop').addEventListener('click',back);$('#backSetup').addEventListener('click',back);$('#gameAgain').addEventListener('click',()=>{if(buildGame()){$('#finishStage').hidden=true;showEvent()}});
+  $('#quickGame').addEventListener('click',quickStart);
   $('#homeButton').addEventListener('click',showLauncher);
-  renderFamilies();renderGoals();
+  renderFamilies();renderGoals();renderMoves();updateQuickButton();
 })();
