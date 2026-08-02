@@ -7,7 +7,7 @@
     ['uitrekken','Maak je heel groot!','uitrekken'],['hurken','Maak je heel klein!','hurken'],['schouders','Tik beide schouders aan!','schouders'],['balanceren','Sta op één been!','balanceren'],
     ['boe','Roep samen: BOE!','boe'],['hand','Schud iemand naast je de hand!','handen-schudden']
   ];
-  const game={family:'combinaties',goals:[],moves:['springen','klappen','draaien','boe'],words:[],events:[],index:0,timer:null,remaining:0,paused:false,currentDuration:0,currentStart:0,lastConfig:null};
+  const game={family:'combinaties',goals:[],moves:['springen','klappen','draaien','boe'],words:[],events:[],index:0,timer:null,briefingTimer:null,briefingIndex:0,briefingMoves:[],remaining:0,paused:false,currentDuration:0,currentStart:0,lastConfig:null};
   const storageKey='zisaLeesboosterLaatsteSpel';
 
   function savedGame(){try{return JSON.parse(localStorage.getItem(storageKey)||'null')}catch{return null}}
@@ -20,7 +20,7 @@
     $('#gameFamilyTabs').innerHTML=families.map(([id,label])=>`<button class="${id===game.family?'active':''}" data-game-family="${id}">${label}</button>`).join('');
   }
   function renderGoals(){
-    $('#gameGoals').innerHTML=doelen.filter(d=>d.family===game.family).map(d=>`<label class="${game.goals.includes(d.id)?'selected':''}"><input type="checkbox" value="${d.id}" ${game.goals.includes(d.id)?'checked':''}><span><b>${d.label}</b><small>${d.words.slice(0,3).join(' · ')}</small></span></label>`).join('');
+    $('#gameGoals').innerHTML=doelen.filter(d=>d.family===game.family).map(d=>`<label class="${game.goals.includes(d.id)?'selected':''}"><input type="checkbox" value="${d.id}" ${game.goals.includes(d.id)?'checked':''}><span><b>${d.label}</b><small>Voorbeelden: ${d.words.slice(0,3).join(' · ')}</small><em>${d.words.length} woorden beschikbaar</em></span></label>`).join('');
     const chosen=game.goals.map(id=>doelen.find(d=>d.id===id)).filter(Boolean);
     $('#gameChoiceSummary').textContent=chosen.length?`Gekozen: ${chosen.map(d=>d.label).join(' · ')}`:'Kies minstens één leesmoeilijkheid.';
   }
@@ -66,7 +66,10 @@
     $('#gamePause').textContent='Pauze';setBar(event.duration);
   }
   function next(){game.index++;showEvent()}
-  function start(){if(!buildGame())return;$('#gameSetup').hidden=true;$('#gameStage').hidden=false;showEvent()}
+  function showBriefingMove(){clearTimeout(game.briefingTimer);const ready=game.briefingIndex>=game.briefingMoves.length;$('#briefingImage').hidden=ready;$('#skipBriefing').hidden=ready;if(ready){$('#briefingLabel').textContent='Alle beweegboosts zijn bekeken';$('#briefingProgress').textContent='';$('#briefingText').textContent='Klaar?';$('#briefingHint').textContent='Zorg dat iedereen klaarstaat. Het eerste woord verschijnt pas wanneer de leerkracht op Start het spel drukt.';$('#nextBriefing').textContent='Start het spel';return}const move=game.briefingMoves[game.briefingIndex];$('#briefingLabel').textContent='Straks verschijnt deze zebra tussen de woorden';$('#briefingImage').src=`afbeeldingen/bewegen/${move[2]}.png`;$('#briefingImage').alt=`Zisa: ${move[1]}`;$('#briefingText').textContent=move[1];$('#briefingHint').textContent='Doe deze beweging samen wanneer deze zebra tijdens het spel verschijnt.';$('#briefingProgress').textContent=`Uitleg ${game.briefingIndex+1} van ${game.briefingMoves.length}`;$('#nextBriefing').textContent=game.briefingIndex===game.briefingMoves.length-1?'Naar het startscherm →':'Volgende uitleg →'}
+  function renderBriefing(){game.briefingMoves=moves.filter(move=>game.moves.includes(move[0]));game.briefingIndex=0;showBriefingMove()}
+  function playNow(){clearTimeout(game.briefingTimer);$('#gameBriefing').hidden=true;$('#gameStage').hidden=false;showEvent()}
+  function start(){if(!buildGame())return;$('#gameSetup').hidden=true;$('#gameStage').hidden=true;$('#gameBriefing').hidden=false;renderBriefing()}
   function finish(){
     clearTimeout(game.timer);$('#wordStage').hidden=true;$('#moveStage').hidden=true;$('#finishStage').hidden=false;$('#gameTimerBar').style.transition='none';$('#gameTimerBar').style.width='100%';$('#gameProgress').textContent='Klaar!';$('#gameGoalLabel').textContent='';$('#finishText').textContent=`Jullie lazen samen ${game.lastConfig.count} woorden.`;
   }
@@ -74,12 +77,12 @@
     if(game.paused){game.paused=false;$('#gamePause').textContent='Pauze';setBar(game.remaining);return}
     game.paused=true;clearTimeout(game.timer);game.remaining=Math.max(100,game.currentDuration-(Date.now()-game.currentStart));const bar=$('#gameTimerBar'),width=getComputedStyle(bar).width;bar.style.transition='none';bar.style.width=width;$('#gamePause').textContent='Ga verder';
   }
-  function back(){clearTimeout(game.timer);$('#gameStage').hidden=true;$('#gameSetup').hidden=false;game.paused=false;$('#gameMessage').textContent='Pas je instellingen aan en start het spel opnieuw.'}
+  function back(){clearTimeout(game.timer);clearTimeout(game.briefingTimer);$('#gameStage').hidden=true;$('#gameBriefing').hidden=true;$('#gameSetup').hidden=false;game.paused=false;$('#gameMessage').textContent='Pas je instellingen aan en start het spel opnieuw.'}
   function openMode(mode){
     const play=mode==='spel';$('#boosterLauncher').hidden=true;$('.app-layout').hidden=play;$('#gameApp').hidden=!play;$('.header-actions').hidden=play;$('#homeButton').hidden=false;$('#currentMode').hidden=false;$('#currentMode').textContent=play?"Smartboardspel · Zisa's Flitsfeest":'Werkbladen maken';
   }
   function showLauncher(){
-    clearTimeout(game.timer);game.paused=false;$('#boosterLauncher').hidden=false;$('.app-layout').hidden=true;$('#gameApp').hidden=true;$('.header-actions').hidden=true;$('#homeButton').hidden=true;$('#currentMode').hidden=true;$('#gameStage').hidden=true;$('#gameSetup').hidden=false;
+    clearTimeout(game.timer);clearTimeout(game.briefingTimer);game.paused=false;$('#boosterLauncher').hidden=false;$('.app-layout').hidden=true;$('#gameApp').hidden=true;$('.header-actions').hidden=true;$('#homeButton').hidden=true;$('#currentMode').hidden=true;$('#gameStage').hidden=true;$('#gameBriefing').hidden=true;$('#gameSetup').hidden=false;
   }
   function quickStart(){
     const saved=savedGame();if(!saved)return;
@@ -94,8 +97,8 @@
   });
   $('#gameGoals').addEventListener('change',e=>{if(!e.target.matches('input'))return;const id=e.target.value;if(e.target.checked&&!game.goals.includes(id))game.goals.push(id);if(!e.target.checked)game.goals=game.goals.filter(x=>x!==id);renderGoals()});
   $('#gameMoveChoices').addEventListener('change',e=>{if(!e.target.matches('input'))return;const id=e.target.value;if(e.target.checked&&!game.moves.includes(id))game.moves.push(id);if(!e.target.checked)game.moves=game.moves.filter(x=>x!==id);renderMoves()});
-  $('#gameStart').addEventListener('click',start);$('#gamePause').addEventListener('click',pause);$('#gameStop').addEventListener('click',back);$('#backSetup').addEventListener('click',back);$('#gameAgain').addEventListener('click',()=>{if(buildGame()){$('#finishStage').hidden=true;showEvent()}});
+  $('#gameStart').addEventListener('click',start);$('#skipBriefing').addEventListener('click',playNow);$('#nextBriefing').addEventListener('click',()=>{if(game.briefingIndex>=game.briefingMoves.length){playNow();return}game.briefingIndex++;showBriefingMove()});$('#gamePause').addEventListener('click',pause);$('#gameStop').addEventListener('click',back);$('#backSetup').addEventListener('click',back);$('#gameAgain').addEventListener('click',()=>{if(buildGame()){$('#finishStage').hidden=true;showEvent()}});
   $('#quickGame').addEventListener('click',quickStart);
   $('#homeButton').addEventListener('click',showLauncher);
-  renderFamilies();renderGoals();renderMoves();updateQuickButton();
+  $('.overview-link').textContent='← Terug naar menu';$('#homeButton').textContent='⇄ Wissel werkblad / smartboardspel';renderFamilies();renderGoals();renderMoves();updateQuickButton();
 })();

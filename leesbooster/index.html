@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Leesbooster – gericht technisch lezen</title>
-  <link rel="stylesheet" href="style.css?v=20260802-3">
+  <link rel="stylesheet" href="style.css?v=20260802-8">
   <script defer src="vendor/html2canvas.min.js"></script>
   <script defer src="vendor/jspdf.umd.min.js"></script>
 </head>
@@ -115,6 +115,9 @@
       </div>
       <div class="game-explain"><b>Zo werkt het:</b> bekijk vooraf samen welke zebra bij welke korte opdracht hoort. Tijdens het spel hoeven de kinderen de uitleg dan niet meer te lezen. De woorden en gekozen beweegboosts verschijnen vanzelf; de leerkracht hoeft niet verder te klikken. Het spel luistert niet mee en beoordeelt dus niet of de klas juist leest.</div>
     </section>
+    <section class="game-briefing" id="gameBriefing" hidden>
+      <div class="briefing-card"><p class="briefing-label" id="briefingLabel">Straks verschijnt deze zebra tussen de woorden</p><div class="briefing-counter" id="briefingProgress"></div><img class="briefing-image" id="briefingImage" alt="Zisa toont de beweegopdracht"><h1 id="briefingText"></h1><p id="briefingHint">Doe de beweging samen wanneer deze zebra tijdens het spel verschijnt.</p><div class="briefing-actions"><button class="briefing-skip" id="skipBriefing">Uitleg overslaan en meteen spelen</button><button class="briefing-next" id="nextBriefing">Volgende uitleg →</button></div></div>
+    </section>
     <section class="game-stage" id="gameStage" hidden>
       <div class="stage-top"><div><b id="gameProgress">Woord 1 van 15</b><span id="gameGoalLabel"></span></div><div class="stage-actions"><button id="gamePause">Pauze</button><button id="gameStop">⚙ Instellingen aanpassen</button></div></div>
       <div class="stage-card word-stage" id="wordStage"><p>Lees samen hardop</p><div class="flash-word" id="flashWord"></div></div>
@@ -124,8 +127,8 @@
     </section>
   </main>
   <div class="pdf-progress" id="pdfProgress" hidden role="status" aria-live="polite"><div><h2>Je PDF wordt gemaakt…</h2><p id="pdfProgressText">Pagina's voorbereiden</p><div class="pdf-progress-track"><span id="pdfProgressBar"></span></div><small>Laat dit scherm even open. De download start vanzelf.</small></div></div>
-  <script src="woorden.js"></script>
-  <script src="app.js?v=20260802-4"></script>
-  <script src="game.js"></script>
+  <script src="woorden.js?v=20260802-2"></script>
+  <script src="app.js?v=20260802-6"></script>
+  <script src="game.js?v=20260802-4"></script>
 </body>
 </html>

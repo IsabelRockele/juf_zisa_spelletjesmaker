@@ -29,6 +29,7 @@
     'politie':[['informatie','uitleg of gegevens die je iets vertellen'],['actie','iets wat iemand doet om een doel te bereiken'],['presentatie','een uitleg die je aan een groep geeft']],
     'eau':[['tableau','een groot schilderij of een grote afbeelding'],['plateau','een hoog en vlak stuk grond'],['niveau','een trap of moeilijkheidsgraad']]
   };
+  const lettergreepHulp={gesloten:['bom-men','tas-sen','fles-sen','bal-len','kam-men','mus-sen','kat-ten','kip-pen','vis-sen','sok-ken','rug-gen','bak-ken','bel-len','ren-nen','stop-pen','zwem-men','bin-nen','lek-ker','let-ter','num-mer','ap-pel','win-ter','dok-ter','man-tel','var-ken','won-der','ham-ster','rug-zak','zak-lamp','voet-bal','school-tas','hand-doek','tand-arts','pick-nick','bas-ket-bal','knut-se-len','ver-tel-len','ont-dek-ken','ver-stop-pen','ver-trek-ken','ver-za-me-len','ver-schil-lend','kin-de-ren','on-der-tus-sen','span-nend','grap-pig','mak-ke-lijk','rus-tig'],open:['ta-fel','bo-men','le-zen','mu-ren','vo-gel','ja-ren','dro-men','ra-men','ste-nen','be-nen','zo-mer','wa-ter','la-ter','me-ter','bo-ter','do-zen','gla-zen','lo-pen','ko-ken','spe-len','ge-ven','ma-ken','pra-ten','dra-gen','we-gen','ze-ven','ne-gen','bo-ven','o-ma','o-pa','ra-di-o','pi-a-no','to-ma-ten','ba-na-nen','va-kan-tie','a-von-tu-ren','te-le-fo-ne-ren','bi-bli-o-theek','be-wo-ners','be-we-gen','ge-lo-ven','pro-be-ren','ver-ha-len','op-ha-len','re-ke-nen','te-ke-nen','be-le-ven','ver-de-len','ver-ge-ten']};
   const storyBits = {
     'wr':['Bij een oud wrak wriemelt iets dat zich tussen twee planken wringt.','Noor wrikt een plank los en wrijft het natte zand van een klein gouden slot.'],
     'th':['Het spoor loopt door een oud theater waar het thema van de voorstelling over een geheim in de bibliotheek gaat.','Naast een thermos vindt Noor een kaartje voor een nieuwe theaterscène.'],
@@ -64,6 +65,16 @@
     stadsraadsel:{focus:['th','i-ie','au-ou','ei-ij','ds'],title:'Het raadsel van de oude stad',image:'afbeeldingen/verhalen/het-raadsel-van-de-stad.png',base:['Een taxi brengt Noor van het station naar een oud plein.','Naast het theater staat een groot gebouw met een kleine studio.','Een gids toont een kaart waarop de bibliotheek en een vijver zijn getekend.'],transitions:['Een reiziger wijst naar de trein achter het gordijn.','Tijdens de pauze drinkt Noor uit een thermos.','In een loods vindt ze een video en een diploma.','Sinds gisteren wacht daar een blauwe auto.'],end:['Het thema van de route blijkt een reis door de stad te zijn.','De gids krijgt applaus wanneer Noor het laatste spoor vindt.']},
     uitvindersbeurs:{focus:['teit-heid','uitgangen','politie','eau'],title:'De geheime uitvindersbeurs',image:'afbeeldingen/verhalen/de-geheime-uitvindersbeurs.png',base:['Noor bezoekt een officiële tentoonstelling vol bijzondere uitvindingen.','Op een bureau staan een gouden radio en een cadeau.','Aan de muur hangt een kleurrijk tableau van een uitvinding.','Een praktische machine controleert de kwaliteit en veiligheid van elke uitvinding.'],transitions:['De politie geeft informatie over een verdwenen toestel.','Noor onderzoekt elke mogelijkheid op een digitaal plateau.','Een speciale actie brengt de machine naar een hoger niveau.','De officiële gids start daarna zijn presentatie.'],end:['In de machine vindt Noor het verdwenen toestel veilig terug.','De uitvinder bedankt haar en geeft haar het cadeau.']}
   };
+  storyThemes.wrak.base=['Noor wandelt langs het strand en ziet een oud wrak bij het water.','Tussen de planken wriemelt iets kleins heen en weer.','Noor wrikt voorzichtig een losse plank omhoog en wrijft het natte zand weg.','Onder de plank vindt ze een kistje met een gouden slot en een geheimzinnige kaart.'];
+  storyThemes.theater.base=['Na de repetitie blijft Noor nog even in het oude theater.','Het thema van de voorstelling is een geheim achter het grote rode toneeldoek.','Tussen de kostuums vindt ze een gouden kaartje zonder naam of nummer.','Wanneer het zaallicht dooft, wijst een fonkelende ster op het kaartje naar een oude reiskoffer.'];
+  storyThemes.dierenpark.transitions=['De kraai vliegt naar een kooi bij de weide.','Op de kooi staat een pijl die naar de linkse oever wijst.','Bij een ruwe bank vindt Noor een ring met de afbeelding van een leeuw.','De ring past precies in een opening naast het houten hek.'];
+  storyThemes.stadsraadsel.transitions=['Een reiziger wijst Noor naar een gordijn in de hal van het theater.','Achter het gordijn vindt ze een plattegrond met een trein erop.','Tijdens de pauze drinkt Noor uit een thermos en bestudeert ze de route.','In een oude loods ontdekt ze een video en een diploma met het laatste teken.'];
+  storyThemes.cadeau.transitions=['Het eerste spoor leidt Noor door de lange gang.','Op een tableau van het station ontdekt ze een klein muzieknootje.','Wanneer Noor erop drukt, hoort ze muziek uit een kast.','Achter de kastdeur vindt ze het laatste briefje.'];
+  storyThemes.uitvindersbeurs.transitions=['De politie geeft informatie over het verdwenen toestel.','Noor onderzoekt elke mogelijkheid op het digitale bedieningspaneel.','Met een speciale actie opent ze een verborgen deel van de machine.','De officiële gids helpt haar om de machine veilig uit te schakelen.'];
+  storyThemes.uitvindersbeurs.end=['In de machine vindt Noor het verdwenen toestel veilig terug.','Daarna hervat de gids zijn presentatie en bedankt de uitvinder Noor met een mooi cadeau.'];
+  storyThemes.museum.end=['De gids bergt de sleutel veilig op, zodat niemand hem kan kwijtraken.','Noor mag morgen terugkomen om samen de geheime deur te openen.'];
+  const themeFocus={wrak:['wr'],theater:['th'],bos:['gesloten','open'],museum:['ds'],winterbos:['gesloten','open'],boomhut:['gesloten','open'],radiostudio:['i-ie'],cadeau:['eau','politie']};
+  const focusFor=(id,theme)=>themeFocus[id]||theme.focus||[];
   const storyQuestions = {
     wrak:{q1:'Waar vindt Noor de geheimzinnige kaart?',a1:['in een kistje bij het wrak','in haar boekentas','onder een strandstoel'],q2:'Wat helpt Noor om de route te volgen?',a2:['het spoor op de kaart','een bord op het strand','een bericht op haar telefoon'],q3:'Waarom wil Noor de volgende dag terugkomen?',a3:['om het volgende geheim te ontdekken','om haar jas te zoeken','om te gaan zwemmen']},
     theater:{q1:'Wat vindt Noor tussen de kostuums?',a1:['een gouden kaartje','een zaklamp','een oud boek'],q2:'Waardoor weet Noor waar ze moet zoeken?',a2:['door een fonkelende ster op het kaartje','door een brief van de conciërge','door een pijl op de vloer'],q3:'Waarom legt Noor alles voorzichtig terug?',a3:['omdat de conciërge eraan komt','omdat de voorstelling begint','omdat ze het kaartje niet mooi vindt']},
@@ -78,6 +89,7 @@
     stadsraadsel:{q1:'Hoe komt Noor in de oude stad?',a1:['met een taxi','met een boot','met de fiets'],q2:'Wat vindt Noor in de loods?',a2:['een video en een diploma','een kroon en een ring','een boek en een sleutel'],q3:'Waarom krijgt de gids applaus?',a3:['omdat Noor het laatste spoor vindt','omdat hij een lied zingt','omdat de trein vertrekt']},
     uitvindersbeurs:{q1:'Wat controleert de praktische machine?',a1:['kwaliteit en veiligheid','kleur en gewicht','tijd en temperatuur'],q2:'Wie geeft informatie over het verdwenen toestel?',a2:['de politie','de koning','de boswachter'],q3:'Waar vindt Noor het toestel?',a3:['in de machine','onder het bureau','achter het tableau']}
   };
+  storyQuestions.cadeau.q2='Waar vindt Noor het cadeau en het laatste briefje?';storyQuestions.cadeau.a2=['achter de kastdeur','onder het bureau','in de feestzaal'];
   const supportThemes={
     wrak:{start:['Noor wandelt op het strand.','Ze ziet een oud wrak bij het water.','Onder een losse plank vindt ze een klein kistje.','In het kistje ligt een geheimzinnige kaart.','Op de kaart staat een duidelijk spoor.','Noor volgt het spoor langs de planken.','Zo vindt ze stap voor stap de juiste weg.'],end:['Noor legt de kaart veilig terug in het kistje.','Morgen komt ze terug om het volgende geheim te ontdekken.']},
     theater:{start:['Noor is in een oud theater.','Ze kijkt achter het rode doek.','Tussen de kostuums vindt ze een gouden kaartje.','Op het kaartje staat een fonkelende ster.','De ster wijst naar een oude koffer.','Noor opent de koffer.','Daar vindt ze een nieuw spoor.'],end:['De conciërge komt eraan en Noor legt alles terug.','Bij de volgende repetitie wil ze verder zoeken.']},
@@ -92,6 +104,12 @@
     stadsraadsel:{start:['Een taxi brengt Noor naar de oude stad.','Ze stapt uit op een groot plein.','Daar ontmoet ze een vriendelijke gids.','De gids toont haar het theater en de bibliotheek.','In een loods vindt Noor een video en een diploma.','Daarna volgt ze een spoor langs de vijver.','Zo vindt Noor het laatste teken.'],end:['De gids krijgt applaus omdat Noor het laatste spoor vindt.','Samen keren ze terug naar het station.']},
     uitvindersbeurs:{start:['Noor bezoekt een uitvindersbeurs.','Een officiële gids toont een praktische machine.','De machine controleert kwaliteit en veiligheid.','Dan blijkt een toestel verdwenen.','De politie geeft Noor informatie.','Noor onderzoekt de machine.','Binnenin vindt ze het verdwenen toestel.'],end:['De uitvinder bedankt Noor voor haar hulp.','Als beloning krijgt ze een mooi cadeau.']}
   };
+  supportThemes.wrak.start=['Noor wandelt op het strand.','Ze ziet een oud wrak bij het water.','Tussen de planken wriemelt iets kleins.','Noor wrikt een losse plank omhoog.','Ze wrijft het natte zand weg.','Onder de plank vindt ze een klein kistje.','In het kistje ligt een geheimzinnige kaart.'];
+  supportThemes.theater.start=['Noor is in een oud theater.','Het thema van de voorstelling is een geheim achter het rode doek.','Na de repetitie kijkt Noor tussen de kostuums.','Daar vindt ze een gouden kaartje.','Op het kaartje staat een fonkelende ster.','De ster wijst naar een oude koffer.','In de koffer vindt Noor een nieuw spoor.'];
+  supportThemes.dierenpark.start=['Noor loopt door het dierenpark.','Ze volgt een zwarte kraai.','Bij de vijver loeit een koe.','De kraai vliegt naar een kooi bij de weide.','Op de kooi staat een pijl naar een ruwe bank.','Bij de bank vindt Noor een ring met een leeuw erop.','De ring opent het houten hek.'];
+  supportThemes.stadsraadsel.start=['Een taxi brengt Noor naar de oude stad.','Ze stapt uit op een groot plein.','Daar ontmoet ze een vriendelijke gids.','De gids toont haar het theater en de bibliotheek.','Achter een gordijn vindt Noor een kaart met een trein erop.','De kaart leidt naar een oude loods.','Daar vindt ze een video en een diploma met het laatste teken.'];
+  supportThemes.stadsraadsel.end=['Op het plein vertelt Noor hoe ze het raadsel heeft opgelost.','De gids krijgt applaus en samen keren ze terug naar het station.'];
+  supportThemes.cadeau.start=['Op het bureau ligt alleen een leeg lint.','Het cadeau voor de school is verdwenen.','Noor vindt een kaartje met een aanwijzing.','Ze volgt het spoor door de lange gang.','Op een tableau van het station ziet ze een muzieknootje.','Wanneer ze erop drukt, hoort ze muziek uit een kast.','Achter de kastdeur vindt ze het cadeau en het laatste briefje.'];
   const supportBits={
     'wr':['Noor ziet het wrak van een kapot schip.','Ze wrikt een plank los en wrijft het zand eraf.'],
     'th':['In het theater ziet Noor een voorstelling met de zee als thema.','Een acteur vertelt dat therapie mensen kan helpen om zich beter te voelen.'],
@@ -132,14 +150,14 @@
   function allowedStoryThemeIds(){
     const families=[...new Set(selectedDoelen().map(d=>d.family))];
     const selectedIds=selectedDoelen().map(d=>d.id);
-    const special=Object.entries(storyThemes).filter(([,theme])=>theme.families?.some(f=>families.includes(f))).map(([id])=>id);
-    const focused=Object.entries(storyThemes).filter(([,theme])=>theme.focus?.some(id=>selectedIds.includes(id))).map(([id])=>id);
+    const special=Object.entries(storyThemes).filter(([id,theme])=>theme.families?.some(f=>families.includes(f))&&(!focusFor(id,theme).length||focusFor(id,theme).some(goal=>selectedIds.includes(goal)))).map(([id])=>id);
+    const focused=Object.entries(storyThemes).filter(([id,theme])=>focusFor(id,theme).some(goal=>selectedIds.includes(goal))).map(([id])=>id);
     const generic=Object.entries(storyThemes).filter(([,theme])=>!theme.families&&!theme.focus).map(([id])=>id);
     if(focused.length)return [...new Set([...focused,...special,...generic])];
     return families.length===1&&special.length?special:Object.entries(storyThemes).filter(([,theme])=>!theme.families).map(([id])=>id);
   }
   function bestStoryThemeId(ids,ds=selectedDoelen()){
-    return ids.map((id,index)=>{const theme=storyThemes[id];const text=[...theme.base,...theme.transitions,...theme.end].join(' ').toLowerCase();const score=ds.reduce((total,d)=>total+(theme.focus?.includes(d.id)?20:0)+d.words.reduce((n,w)=>n+(text.includes(w.toLowerCase())?1:0),0),0);return{id,index,score}}).sort((a,b)=>b.score-a.score||a.index-b.index)[0]?.id||ids[0];
+    return ids.map((id,index)=>{const theme=storyThemes[id];const text=[...theme.base,...theme.transitions,...theme.end].join(' ').toLowerCase();const score=ds.reduce((total,d)=>total+(focusFor(id,theme).includes(d.id)?20:0)+d.words.reduce((n,w)=>n+(text.includes(w.toLowerCase())?1:0),0),0);return{id,index,score}}).sort((a,b)=>b.score-a.score||a.index-b.index)[0]?.id||ids[0];
   }
   function updateStoryThemes(){
     const select=$('#verhaalThema');if(!select)return;const previous=select.value;const ids=allowedStoryThemeIds();
@@ -165,7 +183,13 @@
     $('#alleNiveaus').textContent=limited?'Selecteer beide niveaus':'Selecteer alle 3';
     $('#niveauBeperking').hidden=!limited;
   }
+  function markeerLettergrepen(text,id){
+    const parts=lettergreepHulp[id]||[],index=new Map(parts.map(split=>[split.replaceAll('-',''),split]));if(!parts.length)return text;
+    const words=[...index.keys()].sort((a,b)=>b.length-a.length).join('|'),re=new RegExp(`(^|[^\\p{L}])(${words})(?=$|[^\\p{L}])`,'giu');
+    return text.replace(re,(all,prefix,word)=>{let pieces=index.get(word.toLowerCase()).split('-');if(word[0]===word[0].toUpperCase())pieces[0]=pieces[0][0].toUpperCase()+pieces[0].slice(1);return prefix+pieces.map((piece,i)=>`<span class="syllable-part ${i%2?'syllable-b':'syllable-a'}">${piece}</span>`).join('<i class="syllable-hyphen">-</i>')});
+  }
   function markeer(word,d){
+    if(d.id==='gesloten'||d.id==='open')return markeerLettergrepen(word,d.id);
     if(d.id==='i-ie') return word.replace(/i/gi,m=>`<span class="leesstuk">${m}</span>`);
     if(d.id==='politie') return word.replace(/ti(?=[ea])/gi,m=>`<span class="leesstuk">${m}</span>`);
     if(d.id==='eau') return word.replace(/eau/gi,m=>`<span class="leesstuk">${m}</span>`);
@@ -194,26 +218,14 @@
     s=s.replace(/[.!?]*$/,'.').trim();return s.charAt(0).toUpperCase()+s.slice(1);
   }
   function storySentences(ds,theme,niveau='basis'){
+    const themeId=Object.keys(storyThemes).find(id=>storyThemes[id]===theme);
     if(niveau==='steun'){
-      const themeId=Object.keys(storyThemes).find(id=>storyThemes[id]===theme);
       const easy=supportThemes[themeId];
-      const bestGoal=ds.find(d=>theme.focus?.includes(d.id))||ds[0];
-      return [...easy.start.slice(0,5),...supportBits[bestGoal.id],...easy.start.slice(5),...easy.end];
+      return [...easy.start,'Noor kijkt nog één keer goed om zich heen.',...easy.end];
     }
-    const story=[...theme.base];
-    const usedTransitions=new Set();
-    ds.forEach((d,i)=>{
-      const transition=theme.transitions[i%theme.transitions.length];
-      story.push(transition);usedTransitions.add(transition);
-      const bits=supportBits[d.id];
-      story.push(bits[0],bits[1]);
-    });
-    theme.transitions.forEach(line=>{if(!usedTransitions.has(line))story.push(line)});
-    if(ds.length===1){story.push('Noor bekijkt de aanwijzing nog eens heel nauwkeurig.','Pas wanneer ze alles begrijpt, verschijnt het volgende deel van de route.');}
-    if(niveau==='vlot'&&ds.length<3)story.push('Noor vergelijkt alle aanwijzingen en ontdekt dat ze samen één duidelijke boodschap vormen.','Vol vertrouwen volgt ze het spoor verder, ook wanneer de opdracht plots moeilijker wordt.');
-    story.push(...theme.end);
-    const lines=story.slice(0,15);
-    return lines;
+    const story=[...theme.base,...theme.transitions,'Noor denkt rustig na over alle aanwijzingen die ze heeft gevonden.'];
+    if(niveau==='vlot')story.push('Plots begrijpt ze hoe de aanwijzingen samen één duidelijke boodschap vormen.');
+    return [...story,...theme.end].slice(0,15);
   }
   function storyWordBank(ds,niveau){
     if(niveau==='vlot')return '';
