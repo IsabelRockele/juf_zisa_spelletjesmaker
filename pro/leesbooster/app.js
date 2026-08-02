@@ -30,6 +30,7 @@
     'eau':[['tableau','een groot schilderij of een grote afbeelding'],['plateau','een hoog en vlak stuk grond'],['niveau','een trap of moeilijkheidsgraad']]
   };
   const lettergreepHulp={gesloten:['bom-men','tas-sen','fles-sen','bal-len','kam-men','mus-sen','kat-ten','kip-pen','vis-sen','sok-ken','rug-gen','bak-ken','bel-len','ren-nen','stop-pen','zwem-men','bin-nen','lek-ker','let-ter','num-mer','ap-pel','win-ter','dok-ter','man-tel','var-ken','won-der','ham-ster','rug-zak','zak-lamp','voet-bal','school-tas','hand-doek','tand-arts','pick-nick','bas-ket-bal','knut-se-len','ver-tel-len','ont-dek-ken','ver-stop-pen','ver-trek-ken','ver-za-me-len','ver-schil-lend','kin-de-ren','on-der-tus-sen','span-nend','grap-pig','mak-ke-lijk','rus-tig'],open:['ta-fel','bo-men','le-zen','mu-ren','vo-gel','ja-ren','dro-men','ra-men','ste-nen','be-nen','zo-mer','wa-ter','la-ter','me-ter','bo-ter','do-zen','gla-zen','lo-pen','ko-ken','spe-len','ge-ven','ma-ken','pra-ten','dra-gen','we-gen','ze-ven','ne-gen','bo-ven','o-ma','o-pa','ra-di-o','pi-a-no','to-ma-ten','ba-na-nen','va-kan-tie','a-von-tu-ren','te-le-fo-ne-ren','bi-bli-o-theek','be-wo-ners','be-we-gen','ge-lo-ven','pro-be-ren','ver-ha-len','op-ha-len','re-ke-nen','te-ke-nen','be-le-ven','ver-de-len','ver-ge-ten']};
+  const verhaalLettergreepHulp=['wan-delt','win-ter-bos','vreem-de','spo-ren','lei-den','hou-ten','brief-je','moei-lij-ke','woor-den','har-dop','ver-schijnt','nieu-we','laat-ste','wach-ten','war-me','cho-co-la-de-melk','o-pen'];
   const storyBits = {
     'wr':['Bij een oud wrak wriemelt iets dat zich tussen twee planken wringt.','Noor wrikt een plank los en wrijft het natte zand van een klein gouden slot.'],
     'th':['Het spoor loopt door een oud theater waar het thema van de voorstelling over een geheim in de bibliotheek gaat.','Naast een thermos vindt Noor een kaartje voor een nieuwe theaterscène.'],
@@ -186,7 +187,12 @@
   function markeerLettergrepen(text,id){
     const parts=lettergreepHulp[id]||[],index=new Map(parts.map(split=>[split.replaceAll('-',''),split]));if(!parts.length)return text;
     const words=[...index.keys()].sort((a,b)=>b.length-a.length).join('|'),re=new RegExp(`(^|[^\\p{L}])(${words})(?=$|[^\\p{L}])`,'giu');
-    return text.replace(re,(all,prefix,word)=>{let pieces=index.get(word.toLowerCase()).split('-');if(word[0]===word[0].toUpperCase())pieces[0]=pieces[0][0].toUpperCase()+pieces[0].slice(1);return prefix+pieces.map((piece,i)=>`<span class="syllable-part ${i%2?'syllable-b':'syllable-a'}">${piece}</span>`).join('<i class="syllable-hyphen">-</i>')});
+    return text.replace(re,(all,prefix,word)=>{let pieces=index.get(word.toLowerCase()).split('-');if(word[0]===word[0].toUpperCase())pieces[0]=pieces[0][0].toUpperCase()+pieces[0].slice(1);return prefix+pieces.map((piece,i)=>`<span class="syllable-part ${i%2?'syllable-b':'syllable-a'}">${piece}</span>`).join('')});
+  }
+  function markeerVerhaalLettergrepen(text){
+    const index=new Map(verhaalLettergreepHulp.map(split=>[split.replaceAll('-',''),split]));
+    const words=[...index.keys()].sort((a,b)=>b.length-a.length).join('|'),re=new RegExp(`(^|[^\\p{L}])(${words})(?=$|[^\\p{L}])`,'giu');
+    return text.replace(re,(all,prefix,word)=>{let pieces=index.get(word.toLowerCase()).split('-');if(word[0]===word[0].toUpperCase())pieces[0]=pieces[0][0].toUpperCase()+pieces[0].slice(1);return prefix+pieces.map((piece,i)=>`<span class="syllable-part ${i%2?'syllable-b':'syllable-a'}">${piece}</span>`).join('')});
   }
   function markeer(word,d){
     if(d.id==='gesloten'||d.id==='open')return markeerLettergrepen(word,d.id);
@@ -301,7 +307,7 @@
     const ds=b.doelen.map(id=>doelen.find(d=>d.id===id)).filter(Boolean);
     const theme=storyThemes[b.verhaalThema]||storyThemes.wrak;
     const title=ds.length===1?`${theme.title} – ${ds[0].label}`:`${theme.title} – mix van ${ds.map(d=>d.label).join(', ')}`;
-    const lines=storySentences(ds,theme,b.niveau); const story=lines.map(s=>`<span class="story-sentence">${b.niveau==='steun'?ds.reduce((out,d)=>markeer(out,d),s):s}</span>`).join('');const wordBank=storyWordBank(ds,b.niveau);
+    const lines=storySentences(ds,theme,b.niveau); const hasLettergreepDoel=ds.some(d=>d.id==='gesloten'||d.id==='open');const story=lines.map(s=>`<span class="story-sentence">${b.niveau==='steun'?ds.reduce((out,d)=>markeer(out,d),hasLettergreepDoel?markeerVerhaalLettergrepen(s):s):s}</span>`).join('');const wordBank=storyWordBank(ds,b.niveau);
     const remove=`<button class="remove-story" data-remove="${blockIndex}" title="Verwijder dit volledige verhaal met vragen">🗑 Verwijder verhaal + vragen</button>`;
     const page1=`<article class="paper story-page story-level-${b.niveau}">${remove}${paperHeader('Samen groeien in lezen',b.naamDatum?'Naam: ____________________<br>Datum: ____________________':'')}<h1 class="story-title">${title}</h1><p class="story-instruction">${b.niveau==='steun'?'★ Lees eerst de woorden en daarna het verhaal.':b.niveau==='basis'?'★★ Lees eerst de woorden en daarna het verhaal.':'★★★ Lees het verhaal meteen mooi door.'}</p>${wordBank}<div class="story-image" role="img" aria-label="Illustratie bij ${theme.title}" style="background-image:url('${theme.image}')"></div><div class="story-text">${story}</div><footer class="page-footer"><span>${lines.length} zinnen · ${ds.map(d=>d.label).join(' · ')}</span><span>pagina ${startPage}</span></footer></article>`;
     const page2=`<article class="paper question-page reading-page question-level-${b.niveau}">${remove}${paperHeader('Begrijpend lezen',b.naamDatum?'Naam: ____________________':'')}<p class="question-kicker">Begrijpend lezen · ${niveauNaam[b.niveau]}</p><h1 class="question-story-title">${title}</h1>${readingTasksHtml(b.verhaalThema,b.niveau,ds)}<footer class="page-footer"><span>Lees terug in de tekst als je twijfelt.</span><span>pagina ${startPage+1}</span></footer></article>`;
