@@ -74,3 +74,7 @@
 @keyframes runeWheel{to{transform:rotate(360deg)}}
 @keyframes runeOne{to{rotate:360deg}}
 @media(max-width:520px){.rune-mode .answers{width:260px;height:170px}.rune-mode .answer-core{width:78px;min-height:62px;margin:-31px 0 0 -39px}.rune-mode .answer-core:nth-child(1){transform:translateX(110px)}.rune-mode .answer-core:nth-child(2){transform:rotate(120deg) translateX(110px) rotate(-120deg)}.rune-mode .answer-core:nth-child(3){transform:rotate(240deg) translateX(110px) rotate(-240deg)}}
+
+/* Level 5: de uitkomst staat vast; het kind zoekt de ene passende oefening. */
+.reverse-mode .answer-core{background:linear-gradient(145deg,#f4edff,#c5a7ff);border-color:#8659c7;color:#352052}
+.reverse-mode .answer-core::before{content:'?';display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#8659c7;color:#fff}
