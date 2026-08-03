@@ -7,7 +7,9 @@ const gate=document.createElement("div");gate.id="zisaPlayGate";gate.innerHTML='
 const style=document.createElement("style");style.textContent="#zisaPlayGate{position:fixed;z-index:2147483647;inset:0;background:#fffaf1;display:grid;place-items:center;font:18px Arial;color:#17324d}#zisaPlayGate div{text-align:center}#zisaPlayGate span{display:block;font-size:48px;margin-bottom:14px}#zisaPlayGate.error strong{display:block;max-width:520px;padding:20px}#zisaPlayGate a{display:inline-block;margin-top:18px;color:#1768ac}";document.head.append(style);
 const app=getApps().length?getApp():initializeApp(cfg);getAuth(app);const functions=getFunctions(app,"europe-west1");const join=httpsCallable(functions,"joinPlayClass");const teacherCheck=httpsCallable(functions,"previewPlayClass");
 const code=sessionStorage.getItem("zisa_play_code")||new URLSearchParams(location.search).get("code")||"";const deviceId=localStorage.getItem("zisa_play_device_id")||"";
-const isLocalPreview=['localhost','127.0.0.1'].includes(location.hostname)&&(new URLSearchParams(location.search).get('preview')==='1'||sessionStorage.getItem('zisa_play_allowed')==='1');
+const host=location.hostname.toLowerCase();
+const isPrivateHost=host==='localhost'||host==='::1'||host==='0.0.0.0'||host.startsWith('127.')||host.startsWith('192.168.')||host.startsWith('10.')||(/^172\.(1[6-9]|2\d|3[01])\./).test(host);
+const isLocalPreview=isPrivateHost&&(new URLSearchParams(location.search).get('preview')==='1'||sessionStorage.getItem('zisa_play_allowed')==='1');
 const isTeacherPreview=sessionStorage.getItem('zisa_teacher_preview')==='1';
 const gamesRootUrl=new URL('./',import.meta.url);
 const playHomeUrl=new URL('../index.html',import.meta.url).href;
