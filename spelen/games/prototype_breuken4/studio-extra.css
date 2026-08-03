@@ -11,16 +11,19 @@
 .tower-lab .bar-zones{grid-template-columns:repeat(2,minmax(190px,1fr));align-items:end}.tower-lab .bar-zone canvas{width:220px;height:340px;max-width:100%}.tower-lab .bar-zone{align-self:stretch}.tower-lab+.signs{margin-top:12px}
 @media(max-width:700px){.tower-lab .bar-zones{grid-template-columns:repeat(2,minmax(140px,1fr))}.tower-lab .bar-zone canvas{height:285px}}
 .combine-arrow{text-align:center;margin:12px 0;color:#ad4b13;font-weight:900}.result-zone{width:min(720px,100%);margin:0 auto}.result-zone canvas{width:100%;height:120px}
+header,.quick,.stage-card{width:min(1500px,calc(100% - 12px))}.build-board canvas{aspect-ratio:1/1}
 @media (max-height:820px) and (min-width:800px){
+  html,body{height:100%;overflow:hidden}
   .shell{padding:6px 12px}.shell header{min-height:48px}.shell header small{font-size:.72rem}.shell h1{font-size:2rem;margin:0}
   .quick{grid-template-columns:repeat(6,1fr);margin:4px auto;gap:5px}.quick button{min-height:44px;padding:6px 4px!important;font-size:.78rem;line-height:1.1}
-  .stage-card{min-height:0;padding:10px 14px;border-radius:22px}.task .eyebrow{font-size:.75rem}.task h2{font-size:1.8rem;margin:2px}.task p{font-size:.88rem;margin:2px}
+  .stage-card{min-height:calc(100vh - 118px);padding:10px 14px;border-radius:22px}.task .eyebrow{font-size:.75rem}.task h2{font-size:1.8rem;margin:2px}.task p{font-size:.88rem;margin:2px}
   .workspace{min-height:0;margin-top:7px;padding:8px 10px;border-radius:19px}.ready{margin-top:7px}.ready button{padding:9px 16px}.feedback{min-height:36px;margin-top:5px;padding:8px}
   .fraction-lab{grid-template-columns:310px minmax(0,1fr);gap:12px}.fraction-tray{grid-template-columns:repeat(2,1fr);gap:6px;padding:8px}.unit-tile{grid-template-columns:70px 1fr;gap:3px;padding:6px}.unit-tile span{height:29px}.unit-tile small{display:none}
   .bar-zones{gap:8px}.bar-zone{padding:6px}.take-back{padding:6px 8px;font-size:.76rem}
   .add-fraction-lab .bar-zones{grid-template-columns:repeat(2,minmax(0,1fr))}.add-fraction-lab .bar-zone canvas{height:82px}
   .tower-lab .bar-zones{gap:8px}.tower-lab .bar-zone canvas{width:170px;height:225px}.tower-lab .bar-zone{min-height:290px}
-  .piece-tray{grid-template-columns:repeat(2,1fr);gap:6px;padding:8px}.piece-choice{grid-template-columns:48px 1fr 38px;padding:4px}.piece-choice canvas{width:48px;height:48px}.piece-choice button{height:38px}.build-board canvas{height:260px}
+  .manip-layout{grid-template-columns:320px minmax(0,1fr);gap:14px}.piece-tray{width:100%;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:8px}.piece-choice{min-width:0;grid-template-columns:48px minmax(32px,1fr) 38px;padding:4px}.piece-choice canvas{width:48px;height:48px}.piece-choice button{height:38px}.build-board canvas{width:260px;height:260px}
   .cup{height:220px;width:120px}.cup-lab{grid-template-columns:310px minmax(0,1fr)}.liquid-tray{grid-template-columns:repeat(2,1fr)}
   .combine-arrow{margin:4px 0}.result-zone canvas{height:82px}.stop{padding:8px 12px;font-size:.8rem}
 }
+@media (max-height:820px) and (min-width:1200px){.manip-layout{grid-template-columns:360px minmax(0,1fr)}.build-board canvas{width:340px;height:340px}.workspace{min-height:430px}.piece-choice{grid-template-columns:58px minmax(38px,1fr) 42px}.piece-choice canvas{width:58px;height:58px}}
