@@ -1,0 +1,5 @@
+.cup-scene{gap:42px}
+.cup-scene>div{position:relative}
+.cup-scene>div:after{content:'';position:absolute;right:-30px;top:75px;width:43px;height:105px;border:8px solid #7aa2b5;border-left:0;border-radius:0 35px 35px 0}
+.cup-scene>div:before{content:'';position:absolute;left:-15px;top:-3px;border-style:solid;border-width:0 24px 18px 0;border-color:transparent #7aa2b5 transparent transparent}
+@media(max-width:760px){.cup-scene{gap:34px}.cup-scene>div:after{right:-25px;top:58px;width:35px;height:85px}}
