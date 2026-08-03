@@ -4,7 +4,7 @@ const imgs={pizza:img('assets/pizza.png'),taart:img('assets/taart.png'),chocolad
 const modes=[
  {id:'build',icon:'🍕',name:'Bouw de breuk',desc:'Leg zelf de juiste stukken en klik daarna op Klaar.'},
  {id:'whole',icon:'🧩',name:'Maak één geheel',desc:'Vul aan tot een volledige pizza, taart of reep.'},
- {id:'add',icon:'➕',name:'Breuken samenvoegen',desc:'Voeg gelijknamige breuken visueel samen.'},
+ {id:'add',icon:'➕',name:'Breuken optellen en aftrekken',desc:'Bouw, maak gelijknamig, voeg samen of neem stukken weg.'},
  {id:'equal',icon:'🔎',name:'Gelijkwaardige breuken',desc:'Herken dezelfde hoeveelheid in andere vormen.'},
  {id:'compare',icon:'⚖️',name:'Breuken vergelijken',desc:'Vergelijk stroken en kies <, > of =.'},
  {id:'cup',icon:'🥛',name:'Recepten met 1 liter',desc:'Ontdek hoeveel gelijke breukmaatjes samen een hoeveelheid vormen.'},
@@ -28,7 +28,7 @@ function menuButtons(){return modes.map(m=>`<button class="mode-card mode-${m.id
 $('modeGrid').innerHTML=menuButtons();$('quick').innerHTML=modes.map(m=>`<button data-mode="${m.id}">${m.icon} ${m.name}</button>`).join('');
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>start(b.dataset.mode));$('studioMenu').onclick=()=>menu.hidden=false;$('other').onclick=()=>{done.hidden=true;menu.hidden=false};$('again').onclick=()=>start(mode);
 function shuffled(list){const copy=list.map(x=>[...x]);for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}
-function start(id){mode=id;round=0;score=0;practice=false;demoReturnRound=0;activeRounds=shuffled(rounds[id]).slice(0,10);menu.hidden=true;done.hidden=true;showDemo(id)}
+function start(id){if(id==='add'&&window.BreukenRekenen){menu.hidden=true;done.hidden=true;window.BreukenRekenen.open();return}mode=id;round=0;score=0;practice=false;demoReturnRound=0;activeRounds=shuffled(rounds[id]).slice(0,10);menu.hidden=true;done.hidden=true;showDemo(id)}
 const demos={
  build:{title:'Zo bouw je een breuk',text:'Kies links het juiste soort stuk. Tik daarna evenveel keer op + als de teller aangeeft.',visual:'<div class="demo-parts"><span>1/4</span><span>＋</span><span>1/4</span><span>＋</span><span>1/4</span><b>＝ 3/4</b></div>'},
  whole:{title:'Zo maak je één geheel',text:'Kijk wat er al ligt. Kies links stukken die de lege plaats precies opvullen.',visual:'<div class="demo-parts"><span>3/4</span><span>＋</span><span>1/4</span><b>＝ 1 geheel</b></div>'},
