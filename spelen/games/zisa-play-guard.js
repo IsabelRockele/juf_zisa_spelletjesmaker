@@ -9,9 +9,12 @@ const app=getApps().length?getApp():initializeApp(cfg);getAuth(app);const functi
 const code=sessionStorage.getItem("zisa_play_code")||new URLSearchParams(location.search).get("code")||"";const deviceId=localStorage.getItem("zisa_play_device_id")||"";
 const isLocalPreview=['localhost','127.0.0.1'].includes(location.hostname)&&(new URLSearchParams(location.search).get('preview')==='1'||sessionStorage.getItem('zisa_play_allowed')==='1');
 const isTeacherPreview=sessionStorage.getItem('zisa_teacher_preview')==='1';
+const gamesRootUrl=new URL('./',import.meta.url);
+const playHomeUrl=new URL('../index.html',import.meta.url).href;
+const proHomeUrl=new URL('../../pro/zisa-spelen.html',import.meta.url).href;
 document.documentElement.style.webkitTextSizeAdjust='100%';
 addEventListener('DOMContentLoaded',()=>document.querySelectorAll('button,a,input,select,[role="button"]').forEach(el=>el.style.touchAction='manipulation'));
-async function check(){try{if(!isLocalPreview){if(isTeacherPreview)await teacherCheck({});else await join({code,deviceId})}gate.remove();return true}catch(e){gate.classList.add("error");gate.innerHTML='<div><span>🔒</span><strong>Dit spel is momenteel niet beschikbaar.</strong><a href="../index.html">Terug naar Zisa Spelen</a></div>';return false}}
+async function check(){try{if(!isLocalPreview){if(isTeacherPreview)await teacherCheck({});else await join({code,deviceId})}gate.remove();return true}catch(e){gate.classList.add("error");gate.innerHTML=`<div><span>🔒</span><strong>Dit spel is momenteel niet beschikbaar.</strong><a href="${playHomeUrl}">Terug naar Zisa Spelen</a></div>`;return false}}
 const file=(location.pathname.split('/').pop()||'').toLowerCase();
 const folder=(location.pathname.split('/').filter(Boolean).at(-2)||'').toLowerCase();
 const startMatch=file.match(/^start_leerjaar([1234])\.html$/);if(startMatch)sessionStorage.setItem('zisa_play_grade',startMatch[1]);
@@ -46,10 +49,12 @@ function replaceBackText(element,label){const cleanLabel=label.replace(/^←\s*/
 function clarifyExistingBackButtons(){const label=startMatch?'← Ander leerjaar':'← Vorige stap';document.querySelectorAll('button,a').forEach(element=>{const text=element.textContent.replace(/\s+/g,' ').trim().toLowerCase();if(text==='terug')replaceBackText(element,label)})}
 function addZisaNavigation(){
   if(document.getElementById('zisaNavButton'))return;
-  const grade=sessionStorage.getItem('zisa_play_grade')||startMatch?.[1]||'1',teacher=sessionStorage.getItem('zisa_teacher_preview')==='1';
+  const folderGrade=folder.match(/([1-4])$/)?.[1];
+  const grade=sessionStorage.getItem('zisa_play_grade')||startMatch?.[1]||folderGrade||'1',teacher=sessionStorage.getItem('zisa_teacher_preview')==='1';
   const button=document.createElement('button');button.id='zisaNavButton';button.type='button';button.textContent='🏠 Ander spel kiezen';
   const panel=document.createElement('nav');panel.id='zisaNavPanel';panel.hidden=true;
-  panel.innerHTML=`<button type="button" id="zisaCloseNav" aria-label="Menu sluiten">✕ Sluiten</button><strong>Wat wil je doen?</strong>${help?'<button type="button" class="primary" id="zisaShowHelp">🔊 Leg het spel uit</button>':''}<a href="start_leerjaar${grade}.html">🎮 Andere spellen van mijn leerjaar</a><a href="../index.html">🔢 Een ander leerjaar kiezen</a>${teacher?'<a href="../../pro/zisa-spelen.html">← Leerkracht: terug naar PRO</a>':''}`;
+  const gradeHomeUrl=new URL(`start_leerjaar${grade}.html`,gamesRootUrl).href;
+  panel.innerHTML=`<button type="button" id="zisaCloseNav" aria-label="Menu sluiten">✕ Sluiten</button><strong>Wat wil je doen?</strong>${help?'<button type="button" class="primary" id="zisaShowHelp">🔊 Leg het spel uit</button>':''}<a href="${gradeHomeUrl}">🎮 Andere spellen van mijn leerjaar</a><a href="${playHomeUrl}">🔢 Een ander leerjaar kiezen</a>${teacher?`<a href="${proHomeUrl}">← Leerkracht: terug naar PRO</a>`:''}`;
   document.body.append(button,panel);
   button.onclick=()=>panel.hidden=!panel.hidden;
   panel.querySelector('#zisaCloseNav').onclick=()=>panel.hidden=true;
@@ -94,4 +99,4 @@ function suppressDuplicateTabletKeyboard(){
   });
 }
 function readyUi(){const build=()=>{clarifyExistingBackButtons();addZisaNavigation();improveSettingsScreen();suppressDuplicateTabletKeyboard()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build,{once:true});else build()}
-check().then(ok=>{if(ok){readyUi();if(help&&!sessionStorage.getItem('zisa_help_seen_'+file)){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>showHelp(),{once:true});else showHelp()}if(!isLocalPreview&&!isTeacherPreview)setInterval(()=>join({code,deviceId}).catch(()=>location.href="../index.html"),120000)}});
+check().then(ok=>{if(ok){readyUi();if(help&&!sessionStorage.getItem('zisa_help_seen_'+file)){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>showHelp(),{once:true});else showHelp()}if(!isLocalPreview&&!isTeacherPreview)setInterval(()=>join({code,deviceId}).catch(()=>location.href=playHomeUrl),120000)}});
