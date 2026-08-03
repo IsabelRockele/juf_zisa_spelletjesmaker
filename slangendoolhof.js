@@ -138,13 +138,13 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.strokeStyle = "#aebdca";
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(508, 52); ctx.lineTo(620, 52);
-        ctx.moveTo(665, 52); ctx.lineTo(746, 52);
+        ctx.moveTo(490, 62); ctx.lineTo(630, 62);
+        ctx.moveTo(654, 62); ctx.lineTo(752, 62);
         ctx.stroke();
         ctx.fillStyle = "#66758a";
         ctx.font = "13px Arial";
-        ctx.fillText("Naam", 508, 34);
-        ctx.fillText("Datum", 665, 34);
+        ctx.fillText("Naam", 490, 34);
+        ctx.fillText("Datum", 654, 34);
 
         ctx.fillStyle = "#eaf4fb";
         ctx.beginPath();

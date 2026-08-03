@@ -130,8 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.fillStyle = "#66758a"; ctx.font = "15px Arial";
         ctx.fillText("Volg elk kronkelpad en verbind de oefening met het juiste antwoord.", 54, 82);
         ctx.strokeStyle = "#aebdca"; ctx.lineWidth = 1.5; ctx.beginPath();
-        ctx.moveTo(508, 52); ctx.lineTo(620, 52); ctx.moveTo(665, 52); ctx.lineTo(746, 52); ctx.stroke();
-        ctx.fillStyle = "#66758a"; ctx.font = "13px Arial"; ctx.fillText("Naam", 508, 34); ctx.fillText("Datum", 665, 34);
+        ctx.moveTo(490, 62); ctx.lineTo(630, 62); ctx.moveTo(654, 62); ctx.lineTo(752, 62); ctx.stroke();
+        ctx.fillStyle = "#66758a"; ctx.font = "13px Arial"; ctx.fillText("Naam", 490, 34); ctx.fillText("Datum", 654, 34);
         ctx.fillStyle = "#eaf4fb"; ctx.beginPath(); roundRect(ctx, 48, 122, 150, 42, 12); roundRect(ctx, 602, 122, 150, 42, 12); ctx.fill();
         ctx.fillStyle = "#3478b8"; ctx.font = "700 13px Arial"; ctx.textAlign = "center";
         ctx.fillText("OEFENINGEN", 123, 143); ctx.fillText("ANTWOORDEN", 677, 143);
