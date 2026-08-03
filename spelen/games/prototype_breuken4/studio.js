@@ -27,6 +27,7 @@ const modeTags={build:'BOUWEN',whole:'PUZZELEN',add:'SAMENVOEGEN',equal:'ONTDEKK
 function menuButtons(){return modes.map(m=>`<button class="mode-card mode-${m.id}" data-mode="${m.id}"><span class="mode-art" aria-hidden="true"><i></i><i></i><i></i><strong>${m.icon}</strong></span><span class="mode-copy"><em>${modeTags[m.id]}</em><b>${m.name}</b><span>${m.desc}</span></span><span class="mode-start">Spelen <i aria-hidden="true">→</i></span></button>`).join('')}
 $('modeGrid').innerHTML=menuButtons();$('quick').innerHTML=modes.map(m=>`<button data-mode="${m.id}">${m.icon} ${m.name}</button>`).join('');
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>start(b.dataset.mode));$('studioMenu').onclick=()=>menu.hidden=false;$('other').onclick=()=>{done.hidden=true;menu.hidden=false};$('again').onclick=()=>start(mode);
+window.addEventListener('zisa:breuken-menu',()=>{stopDemoRun();done.hidden=true;['calcPicker','calcIntro','calcFinish','modeDemo'].forEach(id=>{const el=$(id);if(el)el.hidden=true});menu.hidden=false});
 function shuffled(list){const copy=list.map(x=>[...x]);for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}
 function start(id){if(id==='add'&&window.BreukenRekenen){menu.hidden=true;done.hidden=true;window.BreukenRekenen.open();return}mode=id;round=0;score=0;practice=false;demoReturnRound=0;activeRounds=shuffled(rounds[id]).slice(0,10);menu.hidden=true;done.hidden=true;showDemo(id)}
 const demos={

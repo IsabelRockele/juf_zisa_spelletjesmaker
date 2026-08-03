@@ -52,14 +52,16 @@ function addZisaNavigation(){
   if(document.getElementById('zisaNavButton'))return;
   const folderGrade=folder.match(/([1-4])$/)?.[1];
   const grade=sessionStorage.getItem('zisa_play_grade')||startMatch?.[1]||folderGrade||'1',teacher=sessionStorage.getItem('zisa_teacher_preview')==='1';
-  const button=document.createElement('button');button.id='zisaNavButton';button.type='button';button.textContent='🏠 Ander spel kiezen';
+  const fractionStudio=folder==='prototype_breuken4';
+  const button=document.createElement('button');button.id='zisaNavButton';button.type='button';button.textContent=fractionStudio?'☰ Menu':'🏠 Ander spel kiezen';
   const panel=document.createElement('nav');panel.id='zisaNavPanel';panel.hidden=true;
   const gradeHomeUrl=new URL(`start_leerjaar${grade}.html`,gamesRootUrl).href;
-  panel.innerHTML=`<button type="button" id="zisaCloseNav" aria-label="Menu sluiten">✕ Sluiten</button><strong>Wat wil je doen?</strong>${help?'<button type="button" class="primary" id="zisaShowHelp">🔊 Leg het spel uit</button>':''}<a href="${gradeHomeUrl}">🎮 Andere spellen van mijn leerjaar</a><a href="${playHomeUrl}">🔢 Een ander leerjaar kiezen</a>${teacher?`<a href="${proHomeUrl}">← Leerkracht: terug naar PRO</a>`:''}`;
+  panel.innerHTML=`<button type="button" id="zisaCloseNav" aria-label="Menu sluiten">✕ Sluiten</button><strong>Wat wil je doen?</strong>${fractionStudio?'<button type="button" class="primary" id="zisaFractionMenu">🧩 Andere oefenvorm in de Breukenstudio</button>':''}${help?'<button type="button" class="primary" id="zisaShowHelp">🔊 Leg het spel uit</button>':''}<a href="${gradeHomeUrl}">🎮 Ander spel van mijn leerjaar</a><a href="${playHomeUrl}">🔢 Een ander leerjaar kiezen</a>${teacher?`<a href="${proHomeUrl}">← Leerkracht: terug naar PRO</a>`:''}`;
   document.body.append(button,panel);
   button.onclick=()=>panel.hidden=!panel.hidden;
   panel.querySelector('#zisaCloseNav').onclick=()=>panel.hidden=true;
   document.addEventListener('pointerdown',event=>{if(!panel.hidden&&!panel.contains(event.target)&&event.target!==button)panel.hidden=true});
+  if(fractionStudio)panel.querySelector('#zisaFractionMenu').onclick=()=>{panel.hidden=true;window.dispatchEvent(new CustomEvent('zisa:breuken-menu'))};
   if(help)panel.querySelector('#zisaShowHelp').onclick=()=>{panel.hidden=true;showHelp()}
 }
 function improveSettingsScreen(){
