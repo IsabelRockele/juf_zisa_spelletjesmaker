@@ -130,6 +130,16 @@ window.SpellingWeekdicteePaneel = (function() {
     return Math.max(0, Math.min(max, Number(zinnenPerGraad[actieveGraad]) || 0));
   }
 
+  function selecteerAllesAlsStartNogLeegIs() {
+    const set = getAangevinkteCats();
+    if (set.size === 0 || !window.SpellingWoordenkiezer) return;
+    window._zb_aangevinkteCategorieen = set;
+    window.SpellingWoordenkiezer.syncActieveWoorden?.();
+    if ((window._weekdictee_gekozenWoorden || []).length === 0) {
+      window.SpellingWoordenkiezer.selecteerCategorieenAutomatisch?.(set, actieveGraad);
+    }
+  }
+
   function magNaarFase(fase) {
     if (fase <= 1) return true;
     if (getAangevinkteCats().size === 0) return false;
@@ -665,14 +675,23 @@ window.SpellingWeekdicteePaneel = (function() {
         const groepId = e.target.dataset.groep;
         const set = getAangevinkteCats();
         const data = window.SpellingWoordenbibliotheek?.categorieenPerHoofdgroep(actieveGraad) || {};
+        const gewijzigdeCategorieen = new Set();
         for (const groepen of Object.values(data)) {
           const cats = groepen[groepId] || [];
           cats
             .filter(cat => !NIET_LOS_DICTEREN.has(cat.id))
-            .forEach(cat => e.target.checked ? set.add(cat.id) : set.delete(cat.id));
+            .forEach(cat => {
+              gewijzigdeCategorieen.add(cat.id);
+              e.target.checked ? set.add(cat.id) : set.delete(cat.id);
+            });
         }
         bewaarState();
         window._zb_aangevinkteCategorieen = set;
+        if (e.target.checked) {
+          window.SpellingWoordenkiezer?.voegCategorieenAutomatischToe?.(gewijzigdeCategorieen, actieveGraad);
+        } else {
+          window.SpellingWoordenkiezer?.ruimUitgevinkteOp?.();
+        }
         window.SpellingWoordenkiezer?.syncActieveWoorden?.();
         renderCategorieKeuze();
         updateWoordenkiezerKnop();
@@ -691,9 +710,12 @@ window.SpellingWeekdicteePaneel = (function() {
         // Anders blijven de keuzes van de woordenkiezer uitgevinkt 
         // omdat hij denkt dat er geen categorieën aangevinkt zijn.
         window._zb_aangevinkteCategorieen = set;
-        if (window.SpellingWoordenkiezer?.syncActieveWoorden) {
-          window.SpellingWoordenkiezer.syncActieveWoorden();
+        if (e.target.checked) {
+          window.SpellingWoordenkiezer?.voegCategorieenAutomatischToe?.(new Set([catId]), actieveGraad);
+        } else {
+          window.SpellingWoordenkiezer?.ruimUitgevinkteOp?.();
         }
+        window.SpellingWoordenkiezer?.syncActieveWoorden?.();
         renderCategorieKeuze();
         // Ook de UI-state bijwerken (knoppen, teller)
         updateWoordenkiezerKnop();
@@ -819,6 +841,7 @@ window.SpellingWeekdicteePaneel = (function() {
     // kunnen in werkblad-modus gewijzigd zijn)
     window.addEventListener("spelling:weekdictee-actief", () => {
       laadState();
+      selecteerAllesAlsStartNogLeegIs();
       renderGraadTabs();
       renderCategorieKeuze();
       updateLijntypeKnoppen();
@@ -854,6 +877,7 @@ window.SpellingWeekdicteePaneel = (function() {
   function init() {
     laadState();
     bedraadEvents();
+    selecteerAllesAlsStartNogLeegIs();
     renderGraadTabs();
     renderCategorieKeuze();
     updateLijntypeKnoppen();

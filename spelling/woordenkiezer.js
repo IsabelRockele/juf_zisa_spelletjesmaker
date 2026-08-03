@@ -596,6 +596,37 @@ window.SpellingWoordenkiezer = (function() {
     bewaar();
   }
 
+  /* Voeg alleen woorden uit NIEUW aangevinkte categorieën toe.
+     Anders dan selecteerCategorieenAutomatisch() laat deze functie alle
+     bestaande categorieën en bewuste uitvinkkeuzes ongemoeid. Dit is nodig
+     wanneer de leerkracht in het weekdictee later nog een categorie toevoegt. */
+  function voegCategorieenAutomatischToe(categorieIds, leerjaar) {
+    const ids = categorieIds instanceof Set ? categorieIds : new Set(categorieIds || []);
+    const graad = Number(leerjaar) || 1;
+    const data = window.SpellingWoordenbibliotheek?.[`graad${graad}`];
+    if (!data || ids.size === 0) return;
+
+    for (const catId of ids) {
+      const cat = data[catId];
+      if (!cat || !Array.isArray(cat.woorden)) continue;
+      for (const w of cat.woorden) {
+        const id = `${graad}|${catId}|${w.tekst}`;
+        const bestaand = gekozen.find(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` === id);
+        const volledigWoord = {
+          ...w,
+          lidwoord: w.lidwoord || null,
+          afbeelding: w.afbeelding === true,
+          synoniemGroep: w.synoniemGroep || null,
+          categorie: catId,
+          leerjaar: graad
+        };
+        if (bestaand) Object.assign(bestaand, volledigWoord);
+        else gekozen.push(volledigWoord);
+      }
+    }
+    bewaar();
+  }
+
   /* ----- Public API ----- */
   return {
     init,
@@ -607,6 +638,7 @@ window.SpellingWoordenkiezer = (function() {
     herlaad,                         // herlaad uit (nieuwe) storage-namespace
     reset,                           // wis alle gekozen woorden
     selecteerCategorieenAutomatisch,// standaardselectie na categoriekeuze
+    voegCategorieenAutomatischToe,  // voeg alleen pas aangevinkte categorieën toe
     getGekozen: () => gekozen,       // alle woorden (ruwe lijst, ook verborgen)
     getActieveWoorden,               // alleen woorden uit aangevinkte categorieën
     getVerborgenAantal               // hoeveel woorden zijn er momenteel verborgen
