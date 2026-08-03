@@ -4790,19 +4790,49 @@ body.bewerk-aan [data-bewerk-id]:focus {
 }
 .wd-hg-inhoud { padding: 4px 10px 10px 10px; background: white; }
 
-.wd-groep + .wd-groep { margin-top: 10px; }
+.wd-groep {
+  border: 1px solid #d7e3ec;
+  border-radius: 9px;
+  background: #f8fbfd;
+  overflow: hidden;
+}
+.wd-groep + .wd-groep { margin-top: 7px; }
 .wd-groep-titel {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: #777;
-  margin: 8px 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  color: #315a78;
   font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  list-style: none;
+}
+.wd-groep-titel::-webkit-details-marker { display: none; }
+.wd-groep-titel::before {
+  content: "▸";
+  color: var(--zisa-blauw);
+  transition: transform .15s;
+}
+.wd-groep[open] > .wd-groep-titel::before { transform: rotate(90deg); }
+.wd-groep-titel > span { flex: 1; }
+.wd-groep-titel > small {
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: #e8f1f7;
+  color: #5d7588;
+}
+.wd-groep-keuzes {
+  padding: 7px 9px 2px;
+  border-top: 1px solid #e3ebf1;
+  background: #fff;
 }
 .wd-cat-rij {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  padding: 7px 9px 10px;
+  background: #fff;
 }
 .wd-cat-vink {
   display: inline-flex;
@@ -5225,6 +5255,7 @@ body.bewerk-aan [data-bewerk-id]:focus {
   padding-top: 8px;
   border-top: 1px dashed var(--zisa-rand);
 }
+.wd-leerlingenblad-tip{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start;margin:10px 0 9px;padding:10px 11px;border:1.5px solid #9cc8df;border-radius:10px;background:#eef8fd;color:#244b64}.wd-leerlingenblad-tip>span{font-size:20px;line-height:1.2}.wd-leerlingenblad-tip p{margin:0;font-size:12.5px;line-height:1.45}.wd-leerlingenblad-tip strong{color:#123f5c}
 
 /* Dicteerblad-knop visueel onderscheiden (geel-accent = leerkracht-only) */
 .wd-paneel-download-leerkracht {
@@ -7137,4 +7168,6 @@ body.hb-bewerk-aan .hb-item-toevoeg-balk {
 .ov43-zin-kort{grid-template-columns:28px minmax(0,1fr) 185px;align-items:center}.ov43-zin-kort>.ov43-korte-lijn{grid-column:3;min-width:0}.ov43-korte-lijn .ov40-lijn{width:100%;min-width:0;min-height:36px;margin-top:0}.ov43-korte-lijn .ov40-lijn canvas{width:100%!important;max-width:100%!important}
 .wd-fasebalk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:12px}.wd-faseknop{display:flex;min-width:0;flex-direction:column;align-items:center;gap:3px;padding:8px 3px;border:1.5px solid #c8d9e7;border-radius:10px;background:#f6f9fc;color:#698098;font-weight:600}.wd-faseknop b{display:grid;width:27px;height:27px;place-items:center;border-radius:50%;background:#e7eef5;color:#71869a}.wd-faseknop span{font-size:12px}.wd-faseknop.actief{border-color:#3984bd;background:#eaf5ff;color:#174f70}.wd-faseknop.actief b{background:#2f6f9f;color:#fff}.wd-faseknop.klaar b{background:#61af5b;color:#fff}.wd-faseknop:disabled{cursor:not-allowed;opacity:.55}.wd-paneel-zijbalk [data-wd-fase]{display:none}.wd-paneel-zijbalk [data-wd-fase].wd-fase-actief{display:block}.wd-fase-acties{position:sticky;bottom:0;z-index:4;display:grid;grid-template-columns:auto 1fr;gap:8px;margin-top:12px;padding:10px 0 2px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 22%)}.wd-fase-acties button{min-height:46px}.wd-fase-acties #wd-fase-verder{font-weight:750}.wd-fase-acties #wd-fase-terug[hidden],.wd-fase-acties #wd-fase-verder[hidden]{display:none}
 .wd-zinnen-select{width:100%;margin-top:7px;padding:10px 12px;border:1.5px solid #a9bfd1;border-radius:9px;background:#fff;color:#173b5d;font:600 15px/1.3 Arial,sans-serif}
-.wd-groep-titel{display:flex;align-items:center;justify-content:space-between;gap:10px}.wd-groep-alles{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid #b8ccda;border-radius:8px;background:#f7fbfd;color:#315a78;font-size:12px;cursor:pointer}.wd-groep-alles.aan{border-color:#62a76d;background:#e9f7ec;color:#176239}.wd-groep-alles input{margin:0}.wd-groep-alles small{color:#73899b}
+.wd-type-keuzes{display:grid;gap:16px;margin-top:13px}.wd-type-keuze{padding:14px 14px 12px;border:1.5px solid #d3e1eb;border-radius:11px;background:#f8fbfd}.wd-type-keuze+.wd-type-keuze{margin-top:1px}.wd-type-keuze .wd-paneel-mini-label{display:block;margin:0;color:#173b5d;font-weight:750}.wd-type-keuze .wd-zinnen-select{margin-top:8px}.wd-type-keuze .wd-paneel-mini-uitleg{margin:9px 3px 0;color:#667b8e;line-height:1.45}
+#wd-paneel-lijntype{gap:8px;margin-top:10px}.wd-lijnkeuze{min-height:112px;padding:9px 6px;border-width:1.5px;border-radius:10px;background:#f8fbfd;color:#173b5d}.wd-lijnkeuze:hover{border-color:#3984bd;background:#f1f8fd}.wd-lijnkeuze.actief{background:#e6f3ff;color:#174f70;border:2px solid #2f78ac}.wd-lijn-preview{display:block;width:100%;max-width:110px;height:48px;border-radius:5px;background:#fff}.wd-lijnnaam{font-size:12px;font-weight:800;line-height:1.2}.wd-lijnkeuze small{font-size:10px;font-weight:500;color:#6d8192}.wd-lijnkeuze.actief small{color:#43677f}
+.wd-groep-alles{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid #b8ccda;border-radius:8px;background:#f7fbfd;color:#315a78;font-size:12px;cursor:pointer}.wd-groep-alles.aan{border-color:#62a76d;background:#e9f7ec;color:#176239}.wd-groep-alles input{margin:0}.wd-groep-alles small{color:#73899b}

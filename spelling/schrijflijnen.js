@@ -64,8 +64,10 @@ window.SpellingSchrijflijnen = {
     if (type === "type6") {
       // Centrum van canvas voor lijn
       const lijnY = h / 2;
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 1.5;
+      // Bewust fijner dan de kaderranden rond een oefening. Zo blijft dit
+      // visueel een schrijflijn en lijkt het niet op een extra kader.
+      ctx.strokeStyle = "#596b7a";
+      ctx.lineWidth = 0.8;
       ctx.beginPath();
       ctx.moveTo(0, lijnY);
       ctx.lineTo(w, lijnY);

@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Spellinggenerator – Juf Zisa</title>
-  <link rel="stylesheet" href="style.css?v=20260803zp">
+  <link rel="stylesheet" href="style.css?v=20260803zt">
   <link rel="stylesheet" href="modules/graad2-ov01.css">
   <style>
     /* === Woordenkiezer: afbeelding-icoon + filter (mei 2026) === */
@@ -467,14 +467,20 @@
             <span class="wd-stap-titel">Schrijflijn</span>
           </div>
           <div class="lijn-knoppen" id="wd-paneel-lijntype">
-            <button class="lijn-knop actief" data-lijn="vier" type="button">
-              <span class="lijn-mini vier"></span><span>Vierlijn</span>
+            <button class="lijn-knop wd-lijnkeuze actief" data-lijn="vier" type="button">
+              <canvas class="lijntype-preview wd-lijn-preview" data-preview-type="type3" width="110" height="48"></canvas>
+              <span class="wd-lijnnaam">Vier schrijflijnen</span>
+              <small>Met hulplijnen</small>
             </button>
-            <button class="lijn-knop" data-lijn="dubbel" type="button">
-              <span class="lijn-mini dubbel"></span><span>Dubbel</span>
+            <button class="lijn-knop wd-lijnkeuze" data-lijn="dubbel" type="button">
+              <canvas class="lijntype-preview wd-lijn-preview" data-preview-type="type7" width="110" height="48"></canvas>
+              <span class="wd-lijnnaam">Dubbele schrijflijn</span>
+              <small>Twee lijnen</small>
             </button>
-            <button class="lijn-knop" data-lijn="enkel" type="button">
-              <span class="lijn-mini enkel"></span><span>Enkel</span>
+            <button class="lijn-knop wd-lijnkeuze" data-lijn="enkel" type="button">
+              <canvas class="lijntype-preview wd-lijn-preview" data-preview-type="type6" width="110" height="48"></canvas>
+              <span class="wd-lijnnaam">Gewone schrijflijn</span>
+              <small>Eén lijn</small>
             </button>
           </div>
           <div class="wd-paneel-hoogte-rij">
@@ -492,24 +498,30 @@
             <span class="wd-stap-nr">5</span>
             <span class="wd-stap-titel">Type weekdictee</span>
           </div>
-          <label class="wd-paneel-mini-label" for="wd-paneel-aantal-zinnen">Hoeveel dicteezinnen per dag?</label>
-          <select id="wd-paneel-aantal-zinnen" class="wd-zinnen-select">
-            <option value="0">Geen zinnen — alleen woorden</option>
-            <option value="1" selected>1 zin per dag</option>
-            <option value="2" data-alleen-graad2>2 zinnen per dag</option>
-            <option value="3" data-alleen-graad2>3 zinnen per dag</option>
-          </select>
-          <p class="wd-paneel-mini-uitleg">
-            Bij 2 of 3 zinnen krijgt iedere dag een eigen pagina met voldoende schrijfruimte.
-          </p>
-          <label class="wd-paneel-mini-label" for="wd-paneel-vrijdag" style="margin-top:12px">Welke woorden op vrijdag?</label>
-          <select id="wd-paneel-vrijdag" class="wd-zinnen-select">
-            <option value="herhalen" selected>Herhalen uit maandag tot donderdag</option>
-            <option value="nieuw">Nieuwe woorden die deze week nog niet voorkwamen</option>
-          </select>
-          <p class="wd-paneel-mini-uitleg">
-            Bij herhalen zijn ook de zinswoorden al eerder geoefend. Kies je nieuwe woorden, selecteer dan voldoende woorden voor de hele week.
-          </p>
+          <div class="wd-type-keuzes">
+            <div class="wd-type-keuze">
+              <label class="wd-paneel-mini-label" for="wd-paneel-aantal-zinnen">Hoeveel dicteezinnen per dag?</label>
+              <select id="wd-paneel-aantal-zinnen" class="wd-zinnen-select">
+                <option value="0">Geen zinnen — alleen woorden</option>
+                <option value="1" selected>1 zin per dag</option>
+                <option value="2" data-alleen-graad2>2 zinnen per dag</option>
+                <option value="3" data-alleen-graad2>3 zinnen per dag</option>
+              </select>
+              <p class="wd-paneel-mini-uitleg">
+                Bij 2 of 3 zinnen krijgt iedere dag een eigen pagina met voldoende schrijfruimte.
+              </p>
+            </div>
+            <div class="wd-type-keuze">
+              <label class="wd-paneel-mini-label" for="wd-paneel-vrijdag">Welke woorden komen op vrijdag?</label>
+              <select id="wd-paneel-vrijdag" class="wd-zinnen-select">
+                <option value="herhalen" selected>Herhalen uit maandag tot donderdag</option>
+                <option value="nieuw">Nieuwe woorden die deze week nog niet voorkwamen</option>
+              </select>
+              <p class="wd-paneel-mini-uitleg">
+                Bij herhalen zijn ook de zinswoorden al eerder geoefend. Kies je nieuwe woorden, selecteer dan voldoende woorden voor de hele week.
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- Bewerken (alleen voor het dicteerblad — niet op het leerlingblad) -->
@@ -537,9 +549,13 @@
             🔄 Vernieuw voorbeeld
           </button>
           <div class="wd-paneel-download-titel">Downloaden:</div>
+          <div class="wd-leerlingenblad-tip">
+            <span>👧</span>
+            <p><strong>Voor de leerlingen:</strong> de preview toont jouw ingevulde dicteerblad. Download hieronder het <strong>lege leerlingenblad</strong> met alleen schrijflijnen.</p>
+          </div>
           <button id="wd-paneel-download" class="secundair wd-paneel-actie" type="button" disabled
                   title="Lege schrijflijnen — wat de leerling krijgt om in te vullen">
-            📄 Leerling-blad
+            ⬇ Leeg leerlingenblad downloaden
           </button>
           <button id="wd-paneel-download-opl" class="secundair wd-paneel-actie wd-paneel-download-leerkracht" type="button" disabled
                   title="Mét alle woorden en zinnen — wat jij voorleest tijdens het dictee">
@@ -645,7 +661,7 @@
   <script src="modus-storage.js"></script>
   <script src="afbeeldingen.js?v=20260803c"></script>
   <script src="afbeeldingen-helper.js?v=20260803c"></script>
-  <script src="schrijflijnen.js"></script>
+  <script src="schrijflijnen.js?v=20260803a"></script>
   <script src="afleiders.js?v=20260802i"></script>
   <script src="klank-helper.js"></script>
   <script src="woordenbibliotheek.js"></script>
@@ -656,10 +672,10 @@
   <script src="woordenbiblio/zinnen-meervoud-graad1.js"></script>
   <script src="woordenbiblio/zinnen-klinkerdief-graad1.js"></script>
   <script src="woordenbiblio/dictee-zinnen-graad1.js"></script>
-  <script src="woordenbiblio/dictee-zinnen-graad2.js"></script>
+  <script src="woordenbiblio/dictee-zinnen-graad2.js?v=20260803a"></script>
   <script src="woordenkiezer.js?v=20260803d"></script>
   <script src="dedup.js"></script>
-  <script src="modules/weekdictee.js?v=20260803d"></script>
+  <script src="modules/weekdictee.js?v=20260803g"></script>
   <script src="modules/ov01.js"></script>
   <script src="modules/ov02.js"></script>
   <script src="modules/ov03.js"></script>
@@ -691,7 +707,7 @@
 <script src="herhalingsbundel.js?v=20260802a"></script>
   <script src="zijbalk.js?v=20260803zf"></script>
   <script src="app.js?v=20260801g"></script>
-  <script src="weekdictee-paneel.js?v=20260803f"></script>
+  <script src="weekdictee-paneel.js?v=20260803h"></script>
   <script src="modus.js?v=20260803a"></script>
   <script src="werkblad-stappen.js?v=20260803g"></script>
 

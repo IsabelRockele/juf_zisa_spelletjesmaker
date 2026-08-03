@@ -230,3 +230,105 @@ window.SpellingDicteeZinnen.graad2 = {
   // TODO
 
 };
+
+/* ============================================================
+   VOLLEDIGE DEKKING VOOR GRAAD 2
+
+   De handgeschreven zinnen hierboven blijven altijd de eerste keuze.
+   Voor ieder ander woord uit graad2.js maken we hier een grammaticaal
+   veilige contextzin op basis van de woordsoort. Hierdoor valt geen
+   enkel graad-2-woord nog terug op de oude zinnen "Ik zie ...",
+   "Ik heb ..." of "Hier is ...".
+
+   {woord} wordt pas in weekdictee.js vervangen. Op dat moment is de
+   juiste dicteevorm bekend: bijvoorbeeld katten, boekje, jij werkt,
+   wij liepen of zij hadden gezongen.
+   ============================================================ */
+(function vulOntbrekendeDicteezinnenGraad2Aan() {
+  const woordenData = window.SpellingWoordenbibliotheek &&
+    window.SpellingWoordenbibliotheek.graad2;
+  const bib = window.SpellingDicteeZinnen.graad2;
+  if (!woordenData || !bib) return;
+
+  const gewoneContexten = [
+    "In het verhaal komt {lidwoord} {woord} duidelijk voor.",
+    "De juf vertelt iets interessants over {lidwoord} {woord}.",
+    "In het boek lees ik een stukje over {lidwoord} {woord}.",
+    "Op de foto herken ik meteen {lidwoord} {woord}.",
+    "Tijdens de les praten we samen over {lidwoord} {woord}.",
+    "In de bibliotheek zoeken we informatie over {lidwoord} {woord}.",
+    "De klas bekijkt een duidelijke afbeelding van {lidwoord} {woord}.",
+    "In deze tekst speelt {lidwoord} {woord} een belangrijke rol.",
+    "De meester stelt een vraag over {lidwoord} {woord}.",
+    "Op het informatieblad staat uitleg over {lidwoord} {woord}.",
+    "Vandaag leren we iets nieuws over {lidwoord} {woord}.",
+    "In het museum vertelt de gids over {lidwoord} {woord}."
+  ];
+
+  const meervoudContexten = [
+    "In de tekst komen de {woord} meerdere keren voor.",
+    "Op de foto staan de {woord} naast elkaar.",
+    "De klas leest een kort verhaal over de {woord}.",
+    "In het boek vinden we informatie over de {woord}.",
+    "De juf toont een afbeelding van de {woord}.",
+    "Tijdens de les praten we over de {woord}."
+  ];
+
+  const verkleinContexten = [
+    "In het verhaal komt het {woord} plots tevoorschijn.",
+    "Op de foto zie ik duidelijk het {woord}.",
+    "De juf wijst het {woord} op de afbeelding aan.",
+    "In de tekst lees ik iets over het {woord}.",
+    "De klas bedenkt een korte zin met het {woord}.",
+    "Op de woordkaart staat het {woord}."
+  ];
+
+  const vormContexten = [
+    "Lees de vorm ‘{woord}’ aandachtig.",
+    "In deze oefening gebruiken we de vorm ‘{woord}’.",
+    "De juf dicteert de vorm ‘{woord}’.",
+    "Schrijf de vorm ‘{woord}’ zorgvuldig op.",
+    "Op het bord staat de vorm ‘{woord}’.",
+    "Controleer de spelling van de vorm ‘{woord}’."
+  ];
+
+  const woordContexten = [
+    "In deze zin oefenen we het woord ‘{woord}’.",
+    "De juf schrijft het woord ‘{woord}’ op het bord.",
+    "Luister aandachtig naar het woord ‘{woord}’.",
+    "In het dictee komt het woord ‘{woord}’ voor.",
+    "Schrijf het woord ‘{woord}’ zorgvuldig op.",
+    "We controleren samen de spelling van ‘{woord}’."
+  ];
+
+  const hash = (tekst) => String(tekst || "").split("")
+    .reduce((som, teken) => (som * 31 + teken.charCodeAt(0)) >>> 0, 7);
+  const kies = (lijst, sleutel) => lijst[hash(sleutel) % lijst.length];
+
+  Object.keys(woordenData).forEach((categorieId) => {
+    const categorie = woordenData[categorieId];
+    if (!categorie || !Array.isArray(categorie.woorden) || !categorie.groep) return;
+
+    categorie.woorden.forEach((woord) => {
+      if (!woord || !woord.tekst) return;
+      const sleutel = `${categorie.groep}|${woord.tekst}`;
+      if (typeof bib[sleutel] === "string" && bib[sleutel].trim()) return;
+
+      const keuzeSleutel = `${categorieId}|${woord.tekst}`;
+      let zin;
+      if (categorie.groep.startsWith("werkwoorden-") || categorie.groep === "werkwoordstijden-mix") {
+        zin = kies(vormContexten, keuzeSleutel);
+      } else if (categorie.groep === "meervouden" || categorie.groep === "stukjeswoorden") {
+        zin = kies(meervoudContexten, keuzeSleutel);
+      } else if (categorie.groep === "verkleinwoorden") {
+        zin = kies(verkleinContexten, keuzeSleutel);
+      } else if (woord.lidwoord) {
+        zin = kies(gewoneContexten, keuzeSleutel)
+          .replace("{lidwoord}", woord.lidwoord);
+      } else {
+        zin = kies(woordContexten, keuzeSleutel);
+      }
+      bib[sleutel] = zin;
+    });
+  });
+})();

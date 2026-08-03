@@ -29,6 +29,11 @@ window.SpellingWeekdicteePaneel = (function() {
   const LS_WD_MET_ZINNEN = "spelling-wd-met-zinnen-v1";
   const LS_WD_AANTAL_ZINNEN = "spelling-wd-aantal-zinnen-v1";
   const LS_WD_VRIJDAG = "spelling-wd-vrijdag-v1";
+  // Leestekens horen in de dicteezinnen, niet als losse dicteewoorden.
+  const NIET_LOS_DICTEREN = new Set([
+    "leestekens-eind-g2",
+    "leestekens-binnen-g2"
+  ]);
 
   /* ---------- State ---------- */
   let actieveGraad = 1;
@@ -59,7 +64,9 @@ window.SpellingWeekdicteePaneel = (function() {
         const obj = JSON.parse(raw);
         aangevinkteCategorieen = {};
         for (const [g, lijst] of Object.entries(obj)) {
-          aangevinkteCategorieen[g] = new Set(lijst);
+          aangevinkteCategorieen[g] = new Set(
+            lijst.filter(id => !NIET_LOS_DICTEREN.has(id))
+          );
         }
       }
     } catch (e) { /* leeg */ }
@@ -199,6 +206,10 @@ window.SpellingWeekdicteePaneel = (function() {
     container.querySelectorAll("details.wd-hoofdgroep[open]").forEach(d => {
       if (d.dataset.hoofdgroep) wasOpen.add(d.dataset.hoofdgroep);
     });
+    const wasGroepOpen = new Set();
+    container.querySelectorAll("details.wd-groep[open]").forEach(d => {
+      if (d.dataset.groepOpen) wasGroepOpen.add(d.dataset.groepOpen);
+    });
 
     const data = wb.categorieenPerHoofdgroep(actieveGraad);
     const aangevinkt = getAangevinkteCats();
@@ -210,11 +221,12 @@ window.SpellingWeekdicteePaneel = (function() {
       
       let totaal = 0, aanCount = 0;
       for (const cats of Object.values(groepen)) {
-        for (const cat of cats) {
+        for (const cat of cats.filter(item => !NIET_LOS_DICTEREN.has(item.id))) {
           totaal++;
           if (aangevinkt.has(cat.id)) aanCount++;
         }
       }
+      if (totaal === 0) continue;
       const isOpen = wasOpen.has(hgId) || aanCount > 0;
 
       html += `
@@ -225,16 +237,21 @@ window.SpellingWeekdicteePaneel = (function() {
           </summary>
           <div class="wd-hg-inhoud">`;
       
-      for (const [groepId, cats] of Object.entries(groepen)) {
+      for (const [groepId, alleCats] of Object.entries(groepen)) {
+        const cats = alleCats.filter(cat => !NIET_LOS_DICTEREN.has(cat.id));
+        if (cats.length === 0) continue;
         const groepLabel = wb.groepLabels[groepId] || groepId;
         const groepAantal = cats.filter(cat => aangevinkt.has(cat.id)).length;
         const heleGroep = groepAantal === cats.length && cats.length > 0;
-        html += `<div class="wd-groep">
-          <div class="wd-groep-titel">
-            <span>${groepLabel}</span>
+        const groepOpen = wasGroepOpen.has(groepId) || groepAantal > 0;
+        html += `<details class="wd-groep" data-groep-open="${groepId}" ${groepOpen ? 'open' : ''}>
+          <summary class="wd-groep-titel">
+            <span>${groepLabel}</span><small>${groepAantal}/${cats.length}</small>
+          </summary>
+          <div class="wd-groep-keuzes">
             <label class="wd-groep-alles ${heleGroep ? 'aan' : ''}">
               <input type="checkbox" class="wd-groep-checkbox" data-groep="${groepId}" ${heleGroep ? 'checked' : ''}>
-              <span>Hele groep</span><small>${groepAantal}/${cats.length}</small>
+              <span>${heleGroep ? 'Hele groep uitvinken' : 'Hele groep aanvinken'}</span>
             </label>
           </div>
           <div class="wd-cat-rij">`;
@@ -248,7 +265,7 @@ window.SpellingWeekdicteePaneel = (function() {
               <span class="wd-cat-aantal">(${cat.woorden.length})</span>
             </label>`;
         }
-        html += `</div></div>`;
+        html += `</div></details>`;
       }
       html += `</div></details>`;
     }
@@ -261,6 +278,11 @@ window.SpellingWeekdicteePaneel = (function() {
     const knop = document.querySelector("#wd-paneel-open-kiezer");
     const info = document.querySelector("#wd-paneel-woord-info");
     const aangevinkt = getAangevinkteCats();
+    NIET_LOS_DICTEREN.forEach(id => aangevinkt.delete(id));
+    if (Array.isArray(window._weekdictee_gekozenWoorden)) {
+      window._weekdictee_gekozenWoorden = window._weekdictee_gekozenWoorden
+        .filter(woord => !NIET_LOS_DICTEREN.has(woord && woord.categorie));
+    }
 
     // Sync de filter-set zodat woordenkiezer + modules dezelfde lijst zien
     window._zb_aangevinkteCategorieen = aangevinkt;
@@ -336,7 +358,7 @@ window.SpellingWeekdicteePaneel = (function() {
       lijntypePerVorm: {},
       weekdictee: {
         lijnhoogte: lijnhoogte,
-        lijntype: lijntype === "vier" ? "type3" : (lijntype === "dubbel" ? "type2" : "type1"),
+        lijntype: lijntype === "vier" ? "type3" : (lijntype === "dubbel" ? "type7" : "type6"),
         aantalZinnen: getAantalZinnen(),
         vrijdagHerhaling
       }
@@ -508,7 +530,7 @@ window.SpellingWeekdicteePaneel = (function() {
       lijntypePerVorm: {},
       weekdictee: {
         lijnhoogte: lijnhoogte,
-        lijntype: lijntype === "vier" ? "type3" : (lijntype === "dubbel" ? "type2" : "type1"),
+        lijntype: lijntype === "vier" ? "type3" : (lijntype === "dubbel" ? "type7" : "type6"),
         aantalZinnen: getAantalZinnen(),
         vrijdagHerhaling
       }
@@ -645,7 +667,9 @@ window.SpellingWeekdicteePaneel = (function() {
         const data = window.SpellingWoordenbibliotheek?.categorieenPerHoofdgroep(actieveGraad) || {};
         for (const groepen of Object.values(data)) {
           const cats = groepen[groepId] || [];
-          cats.forEach(cat => e.target.checked ? set.add(cat.id) : set.delete(cat.id));
+          cats
+            .filter(cat => !NIET_LOS_DICTEREN.has(cat.id))
+            .forEach(cat => e.target.checked ? set.add(cat.id) : set.delete(cat.id));
         }
         bewaarState();
         window._zb_aangevinkteCategorieen = set;

@@ -240,14 +240,18 @@ window.SpellingModules.weekdictee = {
       let selectie = [];
       if (dag.id === "vr" && vrijdagHerhaling) {
         const uniekeHerhaling = [...new Map(geoefend.map(w => [sleutel(w), w])).values()];
-        selectie = this._kiesWoorden(uniekeHerhaling, aantalPerDag);
+        selectie = this._kiesGebalanceerdeMix(uniekeHerhaling, aantalPerDag, dagIndex);
       } else {
         const nogNietGebruikt = gekozenWoorden.filter(w => !gebruikteSleutels.has(sleutel(w)));
-        selectie = this._kiesWoorden(nogNietGebruikt, aantalPerDag);
+        selectie = this._kiesGebalanceerdeMix(nogNietGebruikt, aantalPerDag, dagIndex);
         if (selectie.length < aantalPerDag && dag.id !== "vr") {
           const alGekozen = new Set(selectie.map(sleutel));
           const aanvulling = gekozenWoorden.filter(w => !alGekozen.has(sleutel(w)));
-          selectie.push(...this._kiesWoorden(aanvulling, aantalPerDag - selectie.length));
+          selectie.push(...this._kiesGebalanceerdeMix(
+            aanvulling,
+            aantalPerDag - selectie.length,
+            dagIndex + selectie.length
+          ));
         }
       }
       weekSelecties[dag.id] = selectie;
@@ -373,7 +377,10 @@ window.SpellingModules.weekdictee = {
     for (let i = 0; i < aantalZinnen; i++) {
       const zinWoord = woordenVoorZin[i] || woordenVoorDag[0];
       const zinWoordTekst = zinWoord ? (typeof zinWoord === "string" ? zinWoord : zinWoord.tekst) : "";
-      const gezinTekst = zinWoord ? this._maakZin(zinWoord, vermijdInZin, gebruikteZinnen) : "";
+      const leestekenIndex = dagIdx * Math.max(1, aantalZinnen) + i;
+      const gezinTekst = zinWoord
+        ? this._maakZin(zinWoord, vermijdInZin, gebruikteZinnen, leestekenIndex)
+        : "";
       if (gezinTekst) {
         // Onthoud de gegenereerde zin zodat hij niet opnieuw verschijnt.
         if (gebruikteZinnen) gebruikteZinnen.add(gezinTekst.toLowerCase());
@@ -547,18 +554,11 @@ window.SpellingModules.weekdictee = {
      Argument `gebruikteZinnen`: Set van zinnen die deze week al gebruikt
      zijn (lowercase). Als de gevonden bib-zin al gebruikt is, vallen we 
      terug op auto-sjabloon zodat de leerling iets nieuws ziet. */
-  _maakZin: function(woordObj, vermijdWoorden, gebruikteZinnen) {
+  _maakZin: function(woordObj, vermijdWoorden, gebruikteZinnen, leestekenIndex) {
     if (!woordObj) return "";
     const vermijd = (vermijdWoorden || []).map(w => String(w).toLowerCase());
     const dicteeVorm = this._dicteeVorm(woordObj);
     const groepWoord = this._groepVoor(woordObj);
-
-    if (groepWoord && groepWoord.startsWith("werkwoorden-")) {
-      const begin = dicteeVorm.charAt(0).toUpperCase() + dicteeVorm.slice(1);
-      if (woordObj.tekst === "hebben") return `${begin} een boek.`;
-      if (woordObj.tekst === "zijn") return `${begin} op school.`;
-      return `${begin}.`;
-    }
 
     // ---- Strategie 1: handmatige dictee-zinnen-bib ----
     const bib = window.SpellingDicteeZinnen;
@@ -574,7 +574,12 @@ window.SpellingModules.weekdictee = {
           const botst = vermijd.some(vw => vw && lz.includes(vw));
           // Skip ook als deze zin al gebruikt is deze week (vrijdag-herhaling).
           const alGebruikt = gebruikteZinnen && gebruikteZinnen.has(lz);
-          if (!botst && !alGebruikt) return zin;
+          if (!botst && !alGebruikt) {
+            const metVorm = zin
+              .replaceAll("{woord}", dicteeVorm)
+              .replaceAll("{Woord}", dicteeVorm.charAt(0).toUpperCase() + dicteeVorm.slice(1));
+            return this._varieerLeestekens(metVorm, dicteeVorm, leestekenIndex);
+          }
         }
       }
     }
@@ -656,6 +661,26 @@ window.SpellingModules.weekdictee = {
     return pool[idx];
   },
 
+  /* Leestekens worden niet als losse woorden gedicteerd. Ze komen
+     verspreid in de gewone zinnen voor. De vaste weekpositie zorgt dat
+     een blad niet toevallig uitsluitend zinnen met een punt bevat. */
+  _varieerLeestekens: function(gewoneZin, dicteeVorm, positie) {
+    if (!Number.isFinite(positie)) return gewoneZin;
+    const woord = String(dicteeVorm || "").trim();
+    const soort = ((positie % 7) + 7) % 7;
+
+    if (soort === 1) {
+      return `Luister goed, want nu hoor je ‘${woord}’.`;
+    }
+    if (soort === 3) {
+      return `Kun jij ‘${woord}’ correct schrijven?`;
+    }
+    if (soort === 4) {
+      return `Schrijf ‘${woord}’ heel zorgvuldig op!`;
+    }
+    return gewoneZin;
+  },
+
   /* Pseudo-random met seed (zelfde aanpak als klankzuiver-module) */
   _seed: null,
   _random: function() {
@@ -674,5 +699,43 @@ window.SpellingModules.weekdictee = {
       uit.push(kopie.splice(idx, 1)[0]);
     }
     return uit;
+  },
+
+  /* Verdeel de gekozen woorden rondgaand over de aangevinkte categorieën.
+     Daardoor krijgt niet eerst één categorie alle plaatsen. De startgroep
+     verschuift per dag, zodat ook bij weinig woorden per dag alle gekozen
+     categorieën in de loop van de week aan bod komen. */
+  _kiesGebalanceerdeMix: function(woorden, n, startVerschuiving) {
+    const perCategorie = new Map();
+    (woorden || []).forEach(woord => {
+      const categorie = woord?.categorie || "zonder-categorie";
+      if (!perCategorie.has(categorie)) perCategorie.set(categorie, []);
+      perCategorie.get(categorie).push(woord);
+    });
+
+    const categorieen = [...perCategorie.keys()];
+    if (categorieen.length === 0 || n <= 0) return [];
+    categorieen.forEach(categorie => {
+      perCategorie.set(categorie, this._kiesWoorden(
+        perCategorie.get(categorie),
+        perCategorie.get(categorie).length
+      ));
+    });
+
+    const start = Math.abs(Number(startVerschuiving) || 0) % categorieen.length;
+    const volgorde = categorieen.slice(start).concat(categorieen.slice(0, start));
+    const resultaat = [];
+    let vooruitgang = true;
+    while (resultaat.length < n && vooruitgang) {
+      vooruitgang = false;
+      for (const categorie of volgorde) {
+        const bak = perCategorie.get(categorie);
+        if (bak && bak.length > 0 && resultaat.length < n) {
+          resultaat.push(bak.shift());
+          vooruitgang = true;
+        }
+      }
+    }
+    return resultaat;
   }
 };
