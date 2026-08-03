@@ -580,8 +580,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 if (bestSegment.distance < .026) {
                     customOutlinePoints.splice(bestSegment.index + 1, 0, bestSegment.point);
+                    draggedOutlinePoint = bestSegment.index + 1;
                     saveCustomWork();
-                    document.getElementById('uploadStatus').textContent = 'Nieuw omtrekpunt toegevoegd. Neem het vast om het te verslepen.';
+                    document.getElementById('uploadStatus').textContent = 'Nieuw omtrekpunt toegevoegd en vastgenomen.';
                 }
             }
             if (draggedOutlinePoint >= 0) editor.setPointerCapture(event.pointerId);

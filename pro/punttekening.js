@@ -1,806 +1,104 @@
-// --- punttekening.js start ---
+document.addEventListener('DOMContentLoaded',()=>{
+  const editor=document.getElementById('editorCanvas'),ectx=editor.getContext('2d');
+  const sheet=document.getElementById('worksheetCanvas'),sctx=sheet.getContext('2d');
+  const mask=document.createElement('canvas'),mctx=mask.getContext('2d');
+  mask.width=mask.height=720;
+  let source=null,sourceData='',points=[],denseOutline=[],mode='points',drag=-1,drawing=false,lastBrush=null,fileName='punttekening';
+  const $=id=>document.getElementById(id);
+  const isPro=location.pathname.replace(/\\/g,'/').includes('/pro/');
+  const storageKey=isPro?'zisa-punttekening-pro-v2':'zisa-punttekening-v2';
 
-// Elementen van de gecombineerde HTML
-const canvas = document.getElementById("mainCanvas"); // Hoofdcanvas
-const ctx = canvas.getContext("2d");
-const dikteInput = document.getElementById("dikte");
-let tool = "bekijken"; // Standaard tool voor punten plaatsen
-const gumVormSelect = document.getElementById("gumvorm");
-let gumVorm = "circle";
+  $('helpButton').addEventListener('click',()=>$('helpDialog').showModal());
+  $('helpClose').addEventListener('click',()=>$('helpDialog').close());
+  $('helpDialog').addEventListener('click',event=>{if(event.target===$('helpDialog'))$('helpDialog').close()});
 
-const maxAantalInput = document.getElementById("maxAantal");
-const clearAllBtn = document.getElementById("clearAllBtn");
-const undoBtn = document.getElementById("undoBtn");
-const opnieuwBtn = document.getElementById("opnieuwBtn"); // NIEUWE KNOP
-const fileInput = document.getElementById("fileInput");
-const uploadImageBtn = document.getElementById("uploadImageBtn");
-const showWorksheetBtn = document.getElementById("showWorksheetBtn");
-const downloadEditedImageBtn = document.getElementById("downloadEditedImageBtn");
-const outputJson = document.getElementById("outputJson");
-
-const VIEWER_CANVAS_WIDTH = 512;
-const VIEWER_CANVAS_HEIGHT = 768;
-
-let punten = [];
-let image = new Image();
-let bestandsnaam = "punttekening"; // Standaardnaam voor downloads
-let afbeeldingGeladen = false;
-
-// Drie canvaslagen voor betere controle
-let baseCanvas = document.createElement('canvas'); // Voor de geüploade afbeelding
-let baseCtx = baseCanvas.getContext('2d');
-
-let drawingCanvas = document.createElement('canvas'); // Voor getekende lijnen
-let drawingCtx = drawingCanvas.getContext('2d');
-
-let pointsCanvas = document.createElement('canvas'); // Voor de rode punten
-let pointsCtx = pointsCanvas.getContext('2d');
-
-let drawnStrokes = [];
-let currentStroke = []; // Tijdelijke array voor de huidige lijn (vrije lijn) of gum-sessie tracking
-
-let undoStack = [];
-const MAX_UNDO_STATES = 20;
-
-// Constanten voor lijn smoothing
-const SPLINE_TENSION = 0.1;
-const SPLINE_SEGMENTS_PER_POINT = 80;
-const RDP_SIMPLIFICATION_EPSILON = 0.5;
-const SMOOTHING_FACTOR = 0.5;
-
-let lastPoint = null; // Voor vrije lijn smoothing
-const MIN_DISTANCE_FOR_POINT = 1;
-
-let startPoint = null; // Startpunt voor rechte lijn en cirkel
-let isDrawing = false;
-
-// Variabele om de huidige muispositie vast te houden voor realtime tekenen
-let currentMousePos = {
-    x: 0,
-    y: 0
-};
-
-
-// --- Initialisatie en Laadlogica ---
-
-document.querySelectorAll("input[name='tool']").forEach(input => {
-    input.addEventListener("change", e => {
-        tool = e.target.value;
-
-        switch (tool) {
-            case 'vrijeLijn':
-            case 'rechteLijn':
-            case 'cirkel':
-                canvas.style.cursor = "url('icons/potlood.png'), auto";
-                break;
-            case 'gummen':
-                canvas.style.cursor = "none";
-                break;
-            case 'bekijken':
-            default:
-                canvas.style.cursor = "default";
-                break;
-        }
-
-        tekenAlles();
-    });
-});
-
-// EVENT LISTENER VOOR DE NIEUWE KNOP
-opnieuwBtn.addEventListener("click", resetApplication);
-
-gumVormSelect.addEventListener("change", () => {
-    gumVorm = gumVormSelect.value;
-});
-
-uploadImageBtn.addEventListener("click", () => {
-    fileInput.click();
-});
-
-fileInput.addEventListener("change", function () {
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    bestandsnaam = file.name.split(".")[0];
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        image = new Image();
-        image.onload = function () {
-            afbeeldingGeladen = true;
-            punten = [];
-            drawnStrokes = [];
-            currentStroke = [];
-            undoStack = [];
-
-            canvas.width = VIEWER_CANVAS_WIDTH;
-            canvas.height = VIEWER_CANVAS_HEIGHT;
-            baseCanvas.width = VIEWER_CANVAS_WIDTH;
-            baseCanvas.height = VIEWER_CANVAS_HEIGHT;
-            drawingCanvas.width = VIEWER_CANVAS_WIDTH;
-            drawingCanvas.height = VIEWER_CANVAS_HEIGHT;
-            pointsCanvas.width = VIEWER_CANVAS_WIDTH;
-            pointsCanvas.height = VIEWER_CANVAS_HEIGHT;
-            
-            // --- START VAN DE AANPASSING ---
-            const canvasRatio = baseCanvas.width / baseCanvas.height;
-            const imageRatio = image.width / image.height;
-            let newWidth, newHeight, x, y;
-
-            if (canvasRatio > imageRatio) {
-                // Canvas is breder dan de afbeelding
-                newHeight = baseCanvas.height;
-                newWidth = newHeight * imageRatio;
-                x = (baseCanvas.width - newWidth) / 2;
-                y = 0;
-            } else {
-                // Canvas is hoger dan of gelijk aan de afbeelding
-                newWidth = baseCanvas.width;
-                newHeight = newWidth / imageRatio;
-                x = 0;
-                y = (baseCanvas.height - newHeight) / 2;
-            }
-
-            // Vul de achtergrond met wit voor het geval de afbeelding niet het hele canvas vult
-            baseCtx.fillStyle = 'white';
-            baseCtx.fillRect(0, 0, baseCanvas.width, baseCanvas.height);
-            
-            // Teken de afbeelding met de juiste verhoudingen en gecentreerd
-            baseCtx.drawImage(image, x, y, newWidth, newHeight);
-            // --- EINDE VAN DE AANPASSING ---
-
-            redrawPoints();
-            redrawDrawnStrokes();
-
-            saveStateForUndo();
-            tekenAlles();
-        };
-        image.src = e.target.result;
-    };
+  $('imageInput').addEventListener('change',event=>{
+    const file=event.target.files?.[0];if(!file)return;
+    fileName=file.name.replace(/\.[^.]+$/,'')||'punttekening';
+    $('status').textContent=`${file.name} wordt verwerkt...`;
+    const reader=new FileReader();
+    reader.onload=()=>{const img=new Image();img.onload=()=>{source=img;sourceData=reader.result;mctx.clearRect(0,0,720,720);denseOutline=detectOutline(img,180);resample();autoKeepInsideLines();enableDownloads();save();render();$('status').textContent='De omtrek en binnenlijnen zijn automatisch geplaatst. Verbeter ze alleen waar nodig.'};img.src=reader.result};
     reader.readAsDataURL(file);
-});
+  });
 
+  $('pointCount').addEventListener('input',()=>{$('pointCountValue').textContent=$('pointCount').value;resample();save();render()});
+  $('simplifyButton').addEventListener('click',()=>{if(source){denseOutline=detectOutline(source,180);resample();save();render()}});
+  $('closedPath').addEventListener('change',()=>{save();render()});
+  $('brushSize').addEventListener('input',()=>{$('brushSizeValue').textContent=$('brushSize').value});
+  $('clearDetails').addEventListener('click',()=>{mctx.clearRect(0,0,720,720);save();render()});
+  $('autoKeepDetails').addEventListener('click',autoKeepInsideLines);
+  function setEditorMode(nextMode){mode=nextMode;document.querySelectorAll('[data-mode]').forEach(button=>button.classList.toggle('active',button.dataset.mode===mode));const active=document.querySelector(`[data-mode="${mode}"]`);$('editorModeLabel').textContent=active?.textContent||'Punten verplaatsen';editor.style.cursor=mode==='points'?'crosshair':'cell';render()}
+  document.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>setEditorMode(button.dataset.mode)));
+  ['titleInput','imageOpacity','showSolution'].forEach(id=>$(id).addEventListener('input',()=>{if(id==='imageOpacity')$('imageOpacityValue').textContent=`${$(id).value}%`;save();renderWorksheet()}));
+  $('labelType').addEventListener('change',()=>{const letters=$('labelType').value!=='numbers';$('pointCount').max=letters?26:100;if(letters&&points.length>26){$('pointCount').value=26;$('pointCountValue').textContent='26';resample()}save();render()});
+  $('downloadPng').addEventListener('click',()=>{renderWorksheet();const a=document.createElement('a');a.download=`${fileName}-punttekening.png`;a.href=sheet.toDataURL('image/png');a.click()});
+  $('downloadPdf').addEventListener('click',()=>{renderWorksheet();const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});doc.addImage(sheet.toDataURL('image/png'),'PNG',0,0,210,297);doc.save(`${fileName}-punttekening.pdf`)});
 
-// --- NIEUWE FUNCTIE OM ALLES TE RESETTEN ---
-function resetApplication() {
-    if (!confirm("Weet je zeker dat je opnieuw wilt beginnen? Alle wijzigingen gaan verloren.")) {
-        return;
-    }
+  function fitRect(img,size=720,pad=.07){const scale=Math.min(size*(1-pad*2)/img.width,size*(1-pad*2)/img.height);const w=img.width*scale,h=img.height*scale;return{x:(size-w)/2,y:(size-h)/2,w,h}}
+  function drawSource(ctx,alpha=1){if(!source)return;const r=fitRect(source);ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(source,r.x,r.y,r.w,r.h);ctx.restore()}
 
-    afbeeldingGeladen = false;
-    punten = [];
-    drawnStrokes = [];
-    undoStack = [];
-    image = new Image();
-    bestandsnaam = "punttekening";
+  function detectOutline(img,count){
+    const size=240,c=document.createElement('canvas'),cctx=c.getContext('2d',{willReadFrequently:true});c.width=c.height=size;cctx.fillStyle='#fff';cctx.fillRect(0,0,size,size);const r=fitRect(img,size,.05);cctx.drawImage(img,r.x,r.y,r.w,r.h);const d=cctx.getImageData(0,0,size,size).data;
+    const foreground=(x,y)=>{if(x<0||y<0||x>=size||y>=size)return false;const i=(Math.floor(y)*size+Math.floor(x))*4;return d[i+3]>35&&(d[i]+d[i+1]+d[i+2]<690)};
+    let sx=0,sy=0,n=0;for(let y=0;y<size;y+=2)for(let x=0;x<size;x+=2)if(foreground(x,y)){sx+=x;sy+=y;n++}if(!n)return[];const cx=sx/n,cy=sy/n,out=[];
+    for(let step=0;step<count;step++){const a=-Math.PI/2+step*Math.PI*2/count;let hit=null;for(let rad=size*.72;rad>1;rad-=.75){const x=cx+Math.cos(a)*rad,y=cy+Math.sin(a)*rad;if(foreground(x,y)){hit={x:x/size*720,y:y/size*720};break}}if(hit)out.push(hit)}
+    return out;
+  }
+  function resample(){if(!denseOutline.length)return;const count=Number($('pointCount').value);points=[];for(let i=0;i<count;i++)points.push({...denseOutline[Math.floor(i*denseOutline.length/count)]})}
+  function closestProjection(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;if(!l)return{x:a.x,y:a.y};const t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l));return{x:a.x+t*dx,y:a.y+t*dy}}
+  function pos(event){const r=editor.getBoundingClientRect();return{x:(event.clientX-r.left)/r.width*720,y:(event.clientY-r.top)/r.height*720}}
 
-    canvas.width = VIEWER_CANVAS_WIDTH;
-    canvas.height = VIEWER_CANVAS_HEIGHT;
-    baseCanvas.width = VIEWER_CANVAS_WIDTH;
-    baseCanvas.height = VIEWER_CANVAS_HEIGHT;
-    drawingCanvas.width = VIEWER_CANVAS_WIDTH;
-    drawingCanvas.height = VIEWER_CANVAS_HEIGHT;
-    pointsCanvas.width = VIEWER_CANVAS_WIDTH;
-    pointsCanvas.height = VIEWER_CANVAS_HEIGHT;
+  editor.addEventListener('pointerdown',event=>{if(!source)return;const p=pos(event);drawing=true;
+    if(mode==='points'){
+      let nearest={i:-1,d:Infinity};points.forEach((q,i)=>{const d=Math.hypot(q.x-p.x,q.y-p.y);if(d<nearest.d)nearest={i,d}});
+      if(nearest.d<14){drag=nearest.i;editor.setPointerCapture(event.pointerId)}else{let best={i:-1,d:Infinity,p:null};const limit=$('closedPath').checked?points.length:points.length-1;for(let i=0;i<limit;i++){const q=closestProjection(p,points[i],points[(i+1)%points.length]),d=Math.hypot(q.x-p.x,q.y-p.y);if(d<best.d)best={i,d,p:q}}if(best.d<18){points.splice(best.i+1,0,best.p);drag=best.i+1;editor.setPointerCapture(event.pointerId);$('pointCount').value=points.length;$('pointCountValue').textContent=points.length;$('status').textContent='Nieuw punt toegevoegd en vastgenomen.';save();render()}}
+    }else if(mode==='remove'){
+      let nearest={i:-1,d:Infinity};points.forEach((q,i)=>{const d=Math.hypot(q.x-p.x,q.y-p.y);if(d<nearest.d)nearest={i,d}});if(nearest.d<18&&points.length>3){points.splice(nearest.i,1);$('pointCount').value=points.length;$('pointCountValue').textContent=points.length;$('status').textContent='Punt verwijderd. Je kunt nu weer punten verplaatsen.';save();setEditorMode('points')}
+    }else{lastBrush=p;paintMask(p,p,mode==='erase')}
+  });
+  editor.addEventListener('pointermove',event=>{if(!drawing)return;const p=pos(event);if(mode==='points'&&drag>=0){points[drag]=p;render()}else if(mode!=='points'&&lastBrush){paintMask(lastBrush,p,mode==='erase');lastBrush=p;render()}});
+  const end=()=>{drawing=false;drag=-1;lastBrush=null;save();render()};editor.addEventListener('pointerup',end);editor.addEventListener('pointercancel',end);
+  editor.addEventListener('dblclick',event=>{if(mode!=='points'||points.length<=3)return;const p=pos(event);let nearest={i:-1,d:Infinity};points.forEach((q,i)=>{const d=Math.hypot(q.x-p.x,q.y-p.y);if(d<nearest.d)nearest={i,d}});if(nearest.d<18){points.splice(nearest.i,1);$('pointCount').value=points.length;$('pointCountValue').textContent=points.length;save();render()}});
+  function paintMask(a,b,erase){mctx.save();mctx.globalCompositeOperation=erase?'destination-out':'source-over';mctx.strokeStyle='#fff';mctx.lineWidth=Number($('brushSize').value);mctx.lineCap='round';mctx.beginPath();mctx.moveTo(a.x,a.y);mctx.lineTo(b.x,b.y);mctx.stroke();mctx.restore()}
 
-    // Maak het canvas leeg
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    baseCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
-    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-    pointsCtx.clearRect(0, 0, pointsCanvas.width, pointsCanvas.height);
+  function pointInPolygon(x,y){let inside=false;for(let i=0,j=points.length-1;i<points.length;j=i++){const a=points[i],b=points[j];if(((a.y>y)!==(b.y>y))&&(x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x))inside=!inside}return inside}
+  function distanceToOutline(p){let best=Infinity;const limit=$('closedPath').checked?points.length:points.length-1;for(let i=0;i<limit;i++){const q=closestProjection(p,points[i],points[(i+1)%points.length]);best=Math.min(best,Math.hypot(p.x-q.x,p.y-q.y))}return best}
+  function autoKeepInsideLines(){if(!source||points.length<3)return;const temp=document.createElement('canvas'),t=temp.getContext('2d',{willReadFrequently:true});temp.width=temp.height=720;t.fillStyle='#fff';t.fillRect(0,0,720,720);drawSource(t,1);const pixels=t.getImageData(0,0,720,720),out=mctx.createImageData(720,720);for(let y=0;y<720;y+=2)for(let x=0;x<720;x+=2){const i=(y*720+x)*4;if(pixels.data[i]+pixels.data[i+1]+pixels.data[i+2]<660&&pointInPolygon(x,y)&&distanceToOutline({x,y})>18){for(let oy=0;oy<3;oy++)for(let ox=0;ox<3;ox++){const px=x+ox,py=y+oy;if(px<720&&py<720){const k=(py*720+px)*4;out.data[k]=out.data[k+1]=out.data[k+2]=255;out.data[k+3]=255}}}}mctx.clearRect(0,0,720,720);mctx.putImageData(out,0,0);$('status').textContent='De binnenlijnen zijn automatisch bewaard. Je kunt de selectie nog bijwerken.';save();render()}
 
-
-    tekenAlles();
-
-    outputJson.value = "";
-    fileInput.value = ""; 
-
-    alert("De editor is gereset. Je kunt een nieuwe afbeelding uploaden.");
-}
-
-
-// --- Tekenfunctionaliteiten ---
-
-function tekenAlles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.drawImage(baseCanvas, 0, 0);
-    ctx.drawImage(pointsCanvas, 0, 0);
-    ctx.drawImage(drawingCanvas, 0, 0);
-
-    if (isDrawing && currentMousePos) {
-        ctx.save();
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = parseInt(dikteInput.value);
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-
-        if (tool === "vrijeLijn" && currentStroke.length > 0) {
-            drawCatmullRomSpline(ctx, currentStroke, SPLINE_TENSION, SPLINE_SEGMENTS_PER_POINT, false);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(currentMousePos.x, currentMousePos.y, parseInt(dikteInput.value) / 2, 0, 2 * Math.PI);
-            ctx.fillStyle = "black";
-            ctx.fill();
-        } else if (tool === "rechteLijn" && startPoint) {
-            ctx.beginPath();
-            ctx.moveTo(startPoint.x, startPoint.y);
-            ctx.lineTo(currentMousePos.x, currentMousePos.y);
-            ctx.stroke();
-        } else if (tool === "cirkel" && startPoint) {
-            const radius = Math.sqrt(Math.pow(currentMousePos.x - startPoint.x, 2) + Math.pow(currentMousePos.y - startPoint.y, 2));
-            ctx.beginPath();
-            ctx.arc(startPoint.x, startPoint.y, radius, 0, 2 * Math.PI);
-            ctx.stroke();
+  function selectedDetailsCanvas(){const c=document.createElement('canvas'),x=c.getContext('2d');c.width=c.height=720;drawSource(x,1);x.globalCompositeOperation='destination-in';x.drawImage(mask,0,0);return c}
+  function render(){ectx.clearRect(0,0,720,720);ectx.fillStyle='#fff';ectx.fillRect(0,0,720,720);const editingDetails=mode==='keep'||mode==='erase';drawSource(ectx,editingDetails?0.82:0.16);ectx.drawImage(selectedDetailsCanvas(),0,0);if(editingDetails){ectx.save();ectx.globalAlpha=.28;ectx.fillStyle='#19a66a';ectx.fillRect(0,0,720,720);ectx.globalCompositeOperation='destination-in';ectx.drawImage(mask,0,0);ectx.restore()}if(points.length){ectx.strokeStyle='#2689d1';ectx.lineWidth=3;ectx.lineJoin='round';ectx.beginPath();points.forEach((p,i)=>i?ectx.lineTo(p.x,p.y):ectx.moveTo(p.x,p.y));if($('closedPath').checked)ectx.closePath();ectx.stroke();points.forEach((p,i)=>{ectx.fillStyle=i===drag?'#ff6856':'#fff';ectx.strokeStyle='#2773aa';ectx.lineWidth=2;ectx.beginPath();ectx.arc(p.x,p.y,7,0,Math.PI*2);ectx.fill();ectx.stroke()})}renderWorksheet()}
+  function labelFor(i){const type=$('labelType').value;if(type==='numbers')return String(i+1);return String.fromCharCode((type==='upper'?65:97)+i)}
+  function drawWorksheetPoints(){
+    const labels=[];
+    sctx.font='16px Segoe UI';
+    sctx.textAlign='center';
+    sctx.textBaseline='middle';
+    points.forEach(p=>{sctx.fillStyle='#182f43';sctx.beginPath();sctx.arc(p.x,p.y,4,0,Math.PI*2);sctx.fill()});
+    points.forEach((p,i)=>{
+      const text=labelFor(i),width=sctx.measureText(text).width;
+      let best=null;
+      [14,23,33,43].forEach(radius=>{
+        for(let step=0;step<12;step++){
+          const angle=-Math.PI/2+step*Math.PI/6,x=p.x+Math.cos(angle)*radius,y=p.y+Math.sin(angle)*radius;
+          const box={left:x-width/2-4,right:x+width/2+4,top:y-11,bottom:y+11};
+          let score=radius;
+          if(box.left<5||box.right>715||box.top<5||box.bottom>715)score+=50000;
+          labels.forEach(other=>{if(box.left<other.right&&box.right>other.left&&box.top<other.bottom&&box.bottom>other.top)score+=10000});
+          points.forEach((q,qi)=>{if(qi!==i&&q.x>box.left-4&&q.x<box.right+4&&q.y>box.top-4&&q.y<box.bottom+4)score+=1200});
+          if(!best||score<best.score)best={x,y,box,score};
         }
-        ctx.restore();
-    }
-}
-
-function redrawDrawnStrokes() {
-    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-    drawnStrokes.forEach(stroke => {
-        drawingCtx.beginPath();
-        drawingCtx.strokeStyle = stroke.color;
-        drawingCtx.lineWidth = stroke.width;
-        drawingCtx.lineCap = "round";
-        drawingCtx.lineJoin = "round";
-
-        if (stroke.type === 'vrijeLijn') {
-            if (stroke.points && stroke.points.length > 1) {
-                drawCatmullRomSpline(drawingCtx, stroke.points, SPLINE_TENSION, SPLINE_SEGMENTS_PER_POINT, false);
-            }
-        } else if (stroke.type === 'rechteLijn') {
-            if (stroke.start && stroke.end) {
-                drawingCtx.moveTo(stroke.start.x, stroke.start.y);
-                drawingCtx.lineTo(stroke.end.x, stroke.end.y);
-            }
-        } else if (stroke.type === 'cirkel') {
-            if (stroke.center && stroke.radius) {
-                drawingCtx.arc(stroke.center.x, stroke.center.y, stroke.radius, 0, 2 * Math.PI);
-            }
-        }
-        drawingCtx.stroke();
+      });
+      labels.push(best.box);
+      sctx.lineWidth=5;sctx.lineJoin='round';sctx.strokeStyle='rgba(255,255,255,.98)';sctx.strokeText(text,best.x,best.y);
+      sctx.fillStyle='#182f43';sctx.fillText(text,best.x,best.y);
     });
-}
+    sctx.textAlign='left';sctx.textBaseline='alphabetic';
+  }
+  function renderWorksheet(){sctx.clearRect(0,0,794,1123);sctx.fillStyle='#fff';sctx.fillRect(0,0,794,1123);sctx.fillStyle='#173a5c';sctx.font='700 30px Segoe UI';sctx.fillText($('titleInput').value||'Punttekening',58,86);sctx.fillStyle='#617a90';sctx.font='14px Segoe UI';sctx.fillText('Verbind de punten in de juiste volgorde.',58,114);sctx.font='12px Segoe UI';sctx.fillText('Naam',520,65);sctx.fillText('Datum',650,65);sctx.strokeStyle='#9db1c1';sctx.lineWidth=1;sctx.beginPath();sctx.moveTo(520,83);sctx.lineTo(625,83);sctx.moveTo(650,83);sctx.lineTo(744,83);sctx.stroke();sctx.setLineDash([6,6]);sctx.strokeStyle='#d4e2ec';sctx.beginPath();sctx.moveTo(58,138);sctx.lineTo(744,138);sctx.stroke();sctx.setLineDash([]);
+    if(!source||!points.length)return;const scale=.78,ox=117,oy=220;sctx.save();sctx.translate(ox,oy);sctx.scale(scale,scale);const opacity=Number($('imageOpacity').value)/100;if(opacity)drawSource(sctx,opacity);sctx.drawImage(selectedDetailsCanvas(),0,0);if($('closedPath').checked&&points.length>1&&!$('showSolution').checked){sctx.strokeStyle='#182f43';sctx.lineWidth=2.5;sctx.lineCap='round';sctx.beginPath();sctx.moveTo(points[points.length-1].x,points[points.length-1].y);sctx.lineTo(points[0].x,points[0].y);sctx.stroke()}if($('showSolution').checked){sctx.strokeStyle='#a8b7c2';sctx.lineWidth=2;sctx.beginPath();points.forEach((p,i)=>i?sctx.lineTo(p.x,p.y):sctx.moveTo(p.x,p.y));if($('closedPath').checked)sctx.closePath();sctx.stroke()}drawWorksheetPoints();sctx.restore();sctx.fillStyle='#9aa9b5';sctx.font='italic 10px Segoe UI';sctx.textAlign='center';sctx.fillText("juf Zisa's werkbladgenerator",397,1092);sctx.textAlign='left'}
 
-function redrawPoints() {
-    pointsCtx.clearRect(0, 0, pointsCanvas.width, pointsCanvas.height);
-
-    punten.forEach(([x, y], i) => {
-        const radius = 8;
-
-        pointsCtx.beginPath();
-        pointsCtx.arc(x, y, radius, 0, 2 * Math.PI);
-        pointsCtx.fillStyle = "white";
-        pointsCtx.fill();
-
-        pointsCtx.beginPath();
-        pointsCtx.arc(x, y, 4, 0, 2 * Math.PI);
-        pointsCtx.fillStyle = "red";
-        pointsCtx.fill();
-
-        pointsCtx.save();
-        pointsCtx.strokeStyle = "white";
-        pointsCtx.lineWidth = 2;
-        pointsCtx.font = "12px Arial";
-        pointsCtx.textAlign = "left";
-        pointsCtx.textBaseline = "bottom";
-
-        pointsCtx.strokeText(i + 1, x + 6, y - 6);
-        pointsCtx.fillText(i + 1, x + 6, y - 6);
-        pointsCtx.restore();
-    });
-}
-
-// Helpers voor Canvas State Management
-function getCanvasImageData(sourceCanvas) {
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCanvas.width = sourceCanvas.width;
-    tempCanvas.height = sourceCanvas.height;
-    tempCtx.drawImage(sourceCanvas, 0, 0);
-    return tempCtx.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
-}
-
-function saveStateForUndo() {
-    if (undoStack.length >= MAX_UNDO_STATES) {
-        undoStack.shift();
-    }
-    undoStack.push({
-        baseCanvasData: getCanvasImageData(baseCanvas),
-        drawingCanvasData: getCanvasImageData(drawingCanvas),
-        pointsData: getCanvasImageData(pointsCanvas),
-        strokes: JSON.parse(JSON.stringify(drawnStrokes)),
-        rawPunten: JSON.parse(JSON.stringify(punten))
-    });
-}
-
-// --- Event Listeners voor Interactie ---
-
-canvas.addEventListener("mousedown", (e) => {
-    if (!afbeeldingGeladen) {
-        alert("Upload eerst een afbeelding!");
-        return;
-    }
-
-    const {
-        x,
-        y
-    } = getPos(e);
-    isDrawing = true;
-
-    if (tool === "bekijken") {
-        const maxAantal = parseInt(maxAantalInput.value);
-        if (punten.length >= maxAantal) {
-            alert(`Maximum aantal punten (${maxAantal}) bereikt.`);
-            isDrawing = false;
-            return;
-        }
-        saveStateForUndo();
-        punten.push([x, y]);
-        redrawPoints();
-        tekenAlles();
-        isDrawing = false;
-    } else if (tool === "gummen") {
-        saveStateForUndo();
-        const gumDikte = parseInt(dikteInput.value);
-        applyGumToCanvas(x, y, gumDikte, gumVorm, baseCtx);
-        tekenAlles();
-        currentStroke = [{
-            x: -1,
-            y: -1
-        }];
-    } else if (tool === "vrijeLijn" || tool === "rechteLijn" || tool === "cirkel") {
-        saveStateForUndo();
-        if (tool === "vrijeLijn") {
-            currentStroke = [{
-                x,
-                y
-            }];
-            lastPoint = {
-                x,
-                y
-            };
-        } else if (tool === "rechteLijn" || tool === "cirkel") {
-            startPoint = {
-                x,
-                y
-            };
-        }
-        currentMousePos = {
-            x,
-            y
-        };
-        tekenAlles();
-    }
+  function enableDownloads(){$('downloadPng').disabled=false;$('downloadPdf').disabled=false}
+  function save(){if(!sourceData)return;try{sessionStorage.setItem(storageKey,JSON.stringify({sourceData,points,denseOutline,mask:mask.toDataURL(),count:$('pointCount').value,closed:$('closedPath').checked,label:$('labelType').value,title:$('titleInput').value,opacity:$('imageOpacity').value}))}catch(_){}}
+  function restore(){let saved;try{const stored=sessionStorage.getItem(storageKey)||(!isPro?sessionStorage.getItem('zisa-punttekening-nieuw'):null);saved=JSON.parse(stored||'null')}catch(_){return}if(!saved?.sourceData)return;const img=new Image();img.onload=()=>{source=img;sourceData=saved.sourceData;points=saved.points||[];denseOutline=saved.denseOutline||[];$('pointCount').value=saved.count||points.length||30;$('pointCountValue').textContent=$('pointCount').value;$('closedPath').checked=saved.closed!==false;$('labelType').value=saved.label||'numbers';$('titleInput').value=saved.title||'Punttekening';$('imageOpacity').value=saved.opacity||0;$('imageOpacityValue').textContent=`${$('imageOpacity').value}%`;if(saved.mask){const mi=new Image();mi.onload=()=>{mctx.drawImage(mi,0,0);render()};mi.src=saved.mask}else render();enableDownloads();$('status').textContent='Je vorige punttekening is teruggezet.'};img.src=saved.sourceData}
+  renderWorksheet();restore();
 });
-
-canvas.addEventListener("mousemove", (e) => {
-    const {
-        x,
-        y
-    } = getPos(e);
-    currentMousePos = {
-        x,
-        y
-    };
-
-    if (tool === "gummen" && afbeeldingGeladen) {
-        tekenAlles();
-        drawGumCursor(x, y, parseInt(dikteInput.value), gumVorm);
-        if (!isDrawing) return;
-    } else if (!isDrawing) {
-        tekenAlles(); // Zorgt voor realtime preview van rechte lijn en cirkel
-        return;
-    }
-
-    if (tool === "gummen") {
-        const gumDikte = parseInt(dikteInput.value);
-        applyGumToCanvas(x, y, gumDikte, gumVorm, baseCtx);
-
-        const tolerance = gumDikte / 2;
-        let linesErasedThisMove = false;
-        for (let i = drawnStrokes.length - 1; i >= 0; i--) {
-            const stroke = drawnStrokes[i];
-            if (isPointNearStroke({x,y}, stroke, tolerance)) {
-                drawnStrokes.splice(i, 1);
-                linesErasedThisMove = true;
-            }
-        }
-
-        if (linesErasedThisMove) {
-            redrawDrawnStrokes();
-        }
-        tekenAlles();
-    } else if (tool === "vrijeLijn") {
-        let newX = x;
-        let newY = y;
-
-        if (lastPoint && currentStroke.length > 0) {
-            newX = (x * SMOOTHING_FACTOR) + (currentStroke[currentStroke.length - 1].x * (1 - SMOOTHING_FACTOR));
-            newY = (y * SMOOTHING_FACTOR) + (currentStroke[currentStroke.length - 1].y * (1 - SMOOTHING_FACTOR));
-        }
-
-        if (!lastPoint || Math.sqrt(Math.pow(newX - lastPoint.x, 2) + Math.pow(newY - lastPoint.y, 2)) > MIN_DISTANCE_FOR_POINT) {
-            currentStroke.push({
-                x: newX,
-                y: newY
-            });
-            lastPoint = {
-                x: newX,
-                y: newY
-            };
-        }
-        tekenAlles();
-    } else if (tool === "rechteLijn" || tool === "cirkel") {
-        tekenAlles();
-    }
-});
-
-canvas.addEventListener("mouseup", (event) => {
-    if (!isDrawing) return;
-
-    isDrawing = false;
-    lastPoint = null;
-
-    if (tool === "gummen") {
-        if (currentStroke.length > 0) {
-            // Gum acties worden al opgeslagen bij mousedown en mousemove, geen dubbele save nodig
-        }
-        currentStroke = [];
-    } else if (tool === "vrijeLijn") {
-        if (currentStroke.length === 0) {
-            const {
-                x,
-                y
-            } = getPos(event);
-            currentStroke.push({
-                x,
-                y
-            });
-        }
-        if (currentStroke.length === 1) {
-            currentStroke.push(currentStroke[0]);
-        }
-
-        const simplifiedPoints = simplifyPolyline(currentStroke, RDP_SIMPLIFICATION_EPSILON);
-        drawnStrokes.push({
-            type: 'vrijeLijn',
-            points: simplifiedPoints,
-            color: "black",
-            width: parseInt(dikteInput.value)
-        });
-
-        redrawDrawnStrokes();
-        currentStroke = [];
-        // Geen saveStateForUndo() hier, wordt bij mouseup van alle tekentools afgehandeld
-    } else if (tool === "rechteLijn") {
-        const {
-            x,
-            y
-        } = getPos(event);
-        if (startPoint) {
-            drawnStrokes.push({
-                type: 'rechteLijn',
-                start: startPoint,
-                end: {
-                    x,
-                    y
-                },
-                color: "black",
-                width: parseInt(dikteInput.value)
-            });
-            startPoint = null;
-            redrawDrawnStrokes();
-        }
-    } else if (tool === "cirkel") {
-        const {
-            x,
-            y
-        } = getPos(event);
-        if (startPoint) {
-            const radius = Math.sqrt(Math.pow(x - startPoint.x, 2) + Math.pow(y - startPoint.y, 2));
-            drawnStrokes.push({
-                type: 'cirkel',
-                center: startPoint,
-                radius: radius,
-                color: "black",
-                width: parseInt(dikteInput.value)
-            });
-            startPoint = null;
-            redrawDrawnStrokes();
-        }
-    }
-    
-    // Save state na elke voltooide actie (mouseup)
-    saveStateForUndo();
-    tekenAlles();
-});
-
-canvas.addEventListener("mouseout", (event) => {
-    if (tool === "gummen") {
-        tekenAlles();
-    }
-
-    // Behandel muis loslaten alsof het binnen het canvas gebeurde om onvoltooide lijnen te voorkomen
-    if (isDrawing) {
-         canvas.dispatchEvent(new MouseEvent('mouseup', {
-            bubbles: true,
-            cancelable: true,
-            clientX: event.clientX,
-            clientY: event.clientY
-        }));
-    }
-});
-
-
-// --- Helper functies ---
-
-// GECORRIGEERDE FUNCTIE:
-function applyGumToCanvas(x, y, size, form, targetCtx) {
-    targetCtx.save();
-    targetCtx.fillStyle = 'white';
-    targetCtx.beginPath();
-    if (form === "circle") {
-        targetCtx.arc(x, y, size / 2, 0, 2 * Math.PI);
-        targetCtx.fill();
-    } else {
-        targetCtx.fillRect(x - size / 2, y - size / 2, size, size);
-    }
-    targetCtx.restore();
-}
-
-function drawGumCursor(x, y, size, form) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "gray";
-    if (form === "circle") {
-        ctx.arc(x, y, size / 2, 0, 2 * Math.PI);
-        ctx.stroke();
-    } else {
-        ctx.strokeRect(x - size / 2, y - size / 2, size, size);
-    }
-    ctx.restore();
-}
-
-function getPos(evt) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-        x: Math.round(evt.clientX - rect.left),
-        y: Math.round(evt.clientY - rect.top)
-    };
-}
-
-function isPointNearStroke(point, stroke, tolerance) {
-    const {x, y} = point;
-    if (stroke.type === 'vrijeLijn' && stroke.points) {
-        for (let i = 0; i < stroke.points.length - 1; i++) {
-            if (distToSegment(point, stroke.points[i], stroke.points[i+1]) < tolerance + stroke.width / 2) {
-                return true;
-            }
-        }
-    } else if (stroke.type === 'rechteLijn' && stroke.start && stroke.end) {
-        if (distToSegment(point, stroke.start, stroke.end) < tolerance + stroke.width / 2) {
-            return true;
-        }
-    } else if (stroke.type === 'cirkel' && stroke.center && stroke.radius) {
-        const distFromCenter = Math.sqrt(Math.pow(x - stroke.center.x, 2) + Math.pow(y - stroke.center.y, 2));
-        if (Math.abs(distFromCenter - stroke.radius) < tolerance + stroke.width / 2) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// Hulplogica voor afstand tot een lijnsegment
-function distToSegment(p, v, w) {
-    var l2 = (v.x - w.x)**2 + (v.y - w.y)**2;
-    if (l2 == 0) return Math.sqrt((p.x - v.x)**2 + (p.y - v.y)**2);
-    var t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
-    t = Math.max(0, Math.min(1, t));
-    return Math.sqrt((p.x - (v.x + t * (w.x - v.x)))**2 + (p.y - (v.y + t * (w.y - v.y)))**2);
-}
-
-
-function drawCatmullRomSpline(ctx, points, tension = 0.5, numOfSegments = 30, close = false) {
-    if (points.length < 2) return;
-    
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-
-    for (let i = 0; i < points.length - 1; i++) {
-        let p0 = (i > 0) ? points[i - 1] : points[0];
-        let p1 = points[i];
-        let p2 = points[i + 1];
-        let p3 = (i + 2 < points.length) ? points[i + 2] : p2;
-
-        let cp1x = p1.x + (p2.x - p0.x) / 6 * tension;
-        let cp1y = p1.y + (p2.y - p0.y) / 6 * tension;
-
-        let cp2x = p2.x - (p3.x - p1.x) / 6 * tension;
-        let cp2y = p2.y - (p3.y - p1.y) / 6 * tension;
-
-        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
-    }
-}
-
-
-function simplifyPolyline(points, epsilon) {
-    if (points.length <= 2) return points;
-
-    // Ramer-Douglas-Peucker algorithm
-    let dmax = 0;
-    let index = 0;
-    const end = points.length - 1;
-
-    for (let i = 1; i < end; i++) {
-        const d = distToSegment(points[i], points[0], points[end]);
-        if (d > dmax) {
-            index = i;
-            dmax = d;
-        }
-    }
-
-    if (dmax > epsilon) {
-        const recResults1 = simplifyPolyline(points.slice(0, index + 1), epsilon);
-        const recResults2 = simplifyPolyline(points.slice(index, end + 1), epsilon);
-        return recResults1.slice(0, recResults1.length - 1).concat(recResults2);
-    } else {
-        return [points[0], points[end]];
-    }
-}
-
-
-// --- Algemene bewerkingsknoppen ---
-
-undoBtn.addEventListener("click", () => {
-    if (undoStack.length > 1) { // We willen niet de allereerste (lege) staat poppen
-        undoStack.pop(); // Verwijder de huidige staat
-        const previousState = undoStack[undoStack.length - 1]; // Ga naar de vorige
-
-        baseCtx.putImageData(previousState.baseCanvasData, 0, 0);
-        drawingCtx.putImageData(previousState.drawingCanvasData, 0, 0);
-        pointsCtx.putImageData(previousState.pointsData, 0, 0);
-
-        drawnStrokes = JSON.parse(JSON.stringify(previousState.strokes));
-        punten = JSON.parse(JSON.stringify(previousState.rawPunten));
-
-        redrawDrawnStrokes();
-        redrawPoints();
-        tekenAlles();
-    } else {
-        alert("Kan niet verder ongedaan maken.");
-    }
-});
-
-
-clearAllBtn.addEventListener("click", () => {
-    if (!confirm("Weet u zeker dat u alle punten en getekende lijnen wilt wissen? De geüploade afbeelding blijft behouden.")) {
-        return;
-    }
-    saveStateForUndo();
-    punten = [];
-    drawnStrokes = [];
-
-    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-    pointsCtx.clearRect(0, 0, pointsCanvas.width, pointsCanvas.height);
-
-    redrawPoints();
-    redrawDrawnStrokes();
-    tekenAlles();
-    outputJson.value = "";
-    saveStateForUndo(); // Bewaar de schone staat
-});
-
-
-// --- jsPDF integratie ---
-showWorksheetBtn.addEventListener("click", async () => {
-    if (!afbeeldingGeladen) {
-        alert("Upload eerst een afbeelding!");
-        return;
-    }
-    if (punten.length === 0 && drawnStrokes.length === 0) {
-        alert("Plaats punten en/of teken lijnen voordat u een werkblad genereert.");
-        return;
-    }
-
-    const exportCanvas = document.createElement('canvas');
-    const exportCtx = exportCanvas.getContext('2d');
-    exportCanvas.width = canvas.width;
-    exportCanvas.height = canvas.height;
-
-    // Teken alle lagen op het export canvas
-    exportCtx.drawImage(baseCanvas, 0, 0);
-    exportCtx.drawImage(drawingCanvas, 0, 0);
-    exportCtx.drawImage(pointsCanvas, 0, 0);
-
-    const dataURL = exportCanvas.toDataURL("image/png");
-
-    const {
-        jsPDF
-    } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
-
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
-
-    const ratio = imgWidth / imgHeight;
-
-    let pdfImgWidth = pageWidth - 20; // 10mm marge aan beide kanten
-    let pdfImgHeight = pdfImgWidth / ratio;
-
-    if (pdfImgHeight > pageHeight - 40) { // 20mm marge boven/onder
-        pdfImgHeight = pageHeight - 40;
-        pdfImgWidth = pdfImgHeight * ratio;
-    }
-
-    const xPos = (pageWidth - pdfImgWidth) / 2;
-    const yPos = 20; // Vaste marge bovenaan
-
-    doc.addImage(dataURL, 'PNG', xPos, yPos, pdfImgWidth, pdfImgHeight);
-
-    doc.setFontSize(10);
-    const date = new Date().toLocaleDateString('nl-BE', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    doc.text(`Gegenereerd op: ${date}`, pageWidth / 2, pageHeight - 10, {
-        align: 'center'
-    });
-
-    doc.save(`${bestandsnaam}_werkblad.pdf`);
-});
-
-// --- PNG Download ---
-downloadEditedImageBtn.addEventListener("click", () => {
-    if (!afbeeldingGeladen) {
-        alert("Upload eerst een afbeelding!");
-        return;
-    }
-
-    const exportCanvas = document.createElement('canvas');
-    const exportCtx = exportCanvas.getContext('2d');
-    exportCanvas.width = canvas.width;
-    exportCanvas.height = canvas.height;
-
-    // Teken alle lagen op het export canvas
-    exportCtx.drawImage(baseCanvas, 0, 0);
-    exportCtx.drawImage(drawingCanvas, 0, 0);
-    exportCtx.drawImage(pointsCanvas, 0, 0);
-
-    const dataURL = exportCanvas.toDataURL("image/png");
-
-    const a = document.createElement("a");
-    a.href = dataURL;
-    a.download = bestandsnaam + "_bewerkt.png";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-});
-
-// --- Begin initiële opzet ---
-function init() {
-    canvas.width = VIEWER_CANVAS_WIDTH;
-    canvas.height = VIEWER_CANVAS_HEIGHT;
-    baseCanvas.width = VIEWER_CANVAS_WIDTH;
-    baseCanvas.height = VIEWER_CANVAS_HEIGHT;
-    drawingCanvas.width = VIEWER_CANVAS_WIDTH;
-    drawingCanvas.height = VIEWER_CANVAS_HEIGHT;
-    pointsCanvas.width = VIEWER_CANVAS_WIDTH;
-    pointsCanvas.height = VIEWER_CANVAS_HEIGHT;
-
-    // Zet een initiële 'lege' staat voor de undo-stack
-    saveStateForUndo();
-    tekenAlles();
-}
-// --- Eind initiële opzet ---
-
-init();

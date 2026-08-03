@@ -1,88 +1,82 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <title>Punttekening Bewerken & Bekijken</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Punttekening maken | Zisa</title>
   <link rel="stylesheet" href="punttekening.css">
+  <style>
+    .mode-buttons{margin-top:9px}.mode-buttons button:first-child{grid-column:auto}.prominent-action{color:#fff!important;background:#2f8b69!important;border-color:#2f8b69!important}
+    .help-button{grid-column:3;justify-self:end;padding:10px 15px;border:1px solid #bcdcf0;border-radius:12px;color:#246796;background:#fff;font-weight:850;cursor:pointer;box-shadow:var(--shadow)}
+    .help-dialog{width:min(680px,calc(100% - 28px));max-height:88vh;padding:0;border:0;border-radius:20px;color:var(--ink);box-shadow:0 24px 80px rgba(23,54,83,.28)}.help-dialog::backdrop{background:rgba(18,42,62,.48)}
+    .help-dialog header{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 24px;background:#eef7fd;border-bottom:1px solid var(--line)}.help-dialog h2{margin:0;font-size:1.35rem}.help-close{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--ink);font-size:1.35rem;cursor:pointer}.help-content{padding:22px 26px 26px}.help-step{display:grid;grid-template-columns:34px 1fr;gap:12px;margin-bottom:18px}.help-step>span{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;color:#fff;background:var(--blue);font-weight:900}.help-step h3{margin:3px 0 5px;font-size:1rem}.help-step p{margin:0;color:var(--muted);font-size:.88rem;line-height:1.55}.help-note{margin:4px 0 0;padding:14px 16px;border-radius:12px;background:#f3faf6;color:#35654f;font-size:.85rem;line-height:1.5}
+    @media(max-width:760px){.help-button{margin:12px 0 18px}.help-dialog header{padding:16px 18px}.help-content{padding:18px}}
+  </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-  <header>
-    <button onclick="window.location.href='index.html'" id="menuBtn">Keuzemenu</button>
-    <h1>Punttekening Bewerken & Bekijken</h1>
+  <header class="tool-header">
+    <a href="index.html" class="back-button">← Keuzemenu</a>
+    <div><p class="eyebrow">Zisa's spelletjesmaker</p><h1>Punttekening</h1><p>Maak automatisch een verbind-de-puntenwerkblad van een afbeelding.</p></div>
+    <button id="helpButton" type="button" class="help-button">? Hoe werkt dit?</button>
   </header>
 
-  <div id="main-content">
-    <div id="left-panel">
-        <div id="controls">
-            <div class="control-group">
-                <label for="fileInput">Afbeelding uploaden:</label>
-                <input type="file" id="fileInput" accept="image/*">
-                <button id="uploadImageBtn">Upload</button>
-            </div>
-
-            <div class="control-group">
-                <label for="maxAantal">Max punten:</label>
-                <input type="number" id="maxAantal" value="20" min="1" max="200">
-                <button id="undoBtn">1 punt/actie terug</button>
-                <button id="clearAllBtn">Alles wissen</button>
-                <button id="opnieuwBtn">Opnieuw</button>
-            </div>
-
-            <div class="control-group">
-                <h3>Teken Tools</h3>
-                <div id="tools-icons">
-                    <label>
-                        <input type="radio" name="tool" value="bekijken" id="toolBekijken" checked>
-                        <img src="icons/icon_plaats_punten.png" alt="Plaats punten" title="Klik om punten te plaatsen." class="tool-icon" data-tooltip="Klik om punten te plaatsen.">
-                    </label>
-                    <label>
-                        <input type="radio" name="tool" value="vrijeLijn" id="toolVrijeLijn">
-                        <img src="icons/icon_vrije_lijn.png" alt="Vrije lijn" title="Teken een vrije lijn (pas de dikte aan bij 'dikte')." class="tool-icon" data-tooltip="Teken een vrije lijn (pas de dikte aan bij 'dikte').">
-                    </label>
-                    <label>
-                        <input type="radio" name="tool" value="rechteLijn" id="toolRechteLijn">
-                        <img src="icons/icon_rechte_lijn.png" alt="Rechte lijn" title="Teken een rechte lijn (pas de dikte aan bij 'dikte')." class="tool-icon" data-tooltip="Teken een rechte lijn (pas de dikte aan bij 'dikte').">
-                    </label>
-                    <label>
-                        <input type="radio" name="tool" value="cirkel" id="toolCirkel">
-                        <img src="icons/icon_cirkel.png" alt="Cirkel" title="Teken een cirkel (pas de dikte aan bij 'dikte')." class="tool-icon" data-tooltip="Teken een cirkel (pas de dikte aan bij 'dikte').">
-                    </label>
-                    <label>
-                        <input type="radio" name="tool" value="gummen" id="toolGummen">
-                        <img src="icons/icon_gum.png" alt="Gummen" title="Gum getekende lijnen of de achtergrond weg (pas dikte en vorm aan)." class="tool-icon" data-tooltip="Gum getekende lijnen of de achtergrond weg (pas dikte en vorm aan).">
-                    </label>
-                </div>
-                
-                <div class="tool-setting">
-                    <label for="dikte">Dikte (potlood/gum):</label>
-                    <input type="number" id="dikte" value="5" min="1" max="50">
-                </div>
-                <div class="tool-setting">
-                    <label for="gumvorm">Gumvorm:</label>
-                    <select id="gumvorm">
-                        <option value="circle">Rond</option>
-                        <option value="square">Vierkant</option>
-                    </select>
-                </div>
-            </div>
-
-            </div>
+  <dialog id="helpDialog" class="help-dialog" aria-labelledby="helpTitle">
+    <header><h2 id="helpTitle">Zo maak je een punttekening</h2><button id="helpClose" type="button" class="help-close" aria-label="Uitleg sluiten">×</button></header>
+    <div class="help-content">
+      <div class="help-step"><span>1</span><div><h3>Kies een afbeelding</h3><p>Gebruik liefst een duidelijke kleurplaat met een witte of rustige achtergrond. De buitenvorm en binnenlijnen worden automatisch gezocht.</p></div></div>
+      <div class="help-step"><span>2</span><div><h3>Controleer de blauwe punten</h3><p>Sleep een punt om het te verplaatsen. Klik en sleep op een blauwe lijn om meteen een nieuw punt toe te voegen. Kies <strong>Punt verwijderen</strong> en klik één overbodig punt weg; daarna schakelt de tool automatisch terug naar verplaatsen.</p></div></div>
+      <div class="help-step"><span>3</span><div><h3>Kies welke binnenlijnen blijven staan</h3><p>De groene aanduiding toont de lijnen die op het werkblad zichtbaar blijven. Met <strong>Teken over een lijn</strong> blijft de hele afbeelding als hulp zichtbaar en teken je over een gewenste lijn. Met <strong>Bewaarde lijn wissen</strong> verwijder je alleen een stukje uit de groene selectie.</p></div></div>
+      <div class="help-step"><span>4</span><div><h3>Stel het werkblad in</h3><p>Kies getallen of letters. Bij letters zijn maximaal 26 punten mogelijk. Met <strong>Afbeelding zichtbaar</strong> kun je eventueel een heel lichte achtergrond laten staan. Bij een gesloten vorm staat de lijn tussen het laatste punt en punt 1 er al.</p></div></div>
+      <div class="help-step"><span>5</span><div><h3>Controleer en download</h3><p>De werkbladpreview toont wat in de PNG of PDF komt. Na een download blijft je werk gewoon staan, zodat je nog iets kunt aanpassen en opnieuw kunt downloaden.</p></div></div>
+      <p class="help-note"><strong>Tip:</strong> zet <em>Verbindingslijn tonen</em> alleen even aan om de oplossing te controleren. Zet ze weer uit voor het werkblad van de leerling.</p>
     </div>
+  </dialog>
 
-    <div id="center-panel"> <div id="right-panel"> <canvas id="mainCanvas" width="512" height="768"></canvas>
+  <main>
+    <aside class="panel controls" aria-label="Instellingen">
+      <section><h2>1. Afbeelding</h2><input id="imageInput" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp"><label for="imageInput" class="upload-button">Kies een afbeelding</label><p id="status">Gebruik bij voorkeur een duidelijke kleurplaat.</p></section>
+
+      <section><h2>2. Verbindingslijn</h2>
+        <label>Aantal punten <output id="pointCountValue">30</output></label><input id="pointCount" type="range" min="8" max="100" value="30">
+        <label class="toggle"><input id="closedPath" type="checkbox" checked> Gesloten vorm</label>
+        <button id="simplifyButton" type="button">Verdeel punten opnieuw</button>
+        <p class="help">Sleep een punt. Klik en sleep op een blauwe lijn om meteen een nieuw punt te plaatsen.</p>
+      </section>
+
+      <section><h2>3. Lijnen behouden</h2>
+        <button id="autoKeepDetails" type="button" class="prominent-action">Binnenlijnen opnieuw zoeken</button>
+        <p class="help">Binnenlijnen worden al automatisch bewaard. De groene aanduiding toont wat zichtbaar blijft, bijvoorbeeld een gezicht, mandje of figuurtje.</p>
+        <div class="mode-buttons">
+          <button type="button" data-mode="points" class="active">Punten verplaatsen</button>
+          <button type="button" data-mode="remove">Punt verwijderen</button>
+          <button type="button" data-mode="keep">Teken over een lijn</button>
+          <button type="button" data-mode="erase">Bewaarde lijn wissen</button>
         </div>
-        <textarea id="outputJson" readonly placeholder="Coördinaten van de punten"></textarea>
-    </div>
+        <label>Penseeldikte <output id="brushSizeValue">22</output></label><input id="brushSize" type="range" min="6" max="60" value="22">
+        <button id="clearDetails" type="button">Alle behouden lijnen wissen</button>
+        <p class="help">Bij ‘Teken over een lijn’ blijft je hele afbeelding goed zichtbaar. Ga over de gewenste lijnen heen; alleen de groen aangeduide lijnen komen op het werkblad.</p>
+      </section>
 
-    <div id="right-panel-buttons">
-      <div class="control-group">
-            <button id="downloadEditedImageBtn">Download Afbeelding (PNG)</button>
-            <button id="showWorksheetBtn">Download Werkblad (PDF)</button>
-        </div>
-    </div>
-  </div>
+      <section><h2>4. Werkblad</h2>
+        <label for="labelType">Labels</label><select id="labelType"><option value="numbers">Getallen</option><option value="lower">Kleine letters (max. 26)</option><option value="upper">Hoofdletters (max. 26)</option></select>
+        <label for="titleInput">Titel</label><input id="titleInput" type="text" value="Punttekening">
+        <label>Afbeelding zichtbaar <output id="imageOpacityValue">0%</output></label><input id="imageOpacity" type="range" min="0" max="100" value="0" step="5">
+        <label class="toggle"><input id="showSolution" type="checkbox"> Verbindingslijn tonen</label>
+      </section>
+    </aside>
 
+    <section class="panel editor-panel" aria-label="Bewerken">
+      <div class="panel-heading"><div><strong>Omtrek en details</strong><small id="editorModeLabel">Punten bewerken</small></div><span>Automatisch bewaard tijdens deze sessie</span></div>
+      <div class="canvas-wrap"><canvas id="editorCanvas" width="720" height="720" aria-label="Omtrek van de afbeelding bewerken"></canvas></div>
+    </section>
+
+    <section class="panel preview-panel" aria-label="Werkbladvoorbeeld">
+      <div class="panel-heading"><div><strong>Werkbladvoorbeeld</strong><small>Wat er in de PDF komt</small></div></div>
+      <canvas id="worksheetCanvas" width="794" height="1123"></canvas>
+      <div class="actions"><button id="downloadPng" disabled>Download PNG</button><button id="downloadPdf" class="primary" disabled>Download PDF</button></div>
+    </section>
+  </main>
   <script src="punttekening.js"></script>
 </body>
 </html>
