@@ -23,7 +23,8 @@ const rounds={
  mixed:[[1,1,2],[1,3,4],[2,1,2],[1,2,3],[2,3,4],[1,4,5],[2,2,3],[1,5,6],[2,1,4],[1,3,5],[2,5,6],[1,7,8]]
 };
 function $(id){return document.getElementById(id)}function img(src){const i=new Image;i.onload=()=>{if(!menu||menu.hidden)show()};i.src=src;return i}
-function menuButtons(){return modes.map(m=>`<button data-mode="${m.id}"><b>${m.icon} ${m.name}</b><span>${m.desc}</span></button>`).join('')}
+const modeTags={build:'BOUWEN',whole:'PUZZELEN',add:'SAMENVOEGEN',equal:'ONTDEKKEN',compare:'VERGELIJKEN',cup:'METEN',line:'PLAATSEN',mixed:'UITDAGING'};
+function menuButtons(){return modes.map(m=>`<button class="mode-card mode-${m.id}" data-mode="${m.id}"><span class="mode-art" aria-hidden="true"><i></i><i></i><i></i><strong>${m.icon}</strong></span><span class="mode-copy"><em>${modeTags[m.id]}</em><b>${m.name}</b><span>${m.desc}</span></span><span class="mode-start">Spelen <i aria-hidden="true">→</i></span></button>`).join('')}
 $('modeGrid').innerHTML=menuButtons();$('quick').innerHTML=modes.map(m=>`<button data-mode="${m.id}">${m.icon} ${m.name}</button>`).join('');
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>start(b.dataset.mode));$('studioMenu').onclick=()=>menu.hidden=false;$('other').onclick=()=>{done.hidden=true;menu.hidden=false};$('again').onclick=()=>start(mode);
 function shuffled(list){const copy=list.map(x=>[...x]);for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}
