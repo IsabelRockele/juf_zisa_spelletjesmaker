@@ -1409,7 +1409,12 @@ window.SpellingZijbalk = (function() {
     syncLegacyCatKnop();
     
     window.addEventListener("spelling:woorden-gewijzigd", () => {
-      updateWoordenkiezerKnop();
+      // De gewone werkbladzijbalk mag alleen woorden opruimen wanneer de
+      // werkbladmaker werkelijk zichtbaar is. In weekdictee-modus beheert het
+      // aparte weekdictee-paneel zijn eigen categorieën en woordenlijst.
+      if (document.body.classList.contains("modus-actief-werkblad")) {
+        updateWoordenkiezerKnop();
+      }
     });
   }
   

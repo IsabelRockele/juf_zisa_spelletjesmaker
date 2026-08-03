@@ -199,8 +199,8 @@ window.SpellingModules.weekdictee = {
     const zinStijl      = opties.weekdictee?.zinStijl || "kleur";
     const reflectieAan  = opties.weekdictee?.reflectieAan !== false;
     const reflectieText = opties.weekdictee?.reflectieText || "Wat vond ik van de dagelijkse spelling deze week?";
-    const titel         = opties.weekdictee?.titel || "Dagelijkse kost spelling";
-    const vrijdagHerhaling = !!opties.weekdictee?.vrijdagHerhaling;
+    const titel         = opties.weekdictee?.titel || (opties.graad === 2 ? "Mijn weekdictee — graad 2" : "Dagelijkse kost spelling");
+    const vrijdagHerhaling = opties.weekdictee?.vrijdagHerhaling !== false;
 
     // Gekozen woorden uit de woordenkiezer
     const gekozenWoorden = window._weekdictee_gekozenWoorden || [];
@@ -215,7 +215,7 @@ window.SpellingModules.weekdictee = {
     }
 
     // Dagen verdelen over pagina's: 2 dagen per pagina
-    const dagenPerPagina = 2;
+    const dagenPerPagina = aantalZinnen >= 2 ? 1 : 2;
     const paginaList = [];
     for (let i = 0; i < actieveDagen.length; i += dagenPerPagina) {
       paginaList.push(actieveDagen.slice(i, i + dagenPerPagina));
@@ -226,6 +226,38 @@ window.SpellingModules.weekdictee = {
     // exact dezelfde zinnen. Als een zin al gebruikt is, valt _maakZin
     // terug op een auto-sjabloon zodat de leerling iets nieuws ziet.
     const gebruikteZinnen = new Set();
+
+    // Leg de volledige week vooraf vast. Zo kan vrijdag gegarandeerd
+    // herhalen wat maandag tot donderdag werkelijk aan bod kwam, of juist
+    // alleen nog ongebruikte woorden nemen wanneer de leerkracht dat kiest.
+    const aantalPerDag = aantalWoorden + aantalZinnen;
+    const weekSelecties = {};
+    const geoefend = [];
+    const gebruikteSleutels = new Set();
+    const sleutel = w => `${w?.categorie || ""}|${w?.tekst || String(w || "")}`;
+
+    actieveDagen.forEach((dag, dagIndex) => {
+      let selectie = [];
+      if (dag.id === "vr" && vrijdagHerhaling) {
+        const uniekeHerhaling = [...new Map(geoefend.map(w => [sleutel(w), w])).values()];
+        selectie = this._kiesWoorden(uniekeHerhaling, aantalPerDag);
+      } else {
+        const nogNietGebruikt = gekozenWoorden.filter(w => !gebruikteSleutels.has(sleutel(w)));
+        selectie = this._kiesWoorden(nogNietGebruikt, aantalPerDag);
+        if (selectie.length < aantalPerDag && dag.id !== "vr") {
+          const alGekozen = new Set(selectie.map(sleutel));
+          const aanvulling = gekozenWoorden.filter(w => !alGekozen.has(sleutel(w)));
+          selectie.push(...this._kiesWoorden(aanvulling, aantalPerDag - selectie.length));
+        }
+      }
+      weekSelecties[dag.id] = selectie;
+      if (dag.id !== "vr") {
+        selectie.forEach(w => {
+          geoefend.push(w);
+          gebruikteSleutels.add(sleutel(w));
+        });
+      }
+    });
 
     let html = "";
     paginaList.forEach((paginaDagen, paginaIdx) => {
@@ -249,12 +281,7 @@ window.SpellingModules.weekdictee = {
       }
 
       paginaDagen.forEach(dag => {
-        // Voor vrijdag-als-herhaling: gebruik de "moeilijkste" woorden uit ma-do
-        // Eenvoudige heuristiek: woorden die op meerdere dagen voorkomen, of
-        // die uit de pool zijn maar nog niet gekozen op andere dagen.
-        // Voor nu: gewoon dezelfde pool gebruiken; vrijdagHerhaling toggle
-        // gerespecteerd via aparte tekst boven (toekomst: smart re-selection).
-        html += this._renderDagBlok(dag, opties, aantalWoorden, aantalZinnen, zinStijl, gekozenWoorden, metAntwoorden, gebruikteZinnen);
+        html += this._renderDagBlok(dag, opties, aantalWoorden, aantalZinnen, zinStijl, gekozenWoorden, metAntwoorden, gebruikteZinnen, weekSelecties[dag.id]);
       });
 
       if (isLaatstePagina && reflectieAan) {
@@ -276,12 +303,14 @@ window.SpellingModules.weekdictee = {
     return html;
   },
 
-  _renderDagBlok: function(dag, opties, aantalWoorden, aantalZinnen, zinStijl, gekozenWoorden, metAntwoorden, gebruikteZinnen) {
+  _renderDagBlok: function(dag, opties, aantalWoorden, aantalZinnen, zinStijl, gekozenWoorden, metAntwoorden, gebruikteZinnen, voorafGekozen) {
     const pool = gekozenWoorden || [];
     const dagIdx = this.dagen.findIndex(d => d.id === dag.id);
     const startIdx = dagIdx * (aantalWoorden + aantalZinnen);
 
-    const sel = this._kiesWoordenVoorDag(pool, aantalWoorden + aantalZinnen, startIdx);
+    const sel = Array.isArray(voorafGekozen)
+      ? voorafGekozen
+      : this._kiesWoordenVoorDag(pool, aantalWoorden + aantalZinnen, startIdx);
     const woordenVoorDag = sel.slice(0, aantalWoorden);
     const woordenVoorZin = sel.slice(aantalWoorden, aantalWoorden + aantalZinnen);
 
@@ -424,9 +453,39 @@ window.SpellingModules.weekdictee = {
 
     const groep = this._groepVoor(w);
 
+    // Bij werkwoorden hoort de persoonsvorm altijd bij een onderwerp.
+    // Gebruik verschillende onderwerpen, maar kies ze deterministisch zodat
+    // dezelfde preview en PDF dezelfde vorm blijven tonen.
+    if (groep && groep.startsWith("werkwoorden-")) {
+      const origineel = this._origineelWoord(w) || w;
+      const onderwerpen = ["ik", "jij", "hij", "wij", "jullie", "zij"];
+      const som = String(w.tekst || "").split("").reduce((t, c) => t + c.charCodeAt(0), 0);
+      const onderwerp = onderwerpen[som % onderwerpen.length];
+      const meervoud = onderwerp === "wij" || onderwerp === "jullie" || onderwerp === "zij";
+
+      if (groep === "werkwoorden-ott" && origineel.ott?.[onderwerp]) {
+        return `${onderwerp} ${origineel.ott[onderwerp]}`;
+      }
+      if ((groep === "werkwoorden-ovt-zwak" || groep === "werkwoorden-ovt-sterk") && origineel.ovt?.[onderwerp]) {
+        return `${onderwerp} ${origineel.ovt[onderwerp]}`;
+      }
+      if (groep === "werkwoorden-vtt" && origineel.deelwoord) {
+        const gebruiktZijn = (origineel.hulpww || [])[0] === "zijn";
+        const hulp = gebruiktZijn
+          ? (meervoud ? "zijn" : onderwerp === "ik" ? "ben" : onderwerp === "jij" ? "bent" : "is")
+          : (meervoud ? "hebben" : onderwerp === "ik" ? "heb" : onderwerp === "jij" ? "hebt" : "heeft");
+        return `${onderwerp} ${hulp} ${origineel.deelwoord}`;
+      }
+      if (groep === "werkwoorden-vvt" && origineel.deelwoord) {
+        const gebruiktZijn = (origineel.hulpww_ovt || [])[0] === "was";
+        const hulp = gebruiktZijn ? (meervoud ? "waren" : "was") : (meervoud ? "hadden" : "had");
+        return `${onderwerp} ${hulp} ${origineel.deelwoord}`;
+      }
+    }
+
     // Voor stukjeswoord-categorieën (verdubbel-verenkel) en meervouden:
     // toon de meervoud-vorm als die er is.
-    if (groep === "verdubbel-verenkel" || groep === "meervouden") {
+    if (groep === "verdubbel-verenkel" || groep === "stukjeswoorden" || groep === "meervouden") {
       const mv = w.meervoud || this._origineelVeld(w, "meervoud");
       if (mv) return mv;
     }
@@ -444,14 +503,18 @@ window.SpellingModules.weekdictee = {
      Nodig omdat de woordenkiezer alleen tekst+lidwoord+categorie+leerjaar
      overneemt; meervoud/verklein/ik staan alleen in de bibliotheek-bron. */
   _origineelVeld: function(w, veldnaam) {
+    const origineel = this._origineelWoord(w);
+    return origineel ? origineel[veldnaam] : null;
+  },
+
+  _origineelWoord: function(w) {
     const wb = window.SpellingWoordenbibliotheek;
     if (!wb || !w.categorie) return null;
     const data = wb[`graad${w.leerjaar || 1}`];
     if (!data) return null;
     const cat = data[w.categorie];
     if (!cat || !Array.isArray(cat.woorden)) return null;
-    const origineel = cat.woorden.find(o => o.tekst === w.tekst);
-    return origineel ? origineel[veldnaam] : null;
+    return cat.woorden.find(o => o.tekst === w.tekst) || null;
   },
 
   /* Helper: zoek de groep op van de categorie waar dit woord onder valt. */
@@ -488,6 +551,14 @@ window.SpellingModules.weekdictee = {
     if (!woordObj) return "";
     const vermijd = (vermijdWoorden || []).map(w => String(w).toLowerCase());
     const dicteeVorm = this._dicteeVorm(woordObj);
+    const groepWoord = this._groepVoor(woordObj);
+
+    if (groepWoord && groepWoord.startsWith("werkwoorden-")) {
+      const begin = dicteeVorm.charAt(0).toUpperCase() + dicteeVorm.slice(1);
+      if (woordObj.tekst === "hebben") return `${begin} een boek.`;
+      if (woordObj.tekst === "zijn") return `${begin} op school.`;
+      return `${begin}.`;
+    }
 
     // ---- Strategie 1: handmatige dictee-zinnen-bib ----
     const bib = window.SpellingDicteeZinnen;
@@ -520,7 +591,7 @@ window.SpellingModules.weekdictee = {
     const grondvorm = (typeof woordObj === "object") ? woordObj.tekst : woord;
     const isMeervoud = lidwoord
       && grondvorm && grondvorm !== woord
-      && (groep === "verdubbel-verenkel" || groep === "meervouden");
+      && (groep === "verdubbel-verenkel" || groep === "stukjeswoorden" || groep === "meervouden");
 
     let sjablonen;
     if (isMeervoud) {
@@ -535,14 +606,27 @@ window.SpellingModules.weekdictee = {
         `Ik heb veel ${woord}.`
       ];
     } else if (!woordObj.lidwoord) {
-      // WW-infinitief
-      sjablonen = [
-        `Ik kan ${woord}.`,
-        `Wij ${woord}.`,
-        `Zij ${woord}.`,
-        `Hier kan ik ${woord}.`,
-        `Daar kan ik ${woord}.`
-      ];
+      const categorie = String(woordObj.categorie || "");
+      const isWerkwoord = categorie.includes("werkwoord") ||
+        categorie.includes("achtervoegsel-elen") || categorie.includes("achtervoegsel-eren") ||
+        /(?:elen|eren|ieren)$/.test(woord);
+      if (isWerkwoord) {
+        sjablonen = [
+          `Ik kan ${woord}.`,
+          `Wij gaan ${woord}.`,
+          `Zij willen ${woord}.`,
+          `Vandaag mag ik ${woord}.`,
+          `Morgen gaan wij ${woord}.`
+        ];
+      } else {
+        sjablonen = [
+          `Dat is ${woord}.`,
+          `Ik vind het ${woord}.`,
+          `Vandaag is het ${woord}.`,
+          `Het lijkt mij ${woord}.`,
+          `Dat klinkt ${woord}.`
+        ];
+      }
     } else {
       sjablonen = [
         `Ik zie ${lidwoord} ${woord}.`,

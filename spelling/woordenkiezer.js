@@ -371,7 +371,9 @@ window.SpellingWoordenkiezer = (function() {
       window.dispatchEvent(new Event("spelling:woorden-gewijzigd"));
       // In de stap-voor-staproute blijft de preview leeg tot de leerkracht
       // in stap 3 zelf een oefening kiest. Andere routes behouden live preview.
-      if (!document.body.classList.contains("modus-actief-werkblad") && window.SpellingPreview) {
+      if (!document.body.classList.contains("modus-actief-werkblad") &&
+          !document.body.classList.contains("modus-actief-weekdictee") &&
+          window.SpellingPreview) {
         window.SpellingPreview.ververs();
       }
     });

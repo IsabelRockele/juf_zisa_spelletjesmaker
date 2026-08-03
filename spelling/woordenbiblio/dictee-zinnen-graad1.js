@@ -774,15 +774,29 @@ window.SpellingDicteeZinnen.zoekVoor = function(grondvorm, groep, graad) {
   const bib = window.SpellingDicteeZinnen["graad" + graad];
   if (!bib) return null;
 
-  // Probeer eerst de exacte (groep, grondvorm)-key
-  const direct = bib[groep + "|" + grondvorm];
-  if (direct && typeof direct === "string") return direct;
+  const zoekIn = function(bibliotheek) {
+    if (!bibliotheek) return null;
+    const direct = bibliotheek[groep + "|" + grondvorm];
+    if (direct && typeof direct === "string") return direct;
 
-  // Probeer synoniem-groep
-  const syn = window.SpellingDicteeZinnen._synoniem[groep];
-  if (syn) {
-    const indirect = bib[syn + "|" + grondvorm];
-    if (indirect && typeof indirect === "string") return indirect;
+    const syn = window.SpellingDicteeZinnen._synoniem[groep];
+    if (syn) {
+      const indirect = bibliotheek[syn + "|" + grondvorm];
+      if (indirect && typeof indirect === "string") return indirect;
+    }
+    return null;
+  };
+
+  // Probeer eerst de exacte (groep, grondvorm)-key
+  const eigenZin = zoekIn(bib);
+  if (eigenZin) return eigenZin;
+
+  // Veel basiswoorden keren in graad 2 bewust terug. Gebruik voor die
+  // woorden de reeds nagekeken zin uit graad 1 in plaats van een leeg
+  // algemeen sjabloon. Een eigen graad-2-zin blijft altijd voorrang krijgen.
+  if (graad > 1) {
+    const herhalingsZin = zoekIn(window.SpellingDicteeZinnen.graad1);
+    if (herhalingsZin) return herhalingsZin;
   }
   return null;
 };

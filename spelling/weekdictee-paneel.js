@@ -27,16 +27,20 @@ window.SpellingWeekdicteePaneel = (function() {
   const LS_WD_LIJNHOOGTE = "spelling-wd-lijnhoogte-v1";
   const LS_WD_LIJNTYPE = "spelling-wd-lijntype-v1";
   const LS_WD_MET_ZINNEN = "spelling-wd-met-zinnen-v1";
+  const LS_WD_AANTAL_ZINNEN = "spelling-wd-aantal-zinnen-v1";
+  const LS_WD_VRIJDAG = "spelling-wd-vrijdag-v1";
 
   /* ---------- State ---------- */
   let actieveGraad = 1;
   let aangevinkteCategorieen = {};   // { 1: Set<string>, 2: Set<string>, ... }
   let lijnhoogte = "klein";          // klein | middel — bij weekdictee is klein de standaard
   let lijntype = "vier";             // vier | dubbel | enkel
-  let metZinnen = true;              // 1 zin per dag onderaan ja/nee
+  let zinnenPerGraad = { 1: 1, 2: 1 };
+  let vrijdagHerhaling = true;
   let bewerkAan = false;             // bewerk-modus aan (contenteditable)
   let wijzigingen = {};              // { 'wd-w-ma-0': 'aangepaste tekst', ... }
   let geinitialiseerd = false;
+  let actieveFase = 1;
 
   /* De preview toont altijd het DICTEERBLAD (met woorden + zinnen).
      Dat is wat de juf nodig heeft om aan te passen voor ze uitdicteert.
@@ -72,7 +76,22 @@ window.SpellingWeekdicteePaneel = (function() {
 
     try {
       const mz = localStorage.getItem(LS_WD_MET_ZINNEN);
-      if (mz === "ja" || mz === "nee") metZinnen = (mz === "ja");
+      if (mz === "ja" || mz === "nee") {
+        const oudAantal = mz === "ja" ? 1 : 0;
+        zinnenPerGraad = { 1: oudAantal, 2: oudAantal };
+      }
+    } catch (e) { /* default */ }
+
+    try {
+      const opgeslagen = JSON.parse(localStorage.getItem(LS_WD_AANTAL_ZINNEN) || "null");
+      if (opgeslagen && typeof opgeslagen === "object") {
+        zinnenPerGraad[1] = Math.max(0, Math.min(1, Number(opgeslagen[1]) || 0));
+        zinnenPerGraad[2] = Math.max(0, Math.min(3, Number(opgeslagen[2]) || 0));
+      }
+    } catch (e) { /* default */ }
+
+    try {
+      vrijdagHerhaling = localStorage.getItem(LS_WD_VRIJDAG) !== "nieuw";
     } catch (e) { /* default */ }
   }
 
@@ -86,7 +105,9 @@ window.SpellingWeekdicteePaneel = (function() {
       localStorage.setItem(LS_CATEGORIEEN, JSON.stringify(catObj));
       localStorage.setItem(LS_WD_LIJNHOOGTE, lijnhoogte);
       localStorage.setItem(LS_WD_LIJNTYPE, lijntype);
-      localStorage.setItem(LS_WD_MET_ZINNEN, metZinnen ? "ja" : "nee");
+      localStorage.setItem(LS_WD_MET_ZINNEN, getAantalZinnen() > 0 ? "ja" : "nee");
+      localStorage.setItem(LS_WD_AANTAL_ZINNEN, JSON.stringify(zinnenPerGraad));
+      localStorage.setItem(LS_WD_VRIJDAG, vrijdagHerhaling ? "herhalen" : "nieuw");
     } catch (e) { /* private mode */ }
   }
 
@@ -95,6 +116,54 @@ window.SpellingWeekdicteePaneel = (function() {
       aangevinkteCategorieen[actieveGraad] = new Set();
     }
     return aangevinkteCategorieen[actieveGraad];
+  }
+
+  function getAantalZinnen() {
+    const max = actieveGraad === 2 ? 3 : 1;
+    return Math.max(0, Math.min(max, Number(zinnenPerGraad[actieveGraad]) || 0));
+  }
+
+  function magNaarFase(fase) {
+    if (fase <= 1) return true;
+    if (getAangevinkteCats().size === 0) return false;
+    if (fase === 2) return true;
+    return (window._weekdictee_gekozenWoorden || []).length > 0;
+  }
+
+  function gaNaarFase(fase) {
+    const doel = Math.max(1, Math.min(4, Number(fase) || 1));
+    if (!magNaarFase(doel)) return;
+    actieveFase = doel;
+    renderFase();
+    document.querySelector("#modus-weekdictee")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function renderFase() {
+    if (actieveFase > 1 && getAangevinkteCats().size === 0) actieveFase = 1;
+    if (actieveFase > 2 && (window._weekdictee_gekozenWoorden || []).length === 0) actieveFase = 2;
+
+    document.querySelectorAll("#modus-weekdictee [data-wd-fase]").forEach(el => {
+      el.classList.toggle("wd-fase-actief", Number(el.dataset.wdFase) === actieveFase);
+    });
+    document.querySelectorAll("#modus-weekdictee [data-wd-ga-naar]").forEach(btn => {
+      const fase = Number(btn.dataset.wdGaNaar);
+      btn.disabled = !magNaarFase(fase);
+      btn.classList.toggle("actief", fase === actieveFase);
+      btn.classList.toggle("klaar", fase < actieveFase);
+    });
+
+    const terug = document.querySelector("#wd-fase-terug");
+    const verder = document.querySelector("#wd-fase-verder");
+    if (terug) terug.hidden = actieveFase === 1;
+    if (verder) {
+      verder.hidden = actieveFase === 4;
+      verder.disabled = !magNaarFase(actieveFase + 1);
+      verder.textContent = ({
+        1: "Verder naar woorden →",
+        2: "Verder naar instellingen →",
+        3: "Bekijk het resultaat →"
+      })[actieveFase] || "Verder →";
+    }
   }
 
   /* ---------- Render: graad-tabs (paneel-eigen) ---------- */
@@ -158,8 +227,16 @@ window.SpellingWeekdicteePaneel = (function() {
       
       for (const [groepId, cats] of Object.entries(groepen)) {
         const groepLabel = wb.groepLabels[groepId] || groepId;
+        const groepAantal = cats.filter(cat => aangevinkt.has(cat.id)).length;
+        const heleGroep = groepAantal === cats.length && cats.length > 0;
         html += `<div class="wd-groep">
-          <div class="wd-groep-titel">${groepLabel}</div>
+          <div class="wd-groep-titel">
+            <span>${groepLabel}</span>
+            <label class="wd-groep-alles ${heleGroep ? 'aan' : ''}">
+              <input type="checkbox" class="wd-groep-checkbox" data-groep="${groepId}" ${heleGroep ? 'checked' : ''}>
+              <span>Hele groep</span><small>${groepAantal}/${cats.length}</small>
+            </label>
+          </div>
           <div class="wd-cat-rij">`;
         for (const cat of cats) {
           const checked = aangevinkt.has(cat.id);
@@ -213,6 +290,7 @@ window.SpellingWeekdicteePaneel = (function() {
     document.querySelectorAll(".wd-paneel-actie").forEach(b => {
       b.disabled = aantalActief === 0;
     });
+    renderFase();
   }
 
   /* ---------- Render lijntype-knoppen status ---------- */
@@ -234,7 +312,7 @@ window.SpellingWeekdicteePaneel = (function() {
         preview.innerHTML = `
           <div class="preview-leeg">
             <h3>Nog geen weekdictee gegenereerd</h3>
-            <p>Kies eerst woorden en klik dan op <strong>Vernieuw voorbeeld</strong>.</p>
+            <p>Kies eerst categorieën en woorden. Daarna verschijnt je weekdictee hier automatisch.</p>
           </div>`;
       }
       return;
@@ -259,7 +337,8 @@ window.SpellingWeekdicteePaneel = (function() {
       weekdictee: {
         lijnhoogte: lijnhoogte,
         lijntype: lijntype === "vier" ? "type3" : (lijntype === "dubbel" ? "type2" : "type1"),
-        aantalZinnen: metZinnen ? 1 : 0
+        aantalZinnen: getAantalZinnen(),
+        vrijdagHerhaling
       }
     };
 
@@ -430,7 +509,8 @@ window.SpellingWeekdicteePaneel = (function() {
       weekdictee: {
         lijnhoogte: lijnhoogte,
         lijntype: lijntype === "vier" ? "type3" : (lijntype === "dubbel" ? "type2" : "type1"),
-        aantalZinnen: metZinnen ? 1 : 0
+        aantalZinnen: getAantalZinnen(),
+        vrijdagHerhaling
       }
     };
 
@@ -546,15 +626,36 @@ window.SpellingWeekdicteePaneel = (function() {
       tab.addEventListener("click", () => {
         if (tab.disabled) return;
         actieveGraad = parseInt(tab.dataset.graad, 10);
+        actieveFase = 1;
+        wijzigingen = {};
         bewaarState();
         renderGraadTabs();
         renderCategorieKeuze();
+        updateToggleStanden();
         updateWoordenkiezerKnop();
+        vernieuwPreview();
       });
     });
 
     // Categorie-vinkjes (event-delegatie)
     document.querySelector("#wd-paneel-categorieen")?.addEventListener("change", (e) => {
+      if (e.target.matches(".wd-groep-checkbox")) {
+        const groepId = e.target.dataset.groep;
+        const set = getAangevinkteCats();
+        const data = window.SpellingWoordenbibliotheek?.categorieenPerHoofdgroep(actieveGraad) || {};
+        for (const groepen of Object.values(data)) {
+          const cats = groepen[groepId] || [];
+          cats.forEach(cat => e.target.checked ? set.add(cat.id) : set.delete(cat.id));
+        }
+        bewaarState();
+        window._zb_aangevinkteCategorieen = set;
+        window.SpellingWoordenkiezer?.syncActieveWoorden?.();
+        renderCategorieKeuze();
+        updateWoordenkiezerKnop();
+        wijzigingen = {};
+        vernieuwPreview();
+        return;
+      }
       if (e.target.matches(".wd-cat-checkbox")) {
         const catId = e.target.dataset.cat;
         const set = getAangevinkteCats();
@@ -572,6 +673,8 @@ window.SpellingWeekdicteePaneel = (function() {
         renderCategorieKeuze();
         // Ook de UI-state bijwerken (knoppen, teller)
         updateWoordenkiezerKnop();
+        wijzigingen = {};
+        vernieuwPreview();
       }
     });
 
@@ -583,12 +686,19 @@ window.SpellingWeekdicteePaneel = (function() {
       }
     });
 
+    document.querySelectorAll("#modus-weekdictee [data-wd-ga-naar]").forEach(btn => {
+      btn.addEventListener("click", () => gaNaarFase(btn.dataset.wdGaNaar));
+    });
+    document.querySelector("#wd-fase-terug")?.addEventListener("click", () => gaNaarFase(actieveFase - 1));
+    document.querySelector("#wd-fase-verder")?.addEventListener("click", () => gaNaarFase(actieveFase + 1));
+
     // Lijntype-knoppen
     document.querySelectorAll("#wd-paneel-lijntype .lijn-knop").forEach(btn => {
       btn.addEventListener("click", () => {
         lijntype = btn.dataset.lijn;
         bewaarState();
         updateLijntypeKnoppen();
+        vernieuwPreview();
       });
     });
 
@@ -598,6 +708,7 @@ window.SpellingWeekdicteePaneel = (function() {
         lijnhoogte = btn.dataset.hoogte;
         bewaarState();
         updateLijntypeKnoppen();
+        vernieuwPreview();
       });
     });
 
@@ -611,11 +722,20 @@ window.SpellingWeekdicteePaneel = (function() {
     document.querySelector("#wd-paneel-download")?.addEventListener("click", () => downloadPDF(false));
     document.querySelector("#wd-paneel-download-opl")?.addEventListener("click", () => downloadPDF(true));
 
-    // "Met zinnen" toggle
-    document.querySelector("#wd-paneel-met-zinnen")?.addEventListener("change", (e) => {
-      metZinnen = e.target.checked;
+    // Aantal dicteezinnen per dag. Graad 1 blijft beperkt tot 0 of 1;
+    // graad 2 biedt ook 2 en 3 zinnen aan.
+    document.querySelector("#wd-paneel-aantal-zinnen")?.addEventListener("change", (e) => {
+      const max = actieveGraad === 2 ? 3 : 1;
+      zinnenPerGraad[actieveGraad] = Math.max(0, Math.min(max, Number(e.target.value) || 0));
       bewaarState();
       // Bij wijziging: wis inline-wijzigingen want layout verandert.
+      wijzigingen = {};
+      vernieuwPreview();
+    });
+
+    document.querySelector("#wd-paneel-vrijdag")?.addEventListener("change", (e) => {
+      vrijdagHerhaling = e.target.value !== "nieuw";
+      bewaarState();
       wijzigingen = {};
       vernieuwPreview();
     });
@@ -657,7 +777,18 @@ window.SpellingWeekdicteePaneel = (function() {
     // Reageer als de woordenkiezer wijzigingen heeft doorgevoerd —
     // (in werkblad-modus aangevinkt/uitgevinkt, of via ✕ in deze preview)
     window.addEventListener("spelling:woorden-gewijzigd", () => {
-      updateWoordenkiezerKnop();
+      // Ook de verborgen werkbladzijbalk luistert naar dit gedeelde event.
+      // Laat die eerst afronden en bevestig daarna opnieuw dat het zichtbare
+      // weekdictee zijn eigen categorieën en woorden blijft gebruiken.
+      setTimeout(() => {
+        window._zb_aangevinkteCategorieen = getAangevinkteCats();
+        if (window.SpellingWoordenkiezer?.syncActieveWoorden) {
+          window.SpellingWoordenkiezer.syncActieveWoorden();
+        }
+        updateWoordenkiezerKnop();
+        wijzigingen = {};
+        vernieuwPreview();
+      }, 0);
     });
 
     // Reageer als paneel zichtbaar wordt — herrender state (graad/categorieën
@@ -669,13 +800,22 @@ window.SpellingWeekdicteePaneel = (function() {
       updateLijntypeKnoppen();
       updateToggleStanden();
       updateWoordenkiezerKnop();
+      vernieuwPreview();
     });
   }
 
   /* ---------- Update de toggle-checkboxes op basis van state ---------- */
   function updateToggleStanden() {
-    const mz = document.querySelector("#wd-paneel-met-zinnen");
-    if (mz) mz.checked = metZinnen;
+    const keuze = document.querySelector("#wd-paneel-aantal-zinnen");
+    if (keuze) {
+      keuze.querySelectorAll("[data-alleen-graad2]").forEach(optie => {
+        optie.hidden = actieveGraad !== 2;
+        optie.disabled = actieveGraad !== 2;
+      });
+      keuze.value = String(getAantalZinnen());
+    }
+    const vrijdag = document.querySelector("#wd-paneel-vrijdag");
+    if (vrijdag) vrijdag.value = vrijdagHerhaling ? "herhalen" : "nieuw";
     updateBewerkenKnop();
   }
 
