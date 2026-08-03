@@ -2,69 +2,136 @@
 <html lang="nl">
 <head>
     <meta charset="utf-8"/>
-    <title>Doolhof Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Doolhof maken | Zisa</title>
     <link href="doolhof.css" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-    <header>
-        <button id="menuBtn" onclick="window.location.href='index.html'">Keuzemenu</button>
-        <h1>Doolhof Generator</h1>
+    <header class="tool-header">
+        <a class="back-button" href="index.html">← Keuzemenu</a>
+        <div>
+            <p class="eyebrow">Zisa's spelletjesmaker</p>
+            <h1>Doolhof</h1>
+            <p class="subtitle">Maak telkens een nieuw, oplosbaar doolhof.</p>
+        </div>
     </header>
 
-    <div id="main-content">
-        <div id="left-panel">
-            <div id="controls">
-                <fieldset class="control-group">
-                    <legend>1. Kies een Vorm</legend>
-                    <div id="vorm-kiezer">
+    <main id="main-content">
+        <section id="left-panel" class="panel controls-panel" aria-label="Instellingen">
+            <fieldset class="control-group count-first-group">
+                <legend>1. Hoeveel doolhoven?</legend>
+                <label for="mazesPerPage">Doolhoven op één blad</label>
+                <select id="mazesPerPage">
+                    <option value="1">1 groot doolhof</option>
+                    <option value="2">2 doolhoven</option>
+                    <option value="4">4 doolhoven</option>
+                </select>
+                <div id="mazeSlotTabs" class="maze-slot-tabs" aria-label="Kies welk doolhof je instelt"></div>
+            </fieldset>
+            <fieldset class="control-group">
+                <legend>2. Kies de vorm</legend>
+                <div id="vorm-kiezer"></div>
+                <div class="upload-panel">
+                    <input id="shapeUpload" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp"/>
+                    <label class="upload-button" for="shapeUpload">Eigen afbeelding kiezen</label>
+                    <p id="uploadStatus">Gebruik liefst een duidelijk silhouet op een rustige achtergrond.</p>
+                    <div id="customImageControls" class="custom-image-controls hidden">
+                        <label for="imageOpacity">Afbeelding zichtbaar <output id="imageOpacityValue">25%</output></label>
+                        <input id="imageOpacity" type="range" min="0" max="100" value="25" step="5">
+                        <button id="simplifyOutlineButton" type="button" class="outline-button secondary-outline-button">Minder omtrekpunten</button>
+                        <button id="applyOutlineButton" type="button" class="outline-button">Volgende stap: maak het doolhof</button>
+                        <button id="editOutlineButton" type="button" class="outline-button hidden">Omtrek opnieuw aanpassen</button>
+                        <button id="clearCustomImageButton" type="button" class="outline-button clear-outline-button">Wis eigen afbeelding</button>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="control-group">
+                <legend>3. Kies de moeilijkheid</legend>
+                <div id="moeilijkheid-kiezer" class="choice-row">
+                    <label><input type="radio" name="difficulty" value="easy" checked><span>Makkelijk</span></label>
+                    <label><input type="radio" name="difficulty" value="medium"><span>Gemiddeld</span></label>
+                    <label><input type="radio" name="difficulty" value="hard"><span>Moeilijk</span></label>
+                </div>
+            </fieldset>
+
+            <fieldset class="control-group">
+                <legend>4. Kies de lijndikte</legend>
+                <div id="dikte-kiezer">
+                    <input type="range" id="thicknessSlider" min="1" max="10" value="2" step="1">
+                    <span class="thickness-output"><output id="thicknessValue">2</output> px</span>
+                </div>
+            </fieldset>
+
+            <fieldset class="control-group compact-options">
+                <legend>5. Kies het thema</legend>
+                <label class="select-label" for="themeSelect">Thema
+                    <select id="themeSelect">
+                        <option value="none">Geen thema</option>
+                        <option value="schoolbus">Naar de schoolbus</option>
+                        <option value="school">Naar school</option>
+                        <option value="ruimte">Ruimte</option>
+                        <option value="boerderij">Boerderij</option>
+                        <option value="zee">Zee</option>
+                        <option value="sinterklaas">Sinterklaas</option>
+                        <option value="pasen">Pasen</option>
+                        <option value="halloween">Halloween</option>
+                        <option value="carnaval">Carnaval</option>
+                        <option value="lente">Lente</option>
+                        <option value="herfst">Herfst</option>
+                        <option value="winter">Winter</option>
+                        <option value="zomer">Zomer</option>
+                        <option value="kerstmis">Kerstmis</option>
+                        <option value="valentijn">Valentijn</option>
+                    </select>
+                </label>
+            </fieldset>
+
+            <button id="generateButton" class="primary-button">Maak een nieuw doolhof</button>
+            <div class="solution-buttons">
+                <button id="solveMazeBtn" class="secondary-button">Toon de oplossing</button>
+                <button id="hideSolutionBtn" class="secondary-button hidden">Verberg de oplossing</button>
+            </div>
+            <p id="instructieText" aria-live="polite">Kies een vorm en moeilijkheid.</p>
+        </section>
+
+        <section id="center-panel" class="preview-panel" aria-label="Voorbeeld">
+            <div class="panel-title"><span>Voorbeeld</span><small>Elk doolhof is uniek</small></div>
+            <div id="comparisonWorkspace">
+                <div id="sourcePreview" class="source-preview hidden">
+                    <span>1. Verbeter de omtrek</span>
+                    <div class="source-image-wrap"><canvas id="outlineEditor" width="420" height="420" aria-label="Omtrek van de geüploade afbeelding aanpassen"></canvas></div>
+                    <small class="outline-help">Sleep een punt. Klik op een lijn om een punt toe te voegen. Dubbelklik op een punt om het te verwijderen.</small>
+                </div>
+                    <div id="mazePreviewColumn" class="maze-preview-column">
+                    <span id="mazePreviewLabel" class="comparison-label hidden">2. Voorbeeld van het werkblad</span>
+                    <div id="worksheetPreview" class="worksheet-preview">
+                        <div class="worksheet-heading">
+                            <div class="worksheet-fields"><span>Naam<i></i></span><span>Datum<i></i></span></div>
+                            <div class="worksheet-top-rule"></div>
+                            <strong>Doolhof</strong>
+                            <div class="worksheet-accent-rule"></div>
+                            <small id="worksheetInstruction">Vind de weg van de ingang naar de uitgang.</small>
                         </div>
-                </fieldset>
-
-                <fieldset class="control-group">
-                    <legend>2. Kies Moeilijkheid</legend>
-                    <div id="moeilijkheid-kiezer">
-                        <label><input type="radio" name="difficulty" value="easy" checked> Makkelijk</label>
-                        <label><input type="radio" name="difficulty" value="medium"> Middelmatig</label>
-                        <label><input type="radio" name="difficulty" value="hard"> Moeilijk</label>
+                        <div id="worksheetMazeGrid" class="worksheet-maze-grid count-1">
+                            <div id="drawingCanvasContainer" class="worksheet-maze-item">
+                                <canvas id="mazeCanvas" width="500" height="500"></canvas>
+                            </div>
+                        </div>
                     </div>
-                </fieldset>
-                
-                <fieldset class="control-group">
-                    <legend>3. Kies Lijndikte</legend>
-                    <div id="dikte-kiezer">
-                        <input type="range" id="thicknessSlider" min="1" max="10" value="2" step="1">
-                        <output id="thicknessValue">2</output> px
-                    </div>
-                </fieldset>
-
-                <button id="generateButton">Genereer Nieuwe Doolhof</button>
-                
-                <div class="solution-buttons">
-                    <button id="solveMazeBtn">Toon Oplossing</button>
-                    <button id="hideSolutionBtn" class="hidden">Verberg Oplossing</button>
-                </div>
-                
-                <div id="instructieText" style="color: #004080; margin-top: 15px; font-weight: bold; min-height: 60px;">
-                    Kies een vorm en moeilijkheid.
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div id="center-panel">
-            <div id="drawingCanvasContainer">
-                <canvas id="mazeCanvas" width="500" height="500"></canvas>
-            </div>
-        </div>
-
-        <div id="right-panel-buttons">
-            <div class="control-group">
-                <h3>Download</h3>
-                <button id="downloadPngBtn">Download als PNG</button>
-                <button id="downloadPdfBtn">Download als PDF</button>
-            </div>
-        </div>
-    </div>
+        <aside id="right-panel-buttons" class="panel download-panel">
+            <p class="eyebrow">Klaar?</p>
+            <h2>Bewaren</h2>
+            <p>Download het doolhof als afbeelding of als printklaar werkblad.</p>
+            <button id="downloadPngBtn" class="secondary-button">Download PNG</button>
+            <button id="downloadPdfBtn" class="primary-button">Download PDF</button>
+        </aside>
+    </main>
 
     <script src="doolhof.js"></script>
 </body>
