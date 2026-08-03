@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="utf-8"/>
-    <title>Doolhof Generator</title>
+    <title>Slangendoolhof</title>
 
     <!-- Optioneel: niet vertalen door Google -->
     <meta name="google" content="notranslate">
@@ -46,14 +46,18 @@
 </header>
 
 <header>
-    <h1>Doolhof Generator</h1>
+    <div class="page-heading">
+        <span class="eyebrow">Zisa's spelletjesmaker</span>
+        <h1>Slangendoolhof</h1>
+        <p>Verbind elke oefening met het juiste antwoord.</p>
+    </div>
 </header>
 
 <div id="main-content">
     <div id="left-panel">
         <div id="controls">
             <div class="control-group">
-                <label>Type Werkblad:</label>
+                <label>Inhoud van het werkblad</label>
                 <div class="radio-group-horizontal">
                     <label><input type="radio" name="werkbladType" value="rekenen" checked> Rekenen</label>
                     <label><input type="radio" name="werkbladType" value="taal"> Taal</label>
@@ -62,6 +66,14 @@
             <hr>
 
             <div id="reken-controls">
+                <div class="control-group">
+                    <label for="aantalPaden">Aantal paden:</label>
+                    <select id="aantalPaden">
+                        <option value="6" selected>6 paden</option>
+                        <option value="8">8 paden</option>
+                        <option value="10">10 paden (moeilijk)</option>
+                    </select>
+                </div>
                 <div class="control-group">
                     <label>Soort som:</label>
                     <div class="radio-group-horizontal">
@@ -81,7 +93,7 @@
                     <div class="control-group">
                         <label for="niveau">Niveau:</label>
                         <select id="niveau">
-                            <option value="10">Tot 10 (6 opgaven)</option>
+                            <option value="10">Tot 10</option>
                             <option value="20">Tot 20</option>
                             <option value="100">Tot 100</option>
                             <option value="1000">Tot 1000</option>
@@ -126,7 +138,7 @@
             
             <hr>
             
-            <button id="genereerBtn">Nieuw Doolhof</button>
+            <button id="genereerBtn">Maak een nieuw doolhof</button>
             <button id="toggleSolutionBtn">Toon oplossing</button>
         </div>
     </div>

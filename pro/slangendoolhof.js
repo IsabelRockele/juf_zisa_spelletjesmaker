@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Reset alles voor een compleet nieuwe puzzel
         isSolutionVisible = false;
         document.getElementById('toggleSolutionBtn').textContent = 'Toon oplossing';
-        document.getElementById('genereerBtn').textContent = 'Nieuw Doolhof';
+        document.getElementById('genereerBtn').textContent = 'Maak een nieuw doolhof';
 
         const werkbladType = document.querySelector('input[name="werkbladType"]:checked').value;
         currentExercises = (werkbladType === 'rekenen') ? generateMathExercises() : getWordsFromUI();
@@ -65,8 +65,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const endIndex = currentShuffledAnswers.findIndex(ans => ans === exercise.answer);
             
             const numExercises = currentExercises.length;
-            const startY = 100;
-        	const verticalSpacing = numExercises > 1 ? (canvas.height - (startY * 2)) / (numExercises - 1) : 0;
+            const startY = 210;
+            const verticalSpacing = numExercises > 1 ? (canvas.height - startY - 90) / (numExercises - 1) : 0;
             const problemX = 100;
         	const answerX = canvas.width - 100;
 
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const startPoint = { x: pathStartX, y: startY + startIndex * verticalSpacing };
             const endPoint = { x: pathEndX, y: startY + endIndex * verticalSpacing };
 
-            const waypoints = generatePathWaypoints(startPoint, endPoint, allGeneratedWaypoints);
+            const waypoints = generatePathWaypoints(startPoint, endPoint, allGeneratedWaypoints, i, numExercises);
             allGeneratedWaypoints.push(waypoints);
             generatedPaths.push(waypoints);
         });
@@ -93,6 +93,8 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        drawWorksheetHeader();
+
         if (generatedPaths.length === 0) return;
 
         generatedPaths.forEach(waypoints => {
@@ -101,8 +103,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Teken de tekst
         const numExercises = currentExercises.length;
-        const startY = 100;
-        const verticalSpacing = numExercises > 1 ? (canvas.height - (startY * 2)) / (numExercises - 1) : 0;
+        const startY = 210;
+	        const verticalSpacing = numExercises > 1 ? (canvas.height - startY - 90) / (numExercises - 1) : 0;
         const problemX = 100;
         const answerX = canvas.width - 100;
         
@@ -119,6 +121,26 @@ document.addEventListener("DOMContentLoaded", () => {
             const yPos = startY + i * verticalSpacing;
             ctx.fillText(String(answer), answerX, yPos); // Zorg ervoor dat antwoord als string wordt behandeld
         });
+    }
+
+    function drawWorksheetHeader() {
+        ctx.save();
+        ctx.fillStyle = "#253449"; ctx.font = "700 31px Arial"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+        ctx.fillText("Slangendoolhof", 54, 52);
+        ctx.fillStyle = "#66758a"; ctx.font = "15px Arial";
+        ctx.fillText("Volg elk kronkelpad en verbind de oefening met het juiste antwoord.", 54, 82);
+        ctx.strokeStyle = "#aebdca"; ctx.lineWidth = 1.5; ctx.beginPath();
+        ctx.moveTo(508, 52); ctx.lineTo(620, 52); ctx.moveTo(665, 52); ctx.lineTo(746, 52); ctx.stroke();
+        ctx.fillStyle = "#66758a"; ctx.font = "13px Arial"; ctx.fillText("Naam", 508, 34); ctx.fillText("Datum", 665, 34);
+        ctx.fillStyle = "#eaf4fb"; ctx.beginPath(); roundRect(ctx, 48, 122, 150, 42, 12); roundRect(ctx, 602, 122, 150, 42, 12); ctx.fill();
+        ctx.fillStyle = "#3478b8"; ctx.font = "700 13px Arial"; ctx.textAlign = "center";
+        ctx.fillText("OEFENINGEN", 123, 143); ctx.fillText("ANTWOORDEN", 677, 143);
+        ctx.strokeStyle = "#d4e0e9"; ctx.setLineDash([5, 7]); ctx.beginPath(); ctx.moveTo(48, 181); ctx.lineTo(752, 181); ctx.stroke();
+        ctx.restore();
+    }
+
+    function roundRect(context, x, y, width, height, radius) {
+        context.roundRect(x, y, width, height, radius);
     }
     
     // --- Data Generatie Functies ---
@@ -145,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (soort === "plusmin") {
             const type = document.getElementById("typeOpgave").value;
             const niveau = parseInt(document.getElementById("niveau").value);
-            numExercises = (niveau === 10) ? 6 : 10;
+            numExercises = parseInt(document.getElementById('aantalPaden').value, 10);
             while (exercises.length < numExercises && attempts < maxAttempts) {
                 attempts++;
                 let a = getRandomInt(1, niveau);
@@ -159,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 exercises.push({ problem: `${a} ${op} ${b} =`, answer });
             }
         } else {
-            numExercises = 10;
+            numExercises = parseInt(document.getElementById('aantalPaden').value, 10);
             const type = document.getElementById("typeTafeloefening").value;
             let selectedTables = Array.from(document.querySelectorAll('#tafelKeuze input:checked')).filter(cb => cb.id !== 'selecteerAlles').map(cb => parseInt(cb.value));
             if (selectedTables.length === 0) selectedTables = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -189,33 +211,65 @@ document.addEventListener("DOMContentLoaded", () => {
         return exercises;
     }
 
-    function generatePathWaypoints(startPoint, endPoint, allOtherPaths) {
-        let waypoints = [startPoint];
-        waypoints.push({ x: startPoint.x + 20, y: startPoint.y });
-        const numSegments = 3;
-        const jungleLeftX = startPoint.x + 80;
-        const jungleRightX = endPoint.x - 80;
-        const jungleWidth = jungleRightX - jungleLeftX;
-        let lastY = startPoint.y;
-        if (jungleWidth > 0) {
-            const segmentWidth = jungleWidth / (numSegments - 1);
-            for (let i = 0; i < numSegments - 1; i++) {
-                let x, y, attempts = 0;
-                const maxAttempts = 50;
-                const minDistance = 50;
-                do {
-                    x = jungleLeftX + (i * segmentWidth) + (Math.random() * (segmentWidth / 2) - (segmentWidth / 4));
-                    y = lastY + ((Math.random() * 2 - 1) * 120);
-                    y = Math.max(80, Math.min(canvas.height - 80, y));
-                    attempts++;
-                } while (isTooCloseToOtherPaths({x, y}, allOtherPaths, minDistance) && attempts < maxAttempts)
-                waypoints.push({ x, y });
-                lastY = y;
+    function generatePathWaypoints(startPoint, endPoint, allOtherPaths, pathIndex, pathCount) {
+        const pageTop = 202, pageBottom = canvas.height - 72;
+        const width = endPoint.x - startPoint.x;
+        const distributedCenters = [.18, .68, .36, .84, .52, .26, .76, .44, .90, .60];
+        const loopCenter = distributedCenters[pathIndex % distributedCenters.length]
+            + (Math.random() - .5) * .018;
+        const loopBaseY = startPoint.y + (endPoint.y - startPoint.y) * loopCenter;
+        const loopDirection = loopBaseY < 420 ? 1 : (loopBaseY > 710 ? -1 : (pathIndex % 2 ? -1 : 1));
+        const loop = {
+            start: loopCenter - .16, width: .32, direction: loopDirection,
+            horizontalRadius: 66 + Math.random() * 18, verticalRadius: 56 + Math.random() * 18
+        };
+        const phase = pathIndex * 1.45 + Math.random() * .35;
+        const bendAmplitude = 88 + Math.random() * 28;
+        const bendCount = 1.35 + (pathIndex % 3) * .18 + Math.random() * .12;
+        const crossingCenters = [.82, .14, .66, .30, .90, .48, .22, .74, .38, .58];
+        const crossingCenter = crossingCenters[pathIndex % crossingCenters.length]
+            + (Math.random() - .5) * .025;
+        const transitionSteepness = 8 + Math.random() * 1.8;
+        const transitionStart = logisticTransition(0, crossingCenter, transitionSteepness);
+        const transitionEnd = logisticTransition(1, crossingCenter, transitionSteepness);
+        const waypoints = [];
+        for (let sample = 0; sample <= 68; sample++) {
+            const t = sample / 68;
+            const baseX = startPoint.x + width * t;
+            const rawTransition = logisticTransition(t, crossingCenter, transitionSteepness);
+            const routeProgress = (rawTransition - transitionStart) / (transitionEnd - transitionStart);
+            const baseY = startPoint.y + (endPoint.y - startPoint.y) * routeProgress;
+            const routeEnvelope = Math.pow(Math.sin(Math.PI * t), 1.18);
+            const gentleBend = Math.sin(t * Math.PI * 2 * bendCount + phase)
+                * bendAmplitude * routeEnvelope;
+            let x = baseX, yOffset = gentleBend;
+            const loopProgress = (t - loop.start) / loop.width;
+            if (loopProgress >= 0 && loopProgress <= 1) {
+                const angle = loopProgress * Math.PI * 2;
+                x += Math.sin(angle) * loop.horizontalRadius;
+                yOffset += (1 - Math.cos(angle)) * loop.verticalRadius * loop.direction;
             }
+            const y = softenVerticalMovement(baseY, yOffset, pageTop + 8, pageBottom - 8);
+            waypoints.push({ x, y });
         }
-        waypoints.push({ x: endPoint.x - 20, y: endPoint.y });
-        waypoints.push(endPoint);
+        waypoints[0] = startPoint;
+        waypoints[waypoints.length - 1] = endPoint;
         return waypoints;
+    }
+
+
+    function logisticTransition(value, center, steepness) {
+        return 1 / (1 + Math.exp(-steepness * (value - center)));
+    }
+
+
+    function softenVerticalMovement(baseY, offset, minimum, maximum) {
+        if (Math.abs(offset) < .001) return baseY;
+        const direction = Math.sign(offset);
+        const available = direction < 0 ? baseY - minimum : maximum - baseY;
+        if (available <= 0) return baseY;
+        const usable = available * .92;
+        return baseY + direction * usable * Math.tanh(Math.abs(offset) / usable);
     }
 
     // --- Tekenfuncties ---
@@ -223,12 +277,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!waypoints || waypoints.length < 2) return;
         ctx.beginPath();
         ctx.moveTo(waypoints[0].x, waypoints[0].y);
-        for (let i = 1; i < waypoints.length - 1; i++) {
-            const xc = (waypoints[i].x + waypoints[i + 1].x) / 2;
-            const yc = (waypoints[i].y + waypoints[i + 1].y) / 2;
-            ctx.quadraticCurveTo(waypoints[i].x, waypoints[i].y, xc, yc);
+        for (let i = 0; i < waypoints.length - 1; i++) {
+            const p0 = waypoints[Math.max(0, i - 1)];
+            const p1 = waypoints[i], p2 = waypoints[i + 1];
+            const p3 = waypoints[Math.min(waypoints.length - 1, i + 2)];
+            ctx.bezierCurveTo(
+                p1.x + (p2.x - p0.x) / 6, p1.y + (p2.y - p0.y) / 6,
+                p2.x - (p3.x - p1.x) / 6, p2.y - (p3.y - p1.y) / 6,
+                p2.x, p2.y
+            );
         }
-        ctx.quadraticCurveTo(waypoints[waypoints.length - 2].x, waypoints[waypoints.length - 2].y, waypoints[waypoints.length - 1].x, waypoints[waypoints.length - 1].y);
         ctx.strokeStyle = strokeStyle;
         ctx.lineWidth = lineWidth;
         ctx.lineCap = "round";
@@ -236,11 +294,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.stroke();
     }
     function drawPuzzlePath(waypoints) {
-        drawPath(waypoints, "black", 20);
-        drawPath(waypoints, "white", 15);
+        drawPath(waypoints, "#26323c", 16);
+        drawPath(waypoints, "white", 10);
     }
     function drawSolutionPath(waypoints, color) {
-        drawPath(waypoints, color, 15);
+        drawPath(waypoints, color, 9);
     }
     
     // --- UI Interactie & Event Listeners ---
@@ -334,7 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Initiele setup
-    for (let i = 0; i < 5; i++) addWordPairRow();
+    for (let i = 0; i < 6; i++) addWordPairRow();
     toggleWerkbladControls();
     toggleRekenenControls();
 });
