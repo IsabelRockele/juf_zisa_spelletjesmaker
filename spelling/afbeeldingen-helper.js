@@ -18,8 +18,8 @@
     pad: function (woord, graad) {
       if (!woord || !woord.tekst) return null;
       if (!woord.afbeelding) return null;
-      graad = graad || woord.leerjaar || 1;
-      const map = woord.categorie || "stukjes";
+      graad = woord.afbeelding_graad || graad || woord.leerjaar || 1;
+      const map = woord.afbeelding_categorie || woord.categorie || "stukjes";
       return `afbeeldingen/graad${graad}/${map}/${woord.tekst}.png`;
     },
 
@@ -34,7 +34,7 @@
     html: function (woord, opties) {
       opties = opties || {};
       const grootte = opties.grootte || 80;
-      const graad = opties.graad || woord.leerjaar || 1;
+      const graad = woord.afbeelding_graad || opties.graad || woord.leerjaar || 1;
       const klas = opties.klas || "ov-afbeelding";
 
       const emoji = (window.SpellingAfbeeldingen && window.SpellingAfbeeldingen.emojiVoor)

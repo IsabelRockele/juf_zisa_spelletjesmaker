@@ -20,6 +20,7 @@
 window.SpellingBundel = {
 
   items: [],
+  toonOplossingenInPreview: false,
 
   /* === Initialisatie === */
   init: function() {
@@ -36,6 +37,11 @@ window.SpellingBundel = {
     document.querySelector("#download-verdieping")?.addEventListener("click", () => this.download("verdieping", false));
     document.querySelector("#download-uitbreiding")?.addEventListener("click", () => this.download("uitbreiding", false));
     document.querySelector("#download-oplossingen-alles")?.addEventListener("click", () => this.download(null, true));
+    document.querySelector("#preview-oplossingen-toggle")?.addEventListener("click", () => {
+      this.toonOplossingenInPreview = !this.toonOplossingenInPreview;
+      this._renderPreview();
+      this._updateUI();
+    });
 
     this._updateUI();
   },
@@ -117,7 +123,11 @@ window.SpellingBundel = {
         const gevraagd = (oef.id === "ov06")
           ? (sub.aantalZinnen || 0)
           : (sub.aantalWoorden || 0);
-        if (gevraagd > uniekBeschikbaar && window.SpellingDedup) {
+        // OV13 en OV14 bouwen zelf volledige zinnen/teksten. De gekozen
+        // categorie-items bepalen alleen welke regels of tekens geoefend
+        // worden en zijn dus geen woorden die geteld moeten worden.
+        const gebruiktEigenOefeninhoud = oef.id === "ov13" || oef.id === "ov14";
+        if (!gebruiktEigenOefeninhoud && gevraagd > uniekBeschikbaar && window.SpellingDedup) {
           const naam = (module.naam || oef.id)
             + " " + (niveau.charAt(0).toUpperCase() + niveau.slice(1));
           window.SpellingDedup.toonTekortMelding(gevraagd, uniekBeschikbaar, naam);
@@ -129,6 +139,7 @@ window.SpellingBundel = {
           opties: opties,
           seed: seed,
           gekozenWoordenSnapshot: gekozenWoordenSnapshot,
+          gekozenCategorieIdsSnapshot: window.SpellingZijbalk?.getAangevinkteCategorieIds?.() || [],
           niveau: niveau,
           html: ""
         };
@@ -286,6 +297,7 @@ window.SpellingBundel = {
       opties: JSON.parse(JSON.stringify(opties)),
       seed: seed,
       gekozenWoordenSnapshot: gekozenWoordenSnapshot,
+      gekozenCategorieIdsSnapshot: window.SpellingZijbalk?.getAangevinkteCategorieIds?.() || [],
       html: ""
     };
     item.html = this._renderItemHTML(item, false);
@@ -352,14 +364,12 @@ window.SpellingBundel = {
       return;
     }
 
-    // Bouw HTML met CLASS-gebaseerde page-break (zoals oude pdf-engine).
-    // Eerste werkblad: geen class. Volgende werkbladen: class "pagina-break-voor".
+    // De algemene CSS zet elk volgend .werkblad al op een nieuwe pagina.
+    // Voeg hier geen tweede pagina-break-class toe: twee gelijktijdige
+    // sprongen konden door html2pdf als een volledig lege pagina worden
+    // geïnterpreteerd. Interne module-sprongen behouden hun eigen class.
     let bundelHTML = "";
-    alleWerkbladen.forEach((wb, idx) => {
-      if (idx > 0) {
-        // Voeg class toe die html2pdf herkent via "before" config
-        wb.classList.add("pagina-break-voor");
-      }
+    alleWerkbladen.forEach(wb => {
       bundelHTML += wb.outerHTML;
     });
 
@@ -389,7 +399,7 @@ window.SpellingBundel = {
       // OV08 ⭐⭐⭐⭐ uitbreiding idem.
       const isOV07Uitbreiding = (item.categorie === "ov07" && item.niveau === "uitbreiding");
       const isOV08Uitbreiding = (item.categorie === "ov08" && item.niveau === "uitbreiding");
-      const supportsPlus1 = ["ov01", "ov02", "ov03", "ov05", "ov06", "ov07", "ov08", "ov09", "ov10"].includes(item.categorie)
+      const supportsPlus1 = ["ov01", "ov02", "ov03", "ov05", "ov06", "ov07", "ov08", "ov09", "ov10", "ov11", "ov12"].includes(item.categorie)
                             && !isOV07Uitbreiding && !isOV08Uitbreiding;
       
       // Check of het max voor dit niveau al bereikt is. De module kan
@@ -419,7 +429,7 @@ window.SpellingBundel = {
         <div class="bundel-item-wrap" data-item-id="${item.id}">
           <button class="bundel-item-verwijder-knop" data-item-id="${item.id}" title="Verwijder dit werkblad">✕</button>
           ${plusKnop}
-          ${item.html}
+          ${this.toonOplossingenInPreview ? this._renderItemHTML(item, true) : item.html}
         </div>`;
     }
     preview.innerHTML = html;
@@ -570,14 +580,19 @@ window.SpellingBundel = {
     
     // Gebruik snapshot als die bestaat, anders val terug op globale pool
     const origineel = window._weekdictee_gekozenWoorden;
+    const origineleCategorieIds = window._spellingCategorieIdsSnapshot;
     if (item.gekozenWoordenSnapshot && Array.isArray(item.gekozenWoordenSnapshot)) {
       window._weekdictee_gekozenWoorden = item.gekozenWoordenSnapshot;
     }
+    window._spellingCategorieIdsSnapshot = Array.isArray(item.gekozenCategorieIdsSnapshot)
+      ? item.gekozenCategorieIdsSnapshot
+      : null;
     
     const html = module.genereerBlad(item.opties, metAntwoorden);
     
     // Restore
     window._weekdictee_gekozenWoorden = origineel;
+    window._spellingCategorieIdsSnapshot = origineleCategorieIds;
     return html;
   },
 
@@ -587,12 +602,17 @@ window.SpellingBundel = {
     
     const dlAlles = document.querySelector("#download-alles");
     const dlOpl = document.querySelector("#download-oplossingen-alles");
+    const toonOpl = document.querySelector("#preview-oplossingen-toggle");
     const wisKnop = document.querySelector("#bundel-wis");
     
-    [dlAlles, dlOpl, wisKnop].forEach(b => {
+    [dlAlles, dlOpl, toonOpl, wisKnop].forEach(b => {
       if (!b) return;
       b.classList.toggle("verborgen", !heeftItems);
     });
+    if (toonOpl) {
+      toonOpl.textContent = this.toonOplossingenInPreview ? "🙈 Verberg oplossingen" : "👁 Toon oplossingen";
+      toonOpl.setAttribute("aria-pressed", this.toonOplossingenInPreview ? "true" : "false");
+    }
 
     // Niveau-knoppen: alleen tonen als er werkbladen van dat niveau zijn
     const niveausInBundel = new Set();
@@ -723,7 +743,7 @@ window.SpellingBundel = {
           pagebreak: {
             mode: "css",
             before: ".pagina-break-voor",
-            avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-rooster", ".ov09-verdieping-afbeeldingen", ".ov09-verdieping-kolommen", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid", ".ov02-rij", ".ov03-cel"]
+            avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".ov11-blad", ".ov12-blad", ".ov13-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-rooster", ".ov09-verdieping-afbeeldingen", ".ov09-verdieping-kolommen", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid", ".ov11-kaart", ".ov11-zin", ".ov11-sorteer section", ".ov12-kaart", ".ov12-uitbreiding-rij", ".ov13-basisrij", ".ov13-zin", ".ov13-tekst", ".ov13-herschrijf", ".ov02-rij", ".ov03-cel"]
           }
         };
 

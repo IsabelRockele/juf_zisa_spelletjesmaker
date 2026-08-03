@@ -761,13 +761,16 @@ window.SpellingModules.ov04 = {
     // Bij uitbreiding: 3 zin-schrijflijnen onderaan (was vroeger "schrijf in schrift")
     let uitbreidingsZinnen = "";
     if (niveau === "uitbreiding") {
-      const zinLijnen = [1, 2, 3].map(() => 
-        sl ? sl.htmlCanvas(lijntype, lijnhoogte, 580) : `<div class="ov04-fallback-lijn"></div>`
-      ).join("");
+      const zinLijnen = [1, 2, 3].map((nr) => `
+        <div class="ov04-eigen-zin"><b>Zin ${nr}</b>
+          ${sl ? sl.htmlCanvas(lijntype, lijnhoogte, 580) : `<div class="ov04-fallback-lijn"></div>`}
+          ${sl ? sl.htmlCanvas(lijntype, lijnhoogte, 580) : `<div class="ov04-fallback-lijn"></div>`}
+        </div>`).join("");
       const oplTekst = metAntwoorden
         ? `<p class="ov01-zin-richtlijn">Verwacht: 3 zinnen, elk met minstens één woord uit een andere kolom.</p>`
         : "";
       uitbreidingsZinnen = `
+        <div class="pagina-break-voor ov04-zinnen-pagina-spatie" aria-hidden="true"></div>
         <div class="ov04-zinnen-blok">
           <div class="ov04-zinnen-titel">Maak nu 3 zinnen met telkens één woord uit een andere kolom:</div>
           ${zinLijnen}
@@ -841,6 +844,7 @@ window.SpellingModules.ov04 = {
         ${legendeHTML}
         ${woordenHTML}
 
+        ${niveau === "verdieping" ? `<div class="pagina-break-voor ov04-verdieping-pagina-spatie" aria-hidden="true"></div>` : ""}
         <div class="ov04-kolommen ov04-kolommen-${kolommen.length}">
           ${kolommenHTML}
         </div>

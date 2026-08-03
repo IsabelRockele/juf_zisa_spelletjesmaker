@@ -3,6 +3,7 @@
    De werkboekjesmodus behoudt zijn vrije, mengbare zijbalk.
    ========================================================== */
 (function () {
+  const LS_STAP = "spelling-werkblad-huidige-stap-v1";
   let huidigeStap = 1;
   let hoogsteStap = 1;
   let aantalVoorGenereren = 0;
@@ -12,6 +13,18 @@
 
   function gekozenCategorieen() {
     return window.SpellingZijbalk?.getAangevinkteCategorieIds?.() || [];
+  }
+
+  /* Deze doelen bouwen hun materiaal volledig met zinnen. De bibliotheekitems
+     zijn alleen technische keuzes, geen woordenpakket om te controleren. */
+  function slaatWoordenStapOver() {
+    const zinDoelen = new Set([
+      "leestekens-eind-g1", "leestekens-binnen-g1",
+      "hoofdletters-g2", "leestekens-eind-g2", "leestekens-binnen-g2",
+      "werkwoordstijden-mix-g2"
+    ]);
+    const gekozen = gekozenCategorieen();
+    return gekozen.length > 0 && gekozen.every(id => zinDoelen.has(id));
   }
 
   function gekozenCombinaties() {
@@ -28,13 +41,45 @@
     return document.querySelectorAll("#preview .werkblad").length;
   }
 
+  function updateGekozenDoelenKader() {
+    const vak = $("#wb-oef-doelen");
+    if (!vak) return;
+    const ids = gekozenCategorieen();
+    const graad = window.SpellingZijbalk?.getActieveGraad?.() || 1;
+    const data = window.SpellingWoordenbibliotheek?.[`graad${graad}`] || {};
+    const namen = ids.map(id => data[id]?.naam || id);
+    if (!namen.length) {
+      vak.innerHTML = "";
+      vak.hidden = true;
+      return;
+    }
+    vak.hidden = false;
+    const meerdere = namen.length > 1;
+    vak.classList.toggle("meerdere", meerdere);
+    vak.innerHTML = `<div class="wb-oef-doelen-kop"><strong>Je maakt oefeningen voor:</strong><button id="wb-doelen-aanpassen" type="button">Keuze aanpassen</button></div>
+      <div class="wb-oef-doelen-tags">${namen.map(naam => `<span>${naam}</span>`).join("")}</div>
+      ${meerdere ? '<p>Je hebt meerdere doelen gekozen. Daarom zie je hieronder ook meerdere passende oefenvormen.</p>' : ''}`;
+    $("#wb-doelen-aanpassen")?.addEventListener("click", () => toonStap(1));
+  }
+
   function updateKnoppen() {
     const heeftDoel = gekozenCategorieen().length > 0;
+    const woordenOverslaan = slaatWoordenStapOver();
+    const introTitel = $("#modus-werkblad .zb-startintro strong");
+    if (introTitel) introTitel.textContent = woordenOverslaan
+      ? "Maak materiaal in drie korte stappen"
+      : "Maak materiaal in vier korte stappen";
+    const oefeningStapNr = $("#wb-stappenbalk button[data-wb-stap='3'] span");
+    const resultaatStapNr = $("#wb-stappenbalk button[data-wb-stap='4'] span");
+    const oefeningSectieNr = $("#zb-sec-oefenvormen .zb-nr");
+    if (oefeningStapNr) oefeningStapNr.textContent = woordenOverslaan ? "2" : "3";
+    if (resultaatStapNr) resultaatStapNr.textContent = woordenOverslaan ? "3" : "4";
+    if (oefeningSectieNr) oefeningSectieNr.textContent = woordenOverslaan ? "2" : "3";
     const naarWoorden = $("#wb-naar-woorden");
     if (naarWoorden) {
       naarWoorden.disabled = !heeftDoel;
       naarWoorden.textContent = heeftDoel
-        ? "Keuze klaar — verder naar woorden →"
+        ? (slaatWoordenStapOver() ? "Keuze klaar — verder naar oefening →" : "Keuze klaar — verder naar woorden →")
         : "Kies eerst een spellingdoel";
     }
 
@@ -53,16 +98,19 @@
 
     document.querySelectorAll("#wb-stappenbalk button").forEach(btn => {
       const stap = Number(btn.dataset.wbStap);
-      btn.disabled = stap > hoogsteStap || (stap === 2 && !heeftDoel);
+      btn.hidden = stap === 2 && woordenOverslaan;
+      btn.disabled = stap > hoogsteStap || (stap === 2 && (!heeftDoel || woordenOverslaan));
       btn.classList.toggle("actief", stap === huidigeStap);
       btn.classList.toggle("klaar", stap < huidigeStap);
     });
+    updateGekozenDoelenKader();
   }
 
   function toonStap(stap) {
     if (!inWerkbladModus()) return;
     huidigeStap = stap;
     hoogsteStap = Math.max(hoogsteStap, stap);
+    try { sessionStorage.setItem(LS_STAP, String(stap)); } catch (_) {}
 
     const categorie = $("#zb-sec-categorie");
     const woorden = $("#zb-sec-woorden");
@@ -81,6 +129,10 @@
       categorie?.classList.remove("wb-stap-verborgen");
       if (categorie) categorie.open = true;
     } else if (stap === 2) {
+      if (slaatWoordenStapOver()) {
+        toonStap(3);
+        return;
+      }
       woorden?.classList.remove("wb-stap-verborgen");
       if (woorden) woorden.open = true;
     } else if (stap === 3) {
@@ -118,6 +170,17 @@
 
   function synchroniseerModus() {
     if (inWerkbladModus()) {
+      // Bij een herinitialisatie van de zijbalk of een korte moduswissel mag
+      // de leerkracht niet onverwacht terugvallen naar stap 1. Herstel de
+      // laatst bereikte werkbladstap, behalve wanneer zij bewust een nieuw
+      // spellingdoel startte (dan is de bewaarde stap al verwijderd/1).
+      try {
+        const bewaard = Number(sessionStorage.getItem(LS_STAP));
+        if (gekozenCategorieen().length > 0 && bewaard >= 2 && bewaard <= 3) {
+          huidigeStap = bewaard;
+          hoogsteStap = Math.max(hoogsteStap, bewaard);
+        }
+      } catch (_) {}
       $("#wb-stappenbalk")?.classList.remove("wb-stappenbalk-verborgen");
       document.querySelectorAll(".wb-stap-nav").forEach(el => el.classList.remove("wb-nav-verborgen"));
       toonStap(huidigeStap);
@@ -127,14 +190,23 @@
   }
 
   function init() {
+    // Herstel de route na een onbedoelde herinitialisatie of paginaverversing.
+    // Stap 4 wordt niet hersteld omdat de preview zelf niet bewaard wordt.
+    try {
+      const bewaard = Number(sessionStorage.getItem(LS_STAP));
+      if (gekozenCategorieen().length > 0 && bewaard >= 2 && bewaard <= 3) {
+        huidigeStap = bewaard;
+        hoogsteStap = bewaard;
+      }
+    } catch (_) {}
     $("#wb-naar-woorden")?.addEventListener("click", () => {
       // Een nieuwe route mag geen oefening uit een vorig werkblad meenemen.
       window.SpellingZijbalk?.wisOefenkeuze?.();
-      toonStap(2);
+      toonStap(slaatWoordenStapOver() ? 3 : 2);
     });
     $("#wb-terug-doel")?.addEventListener("click", () => toonStap(1));
     $("#wb-naar-oefening")?.addEventListener("click", () => toonStap(3));
-    $("#wb-terug-woorden")?.addEventListener("click", () => toonStap(2));
+    $("#wb-terug-woorden")?.addEventListener("click", () => toonStap(slaatWoordenStapOver() ? 1 : 2));
 
     $("#wb-stappenbalk")?.addEventListener("click", e => {
       const btn = e.target.closest("button[data-wb-stap]");
@@ -144,7 +216,12 @@
 
     document.addEventListener("change", e => {
       if (!inWerkbladModus()) return;
-      if (e.target.closest("#hoofdgroep-selector") || e.target.closest("#oefenvorm-selector")) {
+      // De oefenvorm-handler tekent zijn blok meteen opnieuw. Daardoor kan
+      // het oorspronkelijke checkbox-element hier al losstaan van de
+      // container. Herken de checkbox daarom ook rechtstreeks.
+      if (e.target.closest("#hoofdgroep-selector")
+          || e.target.closest("#oefenvorm-selector")
+          || e.target.matches(".zb-oef-checkbox, .zb-niveau-cb")) {
         setTimeout(updateKnoppen, 0);
       }
     });
@@ -183,6 +260,7 @@
       window.SpellingZijbalk?.reset?.();
       window.SpellingWoordenkiezer?.reset?.();
       hoogsteStap = 1;
+      try { sessionStorage.removeItem(LS_STAP); } catch (_) {}
       toonStap(1);
     });
 

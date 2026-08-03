@@ -574,15 +574,20 @@ window.SpellingWoordenkiezer = (function() {
       if (!cat || !Array.isArray(cat.woorden)) continue;
       for (const w of cat.woorden) {
         const id = `${graad}|${catId}|${w.tekst}`;
-        if (gekozen.some(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` === id)) continue;
-        gekozen.push({
-          tekst: w.tekst,
+        const bestaand = gekozen.find(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` === id);
+        const volledigWoord = {
+          ...w,
           lidwoord: w.lidwoord || null,
           afbeelding: w.afbeelding === true,
           synoniemGroep: w.synoniemGroep || null,
           categorie: catId,
           leerjaar: graad
-        });
+        };
+        // Werk ook eerder bewaarde woorden bij. Oude selecties bevatten soms
+        // alleen tekst/lidwoord en misten daardoor o.a. 'verlengd' en het
+        // afbeeldingspad zodra de leerkracht stap 3 bereikte.
+        if (bestaand) Object.assign(bestaand, volledigWoord);
+        else gekozen.push(volledigWoord);
       }
     }
 

@@ -667,19 +667,19 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     beschrijving: "Verleng om te horen of je op het einde t of d schrijft: paard → paarden, hond → honden.",
     woorden: [
       // Behouden uit G1
-      { tekst: "hand", lidwoord: "de", verlengd: "handen", twijfel: "t-d", afbeelding: false },
-      { tekst: "hoed", lidwoord: "de", verlengd: "hoeden", twijfel: "t-d", afbeelding: false },
-      { tekst: "tand", lidwoord: "de", verlengd: "tanden", twijfel: "t-d", afbeelding: false },
-      { tekst: "bed", lidwoord: "het", verlengd: "bedden", twijfel: "t-d", afbeelding: false },
-      { tekst: "hond", lidwoord: "de", verlengd: "honden", twijfel: "t-d", afbeelding: false },
-      { tekst: "wind", lidwoord: "de", verlengd: "winden", twijfel: "t-d", afbeelding: false },
-      { tekst: "land", lidwoord: "het", verlengd: "landen", twijfel: "t-d", afbeelding: false },
-      { tekst: "mond", lidwoord: "de", verlengd: "monden", twijfel: "t-d", afbeelding: false },
-      { tekst: "rand", lidwoord: "de", verlengd: "randen", twijfel: "t-d", afbeelding: false },
-      { tekst: "baard", lidwoord: "de", verlengd: "baarden", twijfel: "t-d", afbeelding: false },
-      { tekst: "poort", lidwoord: "de", verlengd: "poorten", twijfel: "t-d", afbeelding: false },
-      { tekst: "taart", lidwoord: "de", verlengd: "taarten", twijfel: "t-d", afbeelding: false },
-      { tekst: "paard", lidwoord: "het", verlengd: "paarden", twijfel: "t-d", afbeelding: false },
+      { tekst: "hand", lidwoord: "de", verlengd: "handen", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "hoed", lidwoord: "de", verlengd: "hoeden", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "tand", lidwoord: "de", verlengd: "tanden", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "bed", lidwoord: "het", verlengd: "bedden", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "hond", lidwoord: "de", verlengd: "honden", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "wind", lidwoord: "de", verlengd: "winden", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "land", lidwoord: "het", verlengd: "landen", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "mond", lidwoord: "de", verlengd: "monden", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "rand", lidwoord: "de", verlengd: "randen", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "baard", lidwoord: "de", verlengd: "baarden", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "poort", lidwoord: "de", verlengd: "poorten", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "taart", lidwoord: "de", verlengd: "taarten", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "paard", lidwoord: "het", verlengd: "paarden", twijfel: "t-d", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
       // Nieuw G2
       { tekst: "vriend", lidwoord: "de", verlengd: "vrienden", twijfel: "t-d", afbeelding: false },
       { tekst: "pond", lidwoord: "het", verlengd: "ponden", twijfel: "t-d", afbeelding: false },
@@ -700,20 +700,20 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     beschrijving: "Verleng om te horen of je op het einde p of b schrijft: rib → ribben, krab → krabben.",
     woorden: [
       // Behouden uit G1
-      { tekst: "krab", lidwoord: "de", verlengd: "krabben", twijfel: "p-b", afbeelding: false },
-      { tekst: "web", lidwoord: "het", verlengd: "webben", twijfel: "p-b", afbeelding: false },
-      { tekst: "rib", lidwoord: "de", verlengd: "ribben", twijfel: "p-b", afbeelding: false },
-      { tekst: "trap", lidwoord: "de", verlengd: "trappen", twijfel: "p-b", afbeelding: false },
-      { tekst: "step", lidwoord: "de", verlengd: "steppen", twijfel: "p-b", afbeelding: false },
-      { tekst: "klap", lidwoord: "de", verlengd: "klappen", twijfel: "p-b", afbeelding: false },
-      { tekst: "pop", lidwoord: "de", verlengd: "poppen", twijfel: "p-b", afbeelding: false },
-      { tekst: "kip", lidwoord: "de", verlengd: "kippen", twijfel: "p-b", afbeelding: false },
+      { tekst: "krab", lidwoord: "de", verlengd: "krabben", twijfel: "p-b", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "web", lidwoord: "het", verlengd: "webben", twijfel: "p-b", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "rib", lidwoord: "de", verlengd: "ribben", twijfel: "p-b", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "trap", lidwoord: "de", verlengd: "trappen", twijfel: "p-b", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "step", lidwoord: "de", verlengd: "steppen", twijfel: "p-b", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "klap", lidwoord: "de", verlengd: "klappen", twijfel: "p-b", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "pop", lidwoord: "de", verlengd: "poppen", twijfel: "p-b", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
+      { tekst: "kip", lidwoord: "de", verlengd: "kippen", twijfel: "p-b", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "verlengingsregel" },
       // Nieuw G2
       { tekst: "top", lidwoord: "de", verlengd: "toppen", twijfel: "p-b", afbeelding: false },
       { tekst: "klep", lidwoord: "de", verlengd: "kleppen", twijfel: "p-b", afbeelding: false },
       { tekst: "slip", lidwoord: "de", verlengd: "slippen", twijfel: "p-b", afbeelding: false },
       { tekst: "kop", lidwoord: "de", verlengd: "koppen", twijfel: "p-b", afbeelding: false },
-      { tekst: "knop", lidwoord: "de", verlengd: "knoppen", twijfel: "p-b", afbeelding: false },
+      { tekst: "knop", lidwoord: "de", verlengd: "knoppen", twijfel: "p-b", afbeelding: true, afbeelding_graad: 1, afbeelding_categorie: "mmkm" },
       { tekst: "lap", lidwoord: "de", verlengd: "lappen", twijfel: "p-b", afbeelding: false },
       { tekst: "slab", lidwoord: "de", verlengd: "slabben", twijfel: "p-b", afbeelding: false }
     ]
@@ -1179,6 +1179,14 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "kloppen", type: "zwak", stam: "klop", deelwoord: "geklopt", hulpww: ["hebben"] },
       { tekst: "stoppen", type: "zwak", stam: "stop", deelwoord: "gestopt", hulpww: ["hebben", "zijn"] },
       { tekst: "antwoorden", type: "zwak", stam: "antwoord", deelwoord: "geantwoord", hulpww: ["hebben"] },
+      { tekst: "leven", type: "zwak", stam: "leef", deelwoord: "geleefd", hulpww: ["hebben"] },
+      { tekst: "reizen", type: "zwak", stam: "reis", deelwoord: "gereisd", hulpww: ["hebben", "zijn"] },
+      { tekst: "durven", type: "zwak", stam: "durf", deelwoord: "gedurfd", hulpww: ["hebben"] },
+      { tekst: "proeven", type: "zwak", stam: "proef", deelwoord: "geproefd", hulpww: ["hebben"] },
+      { tekst: "zweven", type: "zwak", stam: "zweef", deelwoord: "gezweefd", hulpww: ["hebben"] },
+      { tekst: "wuiven", type: "zwak", stam: "wuif", deelwoord: "gewuifd", hulpww: ["hebben"] },
+      { tekst: "blozen", type: "zwak", stam: "bloos", deelwoord: "gebloosd", hulpww: ["hebben"] },
+      { tekst: "razen", type: "zwak", stam: "raas", deelwoord: "geraasd", hulpww: ["hebben"] },
 
       { tekst: "lopen", type: "sterk", stam: "loop", deelwoord: "gelopen", hulpww: ["hebben", "zijn"] },
       { tekst: "eten", type: "sterk", stam: "eet", deelwoord: "gegeten", hulpww: ["hebben"] },
@@ -1193,6 +1201,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "worden", type: "sterk", stam: "word", deelwoord: "geworden", hulpww: ["zijn"] },
       { tekst: "zwemmen", type: "sterk", stam: "zwem", deelwoord: "gezwommen", hulpww: ["hebben", "zijn"] },
       { tekst: "rijden", type: "sterk", stam: "rijd", deelwoord: "gereden", hulpww: ["hebben", "zijn"] },
+      { tekst: "ruiken", type: "sterk", stam: "ruik", deelwoord: "geroken", hulpww: ["hebben"] },
+      { tekst: "schrijven", type: "sterk", stam: "schrijf", deelwoord: "geschreven", hulpww: ["hebben"] },
 
       { tekst: "hebben", type: "onregelmatig", stam: "heb", deelwoord: "gehad", hulpww: ["hebben"] },
       { tekst: "zijn", type: "onregelmatig", stam: "ben", deelwoord: "geweest", hulpww: ["zijn"] }
@@ -1331,10 +1341,10 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
      ============================================================ */
 
   "hoofdletters-g2": {
-    naam: "Hoofdletters & leestekens",
+    naam: "Hoofdletters (met alle leestekens)",
     groep: "hoofdletters",
     hoofdgroep: "regelwoord",
-    beschrijving: "Hoofdletters bij zinsbegin, eigennamen, titels (L3) + aardrijkskundige namen, feestdagen, talen (L4).",
+    beschrijving: "Hoofdletters bij zinsbegin, eigennamen, aardrijkskundige namen, feestdagen en talen; de zinnen bevatten ook alle leestekens.",
     woorden: [
       // ===== EIGENNAMEN PERSONEN =====
       { tekst: "Erwin", type_hl: "eigennaam", afbeelding: false },
@@ -1379,6 +1389,47 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "De Smurfen", type_hl: "titel", afbeelding: false },
       { tekst: "Sjakie en de chocoladefabriek", type_hl: "titel", afbeelding: false },
       { tekst: "Toverberg", type_hl: "titel", afbeelding: false }
+    ]
+  },
+
+  "leestekens-eind-g2": {
+    naam: "Leestekens: punt, vraagteken en uitroepteken",
+    groep: "hoofdletters",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Oefen de eindtekens . ? en ! in volledige zinnen.",
+    woorden: [
+      { tekst: "punt", teken: ".", afbeelding: false },
+      { tekst: "vraagteken", teken: "?", afbeelding: false },
+      { tekst: "uitroepteken", teken: "!", afbeelding: false }
+    ]
+  },
+
+  // ===== Alle werkwoordstijden gemengd =====
+  "werkwoordstijden-mix-g2": {
+    naam: "Werkwoordstijden door elkaar",
+    groep: "werkwoordstijden-mix",
+    hoofdgroep: "werkwoord",
+    beschrijving: "OTT, OVT, VTT en VVT herkennen en toepassen in zinnen en korte verhalen.",
+    woorden: [
+      { tekst: "werken", afbeelding: false }, { tekst: "wandelen", afbeelding: false },
+      { tekst: "lopen", afbeelding: false }, { tekst: "lezen", afbeelding: false },
+      { tekst: "maken", afbeelding: false }, { tekst: "zingen", afbeelding: false },
+      { tekst: "komen", afbeelding: false }, { tekst: "eten", afbeelding: false },
+      { tekst: "drinken", afbeelding: false }, { tekst: "zien", afbeelding: false },
+      { tekst: "fietsen", afbeelding: false }, { tekst: "spelen", afbeelding: false },
+      { tekst: "horen", afbeelding: false }, { tekst: "stoppen", afbeelding: false },
+      { tekst: "geven", afbeelding: false }, { tekst: "zijn", afbeelding: false }
+    ]
+  },
+
+  "leestekens-binnen-g2": {
+    naam: "Leestekens: komma en dubbele punt",
+    groep: "hoofdletters",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Oefen de komma en de dubbele punt binnen een zin.",
+    woorden: [
+      { tekst: "komma", teken: ",", afbeelding: false },
+      { tekst: "dubbele punt", teken: ":", afbeelding: false }
     ]
   },
 

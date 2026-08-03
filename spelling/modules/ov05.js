@@ -28,10 +28,10 @@ window.SpellingModules.ov05 = {
 
   /* Maximum aantal woorden per paar per niveau dat comfortabel op 1 A4 past. */
   _maxPerNiveau: {
-    basis: 12,
-    kern: 12,
-    verdieping: 12,
-    uitbreiding: 9
+    basis: 9,
+    kern: 9,
+    verdieping: 9,
+    uitbreiding: 6
   },
 
   /* Maximum letterlengte voor woorden in OV5.
@@ -170,7 +170,7 @@ window.SpellingModules.ov05 = {
     },
     {
       id: "verlengen-dt-g2",
-      titel: "Verleng en kies t of d",
+      titel: "Verleng en kies d of t",
       isVerlenging: true,
       trigger: (cats) => {
         if (!cats.includes("verlengen-td-g2")) return null;
@@ -185,7 +185,7 @@ window.SpellingModules.ov05 = {
     },
     {
       id: "verlengen-bp-g2",
-      titel: "Verleng en kies p of b",
+      titel: "Verleng en kies b of p",
       isVerlenging: true,
       trigger: (cats) => {
         if (!cats.includes("verlengen-pb-g2")) return null;
@@ -326,9 +326,11 @@ window.SpellingModules.ov05 = {
         continue;
       }
       for (const niveau of niveaus) {
-        const metPlaatje = !paar.isVerlenging && ((niveau === "basis")
-          || (niveau === "kern" && plaatjeKern)
-          || ((niveau === "verdieping" || niveau === "uitbreiding") && plaatjeVerdieping));
+        const metPlaatje = paar.isVerlenging
+          ? (niveau === "basis" || niveau === "kern" || niveau === "verdieping")
+          : ((niveau === "basis")
+            || (niveau === "kern" && plaatjeKern)
+            || ((niveau === "verdieping" || niveau === "uitbreiding") && plaatjeVerdieping));
         
         // Plaatje-filter alleen toepassen als dit niveau effectief plaatjes toont.
         let poolDitNiveau = passend;
@@ -377,7 +379,7 @@ window.SpellingModules.ov05 = {
     const af = window.SpellingAfleiders;
 
     let rijenHTML = "";
-    for (const w of woorden) {
+    for (const [woordIndex, w] of woorden.entries()) {
       const woordVol = w.tekst;
       const kern = this._kernDeel(woordVol);     // bv. "ligt" of "heb"
       const prefix = this._prefix(woordVol);     // bv. "hij" of "ik" of ""
@@ -385,14 +387,12 @@ window.SpellingModules.ov05 = {
       const plaatjeHtml = metPlaatje ? this._plaatjeHtml(w) : "";
       const plaatjeCel = metPlaatje
         ? `<div class="ov05-plaatje">${plaatjeHtml}</div>`
-        : (paar.isVerlenging
-          ? `<div class="ov05-plaatje-leeg"><strong>${w.verlengd || "verleng het woord"}</strong></div>`
-          : `<div class="ov05-plaatje-leeg"></div>`);
+        : `<div class="ov05-plaatje-leeg"></div>`;
 
       // Bouw keuze-hokjes voor basis en kern via afleiders (hele-woord keuze)
       // Voor woorden met prefix ('hij ligt', 'ik heb'): toon alleen kern in hokjes
       let middenHTML = "";
-      if ((niveau === "basis" || niveau === "kern") && af) {
+      if (paar.isVerlenging && niveau === "basis" && af) {
         // Maak afleiders op basis van het KERN-deel zodat we niet 'hij ligd' krijgen
         // maar 'ligd' — schoner in de keuze-hokjes.
         const kernObj = { ...w, tekst: kern };
@@ -404,7 +404,33 @@ window.SpellingModules.ov05 = {
           return `<div class="ov05-keuze-hokje${juistClass}">${opt}</div>`;
         }).join("");
         middenHTML = `<div class="ov05-keuzes">${hokjes}</div>`;
+      } else if (paar.isVerlenging && niveau === "kern") {
+        const stam = kern.slice(0, -1);
+        const letters = paar.kolommen.map(k => k.titel.replace("-", ""));
+        middenHTML = `<div class="ov05-eindletter-keuze">
+          <div class="ov05-onvolledig-woord">${stam}<span class="ov05-lettergat"></span></div>
+          <div class="ov05-letteropties">${letters.map(letter => {
+            const juist = kern.endsWith(letter);
+            return `<span class="${metAntwoorden && juist ? "juist" : ""}">${letter}</span>`;
+          }).join("")}</div>
+        </div>`;
+      } else if (!paar.isVerlenging && (niveau === "basis" || niveau === "kern") && af) {
+        const kernObj = { ...w, tekst: kern };
+        const afleiders = af.maakAfleiders(kernObj, w.categorie);
+        const opties = af.schikWillekeurig(kern, afleiders, () => this._random());
+        const hokjes = opties.map(opt => {
+          const isJuist = (opt === kern);
+          const juistClass = (metAntwoorden && isJuist) ? " ov05-keuze-juist" : "";
+          return `<div class="ov05-keuze-hokje${juistClass}">${opt}</div>`;
+        }).join("");
+        middenHTML = `<div class="ov05-keuzes">${hokjes}</div>`;
       }
+
+      const verlengsteun = paar.isVerlenging && niveau === "basis"
+        ? `<div class="ov05-verlengsteun"><span>Zeg:</span> ${w.verlengd}</div>`
+        : (paar.isVerlenging && niveau === "kern"
+          ? `<div class="ov05-verlengsteun ov05-verlengtip">Tip: maak het woord langer.</div>`
+          : "");
 
       // Schrijflijn voor alle niveaus.
       // Bij prefix: toon prefix als hint vóór de schrijflijn ("ik ___")
@@ -423,6 +449,7 @@ window.SpellingModules.ov05 = {
         <div class="ov05-rij ov05-rij-${niveau}" data-woord="${w.tekst}">
           <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord van het werkblad" type="button">✕</button>
           ${plaatjeCel}
+          ${verlengsteun}
           ${middenHTML ? `<div class="ov05-midden">${middenHTML}</div>` : ""}
           ${lijnHTML}
         </div>`;
@@ -439,12 +466,14 @@ window.SpellingModules.ov05 = {
     // Opdracht-tekst per niveau
     let opdrachtTekst = "";
     if (paar.isVerlenging && niveau === "basis") {
-      opdrachtTekst = `<div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Lees het langere woord. Daar hoor je de laatste letter.</span></div>
+      opdrachtTekst = `<div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kijk naar de prent en lees het langere hulpwoord.</span></div>
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Omcirkel het juiste korte woord en schrijf het over.</span></div>`;
     } else if (paar.isVerlenging && niveau === "kern") {
-      opdrachtTekst = `<div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Verleng het woord, kies de juiste eindletter en schrijf het woord.</span></div>`;
+      opdrachtTekst = `<div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kijk naar de prent en maak het woord langer.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kies de juiste eindletter en schrijf het korte woord.</span></div>`;
     } else if (paar.isVerlenging && niveau === "verdieping") {
-      opdrachtTekst = `<div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Gebruik het langere woord als hulp. Schrijf zelf het korte woord.</span></div>`;
+      opdrachtTekst = `<div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kijk naar de prent en zeg het meervoud in je hoofd.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf daarna zelf het korte woord.</span></div>`;
     } else if (paar.isVerlenging && niveau === "uitbreiding") {
       opdrachtTekst = `<div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Verleng in je hoofd en schrijf het korte woord correct.</span></div>
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Maak daarna een goede zin met één woord.</span></div>`;
@@ -514,6 +543,7 @@ window.SpellingModules.ov05 = {
       <div class="ov01-zin-blok ov01-uitbreiding-blok">
         <div class="ov01-stappen-label">⭐⭐⭐⭐ Extra opdracht:</div>
         <p class="ov01-zin-vraag">Kies 1 woord van hierboven en maak er een goede zin mee.</p>
+        ${lijn()}
         ${lijn()}
         ${opl}
       </div>

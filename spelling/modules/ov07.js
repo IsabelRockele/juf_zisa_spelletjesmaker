@@ -602,10 +602,12 @@ window.SpellingModules.ov07 = {
       }
       schrijfHTML += `</div>`;
     } else {
-      // 7 schrijflijnen volstaan voor een verhaaltje van 5 zinnen.
-      // (Voorheen 5*2=10, maar dat duwde de inhoud over de A4-grens.)
-      const lijnen = 7;
+      // Graad 2: twee schrijflijnen per zin en een vaste vervolgpagina.
+      const lijnen = cfg.isGraad2 ? 10 : 7;
       for (let i = 0; i < lijnen; i++) {
+        if (cfg.isGraad2 && i === 6) {
+          schrijfHTML += `<div class="pagina-break-voor ov07-pagina2-spatie" aria-hidden="true"></div>`;
+        }
         const canvas = sl
           ? sl.htmlCanvas(cfg.lijntype, cfg.lijnhoogte, 580)
           : `<div class="ov07-fallback-lijn"></div>`;

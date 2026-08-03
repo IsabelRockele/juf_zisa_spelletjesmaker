@@ -19,7 +19,7 @@
 window.SpellingModus = (function() {
 
   const LS_KEY = "spelling-modus-v1";
-  const GELDIGE_MODI = new Set(["werkblad", "herhaling", "weekdictee"]);
+  const GELDIGE_MODI = new Set(["werkblad", "weekdictee"]);
 
   /* ---------- State ---------- */
   let huidigeModus = null;  // null = startscherm
@@ -28,6 +28,9 @@ window.SpellingModus = (function() {
   function laadModus() {
     try {
       const raw = localStorage.getItem(LS_KEY);
+      // De vroegere aparte werkboekjesmodus bestaat niet meer. Bestaande
+      // gebruikers gaan voortaan automatisch naar de gewone werkbladenmaker.
+      if (raw === "herhaling") return "werkblad";
       if (raw && GELDIGE_MODI.has(raw)) return raw;
     } catch (e) { /* SSR/private mode */ }
     return null;
@@ -110,8 +113,7 @@ window.SpellingModus = (function() {
   }
 
   const modusLabels = {
-    "werkblad": "📋 Volledig werkblad",
-    "herhaling": "📚 Werkboekje samenstellen",
+    "werkblad": "📋 Werkbladen maken",
     "weekdictee": "📅 Weekdictee"
   };
 

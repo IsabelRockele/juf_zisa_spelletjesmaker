@@ -52,8 +52,8 @@ window.SpellingZijbalk = (function() {
       vereistGeldigePaar: true
     },
     {
-      id: "ov05", label: "⭕ Klank kiezen",
-      korteUitleg: "De ontbrekende klank herkennen",
+      id: "ov05", label: "⭕ Kies de juiste schrijfwijze",
+      korteUitleg: "Gebruik het langere woord en kies het correcte korte woord",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 8,
       // Werkt enkel voor specifieke klank-paren (ei/ij, au/ou, aai/ooi/oei,
@@ -100,7 +100,183 @@ window.SpellingZijbalk = (function() {
       korteUitleg: "Voor- en achtervoegsels herkennen en correct schrijven",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 8,
+      graad: 2,
       enkelVoor: ["doffe-klank-voorvoegsel", "doffe-klank-achtervoegsel"]
+    },
+    {
+      id: "ov12", label: "🔀 Verlengmix: b, p, d of t",
+      korteUitleg: "Beide verlengingsregels gemengd inoefenen",
+      niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
+      defaultAantal: 8,
+      graad: 2
+    },
+    {
+      id: "ov13", label: "🔠 Hoofdletters en leestekens",
+      korteUitleg: "Volledige zinnen herkennen, verbeteren en correct overschrijven",
+      niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
+      defaultAantal: 6,
+      graad: 2,
+      enkelVoor: ["hoofdletters"]
+    },
+    {
+      id: "ov14", label: "❓ Leestekens oefenen",
+      korteUitleg: "Punt, vraagteken, uitroepteken, komma en dubbele punt plaatsen",
+      niveaus: ["basis", "kern"],
+      defaultAantal: 8,
+      graad: 1,
+      enkelVoor: ["leestekens"]
+    },
+    {
+      id: "ov15", label: "🧠 Onthoudwoorden oefenen",
+      korteUitleg: "Moeilijke woordstukken herkennen, kiezen en toepassen",
+      niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
+      defaultAantal: 8,
+      graad: 2
+    },
+    {
+      id: "ov16", label: "🔧 OTT: de basisregel",
+      korteUitleg: "Oefen ik = stam, enkelvoud = stam + t en meervoud = heel werkwoord",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov17", label: "✅ OTT: kies de juiste vorm",
+      korteUitleg: "Gebruik het onderwerp en kies de correcte persoonsvorm",
+      niveaus: [], defaultAantal: 8, graad: 2
+    },
+    {
+      id: "ov18", label: "↔️ OTT: jij en je voor of achter de persoonsvorm",
+      korteUitleg: "Oefen wanneer de t bij jij of je wel of niet blijft staan",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov19", label: "✍️ OTT: vul de persoonsvorm in",
+      korteUitleg: "Zoek het onderwerp en vervoeg het werkwoord in de zin",
+      niveaus: [], defaultAantal: 8, graad: 2
+    },
+    {
+      id: "ov20", label: "🔎 OTT: verbeter de werkwoordfouten",
+      korteUitleg: "Pas de regels gemengd toe in zinnen en een kort tekstje",
+      niveaus: [], defaultAantal: 8, graad: 2
+    },
+    {
+      id: "ov21", label: "⭐ OTT: hebben en zijn",
+      korteUitleg: "Oefen de onregelmatige vormen van hebben en zijn grondig",
+      niveaus: [], defaultAantal: 12, graad: 2
+    },
+    {
+      id: "ov27", label: "🎨 VTT: herken de twee werkwoorddelen",
+      korteUitleg: "Kleur het hulpwerkwoord en het voltooid deelwoord elk anders",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov24", label: "🔗 VTT: hebben of zijn als hulpwerkwoord",
+      korteUitleg: "Kies eerst het passende hulpwerkwoord in een duidelijke zin",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov22", label: "🧩 VTT: zwakke werkwoorden",
+      korteUitleg: "Bouw VTT-vormen met hebben én zijn en oefen d of t",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov28", label: "⚠️ VTT: let op bij v/f en z/s",
+      korteUitleg: "Oefen vormen zoals leven → geleefd en reizen → gereisd",
+      niveaus: [], defaultAantal: 8, graad: 2
+    },
+    {
+      id: "ov23", label: "🧠 VTT: sterke werkwoorden",
+      korteUitleg: "Onthoud sterke VTT-vormen met hebben én zijn",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov26", label: "⭐ VTT: gehad en geweest",
+      korteUitleg: "Oefen hebben → gehad en zijn → geweest als hoofdwerkwoord",
+      niveaus: [], defaultAantal: 8, graad: 2
+    },
+    {
+      id: "ov25", label: "🔀 VTT: zwak en sterk gemengd",
+      korteUitleg: "Zet als laatste volledige zinnen om naar de VTT",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov29", label: "🔤 OVT zwak: kies -de of -te",
+      korteUitleg: "Kleur de controleletter en bouw de verleden tijd",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov30", label: "↔️ OVT zwak: enkelvoud en meervoud",
+      korteUitleg: "Oefen vormen zoals werkte en werkten naast elkaar",
+      niveaus: [], defaultAantal: 8, graad: 2
+    },
+    {
+      id: "ov31", label: "✍️ OVT zwak: zinnen omzetten",
+      korteUitleg: "Zet volledige zinnen van nu naar vroeger",
+      niveaus: [], defaultAantal: 8, graad: 2
+    },
+    {
+      id: "ov32", label: "🧠 OVT sterk: veranderde vormen onthouden",
+      korteUitleg: "Oefen vormen zoals lopen → liep en drinken → dronk",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov33", label: "↔️ OVT sterk: enkelvoud en meervoud",
+      korteUitleg: "Vergelijk vormen zoals liep en liepen",
+      niveaus: [], defaultAantal: 8, graad: 2
+    },
+    {
+      id: "ov34", label: "✍️ OVT sterk: zinnen omzetten",
+      korteUitleg: "Gebruik sterke werkwoordsvormen in volledige zinnen",
+      niveaus: [], defaultAantal: 8, graad: 2
+    },
+    {
+      id: "ov35", label: "🎨 VVT: herken de twee werkwoorddelen",
+      korteUitleg: "Kleur had of was en het voltooid deelwoord elk anders",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov36", label: "🔗 VVT: kies had of was",
+      korteUitleg: "Kies het hulpwerkwoord en schrijf de volledige zin",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov37", label: "✍️ VVT: zinnen omzetten",
+      korteUitleg: "Vertel wat vóór een ander moment al gebeurd was",
+      niveaus: [], defaultAantal: 8, graad: 2
+    },
+    {
+      id: "ov38", label: "🔀 OTT, OVT, VTT en VVT door elkaar",
+      korteUitleg: "Vul vormen in, zet zinnen om of herschrijf een kort verhaal",
+      niveaus: ["basis", "kern", "verdieping"], defaultAantal: 8, graad: 2
+    },
+    {
+      id: "ov39", label: "🎨 Herken OTT, OVT, VTT of VVT",
+      korteUitleg: "Lees de zin en kleur de juiste werkwoordstijd",
+      niveaus: [], defaultAantal: 10, graad: 2
+    },
+    {
+      id: "ov40", label: "🎨 Hoorwoorden kleuren en sorteren",
+      korteUitleg: "Kleur het moeilijke woordstuk en sorteer de woorden",
+      niveaus: [], defaultAantal: 6, graad: 2
+    },
+    {
+      id: "ov41", label: "🧩 Kies het ontbrekende woordstuk",
+      korteUitleg: "Kies bijvoorbeeld ng, nk, aai, ooi, ch of cht",
+      niveaus: [], defaultAantal: 6, graad: 2
+    },
+    {
+      id: "ov42", label: "🔀 Bouw het hoorwoord",
+      korteUitleg: "Zet woordstukken in de juiste volgorde en schrijf het woord",
+      niveaus: [], defaultAantal: 6, graad: 2
+    },
+    {
+      id: "ov43", label: "📝 Gebruik hoorwoorden in zinnen",
+      korteUitleg: "Vul passende hoorwoorden in en schrijf zinnen correct",
+      niveaus: ["basis", "kern", "verdieping"], defaultAantal: 6, graad: 2
+    },
+    {
+      id: "ov44", label: "🔎 Zoek hoorwoorden in een woordrooster",
+      korteUitleg: "Zoek verborgen woorden zonder vooraf gegeven woordenlijst",
+      niveaus: [], defaultAantal: 6, graad: 2
     }
     // Weekdictee staat NIET meer in de oefenvormen-lijst van de werkbladen-modus.
     // Hij heeft zijn eigen modus-knop op het startscherm en zijn eigen paneel
@@ -137,10 +313,10 @@ window.SpellingZijbalk = (function() {
       uitbreiding: "Sorteren + zelf woorden bedenken bij elke klank. Voor sterke spellers."
     },
     ov05: {
-      basis: "Plaatje + hokjes + lijn. Kind kiest welke klank past en schrijft het woord op. Veilige instap.",
-      kern: "Geen plaatje. Kind kiest klank op basis van de uitspraak alleen.",
-      verdieping: "Plaatje + lijn, kind schrijft zelfstandig met de juiste klank.",
-      uitbreiding: "Plaatje + lijn, kind moet helemaal zelfstandig juist schrijven. Volledig zelfstandig niveau."
+      basis: "Prent + langer hulpwoord + twee korte woorden. Kind kiest en schrijft over.",
+      kern: "Prent + tip om het woord langer te maken. Kind kiest de eindletter en schrijft het korte woord.",
+      verdieping: "Alleen de prent. Kind bedenkt zelf het meervoud en schrijft het korte woord.",
+      uitbreiding: "Geen prent. Kind vormt zelfstandig het korte woord en gebruikt één woord in een zin."
     },
     ov06: {
       basis: "Per zin een keuze uit 2 woorden. Kind kruist juiste aan en schrijft het op de lijn. Veilige instap.",
@@ -173,10 +349,42 @@ window.SpellingZijbalk = (function() {
       uitbreiding: "Beschrijving lezen en zelf het samengesteld woord bedenken. Werkt aan woordenschat én spelling tegelijk."
     },
     ov11: {
-      basis: "Kind kiest de juiste schrijfwijze uit drie woorden en schrijft het correcte woord over.",
+      basis: "De woorden staan in een woordbank. Kind kleurt het woorddeel en sorteert elk woord in de juiste kolom.",
       kern: "Een voor- of achtervoegsel ontbreekt. Kind kiest het juiste woorddeel en schrijft het hele woord.",
-      verdieping: "Kind sorteert de gekozen woorden volgens hun voor- of achtervoegsel.",
-      uitbreiding: "Kind spoort fout geschreven woorden in zinnen op en schrijft elke zin correct over."
+      verdieping: "Kind vult het woorddeel zelf in, sorteert het woord en maakt als extra een goede zin.",
+      uitbreiding: "Kind gebruikt 5 gekozen woorden elk in een duidelijke, betekenisvolle zin."
+    },
+    ov12: {
+      basis: "Prent + onvolledig woord. Kind kiest gemengd tussen b, p, d en t.",
+      kern: "Alleen een prent. Kind verlengt in het hoofd en schrijft het volledige woord.",
+      verdieping: "Kind vult b, p, d of t aan in betekenisvolle zinnen.",
+      uitbreiding: "Kind zoekt echte b/p/d/t-fouten in zinnen en schrijft de zinnen correct over."
+    },
+    ov13: {
+      basis: "Hulpwoorden zijn gekleurd. Kind schrijft ze met de juiste hoofdletter.",
+      kern: "Kind herstelt hoofdletters en het leesteken en schrijft elke zin correct over.",
+      verdieping: "Kind zoekt gemengde fouten bij hoofdletters en leestekens in volledige zinnen.",
+      uitbreiding: "Kind verbetert een kort tekstje en schrijft het volledig correct over."
+    },
+    ov14: {
+      basis: "Kind plaatst leestekens in losse zinnen en krijgt de mogelijke tekens als steun.",
+      kern: "Kind plaatst de gekozen leestekens zelfstandig in een kort tekstje."
+    },
+    ov15: {
+      basis: "Kind herkent en kleurt het moeilijke woordstuk en sorteert of schrijft de volledige woorden.",
+      kern: "Kind kiest het ontbrekende moeilijke woordstuk en schrijft het volledige woord correct over.",
+      verdieping: "Kind vult het moeilijke woordstuk zelfstandig in een duidelijke zin in.",
+      uitbreiding: "Kind verbetert fout geschreven onthoudwoorden en schrijft het tekstje correct over."
+    },
+    ov38: {
+      basis: "Kind krijgt de tijd en het hele werkwoord en vult de juiste werkwoordsvorm in.",
+      kern: "Kind vormt een volledige zin om naar de gevraagde werkwoordstijd.",
+      verdieping: "Kind herschrijft een samenhangend kort verhaal volledig in één opgegeven tijd."
+    },
+    ov43: {
+      basis: "Kind kiest het passende hoorwoord uit een woordbank en schrijft het correct.",
+      kern: "Kind gebruikt de eerste letter als hulp en vult het volledige hoorwoord in.",
+      verdieping: "Kind krijgt hoorwoorden en maakt met elk woord zelf een duidelijke zin."
     }
   };
 
@@ -555,6 +763,10 @@ window.SpellingZijbalk = (function() {
   
   /* Helper: bepaal of een oefenvorm zichtbaar mag zijn in de zijbalk. */
   function _isOefenvormZichtbaar(oef) {
+    // Een oefenvorm die voor één graad gebouwd is, mag nooit via de
+    // generieke terugval in een andere graad verschijnen.
+    if (oef.graad && oef.graad !== actieveGraad) return false;
+
     const soorten = _detecteerCategorieSoorten();
     const ietsAangevinkt = soorten.heeftGenerieke || soorten.specifiekeGroepen.size > 0;
 
@@ -564,6 +776,15 @@ window.SpellingZijbalk = (function() {
     if (actieveGraad === 2) {
       const gekozen = [...getAangevinkteCats()];
       const verlengDoelen = new Set(["verlengen-td-g2", "verlengen-pb-g2"]);
+
+      if (oef.id === "ov02") {
+        // Onthoudwoorden worden sterker opgeslagen door ze meermaals
+        // aandachtig en correct te schrijven. Deze vorm heeft bewust geen
+        // differentiatiesterren en werkt voor elke onthoudwoordcategorie.
+        return gekozen.length > 0 && gekozen.every(id =>
+          window.SpellingWoordenbibliotheek?.graad2?.[id]?.hoofdgroep === "onthoudwoord"
+        );
+      }
 
       if (oef.id === "ov09") {
         return soorten.specifiekeGroepen.has("stukjeswoorden");
@@ -586,6 +807,55 @@ window.SpellingZijbalk = (function() {
           const groep = window.SpellingWoordenbibliotheek?.graad2?.[id]?.groep;
           return groep === "doffe-klank-voorvoegsel" || groep === "doffe-klank-achtervoegsel";
         });
+      }
+
+      if (oef.id === "ov12") {
+        return gekozen.includes("verlengen-td-g2")
+          && gekozen.includes("verlengen-pb-g2");
+      }
+
+      if (oef.id === "ov13") {
+        const doelen = new Set(["hoofdletters-g2", "leestekens-eind-g2", "leestekens-binnen-g2"]);
+        return gekozen.length > 0 && gekozen.every(id => doelen.has(id));
+      }
+
+      if (oef.id === "ov15") {
+        return gekozen.length > 0 && gekozen.every(id =>
+          window.SpellingWoordenbibliotheek?.graad2?.[id]?.hoofdgroep === "onthoudwoord"
+        );
+      }
+
+      if (["ov16", "ov17", "ov18", "ov19", "ov20", "ov21"].includes(oef.id)) {
+        return gekozen.length === 1 && gekozen[0] === "werkwoorden-ott-g2";
+      }
+
+      if (["ov22", "ov23", "ov24", "ov25", "ov26", "ov27", "ov28"].includes(oef.id)) {
+        return gekozen.length === 1 && gekozen[0] === "werkwoorden-vtt-g2";
+      }
+
+      if (["ov29", "ov30", "ov31"].includes(oef.id)) {
+        return gekozen.length === 1 && gekozen[0] === "werkwoorden-ovt-zwak-g2";
+      }
+
+      if (["ov32", "ov33", "ov34"].includes(oef.id)) {
+        return gekozen.length === 1 && gekozen[0] === "werkwoorden-ovt-sterk-g2";
+      }
+
+      if (["ov35", "ov36", "ov37"].includes(oef.id)) {
+        return gekozen.length === 1 && gekozen[0] === "werkwoorden-vvt-g2";
+      }
+
+      if (["ov38", "ov39"].includes(oef.id)) {
+        return gekozen.length === 1 && gekozen[0] === "werkwoordstijden-mix-g2";
+      }
+
+      if (["ov40", "ov41", "ov42", "ov43", "ov44"].includes(oef.id)) {
+        const alleenHoorwoorden = gekozen.length > 0 && gekozen.every(id =>
+          window.SpellingWoordenbibliotheek?.graad2?.[id]?.hoofdgroep === "hoorwoord"
+        );
+        if (!alleenHoorwoorden) return false;
+        if (["ov40", "ov41"].includes(oef.id)) return gekozen.length >= 2;
+        return true;
       }
 
       if (oef.id === "ov04" || oef.id === "ov05") {
@@ -652,6 +922,7 @@ window.SpellingZijbalk = (function() {
     if (!container) return;
     
     let html = "";
+    let verborgenKeuzeGewijzigd = false;
     for (const oef of OEFENVORMEN) {
       // Skip oefenvormen die niet bij de aangevinkte categorieën horen
       if (!_isOefenvormZichtbaar(oef)) {
@@ -659,6 +930,7 @@ window.SpellingZijbalk = (function() {
         const state = oefenvormState.find(s => s.id === oef.id);
         if (state && state.aangevinkt) {
           state.aangevinkt = false;
+          verborgenKeuzeGewijzigd = true;
         }
         continue;
       }
@@ -670,13 +942,23 @@ window.SpellingZijbalk = (function() {
       }
       
       const aan = state.aangevinkt || false;
+      const oefLabel = (actieveGraad === 2 && oef.id === "ov05")
+        ? "⭕ Verleng en kies het korte woord"
+        : (actieveGraad === 2 && oef.id === "ov02")
+          ? "✏️ Onthoudwoord 3× overschrijven"
+        : oef.label;
+      const oefUitleg = (actieveGraad === 2 && oef.id === "ov05")
+        ? "Lees het langere woord als hulp en schrijf het korte woord correct"
+        : (actieveGraad === 2 && oef.id === "ov02")
+          ? "Lees aandachtig en schrijf elk onthoudwoord drie keer correct"
+        : (oef.korteUitleg || "");
       const beschikbareNiveaus = oef.niveaus;
       
       html += `
         <details class="zb-oefenvorm ${aan ? 'aan' : ''}" data-oef="${oef.id}" ${aan ? 'open' : ''}>
           <summary class="zb-oef-titel">
             <input type="checkbox" class="zb-oef-checkbox" data-oef="${oef.id}" ${aan ? 'checked' : ''}>
-            <span class="zb-oef-tekst"><span class="zb-oef-label">${oef.label}</span><span class="zb-oef-kort">${oef.korteUitleg || ''}</span></span>
+            <span class="zb-oef-tekst"><span class="zb-oef-label">${oefLabel}</span><span class="zb-oef-kort">${oefUitleg}</span></span>
           </summary>
           <div class="zb-oef-instel">`;
       
@@ -751,7 +1033,7 @@ window.SpellingZijbalk = (function() {
       
       // OV02: plaatje-toggle (alleen relevant voor OV02 — "Woord 3x overschrijven")
       // Default uit; leerkracht kan aanvinken om plaatje bij elk woord te tonen
-      if (oef.id === "ov02") {
+      if (oef.id === "ov02" && actieveGraad === 1) {
         const metPlaatje = state.metPlaatje === true;  // default false
         html += `
           <div class="zb-oef-rij zb-oef-plaatje">
@@ -801,6 +1083,9 @@ window.SpellingZijbalk = (function() {
         : `<div class="zb-oef-leeg"><strong>Kies eerst een spellingdoel</strong><span>Daarna toont Zisa alleen de oefeningen die daarbij passen.</span></div>`;
     }
     container.innerHTML = html;
+    // Bewaar het automatisch uitvinken meteen. Zo kan een oude keuze uit
+    // een andere graad later niet alsnog een verkeerd werkblad genereren.
+    if (verborgenKeuzeGewijzigd) bewaarState();
     updateOefenvormTeller();
   }
 
@@ -928,16 +1213,18 @@ window.SpellingZijbalk = (function() {
         const oefId = e.target.dataset.oef;
         const state = _getOrCreateState(oefId);
         if (state) {
-          // Een volledig werkblad vertrekt vanuit één oefenvorm. Binnen die
-          // oefenvorm kan de leerkracht wel meerdere niveaus tegelijk kiezen
-          // voor een differentiatiepakket. In een werkboekje blijven meerdere
-          // korte oefenvormen tegelijk mogelijk.
-          if (e.target.checked && document.body.classList.contains("modus-actief-werkblad")) {
-            oefenvormState.forEach(s => {
-              if (s.id !== oefId) s.aangevinkt = false;
-            });
-          }
+          // Meerdere oefenvormen mogen samen gekozen worden. Dat is nodig om
+          // bijvoorbeeld eerst een OTT-basisregel en daarna een gerichte
+          // toepassing met dezelfde werkwoorden te laten maken.
           state.aangevinkt = e.target.checked;
+          // Na een nieuwe doelkeuze zijn oude niveaus bewust gewist. Als de
+          // leerkracht nu een oefenvorm aanvinkt, start die vanzelf op het
+          // eerste niveau. Zo kan de vorm nooit actief lijken terwijl er
+          // technisch nog nul werkbladen gekozen zijn.
+          if (e.target.checked && state.niveaus.size === 0) {
+            const oefDef = OEFENVORMEN.find(o => o.id === oefId);
+            if (oefDef?.niveaus?.length) state.niveaus.add(oefDef.niveaus[0]);
+          }
           bewaarState();
           renderOefenvormen();
           syncLegacyCatKnop();

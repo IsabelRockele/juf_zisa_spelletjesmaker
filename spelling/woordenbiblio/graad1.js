@@ -1240,5 +1240,31 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         beschrijving: "Een vorm met drie hoeken."
       }
     ]
+  },
+
+  /* ==========================================================
+     LEESTEKENS — optionele leerstof tweede leerjaar
+     Twee aparte categorieën zodat scholen zelf kunnen kiezen.
+     ========================================================== */
+  "leestekens-eind-g1": {
+    naam: "Eindtekens: punt, vraagteken en uitroepteken",
+    groep: "leestekens",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Kies achter een zin het juiste eindteken: punt, vraagteken of uitroepteken.",
+    woorden: [
+      { tekst: "punt", teken: ".", afbeelding: false },
+      { tekst: "vraagteken", teken: "?", afbeelding: false },
+      { tekst: "uitroepteken", teken: "!", afbeelding: false }
+    ]
+  },
+  "leestekens-binnen-g1": {
+    naam: "Komma en dubbele punt",
+    groep: "leestekens",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Plaats een komma in een opsomming en een dubbele punt voor een opsomming.",
+    woorden: [
+      { tekst: "komma", teken: ",", afbeelding: false },
+      { tekst: "dubbele punt", teken: ":", afbeelding: false }
+    ]
   }
 });

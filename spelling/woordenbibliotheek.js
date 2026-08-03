@@ -65,6 +65,7 @@ window.SpellingWoordenbibliotheek = {
     "verlengen-tdpb",     // graad 2 — uitgebreid t/d + p/b
     "verkleinwoorden",
     "meervouden",
+    "leestekens",
     // werkwoord (allemaal graad 2)
     "werkwoorden-ott",
     "werkwoorden-vtt",
@@ -167,6 +168,7 @@ window.SpellingWoordenbibliotheek = {
     "verlengen-tdpb": "Verlengingsregel (t/d + p/b)",
     "verkleinwoorden": "Verkleinwoorden",
     "meervouden": "Meervouden",
+    "leestekens": "Leestekens",
     "ei-ij": "ei / ij woorden",
     "au-ou": "au / ou woorden",
     "aai-ooi-oei-eeuw-ieuw-uw": "aai / ooi / oei / eeuw / ieuw / uw",

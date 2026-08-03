@@ -528,11 +528,12 @@
         .sort((a, b) => b.uitgangen.length - a.uitgangen.length);
       const tekst = passende[0] || GRAAD2_MEERVOUDTEKSTEN[2];
 
-      const schrijfregels = Array.from({ length: 7 }, () => {
+      const schrijfregels = Array.from({ length: 8 }, (_, index) => {
         const lijn = sl
           ? sl.htmlCanvas(cfg.lijntype, cfg.lijnhoogte, 650)
           : `<div class="ov07-fallback-lijn ov08-fallback-lijn"></div>`;
-        return `<div class="ov07-verhaal-lijn ov08-verhaal-lijn ov08-meervoudtekst-lijn">${lijn}</div>`;
+        const pagina2 = index === 4 ? `<div class="pagina-break-voor ov08-pagina2-spatie" aria-hidden="true"></div>` : "";
+        return `${pagina2}<div class="ov07-verhaal-lijn ov08-verhaal-lijn ov08-meervoudtekst-lijn">${lijn}</div>`;
       }).join("");
 
       return `

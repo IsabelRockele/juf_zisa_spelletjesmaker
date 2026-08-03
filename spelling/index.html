@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Spellinggenerator – Juf Zisa</title>
-  <link rel="stylesheet" href="style.css?v=20260802o">
+  <link rel="stylesheet" href="style.css?v=20260803zm">
   <link rel="stylesheet" href="modules/graad2-ov01.css">
   <style>
     /* === Woordenkiezer: afbeelding-icoon + filter (mei 2026) === */
@@ -82,26 +82,16 @@
   <section id="modus-startscherm" class="modus-startscherm" style="display:none">
     <div class="modus-startscherm-binnen">
       <h2 class="modus-titel">Wat wil je maken?</h2>
-      <p class="modus-ondertitel">Vertrek vanuit wat je voor je klas nodig hebt. Je kan later altijd terugkeren naar dit scherm.</p>
+      <p class="modus-ondertitel">Maak één werkblad of voeg meerdere doelen en oefenvormen samen tot een volledige bundel.</p>
 
       <div class="modus-kaarten">
 
         <button class="modus-kaart modus-kaart-werkblad" data-modus="werkblad" type="button">
           <div class="modus-kaart-icoon">📋</div>
-          <div class="modus-kaart-titel">Volledig werkblad</div>
+          <div class="modus-kaart-titel">Werkbladen maken</div>
           <div class="modus-kaart-uitleg">
-            Kies één oefenvorm. Zisa vult automatisch een volledige A4-pagina
-            met het passende aantal woorden.
-          </div>
-          <div class="modus-kaart-cta">Aan de slag →</div>
-        </button>
-
-        <button class="modus-kaart modus-kaart-herhaling" data-modus="herhaling" type="button">
-          <div class="modus-kaart-icoon">📚</div>
-          <div class="modus-kaart-titel">Werkboekje samenstellen</div>
-          <div class="modus-kaart-uitleg">
-            Combineer verschillende korte oefeningen. Kies per oefening zelf
-            hoeveel woorden je wilt gebruiken, bijvoorbeeld 3, 5 of 8.
+            Kies één of meerdere doelen en oefenvormen. Eén oefening wordt een
+            werkblad; meerdere werkbladen kan je samen als één PDF downloaden.
           </div>
           <div class="modus-kaart-cta">Aan de slag →</div>
         </button>
@@ -201,6 +191,7 @@
           <span class="zb-teller" id="zb-oef-teller"></span>
         </summary>
         <div class="zb-sectie-inhoud">
+          <div id="wb-oef-doelen" class="wb-oef-doelen" aria-live="polite"></div>
           <p class="zb-uitleg">Je ziet alleen oefeningen die bij je gekozen spellingdoel passen. Kies daarna hoeveel hulp het kind krijgt.</p>
           <div id="oefenvorm-selector">
             <!-- Wordt dynamisch gevuld -->
@@ -330,6 +321,7 @@
 
         <button id="bundel-wis" class="secundair-rood verborgen" type="button">🗑️ Wis bundel</button>
       </div>
+      <button id="preview-oplossingen-toggle" class="preview-oplossingen-knop verborgen" type="button">👁 Toon oplossingen</button>
 
     </aside>
 
@@ -629,47 +621,57 @@
 
   <!-- Volgorde: eerst woordenbibliotheek + graad-bestanden, dan modules -->
   <script src="modus-storage.js"></script>
-  <script src="afbeeldingen.js"></script>
-  <script src="afbeeldingen-helper.js?v=20260801b"></script>
+  <script src="afbeeldingen.js?v=20260803c"></script>
+  <script src="afbeeldingen-helper.js?v=20260803c"></script>
   <script src="schrijflijnen.js"></script>
   <script src="afleiders.js?v=20260802i"></script>
   <script src="klank-helper.js"></script>
   <script src="woordenbibliotheek.js"></script>
   <script src="woordenbiblio/graad1.js"></script>
-  <script src="woordenbiblio/graad2.js?v=20260802a"></script>
+  <script src="woordenbiblio/graad2.js?v=20260803g"></script>
   <script src="woordenbiblio/graad3.js"></script>
   <script src="woordenbiblio/zinnen-graad1.js"></script>
   <script src="woordenbiblio/zinnen-meervoud-graad1.js"></script>
   <script src="woordenbiblio/zinnen-klinkerdief-graad1.js"></script>
   <script src="woordenbiblio/dictee-zinnen-graad1.js"></script>
   <script src="woordenbiblio/dictee-zinnen-graad2.js"></script>
-  <script src="woordenkiezer.js?v=20260801g"></script>
+  <script src="woordenkiezer.js?v=20260803c"></script>
   <script src="dedup.js"></script>
   <script src="modules/weekdictee.js"></script>
   <script src="modules/ov01.js"></script>
   <script src="modules/ov02.js"></script>
   <script src="modules/ov03.js"></script>
-  <script src="modules/ov04.js?v=20260802i"></script>
-  <script src="modules/ov05.js?v=20260802i"></script>
+  <script src="modules/ov04.js?v=20260803a"></script>
+  <script src="modules/ov05.js?v=20260803d"></script>
   <script src="modules/ov06.js"></script>
-  <script src="modules/ov07.js?v=20260802l"></script>
-  <script src="modules/ov08.js?v=20260802n"></script>
+  <script src="modules/ov07.js?v=20260802m"></script>
+  <script src="modules/ov08.js?v=20260802o"></script>
   <script src="modules/ov09.js?v=20260802a"></script>
   <script src="modules/ov10.js"></script>
-  <script src="modules/ov11.js?v=20260802a"></script>
+  <script src="modules/ov11.js?v=20260802h"></script>
+  <script src="modules/ov12.js?v=20260803f"></script>
+  <script src="modules/ov13.js?v=20260803e"></script>
+  <script src="modules/ov14.js?v=20260803b"></script>
+  <script src="modules/ov15.js?v=20260803d"></script>
+  <script src="modules/ov16.js?v=20260803e"></script>
+  <script src="modules/ov22.js?v=20260803r"></script>
+  <script src="modules/ov29.js?v=20260803e"></script>
+  <script src="modules/ov32.js?v=20260803b"></script>
+  <script src="modules/ov35.js?v=20260803g"></script>
+  <script src="modules/ov40.js?v=20260803f"></script>
   <script src="modules/graad2-ov01.js"></script>
   <script src="generator.js?v=20260802i"></script>
   <script src="preview.js?v=20260802h"></script>
   <script src="pdf-engine.js?v=20260801a"></script>
-  <script src="bundel.js?v=20260802m"></script>
+  <script src="bundel.js?v=20260803l"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="herhalingsbundel-pdf.js?v=20260801b"></script>
 <script src="herhalingsbundel.js?v=20260802a"></script>
-  <script src="zijbalk.js?v=20260802o"></script>
+  <script src="zijbalk.js?v=20260803ze"></script>
   <script src="app.js?v=20260801g"></script>
   <script src="weekdictee-paneel.js"></script>
-  <script src="modus.js?v=20260801b"></script>
-  <script src="werkblad-stappen.js?v=20260802b"></script>
+  <script src="modus.js?v=20260803a"></script>
+  <script src="werkblad-stappen.js?v=20260803g"></script>
 
 </body>
 </html>
