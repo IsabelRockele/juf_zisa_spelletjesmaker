@@ -530,10 +530,21 @@ window.SpellingModules.ov10 = {
      ========================================================== */
 
   /* Heel woord als afbeelding (basis-niveau).
-     Probeert eerst PNG (afbeelding:true), dan emoji-combinatie. */
+     Probeert eerst de PNG. Niet elk woord dat historisch afbeelding:true
+     kreeg, heeft ook werkelijk al een bestand in de map. Toon daarom bij
+     een ontbrekende PNG de twee betekenisvolle deel-emoji's en nooit het
+     kapotte-afbeeldingsicoon van de browser. */
   _heelWoordAfbeelding: function(w) {
     if (w.afbeelding) {
-      return `<img class="ov10-afb-img" src="afbeeldingen/graad1/samenstellingen/${w.tekst}.png" alt="${w.tekst}">`;
+      const e = w.delenEmoji || ["", ""];
+      const fallback = `${e[0] || ""}${e[1] || ""}`;
+      return `<span class="ov10-afb-met-fallback">
+        <img class="ov10-afb-img"
+             src="afbeeldingen/graad1/samenstellingen/${w.tekst}.png"
+             alt="${w.tekst}"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex'">
+        <span class="ov10-afb-emoji-combo" style="display:none" aria-label="${w.tekst}">${fallback}</span>
+      </span>`;
     }
     const e = w.delenEmoji || ["", ""];
     return `<span class="ov10-afb-emoji-combo">${e[0]}${e[1]}</span>`;
