@@ -9,15 +9,16 @@
 <body>
     <header>
         <button id="menuBtn" onclick="window.location.href='index.html'">Keuzemenu</button>
-        <h1>Hexagon & Kleur Generator</h1>
+        <div class="header-title"><strong>Hexagonaal raster</strong><small>Teken, kleur en maak een werkblad</small></div>
     </header>
 
     <div id="main-content">
         <div id="left-panel">
             <div id="controls">
 
-                <div class="control-group">
-                    <h3>Tekengereedschap</h3>
+                <div class="control-group" id="drawingToolsGroup">
+                    <h3><span>2</span>Teken je figuur</h3>
+                    <p class="group-help">Kies een kleur en klik of sleep over de zeshoeken.</p>
                     <div id="colorPalette">
                         </div>
                     <div class="tool-setting" style="margin-top: 10px;">
@@ -31,7 +32,7 @@
                 </div>
 
                 <div class="control-group">
-                    <h3>Soort Werkblad</h3>
+                    <h3><span>3</span>Kies je werkblad</h3>
                     <label><input type="radio" name="worksheetType" value="oefeningen" checked> Met oefeningen</label>
                     <label><input type="radio" name="worksheetType" value="natekenen"> Natekenen</label>
                     <label><input type="radio" name="worksheetType" value="pixeltekening"> Hexagon-per-rij Code</label>
@@ -39,7 +40,7 @@
 
                 <div id="exerciseControlsContainer">
                     <div class="control-group">
-                        <h3>Soort Opgaven</h3>
+                        <h3>Welke oefeningen?</h3>
                          <div style="display: flex; gap: 15px;">
                             <div class="operation-type-group">
                                 <h4 style="margin-top: 5px; margin-bottom: 5px;">Optellen/Aftrekken</h4>
@@ -82,8 +83,9 @@
                     </div>
                 </div>
                 
-               <div class="control-group">
-                    <h3>Raster Grootte</h3>
+               <div class="control-group" id="gridControlsGroup">
+                    <h3><span>1</span>Stel je raster in</h3>
+                    <p class="group-help">Kies eerst het aantal kolommen en rijen.</p>
                     <div style="display: flex; gap: 10px; justify-content: space-between;">
                         <div class="tool-setting" style="flex-grow: 1;">
                             <label for="gridWidth">Kolommen:</label>
@@ -95,8 +97,8 @@
                         </div>
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <button id="updateGridSizeBtn" style="flex-grow: 1;">Update Raster</button>
-                        <button id="showPreviewBtn" style="flex-grow: 1;">Toon Werkblad Voorbeeld</button>
+                        <button id="updateGridSizeBtn" style="flex-grow: 1;">Pas raster toe</button>
+                        <button id="showPreviewBtn" style="flex-grow: 1;">Bekijk werkblad →</button>
                     </div>
                 </div>
                 <div id="meldingContainer" style="color: #d9534f; margin-top: 15px; font-weight: bold; min-height: 40px;"></div>
@@ -161,6 +163,6 @@
         </div>
     </div>
 
-    <script src="hexagon.js"></script>
+    <script src="hexagon.js?v=20260807"></script>
 </body>
 </html>
