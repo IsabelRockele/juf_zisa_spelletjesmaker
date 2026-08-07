@@ -1,0 +1,20 @@
+.pro-header {
+    height: 68px;
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    background: rgba(255,255,255,.94);
+    border-bottom: 2px solid var(--line);
+    box-shadow: 0 2px 12px rgba(26,58,92,.07);
+}
+
+.pro-header .back-link {
+    display: inline-flex;
+    padding: 9px 17px;
+    border-radius: 999px;
+    background: var(--navy);
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 900;
+}

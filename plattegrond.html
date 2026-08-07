@@ -7,38 +7,59 @@
     <link rel="stylesheet" href="plattegrond.css"/>
 </head>
 <body>
-    <a href="index.html" class="keuzemenu-knop">Keuzemenu</a>
-    <h1>Klaslokaal Plattegrond Generator</h1>
+    <header class="topbar">
+        <a href="index.html" class="keuzemenu-knop">← Keuzemenu</a>
+        <div class="brand">Juf Zisa <span>spelletjesmaker</span></div>
+    </header>
+    <section class="page-intro">
+        <span class="eyebrow">Klasorganisatie</span>
+        <h1>Plattegrond van je klas</h1>
+        <p>Bouw je lokaal stap voor stap, plaats meubels en voeg daarna namen toe.</p>
+    </section>
 
+    <main class="app-layout">
+    <aside id="controls-sidebar" class="controls-sidebar" aria-label="Instellingen plattegrond">
     <div id="hoofd-werkbalk" class="werkbalk">
-        <button id="nieuwKnop" class="btn btn-groen">Nieuwe Tekening</button>
-        <button id="importeerJsonKnop" class="btn btn-groen">Importeer</button>
-        <button id="exporteerJsonKnop" class="btn btn-groen">Exporteer</button>
-        <div class="separator"></div>
-        <button id="formaatWisselKnop" title="Wissel tussen staand en liggend formaat">Wissel Formaat</button>
-        <div class="separator"></div>
-        <button id="bouwModusKnop" class="btn btn-blauw">Muren Tekenen</button>
-        <button id="meubelModusKnop" class="btn btn-blauw actief">Meubels Plaatsen</button>
-        <button id="namenModusKnop" class="btn btn-blauw">Namen Toevoegen</button>
-        <button id="legendeModusKnop" class="btn btn-blauw">Legende Kleuren</button>
-        <button id="wisselModusKnop" class="btn btn-blauw">Plaatsen Wisselen</button>
-        <div class="separator"></div>
-        <button id="undoKnop" title="Ctrl+Z">Ongedaan Maken</button>
-        <button id="redoKnop" title="Ctrl+Y">Opnieuw</button>
-        <button id="dupliceerKnop" class="btn btn-oranje" title="Ctrl+D">Dupliceren</button>
-        <button id="verwijderKnop" class="btn btn-rood-outline" title="Del">Verwijder</button>
+        <section class="toolbar-section project-section">
+            <div class="toolbar-heading"><span>1</span><div><strong>Start je plattegrond</strong><small>Begin leeg of ga verder met een bewaard ontwerp.</small></div></div>
+            <div class="toolbar-actions">
+                <button id="nieuwKnop" class="btn btn-groen">＋ Nieuwe plattegrond</button>
+                <button id="importeerJsonKnop">↑ Bewaard ontwerp openen</button>
+                <button id="exporteerJsonKnop">↓ Ontwerp bewaren</button>
+                <button id="formaatWisselKnop" title="Wissel tussen staand en liggend formaat">↔ Staand / liggend</button>
+            </div>
+        </section>
 
-        <label><input type="checkbox" id="namenTonenToggle" checked/> Namen Tonen</label>
-        <label><input type="checkbox" id="legendeTonenToggle" checked/> Legende Tonen</label>
+        <section class="toolbar-section mode-section">
+            <div class="toolbar-heading"><span>2</span><div><strong>Wat wil je nu doen?</strong><small>Kies één werkmodus. De passende knoppen verschijnen eronder.</small></div></div>
+            <div class="mode-grid">
+                <button id="bouwModusKnop" class="btn btn-blauw actief"><b>📐 Bouw lokaal</b><small>Muren, deur en ramen</small></button>
+                <button id="meubelModusKnop" class="btn btn-blauw"><b>🪑 Plaats meubels</b><small>Tafels, banken en kasten</small></button>
+                <button id="namenModusKnop" class="btn btn-blauw"><b>✏️ Voeg namen toe</b><small>Koppel leerlingen aan plaatsen</small></button>
+                <button id="legendeModusKnop" class="btn btn-blauw"><b>🎨 Maak legende</b><small>Geef onderdelen een kleur</small></button>
+                <button id="wisselModusKnop" class="btn btn-blauw"><b>🔄 Wissel plaatsen</b><small>Verplaats leerlingen snel</small></button>
+            </div>
+        </section>
 
-        <div class="flex-break"></div>
-
-        <button id="downloadPdfPlattegrondKnop" class="btn btn-rood">PDF enkel Plattegrond</button>
-        <button id="downloadPdfNamenKnop" class="btn btn-rood">PDF met Namen</button>
-        <button id="downloadPdfLegendeKnop" class="btn btn-rood">PDF met Legende</button>
+        <section class="toolbar-section edit-section">
+            <div class="toolbar-heading"><span>3</span><div><strong>Bewerk je selectie</strong><small>Klik eerst een onderdeel op de plattegrond aan.</small></div></div>
+            <div class="toolbar-actions">
+                <button id="undoKnop" title="Ctrl+Z">↶ Ongedaan</button>
+                <button id="redoKnop" title="Ctrl+Y">↷ Opnieuw</button>
+                <button id="dupliceerKnop" class="btn btn-oranje" title="Ctrl+D">⧉ Dupliceren</button>
+                <button id="spiegelKnop" title="Keer de geselecteerde deuropening of het object om">⇋ Spiegelen</button>
+                <button id="verwijderKnop" class="btn btn-rood-outline" title="Del">✕ Verwijderen</button>
+                <label><input type="checkbox" id="namenTonenToggle" checked/> Namen tonen</label>
+                <label><input type="checkbox" id="legendeTonenToggle" checked/> Legende tonen</label>
+            </div>
+        </section>
     </div>
 
-    <div id="bouw-werkbalk" class="werkbalk werkbalk-context verborgen">
+    <div id="modus-uitleg" class="modus-uitleg" aria-live="polite">
+        <span>📐</span><div><strong>Je bouwt nu het lokaal</strong><small>Kies hieronder een volledige rechthoekige klas of teken muren, deuren en ramen afzonderlijk.</small></div>
+    </div>
+
+    <div id="bouw-werkbalk" class="werkbalk werkbalk-context">
         <strong>Bouwmodus:</strong>
         <button id="plaatsKlasKnop">Rechthoekige Klas</button>
         <button id="tekenMuurKnop">Muur per Muur</button>
@@ -50,12 +71,12 @@
         <label><input type="checkbox" id="rasterToggle"/> Raster Tonen</label>
     </div>
 
-    <div id="meubel-werkbalk" class="werkbalk werkbalk-context">
-        <strong>Meubels:</strong>
-        <button data-type="schoolbank">Schoolbank (PNG)</button>
-        <button data-type="bureau">Bureau (PNG)</button>
-        <button data-type="kast">Kast (PNG)</button>
-        <button data-type="wastafel">Wastafel (PNG)</button>
+    <div id="meubel-werkbalk" class="werkbalk werkbalk-context verborgen">
+        <strong>Kies een meubel:</strong>
+        <button data-type="schoolbank">Schoolbank</button>
+        <button data-type="bureau">Bureau</button>
+        <button data-type="kast">Kast</button>
+        <button data-type="wastafel">Wastafel</button>
         <div class="separator"></div>
         <button data-type="leerlingBureau">Leerlingbureau</button>
         <button data-type="tafel">Tafel</button>
@@ -64,12 +85,28 @@
         <button data-type="schoolbordFlappen">Bord (met flappen)</button>
     </div>
 
+    <section class="download-panel">
+        <div class="toolbar-heading"><span>4</span><div><strong>Klaar? Download je plattegrond</strong><small>Kies wat er op de PDF moet verschijnen.</small></div></div>
+        <div class="download-actions">
+            <button id="downloadPdfPlattegrondKnop" class="btn btn-rood"><b>Plattegrond</b><small>Zonder namen of legende</small></button>
+            <button id="downloadPdfNamenKnop" class="btn btn-rood"><b>Met namen</b><small>Inclusief leerlingnamen</small></button>
+            <button id="downloadPdfLegendeKnop" class="btn btn-rood"><b>Met legende</b><small>Inclusief kleurverklaring</small></button>
+        </div>
+    </section>
+
     <div id="namen-werkbalk" class="werkbalk verborgen">
         <strong>Namenmodus:</strong>
         <input type="text" id="naamInput" placeholder="Typ naam..."/>
         <button id="naamToevoegenKnop">Naam Toevoegen aan Selectie</button>
     </div>
 
+    </aside>
+
+    <section class="workspace" aria-label="Werkblad plattegrond">
+    <div class="workspace-heading">
+        <div><span class="eyebrow">Voorbeeld</span><h2>Je plattegrond</h2></div>
+        <p>Versleep, draai en vergroot onderdelen rechtstreeks op het blad.</p>
+    </div>
     <div class="pagina-container">
         <div id="namen-wachtlijst-container" class="verborgen">
             <h3>Wachtlijst</h3>
@@ -85,6 +122,7 @@
             <div id="legende-weergave-container"></div>
         </div>
     </div>
+    </section>
 
     <div id="legende-container" class="verborgen">
         <h2>Legende Kleuren</h2>
@@ -121,6 +159,7 @@
             <span class="stap-nummer">3</span><strong>Klik op objecten in de plattegrond om ze te kleuren.</strong>
         </div>
     </div>
+    </main>
 
     <input type="file" id="json-file-input" accept=".json" style="display:none"/>
 

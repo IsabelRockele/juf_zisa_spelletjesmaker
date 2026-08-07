@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- VARIABELEN & STATUS ---
-    let modus = 'meubel';
+    let modus = 'bouw';
     let isWisselModusActief = false;
     let bouwTool = '';
     let isDrawingWall = false;
@@ -141,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const redoKnop = document.getElementById('redoKnop');
     const verwijderKnop = document.getElementById('verwijderKnop');
     const dupliceerKnop = document.getElementById('dupliceerKnop');
+    const spiegelKnop = document.getElementById('spiegelKnop');
     const nieuwKnop = document.getElementById('nieuwKnop');
     const exporteerJsonKnop = document.getElementById('exporteerJsonKnop');
     const importeerJsonKnop = document.getElementById('importeerJsonKnop');
@@ -159,12 +160,82 @@ document.addEventListener('DOMContentLoaded', () => {
         namen: document.getElementById('namen-werkbalk'),
     };
     const legendeContainer = document.getElementById('legende-container');
+    const controlsSidebar = document.getElementById('controls-sidebar');
+    if (controlsSidebar && legendeContainer) controlsSidebar.appendChild(legendeContainer);
+    const vasteBewerkbalk = document.querySelector('.edit-section');
+    const workspace = document.querySelector('.workspace');
+    const werkbladZone = workspace?.querySelector('.pagina-container');
+    if (workspace && werkbladZone && vasteBewerkbalk) workspace.insertBefore(vasteBewerkbalk, werkbladZone);
     const rasterToggle = document.getElementById('rasterToggle');
     const namenTonenToggle = document.getElementById('namenTonenToggle');
     const legendeTonenToggle = document.getElementById('legendeTonenToggle');
     const namenWachtlijstContainer = document.getElementById('namen-wachtlijst-container');
     const namenLijst = document.getElementById('namen-lijst');
     const kleurenpalet = document.getElementById('kleurenpalet');
+    const modusUitleg = document.getElementById('modus-uitleg');
+    const modusUitlegTeksten = {
+        bouw: ['📐', 'Je bouwt nu het lokaal', 'Kies hieronder een volledige rechthoekige klas of teken muren, deuren en ramen afzonderlijk.'],
+        meubel: ['🪑', 'Je plaatst nu meubels', 'Kies hieronder een meubel. Het verschijnt op het blad en kan daarna versleept, gedraaid of vergroot worden.'],
+        namen: ['✏️', 'Je voegt nu namen toe', 'Selecteer eerst een meubel, typ een leerlingnaam en klik daarna op “Naam toevoegen aan selectie”.'],
+        legende: ['🎨', 'Je maakt nu een kleurenlegende', 'Kies een categorie en een kleur. Klik vervolgens op de bijbehorende objecten in de plattegrond.'],
+        wissel: ['🔄', 'Je wisselt nu leerlingplaatsen', 'Sleep namen uit de wachtlijst naar een andere vrije plaats en klik op “Klaar” wanneer iedereen zit.']
+    };
+
+    function updateModusUitleg(nieuweModus) {
+        if (!modusUitleg || !modusUitlegTeksten[nieuweModus]) return;
+        const [icoon, titel, uitleg] = modusUitlegTeksten[nieuweModus];
+        modusUitleg.innerHTML = `<span>${icoon}</span><div><strong>${titel}</strong><small>${uitleg}</small></div>`;
+    }
+
+    function brengModusGereedschapInBeeld(nieuweModus) {
+        if (!controlsSidebar) return;
+        const doel = werkbalken[nieuweModus] || (nieuweModus === 'legende' ? legendeContainer : modusUitleg);
+        if (!doel) return;
+        requestAnimationFrame(() => {
+            const zijbalkRechthoek = controlsSidebar.getBoundingClientRect();
+            const doelRechthoek = doel.getBoundingClientRect();
+            const gewensteBovenkant = controlsSidebar.scrollTop + doelRechthoek.top - zijbalkRechthoek.top - 8;
+            controlsSidebar.scrollTo({ top: Math.max(0, gewensteBovenkant), behavior: 'smooth' });
+            doel.classList.remove('context-attention');
+            requestAnimationFrame(() => doel.classList.add('context-attention'));
+        });
+    }
+
+    // Houd het volledige tekenblad zichtbaar zonder een scrollbar in de werkzone.
+    function pasCanvasInWerkruimte() {
+        const werkruimte = document.querySelector('.workspace .pagina-container');
+        const canvasHost = canvas.wrapperEl?.parentElement;
+        const fabricWrapper = canvas.wrapperEl;
+        if (!werkruimte || !canvasHost || !fabricWrapper) return;
+
+        const zijpanelen = Array.from(werkruimte.children).filter(element =>
+            element !== canvasHost && !element.classList.contains('verborgen')
+        );
+        const zijbreedte = zijpanelen.reduce((totaal, element) => totaal + element.offsetWidth + 18, 0);
+        const beschikbareBreedte = Math.max(260, werkruimte.clientWidth - zijbreedte - 24);
+        const beschikbareHoogte = Math.max(320, werkruimte.clientHeight - 32);
+        const basisBreedte = canvas.getWidth();
+        const basisHoogte = canvas.getHeight();
+        const schaal = Math.min(1, beschikbareBreedte / basisBreedte, beschikbareHoogte / basisHoogte);
+        const zichtbareBreedte = Math.round(basisBreedte * schaal);
+        const zichtbareHoogte = Math.round(basisHoogte * schaal);
+
+        fabricWrapper.style.width = `${zichtbareBreedte}px`;
+        fabricWrapper.style.height = `${zichtbareHoogte}px`;
+        fabricWrapper.querySelectorAll('canvas').forEach(element => {
+            element.style.width = `${zichtbareBreedte}px`;
+            element.style.height = `${zichtbareHoogte}px`;
+        });
+        canvasHost.style.width = `${zichtbareBreedte + 24}px`;
+        canvasHost.style.height = `${zichtbareHoogte + 24}px`;
+        canvas.calcOffset();
+    }
+
+    const werkruimteElement = document.querySelector('.workspace .pagina-container');
+    if (werkruimteElement && 'ResizeObserver' in window) {
+        new ResizeObserver(() => pasCanvasInWerkruimte()).observe(werkruimteElement);
+    }
+    window.addEventListener('resize', pasCanvasInWerkruimte);
 
     // --- LEGENDE KLEUREN TOEPASSEN / VERWIJDEREN ---
     function setCanvasColorsFromLegend(show) {
@@ -228,6 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
         canvasEl.height = oldWidth;
         canvas.loadFromJSON(json, () => {
             canvas.renderAll();
+            requestAnimationFrame(pasCanvasInWerkruimte);
             if (wasRasterZichtbaar) tekenRaster();
         });
         setTimeout(saveStateImmediate, 200);
@@ -303,6 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         history = [emptyState];
         redoStack = [];
         updateUndoRedoButtons();
+        schakelModus('bouw');
     }
     nieuwKnop.addEventListener('click', () => startNieuweTekening(true));
 
@@ -381,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 redoStack = [];
                 updateUndoRedoButtons();
             }
-            schakelModus('meubel', true);
+            schakelModus('bouw', true);
             setNamenZichtbaarheid(namenTonenToggle.checked);
             rebuildLegendFromCanvas();
             setCanvasColorsFromLegend(legendeTonenToggle.checked);
@@ -420,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startPlaatsenWisselen() {
         const groepen = canvas.getObjects().filter(obj => obj.studentNaam);
         if (groepen.length === 0) { alert("Er zijn geen namen op de plattegrond om te wisselen."); return; }
-        isWisselModusActief = true; schakelModus('wissel'); modusKnoppen.wissel.textContent = 'Klaar';
+        isWisselModusActief = true; schakelModus('wissel'); modusKnoppen.wissel.innerHTML = '<b>✓ Klaar met wisselen</b><small>Bewaar de nieuwe plaatsen</small>';
         let clonesDone = 0; const clonedMeubels = []; const namenVoorWachtruimte = [];
         groepen.forEach(groep => {
             const meubel = groep.getObjects().find(item => !item.isNaam);
@@ -458,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (namenLijst.children.length > 0) {
             if (!confirm("Er staan nog namen in de wachtruimte. Stoppen? Niet-geplaatste namen worden verwijderd.")) return;
         }
-        isWisselModusActief = false; modusKnoppen.wissel.textContent = 'Plaatsen Wisselen';
+        isWisselModusActief = false; modusKnoppen.wissel.innerHTML = '<b>🔄 Wissel plaatsen</b><small>Verplaats leerlingen snel</small>';
         namenWachtlijstContainer.classList.add('verborgen'); namenLijst.innerHTML = '';
         namenLijst.removeEventListener('dragstart', handleDragStart);
         canvas.upperCanvasEl.removeEventListener('dragover', handleDragOver);
@@ -540,11 +613,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     function schakelModus(nieuweModus) {
         modus = nieuweModus; canvas.isDrawingMode = false;
+        updateModusUitleg(nieuweModus);
         Object.values(modusKnoppen).forEach(knop => knop.classList.remove('actief'));
         if (modusKnoppen[nieuweModus]) modusKnoppen[nieuweModus].classList.add('actief');
         Object.values(werkbalken).forEach(balk => balk.classList.add('verborgen'));
         if (werkbalken[nieuweModus]) werkbalken[nieuweModus].classList.remove('verborgen');
         legendeContainer.classList.toggle('verborgen', nieuweModus !== 'legende');
+        brengModusGereedschapInBeeld(nieuweModus);
         const isInteractief = !['legende', 'wissel'].includes(nieuweModus);
         canvas.selection = isInteractief; canvas.defaultCursor = 'default';
         canvas.forEachObject(obj => {
@@ -851,6 +926,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }, customProperties);
     }
     dupliceerKnop.addEventListener('click', dupliceerSelectie);
+    spiegelKnop.addEventListener('click', () => {
+        const selectie = canvas.getActiveObjects();
+        if (!selectie || selectie.length === 0) {
+            alert('Selecteer eerst de deur of het object dat je wilt spiegelen.');
+            return;
+        }
+        selectie.forEach(obj => {
+            obj.set('flipX', !obj.flipX);
+            obj.setCoords();
+        });
+        canvas.requestRenderAll();
+        saveStateImmediate();
+    });
     window.addEventListener('keydown', (e) => {
         const activeEl = document.activeElement;
         if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT')) return;
@@ -1054,4 +1142,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     laadCanvasUitBrowser();
+    requestAnimationFrame(() => requestAnimationFrame(pasCanvasInWerkruimte));
 });
