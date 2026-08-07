@@ -29,7 +29,7 @@ window.SpellingModules.ov10 = {
     basis: 8,
     kern: 8,
     verdieping: 12,
-    uitbreiding: 7
+    uitbreiding: 6
   },
 
   /* ---------- INSTELLINGEN UI (zijbalk) ---------- */
@@ -535,9 +535,11 @@ window.SpellingModules.ov10 = {
      een ontbrekende PNG de twee betekenisvolle deel-emoji's en nooit het
      kapotte-afbeeldingsicoon van de browser. */
   _heelWoordAfbeelding: function(w) {
+    const e = w.delenEmoji || ["", ""];
+    const fallback = `<span class="ov10-afb-emoji-deel">${e[0] || "?"}</span>` +
+      `<span class="ov10-afb-emoji-plus">+</span>` +
+      `<span class="ov10-afb-emoji-deel">${e[1] || "?"}</span>`;
     if (w.afbeelding) {
-      const e = w.delenEmoji || ["", ""];
-      const fallback = `${e[0] || ""}${e[1] || ""}`;
       return `<span class="ov10-afb-met-fallback">
         <img class="ov10-afb-img"
              src="afbeeldingen/graad1/samenstellingen/${w.tekst}.png"
@@ -546,8 +548,7 @@ window.SpellingModules.ov10 = {
         <span class="ov10-afb-emoji-combo" style="display:none" aria-label="${w.tekst}">${fallback}</span>
       </span>`;
     }
-    const e = w.delenEmoji || ["", ""];
-    return `<span class="ov10-afb-emoji-combo">${e[0]}${e[1]}</span>`;
+    return `<span class="ov10-afb-emoji-combo">${fallback}</span>`;
   },
 
   /* Eén deel als afbeelding (kern-niveau).

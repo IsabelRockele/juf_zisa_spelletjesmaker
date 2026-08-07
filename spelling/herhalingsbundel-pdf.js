@@ -5059,7 +5059,8 @@ window.SpellingHerhalingsbundelPDF = (function() {
     const AFB_KOLOMMEN = 4;
     const AFB_SPACING = 3;
     const AFB_BREEDTE_CEL = (breedte - (AFB_KOLOMMEN - 1) * AFB_SPACING) / AFB_KOLOMMEN;
-    const AFB_HOOGTE_CEL = 18;
+    // Lagere afbeeldingskaders houden ook de onderste schrijflijnen binnen A4.
+    const AFB_HOOGTE_CEL = 14;
     const afbRijen = Math.ceil(afbeeldingen.length / AFB_KOLOMMEN);
     const afbSectieHoogte = afbRijen * AFB_HOOGTE_CEL + (afbRijen - 1) * AFB_SPACING;
     
@@ -5266,7 +5267,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     }
     
     // Layout: per rij plaatje + plus + plaatje + is + schrijflijn
-    const PLAATJE_GROOTTE = 14;
+    const PLAATJE_GROOTTE = 12;
     const PLUS_BREEDTE = 6;
     const IS_BREEDTE = 6;
     const PLAATJES_BREEDTE = 2 * PLAATJE_GROOTTE + PLUS_BREEDTE + IS_BREEDTE + 8;
@@ -5274,7 +5275,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     const lijnBreedte = breedte - PLAATJES_BREEDTE - SPACING_PLAATJES_LIJN;
     
     const rijHoogte = Math.max(PLAATJE_GROOTTE, SCHRIJFLIJN_HOOGTE) + 4;
-    const RIJ_SPACING = 5;
+    const RIJ_SPACING = 3;
     
     reserveerRuimte(state, opdrachtHoogte + 4 + rijHoogte + RIJ_SPACING);
     

@@ -2806,7 +2806,9 @@ body.bewerk-aan [data-bewerk-id]:focus {
   body { background: white; }
   .topbar, .sidebar, .actie-knoppen { display: none; }
   .preview-paneel { box-shadow: none; padding: 0; }
-  .werkblad { box-shadow: none; margin: 0; page-break-after: always; }
+  /* De sprong voor een volgend blad staat al op .werkblad + .werkblad.
+     Een break na óók het laatste blad kan een lege PDF-pagina opleveren. */
+  .werkblad { box-shadow: none; margin: 0; page-break-after: auto; break-after: auto; }
 }
 /* =====================================================
    ZIJBALK REDESIGN (mei 2026)
@@ -5327,41 +5329,65 @@ body.bewerk-aan [data-bewerk-id]:focus {
 
 /* ----- BASIS: woordzoeker met plaatjes ----- */
 .ov10-basis-inhoud {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 .ov10-basis-afb-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin: 0 auto 14px;
+  gap: 6px;
+  margin: 0 auto 8px;
   max-width: 700px;
 }
 .ov10-basis-afb-cel {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 70px;
+  height: 48px;
+  min-height: 0;
   background: #f7f9fc;
   border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 6px;
+  padding: 3px 5px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 .ov10-afb-img {
   max-width: 100%;
-  max-height: 80px;
+  max-height: 42px;
   object-fit: contain;
+  /* De vierkante bronprenten bevatten veel witruimte. Zo wordt de
+     eigenlijke rebus groter, zonder het afdrukkader opnieuw te verhogen. */
+  transform: scale(2.25);
+  transform-origin: center;
 }
 .ov10-afb-emoji-combo {
-  font-size: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 2.25rem;
   line-height: 1;
-  letter-spacing: 2px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.ov10-afb-emoji-deel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+}
+.ov10-afb-emoji-plus {
+  color: #1a1a1a;
+  font-family: Arial, sans-serif;
+  font-size: 1.45rem;
+  font-weight: 800;
 }
 
 .ov10-basis-rooster {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  margin: 16px auto;
+  margin: 8px auto;
   width: fit-content;
   font-family: "Courier New", monospace;
 }
@@ -5394,7 +5420,7 @@ body.bewerk-aan [data-bewerk-id]:focus {
 /* ----- Noteer-rijen (gedeeld door basis + verdieping) ----- */
 .ov10-noteer-label {
   font-weight: 600;
-  margin: 14px 0 8px 0;
+  margin: 8px 0 5px 0;
   font-size: 0.95rem;
 }
 .ov10-basis-noteer,
@@ -5426,15 +5452,15 @@ body.bewerk-aan [data-bewerk-id]:focus {
 .ov10-kern-rooster {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 5px;
+  margin-top: 7px;
 }
 .ov10-kern-rij {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 16px;
   align-items: center;
-  padding: 8px 0;
+  padding: 3px 0;
   border-bottom: 1px dashed #e0e0e0;
   position: relative;
 }
@@ -5447,20 +5473,20 @@ body.bewerk-aan [data-bewerk-id]:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   background: #f7f9fc;
   border: 1px solid #ddd;
   border-radius: 6px;
-  font-size: 1.8rem;
+  font-size: 1.55rem;
 }
 .ov10-deel-tekst {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 52px;
-  height: 52px;
-  padding: 0 10px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 8px;
   background: #fff8d6;
   border: 1.5px solid #d4a017;
   border-radius: 6px;
@@ -5604,7 +5630,8 @@ body.bewerk-aan [data-bewerk-id]:focus {
 }
 /* Binnen een mini-oefening: smallere grid + compactere items */
 .ov10-vb-twee-kolommen .ov10-vb-grid {
-  grid-template-columns: 1fr 30px 1fr;
+  /* Voldoende vrije tekenruimte tussen beide woordkolommen. */
+  grid-template-columns: minmax(78px, 1fr) 72px minmax(78px, 1fr);
   padding: 10px 6px;
   max-width: none;
   margin: 0;
