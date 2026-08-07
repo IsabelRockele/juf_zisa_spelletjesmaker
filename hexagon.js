@@ -646,7 +646,7 @@ function pixelToHex(x, y) {
 
     // --- Catalogus Functies ---
     async function loadCatalog() {
-        try { const response = await fetch('hexagon_afbeeldingen/catalog.json'); if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); catalogData = await response.json(); } catch (e) { console.error("Kon de catalogus niet laden:", e); meldingContainer.textContent = "Fout bij laden van de catalogus."; }
+        try { const response = await fetch('hexagon_afbeeldingen/catalog.json', { cache: 'no-store' }); if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); catalogData = await response.json(); } catch (e) { console.error("Kon de catalogus niet laden:", e); meldingContainer.textContent = "Fout bij laden van de catalogus."; }
     }
     function openCatalog() { populateThemes(); catalogModal.style.display = 'block'; }
     function closeCatalog() { catalogModal.style.display = 'none'; themesContainer.style.display = 'grid'; choicesContainer.style.display = 'none'; backToThemesBtn.style.display = 'none'; modalTitle.textContent = 'Catalogus'; }
