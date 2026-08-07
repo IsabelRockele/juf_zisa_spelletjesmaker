@@ -3,38 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digitaal Rad van Fortuin</title>
+    <title>Rad van Fortuin – Juf Zisa</title>
     <link rel="stylesheet" href="rad.css">
 </head>
 <body class="options-view">
 
-    <a href="index.html" class="menu-button">Keuzemenu</a>
+    <header class="topbar">
+        <a href="index.html" class="menu-button">← Keuzemenu</a>
+        <div class="brand">Juf Zisa <span>spelletjesmaker</span></div>
+    </header>
 
     <div class="container">
-        <h1>Digitaal Rad van Fortuin</h1>
+        <div class="page-intro">
+            <span class="eyebrow">Interactief in de klas</span>
+            <h1>Rad van Fortuin</h1>
+            <p>Kies wat er op het rad komt, maak je lijst en laat het rad beslissen.</p>
+        </div>
 
         <div class="controls">
             <div class="controls-header">
-                <h2>Stap 1: Kies en genereer je opdrachten</h2>
+                <div><span class="step-label">Stap 1</span><h2>Kies de inhoud van je rad</h2></div>
                 <div class="option-group">
                     <label><input type="checkbox" id="removeAfterSpin" checked> Verwijder na draai</label>
                 </div>
             </div>
 
             <div class="controls-columns">
-                <div class="column">
-                    <h3>Eigen lijsten & afbeeldingen</h3>
-                    <textarea id="itemInput" placeholder="Typ hier elke optie op een nieuwe regel..." rows="4"></textarea>
-                    <button id="exportListBtn" class="preset-btn" style="width:100%; margin-bottom: 10px; background-color: #16a085;">Bewaar Invoer als .txt</button>
+                <div class="selection-status" id="selectionStatus" aria-live="polite">
+                    <div class="selection-status-icon">🎯</div>
+                    <div class="selection-status-copy">
+                        <strong id="selectionStatusTitle">Nog geen inhoud gekozen</strong>
+                        <span id="selectionStatusText">Kies hieronder één manier om je rad te vullen.</span>
+                        <div id="selectionPreview" class="selection-preview"></div>
+                    </div>
+                    <label class="solutions-choice">
+                        <input type="checkbox" id="showSolutionsAtEnd">
+                        <span><strong>Oplossingen tonen op het einde</strong><small>Na de laatste draai verschijnt een knop om zelf na te kijken.</small></span>
+                    </label>
+                    <button id="showWheelTopBtn" class="action-btn" disabled>Toon mijn rad →</button>
+                </div>
+
+                <div class="choice-help">
+                    <strong>Hoe werkt het?</strong>
+                    <span><b>1.</b> Kies één vak hieronder.</span>
+                    <span><b>2.</b> Maak of laad de inhoud.</span>
+                    <span><b>3.</b> Klik hierboven op ‘Toon mijn rad’.</span>
+                </div>
+
+                <div class="column column-own">
+                    <h3><span class="card-icon">✏️</span>Eigen lijst</h3>
+                    <p class="column-intro">Wil je zelf bepalen wat op het rad staat? Kies dan één van deze drie mogelijkheden.</p>
+                    <div class="own-explanation"><b>Zelf typen</b><span>Zet elke naam of opdracht op een nieuwe regel.</span></div>
+                    <textarea id="itemInput" placeholder="Bijvoorbeeld:&#10;Lina&#10;Noah&#10;Adam" rows="4"></textarea>
+                    <button id="exportListBtn" class="preset-btn save-btn">Bewaar mijn getypte lijst</button>
                     
-                    <label for="fileUpload" class="upload-label">Upload Klaslijst (.txt)</label>
+                    <label for="fileUpload" class="upload-label">📄 Een bestaande namenlijst laden <small>.txt-bestand</small></label>
                     <input type="file" id="fileUpload" accept=".txt" style="display: none;">
-                    <label for="imageUpload" class="upload-label">Upload Afbeeldingen</label>
+                    <label for="imageUpload" class="upload-label">🖼️ Afbeeldingen op het rad zetten <small>meerdere bestanden mogelijk</small></label>
                     <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
                 </div>
 
-                <div class="column">
-                    <h3>Rekenen</h3>
+                <div class="column column-math">
+                    <h3><span class="card-icon">➗</span>Rekenen</h3>
+                    <p class="column-intro">Maak een rad met tafels of bewerkingen op het gewenste niveau.</p>
                     <div class="option-group" style="background-color: #e74c3c1a;">
                         <label style="color: var(--warning-color); font-weight: 600; width: 100%; cursor: pointer;">
                             <input type="checkbox" id="timedMathCheckbox"> Tempo-modus (elke som 4s)
@@ -65,8 +96,9 @@
                     <button id="generateSumsBtn" class="generate-btn" style="margin-top: 10px;">Genereer Sommen</button>
                 </div>
 
-                <div class="column">
-                    <h3>Executieve Functies</h3>
+                <div class="column column-ef">
+                    <h3><span class="card-icon">🧠</span>Executieve functies</h3>
+                    <p class="column-intro">Kies denkvaardigheden voor korte, speelse klasopdrachten.</p>
                     <div class="option-group">
                         <label><input type="checkbox" id="imageModeCheckbox"> Beeldmodus (voor niet-lezers)</label>
                     </div>
@@ -80,14 +112,14 @@
                     <a href="handleiding.pdf" download class="download-btn" style="margin-top: 1.5rem;">Download Handleiding (PDF)</a>
                 </div>
                 
-                <div class="column">
-                    <h3>Beweging</h3>
+                <div class="column column-movement">
+                    <h3><span class="card-icon">🤸</span>Beweging</h3>
                     <p style="font-size: 0.9rem; margin-bottom: 15px;">Genereer leuke en snelle bewegingsoefeningen.</p>
                     <button id="generateMovementBtn" class="movement-btn">Genereer Bewegingstaken</button>
                 </div>
 
-                <div class="column">
-                    <h3>Taal</h3>
+                <div class="column column-language">
+                    <h3><span class="card-icon">💬</span>Taal & lezen</h3>
                     <h4>Taaldenken</h4>
                     <div id="taal-selection-grid" class="ef-selection-grid">
                         <label><input type="checkbox" name="taal_category" value="rijmen" checked> Rijmen</label>
@@ -103,8 +135,8 @@
                     <button id="generateTechLezenBtn" class="tech-lezen-btn">Genereer Leesopdrachten</button>
                 </div>
 
-                <div class="column" style="background-color: #ecf0f1; border-radius: 8px;">
-                    <h3>Mix & Match</h3>
+                <div class="column column-mix">
+                    <h3><span class="card-icon">✨</span>Mix & match</h3>
                     <p style="font-size: 0.9rem; margin-bottom: 15px;">Vink de categorieën aan die je wilt mengen (max. 25 opdrachten).</p>
                     <div id="mix-selection-grid" class="ef-selection-grid">
                         <label><input type="checkbox" class="mix-category-checkbox" data-category="rekenen_tafels"> Rekenen: Tafels</label>
@@ -114,23 +146,27 @@
                         <label><input type="checkbox" class="mix-category-checkbox" data-category="taal"> Taal: Taaldenken</label>
                         <label><input type="checkbox" class="mix-category-checkbox" data-category="taal_lezen"> Taal: Technisch Lezen</label>
                     </div>
-                    <button id="generateMixBtn" class="action-btn" style="margin-top: 10px; background-color: var(--primary-color);">Genereer Gemengd Rad</button>
+                    <button id="generateMixBtn" class="action-btn mix-btn">Genereer gemengd rad</button>
                 </div>
 
             </div>
 
-            <button id="showWheelBtn" class="action-btn" disabled>Stap 2: Toon het Rad</button>
+            <div class="continue-bar">
+                <div><span class="step-label">Stap 2</span><strong>Klaar met kiezen?</strong><small>Je hebt minstens twee opties nodig.</small></div>
+                <button id="showWheelBtn" class="action-btn" disabled>Toon het rad →</button>
+            </div>
         </div>
 
         <div id="wheelViewControls">
-            <button id="restartBtn" class="preset-btn">Nog eens met dit rad</button>
-            <button id="downloadListBtn" class="preset-btn" style="background-color: #16a085;">Download Overzicht</button>
+            <button id="restartBtn" class="preset-btn">↻ Nog eens met dit rad</button>
+            <button id="downloadListBtn" class="preset-btn save-btn">↓ Download overzicht</button>
+            <button id="showSolutionsBtn" class="solutions-btn" type="button">✓ Toon oplossingen</button>
             <button id="newOptionsBtn" type="button" class="warning-btn">Nieuwe opties kiezen</button>
         </div>
 
         <div class="main-content">
             <div class="wheel-wrapper">
-                <canvas id="wheelCanvas" width="650" height="650"></canvas>
+                <div class="wheel-surface"><canvas id="wheelCanvas" width="650" height="650"></canvas></div>
                 <div class="pointer"></div>
                 <button id="spinBtn">DRAAI!</button>
             </div>

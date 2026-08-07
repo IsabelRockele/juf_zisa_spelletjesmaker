@@ -10,34 +10,6 @@
     <link rel="stylesheet" href="rad.css">
 
    
-    <style>
-        .pro-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #3f7fbf;
-            padding: 8px 12px;
-            color: #fff;
-            z-index: 1000;
-            height: 48px;
-        }
-        .pro-header .back-link{
-            background: #5a9fd4;
-            color: #fff;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            display: inline-block;
-            white-space: nowrap;
-            /* float:left; verwijderd om console-waarschuwing te vermijden */
-        }
-        body { margin-top: 60px; }
-    </style>
 </head>
 <body class="options-view">
 <header class="pro-header">
@@ -45,17 +17,42 @@
 </header>
 
 <div class="container">
-    <h1>Digitaal Rad van Fortuin</h1>
+    <div class="page-intro">
+        <span class="eyebrow">Interactief in de klas</span>
+        <h1>Rad van Fortuin</h1>
+        <p>Kies wat er op het rad komt, maak je lijst en laat het rad beslissen.</p>
+    </div>
 
     <div class="controls">
         <div class="controls-header">
-            <h2>Stap 1: Kies en genereer je opdrachten</h2>
+            <div><span class="step-label">Stap 1</span><h2>Kies de inhoud van je rad</h2></div>
             <div class="option-group">
                 <label><input type="checkbox" id="removeAfterSpin" checked> Verwijder na draai</label>
             </div>
         </div>
 
         <div class="controls-columns">
+            <div class="selection-status" id="selectionStatus" aria-live="polite">
+                <div class="selection-status-icon">🎯</div>
+                <div class="selection-status-copy">
+                    <strong id="selectionStatusTitle">Nog geen inhoud gekozen</strong>
+                    <span id="selectionStatusText">Kies hieronder één manier om je rad te vullen.</span>
+                    <div id="selectionPreview" class="selection-preview"></div>
+                </div>
+                <label class="solutions-choice">
+                    <input type="checkbox" id="showSolutionsAtEnd">
+                    <span><strong>Oplossingen tonen op het einde</strong><small>Na de laatste draai verschijnt een knop om zelf na te kijken.</small></span>
+                </label>
+                <button id="showWheelTopBtn" class="action-btn" disabled type="button">Toon mijn rad →</button>
+            </div>
+
+            <div class="choice-help">
+                <strong>Hoe werkt het?</strong>
+                <span><b>1.</b> Kies één vak hieronder.</span>
+                <span><b>2.</b> Maak of laad de inhoud.</span>
+                <span><b>3.</b> Klik hierboven op ‘Toon mijn rad’.</span>
+            </div>
+
             <div class="column">
                 <h3>Eigen lijsten & afbeeldingen</h3>
                 <textarea id="itemInput" placeholder="Typ hier elke optie op een nieuwe regel..." rows="4"></textarea>
@@ -157,12 +154,13 @@
     <div id="wheelViewControls">
         <button id="restartBtn" class="preset-btn" type="button">Nog eens met dit rad</button>
         <button id="downloadListBtn" class="preset-btn" style="background-color: #16a085;" type="button">Download Lijst</button>
+        <button id="showSolutionsBtn" class="solutions-btn" type="button">✓ Toon oplossingen</button>
         <button id="newOptionsBtn" class="warning-btn" type="button">Nieuwe opties kiezen</button>
     </div>
 
     <div class="main-content">
         <div class="wheel-wrapper">
-            <canvas id="wheelCanvas" width="650" height="650"></canvas>
+            <div class="wheel-surface"><canvas id="wheelCanvas" width="650" height="650"></canvas></div>
             <div class="pointer"></div>
             <button id="spinBtn" type="button">DRAAI!</button>
         </div>
@@ -184,7 +182,7 @@
 <script type="module" src="./guard.js"></script>
 
 <!-- Paginascript NA de guard, eenmalig laden -->
-<script src="rad.js"></script>
+<script src="../rad.js"></script>
 </body>
 </html>
 

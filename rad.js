@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateSumsBtn = document.getElementById('generateSumsBtn');
     const maalCheckboxesContainer = document.getElementById('maal-checkboxes');
     const timedMathCheckbox = document.getElementById('timedMathCheckbox');
+    const showSolutionsAtEndCheckbox = document.getElementById('showSolutionsAtEnd');
 
     // Overige genereren-knoppen
     const generateEfBtn = document.getElementById('generateEfBtn');
@@ -32,19 +33,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Weergave-wissel knoppen
     const showWheelBtn = document.getElementById('showWheelBtn');
+    const showWheelTopBtn = document.getElementById('showWheelTopBtn');
+    const selectionStatus = document.getElementById('selectionStatus');
+    const selectionStatusTitle = document.getElementById('selectionStatusTitle');
+    const selectionStatusText = document.getElementById('selectionStatusText');
+    const selectionPreview = document.getElementById('selectionPreview');
     const newOptionsBtn = document.getElementById('newOptionsBtn');
     const restartBtn = document.getElementById('restartBtn');
     const downloadListBtn = document.getElementById('downloadListBtn');
+    const showSolutionsBtn = document.getElementById('showSolutionsBtn');
 
     // ===== VARIABELEN =====
-    let items = ['Typ hier', 'je opties', 'of gebruik', 'de knoppen', 'om een lijst', 'te genereren'];
+    let items = [];
     let usedItems = [];
     let spinHistory = [];
-    let colors = ['#3498db', '#e74c3c', '#f1c40f', '#2ecc71', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'];
+    // Zachte, voldoende contrasterende pasteltinten uit de recente Juf Zisa-stijl.
+    let colors = ['#78AEDD', '#E7A1B5', '#E9C766', '#79BE91', '#A99AD6', '#76C5B6', '#EBA580', '#8EAABD'];
     let currentRotation = 0;
     let isSpinning = false;
     let activeTimer = null;
     let selectedMathLimit = 0;
+    let showingSolutionsOverview = false;
+    let solutionsOverviewShown = false;
+    let activeWheelAnimationFrame = null;
 
     // ===== WEERGAVE-WISSEL =====
     const showOptionsView = () => {
@@ -66,14 +77,41 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     showWheelBtn?.addEventListener('click', showWheelView);
+    showWheelTopBtn?.addEventListener('click', showWheelView);
+
+    const updateSelectionStatus = (source = 'Eigen lijst') => {
+        const count = Array.isArray(items) ? items.length : 0;
+        const ready = count >= 2;
+        if (showWheelBtn) showWheelBtn.disabled = !ready;
+        if (showWheelTopBtn) showWheelTopBtn.disabled = !ready;
+        selectionStatus?.classList.toggle('is-ready', ready);
+        if (!selectionStatusTitle || !selectionStatusText || !selectionPreview) return;
+        if (!ready) {
+            selectionStatusTitle.textContent = count === 1 ? 'Voeg nog minstens één optie toe' : 'Nog geen inhoud gekozen';
+            selectionStatusText.textContent = 'Kies hieronder één manier om je rad te vullen.';
+            selectionPreview.innerHTML = '';
+            return;
+        }
+        selectionStatusTitle.textContent = `${count} opties staan klaar`;
+        selectionStatusText.textContent = `${source} is gekozen. Je hoeft niet verder te zoeken of te scrollen.`;
+        const labels = items.slice(0, 4).map(item => {
+            if (item instanceof Image) return 'Afbeelding';
+            if (typeof item === 'object') return item.label || 'Opdracht';
+            return String(item);
+        });
+        selectionPreview.innerHTML = labels.map(label => `<span>${label}</span>`).join('') + (count > 4 ? `<span>+${count - 4} meer</span>` : '');
+    };
 
     const resetSession = () => {
         spinHistory = [];
+        showingSolutionsOverview = false;
+        solutionsOverviewShown = false;
+        if (showSolutionsBtn) showSolutionsBtn.style.display = 'none';
         if (downloadListBtn) downloadListBtn.style.display = (items && items.length > 0 && document.body.classList.contains('wheel-view')) ? 'inline-block' : 'none';
     };
 
     newOptionsBtn?.addEventListener('click', () => {
-        items = ['Typ hier', 'je opties', 'of gebruik', 'de knoppen', 'om een lijst', 'te genereren'];
+        items = [];
         if (itemInput) itemInput.value = '';
 
         const removeAfterSpin = document.getElementById('removeAfterSpin');
@@ -86,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (zonderBrug) zonderBrug.checked = true;
         if (metBrug) metBrug.checked = true;
         if (timedMathCheckbox) timedMathCheckbox.checked = false;
+        if (showSolutionsAtEndCheckbox) showSolutionsAtEndCheckbox.checked = false;
         document.querySelectorAll('input[name="ef_category"]')?.forEach(cb => cb.checked = false);
         const imageModeCheckbox = document.getElementById('imageModeCheckbox');
         if (imageModeCheckbox) imageModeCheckbox.checked = false;
@@ -96,11 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         resetWheel();
         resetSession();
+        updateSelectionStatus();
         showOptionsView();
     });
 
     restartBtn?.addEventListener('click', () => {
         resetWheel();
+        resetSession();
         alert("Het rad is gereset. Je kunt opnieuw met alle originele opties spelen.");
         isSpinning = false;
         if (spinBtn) spinBtn.disabled = false;
@@ -288,10 +329,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, startAngle, startAngle + anglePerItem);
             ctx.closePath();
-            ctx.fillStyle = usedItems.includes(i) ? '#bbbbbb' : colors[i % colors.length];
+            ctx.fillStyle = usedItems.includes(i) ? '#c8d2da' : colors[i % colors.length];
             ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 4;
+            ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+            ctx.lineWidth = 3;
             ctx.stroke();
             ctx.save();
             ctx.translate(centerX, centerY);
@@ -306,8 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (imgRatio > (maxW / maxH)) { h = w / imgRatio; } else { w = h * imgRatio; }
                 ctx.drawImage(img, radius * 0.5, -w / 2, h, w);
             } else {
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 16px Poppins, sans-serif';
+                ctx.fillStyle = '#173b61';
+                ctx.font = '800 16px Nunito, sans-serif';
                 ctx.textAlign = 'right';
                 wrapText(ctx, String(itemText), radius - 15, 5, radius * 0.75, 18);
             }
@@ -332,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return a;
     };
     
-    const loadNewItems = (newItems) => {
+    const loadNewItems = (newItems, source = 'Gegenereerde inhoud') => {
         itemInput?.removeEventListener('input', updateItemsFromTextarea);
 
         if (!Array.isArray(newItems) || newItems.length === 0) {
@@ -342,14 +383,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             items = newItems;
             if (itemInput) {
-                const isText = typeof newItems[0] === 'string';
-                itemInput.value = isText ? newItems.join('\n') : '[Afbeeldingen succesvol geladen]';
+                // Alleen een bewust geladen namenlijst hoort in het invoervak.
+                // Gegenereerde oefeningen worden bovenaan samengevat en verwarren zo niet met eigen invoer.
+                itemInput.value = source === 'Geladen namenlijst' ? newItems.join('\n') : '';
             }
             showWheelBtn && (showWheelBtn.disabled = false);
         }
         
         resetWheel();
         resetSession();
+        updateSelectionStatus(source);
 
         itemInput?.addEventListener('input', updateItemsFromTextarea);
     };
@@ -372,13 +415,13 @@ document.addEventListener('DOMContentLoaded', () => {
         selected.forEach(cat => all = all.concat(efTasks[cat]));
         const shuffled = shuffleArray(all).slice(0, 20);
         const finalItems = shuffled.map((task, i) => ({ label: `Opdracht ${i + 1}`, fullTask: task }));
-        loadNewItems(finalItems);
+        loadNewItems(finalItems, 'Executieve functies');
     };
 
     const generateMovementTasks = () => {
         const shuffled = shuffleArray(movementTasks).slice(0, 20);
         const finalItems = shuffled.map((task, i) => ({ label: `Opdracht ${i + 1}`, fullTask: task }));
-        loadNewItems(finalItems);
+        loadNewItems(finalItems, 'Bewegingsopdrachten');
     };
 
     const generateTaalTasks = () => {
@@ -388,13 +431,13 @@ document.addEventListener('DOMContentLoaded', () => {
         selected.forEach(cat => { if (taalTasks[cat]) all = all.concat(taalTasks[cat]); });
         const shuffled = shuffleArray(all).slice(0, 20);
         const finalItems = shuffled.map((task, i) => ({ label: `Opdracht ${i + 1}`, fullTask: task }));
-        loadNewItems(finalItems);
+        loadNewItems(finalItems, 'Taalopdrachten');
     };
 
     const generateTechLezenTasks = () => {
         const shuffled = shuffleArray(techLezenTasks).slice(0, 20);
         const finalItems = shuffled.map((task, i) => ({ label: `Leesopdracht ${i + 1}`, fullTask: task }));
-        loadNewItems(finalItems);
+        loadNewItems(finalItems, 'Technisch lezen');
     };
 
     const generateSelectedTables = () => {
@@ -408,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tableType === 'deel' || tableType === 'beide') {
             selectedTables.forEach(t => { for (let i = 1; i <= 10; i++) problems.push(`${i * t} ÷ ${t}`); });
         }
-        loadNewItems(shuffleArray(problems).slice(0, 25));
+        loadNewItems(shuffleArray(problems).slice(0, 25), 'Tafeloefeningen');
     };
 
     const generateSums = (limit, allowWithBridge, allowWithoutBridge) => {
@@ -434,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Kon geen sommen genereren met de gekozen opties.");
             return;
         }
-        loadNewItems(shuffleArray([...sums]));
+        loadNewItems(shuffleArray([...sums]), 'Rekensommen');
     };
 
     const generateMixedWheel = () => {
@@ -512,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof it === 'string') return it;
             return { ...it, label: `${it.fullTask?.category || 'Gemengd'} ${idx + 1}` };
         });
-        loadNewItems(finalWheelItems);
+        loadNewItems(finalWheelItems, 'Gemengd rad');
     };
 
     // ===== RAD-LOGICA =====
@@ -535,22 +578,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const anglePerItem = 360 / items.length;
         const targetAngle = (winningIndex * anglePerItem) + (anglePerItem / 2);
-        const requiredRotation = 360 - targetAngle + 270;
-        const totalRotation = currentRotation - (currentRotation % 360) + (360 * 10) + requiredRotation;
-        currentRotation = totalRotation;
-        canvas.style.transition = 'transform 8s cubic-bezier(0.2, 0.8, 0.2, 1)';
-        canvas.style.transform = `rotate(${currentRotation}deg)`;
-        
-        setTimeout(() => {
+        const targetRotation = ((360 - targetAngle + 270) % 360 + 360) % 360;
+        const startRotation = ((currentRotation % 360) + 360) % 360;
+        const finalDelta = ((targetRotation - startRotation + 360) % 360) + (360 * 7);
+        const animatedEndRotation = startRotation + finalDelta;
+        currentRotation = targetRotation;
+        canvas.style.transition = 'none';
+        canvas.style.transform = `rotate(${startRotation}deg)`;
+
+        let spinFinished = false;
+        const finishSpin = () => {
+            if (spinFinished) return;
+            spinFinished = true;
+            if (activeWheelAnimationFrame !== null) {
+                cancelAnimationFrame(activeWheelAnimationFrame);
+                activeWheelAnimationFrame = null;
+            }
+            canvas.style.transform = `rotate(${targetRotation}deg)`;
             try {
                 if (removeItems) {
                     usedItems.push(winningIndex);
-                    drawWheel();
+                    // Wacht één tekenmoment zodat de laatste animatieframe volledig is vastgelegd.
+                    requestAnimationFrame(drawWheel);
                 }
                 const winningItem = items[winningIndex];
                 const exerciseText = (typeof winningItem === 'object' && winningItem.fullTask) ? (winningItem.fullTask.text || winningItem.fullTask.word) : winningItem;
-                const answer = calculateAnswer(exerciseText);
-                spinHistory.push({ exercise: String(exerciseText), answer: (answer !== null ? answer : 'N/A') });
+                const taskData = (typeof winningItem === 'object' && winningItem.fullTask) ? winningItem.fullTask : winningItem;
+                const calculatedAnswer = calculateAnswer(exerciseText);
+                const suppliedAnswer = (taskData && typeof taskData === 'object') ? taskData.answer : null;
+                const answer = suppliedAnswer ?? calculatedAnswer;
+                spinHistory.push({ exercise: String(exerciseText), answer: (answer !== null ? String(answer) : 'Geen vast antwoord') });
                 if (downloadListBtn) downloadListBtn.style.display = 'inline-block';
                 
                 showResult(winningItem);
@@ -564,7 +621,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (restartBtn) restartBtn.disabled = false;
                 if (newOptionsBtn) newOptionsBtn.disabled = false;
             }
-        }, 8000);
+        };
+        const spinDuration = 7000;
+        let animationStartedAt = null;
+        const animateWheel = (timestamp) => {
+            if (animationStartedAt === null) animationStartedAt = timestamp;
+            const progress = Math.min((timestamp - animationStartedAt) / spinDuration, 1);
+            // Uitsluitend een oplopende hoek: altijd dezelfde draairichting, met een zachte vertraging.
+            const easedProgress = 1 - Math.pow(1 - progress, 4);
+            const displayedRotation = startRotation + (finalDelta * easedProgress);
+            canvas.style.transform = `rotate(${displayedRotation}deg)`;
+            if (progress < 1) {
+                activeWheelAnimationFrame = requestAnimationFrame(animateWheel);
+            } else {
+                activeWheelAnimationFrame = null;
+                finishSpin();
+            }
+        };
+        activeWheelAnimationFrame = requestAnimationFrame(animateWheel);
+        // Alleen als vangnet wanneer een tab tijdens het draaien tijdelijk gepauzeerd wordt.
+        setTimeout(finishSpin, 7600);
     };
 
     const runTimer = (duration, onEnd) => {
@@ -792,9 +868,50 @@ document.addEventListener('DOMContentLoaded', () => {
         resultModal.style.display = 'flex';
     };
 
+    const escapeHtml = (value) => String(value)
+        .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+
+    const showSolutionsOverview = () => {
+        if (spinHistory.length === 0) return;
+        showingSolutionsOverview = true;
+        solutionsOverviewShown = true;
+        timerBarContainer.style.display = 'none';
+        const rows = spinHistory.map((entry, index) => `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${escapeHtml(entry.exercise)}</td>
+                <td>${escapeHtml(entry.answer)}</td>
+            </tr>`).join('');
+        resultOutput.innerHTML = `
+            <div class="solutions-overview">
+                <span class="solutions-badge">Klaar met het rad</span>
+                <h2>Bekijk je oplossingen</h2>
+                <p>De oefeningen staan in dezelfde volgorde als waarin het rad ze koos.</p>
+                <div class="solutions-table-wrap">
+                    <table class="solutions-table">
+                        <thead><tr><th>Beurt</th><th>Oefening</th><th>Oplossing</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+                <button type="button" id="downloadSolutionsFromModal" class="save-btn solutions-download-btn">Download voor de leerkracht</button>
+            </div>`;
+        document.getElementById('downloadSolutionsFromModal')?.addEventListener('click', () => downloadListBtn?.click());
+        resultModal.style.display = 'flex';
+    };
+
     const closeModal = () => {
         if (activeTimer) clearTimeout(activeTimer);
         resultModal.style.display = 'none';
+        if (showingSolutionsOverview) {
+            showingSolutionsOverview = false;
+            return;
+        }
+        const allItemsUsed = items.length > 0 && usedItems.length >= items.length;
+        if (showSolutionsAtEndCheckbox?.checked && allItemsUsed && !solutionsOverviewShown && showSolutionsBtn) {
+            showSolutionsBtn.style.display = 'inline-flex';
+            showSolutionsBtn.focus();
+        }
     };
 
     // ===== EVENT LISTENERS =====
@@ -804,6 +921,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     spinBtn?.addEventListener('click', spin);
+    showSolutionsBtn?.addEventListener('click', showSolutionsOverview);
 
     mathPresetBtns?.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -887,6 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             showWheelBtn.disabled = true;
         }
+        updateSelectionStatus('Zelf getypte lijst');
     };
     
     // --- Upload Handlers ---
@@ -904,7 +1023,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onerror = reject;
             reader.readAsDataURL(f);
         }));
-        Promise.all(promises).then(loadNewItems).catch(err => console.error("Fout bij laden afbeeldingen:", err));
+        Promise.all(promises).then(images => loadNewItems(images, 'Eigen afbeeldingen')).catch(err => console.error("Fout bij laden afbeeldingen:", err));
     };
 
     const handleFileUpload = (event) => {
@@ -914,7 +1033,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onload = (e) => {
             const text = String(e.target.result || '');
             const lines = text.split(/\r\n?|\n/).map(s => s.trim()).filter(Boolean); // Robuuster gemaakt
-            loadNewItems(lines);
+            loadNewItems(lines, 'Geladen namenlijst');
         };
         // Laat de browser zelf de codering raden voor betere compatibiliteit
         reader.readAsText(f);
@@ -928,4 +1047,5 @@ document.addEventListener('DOMContentLoaded', () => {
     createCheckboxes();
     drawWheel();
     showOptionsView();
+    updateSelectionStatus();
 });
