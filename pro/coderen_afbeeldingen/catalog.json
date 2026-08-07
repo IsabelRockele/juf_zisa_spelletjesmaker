@@ -4,6 +4,16 @@
       "name": "Hond",
       "image": "coderen_afbeeldingen/hond.png",
       "json": "coderen_afbeeldingen/hond.json"
+    },
+    {
+      "name": "Vis",
+      "image": "coderen_afbeeldingen/vis.png",
+      "json": "coderen_afbeeldingen/vis.json"
+    },
+    {
+      "name": "Kat",
+      "image": "coderen_afbeeldingen/kat.png",
+      "json": "coderen_afbeeldingen/kat.json"
     }
   ],
   "Kerst": [
@@ -14,17 +24,12 @@
     }
   ],
   "Halloween": [
-     {
+    {
       "name": "pompoen",
       "image": "coderen_afbeeldingen/pompoen.png",
       "json": "coderen_afbeeldingen/pompoen.json"
     }
   ],
-  "Terug naar school": [],
-  "Pasen": [],
-  "Herfst": [],
-  "Lente": [],
-  "Zomer": [],
   "Winter": [
     {
       "name": "sneeuwman",
@@ -32,5 +37,54 @@
       "json": "coderen_afbeeldingen/sneeuwman.json"
     }
   ],
-  "Carnaval": []
+  "Natuur": [
+    {
+      "name": "Bloem",
+      "image": "coderen_afbeeldingen/bloem.png",
+      "json": "coderen_afbeeldingen/bloem.json"
+    },
+    {
+      "name": "Blad",
+      "image": "coderen_afbeeldingen/blad.png",
+      "json": "coderen_afbeeldingen/blad.json"
+    }
+  ],
+  "School": [
+    {
+      "name": "Potlood",
+      "image": "coderen_afbeeldingen/potlood.png",
+      "json": "coderen_afbeeldingen/potlood.json"
+    },
+    {
+      "name": "Boek",
+      "image": "coderen_afbeeldingen/boek.png",
+      "json": "coderen_afbeeldingen/boek.json"
+    }
+  ],
+  "Feest": [
+    {
+      "name": "Hart",
+      "image": "coderen_afbeeldingen/hart.png",
+      "json": "coderen_afbeeldingen/hart.json"
+    },
+    {
+      "name": "Kroon",
+      "image": "coderen_afbeeldingen/kroon.png",
+      "json": "coderen_afbeeldingen/kroon.json"
+    }
+  ],
+  "Voertuigen": [
+    {
+      "name": "Boot",
+      "image": "coderen_afbeeldingen/boot.png",
+      "json": "coderen_afbeeldingen/boot.json"
+    }
+  ],
+  "Gebouwen": [
+    {
+      "name": "Huis",
+      "image": "coderen_afbeeldingen/huis.png",
+      "json": "coderen_afbeeldingen/huis.json"
+    }
+  ]
 }

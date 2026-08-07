@@ -633,6 +633,11 @@ document.addEventListener("DOMContentLoaded", () => {
             wsCtx.lineTo(line.endGridX * cellSize, line.endGridY * cellSize);
             wsCtx.stroke();
         });
+
+        // Het leerlingenblad bevat bewust geen oplossingslijn. Zorg er wel voor
+        // dat de originele tekening in het werkvlak altijd zichtbaar blijft.
+        redrawAll();
+        meldingContainer.textContent = 'Leerlingenblad gemaakt. Je tekening staat nog links; het blad rechts is bewust zonder oplossing.';
     }
 
     function downloadPdf() {
@@ -799,7 +804,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function openCatalog() {
         if (Object.keys(catalogData).length === 0) {
             try {
-                const response = await fetch('coderen_afbeeldingen/catalog.json');
+                const response = await fetch('coderen_afbeeldingen/catalog.json', { cache: 'no-store' });
                 if (!response.ok) throw new Error('catalog.json niet gevonden!');
                 catalogData = await response.json();
             } catch (error) {
@@ -841,7 +846,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const choiceBtn = document.createElement('button');
             choiceBtn.className = 'catalog-choice-button';
             choiceBtn.innerHTML = `
-                <img src="${choice.image}" alt="${choice.name}">
+                <img src="${choice.image}?v=20260807-5" alt="${choice.name}">
                 <span>${choice.name}</span>
             `;
             choiceBtn.onclick = () => loadChoice(choice.json);
@@ -855,7 +860,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         try {
-            const response = await fetch(jsonPath);
+            const response = await fetch(jsonPath, { cache: 'no-store' });
             if (!response.ok) throw new Error(`Bestand ${jsonPath} niet gevonden!`);
             const data = await response.json();
             loadDrawing(data);
