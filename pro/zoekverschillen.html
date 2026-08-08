@@ -2,7 +2,8 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>Zoek de Verschillen Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zoek de verschillen – werkbladmaker Pro</title>
   <meta name="google" content="notranslate">
 
   <link rel="stylesheet" href="zoekverschillen.css">
@@ -34,30 +35,36 @@
         display: inline-block;
         white-space: nowrap;
     }
-    body { margin-top: 60px; }
+    body { padding-top: 64px; }
   </style>
 </head>
 <body>
 <header class="pro-header">
   <a href="app.html" class="back-link">&larr; Terug naar menu</a>
+  <strong>Zoek de verschillen</strong>
 </header>
 
 <div id="main-content">
   <div id="left-panel">
+      <div class="steps-intro"><strong>Zo maak je een werkblad</strong><span>1. Kies een afbeelding</span><span>2. Maak verschillen</span><span>3. Download je werkblad</span></div>
       <div class="control-group">
-          <h3>Bestand</h3>
-          <button id="uploadImageBtn">Upload Afbeelding</button>
+          <h3><span class="step-number">1</span> Afbeelding</h3>
+          <p class="group-help">Kies één duidelijke afbeelding. Die verschijnt meteen twee keer.</p>
+          <button id="uploadImageBtn" class="primary-btn">Afbeelding kiezen</button>
+          <button id="openCatalogBtn" class="catalog-btn">Kies een kleurplaat uit de catalogus</button>
           <input type="file" id="fileInput" accept="image/*" style="display: none;">
       </div>
       
       <div class="control-group">
-          <h3>Acties</h3>
-          <button id="opnieuwBtn">Opnieuw</button>
-          <button id="undoBtn" disabled>Ongedaan Maken</button>
+          <h3>Herstellen</h3>
+          <button id="undoBtn" disabled>↶ Laatste actie ongedaan maken</button>
+          <button id="opnieuwBtn" class="subtle-btn">Alles opnieuw beginnen</button>
       </div>
 
       <div class="control-group">
-          <h3>Handmatige Tools</h3>
+          <h3><span class="step-number">2</span> Verschillen maken</h3>
+          <p class="group-help">Kies een gereedschap en werk in de rechterafbeelding.</p>
+          <div id="toolExplanation" class="tool-explanation" aria-live="polite"><strong>Potlood</strong><span>Teken vrij op de rechterafbeelding.</span></div>
           <div id="tools-container">
               <button class="tool-btn active" data-tool="potlood" title="Potlood">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
@@ -83,13 +90,14 @@
               <button class="tool-btn" data-tool="opvulemmer" title="Opvulemmer">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM6 19c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm14-2.22l-4.22-4.22c-.66-.66-1.74-.66-2.4 0l-2.4 2.4-1.7-1.7c-.39-.39-1.02-.39-1.41 0L5 15.22V5h15v11.78zM17 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>
               </button>
+              <button class="tool-btn" data-tool="tekst" title="Tekst toevoegen" aria-label="Tekst toevoegen"><strong class="text-tool-icon">T</strong></button>
           </div>
           <div class="tool-setting">
-              <label for="dikte">Dikte:</label>
+              <label for="dikte">Lijndikte</label>
               <input type="number" id="dikte" value="10" min="1" max="50">
           </div>
           <div class="tool-setting" id="color-selector">
-              <label>Kleur:</label>
+              <label>Kleur kiezen</label>
               <div id="color-display"></div>
           </div>
           <div class="tool-setting" id="gum-settings" style="display: none;">
@@ -99,10 +107,16 @@
                   <option value="vierkant">Vierkant</option>
               </select>
           </div>
+          <div id="text-settings" class="text-settings" style="display:none">
+              <label for="textOriginal">Tekst links <small>(mag leeg)</small></label><input id="textOriginal" type="text" maxlength="40" placeholder="bv. 6 + 4 = 10">
+              <label for="textDifferent">Tekst rechts</label><input id="textDifferent" type="text" maxlength="40" placeholder="bv. 6 + 4 = 11">
+              <div class="text-setting-row"><label for="textSize">Grootte</label><input id="textSize" type="number" min="10" max="60" value="24"></div>
+              <p class="group-help">Klik daarna in de rechterafbeelding op de plaats waar de tekst moet komen.</p>
+          </div>
       </div>
 
       <div class="control-group" id="selection-tools" style="display: none;">
-          <h3>Klembord</h3>
+          <h3>Gekopieerde selectie</h3>
           <div id="clipboard-preview-container" class="hidden">
               <canvas id="clipboardCanvas"></canvas>
           </div>
@@ -111,14 +125,15 @@
   </div>
 
   <div id="center-panel">
+      <div class="preview-heading"><div><h2>Leerlingpreview</h2><p>Links staat het origineel, rechts maak je de verschillen.</p></div></div>
       <div id="puzzel-container">
           <div class="image-wrapper">
               <h3>Origineel</h3>
               <canvas id="canvasOrigineel" width="400" height="600"></canvas>
           </div>
           <div class="image-wrapper">
-              <h3>Jouw Puzzel (Bewerken)</h3>
-              <canvas id="canvasVerschillen" width="400" height="600" willReadFrequently="true"></canvas>
+              <h3>Afbeelding met verschillen</h3>
+              <div class="canvas-stage"><canvas id="canvasVerschillen" width="400" height="600" willReadFrequently="true"></canvas><canvas id="solutionOverlayCanvas" width="400" height="600" aria-hidden="true"></canvas></div>
           </div>
       </div>
       <p id="status-text">Upload een afbeelding om te beginnen.</p>
@@ -126,11 +141,41 @@
 
   <div id="right-panel-buttons">
       <div class="control-group">
-          <h3>Download</h3>
-          <button id="downloadPngBtn" disabled>Download als PNG</button>
-          <button id="downloadPdfBtn" disabled>Download als PDF</button>
+          <h3><span class="step-number">3</span> Werkblad</h3>
+          <label class="field-label" for="differenceCount">Aantal verschillen</label>
+          <select id="differenceCount"><option>5</option><option>6</option><option selected>7</option><option>8</option><option>9</option><option>10</option></select>
+          <div id="autoDifferencesPanel" class="auto-differences-panel hidden">
+              <span class="auto-badge">PROEF – HERFST</span>
+              <strong>Automatische verschillen beschikbaar</strong>
+              <p>De tool maakt de rechterafbeelding automatisch. Je hoeft niet te tekenen of te gummen.</p>
+              <button id="makeAutoDifferencesBtn" class="auto-differences-btn">Maak automatisch 7 verschillen</button>
+              <div id="solutionActions" class="solution-actions hidden"><button id="toggleSolutionBtn">Bekijk oplossing</button><button id="downloadSolutionPdfBtn">Download oplossing als PDF</button></div>
+              <details id="differenceSummary" class="difference-summary"><summary>Welke verschillen zijn gebruikt?</summary><ol id="differenceSummaryList"></ol></details>
+          </div>
+          <label class="field-label" for="worksheetTitle">Titel</label>
+          <input id="worksheetTitle" type="text" value="Zoek de verschillen" maxlength="70">
+          <label class="field-label" for="worksheetInstruction">Opdrachtzin</label>
+          <textarea id="worksheetInstruction" rows="3" maxlength="180">Zoek de 7 verschillen.</textarea>
+          <button id="downloadPdfBtn" class="primary-btn" disabled>Download werkblad als PDF</button>
+          <button id="downloadPngBtn" class="secondary-btn" disabled>Download afbeeldingen als PNG</button>
+          <p class="download-help">De PDF bevat automatisch ruimte voor naam en datum.</p>
+          <button id="openHelpBtn" class="help-btn">? Hoe werkt het?</button>
       </div>
   </div>
+</div>
+
+<div id="catalog-modal-overlay" class="dialog-overlay hidden">
+  <section class="catalog-dialog" role="dialog" aria-modal="true" aria-labelledby="catalogTitle">
+    <div class="dialog-header"><div><h2 id="catalogTitle">Kleurplaten kiezen</h2><p>Kies een thema en klik daarna op een kleurplaat.</p></div><button id="closeCatalogBtn" class="close-dialog" aria-label="Sluiten">×</button></div>
+    <div id="catalogThemes" class="catalog-themes"></div><div id="catalogImages" class="catalog-images"></div>
+  </section>
+</div>
+<div id="help-modal-overlay" class="dialog-overlay hidden">
+  <section class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="dialog-header"><h2 id="helpTitle">Zo maak je een zoekplaat</h2><button id="closeHelpBtn" class="close-dialog" aria-label="Sluiten">×</button></div>
+    <ol class="help-steps"><li><strong>Kies een afbeelding.</strong><span>Gebruik een kleurplaat uit de catalogus of upload zelf een afbeelding.</span></li><li><strong>Maak verschillen.</strong><span>Werk alleen in de rechterafbeelding. Gebruik bijvoorbeeld de gum, het potlood of kopieer een onderdeel.</span></li><li><strong>Controleer je puzzel.</strong><span>Vergelijk links en rechts en maak een fout ongedaan als dat nodig is.</span></li><li><strong>Maak je werkblad.</strong><span>Pas eventueel de titel en opdrachtzin aan en download de PDF.</span></li></ol>
+    <button id="helpDoneBtn" class="primary-btn">Ik begrijp het</button>
+  </section>
 </div>
 
 <div id="edit-modal-overlay" class="hidden">
