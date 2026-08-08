@@ -9,6 +9,48 @@
   line-height: 1.45;
 }
 
+.puzzle-mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.puzzle-mode-tab {
+  position: relative;
+  width: 100%;
+  padding: 11px 12px 11px 16px;
+  border: 1.5px solid #cbdbe6;
+  border-radius: 10px;
+  background: #fff;
+  color: #52697a;
+  text-align: left;
+  font-size: .78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.puzzle-mode-tab.active {
+  border-color: #1d6fad;
+  background: #e7f4fd;
+  color: #125889;
+  box-shadow: inset 5px 0 #1d6fad;
+}
+
+.puzzle-mode-tab:focus-visible {
+  outline: 3px solid #1d6fad35;
+  outline-offset: 2px;
+}
+
+.workflow-dependent[hidden] {
+  display: none !important;
+}
+
+#toonOplossingBtn {
+  border-color: #8e78c4;
+  background: #f3efff;
+  color: #543b91;
+}
+
 .pair-own-words {
   margin: 10px 0 5px;
   padding: 9px 10px;
@@ -211,4 +253,122 @@
 #woordenLijst li::before {
   width: 13px;
   height: 13px;
+}
+
+.message-mode-note {
+  margin: 10px 0 12px;
+  padding: 12px;
+  border: 1px solid #b9d8ee;
+  border-radius: 10px;
+  background: #f2f8fd;
+  color: #254c68;
+  font-size: .76rem;
+  line-height: 1.45;
+}
+
+.message-mode-note > strong {
+  color: #164f80;
+  font-size: .82rem;
+}
+
+.message-mode-note p {
+  margin: 7px 0 0;
+}
+
+.solution-color-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 11px;
+  padding: 10px 11px;
+  border: 1px solid #d4e2eb;
+  border-radius: 10px;
+  background: #f9fcfe;
+}
+
+.solution-color-field > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.solution-color-field label {
+  margin: 0;
+}
+
+.solution-color-field small {
+  color: #667b8c;
+  font-size: .7rem;
+}
+
+.solution-color-field input[type="color"] {
+  width: 52px;
+  height: 40px;
+  flex: none;
+  padding: 3px;
+  border: 1px solid #afc4d2;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.message-answer-area {
+  width: 100%;
+  margin-top: 3.5%;
+  padding: 2.5% 3%;
+  border: 1.5px solid #9cc9ec;
+  border-radius: 8px;
+  background: #f2f8fd;
+}
+
+.message-answer-area h3 {
+  margin: 0 0 2%;
+  color: #164f80;
+  font-size: clamp(.7rem, 1.3vw, 1rem);
+}
+
+.message-letter-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.message-letter-word {
+  display: inline-flex;
+  gap: 4px;
+  margin-right: 14px;
+}
+
+.message-letter-box {
+  display: grid;
+  place-items: center;
+  width: clamp(20px, 2.8vw, 28px);
+  aspect-ratio: 1;
+  border: 1px solid #55758d;
+  background: #fff;
+  color: #6750a4;
+  font-size: clamp(.65rem, 1.1vw, .9rem);
+  font-weight: 900;
+}
+
+.message-writing-line {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 5%;
+  color: #38556b;
+  font-size: clamp(.52rem, .95vw, .76rem);
+  font-weight: 700;
+}
+
+.message-writing-line i {
+  flex: 1;
+  height: 1em;
+  border-bottom: 1px solid #38556b;
+  color: #6750a4;
+  font-style: normal;
+  font-weight: 800;
 }

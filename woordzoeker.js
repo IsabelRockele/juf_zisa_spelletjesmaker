@@ -6,6 +6,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 // Globale variabelen om de huidige puzzelstatus bij te houden
 let currentPuzzleState = {};
 let solutionVisible = false;
+let activeExerciseMode = "";
 
 // ===== Helpers =====
 function getRandomInt(min, max) {
@@ -25,6 +26,14 @@ function sanitizeWord(raw) {
     .toUpperCase()
     .replace(/[^A-Z]/g, ""); // keep A-Z only
   return lettersOnly;
+}
+
+function hexToRgba(hex, alpha) {
+  const value = String(hex || "#f5c542").replace("#", "");
+  const normalized = value.length === 3 ? value.split("").map(char => char + char).join("") : value;
+  const number = Number.parseInt(normalized, 16);
+  if (!Number.isFinite(number)) return `rgba(245, 197, 66, ${alpha})`;
+  return `rgba(${(number >> 16) & 255}, ${(number >> 8) & 255}, ${number & 255}, ${alpha})`;
 }
 
 // ===== Plaatsen/genereren =====
@@ -102,6 +111,123 @@ function generateWordSearch(words, gridSize, directions) {
   return { grid, successfullyPlacedWords, unplacedWords, wordLocations };
 }
 
+function generateMessageWordSearch(words, message, gridSize, directions) {
+  const possibleDirections = [];
+  if (directions.horizontaal) possibleDirections.push({ dr: 0, dc: 1, name: "horizontaal" });
+  if (directions.verticaal) possibleDirections.push({ dr: 1, dc: 0, name: "verticaal" });
+  if (directions.diagonaal) {
+    possibleDirections.push({ dr: 1, dc: 1, name: "diagonaal" });
+    possibleDirections.push({ dr: -1, dc: 1, name: "diagonaal" });
+  }
+  if (!possibleDirections.length) return null;
+
+  const ordered = words.map((word, index) => ({ word, index })).sort((a, b) => b.word.length - a.word.length);
+
+  for (let attempt = 0; attempt < 7; attempt++) {
+    const candidates = ordered.map(item => {
+      const options = [];
+      possibleDirections.forEach(direction => {
+        for (let row = 0; row < gridSize; row++) {
+          for (let col = 0; col < gridSize; col++) {
+            const endRow = row + direction.dr * (item.word.length - 1);
+            const endCol = col + direction.dc * (item.word.length - 1);
+            if (endRow < 0 || endRow >= gridSize || endCol < 0 || endCol >= gridSize) continue;
+            const cells = [];
+            for (let i = 0; i < item.word.length; i++) {
+              const r = row + direction.dr * i;
+              const c = col + direction.dc * i;
+              cells.push({ row: r, col: c, key: r * gridSize + c });
+            }
+            options.push({ item, direction, cells, random: Math.random() });
+          }
+        }
+      });
+      return options;
+    });
+
+    const occupied = new Set();
+    const used = new Set();
+    const placed = [];
+    const usedDirectionNames = new Set();
+    let visits = 0;
+
+    const isFree = option => option.cells.every(cell => !occupied.has(cell.key));
+
+    function search() {
+      visits++;
+      if (visits > 160000) return false;
+      if (used.size === ordered.length) return true;
+
+      let options = null;
+      let chosenIndex = -1;
+      for (let index = 0; index < ordered.length; index++) {
+        if (used.has(index)) continue;
+        const freeOptions = candidates[index].filter(isFree);
+        if (!freeOptions.length) return false;
+        if (!options || freeOptions.length < options.length) {
+          options = freeOptions;
+          chosenIndex = index;
+        }
+      }
+
+      options.sort((a, b) => {
+        const aUsed = usedDirectionNames.has(a.direction.name) ? 1 : 0;
+        const bUsed = usedDirectionNames.has(b.direction.name) ? 1 : 0;
+        return aUsed - bUsed || a.random - b.random;
+      });
+
+      used.add(chosenIndex);
+      for (const option of options) {
+        option.cells.forEach(cell => occupied.add(cell.key));
+        placed.push(option);
+        const directionAlreadyUsed = usedDirectionNames.has(option.direction.name);
+        usedDirectionNames.add(option.direction.name);
+        if (search()) return true;
+        placed.pop();
+        option.cells.forEach(cell => occupied.delete(cell.key));
+        if (!directionAlreadyUsed) usedDirectionNames.delete(option.direction.name);
+      }
+      used.delete(chosenIndex);
+      return false;
+    }
+
+    if (!search()) continue;
+
+    const grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(""));
+    const wordLocations = [];
+    placed.forEach(option => {
+      option.cells.forEach((cell, index) => { grid[cell.row][cell.col] = option.item.word[index]; });
+      wordLocations.push({
+        word: option.item.word,
+        row: option.cells[0].row,
+        col: option.cells[0].col,
+        dr: option.direction.dr,
+        dc: option.direction.dc
+      });
+    });
+
+    const messageCells = [];
+    let messageIndex = 0;
+    for (let row = 0; row < gridSize; row++) {
+      for (let col = 0; col < gridSize; col++) {
+        if (grid[row][col] !== "") continue;
+        grid[row][col] = message[messageIndex++];
+        messageCells.push({ row, col });
+      }
+    }
+    if (messageIndex !== message.length) continue;
+    return {
+      grid,
+      successfullyPlacedWords: words,
+      unplacedWords: [],
+      wordLocations,
+      messageCells,
+      usedDirections: [...usedDirectionNames]
+    };
+  }
+  return null;
+}
+
 // ===== Tekenen =====
 function drawPuzzle() {
   if (!currentPuzzleState.grid) return;
@@ -111,6 +237,13 @@ function drawPuzzle() {
   const h = canvas.height / gridSize;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (solutionVisible && currentPuzzleState.mode === "message") {
+    ctx.fillStyle = "rgba(103, 80, 164, 0.22)";
+    (currentPuzzleState.messageCells || []).forEach(cell => {
+      ctx.fillRect(cell.col * w, cell.row * h, w, h);
+    });
+  }
 
   // Letters
   ctx.font = `${Math.min(h * 0.6, 30)}px Arial`;
@@ -140,6 +273,7 @@ function drawPuzzle() {
   }
 
   if (solutionVisible) drawSolution();
+  updateMessageAnswerPreview();
 }
 
 function drawSolution() {
@@ -149,7 +283,7 @@ function drawSolution() {
   const w = canvas.width / gridSize;
   const h = canvas.height / gridSize;
 
-  ctx.strokeStyle = "rgba(255, 255, 0, 0.7)";
+  ctx.strokeStyle = hexToRgba(currentPuzzleState.solutionColor, 0.68);
   ctx.lineWidth = h * 0.7;
   ctx.lineCap = "round";
 
@@ -164,6 +298,36 @@ function drawSolution() {
     ctx.lineTo(x2, y2);
     ctx.stroke();
   });
+}
+
+function updateMessageAnswerPreview() {
+  const area = document.getElementById("messageAnswerArea");
+  const boxes = document.getElementById("messageLetterBoxes");
+  if (!area || !boxes) return;
+  if (currentPuzzleState.mode !== "message") {
+    area.hidden = true;
+    boxes.innerHTML = "";
+    return;
+  }
+  area.hidden = false;
+  boxes.innerHTML = "";
+  const words = (currentPuzzleState.secretMessageDisplay || "")
+    .split(/\s+/)
+    .map(sanitizeWord)
+    .filter(Boolean);
+  words.forEach(word => {
+    const wordGroup = document.createElement("span");
+    wordGroup.className = "message-letter-word";
+    [...word].forEach(letter => {
+      const box = document.createElement("span");
+      box.className = "message-letter-box";
+      box.textContent = solutionVisible ? letter : "";
+      wordGroup.appendChild(box);
+    });
+    boxes.appendChild(wordGroup);
+  });
+  const writingLine = area.querySelector(".message-writing-line i");
+  if (writingLine) writingLine.textContent = solutionVisible ? currentPuzzleState.secretMessageDisplay : "";
 }
 
 function toggleSolution() {
@@ -202,7 +366,9 @@ function updateLijstTitel() {
   }
 }
 function getSelectedExerciseMode() {
-  if (document.getElementById("taalMode").value === "single") return "single";
+  const selected = document.getElementById("taalMode").value;
+  if (!selected) return "";
+  if (selected === "single" || selected === "message") return selected;
   return document.querySelector('input[name="pairPuzzleSide"]:checked')?.value || "linksInPuzzel";
 }
 
@@ -210,8 +376,16 @@ function updateModeExplanation() {
   const selectedMode = getSelectedExerciseMode();
   const explanation = document.getElementById("modeExplanation");
   if (!explanation) return;
+  if (!selectedMode) {
+    explanation.hidden = true;
+    explanation.innerHTML = "";
+    return;
+  }
+  explanation.hidden = false;
   if (selectedMode === "single") {
     explanation.innerHTML = "<b>Gewone woordzoeker:</b> de woorden die je invoert, worden in het rooster verstopt én staan onderaan in de zoeklijst.";
+  } else if (selectedMode === "message") {
+    explanation.innerHTML = "<b>Geheime boodschap:</b> na het wegstrepen van alle zoekwoorden vormen de overgebleven letters samen een woord of korte zin. De woordlengtes moeten exact bij het gekozen rooster passen.";
   } else if (selectedMode === "linksInPuzzel") {
     explanation.innerHTML = "<b>Voorbeeld:</b> woord <strong>maison</strong> + vertaling <strong>huis</strong>.<br><strong>MAISON</strong> wordt verstopt in het rooster. <strong>huis</strong> staat onderaan als hint.";
   } else {
@@ -244,18 +418,75 @@ function addPairRow() {
   document.getElementById("addPairRowBtn").disabled = container.children.length >= 20;
 }
 
+function resetPreviewForModeChange(nextMode) {
+  currentPuzzleState = {};
+  solutionVisible = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const list = document.getElementById("woordenLijst");
+  if (list) list.innerHTML = "";
+  const answerArea = document.getElementById("messageAnswerArea");
+  if (answerArea) answerArea.hidden = true;
+  const answerBoxes = document.getElementById("messageLetterBoxes");
+  if (answerBoxes) answerBoxes.innerHTML = "";
+  const preview = document.getElementById("worksheet-preview");
+  if (preview) preview.classList.add("preview-empty");
+  const emptyText = document.querySelector(".empty-message span");
+  if (emptyText) {
+    const texts = {
+      single: "Vul minstens 6 woorden in en klik op ‘Maak mijn woordzoeker’.",
+      pairs: "Vul minstens 6 volledige woordparen in en maak daarna het rooster.",
+      message: "Vul zoekwoorden en een geheime boodschap in. Het programma helpt je om het aantal letters passend te maken."
+    };
+    emptyText.textContent = texts[nextMode] || "Kies links eerst wat je wilt maken.";
+  }
+  const solutionButton = document.getElementById("toonOplossingBtn");
+  if (solutionButton) solutionButton.textContent = "Toon Oplossing";
+  const message = document.getElementById("meldingContainer");
+  if (message) message.innerHTML = "";
+}
+
 function updateModeUI() {
   const mode = document.getElementById("taalMode").value;
+  if (activeExerciseMode && mode !== activeExerciseMode) resetPreviewForModeChange(mode);
+  activeExerciseMode = mode;
   const singleGrp = document.getElementById("singleInputGroup");
   const pairGrp = document.getElementById("pairInputGroup");
-  if (mode === "single") {
+  const messageGrp = document.getElementById("messageInputGroup");
+  const instruction = document.getElementById("opdrachtzin");
+  const ordinaryInstruction = "Zoek alle woorden in het letterrooster.";
+  const messageInstruction = "Zoek alle woorden. Lees daarna de overgebleven letters per rij en noteer de boodschap.";
+  if (instruction && mode === "message" && instruction.value === ordinaryInstruction) instruction.value = messageInstruction;
+  if (instruction && mode && mode !== "message" && instruction.value === messageInstruction) instruction.value = ordinaryInstruction;
+  if (instruction && mode) updateWorksheetText();
+  if (!mode) {
+    singleGrp.hidden = true;
+    pairGrp.hidden = true;
+    messageGrp.hidden = true;
+  } else if (mode === "single") {
     singleGrp.hidden = false;
     pairGrp.hidden = true;
+    messageGrp.hidden = true;
+  } else if (mode === "message") {
+    singleGrp.hidden = true;
+    pairGrp.hidden = true;
+    messageGrp.hidden = false;
   } else {
     singleGrp.hidden = true;
     pairGrp.hidden = false;
+    messageGrp.hidden = true;
   }
+  document.querySelectorAll(".puzzle-mode-tab").forEach(tab => {
+    const active = tab.dataset.mode === mode;
+    tab.classList.toggle("active", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+  document.querySelectorAll(".workflow-dependent").forEach(element => {
+    element.hidden = !mode;
+  });
+  const answerArea = document.getElementById("messageAnswerArea");
+  if (answerArea && mode !== "message") answerArea.hidden = true;
   updateModeExplanation();
+  if (mode === "message") updateMessageWordsVisibility();
 }
 
 function updateWorksheetText() {
@@ -304,24 +535,27 @@ function genereerWoordzoeker() {
   let puzzleWords = [];       // gesaneerde woorden die in het raster komen
   let displayPairs = [];      // voor paren: [{puzzleSan, shownRaw}] zodat we na plaatsing kunnen filteren
   let displayListRaw = [];    // wat effectief onderaan getoond wordt (na plaatsingsfilter)
+  let secretMessage = "";
+  let secretMessageDisplay = "";
   let meldingContainer = document.getElementById("meldingContainer");
   meldingContainer.innerHTML = "";
   meldingContainer.style.color = "#004080";
 
   const MIN_WORDS = 6, MAX_WORDS = 20, MAX_WORD_LENGTH = 12, MIN_GRID_SIZE_AUTO = 8;
 
-  if (mode === "single") {
-    const woordenInput = document.getElementById("woordenInput").value;
+  if (mode === "single" || mode === "message") {
+    const woordenInput = document.getElementById(mode === "message" ? "messageWordsInput" : "woordenInput").value;
     let woorden = woordenInput
       .split("\n")
       .map(w => sanitizeWord(w.trim()))
       .filter(w => w.length > 0 && /^[A-Z]+$/.test(w));
 
-    updateWordCountMessageSingle(woorden.length);
+    if (mode === "message") updateMessageWordCount(woorden.length);
+    else updateWordCountMessageSingle(woorden.length);
 
     if (woorden.length < MIN_WORDS) {
       meldingContainer.style.color = "red";
-      meldingContainer.innerHTML = `Voer minimaal ${MIN_WORDS} geldige woorden in.`;
+      meldingContainer.innerHTML = `Voer minimaal ${MIN_WORDS} geldige woorden in. Voeg nog ${MIN_WORDS - woorden.length} woord(en) toe.`;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       document.getElementById("woordenLijst").innerHTML = "";
       return;
@@ -339,6 +573,16 @@ function genereerWoordzoeker() {
     if (truncated) {
       meldingContainer.style.color = "orange";
       meldingContainer.innerHTML += `Sommige woorden zijn afgekapt tot ${MAX_WORD_LENGTH} letters.<br>`;
+    }
+
+    if (mode === "message") {
+      secretMessageDisplay = (document.getElementById("geheimeBoodschap").value || "").trim().replace(/\s+/g, " ").toUpperCase();
+      secretMessage = sanitizeWord(secretMessageDisplay);
+      if (!secretMessage) {
+        meldingContainer.style.color = "red";
+        meldingContainer.innerHTML = "Vul eerst een geheime boodschap in.";
+        return;
+      }
     }
 
   } else {
@@ -386,14 +630,56 @@ function genereerWoordzoeker() {
   const rasterFormaat = document.getElementById("rasterFormaat").value;
   let gridSize;
   const selectedGridSize = parseInt(rasterFormaat.split("x")[0]);
-  if ([6, 8, 10].includes(selectedGridSize)) {
+  if (mode !== "message" && [6, 8, 10].includes(selectedGridSize)) {
     let maxLen = Math.max(...puzzleWords.map(w => w.length));
     if (maxLen > selectedGridSize) {
       meldingContainer.style.color = "orange";
       meldingContainer.innerHTML += `Let op: Raster van ${selectedGridSize}×${selectedGridSize} is krap voor woorden langer dan ${selectedGridSize} letters.<br>`;
     }
   }
-  if (rasterFormaat === "auto") {
+  if (mode === "message") {
+    const wordLetterCount = puzzleWords.reduce((sum, word) => sum + word.length, 0);
+    const neededCells = wordLetterCount + secretMessage.length;
+    if (rasterFormaat === "auto") {
+      const exactSize = Math.sqrt(neededCells);
+      if (!Number.isInteger(exactSize) || exactSize < 6 || exactSize > 25) {
+        const lower = Math.max(6, Math.floor(exactSize));
+        const upper = Math.min(25, Math.max(6, Math.ceil(exactSize)));
+        const lowerDiff = wordLetterCount - (lower * lower - secretMessage.length);
+        const upperDiff = wordLetterCount - (upper * upper - secretMessage.length);
+        const describeDifference = (size, difference) => difference < 0
+          ? `Voor ${size}×${size} heb je ${Math.abs(difference)} woordletters te weinig: voeg woorden toe of maak woorden langer.`
+          : `Voor ${size}×${size} heb je ${Math.abs(difference)} woordletters te veel: verwijder een woord of maak woorden korter.`;
+        const advice = lower === upper
+          ? describeDifference(lower, lowerDiff)
+          : `${describeDifference(lower, lowerDiff)} ${describeDifference(upper, upperDiff)}`;
+        document.getElementById("boodschapPasMelding").textContent = advice;
+        document.getElementById("boodschapPasMelding").style.color = "#a65400";
+        meldingContainer.style.color = "#a65400";
+        meldingContainer.innerHTML = `De huidige woorden en boodschap vullen geen vierkant rooster exact. ${advice} Pas enkele woordlengtes aan.`;
+        return;
+      }
+      gridSize = exactSize;
+    } else {
+      gridSize = selectedGridSize;
+    }
+    const targetWordLetters = gridSize * gridSize - secretMessage.length;
+    const difference = wordLetterCount - targetWordLetters;
+    const fitMessage = document.getElementById("boodschapPasMelding");
+    if (difference !== 0) {
+      fitMessage.textContent = difference < 0
+        ? `${Math.abs(difference)} woordletters te weinig. Voeg woorden toe of maak woorden langer.`
+        : `${Math.abs(difference)} woordletters te veel. Verwijder een woord of maak woorden korter.`;
+      fitMessage.style.color = difference < 0 ? "#a65400" : "#b3261e";
+      meldingContainer.style.color = difference < 0 ? "#a65400" : "#b3261e";
+      meldingContainer.innerHTML = difference < 0
+        ? `Je hebt <b>${Math.abs(difference)} woordletters te weinig</b>. Voeg één of meer woorden toe of vervang woorden door langere woorden.`
+        : `Je hebt <b>${Math.abs(difference)} woordletters te veel</b>. Verwijder een woord of vervang woorden door kortere woorden.`;
+      return;
+    }
+    fitMessage.textContent = `Exact passend: ${wordLetterCount} woordletters en ${secretMessage.length} boodschapletters vullen ${gridSize * gridSize} vakjes.`;
+    fitMessage.style.color = "#24865b";
+  } else if (rasterFormaat === "auto") {
     let maxWordLength = Math.max(...puzzleWords.map(w => w.length));
     gridSize = Math.max(maxWordLength + 3, Math.ceil(Math.sqrt(puzzleWords.length) * 3) + 3);
     gridSize = Math.min(gridSize, 25);
@@ -417,12 +703,25 @@ function genereerWoordzoeker() {
   }
 
   // Genereer
-  const result = generateWordSearch(puzzleWords, gridSize, allowedDirections);
+  const result = mode === "message"
+    ? generateMessageWordSearch(puzzleWords, secretMessage, gridSize, allowedDirections)
+    : generateWordSearch(puzzleWords, gridSize, allowedDirections);
+
+  if (!result) {
+    meldingContainer.style.color = "#a65400";
+    meldingContainer.innerHTML = "Het aantal letters past exact, maar er werd nog geen geldige plaatsing gevonden. Probeer opnieuw, pas één woord aan of kies andere toegestane richtingen.";
+    return;
+  }
 
   currentPuzzleState = {
     grid: result.grid,
     gridSize: gridSize,
     wordLocations: result.wordLocations,
+    mode,
+    messageCells: result.messageCells || [],
+    secretMessage,
+    secretMessageDisplay,
+    solutionColor: document.getElementById("solutionColor").value,
     title: (document.getElementById("werkbladTitel").value || "Woordzoeker").trim() || "Woordzoeker",
     instruction: (document.getElementById("opdrachtzin").value || "Zoek alle woorden in het letterrooster.").trim() || "Zoek alle woorden in het letterrooster."
   };
@@ -435,6 +734,13 @@ function genereerWoordzoeker() {
     // Toon onthoofde puzzelwoorden; bij paren adviseer groter raster
     meldingContainer.innerHTML += `<b>Opgelet:</b> De volgende woorden konden niet geplaatst worden: ${result.unplacedWords.join(", ")}. Probeer een groter raster.`;
   }
+  if (mode === "message" && result.usedDirections) {
+    const allowed = Object.entries(allowedDirections).filter(([, enabled]) => enabled).map(([name]) => name);
+    const unused = allowed.filter(name => !result.usedDirections.includes(name));
+    meldingContainer.style.color = "#24865b";
+    meldingContainer.innerHTML = `<b>Gelukt.</b> Gebruikte richtingen: ${result.usedDirections.join(", ")}.`;
+    if (unused.length) meldingContainer.innerHTML += ` De toegestane richting ${unused.join(", ")} was voor deze geldige plaatsing niet nodig.`;
+  }
 
   // Woordenlijst onderaan opbouwen
   const woordenLijstDiv = document.getElementById("woordenLijst");
@@ -442,7 +748,7 @@ function genereerWoordzoeker() {
   const ul = document.createElement("ul");
   ul.className = "kolommen";
 
-  if (mode === "single") {
+  if (mode === "single" || mode === "message") {
     const placedSet = new Set(result.successfullyPlacedWords);
     const list = Array.from(placedSet);
     list.sort();
@@ -471,6 +777,76 @@ function genereerWoordzoeker() {
   document.getElementById("worksheet-preview").classList.remove("preview-empty");
 }
 
+function updateMessageWordCount(count) {
+  const el = document.getElementById("messageWoordAantalMelding");
+  if (!el) return;
+  if (count < 6) {
+    el.textContent = `Voeg nog ${6 - count} woord(en) toe. Je hebt er minimaal 6 nodig.`;
+    el.style.color = "red";
+  } else if (count > 20) {
+    el.textContent = `Verwijder ${count - 20} woord(en). Er worden maximaal 20 woorden gebruikt.`;
+    el.style.color = "orange";
+  } else {
+    el.textContent = `Aantal woorden: ${count} (OK)`;
+    el.style.color = "#004080";
+  }
+}
+
+function updateMessageWordsVisibility() {
+  const group = document.getElementById("messageWordsGroup");
+  if (!group) return;
+  const hasMessage = sanitizeWord(document.getElementById("geheimeBoodschap").value).length > 0;
+  group.hidden = !hasMessage;
+  if (!hasMessage) return;
+  const count = document.getElementById("messageWordsInput").value
+    .split("\n")
+    .map(value => sanitizeWord(value.trim()))
+    .filter(Boolean).length;
+  updateMessageWordCount(count);
+  updateMessageFitPreview();
+}
+
+function updateMessageFitPreview() {
+  const feedback = document.getElementById("boodschapPasMelding");
+  if (!feedback || document.getElementById("taalMode").value !== "message") return;
+  const words = document.getElementById("messageWordsInput").value
+    .split("\n")
+    .map(value => sanitizeWord(value).slice(0, 12))
+    .filter(Boolean)
+    .slice(0, 20);
+  const message = sanitizeWord(document.getElementById("geheimeBoodschap").value);
+  if (!words.length || !message.length) {
+    feedback.textContent = "Vul woorden en een boodschap in om de passendheid te berekenen.";
+    feedback.style.color = "#667b8c";
+    return;
+  }
+  const wordLetters = words.reduce((sum, word) => sum + word.length, 0);
+  const raster = document.getElementById("rasterFormaat").value;
+  if (raster === "auto") {
+    const size = Math.sqrt(wordLetters + message.length);
+    if (Number.isInteger(size) && size >= 6 && size <= 25) {
+      feedback.textContent = `Exact passend in een raster van ${size}×${size}.`;
+      feedback.style.color = "#24865b";
+    } else {
+      const near = Math.max(6, Math.min(25, Math.round(size)));
+      const difference = wordLetters - (near * near - message.length);
+      feedback.textContent = difference < 0
+        ? `Je hebt ${Math.abs(difference)} woordletters te weinig voor ${near}×${near}. Voeg woorden toe of maak woorden langer.`
+        : `Je hebt ${Math.abs(difference)} woordletters te veel voor ${near}×${near}. Verwijder een woord of maak woorden korter.`;
+      feedback.style.color = "#a65400";
+    }
+    return;
+  }
+  const size = Number.parseInt(raster, 10);
+  const difference = wordLetters - (size * size - message.length);
+  feedback.textContent = difference === 0
+    ? `Exact passend: ${wordLetters} woordletters en ${message.length} boodschapletters.`
+    : difference < 0
+      ? `Je hebt ${Math.abs(difference)} woordletters te weinig. Voeg woorden toe of maak woorden langer.`
+      : `Je hebt ${Math.abs(difference)} woordletters te veel. Verwijder een woord of maak woorden korter.`;
+  feedback.style.color = difference === 0 ? "#24865b" : difference < 0 ? "#a65400" : "#b3261e";
+}
+
 // ===== Events =====
 document.addEventListener("DOMContentLoaded", () => {
   for (let index = 0; index < 6; index++) addPairRow();
@@ -480,11 +856,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("genereerBtn").addEventListener("click", genereerWoordzoeker);
   document.getElementById("toonOplossingBtn").addEventListener("click", toggleSolution);
+  document.getElementById("solutionColor").addEventListener("input", event => {
+    if (!currentPuzzleState.grid) return;
+    currentPuzzleState.solutionColor = event.target.value;
+    if (solutionVisible) drawPuzzle();
+  });
 
   document.getElementById("woordenInput").addEventListener("input", event => {
     const count = event.target.value.split("\n").map(value => sanitizeWord(value.trim())).filter(Boolean).length;
     updateWordCountMessageSingle(count);
+    updateMessageFitPreview();
   });
+  document.getElementById("messageWordsInput").addEventListener("input", event => {
+    const count = event.target.value.split("\n").map(value => sanitizeWord(value.trim())).filter(Boolean).length;
+    updateMessageWordCount(count);
+    updateMessageFitPreview();
+  });
+  document.getElementById("geheimeBoodschap").addEventListener("input", updateMessageWordsVisibility);
+  document.getElementById("rasterFormaat").addEventListener("change", updateMessageFitPreview);
   document.getElementById("pairRowsContainer").addEventListener("input", () => updatePairCountMessage(readPairInputs().length));
   document.getElementById("pairRowsContainer").addEventListener("click", event => {
     const removeButton = event.target.closest(".remove-pair-row");
@@ -502,6 +891,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("taalMode").addEventListener("change", () => {
     updateModeUI();
+  });
+  document.querySelectorAll(".puzzle-mode-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.getElementById("taalMode").value = tab.dataset.mode;
+      updateModeUI();
+    });
   });
   document.querySelectorAll('input[name="pairPuzzleSide"]').forEach(radio => {
     radio.addEventListener("change", updateModeExplanation);
@@ -547,6 +942,7 @@ function createWorksheetPdf(withSolution) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const title = (document.getElementById("werkbladTitel")?.value || "").trim() || "Woordzoeker";
   const instruction = (document.getElementById("opdrachtzin")?.value || "").trim() || "Zoek alle woorden in het letterrooster.";
+  const isMessageMode = currentPuzzleState.mode === "message";
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
@@ -568,14 +964,14 @@ function createWorksheetPdf(withSolution) {
   const instructionLines = doc.splitTextToSize(instruction, 168);
   doc.text(instructionLines, 21, 40.5);
 
-  const pdfImgWidth = 132;
-  const pdfImgHeight = 132;
+  const pdfImgWidth = isMessageMode ? 120 : 132;
+  const pdfImgHeight = isMessageMode ? 120 : 132;
   const xPosImg = (pageWidth - pdfImgWidth) / 2;
   const yPosImg = 50;
   doc.addImage(dataURL, "PNG", xPosImg, yPosImg, pdfImgWidth, pdfImgHeight);
 
   const woorden = Array.from(document.querySelectorAll("#woordenLijst li")).map(li => li.textContent);
-  const listStartY = 198;
+  const listStartY = isMessageMode ? 184 : 198;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
   doc.setTextColor(20, 79, 128);
@@ -585,15 +981,88 @@ function createWorksheetPdf(withSolution) {
   doc.setTextColor(0, 0, 0);
   const itemsPerColumn = Math.max(1, Math.ceil(woorden.length / 3));
   const columnWidth = 58;
+  const listRowHeight = isMessageMode ? 7 : 8;
   for (let i = 0; i < woorden.length; i++) {
     const colIndex = Math.floor(i / itemsPerColumn);
     const rowIndex = i % itemsPerColumn;
     const x = 18 + colIndex * columnWidth;
-    const y = listStartY + 10 + rowIndex * 8;
+    const y = listStartY + 10 + rowIndex * listRowHeight;
     doc.circle(x + 2, y - 1.2, 1.8, "S");
     doc.text(woorden[i], x + 7, y);
   }
-  doc.save(withSolution ? "woordzoeker-oplossing.pdf" : "woordzoeker-werkblad.pdf");
+
+  if (isMessageMode) {
+    const messageWords = (currentPuzzleState.secretMessageDisplay || "")
+      .split(/\s+/)
+      .map(sanitizeWord)
+      .filter(Boolean);
+    const boxSize = 7;
+    const boxGap = 1;
+    const wordGap = 4.5;
+    const minX = 20;
+    const maxX = 190;
+    const boxRows = [];
+    let row = [];
+    let cursorX = minX;
+    messageWords.forEach(word => {
+      const wordWidth = word.length * boxSize + Math.max(0, word.length - 1) * boxGap;
+      if (row.length && cursorX + wordWidth > maxX) {
+        boxRows.push(row);
+        row = [];
+        cursorX = minX;
+      }
+      const letters = [...word].map(letter => {
+        const item = { letter, x: cursorX };
+        cursorX += boxSize + boxGap;
+        return item;
+      });
+      row.push(...letters);
+      cursorX += wordGap;
+    });
+    if (row.length) boxRows.push(row);
+
+    const lastListY = listStartY + 10 + (itemsPerColumn - 1) * listRowHeight;
+    const answerTop = Math.max(lastListY + 8, 229);
+    const panelHeight = 27 + boxRows.length * 9;
+    doc.setDrawColor(119, 174, 216);
+    doc.setFillColor(242, 248, 253);
+    doc.roundedRect(16, answerTop, 178, panelHeight, 2, 2, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(20, 79, 128);
+    doc.text("Overgebleven boodschap:", 20, answerTop + 7);
+
+    boxRows.forEach((boxRow, rowIndex) => {
+      const y = answerTop + 10 + rowIndex * 9;
+      boxRow.forEach(item => {
+        doc.setDrawColor(66, 91, 110);
+        doc.setFillColor(255, 255, 255);
+        doc.rect(item.x, y, boxSize, boxSize, "FD");
+        if (withSolution) {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(11);
+          doc.setTextColor(103, 80, 164);
+          doc.text(item.letter, item.x + boxSize / 2, y + 5.2, { align: "center" });
+        }
+      });
+    });
+
+    const writingY = answerTop + 18 + boxRows.length * 9;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(38, 76, 104);
+    doc.text("Schrijf de boodschap:", 20, writingY);
+    doc.setDrawColor(38, 76, 104);
+    doc.line(56, writingY + 0.8, 188, writingY + 0.8);
+    if (withSolution) {
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(103, 80, 164);
+      doc.text(currentPuzzleState.secretMessageDisplay, 58, writingY - 1);
+    }
+  }
+
+  const prefix = isMessageMode ? "woordzoeker-geheime-boodschap" : "woordzoeker";
+  doc.save(withSolution ? `${prefix}-oplossing.pdf` : `${prefix}-werkblad.pdf`);
   if (solutionVisible !== wasVisible) toggleSolution();
 }
 
