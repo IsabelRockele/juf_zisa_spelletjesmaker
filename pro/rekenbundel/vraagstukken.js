@@ -13,14 +13,22 @@ window.VraagstukkenModule = (() => {
 
   // ── DAGELIJKS LIMIET (localStorage per gebruiker) ────────────
   async function haalIdToken() {
-    const [{ getApps }, { getAuth }] = await Promise.all([
+    const [{ initializeApp, getApps }, { getAuth }] = await Promise.all([
       import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
       import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js')
     ]);
-    const app = getApps()[0];
-    const auth = app ? getAuth(app) : null;
-    if (auth) await auth.authStateReady();
-    const user = auth?.currentUser || null;
+    const config = {
+      apiKey: 'AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw',
+      authDomain: 'zisa-spelletjesmaker-pro.firebaseapp.com',
+      projectId: 'zisa-spelletjesmaker-pro',
+      storageBucket: 'zisa-spelletjesmaker-pro.appspot.com',
+      messagingSenderId: '828063957776',
+      appId: '1:828063957776:web:8d8686b478846fe980db95'
+    };
+    const app = getApps().find((item) => item.options.projectId === 'zisa-spelletjesmaker-pro') || initializeApp(config);
+    const auth = getAuth(app);
+    await auth.authStateReady();
+    const user = auth.currentUser;
     if (!user) throw new Error('Meld je opnieuw aan bij Spelgenerator PRO.');
     return user.getIdToken();
   }
@@ -50,8 +58,9 @@ window.VraagstukkenModule = (() => {
     if (!badge) return;
     try {
       status = status || await roepBeveiligdeFunctie({ action: 'status' });
-    } catch {
-      badge.textContent = 'Aanmelden vereist';
+    } catch (e) {
+      console.error('AI-limiet laden mislukt:', e);
+      badge.textContent = e?.message || 'Aanmelden vereist';
       badge.className = 'vs-limiet-badge leeg';
       return;
     }
