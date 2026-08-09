@@ -1087,6 +1087,119 @@ if (!isActive) {
   };
 });
 
+// ---------------------- Ontdek: gratis account + PDF-limieten ----------------
+// Ontdek gebruikt bewust hetzelfde Firebase Auth-account als PRO. Alleen de
+// proefstand staat apart, zodat maand-, jaar- en schoollicenties nooit worden
+// aangepast door deze tellers.
+const DISCOVER_TOTAL_LIMIT = 15;
+const DISCOVER_TOOL_LIMIT = 3;
+const DISCOVER_LARGE_BUNDLE_PAGE_LIMIT = 3;
+const DISCOVER_LARGE_BUNDLE_TOOLS = new Set([
+  "rekenbundel",
+  "getalinzicht",
+  "cijferen",
+  "geldbundel",
+  "meetkundebundel",
+  "rekenpiramide",
+  "rekendriehoek",
+  "rekencirkel",
+  "rekenspellen",
+  "verliefde-harten",
+  "spellingbundel",
+  "leesbooster",
+  "leeskaartjes",
+  "handschrift",
+  "woordzoeker",
+  "kruiswoordpuzzel",
+  "geheime-boodschap",
+  "lettercode",
+  "lettertetris",
+  "sudoku",
+  "zoek-verschillen",
+  "doolhof",
+  "slangendoolhof",
+  "hexagonaal-raster",
+  "schaduw",
+  "punttekening",
+  "pixelart",
+  "bouwplaten",
+  "coderen",
+  "blokkenbouwsels",
+  "plattegrond",
+  "kloklezenbundel",
+  "kalenderbundel",
+]);
+
+function discoverPayload(data: any = {}) {
+  const totalUsed = Math.max(0, Number(data.totalDownloads || 0));
+  const byTool = data.byTool && typeof data.byTool === "object" ? data.byTool : {};
+  return {
+    totalLimit: DISCOVER_TOTAL_LIMIT,
+    totalUsed,
+    totalRemaining: Math.max(0, DISCOVER_TOTAL_LIMIT - totalUsed),
+    toolLimit: DISCOVER_TOOL_LIMIT,
+    maxLargeBundlePages: DISCOVER_LARGE_BUNDLE_PAGE_LIMIT,
+    byTool,
+  };
+}
+
+export const getDiscoverStatus = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const uid = req.auth.uid;
+  const pro = Boolean(await activePlayLicense(uid));
+  const snap = await db.collection("discoverTrials").doc(uid).get();
+  return { pro, ...discoverPayload(snap.exists ? snap.data() : {}) };
+});
+
+export const reserveDiscoverDownload = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const uid = req.auth.uid;
+  const email = String((req.auth.token as any)?.email || "").trim().toLowerCase();
+  const toolId = String(req.data?.toolId || "").trim().toLowerCase();
+  const pages = Number(req.data?.pages || 0);
+
+  if (!/^[a-z0-9-]{2,60}$/.test(toolId)) {
+    throw new HttpsError("invalid-argument", "Ongeldige tool.");
+  }
+  if (!Number.isInteger(pages) || pages < 1 || pages > 100) {
+    throw new HttpsError("invalid-argument", "Ongeldig paginatal.");
+  }
+  if (DISCOVER_LARGE_BUNDLE_TOOLS.has(toolId) && pages > DISCOVER_LARGE_BUNDLE_PAGE_LIMIT) {
+    throw new HttpsError("failed-precondition", "PAGE_LIMIT");
+  }
+
+  if (await activePlayLicense(uid)) {
+    return { pro: true, reserved: false, ...discoverPayload({}) };
+  }
+
+  const ref = db.collection("discoverTrials").doc(uid);
+  const result = await db.runTransaction(async tx => {
+    const snap = await tx.get(ref);
+    const current = discoverPayload(snap.exists ? snap.data() : {});
+    const usedForTool = Math.max(0, Number(current.byTool[toolId] || 0));
+
+    if (current.totalUsed >= DISCOVER_TOTAL_LIMIT) {
+      throw new HttpsError("resource-exhausted", "TOTAL_LIMIT");
+    }
+    if (usedForTool >= DISCOVER_TOOL_LIMIT) {
+      throw new HttpsError("resource-exhausted", "TOOL_LIMIT");
+    }
+
+    const nextByTool = { ...current.byTool, [toolId]: usedForTool + 1 };
+    const next = {
+      totalDownloads: current.totalUsed + 1,
+      byTool: nextByTool,
+      email: email || null,
+      updatedAt: Timestamp.now(),
+      ...(snap.exists ? {} : { createdAt: Timestamp.now() }),
+    };
+    tx.set(ref, next, { merge: true });
+    return discoverPayload(next);
+  });
+
+  return { pro: false, reserved: true, ...result };
+});
+
 
 // --------------------------- HTTP wrappers (CORS) -----------------------------
 export const listDevicesHttp = onRequest({ region: REGION }, async (req: Request, res: Response) => {
@@ -1264,6 +1377,162 @@ async function activePlayLicense(uid: string): Promise<{ expiresAt: Timestamp; o
   const expiresAt = lic?.expiresAt as Timestamp | undefined;
   return expiresAt ? { expiresAt, owner: false } : null;
 }
+
+// ===== Bingo-bibliotheek: maximaal 15 spellen per PRO-account ================
+
+const BINGO_LIBRARY_LIMIT = 15;
+
+function bingoGamesRef(uid: string) {
+  return db.collection("users").doc(uid).collection("bingoGames");
+}
+
+function bingoMetaRef(uid: string) {
+  return db.collection("users").doc(uid).collection("bingoMeta").doc("library");
+}
+
+async function requireBingoPro(uid: string) {
+  const license = await activePlayLicense(uid);
+  if (!license) throw new HttpsError("permission-denied", "Een actief PRO-abonnement is vereist.");
+  return license;
+}
+
+function cleanBingoName(value: unknown): string {
+  const name = String(value || "").replace(/\s+/g, " ").trim().slice(0, 90);
+  if (!name) throw new HttpsError("invalid-argument", "Geef het bingospel een naam.");
+  return name;
+}
+
+function cleanBingoType(value: unknown): string {
+  const type = String(value || "").trim().toLowerCase();
+  const allowed = new Set(["woorden", "getallen", "tafels", "rekenen"]);
+  return allowed.has(type) ? type : "woorden";
+}
+
+function cleanBingoGameData(value: unknown): Record<string, any> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new HttpsError("invalid-argument", "Ongeldige bingogegevens.");
+  }
+  let clone: Record<string, any>;
+  try {
+    clone = JSON.parse(JSON.stringify(value));
+  } catch {
+    throw new HttpsError("invalid-argument", "De bingogegevens konden niet worden gelezen.");
+  }
+  if (!String(clone.levelNaam || "").trim() || !Array.isArray(clone.kaartItemsLijst)) {
+    throw new HttpsError("invalid-argument", "Het bingospel mist noodzakelijke spelgegevens.");
+  }
+  if (!Array.isArray(clone.bingokaarten) || clone.bingokaarten.length === 0 || !clone.kaartConfiguratie) {
+    throw new HttpsError("failed-precondition", "Maak eerst de bingokaarten voordat je het spel bewaart.");
+  }
+  const bytes = Buffer.byteLength(JSON.stringify(clone), "utf8");
+  if (bytes > 700_000) {
+    throw new HttpsError("invalid-argument", "Dit bingospel is te groot om in de bibliotheek te bewaren.");
+  }
+  return clone;
+}
+
+export const listBingoGames = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const uid = req.auth.uid;
+  await requireBingoPro(uid);
+  const snap = await bingoGamesRef(uid).orderBy("updatedAt", "desc").limit(BINGO_LIBRARY_LIMIT).get();
+  const games = snap.docs.map(doc => {
+    const data = doc.data() as any;
+    return {
+      id: doc.id,
+      name: data.name || "Bingospel",
+      type: data.type || "woorden",
+      levelName: data.levelName || "",
+      cardCount: Number(data.cardCount || 0),
+      cardSize: Number(data.cardSize || 0),
+      createdAt: data.createdAt?.toDate?.()?.toISOString?.() || null,
+      updatedAt: data.updatedAt?.toDate?.()?.toISOString?.() || null,
+    };
+  });
+  return { games, count: games.length, limit: BINGO_LIBRARY_LIMIT };
+});
+
+export const getBingoGame = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const uid = req.auth.uid;
+  await requireBingoPro(uid);
+  const gameId = String(req.data?.gameId || "").trim();
+  if (!/^[A-Za-z0-9_-]{8,80}$/.test(gameId)) throw new HttpsError("invalid-argument", "Ongeldig spel-ID.");
+  const snap = await bingoGamesRef(uid).doc(gameId).get();
+  if (!snap.exists) throw new HttpsError("not-found", "Dit bingospel bestaat niet meer.");
+  const data = snap.data() as any;
+  return { id: snap.id, name: data.name, type: data.type, gameData: data.gameData };
+});
+
+export const saveBingoGame = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const uid = req.auth.uid;
+  await requireBingoPro(uid);
+  const name = cleanBingoName(req.data?.name);
+  const type = cleanBingoType(req.data?.type);
+  const gameData = cleanBingoGameData(req.data?.gameData);
+  const requestedId = String(req.data?.gameId || "").trim();
+  if (requestedId && !/^[A-Za-z0-9_-]{8,80}$/.test(requestedId)) {
+    throw new HttpsError("invalid-argument", "Ongeldig spel-ID.");
+  }
+  const gameRef = requestedId ? bingoGamesRef(uid).doc(requestedId) : bingoGamesRef(uid).doc();
+  const metaRef = bingoMetaRef(uid);
+  const result = await db.runTransaction(async tx => {
+    const [gameSnap, metaSnap] = await Promise.all([tx.get(gameRef), tx.get(metaRef)]);
+    const isNew = !gameSnap.exists;
+    let count = Math.max(0, Number(metaSnap.data()?.count || 0));
+    if (isNew && count >= BINGO_LIBRARY_LIMIT) {
+      throw new HttpsError("resource-exhausted", "BINGO_LIBRARY_FULL");
+    }
+    const now = Timestamp.now();
+    tx.set(gameRef, {
+      uid,
+      name,
+      type,
+      levelName: String(gameData.levelNaam || "").slice(0, 120),
+      cardCount: Number(gameData.kaartConfiguratie?.aantalKaarten || gameData.bingokaarten.length || 0),
+      cardSize: Number(gameData.kaartConfiguratie?.kaartGrootte || 0),
+      gameData,
+      createdAt: gameSnap.exists ? (gameSnap.data()?.createdAt || now) : now,
+      updatedAt: now,
+    });
+    if (isNew) count += 1;
+    tx.set(metaRef, { count, limit: BINGO_LIBRARY_LIMIT, updatedAt: now }, { merge: true });
+    return { id: gameRef.id, count };
+  });
+  return { ok: true, ...result, limit: BINGO_LIBRARY_LIMIT };
+});
+
+export const renameBingoGame = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const uid = req.auth.uid;
+  await requireBingoPro(uid);
+  const gameId = String(req.data?.gameId || "").trim();
+  if (!/^[A-Za-z0-9_-]{8,80}$/.test(gameId)) throw new HttpsError("invalid-argument", "Ongeldig spel-ID.");
+  const ref = bingoGamesRef(uid).doc(gameId);
+  if (!(await ref.get()).exists) throw new HttpsError("not-found", "Dit bingospel bestaat niet meer.");
+  await ref.update({ name: cleanBingoName(req.data?.name), updatedAt: Timestamp.now() });
+  return { ok: true };
+});
+
+export const deleteBingoGame = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const uid = req.auth.uid;
+  await requireBingoPro(uid);
+  const gameId = String(req.data?.gameId || "").trim();
+  if (!/^[A-Za-z0-9_-]{8,80}$/.test(gameId)) throw new HttpsError("invalid-argument", "Ongeldig spel-ID.");
+  const gameRef = bingoGamesRef(uid).doc(gameId);
+  const metaRef = bingoMetaRef(uid);
+  const count = await db.runTransaction(async tx => {
+    const [gameSnap, metaSnap] = await Promise.all([tx.get(gameRef), tx.get(metaRef)]);
+    if (!gameSnap.exists) throw new HttpsError("not-found", "Dit bingospel bestaat niet meer.");
+    const next = Math.max(0, Number(metaSnap.data()?.count || 1) - 1);
+    tx.delete(gameRef);
+    tx.set(metaRef, { count: next, limit: BINGO_LIBRARY_LIMIT, updatedAt: Timestamp.now() }, { merge: true });
+    return next;
+  });
+  return { ok: true, count, limit: BINGO_LIBRARY_LIMIT };
+});
 
 function normalisePlayConfig(value: any) {
   return {
