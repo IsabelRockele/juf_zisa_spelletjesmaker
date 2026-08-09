@@ -2,6 +2,9 @@
 node_modules/
 lib/
 .tmp/
+.tmp-edge-dk/
+.codex-tmp/
+tmp/
 dist/
 # OS
 .DS_Store
@@ -12,5 +15,9 @@ Thumbs.db
 # Backups/oud
 pro_backend/functions_oud/
 *package-lock-*.json
-# Cloud Functions (bevat API keys)
-vraagstukken/
+# Cloud Functions: broncode wel bijhouden; alleen lokale secrets uitsluiten.
+vraagstukken/.env
+vraagstukken/.env.*
+!vraagstukken/.env.example
+vraagstukken/.secret.local
+vraagstukken/node_modules/

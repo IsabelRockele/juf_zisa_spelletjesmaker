@@ -7,28 +7,66 @@ window.VraagstukkenModule = (() => {
   // ── STAAT ────────────────────────────────────────────────────
   let gegenereerdeVraagstukken = []; // opgeslagen in de bundel
   let huidigVraagstuk = null;        // laatste gegenereerde preview
+  const CLOUD_FUNCTION_URL = 'https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net/genereerVraagstuk';
+
+  async function haalIdToken() {
+    const [{ initializeApp, getApps }, { getAuth }] = await Promise.all([
+      import('https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js'),
+      import('https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js')
+    ]);
+    const config = {
+      apiKey: 'AIzaSyCYkB9CSNahs1UNv9pduNC7TTsj0LNNHSU',
+      authDomain: 'zisa-collegas.firebaseapp.com',
+      projectId: 'zisa-collegas',
+      storageBucket: 'zisa-collegas.firebasestorage.app',
+      messagingSenderId: '1029178227426',
+      appId: '1:1029178227426:web:cb21cf199072c44b30bcbb'
+    };
+    const app = getApps().find((item) => item.options.projectId === 'zisa-collegas') || initializeApp(config);
+    const auth = getAuth(app);
+    await auth.authStateReady();
+    if (!auth.currentUser) throw new Error('Meld je opnieuw aan bij de collega-versie.');
+    return auth.currentUser.getIdToken();
+  }
+
+  async function roepBeveiligdeFunctie(body) {
+    const token = await haalIdToken();
+    const resp = await fetch(CLOUD_FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(body)
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || data.error) throw new Error(data.error || 'De aanvraag is mislukt.');
+    return data;
+  }
 
   // ── DAGELIJKS LIMIET (localStorage — tijdelijk voor testen) ──
   async function haalTellerOp() {
-    const datum = new Date().toISOString().slice(0, 10);
-    const key = `vs-teller-${datum}`;
-    return parseInt(localStorage.getItem(key) || '0');
+    return 0;
   }
 
   async function verhoogTeller() {
-    const datum = new Date().toISOString().slice(0, 10);
-    const key = `vs-teller-${datum}`;
-    const huidig = parseInt(localStorage.getItem(key) || '0');
-    localStorage.setItem(key, huidig + 1);
+    return;
   }
 
   // ── LIMIET BADGE UPDATEN ─────────────────────────────────────
-  async function updateLimietBadge() {
-    const teller = await haalTellerOp();
-    const resterend = Math.max(0, 20 - teller);
+  async function updateLimietBadge(status) {
     const badge = document.getElementById('vs-limiet-badge');
     if (!badge) return;
-    badge.textContent = `${resterend}/20 vandaag`;
+    try {
+      status = status || await roepBeveiligdeFunctie({ action: 'status' });
+    } catch {
+      badge.textContent = 'Aanmelden vereist';
+      badge.className = 'vs-limiet-badge leeg';
+      return;
+    }
+    const resterend = Math.max(0, Number(status.remaining || 0));
+    const limiet = Number(status.limit || 20);
+    badge.textContent = `Nog ${resterend} van ${limiet} beschikbaar vandaag`;
     badge.className = 'vs-limiet-badge ' + (resterend === 0 ? 'leeg' : resterend <= 5 ? 'weinig' : '');
   }
 
@@ -250,21 +288,15 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
 
   // ── API AANROEP ──────────────────────────────────────────────
   async function roepAPIaan(prompt) {
-    const CLOUD_FUNCTION_URL = 'https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net/genereerVraagstuk';
-    const resp = await fetch(CLOUD_FUNCTION_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
-    });
-    if (!resp.ok) throw new Error(await resp.text());
-    const data = await resp.json();
-    if (data.error) throw new Error(data.error);
+    const data = await roepBeveiligdeFunctie({ prompt });
     // Splits vraagstuk en antwoordzin op ---
     const volledig = data.tekst;
     const delen = volledig.split('---');
     return {
       vraagstuk: (delen[0] || volledig).trim(),
-      antwoordzin: (delen[1] || '').trim()
+      antwoordzin: (delen[1] || '').trim(),
+      remaining: data.remaining,
+      limit: data.limit
     };
   }
 
