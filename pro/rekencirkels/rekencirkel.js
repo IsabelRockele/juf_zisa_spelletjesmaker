@@ -866,13 +866,16 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("downloadPdfBtn").addEventListener("click", function() { downloadPDF(); });
     var oplBtn = document.getElementById("downloadOplossingPdfBtn");
     if (oplBtn) oplBtn.addEventListener("click", downloadOplossingPDF);
-    document.getElementById("infoBtn").addEventListener("click", function() {
-      document.getElementById("infoModal").style.display = "flex";
+    var infoBtn = document.getElementById("infoBtn");
+    var infoModal = document.getElementById("infoModal");
+    var infoModalClose = document.getElementById("infoModalClose");
+    if (infoBtn && infoModal) infoBtn.addEventListener("click", function() {
+      infoModal.style.display = "flex";
     });
-    document.getElementById("infoModalClose").addEventListener("click", function() {
-      document.getElementById("infoModal").style.display = "none";
+    if (infoModalClose && infoModal) infoModalClose.addEventListener("click", function() {
+      infoModal.style.display = "none";
     });
-    document.getElementById("infoModal").addEventListener("click", function(e) {
+    if (infoModal) infoModal.addEventListener("click", function(e) {
       if (e.target === this) this.style.display = "none";
     });
 
