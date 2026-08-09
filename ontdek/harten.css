@@ -1,0 +1,87 @@
+/* --- Algemene en Knop Styling --- */
+body { font-family: 'Comic Sans MS', cursive, sans-serif; background: #fce4ec; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+.screen { text-align: center; }
+.panel { background: white; padding: 30px 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
+h1 { color: #c2185b; margin-top: 0; }
+p { color: #333; font-size: 1.1em; max-width: 400px; }
+.start-button { background-color: #e91e63; color: white; border: none; padding: 15px 30px; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer; margin-top: 20px; transition: background-color 0.2s; }
+.start-button:hover { background-color: #c2185b; }
+.stop-button { background-color: #78909c; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 10px; cursor: pointer; transition: background-color 0.2s; }
+.stop-button:hover { background-color: #546e7a; }
+.menu-btn { position: fixed; top: 20px; left: 20px; z-index: 1000; background-color: #003366; color: white; padding: 10px 18px; border-radius: 10px; text-decoration: none; font-size: 16px; font-weight: bold; transition: background-color 0.2s; }
+.menu-btn:hover { background-color: #002244; }
+.button-group { display: flex; gap: 15px; justify-content: center; }
+.start-button.secondary { background-color: #007bff; }
+.start-button.secondary:hover { background-color: #0056b3; }
+.target-choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0 4px}.target-choice label{position:relative}.target-choice input{position:absolute;opacity:0}.target-choice span{display:grid;place-items:center;min-height:58px;padding:8px 12px;border:2px solid #f3bfd0;border-radius:12px;background:#fff7fa;color:#8f3153;font-family:Arial,sans-serif;font-weight:800;cursor:pointer}.target-choice small{font-size:.7rem;font-weight:600;color:#8a6875}.target-choice input:checked+span{border-color:#e91e63;background:#fce4ec;color:#b31250;box-shadow:inset 0 -4px #e91e63}
+.worksheet-choice-box{margin-top:18px;padding:13px;border:1px solid #efd3dd;border-radius:12px;background:#fffafd;font-family:Arial,sans-serif}.worksheet-choice-box>strong{display:block;color:#8f3153;font-size:.9rem}.worksheet-choice-box>p{margin:3px auto 9px;font-size:.72rem;color:#775e68}.worksheet-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.worksheet-choice-grid label{position:relative}.worksheet-choice-grid input{position:absolute;opacity:0}.worksheet-choice-grid span{display:grid;place-items:center;min-height:39px;padding:6px;border:1.5px solid #e6cbd5;border-radius:8px;background:#fff;color:#6e5060;font-size:.72rem;font-weight:750;cursor:pointer}.worksheet-choice-grid input:checked+span{border-color:#1c6fb0;background:#eaf5ff;color:#155985;box-shadow:inset 0 -3px #1c6fb0}
+
+/* --- Spel-styling --- */
+.drop-zone { height: 250px; width: 450px; display: flex; justify-content: center; align-items: center; gap: 0; margin: 0 auto 20px auto; border: 3px dashed #f8bbd0; border-radius: 20px; transition: background-color 0.3s, border 0.3s; }
+.drop-zone.drag-over { background-color: #fdeaf1; }
+.options-container { display: flex; justify-content: center; gap: 20px; min-height: 250px; }
+.heart-half { width: 200px; height: 230px; position: relative; cursor: grab; transition: transform 0.3s ease-out; }
+.heart-half.dragging { opacity: 0.5; }
+.heart-half img { width: 100%; height: 100%; pointer-events: none; }
+.heart-half span { position: absolute; top: 50%; font-size: 60px; font-weight: bold; color: white; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; pointer-events: none; }
+.left-half span { left: 38%; transform: translate(-50%, -50%); }
+.right-half span { left: 55%; transform: translate(-50%, -50%); }
+.full-heart-container { width: 400px; height: 380px; background-image: url('harten_afbeeldingen/hart_volledig.png'); background-size: contain; background-position: center; background-repeat: no-repeat; display: flex; justify-content: center; align-items: center; animation: flash-together 1s ease-in-out; }
+.full-heart-container span { font-size: 100px; font-weight: bold; color: white; text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000; }
+/* TOEGEVOEGD: Maak duidelijker dat de opties klikbaar zijn */
+.options-container .heart-half {
+    cursor: pointer;
+}
+@keyframes flash-together { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); filter: drop-shadow(0 0 15px white) brightness(1.5); } }
+.game-footer { margin-top: 20px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+.feedback { font-size: 24px; min-height: 30px; font-weight: bold; flex-grow: 1; text-align: center; }
+.show-correct-animation { outline: 5px solid #4CAF50; border-radius: 10px; transform: scale(1.1); transition: transform 0.3s, outline 0.3s; }
+
+/* --- Werkblad Styling --- */
+.werkblad-pagina {
+    background: white; border: 1px solid #ccc; width: 210mm; height: 297mm;
+    padding: 15mm; box-sizing: border-box; font-family: Arial, sans-serif;
+    display: flex; flex-direction: column; gap: 10px;
+}
+.werkblad-identiteit{display:flex;justify-content:space-between;gap:30px;margin:0 0 8mm;font-size:16px;color:#222}.werkblad-identiteit span{display:flex;align-items:flex-end;gap:8px;width:44%}.werkblad-identiteit i{display:block;flex:1;height:20px;border-bottom:1.5px solid #333}
+.werkblad-pagina h2 { text-align: center; color: #333; margin: 0; }
+.werkblad-pagina .opdracht {
+    text-align: center;
+    font-size: 1.1em;
+    margin: 0 0 12px;
+    padding: 9px 12px;
+    border: 1.5px solid #e4a3bc;
+    border-radius: 8px;
+    background: #fff5f8;
+    color: #555;
+    max-width: none;
+}
+.werkblad-inhoud{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:12px;align-items:stretch}
+.werkblad-hart { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+.werkblad-hart img { max-width: 90%; max-height: 90%; object-fit: contain; }
+.werkblad-hart span {
+    position: absolute; top: 50%; transform: translate(-50%, -50%);
+    font-size: 40px; font-weight: bold; color: black;
+}
+
+/* Positionering voor de witte harten */
+.werkblad-hart.left-half span {
+    left: 40%; /* GOED: Blijft ongewijzigd */
+}
+.werkblad-hart.right-half span {
+    left: 53%; /* AANGEPAST: Iets meer naar links (was 60%) */
+}
+.knip-vak{min-height:0;border:1.5px dashed #999;border-radius:6px;padding:3px;display:flex;align-items:center;justify-content:center}.knip-vak .werkblad-hart{min-height:0}
+.werkblad-verbinden .werkblad-inhoud{grid-template-columns:1fr 1fr;grid-template-rows:1fr;gap:50mm;padding:3mm 5mm}.verbind-kolom{display:grid;grid-template-rows:repeat(6,1fr);gap:4px;min-height:0;width:45mm}.verbind-kolom:first-child{justify-self:start}.verbind-kolom:last-child{justify-self:end}.verbind-kolom .werkblad-hart{min-height:0}.werkblad-verbinden .verbind-kolom:first-child .werkblad-hart::after,.werkblad-verbinden .verbind-kolom:last-child .werkblad-hart::before{content:'';position:absolute;top:50%;width:8px;height:8px;border:1.5px solid #333;border-radius:50%;background:#fff}.werkblad-verbinden .verbind-kolom:first-child .werkblad-hart::after{right:-4px}.werkblad-verbinden .verbind-kolom:last-child .werkblad-hart::before{left:-4px}
+.werkblad-invullen .werkblad-inhoud{grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:12px}.invul-opgave{border:1.5px solid #e1b2c3;border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}.invul-harten{height:75%;width:100%;display:flex;align-items:center;justify-content:center}.invul-harten .werkblad-hart{width:42%;height:100%}.invul-harten .werkblad-hart:first-child{margin-right:-6%}.invul-harten .werkblad-hart span{font-size:30px}.invul-som{font-size:20px;font-weight:700;letter-spacing:1px;color:#333}
+
+/* --- Preview Modal Styling --- */
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+.modal-content { background-color: #fefefe; border-radius: 10px; padding: 20px; width: auto; max-width: 95vw; max-height: 95vh; display: flex; flex-direction: column; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px; }
+.modal-header h2 { color: #333; margin: 0; }
+.close-button { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+.close-button:hover { color: #000; }
+#preview-body { overflow: auto; text-align: center; background: #eee; padding: 20px; display:flex;flex-direction:column;gap:20px; }
+#preview-body .werkblad-pagina { transform-origin: top center; margin: 0 auto; flex:none; }
+.modal-footer { display: flex; justify-content: center; border-top: 1px solid #ddd; padding-top: 15px; margin-top: 15px; }.modal-footer { display: flex; justify-content: center; border-top: 1px solid #ddd; padding-top: 15px; margin-top: 15px; }

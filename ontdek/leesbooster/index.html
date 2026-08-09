@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Leesbooster – Juf Zisa PRO</title>
+  <link rel="stylesheet" href="style.css?v=20260802-9">
+  <link rel="stylesheet" href="leesbooster-ontdek.css?v=1">
+  <script defer src="vendor/html2canvas.min.js"></script>
+  <script defer src="vendor/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="pro-banner"><span class="pro-badge">★ PRO</span><span>Leesbooster — Juf Zisa PRO</span><a href="../app.html">← Terug naar het Pro-menu</a></div>
+  <header class="app-header">
+    <div><strong>Leesbooster</strong><span>gericht technisch lezen</span></div>
+    <a class="overview-link" href="../app.html">← Alle Pro-tools</a>
+    <button class="home-button" id="homeButton" hidden>← Terug naar startscherm</button>
+    <span class="current-mode" id="currentMode" hidden></span>
+    <div class="header-actions" hidden>
+      <span class="blok-teller" id="blokTeller">0 oefenblokken</span>
+      <button class="secondary clear-preview" id="wisAlles">🗑 Preview helemaal leegmaken</button>
+      <button class="download-btn" id="downloadPdf" disabled>↓ PDF downloaden</button>
+      <button class="print-btn" id="printPdf" disabled>🖨 Afdrukken</button>
+    </div>
+  </header>
+
+  <main class="booster-launcher" id="boosterLauncher">
+    <div class="launcher-intro"><img src="afbeeldingen/zisa-leesbooster.png" alt="Zisa leest enthousiast"><div><h1>Wat wil je vandaag maken?</h1><p>Kies één onderdeel. Zo blijft het scherm rustig en zie je alleen wat je nodig hebt.</p></div></div>
+    <div class="launcher-choices">
+      <button class="launcher-card worksheet-card" data-open-mode="werkblad"><span class="launcher-icon">📄</span><span><b>Werkbladen maken</b><small>Maak leesbladen, verhalen, vragen en een bundel om af te drukken.</small><em>Open de werkbladmaker →</em></span></button>
+      <button class="launcher-card game-launch-card" data-open-mode="spel"><span class="launcher-zebra"><img src="afbeeldingen/bewegen/springen.png" alt="Zisa springt"></span><span><b>Samen spelen op het smartboard</b><small>Lees klassikaal flitswoorden en beweeg samen met Zisa.</small><em>Open Zisa's Flitsfeest →</em></span></button>
+    </div>
+    <button class="quick-game" id="quickGame" hidden><span>⚡</span><b>Meteen opnieuw spelen</b><small>Gebruik de laatst gekozen woorden, snelheid en beweegboosts.</small></button>
+  </main>
+
+  <main class="app-layout" hidden>
+    <aside class="sidebar">
+      <div class="intro">
+        <strong>Maak een leesblad of leesbundel</strong>
+        <p>Kies op basis van wat je leerlingen nodig hebben. De leesdoelen zijn bewust niet aan een leerjaar gekoppeld.</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Soort leesmoeilijkheid">
+        <button class="tab active" data-family="combinaties">Lettercombinaties</button>
+        <button class="tab" data-family="lettergrepen">Lettergrepen</button>
+        <button class="tab" data-family="uitspraak">Andere uitspraak</button>
+      </div>
+
+      <div class="sidebar-scroll">
+        <section class="config-card step-card">
+          <div class="card-title"><span>1</span>Kies één of meer leesdoelen</div>
+          <div class="mix-status" id="mixStatus">Nog geen leesdoel gekozen</div>
+          <div class="goal-list" id="doelKeuzes"></div>
+          <button class="clear-goals" id="wisDoelen">Wis mijn leesdoelen</button>
+          <p class="tip">Je keuzes blijven staan als je naar een ander tabblad gaat. Zo kun je bijvoorbeeld <b>wr + th + i klinkt als ie</b> mengen.</p>
+          <div class="word-preview" id="woordVoorbeeld"></div>
+        </section>
+
+        <section class="config-card">
+          <div class="card-title"><span>2</span>Kies de oefenvorm</div>
+          <div class="choice-grid" id="vormKeuzes"></div>
+          <div class="story-options" id="verhaalOpties" hidden>
+            <label class="field-label" for="verhaalThema">Onderwerp van het verhaal</label>
+            <select id="verhaalThema"><option value="verrassing" selected>Verras mij</option><option value="wrak">Het geheim van het wrak</option><option value="theater">Het geheim achter het doek</option><option value="bos">De deur in de oude boom</option><option value="museum">Het museum na sluitingstijd</option></select>
+            <input type="hidden" id="vraagType" value="niveau"><input type="hidden" id="woordenschatType" value="afwisselend">
+            <p class="tip story-auto-tasks"><b>Opdrachten op maat:</b> elk niveau krijgt vier ruime bladzijden: verhaal, begrijpend lezen, woordenschat en zinnen schrijven.</p>
+          </div>
+        </section>
+
+        <section class="config-card">
+          <div class="card-title"><span>3</span>Kies de ondersteuning</div>
+          <div class="level-list" id="niveauKeuzes">
+            <label><input type="checkbox" value="steun" checked><span><b>Met veel steun</b><small>leesstukjes en markering</small></span></label>
+            <label><input type="checkbox" value="basis"><span><b>Basis</b><small>woorden en zinnen</small></span></label>
+            <label><input type="checkbox" value="vlot"><span><b>Vlot lezen</b><small>langere woorden en tekst</small></span></label>
+          </div>
+          <button class="all-levels" id="alleNiveaus">Selecteer alle 3</button>
+          <p class="level-limit" id="niveauBeperking" hidden>Een leespiramide heeft twee zinvolle niveaus: met veel steun en basis.</p>
+          <div class="differentiatie-uitleg">
+            <b>Zo kun je differentiëren</b>
+            <p>Bij korte oefeningen kan iedereen starten met steun en daarna een moeilijker kader proberen. De woorden, hoeveelheid en opdracht verschillen per niveau. Verhalen en vragen worden als afzonderlijke niveaubladen gemaakt om gericht uit te delen.</p>
+          </div>
+        </section>
+
+        <section class="config-card compact">
+          <div class="card-title"><span>4</span>Werk het blok af</div>
+          <label class="field-label" for="aantalWoorden">Aantal woorden</label>
+          <select id="aantalWoorden"><option>8</option><option selected>12</option><option>16</option><option>20</option></select>
+          <label class="check-row"><input type="checkbox" id="naamDatum" checked> Naam en datum tonen</label>
+          <button class="add-btn" id="voegToe">+ Voeg oefenblok toe</button>
+          <p class="validation" id="melding" aria-live="polite"></p>
+        </section>
+      </div>
+    </aside>
+
+    <section class="preview-zone">
+      <div class="preview-toolbar">
+        <div><strong>📄 Bundelpreview</strong><span>Alles binnen de witte pagina komt op papier.</span></div>
+        <button class="shuffle-btn" id="groepeerNiveau" title="Zet alle oefeningen van hetzelfde niveau achter elkaar" aria-pressed="false" disabled>⇅ Groepeer per niveau</button>
+        <button class="shuffle-btn" id="vernieuw" title="Vervang de woorden in alle reeds toegevoegde woordoefeningen" disabled>↻ Andere woorden kiezen</button>
+        <button class="download-btn" id="downloadPdf2" disabled>↓ PDF downloaden</button>
+        <button class="print-btn" id="printPdf2" disabled>🖨 Afdrukken</button>
+      </div>
+      <div class="pages" id="pages">
+        <div class="empty-state">
+          <div>📚</div><h1>Klaar voor een leesbooster?</h1>
+          <p>Kies links een leesdoel, oefenvorm en ondersteuning. Voeg daarna je eerste oefenblok toe.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <main class="game-app" id="gameApp" hidden>
+    <section class="game-setup" id="gameSetup">
+      <div class="game-setup-head"><img src="afbeeldingen/zisa-leesbooster.png" alt="Zisa met een leesboek"><div><h1>Zisa's Flitsfeest</h1><p>Lees alle woorden samen. De woorden wisselen vanzelf en Zisa verrast jullie tussendoor met een beweging.</p></div></div>
+      <div class="game-config-grid">
+        <section class="game-card"><h2><span>1</span>Kies de leesmoeilijkheden</h2><div class="game-family-tabs" id="gameFamilyTabs"></div><div class="game-goals" id="gameGoals"></div><p class="game-choice-summary" id="gameChoiceSummary"></p></section>
+        <section class="game-card"><h2><span>2</span>Stel het spel in</h2><label for="gameWordCount">Hoeveel woorden?</label><select id="gameWordCount"><option>10</option><option selected>15</option><option>20</option><option>30</option></select><label for="gameSeconds">Tijd per woord</label><select id="gameSeconds"><option value="2">2 seconden</option><option value="3">3 seconden</option><option value="4" selected>4 seconden</option><option value="5">5 seconden</option><option value="7">7 seconden</option></select><label for="gameDifficulty">Welke woorden?</label><select id="gameDifficulty"><option value="makkelijk">Eenvoudiger</option><option value="mix" selected>Gemengd</option><option value="uitdaging">Uitdagender</option></select><fieldset class="move-picker"><legend>Kies de beweegboosts</legend><p>Kies één opdracht om die telkens te herhalen, of kies er meerdere voor verrassingen.</p><div id="gameMoveChoices"></div></fieldset><button class="game-start" id="gameStart">Start het Flitsfeest</button><p class="game-message" id="gameMessage"></p></section>
+      </div>
+      <div class="game-explain"><b>Zo werkt het:</b> bekijk vooraf samen welke zebra bij welke korte opdracht hoort. Tijdens het spel hoeven de kinderen de uitleg dan niet meer te lezen. De woorden en gekozen beweegboosts verschijnen vanzelf; de leerkracht hoeft niet verder te klikken. Het spel luistert niet mee en beoordeelt dus niet of de klas juist leest.</div>
+    </section>
+    <section class="game-briefing" id="gameBriefing" hidden>
+      <div class="briefing-card"><p class="briefing-label" id="briefingLabel">Straks verschijnt deze zebra tussen de woorden</p><div class="briefing-counter" id="briefingProgress"></div><img class="briefing-image" id="briefingImage" alt="Zisa toont de beweegopdracht"><h1 id="briefingText"></h1><p id="briefingHint">Doe de beweging samen wanneer deze zebra tijdens het spel verschijnt.</p><div class="briefing-actions"><button class="briefing-skip" id="skipBriefing">Uitleg overslaan en meteen spelen</button><button class="briefing-next" id="nextBriefing">Volgende uitleg →</button></div></div>
+    </section>
+    <section class="game-stage" id="gameStage" hidden>
+      <div class="stage-top"><div><b id="gameProgress">Woord 1 van 15</b><span id="gameGoalLabel"></span></div><div class="stage-actions"><button id="gamePause">Pauze</button><button id="gameStop">⚙ Instellingen aanpassen</button></div></div>
+      <div class="stage-card word-stage" id="wordStage"><p>Lees samen hardop</p><div class="flash-word" id="flashWord"></div></div>
+      <div class="stage-card move-stage" id="moveStage" hidden><p>Beweegboost!</p><img id="moveImage" alt="Zisa doet de beweging voor"><h1 id="moveText"></h1><span>Daarna gaat het lezen vanzelf verder.</span></div>
+      <div class="stage-card finish-stage" id="finishStage" hidden><img src="afbeeldingen/zisa-leesbooster.png" alt="Zisa leest"><h1>Knap samen gelezen!</h1><p id="finishText"></p><button id="gameAgain">Speel opnieuw</button><button class="back-setup" id="backSetup">Andere instellingen</button></div>
+      <div class="game-timer"><div id="gameTimerBar"></div></div>
+    </section>
+  </main>
+  <div class="pdf-progress" id="pdfProgress" hidden role="status" aria-live="polite"><div><h2>Je PDF wordt gemaakt…</h2><p id="pdfProgressText">Pagina's voorbereiden</p><div class="pdf-progress-track"><span id="pdfProgressBar"></span></div><small>Laat dit scherm even open. De download start vanzelf.</small></div></div>
+  <script src="woorden.js?v=20260802-2"></script>
+  <script src="app.js?v=20260802-7"></script>
+  <script src="game.js?v=20260802-4"></script>
+  <script>window.ONTDEK_TAAL={toolId:'leesbooster',back:'../app.html',previewSelectors:['#pages'],pageSelector:'#pages .paper',pdfSelectors:['#downloadPdf','#downloadPdf2'],proSelectors:['#printPdf','#printPdf2'],demoStart:'#skipBriefing,#nextBriefing',demoStop:'#gameStop',demoLabelTarget:'.stage-top'};</script><script type="module" src="../taal-ontdek.js"></script>
+</body>
+</html>

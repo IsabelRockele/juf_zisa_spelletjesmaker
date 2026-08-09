@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <!-- De PRO-ingang gebruikt bewust dezelfde actuele bronbestanden als de
+       spellinggenerator. Zo blijven verbeteringen in beide versies gelijk. -->
+  <base href="../../spelling/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Bundel spelling – Juf Zisa PRO</title>
+  <link rel="stylesheet" href="style.css?v=20260807ov10">
+  <link rel="stylesheet" href="modules/graad2-ov01.css">
+  <style>
+    /* === Woordenkiezer: afbeelding-icoon + filter (mei 2026) === */
+    .wk-info-balk {
+      background: #f0f7fb;
+      border: 1px solid #cfe2ef;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin: 0 0 12px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .wk-info-uitleg {
+      font-size: 13px;
+      color: #2c4d7a;
+      line-height: 1.4;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .wk-info-uitleg .wk-afb-icoon {
+      flex: 0 0 auto;
+      font-size: 18px;
+    }
+    .wk-filter-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #2c4d7a;
+      cursor: pointer;
+      user-select: none;
+    }
+    .wk-filter-toggle input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .wk-afb-icoon {
+      display: inline-block;
+      margin-left: 4px;
+      font-size: 14px;
+      vertical-align: middle;
+      opacity: 0.85;
+    }
+    /* Subtiel onderscheid: woorden zonder plaatje krijgen iets fletsere achtergrond.
+       Niet doorstrepen of grijzen — ze zijn nog perfect bruikbaar in andere oefenvormen. */
+    .wk-woord-vinkje.wk-geen-afb {
+      background: rgba(0, 0, 0, 0.02);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a href="../pro/app.html" class="terug" style="display:inline-block;background:#1e3a5f;color:#fff;text-decoration:none;padding:8px 16px;border-radius:6px;font-weight:600;font-size:14px;transition:background 0.15s;" onmouseover="this.style.background='#2c4d7a'" onmouseout="this.style.background='#1e3a5f'">← Terug naar alle tools</a>
+    <h1>Spellinggenerator <small style="font-size:.48em;font-weight:800;opacity:.82;vertical-align:middle;">PRO</small></h1>
+    <span id="modus-badge" class="modus-badge" style="display:none"></span>
+    <button id="modus-uitleg-knop" type="button" style="display:none;background:#2d8a4e;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:600;font-size:14px;cursor:pointer;transition:background 0.15s;margin-left:8px;" onmouseover="this.style.background='#247140'" onmouseout="this.style.background='#2d8a4e'" title="Uitleg over deze modus">
+      💡 Uitleg
+    </button>
+    <button id="modus-wisselen" class="modus-wisselen" type="button" style="display:none" title="Terug naar het startscherm">
+      ⇄ Modus wisselen
+    </button>
+  </header>
+
+  <!-- ============================================================
+       STARTSCHERM — drie modi-kaarten
+       ============================================================ -->
+  <section id="modus-startscherm" class="modus-startscherm" style="display:none">
+    <div class="modus-startscherm-binnen">
+      <h2 class="modus-titel">Wat wil je maken?</h2>
+      <p class="modus-ondertitel">Maak één werkblad of voeg meerdere doelen en oefenvormen samen tot een volledige bundel.</p>
+
+      <div class="modus-kaarten">
+
+        <button class="modus-kaart modus-kaart-werkblad" data-modus="werkblad" type="button">
+          <div class="modus-kaart-icoon">📋</div>
+          <div class="modus-kaart-titel">Werkbladen maken</div>
+          <div class="modus-kaart-uitleg">
+            Kies één of meerdere doelen en oefenvormen. Eén oefening wordt een
+            werkblad; meerdere werkbladen kan je samen als één PDF downloaden.
+          </div>
+          <div class="modus-kaart-cta">Aan de slag →</div>
+        </button>
+
+        <button class="modus-kaart modus-kaart-weekdictee" data-modus="weekdictee" type="button">
+          <div class="modus-kaart-icoon">📅</div>
+          <div class="modus-kaart-titel">Weekdictee</div>
+          <div class="modus-kaart-uitleg">
+            Een week vol oefenen — elke dag een klein blokje met woorden
+            en zinnen, klaar om uit te delen op maandag.
+          </div>
+          <div class="modus-kaart-cta">Aan de slag →</div>
+        </button>
+
+      </div>
+
+      <div class="modus-startscherm-voet">
+        Spelen, schrijven, leren — bij Juf Zisa.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MODUS: WERKBLAD — bestaande layout (zijbalk + preview)
+       ============================================================ -->
+  <div id="modus-werkblad" class="layout" style="display:none">
+
+    <!-- LINKS: instellingen -->
+    <aside class="sidebar">
+
+      <!-- Tabs voor graad -->
+      <div class="zb-startintro">
+        <strong>Maak materiaal in vier korte stappen</strong>
+        <span>Dezelfde spellingcategorie kan in verschillende leerjaren voorkomen. Kies daarom de graad, niet een apart leerjaar.</span>
+      </div>
+      <div class="graad-tabs" id="graad-tabs">
+        <button class="graad-tab actief" data-graad="1" title="1ste en 2de leerjaar">Graad 1 <small>1ste + 2de leerjaar</small></button>
+        <button class="graad-tab" data-graad="2" title="3de en 4de leerjaar">Graad 2 <small>3de + 4de leerjaar</small></button>
+        <button class="graad-tab" data-graad="3" disabled title="5de en 6de leerjaar">Graad 3 <small>5de + 6de leerjaar</small><span class="binnenkort">later</span></button>
+      </div>
+
+      <nav id="wb-stappenbalk" class="wb-stappenbalk" aria-label="Stappen werkbladmaker">
+        <button type="button" data-wb-stap="1" class="actief"><span>1</span>Doel</button>
+        <button type="button" data-wb-stap="2" disabled><span>2</span>Woorden</button>
+        <button type="button" data-wb-stap="3" disabled><span>3</span>Oefening</button>
+        <button type="button" data-wb-stap="4" disabled><span>4</span>Resultaat</button>
+      </nav>
+
+      <!-- Sectie 1: Wat wil je oefenen? (categorie-selector) -->
+      <details class="zb-sectie" id="zb-sec-categorie" open>
+        <summary class="zb-sectie-titel">
+          <span class="zb-nr">1</span>
+          <span class="zb-label">Kies je spellingdoel</span>
+          <span class="zb-teller" id="zb-cat-teller"></span>
+        </summary>
+        <div class="zb-sectie-inhoud">
+          <p class="zb-uitleg">Open eerst een hoofdgroep. Kies daarbinnen één of meerdere concrete klanken of spellingregels.</p>
+          <div id="hoofdgroep-selector">
+            <!-- Wordt dynamisch gevuld door app.js -->
+          </div>
+          <div id="zb-keuze-samenvatting" class="zb-keuze-samenvatting" aria-live="polite"></div>
+          <div class="wb-stap-nav wb-stap-nav-rechts">
+            <button id="wb-naar-woorden" class="primair" type="button" disabled>Kies eerst een spellingdoel</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- Sectie 2: Bekijk en kies woorden -->
+      <details class="zb-sectie" id="zb-sec-woorden" open>
+        <summary class="zb-sectie-titel">
+          <span class="zb-nr">2</span>
+          <span class="zb-label">Controleer de woorden <small>optioneel</small></span>
+          <span class="zb-teller" id="zb-woord-teller"></span>
+        </summary>
+        <div class="zb-sectie-inhoud">
+          <div style="display:flex;gap:6px;align-items:stretch;">
+            <button id="open-woordenkiezer" class="zb-knop-groot" type="button" disabled style="flex:1;">
+              ✏️ Woorden bekijken of aanpassen
+            </button>
+            <button type="button" class="woordenkiezer-help" title="Wat doet de woordenkiezer?" style="background:#e0f2e9;border:2px solid #2d8a4e;color:#2d8a4e;font-weight:700;width:42px;border-radius:8px;cursor:pointer;font-size:18px;" onmouseover="this.style.background='#c7e9d5'" onmouseout="this.style.background='#e0f2e9'">?</button>
+          </div>
+          <p class="zb-info" id="zb-woord-info">
+            Kies eerst een categorie. Zisa selecteert daarna automatisch passende woorden.
+          </p>
+          <div class="wb-stap-nav">
+            <button id="wb-terug-doel" class="secundair" type="button">← Terug</button>
+            <button id="wb-naar-oefening" class="primair" type="button">Verder naar oefeningen →</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- Sectie 3: Oefenvormen -->
+      <details class="zb-sectie" id="zb-sec-oefenvormen">
+        <summary class="zb-sectie-titel">
+          <span class="zb-nr">3</span>
+          <span class="zb-label">Kies hoe je wilt oefenen</span>
+          <span class="zb-teller" id="zb-oef-teller"></span>
+        </summary>
+        <div class="zb-sectie-inhoud">
+          <div id="wb-oef-doelen" class="wb-oef-doelen" aria-live="polite"></div>
+          <p class="zb-uitleg">Je ziet alleen oefeningen die bij je gekozen spellingdoel passen. Kies daarna hoeveel hulp het kind krijgt.</p>
+          <div id="oefenvorm-selector">
+            <!-- Wordt dynamisch gevuld -->
+          </div>
+          <div class="wb-stap-nav">
+            <button id="wb-terug-woorden" class="secundair" type="button">← Terug</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- Sectie 4: Schrijflijn (globaal voor alle werkbladen) -->
+      <details class="zb-sectie zb-sectie-optioneel" id="zb-sec-schrijflijn">
+        <summary class="zb-sectie-titel">
+          <span class="zb-nr">⚙</span>
+          <span class="zb-label">Opmaak <small>optioneel</small></span>
+        </summary>
+        <div class="zb-sectie-inhoud">
+          <p class="zb-uitleg">De standaardopmaak is al geschikt. Pas hier alleen de schrijflijn aan als je dat nodig vindt.</p>
+
+          <!-- Type-keuze met previews -->
+          <label class="zb-lt-label">Type schrijflijn:</label>
+          <div class="zb-lt-grid" id="zb-lt-grid">
+            <button class="zb-lt-knop" data-lt="type1" type="button" title="Type 1 — klassiek hulp">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type1" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 1</span>
+            </button>
+            <button class="zb-lt-knop" data-lt="type2" type="button" title="Type 2 — standaard">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type2" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 2</span>
+            </button>
+            <button class="zb-lt-knop actief" data-lt="type3" type="button" title="Type 3 — kleurgecodeerd">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type3" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 3</span>
+            </button>
+            <button class="zb-lt-knop" data-lt="type4" type="button" title="Type 4 — grijs-blauw">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type4" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 4</span>
+            </button>
+            <button class="zb-lt-knop" data-lt="type5" type="button" title="Type 5 — intens kleur">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type5" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 5</span>
+            </button>
+            <button class="zb-lt-knop" data-lt="type6" type="button" title="Type 6 — enkele lijn">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type6" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 6</span>
+            </button>
+            <button class="zb-lt-knop" data-lt="type7" type="button" title="Type 7 — twee lijnen">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type7" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 7</span>
+            </button>
+          </div>
+
+          <!-- Hoogte-keuze -->
+          <label class="zb-lt-label" style="margin-top: 12px;">Hoogte:</label>
+          <div class="zb-hoogte-knoppen" id="zb-globale-hoogte">
+            <button class="zb-hoogte-btn" data-hoogte="klein" type="button">Klein</button>
+            <button class="zb-hoogte-btn actief" data-hoogte="middel" type="button">Middel</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- Verborgen legacy elementen voor backwards-compat met app.js.
+           De OUDE .lijn-knop[data-lijn=vier|dubbel|enkel] blijft hier
+           verborgen aanwezig zodat eventuele oude code die er nog naar
+           kijkt geen errors gooit. Niet meer in gebruik voor UI. -->
+      <div id="legacy-lijn-knoppen" style="display:none">
+        <button class="lijn-knop actief" data-lijn="vier"></button>
+        <button class="lijn-knop" data-lijn="dubbel"></button>
+        <button class="lijn-knop" data-lijn="enkel"></button>
+      </div>
+
+      <!-- Verborgen legacy elementen voor backwards-compat met app.js
+           (de bestaande oefenvorm-modules verwachten deze knoppen.
+            We renderen ze verborgen zodat hun event-handlers nog werken.) -->
+      <div id="legacy-knoppen" style="display:none">
+        <button class="cat-knop actief" data-categorie="ov01"></button>
+        <button class="niveau-knop actief" data-niveau="basis"></button>
+        <button class="graad-knop actief" data-graad="1"></button>
+      </div>
+
+      <!-- Module-instellingen container (voor de actieve oefenvorm in 'enkele werkblad'-modus) -->
+      <section class="block" id="module-instellingen" style="display:none">
+        <!-- module-specifieke instellingen worden hier ingeladen -->
+      </section>
+
+      <section id="wb-resultaat-paneel" class="wb-resultaat-paneel" hidden>
+        <div class="wb-resultaat-icoon">✓</div>
+        <h2 id="wb-resultaat-titel">Je werkblad is klaar</h2>
+        <p id="wb-resultaat-tekst">Bekijk het resultaat rechts en download wat je nodig hebt.</p>
+        <p class="wb-resultaat-tip">Niet tevreden over één blad of niveau? Verwijder alleen dat blad met de rode × rechtsboven op het werkblad.</p>
+        <div class="wb-resultaat-keuzes">
+          <button id="wb-nog-een" class="primair" type="button">＋ Andere oefenvorm met dezelfde woorden</button>
+          <button id="wb-nieuw-doel" class="secundair" type="button">↺ Ander spellingdoel kiezen</button>
+        </div>
+      </section>
+
+      <div class="actie-knoppen">
+        <button id="bundel-voeg-toe" class="primair primair-groot" type="button">
+          📋 Maak volledig werkblad
+        </button>
+        <button id="bewerken-toggle" class="secundair" type="button">✏️ Bewerken: uit</button>
+
+        <div class="download-groep">
+          <h3 class="download-groep-titel">Download je materiaal</h3>
+          <div class="download-keuzekaart download-keuzekaart-leerling">
+            <div class="download-keuzekop">
+              <span class="download-keuze-icoon">📄</span>
+              <span><strong>Werkbladen voor de leerlingen</strong><small>Zonder ingevulde antwoorden</small></span>
+            </div>
+            <button id="download-alles" class="primair download-knop verborgen" type="button">⬇ Download alle werkbladen als pdf</button>
+            <div class="download-niveaus">
+              <span class="download-niveaus-label">Of kies één niveau:</span>
+              <button id="download-basis" class="secundair download-niveau-knop verborgen" type="button">⬇ Veel hulp</button>
+              <button id="download-kern" class="secundair download-niveau-knop verborgen" type="button">⬇ Beetje hulp</button>
+              <button id="download-verdieping" class="secundair download-niveau-knop verborgen" type="button">⬇ Zelfstandig</button>
+              <button id="download-uitbreiding" class="secundair download-niveau-knop verborgen" type="button">⬇ Uitdaging</button>
+            </div>
+          </div>
+          <div class="download-keuzekaart download-keuzekaart-oplossingen">
+            <div class="download-keuzekop">
+              <span class="download-keuze-icoon">✅</span>
+              <span><strong>Oplossingen voor de leerkracht</strong><small>Alle bladen met antwoorden ingevuld</small></span>
+            </div>
+            <button id="download-oplossingen-alles" class="download-oplossingen-knop download-knop verborgen" type="button">⬇ Download oplossingen als pdf</button>
+          </div>
+        </div>
+
+        <button id="bundel-wis" class="secundair-rood verborgen" type="button">🗑️ Wis bundel</button>
+      </div>
+      <button id="preview-oplossingen-toggle" class="preview-oplossingen-knop verborgen" type="button">👁 Toon oplossingen</button>
+
+    </aside>
+
+    <!-- RECHTS: preview -->
+    <main class="preview-paneel" style="min-width:0;width:100%;max-width:100%;overflow-x:hidden;">
+      <div id="preview" class="preview-modus"></div>
+    </main>
+
+  </div><!-- /#modus-werkblad -->
+
+  <!-- ============================================================
+       MODUS: HERHALINGSBUNDEL — placeholder (etappe 2)
+       ============================================================ -->
+  <!-- ============================================================
+       MODUS: HERHALINGSBUNDEL — zijbalk + A4-pagina-preview met navigatie
+       ============================================================ -->
+  <section id="modus-herhaling" class="hb-layout" style="display:none">
+    
+    <!-- LINKS: zijbalk (gedeelde structuur met werkblad-modus) -->
+    <aside class="sidebar hb-sidebar" id="hb-sidebar">
+      <!-- De zijbalk-secties worden hier dynamisch ingeladen door zijbalk.js
+           (graad-tabs, categorieën, oefenvormen, schrijflijnen).
+           
+           Onderaan komt een aparte sectie met "Voeg toe aan bundel"-acties. -->
+      
+      <!-- PLACEHOLDER: wordt gevuld door app.js init -->
+      <div id="hb-sidebar-content"></div>
+      
+      <!-- Onderaan: bundel-acties -->
+      <div class="hb-bundel-acties">
+        <button id="hb-voeg-toe" class="primair primair-groot" type="button">
+          ➕ Voeg korte oefening toe
+        </button>
+        <button id="hb-wis" class="secundair" type="button">
+          🗑 Wis hele bundel
+        </button>
+        <button class="secundair" type="button" 
+                onclick="window.SpellingModus && window.SpellingModus.terugNaarStartscherm()">
+          ← Terug naar startscherm
+        </button>
+      </div>
+    </aside>
+    
+    <!-- RECHTS: A4-preview met paginanavigatie -->
+    <main class="hb-preview">
+      
+      <!-- Topbalk: titel + navigatie -->
+      <div class="hb-topbalk">
+        <div class="hb-topbalk-titel">
+          <span>📚</span>
+          <input type="text" id="hb-boekje-titel" 
+                 class="hb-titel-input"
+                 value="Mijn werkboekje"
+                 placeholder="Geef je boekje een naam">
+        </div>
+        <div class="hb-paginanav">
+          <button id="hb-vorig" class="hb-navknop" type="button" disabled>◀</button>
+          <span id="hb-paginanr" class="hb-paginanr-label">—</span>
+          <button id="hb-volgend" class="hb-navknop" type="button" disabled>▶</button>
+        </div>
+        <div class="hb-acties">
+          <button id="hb-bewerken-toggle" class="secundair" type="button" title="Schakel bewerken in om woorden te verwijderen">
+            ✏️ Bewerken: uit
+          </button>
+          <button id="hb-download" class="primair" type="button" title="Download bundel als PDF">
+            📥 Werkboekje
+          </button>
+          <button id="hb-download-oplossingen" class="secundair" type="button" title="Download met oplossingen">
+            📥 Met oplossingen
+          </button>
+        </div>
+      </div>
+      
+      <!-- Pagina-container: toont één A4 op echte grootte -->
+      <div class="hb-pages-wrapper">
+        <div id="hb-pages">
+          <!-- Pagina-HTML wordt hier ingeladen door herhalingsbundel.renderPreview() -->
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <!-- ============================================================
+       MODUS: WEEKDICTEE — eigen paneel
+       ============================================================ -->
+  <section id="modus-weekdictee" class="wd-paneel" style="display:none">
+    <div class="wd-paneel-layout">
+
+      <!-- LINKS: instellingen -->
+      <aside class="wd-paneel-zijbalk">
+
+        <nav class="wd-fasebalk" aria-label="Stappen weekdictee">
+          <button type="button" class="wd-faseknop actief" data-wd-ga-naar="1"><b>1</b><span>Graad + doel</span></button>
+          <button type="button" class="wd-faseknop" data-wd-ga-naar="2" disabled><b>2</b><span>Woorden</span></button>
+          <button type="button" class="wd-faseknop" data-wd-ga-naar="3" disabled><b>3</b><span>Instellingen</span></button>
+          <button type="button" class="wd-faseknop" data-wd-ga-naar="4" disabled><b>4</b><span>Resultaat</span></button>
+        </nav>
+
+        <!-- Stap 1: Graad -->
+        <div class="wd-paneel-blok" data-wd-fase="1">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">1</span>
+            <span class="wd-stap-titel">Voor welke graad?</span>
+          </div>
+          <div class="graad-tabs" id="wd-paneel-graad-tabs">
+            <button class="graad-tab actief" data-graad="1" type="button">Graad 1</button>
+            <button class="graad-tab" data-graad="2" type="button">Graad 2</button>
+            <button class="graad-tab" data-graad="3" type="button" disabled>Graad 3 <span class="binnenkort">binnenkort</span></button>
+          </div>
+        </div>
+
+        <!-- Stap 2: Categorieën -->
+        <div class="wd-paneel-blok" data-wd-fase="1">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">2</span>
+            <span class="wd-stap-titel">Welke categorieën?</span>
+          </div>
+          <p class="wd-paneel-uitleg">Vink aan welke spellingsregels deze week aan bod komen.</p>
+          <div id="wd-paneel-categorieen"></div>
+        </div>
+
+        <!-- Stap 3: Woorden -->
+        <div class="wd-paneel-blok" data-wd-fase="2">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">3</span>
+            <span class="wd-stap-titel">Kies de woorden</span>
+          </div>
+          <p class="wd-paneel-uitleg">Alle woorden uit je gekozen categorieën staan al aangevinkt. Open de woordenkiezer alleen om woorden uit te vinken die je niet wilt gebruiken.</p>
+          <div style="display:flex;gap:6px;align-items:stretch;">
+            <button id="wd-paneel-open-kiezer" class="zb-knop-groot" type="button" disabled style="flex:1;">
+              📋 Open woordenkiezer
+            </button>
+            <button type="button" class="woordenkiezer-help" title="Wat doet de woordenkiezer?" style="background:#e0f2e9;border:2px solid #2d8a4e;color:#2d8a4e;font-weight:700;width:42px;border-radius:8px;cursor:pointer;font-size:18px;" onmouseover="this.style.background='#c7e9d5'" onmouseout="this.style.background='#e0f2e9'">?</button>
+          </div>
+          <p class="wd-paneel-info wd-info-grijs" id="wd-paneel-woord-info">
+            Kies eerst categorieën hierboven.
+          </p>
+        </div>
+
+        <!-- Stap 4: Schrijflijn -->
+        <div class="wd-paneel-blok" data-wd-fase="3">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">4</span>
+            <span class="wd-stap-titel">Schrijflijn</span>
+          </div>
+          <div class="lijn-knoppen" id="wd-paneel-lijntype">
+            <button class="lijn-knop wd-lijnkeuze actief" data-lijn="vier" type="button">
+              <canvas class="lijntype-preview wd-lijn-preview" data-preview-type="type3" width="110" height="48"></canvas>
+              <span class="wd-lijnnaam">Vier schrijflijnen</span>
+              <small>Met hulplijnen</small>
+            </button>
+            <button class="lijn-knop wd-lijnkeuze" data-lijn="dubbel" type="button">
+              <canvas class="lijntype-preview wd-lijn-preview" data-preview-type="type7" width="110" height="48"></canvas>
+              <span class="wd-lijnnaam">Dubbele schrijflijn</span>
+              <small>Twee lijnen</small>
+            </button>
+            <button class="lijn-knop wd-lijnkeuze" data-lijn="enkel" type="button">
+              <canvas class="lijntype-preview wd-lijn-preview" data-preview-type="type6" width="110" height="48"></canvas>
+              <span class="wd-lijnnaam">Gewone schrijflijn</span>
+              <small>Eén lijn</small>
+            </button>
+          </div>
+          <div class="wd-paneel-hoogte-rij">
+            <label class="wd-paneel-mini-label">Hoogte:</label>
+            <div class="zb-hoogte-knoppen" id="wd-paneel-lijnhoogte">
+              <button class="zb-hoogte-btn actief" data-hoogte="klein" type="button">Klein</button>
+              <button class="zb-hoogte-btn" data-hoogte="middel" type="button">Middel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stap 5: Met of zonder zinnen -->
+        <div class="wd-paneel-blok" data-wd-fase="3">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">5</span>
+            <span class="wd-stap-titel">Type weekdictee</span>
+          </div>
+          <div class="wd-type-keuzes">
+            <div class="wd-type-keuze">
+              <label class="wd-paneel-mini-label" for="wd-paneel-aantal-zinnen">Hoeveel dicteezinnen per dag?</label>
+              <select id="wd-paneel-aantal-zinnen" class="wd-zinnen-select">
+                <option value="0">Geen zinnen — alleen woorden</option>
+                <option value="1" selected>1 zin per dag</option>
+                <option value="2" data-alleen-graad2>2 zinnen per dag</option>
+                <option value="3" data-alleen-graad2>3 zinnen per dag</option>
+              </select>
+              <p class="wd-paneel-mini-uitleg">
+                Bij 2 of 3 zinnen krijgt iedere dag een eigen pagina met voldoende schrijfruimte.
+              </p>
+            </div>
+            <div class="wd-type-keuze">
+              <label class="wd-paneel-mini-label" for="wd-paneel-vrijdag">Welke woorden komen op vrijdag?</label>
+              <select id="wd-paneel-vrijdag" class="wd-zinnen-select">
+                <option value="herhalen" selected>Herhalen uit maandag tot donderdag</option>
+                <option value="nieuw">Nieuwe woorden die deze week nog niet voorkwamen</option>
+              </select>
+              <p class="wd-paneel-mini-uitleg">
+                Bij herhalen zijn ook de zinswoorden al eerder geoefend. Kies je nieuwe woorden, selecteer dan voldoende woorden voor de hele week.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bewerken (alleen voor het dicteerblad — niet op het leerlingblad) -->
+        <div class="wd-paneel-blok wd-paneel-blok-preview" data-wd-fase="4">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">✏️</span>
+            <span class="wd-stap-titel">Aanpassen</span>
+          </div>
+          <p class="wd-paneel-mini-uitleg-top">
+            De preview rechts is jouw <strong>dicteerblad</strong> — wat jij gaat voorlezen.
+            Klik op een woord of zin om aan te passen.
+          </p>
+          <button id="wd-paneel-bewerken" class="primair wd-paneel-bewerk-knop" type="button">
+            ✏️ Bewerken: uit
+          </button>
+          <p class="wd-paneel-mini-uitleg">
+            Zet aan om woorden of zinnen te wijzigen. Jouw aanpassingen
+            komen mee in het dicteerblad-PDF.
+          </p>
+        </div>
+
+        <!-- Acties -->
+        <div class="wd-paneel-acties" data-wd-fase="4">
+          <button id="wd-paneel-vernieuw" class="primair primair-groot wd-paneel-actie" type="button" disabled>
+            🔄 Vernieuw voorbeeld
+          </button>
+          <div class="wd-paneel-download-titel">Downloaden:</div>
+          <div class="wd-leerlingenblad-tip">
+            <span>👧</span>
+            <p><strong>Voor de leerlingen:</strong> de preview toont jouw ingevulde dicteerblad. Download hieronder het <strong>lege leerlingenblad</strong> met alleen schrijflijnen.</p>
+          </div>
+          <button id="wd-paneel-download" class="secundair wd-paneel-actie" type="button" disabled
+                  title="Lege schrijflijnen — wat de leerling krijgt om in te vullen">
+            ⬇ Leeg leerlingenblad downloaden
+          </button>
+          <button id="wd-paneel-download-opl" class="secundair wd-paneel-actie wd-paneel-download-leerkracht" type="button" disabled
+                  title="Mét alle woorden en zinnen — wat jij voorleest tijdens het dictee">
+            📋 Dicteerblad (mijn versie)
+          </button>
+        </div>
+
+        <div class="wd-fase-acties">
+          <button id="wd-fase-terug" class="secundair" type="button">← Terug</button>
+          <button id="wd-fase-verder" class="primair" type="button">Verder naar woorden →</button>
+        </div>
+
+      </aside>
+
+      <!-- RECHTS: preview -->
+      <main class="preview-paneel wd-paneel-preview-wrap">
+        <div id="wd-paneel-preview" class="preview-modus">
+          <div class="preview-leeg">
+            <h3>Welkom bij het weekdictee</h3>
+            <p>Volg de stappen links: graad → categorieën → woorden → schrijflijn,<br>en klik dan op <strong>Vernieuw voorbeeld</strong>.</p>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       WOORDENKIEZER MODAL (gedeeld door werkblad-modus en weekdictee-modus)
+       ============================================================ -->
+  <div class="wk-modal" id="wk-modal" style="display:none">
+    <div class="wk-modal-inhoud">
+      <div class="wk-modal-header">
+        <h2>Kies je woorden</h2>
+        <div class="wk-teller-rij">
+          <span class="wk-teller">
+            <strong id="wk-aantal-gekozen">0</strong> woorden gekozen
+          </span>
+          <button class="wk-mini-btn" id="wk-reset" type="button">↻ Reset</button>
+        </div>
+        <button class="wk-sluiten" id="wk-sluiten" type="button">✕</button>
+      </div>
+
+      <div class="wk-modal-body">
+        <!-- Tabs Standaard / Mijn lijsten -->
+        <div class="wk-tabs">
+          <button class="wk-tab actief" data-wk-tab="standaard" type="button">📚 Standaard</button>
+          <button class="wk-tab" data-wk-tab="mijn" type="button">⭐ Mijn lijsten</button>
+        </div>
+
+        <!-- Tab inhoud STANDAARD -->
+        <div class="wk-tab-inhoud" id="wk-standaard">
+
+          <!-- Uitleg-balk + filter-toggle -->
+          <div class="wk-info-balk">
+            <div class="wk-info-uitleg">
+              <span class="wk-afb-icoon">🖼️</span>
+              <span>Woorden met dit icoon hebben een afbeelding. Sommige oefenvormen (Schrijf bij plaatje, 3× overschrijven met plaatje, Klank kiezen met plaatje, Samenstellingen) kunnen alleen woorden mét afbeelding gebruiken.</span>
+            </div>
+            <label class="wk-filter-toggle">
+              <input type="checkbox" id="wk-filter-afb">
+              <span>Toon enkel woorden met plaatje 🖼️</span>
+            </label>
+          </div>
+
+          <div class="wk-leerjaar-keuze">
+            <label>Leerjaar:</label>
+            <select id="wk-leerjaar">
+              <option value="1">Graad 1 (lj 1-2)</option>
+              <option value="2">Graad 2 (lj 3-4)</option>
+              <option value="3">Graad 3 (lj 5-6)</option>
+            </select>
+          </div>
+          <div class="wk-categorieen" id="wk-categorieen">
+            <!-- Wordt dynamisch gevuld -->
+          </div>
+        </div>
+
+        <!-- Tab inhoud MIJN LIJSTEN -->
+        <div class="wk-tab-inhoud" id="wk-mijn" style="display:none">
+          <p class="wk-binnenkort">
+            ⭐ <strong>Mijn lijsten</strong> komt in een volgende update.
+            Dan kan je je gekozen woorden bewaren onder een eigen titel
+            (bv. "Thema 1 - Op school") en die jaar na jaar hergebruiken
+            of bewerken.
+          </p>
+        </div>
+      </div>
+
+      <div class="wk-modal-footer">
+        <button class="secundair" id="wk-annuleren" type="button">Annuleren</button>
+        <button class="primair" id="wk-bevestigen" type="button">Gebruik deze woorden</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- html2pdf.js voor PDF-export, geladen via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <!-- Volgorde: eerst woordenbibliotheek + graad-bestanden, dan modules -->
+  <script src="modus-storage.js"></script>
+  <script src="afbeeldingen.js?v=20260803c"></script>
+  <script src="afbeeldingen-helper.js?v=20260803c"></script>
+  <script src="schrijflijnen.js?v=20260803a"></script>
+  <script src="afleiders.js?v=20260802i"></script>
+  <script src="klank-helper.js"></script>
+  <script src="woordenbibliotheek.js"></script>
+  <script src="woordenbiblio/graad1.js"></script>
+  <script src="woordenbiblio/graad2.js?v=20260803g"></script>
+  <script src="woordenbiblio/graad3.js"></script>
+  <script src="woordenbiblio/zinnen-graad1.js"></script>
+  <script src="woordenbiblio/zinnen-meervoud-graad1.js"></script>
+  <script src="woordenbiblio/zinnen-klinkerdief-graad1.js"></script>
+  <script src="woordenbiblio/dictee-zinnen-graad1.js"></script>
+  <script src="woordenbiblio/dictee-zinnen-graad2.js?v=20260803a"></script>
+  <script src="woordenkiezer.js?v=20260803e"></script>
+  <script src="dedup.js"></script>
+  <script src="modules/weekdictee.js?v=20260803g"></script>
+  <script src="modules/ov01.js"></script>
+  <script src="modules/ov02.js"></script>
+  <script src="modules/ov03.js"></script>
+  <script src="modules/ov04.js?v=20260803a"></script>
+  <script src="modules/ov05.js?v=20260803d"></script>
+  <script src="modules/ov06.js"></script>
+  <script src="modules/ov07.js?v=20260802m"></script>
+  <script src="modules/ov08.js?v=20260802o"></script>
+  <script src="modules/ov09.js?v=20260802a"></script>
+  <script src="modules/ov10.js"></script>
+  <script src="modules/ov11.js?v=20260802h"></script>
+  <script src="modules/ov12.js?v=20260803f"></script>
+  <script src="modules/ov13.js?v=20260803e"></script>
+  <script src="modules/ov14.js?v=20260803b"></script>
+  <script src="modules/ov15.js?v=20260803d"></script>
+  <script src="modules/ov16.js?v=20260803e"></script>
+  <script src="modules/ov22.js?v=20260803r"></script>
+  <script src="modules/ov29.js?v=20260803e"></script>
+  <script src="modules/ov32.js?v=20260803b"></script>
+  <script src="modules/ov35.js?v=20260803g"></script>
+  <script src="modules/ov40.js?v=20260803f"></script>
+  <script src="modules/graad2-ov01.js"></script>
+  <script src="generator.js?v=20260802i"></script>
+  <script src="preview.js?v=20260802h"></script>
+  <script src="pdf-engine.js?v=20260801a"></script>
+  <script src="bundel.js?v=20260803l"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="herhalingsbundel-pdf.js?v=20260807ov10"></script>
+<script src="herhalingsbundel.js?v=20260802a"></script>
+  <script src="zijbalk.js?v=20260803zf"></script>
+  <script src="app.js?v=20260801g"></script>
+  <script src="weekdictee-paneel.js?v=20260803i"></script>
+  <script src="modus.js?v=20260803a"></script>
+  <script src="werkblad-stappen.js?v=20260803g"></script>
+
+  <script>window.ONTDEK_TAAL={toolId:'spellingbundel',back:'../app.html',previewSelectors:['#preview','#hb-pages','#wd-preview'],pageCount:()=>{const bladen=[...document.querySelectorAll('#preview .werkblad,#hb-pages .werkblad,#wd-preview .werkblad')].filter(x=>x.offsetParent!==null);const breuken=[...document.querySelectorAll('#preview .pagina-break-voor,#hb-pages .pagina-break-voor,#wd-preview .pagina-break-voor')].filter(x=>x.offsetParent!==null);return bladen.length+breuken.length;},pdfSelectors:['#download-alles','#download-basis','#download-kern','#download-verdieping','#download-uitbreiding','#hb-download','#wd-paneel-download','#wd-download'],proSelectors:['#download-oplossingen-alles','#preview-oplossingen-toggle','#hb-download-oplossingen','#wd-paneel-download-opl','#wd-download-opl']};</script><script type="module" src="/ontdek/taal-ontdek.js"></script>
+</body>
+</html>

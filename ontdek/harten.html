@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verliefde Harten — Ontdek</title>
+
+    <!-- Stijlen liggen buiten /pro/ -->
+    <link rel="stylesheet" href="harten.css">
+    <link rel="stylesheet" href="harten-ontdek.css">
+    <style>.werkblad-pagina::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='190' viewBox='0 0 360 190'%3E%3Cg transform='translate(180 95) rotate(-24)'%3E%3Ctext x='0' y='0' text-anchor='middle' dominant-baseline='middle' fill='%238b3773' fill-opacity='.22' font-family='Arial,sans-serif' font-size='35' font-weight='900' letter-spacing='4'%3EONTDEK%3C/text%3E%3Ctext x='0' y='35' text-anchor='middle' fill='%238b3773' fill-opacity='.18' font-family='Arial,sans-serif' font-size='13' font-weight='700'%3Evoorbeeldweergave%3C/text%3E%3C/g%3E%3C/svg%3E")}</style>
+
+    <!-- voorkom Google-Translate overlay / CSP-consolemelding -->
+    <meta name="google" content="notranslate">
+
+    <style>
+        /* Vaste PRO-header met alleen 'Terug naar menu' */
+        .pro-header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background-color: #3f7fbf; padding: 8px 12px; color: #fff;
+            z-index: 1000; height: 48px;
+        }
+        .pro-header .back-link {
+            background: #5a9fd4; color: #fff; border: none; padding: 6px 10px;
+            border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;
+            cursor: pointer; display: inline-block; white-space: nowrap;
+            /* float:left;  ← overbodig en negeert display:inline-block, daarom verwijderd */
+        }
+        /* Zorg dat de inhoud niet achter de header valt */
+        body { margin-top: 60px; }
+    </style>
+</head>
+<body>
+    <header class="pro-header">
+        <a href="app.html" class="back-link">&larr; Keuzemenu alle tools</a><span>Verliefde harten — Juf Zisa Ontdek</span>
+    </header>
+
+    <section id="setup-screen" class="screen">
+        <div class="panel">
+            <h1>Verliefde Harten</h1>
+            <p>Speel het spel of maak een werkblad met getallen die samen 10 of 100 vormen.</p>
+            <div class="target-choice" role="group" aria-label="Kies het doelgetal">
+                <label><input type="radio" name="targetTotal" value="10" checked><span>Samen 10</span></label>
+                <label><input type="radio" name="targetTotal" value="100"><span>Samen 100<br><small>enkel tientallen</small></span></label>
+            </div>
+            <div class="worksheet-choice-box">
+                <strong>Werkblad of gemengde bundel</strong>
+                <p>Kies één of meer oefenvormen.</p>
+                <div class="worksheet-choice-grid">
+                    <label><input type="checkbox" name="heartWorksheetType" value="zoeken" checked><span>Zoek de paren</span></label>
+                    <label><input type="checkbox" name="heartWorksheetType" value="verbinden"><span>Verbind de helften</span></label>
+                    <label><input type="checkbox" name="heartWorksheetType" value="invullen"><span>Vul de helft in</span></label>
+                    <label><input type="checkbox" name="heartWorksheetType" value="knippen"><span>Knip en plak</span></label>
+                </div>
+            </div>
+            <div class="button-group">
+                <button id="start-btn" class="start-button">Start Spel</button>
+                <button id="werkblad-btn" class="start-button secondary">Maak Werkblad</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="game-container" class="screen" style="display:none;">
+        <div id="target-zone" class="drop-zone"></div>
+        <div id="options-zone" class="options-container"></div>
+        <div class="game-footer">
+            <div id="feedback" class="feedback"></div>
+            <button id="stop-btn" class="stop-button">Stop Spel</button>
+        </div>
+    </section>
+
+    <div id="preview-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Voorbeeld Werkblad</h2>
+                <span id="close-preview-btn" class="close-button">&times;</span>
+            </div>
+            <div id="preview-body"></div>
+            <div class="modal-footer">
+                <button id="download-pdf-btn" class="start-button">Download als PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Externe libs (ongewijzigd) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="./harten.js"></script>
+    <script type="module" src="./harten-ontdek.js"></script>
+</body>
+</html>
+
+

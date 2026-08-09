@@ -1,0 +1,1 @@
+@media(max-width:1450px) and (min-width:761px){body{padding:16px}.tool-header{grid-template-columns:180px 1fr 180px}main{grid-template-columns:320px minmax(0,1fr)}.preview-panel{grid-column:1/-1}.editor-panel,.preview-panel{min-width:0}}

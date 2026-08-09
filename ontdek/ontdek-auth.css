@@ -1,0 +1,35 @@
+.ontdek-auth-dialog {
+  width:min(470px,calc(100% - 28px));
+  max-height:min(760px,calc(100vh - 28px));
+  margin:auto;
+  border:0;
+  border-radius:22px;
+  padding:0;
+  overflow:auto;
+  background:#fff;
+  color:#17324d;
+  box-shadow:0 24px 80px rgba(23,50,77,.35);
+  font-family:Arial,sans-serif;
+}
+.ontdek-auth-dialog::backdrop { background:rgba(23,50,77,.68);backdrop-filter:blur(2px); }
+.ontdek-auth-card { position:relative;box-sizing:border-box;padding:28px;display:grid;gap:12px;background:#fff;border-radius:22px; }
+.ontdek-auth-card * { box-sizing:border-box; }
+.ontdek-auth-close { position:absolute!important;right:14px!important;top:12px!important;width:38px!important;height:38px!important;margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;box-shadow:none!important;font:400 1.7rem/38px Arial,sans-serif!important;color:#687b8b!important;cursor:pointer; }
+.ontdek-auth-close:hover { background:#edf3f7!important;color:#17324d!important;transform:none!important; }
+.ontdek-auth-kicker { padding-right:34px;color:#9a5a00;font-size:.7rem;font-weight:900;letter-spacing:.1em; }
+.ontdek-auth-card h2 { margin:0;color:#17324d;font-size:1.55rem;line-height:1.2; }
+.ontdek-auth-intro { margin:0 0 4px;color:#617587;line-height:1.5;font-size:.9rem; }
+.ontdek-auth-card label { display:grid;gap:5px;margin:0;color:#17324d;font-size:.8rem;font-weight:800; }
+.ontdek-auth-card input { display:block;width:100%!important;height:auto!important;margin:0!important;border:1px solid #becbd6!important;border-radius:10px!important;padding:11px!important;background:#fff!important;color:#17324d!important;font:400 .95rem Arial,sans-serif!important;box-shadow:none!important; }
+.ontdek-auth-card input:focus { outline:3px solid rgba(23,104,172,.15);border-color:#1768ac!important; }
+.ontdek-google,.ontdek-auth-primary { display:block;width:100%!important;min-height:44px;margin:0!important;border-radius:11px!important;padding:11px 13px!important;box-shadow:none!important;font:900 .88rem Arial,sans-serif!important;cursor:pointer; }
+.ontdek-google { background:#fff!important;border:1px solid #cbd5de!important;color:#17324d!important; }
+.ontdek-auth-primary { border:0!important;background:#1768ac!important;color:#fff!important; }
+.ontdek-google:hover { background:#f5f8fa!important;transform:none!important; }
+.ontdek-auth-primary:hover { background:#12588f!important;transform:none!important; }
+.ontdek-auth-switch,.ontdek-auth-reset { width:100%!important;min-height:34px;margin:0!important;padding:6px!important;border:0!important;background:transparent!important;box-shadow:none!important;color:#1768ac!important;font:800 .82rem Arial,sans-serif!important;cursor:pointer; }
+.ontdek-auth-switch:hover,.ontdek-auth-reset:hover { text-decoration:underline;transform:none!important; }
+.ontdek-auth-of { display:flex;align-items:center;gap:10px;color:#8a99a5;font-size:.72rem; }
+.ontdek-auth-of::before,.ontdek-auth-of::after { content:'';height:1px;background:#dce4ea;flex:1; }
+.ontdek-auth-feedback { min-height:20px;margin:0;color:#a32626;font-size:.8rem;font-weight:700;line-height:1.4; }
+@media(max-width:520px){.ontdek-auth-card{padding:24px 18px}.ontdek-auth-card h2{font-size:1.3rem}}

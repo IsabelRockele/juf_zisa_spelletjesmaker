@@ -365,6 +365,10 @@ button:disabled { opacity: .55; background: #dedde5; color: #777; }
 #tools-container .tool-btn { height:43px; padding:8px; color:#31567d; }
 #tools-container .tool-btn.active { background: var(--blue); color:white; box-shadow:none; outline:3px solid #dcecff; }
 .tool-setting { font-size:.82rem; }
+.gum-size-row { display:grid; grid-template-columns:1fr 34px; align-items:center; gap:8px; width:100%; }
+.gum-size-row input[type="range"] { width:100%; accent-color:var(--green); }
+.gum-size-row output { padding:4px 5px; border-radius:6px; background:#e8f5f1; color:#126b55; text-align:center; font-weight:900; }
+#gum-settings { align-items:stretch; }
 input[type="number"], select, #worksheetTitle, #worksheetInstruction {
     width:100%; padding:9px 10px; border:1px solid #c9c6da; border-radius:8px; background:#fff; color:var(--ink); font:inherit;
 }

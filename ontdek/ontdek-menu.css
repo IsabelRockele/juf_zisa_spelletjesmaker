@@ -1,0 +1,93 @@
+.pro-badge {
+  background: #ffd45c !important;
+  color: #493500 !important;
+}
+.sidebar-bottom,
+.summer-notice,
+.updates-overlay,
+.suggest-overlay,
+.favorites-panel,
+#updatesKnop {
+  display: none !important;
+}
+.ontdek-sidebar-actions {
+  margin-top: auto;
+  display: grid;
+  gap: 8px;
+}
+.ontdek-sidebar-actions a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #fff;
+  text-decoration: none;
+  text-align: center;
+  font-size: .78rem;
+  font-weight: 800;
+}
+.ontdek-sidebar-actions .ontdek-pro-cta {
+  background: #ffd45c;
+  color: #493500;
+}
+.ontdek-sidebar-actions .ontdek-terug { background: rgba(255,255,255,.13); }
+.status.ontdek-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  background: #fff8df;
+  border-color: #efd98d;
+  color: #5b4915;
+}
+.status.ontdek-status strong { color: #7b3d72; }
+.ontdek-account-zone { display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap; }
+.ontdek-account-zone button,.ontdek-account-zone a { border:0;border-radius:9px;padding:7px 10px;background:#173f73;color:#fff;text-decoration:none;font:800 .72rem Arial,sans-serif;cursor:pointer; }
+.ontdek-account-zone button+button { background:#fff;color:#173f73;border:1px solid #b8cad9; }
+.ontdek-auth-dialog { width:min(470px,calc(100% - 28px));border:0;border-radius:22px;padding:0;color:#17324d;box-shadow:0 24px 80px rgba(23,50,77,.35); }
+.ontdek-auth-dialog::backdrop { background:rgba(23,50,77,.68); }
+.ontdek-auth-card { position:relative;padding:28px;display:grid;gap:12px; }
+.ontdek-auth-close { position:absolute;right:14px;top:12px;border:0;background:transparent;font-size:1.7rem;color:#687b8b;cursor:pointer; }
+.ontdek-auth-kicker { color:#9a5a00;font-size:.7rem;font-weight:900;letter-spacing:.1em; }
+.ontdek-auth-card h2 { margin:0; }
+.ontdek-auth-intro { margin:0 0 4px;color:#617587;line-height:1.5;font-size:.9rem; }
+.ontdek-auth-card label { display:grid;gap:5px;font-size:.8rem;font-weight:800; }
+.ontdek-auth-card input { width:100%;border:1px solid #becbd6;border-radius:10px;padding:11px;font:inherit; }
+.ontdek-google,.ontdek-auth-primary { border:0;border-radius:11px;padding:11px 13px;font-weight:900;cursor:pointer; }
+.ontdek-google { background:#fff;border:1px solid #cbd5de;color:#17324d; }
+.ontdek-auth-primary { background:#1768ac;color:#fff; }
+.ontdek-auth-switch,.ontdek-auth-reset { border:0;background:transparent;color:#1768ac;font-weight:800;cursor:pointer; }
+.ontdek-auth-of { display:flex;align-items:center;gap:10px;color:#8a99a5;font-size:.72rem; }
+.ontdek-auth-of::before,.ontdek-auth-of::after { content:'';height:1px;background:#dce4ea;flex:1; }
+.ontdek-auth-feedback { min-height:20px;margin:0;color:#a32626;font-size:.8rem;font-weight:700; }
+a.img-link.ontdek-nog-niet {
+  cursor: pointer;
+}
+a.img-link.ontdek-nog-niet::after {
+  content: "VOLGT";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 4;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #eee8df;
+  color: #695f52;
+  font-size: .58rem;
+  font-weight: 900;
+}
+a.img-link.ontdek-beschikbaar::after {
+  content: "PROBEREN";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 4;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #dff5e8;
+  color: #12613d;
+  font-size: .58rem;
+  font-weight: 900;
+}
+.play-nav-link.ontdek-nog-niet small { display: inline-block; }
+@media (max-width: 900px) {
+  .ontdek-sidebar-actions { margin-top: 0; grid-template-columns: 1fr 1fr; width: 100%; }
+}

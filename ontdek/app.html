@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ontdek de Spelgenerator van juf Zisa</title>
+
+  <link rel="icon" href="../start_afbeeldingen/Zisa_spelgenerator-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../start_afbeeldingen/Zisa_spelgenerator-192.png">
+  <meta name="theme-color" content="#ffcf56">
+
+  <style>
+    @font-face {
+      font-family: 'Nunito Zisa';
+      src: url('../assets/fonts/Nunito-Variable.ttf') format('truetype');
+      font-style: normal;
+      font-weight: 200 1000;
+      font-display: swap;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito Zisa', 'Nunito', Arial, sans-serif;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      background: #e8e0d0;
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+    }
+
+    /* ═══════════════════════════
+       ZIJBALK
+    ═══════════════════════════ */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: #2a2a2a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 12px 20px;
+      gap: 6px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    .sidebar-logo img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #ffcf56;
+      padding: 5px;
+      object-fit: contain;
+    }
+
+    .sidebar-logo .brand-sub {
+      font-size: 0.72rem;
+      color: #ffcf56;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .sidebar-logo .brand-main {
+      font-size: 1.25rem;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* PRO-badge */
+    .pro-badge {
+      background: #ffcf56;
+      color: #7a4500;
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.08em;
+    }
+
+    .sidebar-divider {
+      width: 50px;
+      height: 2px;
+      background: #444;
+      border-radius: 2px;
+      margin: 4px 0 8px;
+      flex-shrink: 0;
+    }
+
+    .nav-btn {
+      width: 100%;
+      background: #383838;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 10px;
+      color: #bbb;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: bold;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 0.15s, color 0.15s;
+      line-height: 1.2;
+      flex-shrink: 0;
+    }
+
+    .nav-btn:hover { background: #484848; color: #fff; }
+
+    .nav-btn.active { color: white; }
+    .nav-btn.active.cat-reken    { background: #e67e00; }
+    .nav-btn.active.cat-overview { background: #9b741d; }
+    .nav-btn.active.cat-taal     { background: #2980b9; }
+    .nav-btn.active.cat-puzzels  { background: #8e44ad; }
+    .nav-btn.active.cat-creatief { background: #27ae60; }
+    .nav-btn.active.cat-spel            { background: #c0392b; }
+.nav-btn.active.cat-tijd            { background: #16a085; }
+.nav-btn.active.cat-klasmanagement  { background: #5b7cfa; }
+    #panel-klasmanagement { position: relative; }
+    #klas-blokkeer { display: none; }
+    #klas-blokkeer.actief { display: flex !important; }
+
+    .nav-btn .nav-icon { font-size: 1rem; flex-shrink: 0; }
+
+    /* Onderste blok: user-info + knoppen */
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 12px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .user-pill {
+      background: #383838;
+      color: #ccc;
+      font-size: 0.72rem;
+      padding: 6px 10px;
+      border-radius: 8px;
+      text-align: center;
+      word-break: break-all;
+    }
+
+    .btn-logout {
+      width: 100%;
+      background: #ffcf56;
+      color: #7a4500;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-logout:hover { background: #ffd97d; transform: scale(1.03); }
+
+    /* Admin-knop: alleen zichtbaar voor owner-accounts */
+    .btn-admin {
+      width: 100%;
+      background: #6B4E9B;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      text-decoration: none;
+      display: none; /* standaard verborgen, JS toont voor owners */
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .btn-admin:hover { background: #543B7D; transform: scale(1.03); }
+
+    .help-btn {
+      width: 100%;
+      background: #484848;
+      color: #ddd;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .help-btn:hover { background: #555; color: #fff; }
+
+    .suggest-btn {
+      width: 100%;
+      background: #ffcf56;
+      color: #7a4500;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.2s, transform 0.15s;
+      position: relative;
+    }
+    .suggest-btn:hover { background: #ffd97d; transform: scale(1.03); }
+
+    .suggest-btn .tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2a2a2a;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: normal;
+      padding: 6px 10px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .suggest-btn .tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #2a2a2a;
+    }
+    .suggest-btn:hover .tooltip { display: block; }
+
+    /* Modal */
+    .suggest-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .suggest-overlay.open { display: flex; }
+
+    .suggest-modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      width: min(420px, 90vw);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      font-family: inherit;
+      position: relative;
+    }
+    .suggest-modal h3 {
+      font-size: 1.15rem;
+      color: #2a2a2a;
+      margin-bottom: 4px;
+    }
+    .suggest-modal .modal-sub {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 18px;
+    }
+    .suggest-modal label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 4px;
+    }
+    .suggest-modal input,
+    .suggest-modal textarea {
+      width: 100%;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: #2a2a2a;
+      margin-bottom: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+      resize: none;
+    }
+    .suggest-modal input:focus,
+    .suggest-modal textarea:focus { border-color: #ffcf56; }
+
+    .suggest-modal .modal-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .suggest-modal .btn-annuleer {
+      background: #f0f0f0;
+      color: #555;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .suggest-modal .btn-annuleer:hover { background: #e0e0e0; }
+    .suggest-modal .btn-verstuur {
+      background: #ffcf56;
+      color: #7a4500;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .suggest-modal .btn-verstuur:hover { background: #ffd97d; }
+    .suggest-modal .btn-verstuur:disabled { opacity: 0.5; cursor: default; }
+
+    .suggest-modal .modal-feedback {
+      font-size: 0.82rem;
+      text-align: center;
+      margin-top: 10px;
+      min-height: 1.2em;
+    }
+    .suggest-modal .modal-feedback.ok { color: #2d6a2d; }
+    .suggest-modal .modal-feedback.err { color: #a02020; }
+
+    .modal-close {
+      position: absolute;
+      top: 12px; right: 14px;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #aaa;
+      line-height: 1;
+    }
+    .modal-close:hover { color: #555; }
+
+    /* ═══════════════════════════
+       HOOFDINHOUD
+    ═══════════════════════════ */
+    .main {
+      flex: 1;
+      padding: 28px 32px 40px;
+      min-width: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Status-balk */
+    .status {
+      margin-bottom: 20px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      background: #fff;
+      border: 1px solid #eee;
+      color: #555;
+    }
+    .status.good { border-color: #bfe3bf; background: #f5fff5; color: #2d6a2d; }
+    .status.warn { border-color: #ffd6a8; background: #fff7ec; color: #a05000; }
+    .status.err  { border-color: #f1c0c0; background: #fff5f5; color: #a02020; }
+
+    /* Tijdelijke zomerboodschap: automatisch verborgen vanaf 1 september 2026 */
+    .summer-notice {
+      display: none;
+      align-items: flex-start;
+      gap: 11px;
+      position: relative;
+      margin-bottom: 16px;
+      padding: 13px 44px 13px 15px;
+      border: 1px solid #b9d8ed;
+      border-radius: 14px;
+      background: #eef8ff;
+      color: #28556f;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    .summer-notice.visible { display: flex; }
+    .summer-notice-icon { font-size: 1.25rem; flex: 0 0 auto; }
+    .summer-notice strong { display: block; color: #174b69; margin-bottom: 2px; }
+    .summer-notice-close {
+      position: absolute;
+      top: 8px;
+      right: 9px;
+      width: 28px;
+      height: 28px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #5f7f91;
+      font: inherit;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .summer-notice-close:hover { background: #dceef8; color: #174b69; }
+
+    /* Updates-balk */
+    /* Updates knop */
+    .updates-knop {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff3cd;
+      border: 1.5px solid #ffe082;
+      border-radius: 20px;
+      padding: 7px 16px;
+      font-family: inherit;
+      font-size: 0.83rem;
+      font-weight: bold;
+      color: #7a4500;
+      cursor: pointer;
+      margin-bottom: 18px;
+      transition: background 0.15s;
+    }
+    .updates-knop:hover { background: #ffe082; }
+
+    /* Updates modal overlay */
+    .updates-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .updates-overlay.open { display: flex; }
+
+    .updates-modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      width: min(700px, 92vw);
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      font-family: inherit;
+      position: relative;
+    }
+    .updates-modal h3 {
+      font-size: 1.1rem;
+      color: #7a4500;
+      margin: 0 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .updates-modal ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .updates-modal li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: #444;
+      line-height: 1.6;
+      font-size: 0.83rem;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f5f0e8;
+    }
+    .updates-modal li:last-child { border-bottom: none; padding-bottom: 0; }
+    .updates-modal li .update-datum {
+      background: #fff3cd;
+      color: #7a4500;
+      font-size: 0.72rem;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .updates-modal li .update-tool {
+      font-weight: bold;
+      color: #2a2a2a;
+    }
+    .updates-modal-close {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #aaa;
+      line-height: 1;
+    }
+    .updates-modal-close:hover { color: #555; }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-header .section-icon { font-size: 1.8rem; }
+    .section-header h2 { font-size: 1.6rem; font-weight: bold; color: #2a2a2a; margin: 0; }
+    .section-header .section-bar { height: 4px; border-radius: 2px; flex: 1; opacity: 0.3; }
+
+    /* Knoppenraster */
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 24px 16px;
+      justify-items: center;
+    }
+
+    a.img-link {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      width: 100%;
+    }
+
+    .drukknop-afbeelding {
+      width: 100%;
+      max-width: 150px;
+      height: auto;
+      display: block;
+      transition: transform 0.2s ease;
+    }
+
+    a.img-link:hover .drukknop-afbeelding { transform: scale(1.07); }
+
+    .img-label {
+      font-size: 0.9rem;
+      font-family: inherit;
+      font-weight: bold;
+      color: #3a2000;
+      text-align: center;
+      line-height: 1.2;
+      width: 100%;
+    }
+
+    /* Panelen */
+    .section-panel { display: none; flex-direction: column; flex: 1; }
+    .section-panel.active { display: flex; }
+
+    /* Categorie-footer */
+    .section-footer { margin-top: auto; padding-top: 40px; }
+
+    .footer-banner {
+      border-radius: 16px;
+      padding: 22px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .footer-banner .footer-pattern {
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 200px;
+      opacity: 0.12;
+    }
+
+    .footer-banner .footer-emoji { font-size: 2.8rem; flex-shrink: 0; position: relative; z-index: 1; }
+
+    .footer-banner .footer-text { position: relative; z-index: 1; }
+    .footer-banner .footer-text strong { display: block; font-size: 1.1rem; color: white; font-weight: bold; margin-bottom: 3px; }
+    .footer-banner .footer-text span { font-size: 0.85rem; color: rgba(255,255,255,0.82); }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; min-height: auto; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 12px; gap: 6px; }
+      .sidebar-logo { flex-direction: row; margin-bottom: 0; width: auto; }
+      .sidebar-logo img { width: 40px; height: 40px; }
+      .sidebar-logo .brand-main { font-size: 0.85rem; }
+      .sidebar-logo .brand-sub { display: none; }
+      .sidebar-divider { display: none; }
+      .sidebar-bottom { margin-top: 0; padding-top: 0; width: auto; flex-direction: row; }
+      .nav-btn { width: auto; padding: 7px 10px; font-size: 0.7rem; }
+      .main { padding: 16px; }
+    }
+    /* Rustiger PRO-overzicht met persoonlijke favorieten */
+    .main{background:#faf7f1;padding-top:22px}.overview-toolbar{display:flex;align-items:center;gap:14px;margin:0 0 18px;background:#fff;border:1px solid #e7dfd2;border-radius:16px;padding:13px 15px;box-shadow:0 5px 18px rgba(70,45,10,.06)}.overview-welcome{min-width:205px}.overview-welcome strong{display:block;color:#2a2a2a;font-size:.95rem}.overview-welcome span{display:block;color:#766b5b;font-size:.7rem}.tool-search-wrap{position:relative;flex:1}.tool-search-wrap:before{content:'🔎';position:absolute;left:12px;top:50%;transform:translateY(-50%)}.tool-search{width:100%;border:1px solid #d8d0c5;border-radius:11px;padding:10px 12px 10px 39px;font-family:inherit;background:#fff}.tool-search:focus{outline:3px solid rgba(255,207,86,.35);border-color:#d2a525}.search-result-count{font-size:.7rem;color:#806f56}.favorites-panel{display:none;background:#fff3cc;border:1px solid #ead9a5;border-radius:16px;padding:14px;margin-bottom:20px}.favorites-panel.ready{display:block}.favorites-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.favorites-title strong{color:#5f4306}.favorites-title span{font-size:.7rem;color:#806f56}.favorites-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px}.favorite-shortcut{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e6d9b7;border-radius:11px;padding:8px;text-decoration:none;color:#332d25;min-width:0}.favorite-shortcut img{width:42px;height:42px;object-fit:contain}.favorite-shortcut span{font-size:.72rem;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.favorites-empty{color:#776b58;font-size:.75rem}.button-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:16px;align-items:stretch}a.img-link{align-items:stretch;gap:0;padding:10px 10px 12px;border-radius:15px;background:#fff;border:1px solid #e7dfd2;box-shadow:0 4px 13px rgba(70,45,10,.055);transition:transform .16s ease,box-shadow .16s ease}a.img-link:hover{transform:translateY(-3px);box-shadow:0 9px 20px rgba(70,45,10,.11)}.tool-image-stage{min-height:118px;display:grid;place-items:center;border-radius:11px;background:#fbf7ee;overflow:hidden;margin-bottom:9px}.drukknop-afbeelding{width:112px;max-width:88%;max-height:112px;object-fit:contain}a.img-link:hover .drukknop-afbeelding{transform:scale(1.035)}.img-label{font-size:.82rem;min-height:2.2em;display:grid;place-items:center}.favorite-toggle{position:absolute;right:7px;top:7px;width:31px;height:31px;border:0;border-radius:9px;background:rgba(255,255,255,.92);color:#8b8171;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.1);z-index:2}.favorite-toggle.active{background:#ffefb3;color:#c88700}.tool-hidden{display:none!important}.no-results{display:none;padding:28px;text-align:center;color:#756a5b;background:#fff;border:1px dashed #d8d0c5;border-radius:14px}.no-results.visible{display:block}@media(max-width:700px){.overview-toolbar{align-items:stretch;flex-direction:column}.overview-welcome{min-width:0}.favorites-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.button-grid{grid-template-columns:repeat(auto-fill,minmax(135px,1fr))}}
+    .tool-image-stage{border-bottom:3px solid #e7d7b4}.tool-image-stage.stage-reken{background:#fff8e9;border-color:#e67e00}.tool-image-stage.stage-taal{background:#eef7fc;border-color:#2980b9}.tool-image-stage.stage-puzzels{background:#f7f0fa;border-color:#8e44ad}.tool-image-stage.stage-creatief{background:#eff9f2;border-color:#27ae60}.tool-image-stage.stage-spel{background:#fcf1ef;border-color:#c0392b}.tool-image-stage.stage-tijd{background:#edf8f6;border-color:#16a085}.tool-image-stage.stage-klasmanagement{background:#eef2ff;border-color:#5b7cfa}.img-label{min-height:1.5em}.tool-description{display:block;color:#796f61;font-family:inherit;font-size:.68rem;line-height:1.3;text-align:center;min-height:2.6em;margin-top:4px;padding:0 3px}
+    .status.good{align-self:flex-end;width:max-content;margin:0 0 10px;padding:5px 10px;border-radius:999px;font-size:.68rem}.status.warn,.status.err{align-self:stretch;width:auto}.overview-toolbar .updates-knop{flex:0 0 auto;margin:0;padding:9px 12px;white-space:nowrap}.favorites-panel{background:#fff;border-color:#e7dfd2}.pro-start-welcome{display:grid;grid-template-columns:minmax(190px,300px) minmax(230px,1fr);align-items:center;gap:26px;min-height:330px;margin-top:26px;padding:26px 48px;border-top:1px solid #e7dfd2;color:#756b5e}.pro-start-welcome.hidden{display:none}.pro-start-welcome img{display:block;width:100%;max-height:300px;object-fit:contain}.pro-start-copy h2{margin:0 0 8px;color:#2a2a2a;font-size:1.45rem}.pro-start-copy p{margin:0;max-width:470px;font-family:inherit;font-size:.9rem;line-height:1.55}.pro-start-copy strong{color:#5f4306}.category-back{display:none;align-items:center;gap:6px;width:max-content;margin:0 0 14px;padding:8px 12px;border:1px solid #ddd2c2;border-radius:10px;background:#fff;color:#554a3c;font-family:inherit;font-weight:bold;cursor:pointer}.category-back.visible{display:inline-flex}.main.category-open .summer-notice,.main.category-open .overview-toolbar,.main.category-open .favorites-panel,.main.category-open .status.good{display:none!important}.main.search-open .summer-notice,.main.search-open .favorites-panel,.main.search-open .status.good{display:none!important}.main.category-open .category-back{margin-top:0}.main.category-open .section-panel.active{margin-top:0}@media(max-width:700px){.status.good{align-self:flex-start}.pro-start-welcome{grid-template-columns:1fr;text-align:center;padding:24px 12px}.pro-start-welcome img{max-height:220px}.pro-start-copy p{margin-inline:auto}}
+    .play-nav-link{display:flex;align-items:center;gap:10px;margin:7px 15px;padding:13px 14px;border-radius:12px;background:linear-gradient(135deg,#1768ac,#14805e);color:#fff;text-decoration:none;font-family:inherit;font-size:.84rem;font-weight:800;box-shadow:0 5px 15px rgba(23,104,172,.22)}.play-nav-link:hover{filter:brightness(1.06);transform:translateY(-1px)}
+  </style>
+  <link rel="stylesheet" href="./ontdek-menu.css?v=1">
+<style>a.img-link.live-board-tool:before{content:'↗ Opent apart';position:absolute;z-index:3;left:8px;top:8px;padding:4px 7px;border-radius:999px;background:#173f73;color:#fff;font-size:.58rem;font-weight:900;box-shadow:0 3px 9px rgba(23,63,115,.2)}</style>
+</head>
+<body>
+
+<!-- ═══ ZIJBALK ═══ -->
+<nav class="sidebar">
+
+  <div class="sidebar-logo">
+    <img src="../start_afbeeldingen/zisa.png" alt="Zisa logo">
+    <div>
+      <div class="brand-sub">Juf Zisa's</div>
+      <div class="brand-main">Spel&shy;generator</div>
+    </div>
+    <span class="pro-badge">ONTDEK</span>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <button class="nav-btn cat-overview active" data-target="overview">
+    <span class="nav-icon">⌂</span> Overzicht
+  </button>
+  <button class="nav-btn cat-reken" data-target="reken">
+    <span class="nav-icon">📐</span> Reken-oefeningen
+  </button>
+  <button class="nav-btn cat-taal" data-target="taal">
+    <span class="nav-icon">🅰️</span> Taal en letters
+  </button>
+  <button class="nav-btn cat-puzzels" data-target="puzzels">
+    <span class="nav-icon">🧩</span> Puzzels &amp; logica
+  </button>
+  <button class="nav-btn cat-creatief" data-target="creatief">
+    <span class="nav-icon">🎨</span> Creatief en bouwen
+  </button>
+  <button class="nav-btn cat-spel" data-target="spel">
+    <span class="nav-icon">🎲</span> Spelvormen
+  </button>
+  <button class="nav-btn cat-tijd" data-target="tijd">
+    <span class="nav-icon">⏰</span> Tijd en klok
+  </button>
+  <button class="nav-btn cat-klasmanagement" data-target="klasmanagement">
+  <span class="nav-icon">📋</span> Klasmanagement
+</button>
+  <a class="play-nav-link" href="./zisa-spelen.html"><span aria-hidden="true">🎮</span> Zisa Spelen <small style="margin-left:auto;background:#ffd45c;color:#493300;border-radius:999px;padding:2px 6px">PRO</small></a>
+
+  <div class="sidebar-bottom">
+    <div id="user-pill" class="user-pill" style="display:none;">-</div>
+    <a href="./admin-school.html" id="admin-link" class="btn-admin">🏫 Admin school</a>
+    <button id="logout" class="btn-logout">↩ Uitloggen</button>
+    <a href="../Handleiding spelletjesmaker.pdf" class="help-btn" download>❓ Handleiding</a>
+    <a href="./privacy.html" class="help-btn" target="_blank">🔒 Privacyverklaring</a>
+    <button class="suggest-btn" onclick="document.getElementById('suggestOverlay').classList.add('open')">
+    <span class="tooltip">Idee voor een nieuwe tool?</span>
+💡 Suggestie insturen <span style="background:#fff4;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;margin-left:2px;">?</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ SUGGESTIE MODAL ═══ -->
+<div class="suggest-overlay" id="suggestOverlay">
+  <div class="suggest-modal">
+    <button class="modal-close" onclick="sluitModal()">✕</button>
+    <h3>💡 Jouw suggestie</h3>
+    <p class="modal-sub">Mis je een tool? Heb je een idee? Laat het weten!</p>
+
+    <label for="sug-naam">Jouw naam (optioneel)</label>
+    <input type="text" id="sug-naam" placeholder="bv. Juf An"/>
+
+    <label for="sug-bericht">Jouw suggestie *</label>
+    <textarea id="sug-bericht" rows="4" placeholder="Ik zou graag een tool zien die…"></textarea>
+
+    <p style="font-size:0.72rem;color:#999;margin-bottom:12px;">🔒 Je naam en suggestie worden enkel gebruikt om jouw vraag te beantwoorden en niet gedeeld met derden.</p>
+    <div class="modal-btns">
+      <button class="btn-annuleer" onclick="sluitModal()">Annuleer</button>
+      <button class="btn-verstuur" id="sug-verstuur" onclick="verstuurSuggestie()">✉ Verstuur</button>
+    </div>
+    <div class="modal-feedback" id="sug-feedback"></div>
+  </div>
+</div>
+
+</nav>
+
+<!-- ═══ HOOFDINHOUD ═══ -->
+<main class="main" id="content">
+
+  <aside class="summer-notice" id="summerNotice" aria-label="Tijdelijke mededeling">
+    <span class="summer-notice-icon" aria-hidden="true">🛠️</span>
+    <div>
+      <strong>Zisa wordt deze zomer stap voor stap vernieuwd</strong>
+      In augustus verbeteren we het overzicht en de vormgeving van PRO. Daardoor kan een scherm er tussendoor iets anders uitzien. De tools blijven gewoon bruikbaar. Zie je toch iets vreemds? Ververs dan eerst de pagina of meld het via <strong style="display:inline">💡 Suggestie insturen</strong> in de linkerbalk.
+    </div>
+    <button class="summer-notice-close" id="summerNoticeClose" type="button" aria-label="Melding sluiten">✕</button>
+  </aside>
+
+  <!-- UPDATES MODAL -->
+  <div class="updates-overlay" id="updatesOverlay">
+    <div class="updates-modal">
+      <button class="updates-modal-close" onclick="document.getElementById('updatesOverlay').classList.remove('open')">✕</button>
+      <h3>🆕 Laatste updates</h3>
+      <ul>
+        <li data-datum="2026-08-03" data-tot="2026-10-01">
+          <span class="update-datum">augustus 2026</span>
+          <span><span class="update-tool">Bundel spelling</span> - Nieuw in PRO. Kies per graad een spellingdoel, bekijk de passende woorden en combineer meerdere oefenvormen en niveaus tot printklare werkbladen. Graad 1 (1ste en 2de lj - groep 3 en 4) en graad 2 (3de en 4de lj - groep 5 en 6) zijn beschikbaar; graad 3 (5de en 6de leerjaar / groep 7 en 8) is nog in opbouw.</span>
+        </li>
+        <li data-datum="2026-08-03" data-tot="2026-10-01">
+          <span class="update-datum">augustus 2026</span>
+          <span><span class="update-tool">Zisa Spelen</span> - Nieuw in de linkerzijbalk. Geef leerlingen via een vaste QR-code of leerlingenlink toegang tot speelse oefeningen per leerjaar. Als leerkracht kun je de spellen ook zelf vooraf openen op je computer of smartboard. Je vindt er onder meer tafelspellen, geldspellen en de nieuwe Breukenstudio.</span>
+        </li>
+        <li data-datum="2026-08-03" data-tot="2026-10-01">
+          <span class="update-datum">augustus 2026</span>
+          <span><span class="update-tool">Bundel bewerkingen</span> - De bundel is verder uitgebreid met nieuwe oefeningen rond bewerkingen met kommagetallen, breuken en percenten.</span>
+        </li>
+        <li data-datum="2026-08-02" data-tot="2026-10-01">
+          <span class="update-datum">augustus 2026</span>
+          <span><span class="update-tool">Leesbooster</span> - Nieuwe tool voor gericht technisch lezen. Maak gedifferentieerde werkbladen en verhalen of oefen klassikaal met het automatische smartboardspel en verrassende beweegboosts.</span>
+        </li>
+        <li data-datum="2026-07-20" data-tot="2026-10-01">
+          <span class="update-datum">juli 2026</span>
+          <span><span class="update-tool">Bundel getallen</span> - De getallenbundel is uitgebreid met een vernieuwde bovenbouwmodule voor 4de, 5de en 6de leerjaar. Je vindt er nu extra oefeningen rond kommagetallen, breuken, percenten, Romeinse cijfers en negatieve getallen. De keuzepagina kreeg ook een duidelijker overzicht met onderbouw en bovenbouw apart.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="status" class="status">Status laden…</div>
+  <div class="overview-toolbar"><div class="overview-welcome"><strong>Wat wil je vandaag maken?</strong><span>Kies een categorie of zoek meteen naar een tool.</span></div><label class="tool-search-wrap"><span style="position:absolute;left:-9999px">Zoek een tool</span><input class="tool-search" id="proToolSearch" type="search" placeholder="Zoek bv. bingo, kloklezen of spelling…"></label><span class="search-result-count" id="proSearchCount"></span><button class="updates-knop" id="updatesKnop" style="display:none;" onclick="document.getElementById('updatesOverlay').classList.add('open')">🆕 Updates</button></div>
+  <section class="favorites-panel" id="favoritesPanel"><div class="favorites-title"><strong>★ Mijn favorieten</strong><span>Opgeslagen op al je toestellen</span></div><div class="favorites-grid" id="favoritesGrid"><span class="favorites-empty">Favorieten laden…</span></div></section>
+  <button class="category-back" id="categoryBack" type="button">← Terug naar overzicht</button>
+  <section class="pro-start-welcome" id="proStartWelcome">
+    <img src="../pro/zisa-welkom-modern.png" alt="Zisa zwaait en nodigt je uit om links een categorie te kiezen">
+    <div class="pro-start-copy">
+      <h2>Welkom bij de Ontdek-versie</h2>
+      <p>Kies een <strong>categorie in de linkerbalk</strong> of zoek meteen naar een tool. Je leert dezelfde werkwijze kennen als in PRO.</p>
+    </div>
+  </section>
+
+  <!-- REKEN-OEFENINGEN -->
+   <div class="section-panel" id="panel-reken">
+    <div class="section-header">
+      <span class="section-icon">📐</span>
+      <h2>Reken-oefeningen</h2>
+      <div class="section-bar" style="background:#e67e00"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./rekenbundel/index.html"><img alt="Bewerkingen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/werkblad_bewerkingen.png" loading="eager"/><span class="img-label">Bundel bewerkingen</span></a>
+      <a class="img-link" href="./tempotoetsen/index.html"><img alt="Tempotoetsen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/tempotoetsen.png" loading="eager"/><span class="img-label">Tempotoetsen</span></a>
+      <a class="img-link" href="./bundel_getallen/getalkeuze.html"><img alt="Getalinzicht" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/getalinzicht.png" loading="eager"/><span class="img-label">Bundel getalinzicht</span></a>
+      <a class="img-link" href="./cijferen.html"><img alt="Cijferen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/cijferen.png" loading="eager"/><span class="img-label">Werkblad cijferen</span></a>
+      <a class="img-link" href="./geldrekenen/index.html"><img alt="Bundel geld" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/geld.png" loading="eager"/><span class="img-label">Bundel geld</span></a>
+      <a class="img-link" href="./meetkundebundelmaker/index.html"><img alt="Vlakke figuren voor de meetkundebundel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/meetkundebundel.png" loading="eager"/><span class="img-label">Bundel meetkunde</span></a>
+      <a class="img-link" href="./reken_en_kleur.html"><img alt="Reken en kleur" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/reken_en_kleur.png" loading="eager"/><span class="img-label">Reken en kleur</span></a>
+      <a class="img-link" href="./rekenweg/rekenweg.html"><img alt="Rekenweg" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/rekenweg.png" loading="eager"/><span class="img-label">Rekenweg</span></a>
+      <a class="img-link" href="./rekenvierkanten/index.html"><img alt="Rekenvierkant" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/rekenvierkant.png" loading="eager"/><span class="img-label">Rekenvierkant</span></a>
+      <a class="img-link" href="./rekenpiramide/index.html"><img alt="Rekenpiramide" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/rekenpiramide.png" loading="eager"/><span class="img-label">Rekenpiramide</span></a>
+      <a class="img-link" href="./rekendriehoek/index.html"><img alt="Rekendriehoek" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/rekendriehoek.png" loading="eager"/><span class="img-label">Rekendriehoek</span></a>
+      <a class="img-link" href="./rekencirkels/rekencirkel.html"><img alt="Rekencirkel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/rekencirkel.png" loading="eager"/><span class="img-label">Rekencirkel</span></a>
+      <a class="img-link" href="./rekenrooster.html"><img alt="Rekenrooster" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/rekenrooster.png" loading="eager"/><span class="img-label">Rekenrooster</span></a>
+      <a class="img-link" href="./reken-doolhof-generator.html"><img alt="Rekenspellen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/rekenspellen.png" loading="eager"/><span class="img-label">Rekenspellen</span></a>
+      <a class="img-link" href="./loopspel.html"><img alt="Loopspel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/loop.png" loading="eager"/><span class="img-label">Loopspel</span></a>
+      <a class="img-link" href="./harten.html"><img alt="Verliefde harten" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/harten.png" loading="eager"/><span class="img-label">Verliefde harten</span></a>
+      <a class="img-link" href="./keuze-hulpschema.html"><img alt="MAB en schema" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/MAB.png" loading="eager"/><span class="img-label">MAB en schema</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#e67e00">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <text x="10" y="40" font-size="60" fill="white">+ − × ÷</text>
+          <text x="10" y="75" font-size="30" fill="white">= &lt; &gt; %</text>
+        </svg>
+        <span class="footer-emoji">🧮</span>
+        <div class="footer-text">
+          <strong>Rekenen doe je samen!</strong>
+          <span>Kies een oefening en genereer in seconden een werkblad op maat.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAAL EN LETTERS -->
+  <div class="section-panel" id="panel-taal">
+    <div class="section-header">
+      <span class="section-icon">🅰️</span>
+      <h2>Taal en letters</h2>
+      <div class="section-bar" style="background:#2980b9"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./spelling/index.html"><img alt="Bundel spelling" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/spelling.png" loading="eager"/><span class="img-label">Bundel spelling</span><span class="tool-description">Maak gedifferentieerde spellingwerkbladen per graad en spellingdoel.</span></a>
+      <a class="img-link" href="./leesbooster/index.html"><img alt="Leesbooster technisch lezen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/leesbooster.png" loading="eager"/><span class="img-label">Leesbooster</span><span class="tool-description">Maak leeswerkbladen, verhalen en een klassikaal smartboardspel.</span></a>
+      <a class="img-link" href="./Leeskaartjes/leeskaartjes.html"><img alt="Leeskaartjes per AVI" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/leeskaartjes.png" loading="eager"/><span class="img-label">Leeskaartjes per AVI</span></a>
+      <a class="img-link" href="./lees.html"><img alt="Leesspel met eigen woorden voor het smartboard" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/lees.png" loading="lazy"/><span class="img-label">Leesspel – eigen woorden</span><span class="tool-description">Voer zelf woorden in en laat ze automatisch flitsen op het smartboard, met bewegingen tussendoor.</span></a>
+      <a class="img-link" href="./schrijfgenerator.html"><img alt="Handschrift" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/handschrift.png" loading="lazy"/><span class="img-label">Handschrift</span></a>
+      <a class="img-link" href="./woordzoeker.html"><img alt="Woordzoeker" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/woordzoeker.png" loading="lazy"/><span class="img-label">Woordzoeker</span></a>
+      <a class="img-link" href="./kruiswoordpuzzel.html"><img alt="Kruiswoordpuzzel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/kruiswoordpuzzel.png" loading="lazy"/><span class="img-label">Kruiswoordpuzzel</span></a>
+      <a class="img-link" href="./geheimeboodschap.html"><img alt="Geheime boodschap" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/geheime_boodschap.png" loading="lazy"/><span class="img-label">Geheime boodschap</span></a>
+      <a class="img-link" href="./lettercode.html"><img alt="Lettercode" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/lettercode.png" loading="lazy"/><span class="img-label">Lettercode</span></a>
+      <a class="img-link" href="./lettertetris.html"><img alt="Lettertetris" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/lettertetris.png" loading="lazy"/><span class="img-label">Lettertetris</span></a>
+      <a class="img-link" href="./galgje.html"><img alt="Galgje" class="drukknop-afbeelding" src="../drukknop_afbeeldingen_v3/galgje.png" loading="lazy"/><span class="img-label">Galgje</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#2980b9">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <text x="5" y="45" font-size="55" fill="white">A B C</text>
+          <text x="5" y="75" font-size="28" fill="white">a b c d e f</text>
+        </svg>
+        <span class="footer-emoji">✏️</span>
+        <div class="footer-text">
+          <strong>Taal is meer dan spellen!</strong>
+          <span>Van woordzoeker tot geheime boodschap — lezen en schrijven wordt een spel.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUZZELS & LOGICA -->
+  <div class="section-panel" id="panel-puzzels">
+    <div class="section-header">
+      <span class="section-icon">🧩</span>
+      <h2>Puzzels &amp; logica</h2>
+      <div class="section-bar" style="background:#8e44ad"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./sudoku.html"><img alt="Sudoku" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/sudoku.webp" loading="lazy"/><span class="img-label">Sudoku</span></a>
+      <a class="img-link" href="./zoekverschillen.html"><img alt="Zoek de verschillen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/zoek_de_verschillen.webp" loading="lazy"/><span class="img-label">Zoek de verschillen</span></a>
+      <a class="img-link" href="./doolhof.html"><img alt="Doolhof" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/doolhof.webp" loading="lazy"/><span class="img-label">Doolhof</span></a>
+      <a class="img-link" href="./slangendoolhof.html"><img alt="Slangendoolhof" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/slangendoolhof.webp" loading="lazy"/><span class="img-label">Slangendoolhof</span></a>
+      <a class="img-link" href="./hexagon.html"><img alt="Hexagonaal raster" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/hexagon.webp" loading="lazy"/><span class="img-label">Hexagonaal raster</span></a>
+      <a class="img-link" href="./schaduw.html"><img alt="Schaduw" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/schaduw.webp" loading="lazy"/><span class="img-label">Schaduw</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#8e44ad">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="25" height="25" rx="4" fill="white"/>
+          <rect x="45" y="10" width="25" height="25" rx="4" fill="white"/>
+          <rect x="10" y="45" width="25" height="25" rx="4" fill="white"/>
+          <rect x="80" y="10" width="25" height="60" rx="4" fill="white"/>
+          <rect x="115" y="10" width="60" height="25" rx="4" fill="white"/>
+          <rect x="115" y="45" width="25" height="25" rx="4" fill="white"/>
+        </svg>
+        <span class="footer-emoji">🔍</span>
+        <div class="footer-text">
+          <strong>Denken is ook leren!</strong>
+          <span>Logisch redeneren, patronen herkennen en problemen oplossen — stap voor stap.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATIEF EN BOUWEN -->
+  <div class="section-panel" id="panel-creatief">
+    <div class="section-header">
+      <span class="section-icon">🎨</span>
+      <h2>Creatief en bouwen</h2>
+      <div class="section-bar" style="background:#27ae60"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./punttekening.html"><img alt="Punttekening" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/punttekening.webp" loading="lazy"/><span class="img-label">Punttekening</span></a>
+      <a class="img-link" href="./pixelart.html"><img alt="Pixelart" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/pixelart.webp" loading="lazy"/><span class="img-label">Pixelart</span></a>
+      <a class="img-link" href="./bouwplaat.html"><img alt="Bouwplaten" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/bouwplaat.webp" loading="lazy"/><span class="img-label">Bouwplaten</span></a>
+      <a class="img-link" href="./coderen.html"><img alt="Coderen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/coderen.webp" loading="lazy"/><span class="img-label">Coderen</span></a>
+      <a class="img-link" href="./blokkenbouwsels/index.html"><img alt="Blokkenbouwsels" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/blokkenbouwsels.webp" loading="eager"/><span class="img-label">Blokkenbouwsels</span></a>
+      <a class="img-link" href="./plattegrond.html"><img alt="Plattegrond" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/plattegrond.webp" loading="lazy"/><span class="img-label">Plattegrond</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#27ae60">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="30" cy="40" r="25" fill="white"/>
+          <polygon points="80,15 110,65 50,65" fill="white"/>
+          <rect x="125" y="15" width="50" height="50" rx="6" fill="white"/>
+        </svg>
+        <span class="footer-emoji">🎨</span>
+        <div class="footer-text">
+          <strong>Bouwen, tekenen, ontwerpen!</strong>
+          <span>Creatief aan de slag met pixels, punten en plattegronden.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPELVORMEN -->
+  <div class="section-panel" id="panel-spel">
+    <div class="section-header">
+      <span class="section-icon">🎲</span>
+      <h2>Spelvormen</h2>
+      <div class="section-bar" style="background:#c0392b"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./bingo.html"><img alt="Bingo" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/bingo.webp" loading="lazy"/><span class="img-label">Bingo</span></a>
+      <a class="img-link" href="./vieropeenrij.html"><img alt="Vier op een rij" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/vieropeenrij.webp" loading="lazy"/><span class="img-label">Vier op een rij</span></a>
+      <a class="img-link" href="./rad.html"><img alt="Rad" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rad.webp" loading="lazy"/><span class="img-label">Rad</span></a>
+      <a class="img-link" href="./QR.html"><img alt="QR-generator" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/QR.webp" loading="lazy"/><span class="img-label">QR-generator</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#c0392b">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="25" cy="25" r="18" fill="white"/>
+          <circle cx="70" cy="25" r="18" fill="white"/>
+          <circle cx="25" cy="60" r="18" fill="white"/>
+          <circle cx="70" cy="60" r="18" fill="white"/>
+          <circle cx="120" cy="40" r="30" fill="white"/>
+        </svg>
+        <span class="footer-emoji">🎲</span>
+        <div class="footer-text">
+          <strong>Spelen is leren!</strong>
+          <span>Van bingo tot QR-code — zet leerinhoud om in een leuk klassikaal spel.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIJD EN KLOK -->
+  <div class="section-panel" id="panel-tijd">
+    <div class="section-header">
+      <span class="section-icon">⏰</span>
+      <h2>Tijd en klok</h2>
+      <div class="section-bar" style="background:#16a085"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./kloklezen/kloklezen.html"><img alt="Bundel kloklezen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/werkblad_kloklezen.webp" loading="lazy"/><span class="img-label">Bundel kloklezen</span></a>
+      <a class="img-link" href="./kalender/kalender.html"><img alt="Bundel kalenders" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/kalender.webp" loading="lazy"/><span class="img-label">Bundel kalenders</span></a>
+      <a class="img-link" href="./timer.html"><img alt="Timer" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/timer.webp" loading="lazy"/><span class="img-label">Timer</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#16a085">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="40" r="35" fill="none" stroke="white" stroke-width="6"/>
+          <line x1="100" y1="40" x2="100" y2="15" stroke="white" stroke-width="4" stroke-linecap="round"/>
+          <line x1="100" y1="40" x2="120" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="100" cy="40" r="4" fill="white"/>
+        </svg>
+        <span class="footer-emoji">⏰</span>
+        <div class="footer-text">
+          <strong>Tijd voor tijd!</strong>
+          <span>Kloklezen oefenen of een timer instellen — handig voor elke les.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- KLASMANAGEMENT -->
+<div class="section-panel" id="panel-klasmanagement">
+
+  <!-- Blokkeer-overlay: zichtbaar zolang consent niet gegeven -->
+  <div id="klas-blokkeer" style="
+    display:none;
+    position:absolute;
+    inset:0;
+    background:rgba(240,237,232,0.92);
+    z-index:10;
+    border-radius:12px;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:12px;
+    text-align:center;
+    padding:40px;
+  ">
+    <span style="font-size:2rem;">🔒</span>
+    <p style="font-family:inherit;font-weight:bold;color:#2a2a2a;font-size:1rem;">
+      Geef eerst akkoord met de privacyverklaring om Klasmanagement te gebruiken.
+    </p>
+    <button onclick="document.getElementById('zisa-consent-overlay') && document.getElementById('zisa-consent-overlay').scrollIntoView()"
+      style="background:#ffcf56;color:#7a4500;border:none;border-radius:10px;padding:9px 20px;font-family:inherit;font-weight:bold;cursor:pointer;">
+      Bekijk de privacyverklaring →
+    </button>
+  </div>
+
+  <div class="section-header">
+    <span class="section-icon">📋</span>
+    <h2>Klasmanagement</h2>
+    <div class="section-bar" style="background:#5b7cfa"></div>
+  </div>
+
+  <div class="button-grid">
+    <a class="img-link" href="#" onclick="navigeerMetConsent(event, './opvolging_huistaken/opvolging_huistaken.html')">
+      <img alt="Opvolging huistaken" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/huistaken.webp" loading="lazy"/>
+      <span class="img-label">Opvolging huistaken</span>
+    </a>
+     <a class="img-link" href="#" onclick="navigeerMetConsent(event, './Takenbord_v2/welkomstbord.html', true)">
+      <img alt="Takenbord" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/takenbord.webp" loading="lazy"/>
+      <span class="img-label">Takenbord</span>
+    </a>
+     <a class="img-link" href="#" onclick="navigeerMetConsent(event, './planbord/index.html', true)">
+      <img alt="Planbord" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/planbord.webp" loading="lazy"/>
+      <span class="img-label">Planbord</span>
+    </a>
+  </div>
+
+  <div class="section-footer">
+    <div class="footer-banner" style="background:#5b7cfa">
+      <span class="footer-emoji">📋</span>
+      <div class="footer-text">
+        <strong>Overzicht in je klas</strong>
+        <span>Gebruik klasmanagement om taken tijdens zelfstandig werk of hoekenwerk en huistaken overzichtelijk op te volgen.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+<div class="no-results" id="proNoResults">Geen tool gevonden. Probeer een andere zoekterm.</div>
+
+<script type="module" src="./ontdek-menu.js?v=2"></script>
+</body>
+</html>

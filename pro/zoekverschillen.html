@@ -92,7 +92,7 @@
               </button>
               <button class="tool-btn" data-tool="tekst" title="Tekst toevoegen" aria-label="Tekst toevoegen"><strong class="text-tool-icon">T</strong></button>
           </div>
-          <div class="tool-setting">
+          <div class="tool-setting" id="line-thickness-setting">
               <label for="dikte">Lijndikte</label>
               <input type="number" id="dikte" value="10" min="1" max="50">
           </div>
@@ -101,11 +101,17 @@
               <div id="color-display"></div>
           </div>
           <div class="tool-setting" id="gum-settings" style="display: none;">
-              <label for="gumvorm">Gomvorm:</label>
+              <label for="gumgrootte">Grootte van de gom</label>
+              <div class="gum-size-row">
+                  <input type="range" id="gumgrootte" value="12" min="4" max="40" step="2">
+                  <output id="gumgrootte-waarde" for="gumgrootte">12</output>
+              </div>
+              <label for="gumvorm">Vorm van de gom</label>
               <select id="gumvorm">
                   <option value="rond">Rond</option>
                   <option value="vierkant">Vierkant</option>
               </select>
+              <p class="group-help">De cirkel of het vierkant op de afbeelding toont vooraf precies wat je wegveegt.</p>
           </div>
           <div id="text-settings" class="text-settings" style="display:none">
               <label for="textOriginal">Tekst links <small>(mag leeg)</small></label><input id="textOriginal" type="text" maxlength="40" placeholder="bv. 6 + 4 = 10">

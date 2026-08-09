@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Kruiswoordpuzzel Generator</title>
+
+    <!-- Styles liggen buiten /pro/ -->
+    <link href="../kruiswoordpuzzel.css" rel="stylesheet"/>
+
+    <!-- voorkom Google-Translate overlay / CSP-consolemelding -->
+    <meta name="google" content="notranslate">
+
+    <!-- Externe lib (zoals origineel) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        .pro-header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background-color: #3f7fbf; padding: 8px 12px; color: #fff;
+            z-index: 1000; height: 48px;
+        }
+        .pro-header .back-link{
+            background:#5a9fd4; color:#fff; border:none; padding:6px 10px;
+            border-radius:6px; font-size:14px; font-weight:600; text-decoration:none;
+            cursor:pointer; display:inline-block; white-space:nowrap;
+            /* float:left;  ← verwijderd: was overbodig en gaf console-waarschuwing */
+        }
+    </style>
+</head>
+<body>
+<div class="pro-banner">
+    <span class="pro-badge">★ PRO</span>
+    <span>Kruiswoordpuzzel Generator — Juf Zisa PRO</span>
+    <a href="app.html">← Terug naar menu</a>
+</div>
+
+<header class="app-header">
+    <div class="app-header-left"><button class="back-btn" onclick="window.location.href='app.html'">← Keuzemenu</button></div>
+    <div class="app-header-center">
+        <h1>Kruiswoordpuzzel Generator</h1>
+        <p>Kies een puzzeltype, vul je woorden in en maak meteen een werkblad.</p>
+    </div>
+    <div class="app-header-right"><button id="terugNaarKeuzeBtn" class="secondary-btn verborgen">← Andere puzzel kiezen</button></div>
+</header>
+
+<div id="keuzescherm">
+    <h2>Kies het type puzzel dat je wilt maken</h2>
+    <div class="puzzel-opties">
+        <div class="puzzel-keuze" id="kies-klassiek">
+            <img src="../start_afbeeldingen/kruiswoordpuzzel1.png" alt="Klassieke Kruiswoordpuzzel">
+            <div class="puzzel-keuze-inhoud"><p>Klassieke kruiswoordpuzzel</p><span>Woorden kruisen horizontaal en verticaal.</span></div>
+        </div>
+        <div class="puzzel-keuze" id="kies-verborgenwoord">
+            <img src="../start_afbeeldingen/kruiswoordpuzzel2.png" alt="Verborgen Woord Puzzel">
+            <div class="puzzel-keuze-inhoud"><p>Verborgen woord</p><span>Ontdek het geheime woord met omschrijvingen.</span></div>
+        </div>
+    </div>
+</div>
+
+<div id="generator-klassiek" class="generator-container verborgen">
+    <div id="klassiek-keuzescherm">
+        <h3>Hoe wil je de woorden invoeren?</h3>
+        <div class="sub-keuze-opties">
+            <button id="kies-simpel-modus" class="sub-keuze-knop">Simpel (alle woorden in één vak)</button>
+            <button id="kies-omschrijving-modus" class="sub-keuze-knop">Uitgebreid (woord met omschrijving apart)</button>
+        </div>
+    </div>
+
+    <div id="klassiek-werkruimte" class="verborgen">
+        <div id="main-content">
+            <div id="left-panel">
+                <div id="klassiek-simpel-invoer" class="invoer-modus verborgen">
+                    <div class="control-group">
+                        <label for="woordenInput">Woorden en omschrijvingen:</label>
+                        <textarea id="woordenInput" rows="12" placeholder="Typ hier je woord en als je een omschrijving wil zet je een ; achter het woord en geef je de omschrijving. Elk woord op een nieuwe regel"></textarea>
+                        <div id="woordAantalMelding" style="font-size: 0.9em; color: #555; margin-top: 5px;"></div>
+                    </div>
+                </div>
+                <div id="klassiek-omschrijving-invoer" class="invoer-modus verborgen">
+                    <div class="control-group">
+                        <label for="aantalWoordenInput">Hoeveel woorden wil je invoeren?</label>
+                        <input type="number" id="aantalWoordenInput" min="2" max="50" value="5">
+                        <button id="genereerWoordVeldenBtn">Maak invulvelden</button>
+                    </div>
+                    <hr>
+                    <div id="klassiekWoordenContainer"></div>
+                </div>
+                <div id="meldingContainer" style="color: #d9534f; margin-top: 10px; font-weight: bold; min-height: 40px;"></div>
+                <button id="genereerBtn">Genereer Kruiswoordpuzzel</button>
+            </div>
+
+            <div id="center-panel">
+                <div id="right-panel">
+                    <canvas id="mainCanvas" width="512" height="512"></canvas>
+                </div>
+                <div id="clues-container">
+                    <div id="horizontal-clues" class="clue-box">
+                        <h2>Horizontaal</h2>
+                        <ul id="horizontal-clues-list"></ul>
+                    </div>
+                    <div id="vertical-clues" class="clue-box">
+                        <h2>Verticaal</h2>
+                        <ul id="vertical-clues-list"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="right-panel-buttons">
+                <div class="control-group">
+                    <button id="downloadPngBtn">Download als PNG</button>
+                    <button id="downloadPdfBtn">Download als PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="generator-verborgenwoord" class="generator-container verborgen">
+    <div class="vw-container">
+        <div class="vw-setup-paneel">
+            <h2>Stap 1: Voer het verborgen woord in</h2>
+            <input type="text" id="verborgenWoordInput" placeholder="bv. ZOMERVAKANTIE">
+            <button id="vwStartBtn">Start met invullen</button>
+            <hr>
+            <h2>Stap 2: Vul de omschrijvingen en antwoorden in</h2>
+            <div id="vwAntwoordenContainer"></div>
+            <div id="vwGeneratorKnoppen" class="verborgen">
+                <hr>
+                <h2>Stap 3: Genereer je werkblad</h2>
+                <button id="vwGenereerWerkbladBtn">Maak Werkblad voor Leerling</button>
+                <button id="vwGenereerOplossingBtn">Maak Oplossingsblad</button>
+            </div>
+        </div>
+        <div class="vw-output-paneel">
+            <div id="vwWerkbladContainer" class="vw-print-area">
+                <div class="vw-placeholder">
+                    <p>Vul links de gegevens in om een werkblad te genereren.</p>
+                </div>
+            </div>
+            <div id="vw-export-knoppen" class="verborgen">
+                <button id="vwDownloadPngBtn">Download als PNG</button>
+                <button id="vwDownloadPdfBtn">Download als PDF</button>
+                <button id="vwPrintBtn">🖨️ Afdrukken</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SCRIPT-ORDE: device-id.js → guard.js → paginacode ===== -->
+
+<!-- 1) Stabiele device-id (localStorage + cookie) -->
+<script src="../kruiswoordpuzzel.js"></script>
+<script>window.ONTDEK_TAAL={toolId:'kruiswoordpuzzel',previewSelectors:['#werkbladContainer','#vwWerkbladContainer'],pageSelector:'#werkbladContainer,#vwWerkbladContainer',pdfSelectors:['#downloadPdfBtn','#vwDownloadPdfBtn'],proSelectors:['#downloadPngBtn','#vwDownloadPngBtn','#vwPrintBtn','#vwGenereerOplossingBtn']};</script><script type="module" src="taal-ontdek.js"></script>
+</body>
+</html>

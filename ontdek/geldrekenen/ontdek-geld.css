@@ -1,0 +1,17 @@
+.ontdek-uitleg { width:min(100%,1120px);box-sizing:border-box;margin:0 auto 10px;padding:10px 18px;background:#fff8df;border:1px solid #efd98d;border-radius:12px;color:#5b4915;font:700 13px/1.45 Arial,sans-serif;text-align:center; }
+.ontdek-uitleg a { color:#174b80; font-weight:900; }
+.ontdek-werkbalk { position:sticky; top:46px; z-index:500; display:flex; flex-wrap:wrap; align-items:center; gap:8px; width:min(100%, 1120px); box-sizing:border-box; margin:0 auto 16px; padding:10px 12px; background:#f4f8fc; border:1px solid #d6e3ef; border-radius:12px; box-shadow:0 5px 16px rgba(26,58,92,.10); }
+.ontdek-pagina-status, .ontdek-download-status { display:inline-flex; align-items:center; padding:8px 11px; border-radius:9px; font-size:12px; font-weight:900; }
+.ontdek-pagina-status { border:1px solid #2f6fb1; background:#eef4fa; color:#174b80; }
+.ontdek-pagina-status[data-status="goed"] { background:#e6f7ed; color:#176b3a; }
+.ontdek-pagina-status[data-status="teveel"] { background:#fff0f0; color:#a82929; }
+.ontdek-download-status { min-height:38px;box-sizing:border-box;border:1px solid #efd98d;background:#fff8df;color:#5b4915;box-shadow:0 2px 7px rgba(91,73,21,.08); }
+.ontdek-download-status::before { content:"🔐";margin-right:7px;font-size:14px; }
+.ontdek-werkbalk .print-btn,.ontdek-werkbalk .download-btn { width:auto; min-height:38px; margin:0; padding:8px 14px; border-radius:9px; font:800 12px/1.2 'Nunito',Arial,sans-serif; }
+.ontdek-werkbalk .download-btn { margin-left:auto; background:#174b80; border-color:#174b80; color:#fff; }
+.ontdek-werkbalk .download-btn:hover { background:#123e6b; }
+.ontdek-werkbalk .print-btn { background:#fff; border:1px solid #b9cce0; color:#174b80; }
+#werkblad { position:relative; isolation:isolate; }
+#werkblad::after { content:""; position:absolute; inset:0; z-index:2147483646; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='190' viewBox='0 0 360 190'%3E%3Cg transform='translate(180 95) rotate(-24)'%3E%3Ctext x='0' y='0' text-anchor='middle' dominant-baseline='middle' fill='%238b3773' fill-opacity='.22' font-family='Arial,sans-serif' font-size='35' font-weight='900' letter-spacing='4'%3EONTDEK%3C/text%3E%3Ctext x='0' y='35' text-anchor='middle' fill='%238b3773' fill-opacity='.18' font-family='Arial,sans-serif' font-size='13' font-weight='700'%3Evoorbeeldweergave%3C/text%3E%3C/g%3E%3C/svg%3E"); background-repeat:repeat; background-size:300px 158px; pointer-events:none; }
+.ontdek-pro-slot { position:relative; opacity:1; cursor:not-allowed !important; }
+.ontdek-pro-slot::after { content:"PRO"; margin-left:7px; padding:2px 7px; border-radius:999px; background:#ffd45c; color:#493500; font-size:10px; font-weight:900; }

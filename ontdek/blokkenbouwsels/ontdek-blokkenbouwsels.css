@@ -1,0 +1,4 @@
+body{display:block;overflow-x:hidden}
+.ontdek-trial-bar,.pro-header{margin-left:300px;width:calc(100% - 300px);box-sizing:border-box}
+#preview{margin-left:300px;width:calc(100% - 300px);box-sizing:border-box}
+@media(max-width:800px){.ontdek-trial-bar,.pro-header{margin-left:0;width:100%}#dashboard{position:relative;width:100%;height:auto}#preview{margin-left:0;width:100%;padding:12px}}

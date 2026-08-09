@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Werkblad Cijferen — Juf Zisa Ontdek</title>
+  <style>html,body{margin:0;height:100%;overflow:hidden;background:#f7f4ee}iframe{display:block;width:100%;height:100%;border:0}</style>
+</head>
+<body>
+  <iframe id="cijferApp" title="Werkblad Cijferen Ontdek"></iframe>
+  <script>
+    const lokaal=['localhost','127.0.0.1'].includes(location.hostname);
+    const frame=document.getElementById('cijferApp');
+    const parameters=new URLSearchParams({discoverTool:'cijferen'});
+    if(lokaal)parameters.set('guard','off');
+    frame.src='./rekenbundel/index.html?'+parameters.toString();
+    frame.addEventListener('load',()=>{
+      try{
+        const w=frame.contentWindow,d=w.document;
+        const stijl=d.createElement('style');
+        stijl.textContent=`
+          .sidebar-tabs .sidebar-tab:not(.tab-cijferen),.tabs-scroll-hint,#tab-hoofdrekenen,
+          .sidebar-content:not(#tab-cijferen),header .badge,#helpBtn{display:none!important}
+          .sidebar-tabs{display:block;padding:0;border:0}.sidebar-tab.tab-cijferen{display:block;width:100%;max-width:none;border-radius:10px;background:#174a73!important;color:#fff!important;text-align:left;padding:12px 16px;font-weight:800}
+          #tab-cijferen{display:block!important}#tab-cijferen>.sectie-titel{font-size:0}#tab-cijferen>.sectie-titel:after{content:'Maak je werkblad stap voor stap';font-size:15px}
+          #tab-cijferen .config-kaart:first-of-type .radio-groep{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+          #tab-cijferen .config-kaart:first-of-type .radio-chip{justify-content:center;text-align:center;min-height:45px}
+          #tab-cijferen .config-kaart:first-of-type{position:sticky;top:0;z-index:25;box-shadow:0 7px 18px rgba(11,48,96,.14)}
+          .preview-toolbar .bundel-teller{display:none}.btn-toevoegen{background:#14804a!important}
+          @media(max-width:800px){#tab-cijferen .config-kaart:first-of-type .radio-groep{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        `;
+        d.head.appendChild(stijl);
+        d.title='Werkblad Cijferen — Juf Zisa Ontdek';
+        d.querySelector('.tab-cijferen')?.click();
+        const logo=d.querySelector('header .logo');if(logo)logo.innerHTML='🧮 Werkblad <span>Cijferen</span>';
+        const sub=d.querySelector('header .subtitle');if(sub)sub.textContent='— maak, bekijk en download';
+        const banner=d.querySelector('.pro-banner span:nth-child(2)');if(banner)banner.textContent='Werkblad Cijferen — Juf Zisa Ontdek';
+        const toolbar=d.querySelector('.toolbar-titel');if(toolbar)toolbar.textContent='📄 Werkblad preview';
+        d.querySelectorAll('a[href="../app.html"]').forEach(link=>{
+          link.href='/ontdek/app.html';
+          link.target='_top';
+          link.addEventListener('click',event=>{
+            event.preventDefault();
+            window.location.href='/ontdek/app.html';
+          });
+        });
+        const toevoegen=d.querySelector('#tab-cijferen .btn-toevoegen');
+        if(toevoegen){toevoegen.textContent='▶ Voeg werkblad toe aan preview';toevoegen.onclick=()=>{w.App.voegCijferenBlokToe();w.App.genereerPreview();};}
+        const preview=d.getElementById('btn-genereer');if(preview)preview.textContent='↻ Nieuwe oefeningen';
+      }catch(fout){console.error('Cijferweergave kon niet worden ingericht.',fout);}
+    });
+  </script>
+</body>
+</html>

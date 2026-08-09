@@ -56,7 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectionToolsDiv = document.getElementById('selection-tools');
     const dikteInput = document.getElementById('dikte');
     const gumvormSelect = document.getElementById('gumvorm');
+    const gumgrootteInput = document.getElementById('gumgrootte');
+    const gumgrootteWaarde = document.getElementById('gumgrootte-waarde');
     const gumSettingsDiv = document.getElementById('gum-settings');
+    const lineThicknessSetting = document.getElementById('line-thickness-setting');
     const colorDisplay = document.getElementById('color-display');
 
     // Modal
@@ -137,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentTool = btn.dataset.tool;
             showToolExplanation(currentTool);
             gumSettingsDiv.style.display = (currentTool === 'gum') ? 'flex' : 'none';
+            lineThicknessSetting.style.display = (currentTool === 'gum') ? 'none' : 'flex';
             textSettings.style.display = (currentTool === 'tekst') ? 'grid' : 'none';
             canvasVerschillen.style.cursor = getCursorForTool(currentTool);
         });
@@ -184,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ['de-zee','De zee',['onderwaterwereld','aan-de-kust']], ['sport','Sport',['sportdag','sporthal']]
     ];
     const toolInfo = {
-        potlood:{name:'Potlood',text:'Teken vrij op de rechterafbeelding.'}, gum:{name:'Gum',text:'Wis een deel van de rechterafbeelding.'},
+        potlood:{name:'Potlood',text:'Teken vrij op de rechterafbeelding.'}, gum:{name:'Gum',text:'Kies een kleine of grote gom. De omtrek op de afbeelding toont precies wat wordt weggeveegd.'},
         select:{name:'Selecteren',text:'Sleep een kader rond een onderdeel dat je wilt kopiëren of verplaatsen.'}, lijn:{name:'Lijn',text:'Trek een rechte lijn in de rechterafbeelding.'},
         cirkel:{name:'Cirkel',text:'Sleep om een cirkel of ovaal te tekenen.'}, rechthoek:{name:'Rechthoek',text:'Sleep om een rechthoek te tekenen.'},
         pipet:{name:'Kleur kiezen',text:'Klik in de afbeelding om exact die kleur over te nemen.'}, opvulemmer:{name:'Opvullen',text:'Klik in een vlak om het met de gekozen kleur te vullen.'},
@@ -201,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (info) toolExplanation.innerHTML = `<strong>${info.name}</strong><span>${info.text}</span>`;
     }
 
-    const automaticThemes = new Set(['naar-school','herfst','sinterklaas','kerst','pasen','lente','carnaval','winter','zomer','valentijn','dieren','voertuigen','prehistorie','oudheid','middeleeuwen','vroegmoderne-tijd','moderne-tijd','hedendaagse-tijd','ruimte','de-zee','sport']);
+    const automaticThemes = new Set(['naar-school','herfst','sinterklaas','kerst','pasen','lente','carnaval','winter','zomer','valentijn','dieren','ruimte','de-zee']);
     function renderCatalog(activeSlug) {
         catalogThemes.innerHTML = catalog.map(([slug,label]) => `<button class="catalog-theme ${slug===activeSlug?'active':''}" data-theme="${slug}">${label}</button>`).join('');
         const [,label,images] = catalog.find(item => item[0] === activeSlug);
@@ -407,7 +411,14 @@ document.addEventListener('DOMContentLoaded', () => {
         switch (tool) {
             case 'potlood': return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath fill='black' stroke='white' stroke-width='1.5' d='M26.75 5.25L22.75 1.25C22.5 1 22.25 1 22 1.25L19 4.25L23.75 9L26.75 6C27 5.75 27 5.5 26.75 5.25Z'/%3E%3Cpath fill='black' stroke='white' stroke-width='1' d='M18.25 5L3.25 20C3 20.25 3 20.5 3.25 20.75L7.25 24.75C7.5 25 7.75 25 8 24.75L23 9.75L18.25 5Z'/%3E%3Cpath fill='rgba(0,0,0,0.5)' d='M3.25 20L8 24.75L7.25 21.5L3.25 20Z'/%3E%3C/svg%3E") 4 24, auto`;
             case 'cirkel': case 'rechthoek': case 'lijn': return 'crosshair';
-            case 'gum': return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Ccircle cx='9' cy='9' r='7' fill='none' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E") 9 9, auto`;
+            case 'gum': {
+                const size = Math.max(4, Math.min(40, Number(gumgrootteInput.value) || 12));
+                const outer = size - 2;
+                const shape = gumvormSelect.value === 'vierkant'
+                    ? `%3Crect x='1' y='1' width='${outer}' height='${outer}' fill='none' stroke='white' stroke-width='3'/%3E%3Crect x='1' y='1' width='${outer}' height='${outer}' fill='none' stroke='%230b3b59' stroke-width='1.5'/%3E`
+                    : `%3Ccircle cx='${size / 2}' cy='${size / 2}' r='${Math.max(1, size / 2 - 1)}' fill='none' stroke='white' stroke-width='3'/%3E%3Ccircle cx='${size / 2}' cy='${size / 2}' r='${Math.max(1, size / 2 - 1)}' fill='none' stroke='%230b3b59' stroke-width='1.5'/%3E`;
+                return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'%3E${shape}%3C/svg%3E") ${size / 2} ${size / 2}, crosshair`;
+            }
             case 'pipet': case 'opvulemmer': return 'crosshair';
             default: return 'default';
         }
@@ -727,7 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function draw(x, y) { ctxVerschillen.beginPath(); ctxVerschillen.moveTo(startX, startY); ctxVerschillen.lineTo(x, y); ctxVerschillen.stroke(); }
 
     function erase(x, y) {
-        const size = parseFloat(dikteInput.value);
+        const size = parseFloat(gumgrootteInput.value);
         const halfSize = size / 2;
         const shape = gumvormSelect.value;
         ctxVerschillen.save();
@@ -888,6 +899,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.original && state.different) { ctxOrigineel.putImageData(state.original, 0, 0); ctxVerschillen.putImageData(state.different, 0, 0); }
         else { ctxVerschillen.putImageData(state, 0, 0); }
     }
+
+    function updateGumPreview() {
+        gumgrootteWaarde.value = gumgrootteInput.value;
+        if (currentTool === 'gum') canvasVerschillen.style.cursor = getCursorForTool('gum');
+    }
+    gumgrootteInput.addEventListener('input', updateGumPreview);
+    gumvormSelect.addEventListener('change', updateGumPreview);
 
     function doUndo() {
         transformableObject = null; transformAction = 'none';

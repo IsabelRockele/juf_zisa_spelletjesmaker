@@ -1,0 +1,123 @@
+import { getApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+import { startOntdekAuth } from '../ontdek-auth.js';
+
+let currentUser = null;
+let currentTrial = null;
+
+function statusTekst(pro = false) {
+  if (pro) return 'PRO actief · onbeperkt downloaden';
+  if (currentUser && currentTrial) {
+    const gebruikt = Number(currentTrial.byTool?.rekendriehoek || 0);
+    const over = Math.max(0, Number(currentTrial.toolLimit || 3) - gebruikt);
+    return `${currentTrial.totalRemaining} van ${currentTrial.totalLimit} downloads over · ${over} voor Rekendriehoek`;
+  }
+  return 'Gratis account nodig voor een PDF zonder watermerk';
+}
+
+startOntdekAuth({
+  onState: ({ user, pro, trial }) => {
+    currentUser = user;
+    currentTrial = trial;
+    document.querySelectorAll('.ontdek-download-status').forEach(el => { el.textContent = statusTekst(pro); });
+  }
+});
+
+function foutmelding(error) {
+  const raw = String(error?.message || error?.details || '');
+  if (raw.includes('PAGE_LIMIT')) return 'Deze PDF telt meer dan 3 pagina’s. Kies minder driehoeken of PRO zonder paginalimiet.';
+  if (raw.includes('TOOL_LIMIT')) return 'Je 3 gratis PDF-downloads voor Rekendriehoek zijn opgebruikt. Je kunt blijven maken en bekijken.';
+  if (raw.includes('TOTAL_LIMIT')) return 'Je 15 gratis Ontdek-downloads zijn opgebruikt. Je kunt blijven maken en bekijken.';
+  return 'De gratis download kon niet worden gecontroleerd. Probeer het straks opnieuw.';
+}
+
+async function authorizeDownload(pages) {
+  if (!currentUser) {
+    window.openOntdekAuth?.('registreren');
+    const error = new Error('Maak eerst je gratis account. Daarna kun je de PDF zonder watermerk downloaden.');
+    error.code = 'ONTDEK_LOGIN';
+    throw error;
+  }
+  const app = getApps().length ? getApp() : null;
+  if (!app) throw new Error('De accountverbinding is nog niet klaar.');
+  try {
+    const reserve = httpsCallable(getFunctions(app, 'europe-west1'), 'reserveDiscoverDownload');
+    const result = (await reserve({ toolId: 'rekendriehoek', pages })).data;
+    currentTrial = result;
+    document.querySelectorAll('.ontdek-download-status').forEach(el => { el.textContent = statusTekst(Boolean(result.pro)); });
+    return result;
+  } catch (error) {
+    const wrapped = new Error(foutmelding(error));
+    wrapped.code = 'ONTDEK_LIMIT';
+    throw wrapped;
+  }
+}
+
+window.OntdekTrial = { authorizeDownload, get status() { return currentTrial; } };
+
+function blokkeer(id, tekst) {
+  const knop = document.getElementById(id);
+  if (!knop) return;
+  knop.classList.add('ontdek-pro-slot');
+  knop.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    alert(tekst);
+  }, true);
+}
+
+function start() {
+  const uitleg = document.createElement('div');
+  uitleg.className = 'ontdek-uitleg';
+  uitleg.innerHTML = '<strong>Ontdek-versie.</strong> Maak alle soorten rekendriehoeken vrij in de preview. Je kunt 3 werkblad-PDF’s zonder watermerk downloaden, met maximaal 3 pagina’s per PDF. Oplossingen zijn PRO. <a href="https://demo.jufzisa.be/#zg-prijzen" target="_blank" rel="noopener">Bekijk en koop PRO</a>';
+  document.body.insertAdjacentElement('afterbegin', uitleg);
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'ontdek-werkbalk';
+  const paginaStatus = document.createElement('span');
+  paginaStatus.className = 'ontdek-pagina-status';
+  paginaStatus.textContent = 'PDF-pagina’s berekenen…';
+  const downloadStatus = document.createElement('span');
+  downloadStatus.className = 'ontdek-download-status';
+  downloadStatus.textContent = statusTekst(false);
+  toolbar.append(paginaStatus, downloadStatus);
+  ['toonOplossing', 'downloadPdfOplBtn', 'downloadPdfBtn'].forEach(id => {
+    const knop = document.getElementById(id);
+    if (knop) toolbar.appendChild(knop);
+  });
+  document.querySelector('.app-header')?.insertAdjacentElement('afterend', toolbar);
+
+  blokkeer('toonOplossing', 'Oplossingen bekijken is beschikbaar in PRO. In Ontdek kun je alle rekendriehoeken samenstellen en bekijken.');
+  blokkeer('downloadPdfOplBtn', 'De PDF-sleutel met oplossingen is beschikbaar in PRO.');
+
+  let volgnummer = 0;
+  async function tel(event) {
+    const data = event?.detail || window.RekendriehoekOntdekData;
+    if (!data || !window.RekendriehoekPdfEngine) return;
+    const nummer = ++volgnummer;
+    paginaStatus.dataset.status = '';
+    paginaStatus.textContent = 'PDF-pagina’s berekenen… · Ontdek max. 3 · PRO onbeperkt';
+    const download = document.getElementById('downloadPdfBtn');
+    if (download) download.disabled = true;
+    try {
+      const result = await window.RekendriehoekPdfEngine.genereer(data.driehoeken, { ...data.opties, countOnly: true });
+      if (nummer !== volgnummer) return;
+      const pages = Number(result?.pages || 0);
+      const toegestaan = pages > 0 && pages <= 3;
+      paginaStatus.dataset.status = toegestaan ? 'goed' : 'teveel';
+      paginaStatus.textContent = toegestaan
+        ? `${pages} van maximaal 3 pagina${pages === 1 ? '' : '’s'} · download mogelijk · PRO onbeperkt`
+        : `${pages} pagina’s · download niet mogelijk in Ontdek · PRO onbeperkt`;
+      if (download) download.disabled = !toegestaan;
+    } catch {
+      paginaStatus.dataset.status = 'teveel';
+      paginaStatus.textContent = 'Paginatelling mislukt · wijzig een instelling om opnieuw te proberen';
+    }
+  }
+
+  document.addEventListener('rekendriehoek:updated', tel);
+  tel();
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+else start();

@@ -1,0 +1,1 @@
+document.addEventListener('DOMContentLoaded',()=>{const balk=document.createElement('div');balk.className='ontdek-mab-balk';balk.innerHTML='<span><strong>Ontdek:</strong> volledige smartboardwerking · QR en leerlinglink zijn PRO</span><a href="https://demo.jufzisa.be/#zg-prijzen" target="_blank" rel="noopener">Bekijk PRO</a>';document.body.appendChild(balk);});

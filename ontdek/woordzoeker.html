@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google" content="notranslate">
+  <title>Woordzoeker Generator — Zisa PRO</title>
+  <link href="../woordzoeker.css" rel="stylesheet">
+  <link href="../woordzoeker-pairs.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="pro-tool">
+  <header class="tool-header">
+    <button id="menuBtn" onclick="window.location.href='app.html'">← Keuzemenu</button>
+    <div><span class="pro-badge">PRO</span><h1>Woordzoeker Generator</h1><p>Maak een duidelijke woordzoeker met je eigen woorden of woordparen.</p></div>
+  </header>
+  <main id="main-content">
+    <aside id="left-panel">
+      <div class="step-card">
+        <div class="step-title"><span>1</span><div><strong>Wat wil je maken?</strong><small>Kies eerst het soort woordrooster.</small></div></div>
+        <div class="puzzle-mode-tabs" role="tablist" aria-label="Kies het soort woordrooster">
+          <button type="button" class="puzzle-mode-tab" data-mode="single" role="tab" aria-selected="false">Gewone woordzoeker</button>
+          <button type="button" class="puzzle-mode-tab" data-mode="pairs" role="tab" aria-selected="false">Woordparen</button>
+          <button type="button" class="puzzle-mode-tab" data-mode="message" role="tab" aria-selected="false">Geheime boodschap</button>
+        </div>
+        <select id="taalMode" hidden aria-hidden="true"><option value="" selected>Kies een woordrooster</option><option value="single">Gewone woordzoeker — één woordenlijst</option><option value="pairs">Woordparen — werken met woorden en hints</option><option value="message">Geheime boodschap — lees de overgebleven letters</option></select>
+        <div id="modeExplanation" class="mode-explanation" hidden></div>
+        <div id="singleInputGroup" hidden><p class="pair-own-words"><strong>Vul hier je eigen woorden in.</strong> De lichte woorden in het vak zijn alleen voorbeelden.</p><label for="woordenInput">Woorden — één per regel</label><textarea id="woordenInput" rows="9" placeholder="boekentas&#10;brooddoos&#10;klas&#10;lijm&#10;potlood&#10;school"></textarea><div id="woordAantalMelding" class="input-feedback">Voer 6 tot 20 woorden in.</div></div>
+        <div id="messageInputGroup" hidden>
+          <div class="message-mode-note"><strong>Deze puzzel vraagt wat denk- en probeerwerk.</strong><p>Alle vakjes die niet bij een zoekwoord horen, moeten samen exact je geheime boodschap vormen. Daarom moeten het aantal woorden en hun woordlengtes precies bij het rooster passen.</p><p>Het programma zegt exact hoeveel woordletters je tekortkomt of te veel hebt. <b>Te weinig?</b> Voeg woorden toe of kies langere woorden. <b>Te veel?</b> Verwijder een woord of kies kortere woorden.</p><p><b>De aangevinkte richtingen zijn toegestaan, niet gegarandeerd.</b> Een richting zoals diagonaal wordt alleen gebruikt wanneer daarmee een geldige plaatsing lukt.</p></div>
+          <label for="geheimeBoodschap">Geheime boodschap</label><input id="geheimeBoodschap" type="text" maxlength="80" placeholder="Bijvoorbeeld: JIJ BENT EEN KANJER"><p class="field-help">Spaties en leestekens tellen niet mee als roostervakje.</p>
+          <div id="messageWordsGroup" hidden><p class="pair-own-words"><strong>Vul nu de zoekwoorden voor dit rooster in.</strong> Deze lijst staat los van de gewone woordzoeker.</p><label for="messageWordsInput">Zoekwoorden — één per regel</label><textarea id="messageWordsInput" rows="9" placeholder="regenboog&#10;vriend&#10;spelen&#10;school&#10;boek&#10;potlood"></textarea><div id="messageWoordAantalMelding" class="input-feedback">Voer 6 tot 20 woorden in.</div><div id="boodschapPasMelding" class="input-feedback">Voer woorden in om de passendheid te berekenen.</div></div>
+        </div>
+        <div id="pairInputGroup" hidden><p class="pair-own-words"><strong>Vul hier je eigen woorden in.</strong> De lichte tekst in de vakken is alleen een voorbeeld.</p><div class="pair-column-headings"><span>Woord</span><span>Omschrijving of vertaling</span></div><div id="pairRowsContainer" class="pair-rows"></div><button type="button" id="addPairRowBtn" class="add-pair-button">＋ Nog een woordpaar</button><p class="field-help">Ieder kader vormt één woordpaar. Vul beide vakken in.</p><div id="paarAantalMelding" class="input-feedback">Voer 6 tot 20 woordparen in.</div><fieldset class="pair-placement"><legend>Wat wil je waar tonen?</legend><label><input type="radio" name="pairPuzzleSide" value="linksInPuzzel" checked><span><b>Woorden in het rooster</b><small>Omschrijvingen of vertalingen staan onderaan</small></span></label><label><input type="radio" name="pairPuzzleSide" value="rechtsInPuzzel"><span><b>Omschrijvingen of vertalingen in het rooster</b><small>De woorden staan onderaan als hint</small></span></label></fieldset></div>
+      </div>
+      <div class="step-card workflow-dependent" hidden>
+        <div class="step-title"><span>2</span><div><strong>Werkblad</strong><small>Titel en opdracht</small></div></div>
+        <label for="werkbladTitel">Titel</label><input id="werkbladTitel" type="text" value="Woordzoeker" maxlength="55">
+        <label for="opdrachtzin">Opdrachtzin</label><input id="opdrachtzin" type="text" value="Zoek alle woorden in het letterrooster." maxlength="110">
+        <label for="lijstTitelType">Titel boven de woordenlijst</label>
+        <select id="lijstTitelType"><option value="default" selected>Woorden om te vinden</option><option value="vertaling">Zoek de vertaling</option><option value="synoniem">Zoek het synoniem</option><option value="tegenstelling">Zoek de tegenstelling</option><option value="rijmwoord">Zoek het rijmwoord</option><option value="custom">Eigen titel…</option></select>
+        <input type="text" id="customLijstTitel" placeholder="Typ je eigen titel" hidden>
+      </div>
+      <div class="step-card workflow-dependent" hidden>
+        <div class="step-title"><span>3</span><div><strong>Moeilijkheid</strong><small>Raster en zoekrichtingen</small></div></div>
+        <label for="rasterFormaat">Rasterformaat</label><select id="rasterFormaat"><option value="auto">Automatisch aanbevolen</option><option value="6x6">6 × 6</option><option value="8x8">8 × 8</option><option value="10x10">10 × 10</option><option value="12x12">12 × 12</option><option value="15x15">15 × 15</option><option value="20x20">20 × 20</option><option value="25x25">25 × 25</option></select>
+        <fieldset class="direction-choice"><legend>Woorden mogen staan</legend><label><input type="checkbox" name="richting" value="horizontaal" checked><span>→ Horizontaal</span></label><label><input type="checkbox" name="richting" value="verticaal" checked><span>↓ Verticaal</span></label><label><input type="checkbox" name="richting" value="diagonaal" checked><span>↘ Diagonaal</span></label></fieldset>
+        <div class="solution-color-field"><div><label for="solutionColor">Kleur van de oplossing</label><small>Kies een rustige of opvallende markeerkleur.</small></div><input id="solutionColor" type="color" value="#f5c542" aria-label="Kleur van de oplossingslijnen"></div>
+      </div>
+      <div id="meldingContainer" role="status"></div><button id="genereerBtn" class="primary-action workflow-dependent" hidden>▶ Maak mijn woordzoeker</button>
+    </aside>
+    <section class="preview-panel">
+      <div class="preview-toolbar"><div><span class="eyebrow">Live voorbeeld</span><strong>Zo ziet het werkblad eruit</strong></div><div class="toolbar-actions"><button id="toonOplossingBtn">👁 Toon oplossing</button><button id="downloadPngBtn">PNG</button><button id="downloadPdfBtn" class="download">↓ PDF werkblad</button><button id="downloadSolutionPdfBtn" class="solution-download">↓ PDF oplossing</button></div></div>
+      <div class="preview-stage"><article id="worksheet-preview" class="worksheet-sheet preview-empty"><div class="worksheet-identity"><span>Naam: <i></i></span><span>Datum: <i></i></span></div><h2 id="previewTitel">Woordzoeker</h2><p id="previewOpdracht" class="worksheet-instruction">Zoek alle woorden in het letterrooster.</p><div id="right-panel"><canvas id="mainCanvas" width="720" height="720"></canvas></div><div id="woordenLijstContainer"><h3 id="woordenLijstTitel">Woorden om te vinden</h3><div id="woordenLijst"></div></div><div id="messageAnswerArea" class="message-answer-area" hidden><h3>Overgebleven boodschap</h3><div id="messageLetterBoxes" class="message-letter-boxes"></div><div class="message-writing-line"><span>Schrijf de boodschap:</span><i></i></div></div><div class="empty-message"><strong>Je woordzoeker verschijnt hier.</strong><span>Kies links eerst wat je wilt maken.</span></div></article></div>
+    </section>
+  </main>
+  <script src="../woordzoeker.js"></script><script>window.ONTDEK_TAAL={toolId:'woordzoeker',previewSelectors:['#werkbladPreview'],pageSelector:'#werkbladPreview',pdfSelectors:['#downloadPdfBtn'],proSelectors:['#toonOplossingBtn','#downloadPngBtn','#downloadSolutionPdfBtn']};</script><script type="module" src="taal-ontdek.js"></script>
+</body>
+</html>

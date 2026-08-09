@@ -1,0 +1,3743 @@
+/* ══════════════════════════════════════════════════════════════
+   style.css — Rekenbundel Generator
+   Verantwoordelijkheid: ENKEL visuele opmaak
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── RESET & BASIS ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { height: 100%; }
+
+:root {
+  --blauw:      #1A3A5C;
+  --lichtblauw: #4A90D9;
+  --accent:     #c4c22c;
+  --groen:      #27AE60;
+  --rood:       #E74C3C;
+  --bg:         #F4F6FB;
+  --wit:        #FFFFFF;
+  --border:     #D8E2F0;
+  --tekst:      #2C3E50;
+  --muted:      #7F8C9A;
+  --sidebar-w:  380px;
+  --header-h:   64px;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--tekst);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ────────────────────────────────────────────────── */
+header {
+  height: var(--header-h);
+  background: #f4deee;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,.12);
+}
+
+header .logo {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1a3a5c;
+  letter-spacing: -.5px;
+}
+
+header .logo span {
+  color: var(--accent);
+}
+
+header .subtitle {
+  font-size: 13px;
+  color: rgba(18, 45, 73, 0.7);
+  margin-left: 4px;
+}
+
+header .spacer {
+  flex: 1;
+}
+
+header .badge {
+  background: #1a3a5c;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: .5px;
+}
+
+/* ── MAIN LAYOUT ───────────────────────────────────────────── */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* ── SIDEBAR ───────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--wit);
+  border-right: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.sidebar-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 2px solid var(--border);
+  background: #ffffff;
+  scrollbar-gutter: stable;
+}
+
+.sidebar-tabs::-webkit-scrollbar {
+  height: 14px;
+}
+
+.sidebar-tabs::-webkit-scrollbar-track {
+  background: #eaf2fb;
+}
+
+.sidebar-tabs::-webkit-scrollbar-thumb {
+  background: #be66b5;
+  border-radius: 999px;
+}
+
+.sidebar-tabs::-webkit-scrollbar-thumb:hover {
+  background: #be66b5;
+}
+
+.sidebar-tab {
+  flex: 0 0 auto;
+  min-width: 120px;
+  padding: 12px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  color: var(--muted);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all .2s;
+  white-space: normal;
+}
+.sidebar-tab.active {
+  color: var(--lichtblauw);
+  border-bottom-color: var(--lichtblauw);
+  background: var(--wit);
+}
+.tabs-scroll-btn{
+  margin-left:8px;
+  padding:2px 8px;
+  border:none;
+  background:#be66b5;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.tabs-scroll-btn:hover{
+  background:#be66b5;
+}
+/* --- NIEUWE STIJL VOOR DE TABBLADEN --- */
+
+/* Basis instelling voor alle tabs zodat de transitie vloeiend is */
+.sidebar-tab {
+  transition: all 0.2s ease;
+  border-bottom: 4px solid transparent;
+  opacity: 1 !important;
+  font-size: 13px;
+  padding: 14px 8px;
+}
+
+/* 1. Optellen (Blauw) */
+.sidebar-tab.tab-optellen { background-color: #A2D2FF; color: #1A3A5C; }
+.sidebar-tab.tab-optellen:hover { background-color: #8ECAFF; }
+.sidebar-tab.tab-optellen.active { 
+  background-color: #96c3f3 !important; 
+  color: #ffffff;
+  border-bottom-color: #1A3A5C !important;
+  font-weight: 800;
+}
+
+/* 2. Aftrekken (Rood/Roze) */
+.sidebar-tab.tab-aftrekken { background-color: #FFB3B3; color: #1A3A5C; }
+.sidebar-tab.tab-aftrekken:hover { background-color: #FF9999; }
+.sidebar-tab.tab-aftrekken.active { 
+  background-color: #E74C3C !important; 
+  color: #ffffff;
+  border-bottom-color: #B71C1C !important;
+  font-weight: 800;
+}
+
+/* 3. Herken Brug (Geel/Oranje) */
+.sidebar-tab.tab-gemengd { background-color: #FFD0A0; color: #1A3A5C; }
+.sidebar-tab.tab-gemengd:hover { background-color: #FFC080; }
+.sidebar-tab.tab-gemengd.active {
+  background-color: #FF8C00;
+  color: #fff;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.15);
+}
+
+.sidebar-tab.tab-komma { background-color: #d4edda; color: #1A3A5C; }
+.sidebar-tab.tab-komma:hover { background-color: #b8dfc2; }
+.sidebar-tab.tab-komma.active {
+  background-color: #28a745;
+  color: #fff;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.15);
+}
+
+.sidebar-tab.tab-brug { background-color: #ffe595; color: #1A3A5C; }
+.sidebar-tab.tab-brug:hover { background-color: #fcde7e; }
+.sidebar-tab.tab-brug.active { 
+  background-color: #ecdc5f !important; 
+  color: #ffffff;
+  border-bottom-color: #E67E22 !important;
+  font-weight: 800;
+}
+
+/* 4. Splitsen (Groen) */
+.sidebar-tab.tab-splits { background-color: #A5D6A7; color: #1A3A5C; }
+.sidebar-tab.tab-splits:hover { background-color: #60b064; }
+.sidebar-tab.tab-splits.active { 
+  background-color: #27AE60 !important; 
+  color: #ffffff;
+  border-bottom-color: #1B5E20 !important;
+  font-weight: 800;
+}
+.sidebar-tab.tab-tafels { background-color: #E1BEE7; color: #1A3A5C; }
+.sidebar-tab.tab-tafels:hover { background-color: #CE93D8; }
+.sidebar-tab.tab-tafels.active { 
+  background-color: #9733b3 !important; 
+  color: #ffffff;
+  border-bottom-color: #4A148C !important;
+  font-weight: 800;
+}
+.tab-cijferen {
+  background: #f4e8fb;
+  color: #1A3A5C;
+}
+
+.tab-cijferen:hover {
+  background: #ead7f6;
+  color: #fcfcf8;
+  font-weight: 800;
+}
+
+.tab-cijferen.active {
+  background: #8e44ad;
+  color: #ffffff;
+  border-bottom-color: #8e44ad;
+}
+.sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
+
+/* ── BUNDEL INFO ───────────────────────────────────────────── */
+.bundel-info {
+  background: linear-gradient(135deg, #EBF3FB 0%, #F8FAFD 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.bundel-info label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+}
+.bundel-info input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--tekst);
+  background: var(--wit);
+  outline: none;
+  transition: border-color .2s;
+  margin-bottom: 12px;
+}
+.bundel-info input:focus { border-color: var(--lichtblauw); }
+.bundel-info input:last-child { margin-bottom: 0; }
+
+/* ── SECTIETITEL ───────────────────────────────────────────── */
+.sectie-titel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── CONFIGURATIE KAART ────────────────────────────────────── */
+.config-kaart {
+  background: var(--wit);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.config-kaart .kaart-titel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blauw);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.config-kaart .kaart-titel .icon {
+  width: 28px; height: 28px;
+  background: var(--blauw);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* ── FORM ELEMENTEN ────────────────────────────────────────── */
+.form-rij { margin-bottom: 12px; }
+.form-rij label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 5px;
+}
+.form-rij select,
+.form-rij input[type="number"],
+.form-rij input[type="text"] {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--tekst);
+  background: var(--wit);
+  outline: none;
+  transition: border-color .2s;
+  appearance: none;
+}
+.form-rij select:focus,
+.form-rij input:focus { border-color: var(--lichtblauw); }
+
+/* Checkbox chips */
+.checkbox-groep { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
+.checkbox-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  background: #ffffff;
+  transition: all .2s;
+  user-select: none;
+}
+.checkbox-chip input { display: none; }
+.checkbox-chip.geselecteerd { border-color: var(--lichtblauw); background: #EBF3FB; color: var(--lichtblauw); }
+
+/* Vink chips (voor oefeningstypes) */
+.vink-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  background: #ffffff;
+  transition: all .2s;
+  user-select: none;
+}
+.vink-chip.geselecteerd {
+  border-color: var(--lichtblauw);
+  background: #EBF3FB;
+  color: var(--blauw);
+}
+.vink-box {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  background: var(--wit);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--lichtblauw);
+  flex-shrink: 0;
+  transition: all .2s;
+}
+.vink-chip.geselecteerd .vink-box {
+  border-color: var(--lichtblauw);
+  background: var(--lichtblauw);
+  color: var(--wit);
+}
+
+/* Radio chips */
+.radio-groep { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 4px; }
+.radio-chip {
+  padding: 5px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  background: #ffffff;
+  transition: all .2s;
+  user-select: none;
+}
+.radio-chip input { display: none; }
+.radio-chip.geselecteerd { border-color: var(--lichtblauw); background: #EBF3FB; color: var(--lichtblauw); }
+.radio-chip.radio-chip-binnenkort {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-style: dashed;
+  color: var(--muted);
+}
+
+/* ── KNOPPEN ───────────────────────────────────────────────── */
+.btn-toevoegen {
+  width: 100%;
+  padding: 12px;
+  background: var(--lichtblauw);
+  color: var(--wit);
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all .2s;
+  margin-top: 4px;
+}
+.btn-toevoegen:hover { background: var(--blauw); transform: translateY(-1px); }
+
+.btn-genereer {
+  padding: 9px 20px;
+  background: var(--groen);
+  color: var(--wit);
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all .2s;
+}
+.btn-genereer:hover { background: #219A52; }
+.btn-genereer:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn-pdf {
+  padding: 9px 20px;
+  background: var(--rood);
+  color: var(--wit);
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all .2s;
+}
+.btn-pdf:hover { background: #C0392B; }
+.btn-pdf:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── PREVIEW ZONE ──────────────────────────────────────────── */
+.preview-zone { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--wit);
+  border-bottom: 2px solid var(--border);
+  gap: 12px;
+  flex-shrink: 0;
+}
+.preview-toolbar .toolbar-titel { font-size: 14px; font-weight: 700; color: var(--blauw); flex: 1; }
+.preview-toolbar .bundel-teller {
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--bg);
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.preview-inhoud { flex: 1; overflow-y: scroll; padding: 24px; min-height: 0; display: block; }
+.preview-blok { margin-bottom: 16px; }
+
+/* Herken-brug oefening */
+.oefening-herken {
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 6px 10px 12px;
+  gap: 6px;
+}
+.lamp-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.lamp-kader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--blauw);
+  border-radius: 6px;
+  padding: 4px;
+  background: var(--wit);
+}
+
+/* Ingekleurd bij oplossing: brugoefening */
+.lamp-brug-oplossing {
+  background: #c6efce !important;
+  border-color: #27ae60 !important;
+}
+
+/* Getallenlijn zelf: boogjes verborgen tot oplossing getoond - opacity via JS */
+.gl-boog-oplossing {
+  /* opacity geregeld via setAttribute in toggle */
+}
+.zisa-lamp {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.9;
+}
+.oefening-herken .oef-tekst {
+  width: 100%;
+  text-align: center;
+}
+.oefening-herken .antwoord-vak {
+  width: 44px;
+  align-self: center;
+}
+
+/* ── LEGE STATE ────────────────────────────────────────────── */
+.leeg-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
+  text-align: center;
+  padding: 60px 40px;
+  min-height: 300px;
+}
+.leeg-state .leeg-icon { font-size: 56px; opacity: .3; }
+.leeg-state .leeg-titel { font-size: 18px; font-weight: 700; color: var(--blauw); opacity: .4; }
+.leeg-state .leeg-tekst { font-size: 14px; max-width: 300px; line-height: 1.6; }
+
+/* ── PREVIEW BLOK KAART ────────────────────────────────────── */
+.preview-blok {
+  background: var(--wit);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.preview-blok-header {
+  background: linear-gradient(135deg, var(--blauw) 0%, #2A5298 100%);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.preview-blok-header .blok-type-badge {
+  background: rgba(255,255,255,.2);
+  color: var(--wit);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  letter-spacing: .4px;
+}
+.preview-blok-header .blok-niveau { color: var(--accent); font-size: 12px; font-weight: 700; }
+.preview-blok-header .spacer { flex: 1; }
+.preview-blok-header .blok-acties { display: flex; gap: 6px; }
+
+.btn-blok-actie {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.btn-blok-actie.verwijder { background: rgba(231,76,60,.8); color: var(--wit); }
+.btn-blok-actie.verwijder:hover { background: var(--rood); }
+
+.preview-blok-body { padding: 16px; }
+
+.opdrachtzin-wrapper { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.opdrachtzin-tekst { font-size: 14px; font-weight: 600; color: var(--blauw); flex: 1; }
+.opdrachtzin-input {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blauw);
+  border: 1.5px solid var(--lichtblauw);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-family: inherit;
+  outline: none;
+}
+.btn-bewerk-zin {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--muted);
+  transition: color .15s;
+  padding: 2px;
+}
+.btn-bewerk-zin:hover { color: var(--lichtblauw); }
+
+/* Oefeningen grid */
+.oefeningen-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.oefeningen-grid.aanvullen-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.oefeningen-grid.aanvullen-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.oefening-item {
+  background: #ffffff;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 10px 10px 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tekst);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  position: relative;
+  min-height: 52px;
+}
+/* Som-inhoud links bijeenhouden, delete-knop rechts */
+.oefening-item .som-inhoud {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.oefening-item .antwoord-vak {
+  display: inline-block;
+  width: 44px;
+  height: 28px;
+  border: 1.5px solid var(--blauw);
+  border-radius: 8px;
+  background: var(--wit);
+  margin-left: 1px;
+  flex-shrink: 0;
+}
+.oefening-item .btn-del-oef {
+  opacity: 0;
+  background: var(--rood);
+  color: var(--wit);
+  border: none;
+  border-radius: 4px;
+  width: 18px; height: 18px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity .15s;
+  flex-shrink: 0;
+}
+.oefening-item:hover .btn-del-oef { opacity: 1; }
+
+.preview-blok-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FAFBFD;
+}
+.footer-info { font-size: 12px; color: var(--muted); }
+.btn-add-oef {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lichtblauw);
+  background: #EBF3FB;
+  border: 1px solid #C3DAFA;
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-add-oef:hover { background: var(--lichtblauw); color: var(--wit); }
+
+/* ── SCROLLBAR ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #B0C4D8; }
+
+/* ── TOAST ─────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--blauw);
+  color: var(--wit);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,.2);
+  transition: transform .3s ease;
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.zichtbaar { transform: translateX(-50%) translateY(0); }
+
+/* ── Hulpmiddelen layout ─────────────────────────────────────── */
+.oefeningen-grid.hulp-grid {
+  grid-template-columns: repeat(2, minmax(0, 280px));
+  gap: 12px;
+}
+.oefening-hulp {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding: 10px 10px 18px 10px;
+  background: #ffffff;
+  position: relative;
+  min-height: 128px;
+  /* Kader past zich automatisch aan schrijflijnen aan */
+  height: auto;
+}
+
+/* Groter kader bij 3 schrijflijnen */
+.oefening-hulp .hulp-schrijflijnen:has(.schrijflijn:nth-child(3)) {
+  margin-bottom: 6px;
+}
+.oefening-hulp.aftrektal-hulp { padding-left: 30px; }
+.oefening-hulp.aftrektal-hulp.aftrektal-hulp-groot { padding-left: 54px; }
+
+.hulp-som-rij {
+  display: flex; align-items: center; white-space: nowrap;
+  position: relative;
+}
+.hulp-rechts { display: none; }  /* antwoordvak nu inline in som-rij */
+.hulp-splits-rij {
+  padding-top: 2px;
+  position: relative;
+}
+.splitsbeen-anker {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.splitsbeen-boom {
+  width: 48px; height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='16'%3E%3Cpolyline points='4,16 24,2 44,16' fill='none' stroke='%231a3a5c' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 48px 16px;
+}
+.splitsbeen-boom.splitsbeen-3 {
+  width: 72px; height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='16'%3E%3Cline x1='36' y1='2' x2='6' y2='16' stroke='%231a3a5c' stroke-width='2'/%3E%3Cline x1='36' y1='2' x2='36' y2='16' stroke='%231a3a5c' stroke-width='2'/%3E%3Cline x1='36' y1='2' x2='66' y2='16' stroke='%231a3a5c' stroke-width='2'/%3E%3C/svg%3E");
+  background-size: 72px 16px;
+}
+.splitsbeen-vakjes { display: flex; gap: 8px; margin-top: 4px; }
+.splits-vak {
+  width: 26px; height: 22px;
+  border: 1.5px solid var(--blauw);
+  border-radius: 4px; background: white;
+}
+/* Bredere vakjes voor getallen tot 10.000 */
+.splits-vak-groot {
+  width: 30px; height: 22px;
+  border: 1.5px solid var(--blauw);
+  border-radius: 4px; background: white;
+}
+.splitsbeen-boom-groot {
+  width: 72px; height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='16'%3E%3Cpolyline points='4,16 36,2 68,16' fill='none' stroke='%231a3a5c' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 72px 16px;
+}
+.hulp-schrijflijnen {
+  position: absolute;
+  left: 128px;
+  right: 14px;
+  top: 54px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+}
+
+/* Bij 3 schrijflijnen: kader moet groter */
+.oefening-hulp:has(.schrijflijn:nth-child(3)) {
+  min-height: 168px !important;
+  padding-bottom: 24px !important;
+}
+.oefening-hulp.niveau-10000 .hulp-schrijflijnen {
+  left: 158px;
+}
+
+.hulp-schrijflijnen .schrijflijn {
+  height: 0;
+  width: 100%;
+  border-bottom: 1.5px solid #B0C4D8;
+  margin-bottom: 12px;
+}
+.oefening-hulp .btn-del-oef {
+  position: absolute !important;
+  top: 6px; right: 6px;
+}
+.splits-doel { display: inline; }
+.hulp-schrijflijnen-inline { display: none; }
+
+/* ── Aanvullen algemeen ───────────────────────────────────── */
+.oefening-aanvullen {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 28px 12px 10px;
+  min-height: 80px;
+}
+.aanvullen-rij {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.invulhokje {
+  display: inline-block;
+  width: 36px;
+  height: 26px;
+  border: 1.5px solid var(--blauw);
+  border-radius: 6px;
+  background: white;
+  flex-shrink: 0;
+}
+
+/* ── Aanvullen zonder schema ──────────────────────────────── */
+.aanvullen-zonder .aanvullen-rij + .aanvullen-rij {
+  margin-top: 4px;
+}
+
+/* ── Aanvullen met schema ─────────────────────────────────── */
+.aanvullen-schema {
+  align-items: center;
+}
+.aanvullen-tabel {
+  display: flex;
+  flex-direction: column;
+  width: 120px;
+  border: 1.5px solid var(--blauw);
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 700;
+}
+.aanvullen-groot {
+  background: #D6EAF8;
+  text-align: center;
+  padding: 5px 0;
+  border-bottom: 1.5px solid var(--blauw);
+}
+.aanvullen-rij-onder {
+  display: flex;
+}
+.aanvullen-klein {
+  flex: 3;
+  background: #D5F5E3;
+  text-align: center;
+  padding: 5px 0;
+  border-right: 1.5px solid var(--blauw);
+}
+.aanvullen-vraag {
+  flex: 1;
+  background: #FDFEFE;
+  text-align: center;
+  padding: 5px 0;
+  color: #999;
+}
+
+/* ── Aanvullen met schijfjes ──────────────────────────────── */
+.aanvullen-schijfjes { gap: 6px; }
+.aanvullen-sommen { display: flex; flex-direction: column; gap: 6px; }
+
+/* Tabel: T-kolom | E-kolom met gekleurde headers */
+.schijfjes-tabel {
+  display: flex;
+  border: 1.5px solid #aaa;
+  border-radius: 6px;
+  overflow: hidden;
+  width: fit-content;
+}
+.schijfjes-kolom {
+  display: flex;
+  flex-direction: column;
+  min-width: 72px;
+}
+.schijfjes-kolom-d {
+  min-width: 60px;
+}
+.schijfjes-kolom + .schijfjes-kolom {
+  border-left: 1.5px solid #aaa;
+}
+.schijfjes-kop {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 0;
+  border-bottom: 1.5px solid #aaa;
+}
+.schijfjes-kop-d {
+  background: #E74C3C;
+  color: #fff;
+}
+.schijfjes-kop-h {
+  background: #85C1E9;
+  color: #1A3A6B;
+}
+.schijfjes-kop-t {
+  background: #52BE80;
+  color: #0B5A2A;
+}
+.schijfjes-kop-e {
+  background: #F9CA3F;
+  color: #6B4F00;
+}
+.schijfjes-rij {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 6px 5px;
+}
+.schijfje {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+}
+.schijfje-d {
+  background: #E74C3C;
+  border: 1.5px solid #922B21;
+  color: #fff;
+}
+.schijfje-h {
+  background: #5DADE2;
+  border: 1.5px solid #1A5276;
+  color: #0A2A5C;
+}
+.schijfje-t {
+  background: #27AE60;
+  border: 1.5px solid #0B5A2A;
+  color: #072A13;
+}
+.schijfje-e {
+  background: #F4D03F;
+  border: 1.5px solid #9A7D0A;
+  color: #6B4F00;
+}
+.schijfje-leeg {
+  background: white;
+  border: 1.5px dashed #BDC3C7;
+}
+
+/* Extra lege schijfjes onderaan voor aanvullen inkleuren */
+.schijfje-aanvul {
+  background: #fafcff;
+  border: 1.5px dashed #d8e4ef;
+  opacity: 0.55;
+}
+
+/* ══════════════════════════════════════════════════════
+   COMPENSEREN
+   ══════════════════════════════════════════════════════ */
+
+.oefeningen-grid.comp-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+/* Oefening: flex row — comp-grid links, schrijflijnen rechts */
+.oefening-comp {
+  display: flex !important;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 28px 14px 10px;
+  position: relative;
+}
+.oefening-comp.comp-voorbeeld {
+  background: #FFF3CD !important;
+  border-color: #F0A500 !important;
+}
+
+/* Hoofdgrid: 4 kolommen × 3 rijen
+   kol1=prefix  kol2=kring  kol3=suffix  kol4=antwoordvak
+   rij1: som tekst
+   rij2: leeg   pijl        leeg         leeg
+   rij3: blokje (span kol1-3)            leeg             */
+.comp-grid {
+  display: inline-grid;
+  grid-template-columns: auto auto auto auto;
+  grid-template-rows: auto auto auto;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 600;
+  row-gap: 2px;
+  column-gap: 0;
+  align-items: center;
+}
+
+/* Rij 1 */
+.cg-pre  { grid-column: 1; grid-row: 1; }
+.cg-k    { grid-column: 2; grid-row: 1; display: flex; align-items: center; }
+.cg-suf  { grid-column: 3; grid-row: 1; }
+.cg-av   { grid-column: 4; grid-row: 1; padding-left: 6px; display: flex; align-items: center; }
+
+/* Rij 2: pijl — grid-column 2 = altijd exact onder kring */
+.cg-pijl {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--tekst);
+}
+
+/* Rij 3: blokje — kol 1-3, links uitgelijnd */
+.cg-blok {
+  grid-column: 1 / 4;
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+}
+
+.comp-kring {
+  display: inline-block;
+  border: 2px solid var(--tekst);
+  border-radius: 50%;
+  padding: 0 4px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.comp-blokje {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: 2px solid var(--primair);
+  border-radius: 6px;
+  padding: 2px 8px;
+  background: #EAF4FB;
+  white-space: nowrap;
+}
+.comp-blokje-teken { font-size: 12px; font-weight: 700; color: var(--primair); }
+.comp-blokje-getal { font-size: 12px; font-weight: 700; color: var(--tekst); }
+.comp-blokje-hokje {
+  display: inline-block; width: 20px; height: 16px;
+  border: 1.5px solid var(--primair); border-radius: 3px; background: white;
+}
+.comp-blokje-hokje-breed { width: 34px; }
+
+/* Schrijflijnen rechts */
+.comp-schrijf {
+  display: flex; flex-direction: column; flex: 1;
+  padding-top: 40px; min-width: 70px;
+}
+.comp-schrijflijn {
+  display: flex; flex-direction: column; justify-content: flex-end;
+  height: 26px; border-bottom: 1.5px solid #B0C4D8; margin-bottom: 8px;
+}
+.comp-schrijf-tekst { font-size: 11px; color: #444; padding-bottom: 2px; }
+
+.antwoord-ingevuld {
+  background: #F0A500 !important; color: white !important;
+  border-color: #cc8800 !important; display: inline-flex !important;
+  align-items: center !important; justify-content: center !important;
+  font-weight: 700 !important;
+}
+.oefening-comp .btn-del-oef { position: absolute !important; top: 6px; right: 6px; }
+/* ══════════════════════════════════════════════════════════
+   SPLITSINGEN — preview stijlen
+══════════════════════════════════════════════════════════ */
+
+/* Grid: 4 per rij voor klein splitshuis */
+.splits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px 10px;
+  align-items: start;
+}
+
+/* Basis override */
+.oefening-splits {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 8px 28px;
+  min-height: 90px;
+}
+
+/* ─────────────────────────────────────────
+   KLEIN SPLITSHUIS
+   Visueel huisje: driehoekig dak + 2 kamers
+───────────────────────────────────────── */
+.splitshuis-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* DAK: driehoek via clip-path + inhoud gecentreerd */
+.sh-dak {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sh-dak-driehoek {
+  width: 0;
+  height: 0;
+  border-left: 44px solid transparent;
+  border-right: 44px solid transparent;
+  border-bottom: 34px solid #4A90D9;
+  position: relative;
+}
+
+.sh-dak-driehoek::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: -38px;
+  width: 0;
+  height: 0;
+  border-left: 38px solid transparent;
+  border-right: 38px solid transparent;
+  border-bottom: 28px solid #EAF4FB;
+}
+
+.sh-dak-inhoud {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -20%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* MUUR: rechthoek met 2 kamers en scheidingswand */
+.sh-muur {
+  width: 88px;
+  border: 2px solid #4A90D9;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  background: white;
+  display: flex;
+  align-items: stretch;
+  min-height: 38px;
+}
+
+.sh-kamer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px;
+}
+
+.sh-scheidingswand {
+  width: 2px;
+  background: #4A90D9;
+  flex-shrink: 0;
+}
+
+/* Getallen in het huis */
+.sh-dak-getal {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1A3A5C;
+  line-height: 1;
+}
+
+.sh-kamer-getal {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A3A5C;
+  line-height: 1;
+}
+
+/* Invulvakjes */
+.sh-vakje {
+  display: inline-block;
+  border: 1.5px solid #1A3A5C;
+  border-radius: 3px;
+  background: #fff;
+}
+
+.sh-vakje-dak {
+  width: 28px;
+  height: 20px;
+}
+
+.sh-vakje-kamer {
+  width: 28px;
+  height: 22px;
+}
+
+/* ─────────────────────────────────────────
+   SPLITSBEEN — omgekeerde V
+───────────────────────────────────────── */
+.oefening-splitsbeen {
+  padding: 6px 8px 28px;
+}
+
+.splitsbeen-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 0;
+}
+
+/* Bovenaan: getal of vakje */
+.sb-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+/* De V-vorm via SVG */
+.sb-v-svg {
+  width: 64px;
+  height: 22px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Onderaan: twee vakjes naast elkaar */
+.sb-onder {
+  display: flex;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.sb-cel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+}
+
+/* Gedeelde stijlen getal / vakje */
+/* Alle getallen in een hokje — gegeven getallen én invulhokjes */
+.sb-hokje {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 26px;
+  border: 1.2px solid #1A3A5C;
+  border-radius: 3px;
+  background: white;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A3A5C;
+}
+
+/* ─────────────────────────────────────────
+   GROOT SPLITSHUIS
+───────────────────────────────────────── */
+/* Grid: 4 per rij, align top zodat verschillende hoogtes niet overlappen */
+.splits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px 10px;
+  align-items: start;  /* crucciaal: elk huis start bovenaan, geen overlap */
+}
+
+.oefening-grootsplitshuis {
+  padding: 6px 8px 28px;
+}
+
+/* Muur met meerdere verdiepen */
+.sh-muur-groot {
+  display: flex;
+  flex-direction: column;
+  width: 88px;
+}
+
+.sh-muur-rij {
+  display: flex;
+  align-items: stretch;
+  min-height: 30px;
+  border-bottom: 1px solid #B0C8E8;
+}
+
+.sh-muur-rij:last-child {
+  border-bottom: none;
+}
+
+/* ─────────────────────────────────────────
+   SPLITSBEEN + BEWERKINGEN
+───────────────────────────────────────── */
+/* Grid: 3 per rij voor dit type */
+.splits-grid:has(.oefening-sbw) {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.oefening-sbw {
+  padding: 4px 6px 28px;
+}
+
+/* Kader rond de hele oefening */
+.sbw-kader {
+  border: 2px solid #4A90D9;
+  border-radius: 8px;
+  padding: 10px 10px 8px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Splitsbeen iets compacter in kader */
+.sbw-been {
+  padding-bottom: 0;
+}
+
+/* Bewerkingen sectie */
+.sbw-bewerkingen {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 6px;
+  border-top: 1px solid #D0E4F5;
+}
+
+.sbw-bewerking {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  justify-content: center;
+}
+
+.sbw-vak {
+  display: inline-block;
+  width: 28px;
+  height: 20px;
+  border-bottom: 1.5px solid #1A3A5C;
+  flex-shrink: 0;
+}
+
+.sbw-op, .sbw-is {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A3A5C;
+  flex-shrink: 0;
+  padding-bottom: 1px;
+}
+
+/* ─────────────────────────────────────────
+   PUNTOEFENING
+───────────────────────────────────────── */
+/* Grid: 4 per rij */
+.splits-grid:has(.oefening-punt),
+.punt-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.oefening-punt {
+  padding: 8px 6px 12px;
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #1A3A5C;
+  border-radius: 6px;
+  min-height: 48px;
+}
+
+.punt-rij {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  width: 100%;
+  justify-content: center;
+}
+
+.punt-getal {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A3A5C;
+  padding-bottom: 2px;
+}
+
+.punt-teken {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A3A5C;
+  padding-bottom: 2px;
+}
+
+.punt-lijn {
+  display: inline-block;
+  width: 30px;
+  border-bottom: 1.5px solid #1A3A5C;
+  margin-bottom: 3px;
+}
+
+/* ── Tafels grid ────────────────────────────────────────────── */
+.tafels-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 12px;
+  padding: 8px 0;
+}
+
+.tafel-oef {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  min-height: 38px;
+}
+
+.tafel-oef:hover { background: #eef2f7; }
+
+.tafel-som {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1A3A5C;
+}
+
+.tafel-term {
+  min-width: 18px;
+  text-align: center;
+}
+
+.tafel-op {
+  color: #E67E22;
+  font-size: 16px;
+}
+
+.tafel-is {
+  color: #666;
+}
+
+.tafel-vak {
+  display: inline-block;
+  width: 32px;
+  height: 28px;
+  border: 2px solid #1A3A5C;
+  border-radius: 4px;
+  background: #fff;
+  vertical-align: middle;
+}
+
+/* ── Tafels inzicht tab ──────────────────────────────────────── */
+.sidebar-tab.tab-tafels-inzicht { background-color: #FFCCBC; color: #1A3A5C; }
+.sidebar-tab.tab-tafels-inzicht:hover { background-color: #FFAB91; }
+.sidebar-tab.tab-tafels-inzicht.active {
+  background-color: #ed7551 !important;
+  color: #ffffff;
+  border-bottom-color: #BF360C !important;
+  font-weight: 800;
+}
+
+.sidebar-tab.tab-tafels-getallenlijn { background-color: #B2EBF2; color: #1A3A5C; }
+.sidebar-tab.tab-tafels-getallenlijn:hover { background-color: #80DEEA; }
+.sidebar-tab.tab-tafels-getallenlijn.active {
+  background-color: #00838F !important;
+  color: #ffffff;
+  border-bottom-color: #006064 !important;
+  font-weight: 800;
+}
+
+/* ── Inzicht grid: 1 oefening per rij ────────────────────────── */
+.inzicht-grid,
+.inzicht-grid-1 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.inzicht-oef {
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+}
+.inzicht-oef:hover { border-color: #E64A19; }
+
+/* Links/rechts binnen oefening */
+.inzicht-inner {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  align-items: center;
+}
+
+.inzicht-links {
+  flex: 0 0 35%;
+  border-right: 1px solid #eee;
+  padding-right: 12px;
+}
+
+.inzicht-rechts {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Groepjes */
+.inzicht-groepjes-wrap { display: flex; flex-direction: column; gap: 5px; }
+.inzicht-groepjes-rij  { display: flex; flex-direction: row; gap: 5px; }
+
+.inzicht-vakje {
+  border: 2px solid #E64A19;
+  border-radius: 7px;
+  padding: 4px;
+  display: grid;
+  gap: 2px;
+  background: #ffffff;
+}
+/* Aantal kolommen gezet via inline style door JS */
+
+.inzicht-emoji { font-size: 20px; line-height: 1; }
+.inzicht-emoji-rijbreak { display: none; } /* niet nodig meer met grid */
+
+/* Formule-rijen */
+.inzicht-optel-rij {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  gap: 2px;
+}
+
+.inzicht-tekst-rij {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  flex-wrap: nowrap;
+}
+
+/* Invullijntjes */
+.inzicht-lijn {
+  display: inline-block;
+  border-bottom: 1px solid #555;
+  width: 26px;
+  margin-bottom: 2px;
+  flex-shrink: 0;
+}
+.inzicht-lijn.smal  { width: 22px; }
+.inzicht-lijn.breed { width: 32px; }
+
+.inzicht-plus, .inzicht-op {
+  font-size: 15px;
+  font-weight: 700;
+  color: #E64A19;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.inzicht-is {
+  font-size: 15px;
+  font-weight: 700;
+  color: #444;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.inzicht-tekst {
+  font-size: 14px;
+  font-style: italic;
+  color: #555;
+  font-weight: 500;
+  white-space: nowrap;
+  padding-bottom: 2px;
+}
+
+/* Ingevuld getal bij delen-aftrekking (groepGrootte) */
+.inzicht-ingevuld {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1565C0;
+  min-width: 18px;
+  text-align: center;
+  padding-bottom: 2px;
+  flex-shrink: 0;
+}
+
+/* Nul bij het einde van de aftrekrij */
+.inzicht-nul {
+  font-size: 15px;
+  font-weight: 700;
+  color: #444;
+  padding-bottom: 2px;
+  flex-shrink: 0;
+}
+
+/* Min-teken bij herhaalde aftrekking */
+.inzicht-min {
+  font-size: 15px;
+  font-weight: 700;
+  color: #E64A19;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ── Getallenlijn preview ──────────────────────────────────────── */
+.gl-oefening {
+  background: #fff;
+  border: 1px solid #d8d8d8;
+  border-radius: 10px;
+  padding: 14px 16px 12px 16px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+}
+
+.gl-svg-wrapper {
+  overflow-x: auto;
+  margin-bottom: 8px;
+}
+
+.gl-formules {
+  margin-top: 4px;
+}
+
+.gl-zin {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 14px;
+  line-height: 1;
+  flex-wrap: wrap;
+}
+
+.gl-formule-rij {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  margin-bottom: 7px;
+  flex-wrap: wrap;
+}
+
+.gl-lijn {
+  display: inline-block;
+  min-width: 16px;
+  width: 16px;
+  border-bottom: 1.5px solid #777;
+  height: 16px;
+  flex-shrink: 0;
+  text-align: center;
+  line-height: 14px;
+  vertical-align: bottom;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.gl-lijn.kort {
+  min-width: 18px;
+  width: 18px;
+}
+
+.gl-lijn.breed {
+  min-width: 22px;
+  width: auto;
+  padding: 0 3px;
+}
+
+.gl-plus,
+.gl-maal,
+.gl-eq {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1;
+  padding-bottom: 2px;
+}
+
+.gl-getal-vast {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  padding-bottom: 2px;
+  line-height: 1;
+}
+
+/* oude niet-meer-gebruikte opbouw mag blijven bestaan, maar stoort niet */
+.gl-lijn-wrapper,
+.gl-bogen-laag,
+.gl-boog,
+.gl-boog-getal,
+.gl-boog-svg,
+.gl-vakjes-rij,
+.gl-vakje,
+.gl-pijl,
+.gl-grid {
+  all: unset;
+}
+.menu-knop{
+  background:#1a3a5c;
+  color:white;
+  text-decoration:none;
+  padding:8px 14px;
+  border-radius:8px;
+  font-size:14px;
+  margin-right:15px;
+}
+.help-knop{
+  background:#51ad77;
+  color:white;
+  border:none;
+  padding:8px 16px;
+  border-radius:20px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,.2);
+  transition:.2s;
+}
+
+.help-knop:hover{
+  background:#3ab06b;
+  transform:translateY(-1px);
+}
+
+.help-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+}
+
+.help-content{
+  background:white;
+  padding:30px;
+  border-radius:12px;
+  width:420px;
+  max-width:90%;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+.help-content p{
+  margin-bottom:14px;
+}
+.help-content h2{
+  margin-top:0;
+  margin-bottom:16px;
+}
+.sluit-knop{
+  margin-top:20px;
+  background:#27AE60;
+  color:white;
+  border:none;
+  padding:8px 16px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CIJFEREN — preview stijlen
+   ══════════════════════════════════════════════════════════════ */
+
+.cijferen-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px 18px;
+}
+
+.cijferen-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px 18px;
+}
+
+.cij-oefening {
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  padding: 8px 10px 10px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.cij-vraag {
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+/* Schatting: eigen afgerond grijs vak */
+.cij-schatting-vak {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 6px 8px 5px 8px;
+  box-sizing: border-box;
+  margin-bottom: 2px;
+}
+.cij-schat-label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+  white-space: nowrap;
+  line-height: 1;
+  padding-bottom: 2px;
+}
+.cij-schat-lijn {
+  flex: 1;
+  border-bottom: 1.5px solid #aaa;
+  display: inline-block;
+  min-width: 40px;
+  margin-bottom: 1px;
+}
+
+.cij-schema-wrap {
+  position: relative;
+  margin-left: 26px;
+  margin-top: 18px;   /* ruimte voor de pijl die boven de header uitsteekt */
+}
+
+/* Operator naast de g2-rij (direct boven de dikke oplossings-lijn).
+   Rij 0=header(34) + rij1=onthoud(34) + rij2=g1(34) = 102px, dan midden g2-rij = +17px */
+.cij-operator {
+  position: absolute;
+  left: -22px;
+  font-size: 18px;
+  font-weight: bold;
+  top: calc(3 * 34px + 17px);
+  transform: translateY(-50%);
+}
+
+.cij-schema {
+  border-collapse: collapse;
+}
+
+.cij-schema td {
+  width: 34px;
+  height: 34px;
+  border: 2px solid #999;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  vertical-align: bottom;
+  padding-bottom: 3px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.cij-header {
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  vertical-align: middle !important;
+  padding-bottom: 0 !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.cij-duizend { background-color: #e74c3c; color: #fff !important; }
+.cij-honderd { background-color: #2980b9; }
+.cij-tien    { background-color: #27ae60; }
+.cij-een     { background-color: #f1c40f; color: #333 !important; }
+
+.cij-onthoud { vertical-align: middle !important; padding: 4px 2px !important; line-height: 1.3 !important; font-size: 12px; font-weight: bold; text-align: center; }
+.cij-onthoud.cij-duizend { background-color: #f1948a; }
+.cij-onthoud.cij-honderd { background-color: #a9cce3; }
+.cij-onthoud.cij-tien    { background-color: #a3e4d7; }
+.cij-onthoud.cij-een     { background-color: #f9e79f; }
+
+.cij-getal    { background-color: #fdfdfd; }
+
+/* Doorgestreept origineel getal bij aftrekken met lenen */
+/* Doorstreep bij aftrekken met lenen */
+.cij-getal.cij-heeft-doorstreep {
+  text-decoration: line-through;
+  text-decoration-color: #c0392b;
+  text-decoration-thickness: 2px;
+  color: #c0392b !important;
+}
+
+/* Gestapelde onthoud-getallen (twee bruggen) */
+.cij-onth-boven, .cij-onth-onder {
+  display: none;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1.3;
+  color: #006100;
+  text-align: center;
+}
+.cij-onth-boven {
+  font-size: 9px;
+  border-bottom: 1px solid #888;
+}
+.cij-oplossing {
+  background-color: #fff;
+  border-top: 3px solid #000 !important;
+}
+
+/* ── Startpijl: driehoek + kort staaltje ── */
+.cij-startpijl {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  pointer-events: none;
+}
+
+/* staaltje boven de punt — kort */
+.cij-startpijl::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 5px;
+  background-color: #f1c40f;
+  border-radius: 1px 1px 0 0;
+}
+
+/* pijlpunt (driehoek naar beneden) */
+.cij-startpijl::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 9px solid #f1c40f;
+}
+
+@media (max-width: 900px) {
+  .cijferen-grid   { grid-template-columns: repeat(3, 1fr); }
+  .cijferen-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+/* Deler-cel: geen border, tekst rechts van header */
+.deel-deler-cel {
+  border: none !important;
+  background: transparent !important;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  padding-left: 6px;
+  vertical-align: middle;
+  width: auto !important;
+  white-space: nowrap;
+}
+
+.deel-hdr {
+  color: #fff;
+  font-weight: bold;
+  vertical-align: middle !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.deel-T { background-color: #27ae60; }
+.deel-E { background-color: #f1c40f; color: #333 !important; }
+.deel-H { background-color: #2980b9; color: #fff; }
+
+.deel-cel {
+  background-color: #fdfdfd;
+}
+.deel-leeg {
+  background-color: #fdfdfd;
+}
+
+/* Aftrek-rijen: minteken links, dunne bovenlijn */
+.deel-aftrek-rij td {
+  border-top: 2px solid #333 !important;
+}
+.deel-aftrek {
+  position: relative;
+}
+.deel-aftrek::before {
+  content: '−';
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Quotiënt-cellen rood */
+.deel-quot {
+  color: #e74c3c !important;
+  font-size: 15px;
+}
+
+/* Quotiënt-tabel: plakt aan de onderkant van deel-rechts */
+.deel-quot-tabel {
+  margin-left: 4px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STAARTDELING SCHEMA
+   ══════════════════════════════════════════════════════════════ */
+
+.deel-oefening {
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  padding: 10px 12px 12px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.deel-vraag {
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* Schrijflijnen in de vraag (voor deler en antwoord) */
+.deel-lijn-deler,
+.deel-lijn-antw {
+  display: inline-block;
+  border-bottom: 2px solid #333;
+  min-width: 36px;
+  vertical-align: bottom;
+}
+
+/* Schema-wrap: links + rechts naast elkaar, geen gap */
+.deel-schema-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  position: relative;
+}
+
+/* Linkerschema */
+.deel-links {
+  position: relative;
+}
+
+/* Verticale dikke lijn rechts van linkerschema */
+.deel-links::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: #222;
+  z-index: 2;
+}
+
+/* Rechterschema: margin-top = 1 rij (na header only)
+   Schrijflijn staat op hoogte van rij 1 = deeltal, zodat deler naast deeltal geschreven wordt */
+.deel-rechts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: calc(1 * 34px);
+  margin-left: 2px;
+}
+
+/* Schrijflijn = 1 cel hoog, lijn onderaan, deler-waarde rechts uitlijnen */
+.deel-schrijflijn {
+  width: calc(2 * 34px);
+  height: 34px;
+  border-bottom: 1.5px solid #999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding-bottom: 2px;
+  padding-right: 4px;
+  box-sizing: border-box;
+}
+
+.deel-deler-val {
+  font-size: 14px;
+  font-weight: bold;
+  color: #222;
+}
+
+/* Gedeelde tabelstijl */
+.deel-tabel {
+  border-collapse: collapse;
+}
+
+.deel-tabel td {
+  width: 34px;
+  height: 34px;
+  border: 2px solid #bbb;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  vertical-align: middle;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+/* Gekleurde headers */
+.deel-hdr {
+  color: #fff;
+  font-weight: bold;
+  vertical-align: middle !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.deel-T { background-color: #27ae60 !important; }
+.deel-E { background-color: #f1c40f !important; color: #333 !important; }
+.deel-H { background-color: #2980b9 !important; color: #fff !important; }
+
+/* Gewone invulcellen */
+.deel-cel {
+  background-color: #fff;
+  position: relative;
+}
+
+/* Aftrekrijen met dikke bovenlijn (oude styling, behouden voor andere usages) */
+.deel-aftrek-rij td {
+  border-top: 3px solid #222 !important;
+}
+
+/* Nieuwe aftrek-rij: dikke lijn ONDER de rij met het aftrek-getal */
+.deel-aftrek-onder td {
+  border-bottom: 3px solid #222 !important;
+}
+
+/* Dikke bovenlijn per cel (voor compatibiliteit met oudere HTE-rendering) */
+.deel-dikboven {
+  border-top: 3px solid #222 !important;
+}
+
+/* Dalend cijfer: verticale stippellijn boven de cel, blauwgroen.
+   Alleen zichtbaar als de body de klasse .toont-oplossingen heeft
+   (anders moet de leerling zelf de cijfers naar beneden halen). */
+.deel-dalend::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 12px;
+  border-left: 2px dotted #1abc9c;
+  pointer-events: none;
+  z-index: 2;
+  display: none;
+}
+body.toont-oplossingen .deel-dalend::before {
+  display: block;
+}
+
+/* Boogje boven H+T (alleen bij HTE:E scenario B: H < deler) */
+.deel-links {
+  position: relative;
+}
+.deel-boog {
+  position: absolute;
+  top: -8px;
+  height: 6px;
+  border: 2px solid #1abc9c;
+  border-bottom: none;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  pointer-events: none;
+  z-index: 3;
+  display: none;
+}
+body.toont-oplossingen .deel-boog {
+  display: block;
+}
+/* Boogje over H + T (kolom 0 en 1 van 3) — centreer over de eerste twee cellen.
+   Stel in dat cellen ~32px breed zijn (deel-cel heeft typically die breedte).
+   We positioneren de boog boven kolom 0 (links) met breedte = 2 kolommen. */
+.deel-boog-HT {
+  left: 1px;
+  width: calc(2 * var(--deel-cel-w, 32px) - 6px);
+  top: 32px;  /* ongeveer onder de headerrij, boven rij 1 */
+}
+
+/* Minteken: verschijnt net BOVEN de dikke lijn van de aftrekrij */
+.deel-min {
+  position: relative;
+}
+.deel-min::before {
+  content: '−';
+  position: absolute;
+  left: -15px;
+  top: -10px;   /* boven de dikke bovenlijn */
+  font-size: 15px;
+  font-weight: bold;
+  color: #222;
+}
+
+/* Quotiëntcellen rood */
+.deel-rechts .deel-cel {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   KOMMASCHEMA (E,t cijferen)
+   ══════════════════════════════════════════════════════════════ */
+
+/* Smalle kommakolom (grijs) */
+.komma-kolom {
+  width: 10px !important;
+  min-width: 10px !important;
+  max-width: 10px !important;
+  background-color: #e0e0e0 !important;
+  border-color: #bbb !important;
+  font-size: 13px;
+  font-weight: bold;
+  color: #555;
+  text-align: center;
+  vertical-align: middle;
+  padding: 0 !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Kommakolom header */
+.komma-hdr {
+  background-color: #bbb !important;
+  color: #fff !important;
+}
+
+/* Komma-dot in datarijen */
+.komma-dot {
+  font-size: 14px;
+  font-weight: bold;
+  color: #555;
+}
+
+/* t-kolom header (lichtgeel, iets donkerder dan E) */
+.komma-tien {
+  background-color: #e8b400 !important;
+  color: #fff !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Pijltje boven kommaschema */
+.komma-schema thead {
+  position: relative;
+}
+
+/* Onthoud-rij in kommaschema: lichtgrijs, kleiner */
+.komma-onthoud {
+  padding: 4px 2px !important;
+  line-height: 1.3 !important;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  background-color: #e8e8e8 !important;
+  border-color: #ccc !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+/* ══════════════════════════════════════════════════════════════
+   REKENTAAL — stijlen
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Tab kleur: warm paars/aubergine ─────────────────────────── */
+.tab-rekentaal {
+  background: #f3eeff;
+  color: #5b2d8e;
+  border-bottom: 3px solid transparent;
+}
+.tab-rekentaal:hover {
+  background: #e4d4ff;
+  color: #3d1d6e;
+}
+.tab-rekentaal.active {
+  background: #7c3aed !important;
+  color: #fff !important;
+  border-bottom-color: #5b21b6 !important;
+}
+
+/* ── Invulhokje in de preview (op plaats van {?}) ────────────── */
+.rt-invulhokje {
+  display: inline-block;
+  min-width: 26px;
+  height: 14px;
+  border: 1.5px solid #7c3aed;
+  border-radius: 3px;
+  background: #f5f0ff;
+  margin: 0 3px;
+  vertical-align: middle;
+}
+
+/* ── Oefeningen-lijst in de bundel-preview ───────────────────── */
+.rt-oefeningen-lijst {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px 2px;
+}
+
+.rt-oefeningen-lijst {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 2px;
+}
+
+.rt-oef-rij {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  padding: 4px 2px;
+  font-size: 13px;
+  border-bottom: 1px dotted #ddd;
+}
+
+.rt-oef-rij:last-child {
+  border-bottom: none;
+}
+
+.rt-oef-zin {
+  flex: 0 0 auto;
+  color: #1e2d40;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.rt-oef-zin strong {
+  color: #111;
+  font-weight: 700;
+}
+
+.rt-pijl {
+  flex: 0 0 auto;
+  color: #999;
+  font-size: 11px;
+  letter-spacing: -1px;
+}
+
+.rt-oef-lijn {
+  flex: 1;
+  border-bottom: 1.5px solid #333;
+  min-width: 60px;
+  margin: 0 4px;
+  align-self: flex-end;
+  margin-bottom: 2px;
+}
+
+/* ── Categorie-knop ─────────────────────────────────────────── */
+.rt-cat-btn {
+  transition: background 0.15s, color 0.15s;
+}
+.rt-cat-btn.geselecteerd {
+  background: #7c3aed !important;
+  color: #fff !important;
+  border-color: #5b21b6 !important;
+}
+
+/* ── Vink-chip in rekentaal sidebar ─────────────────────────── */
+#tab-rekentaal .vink-chip.geselecteerd {
+  background: #ede9fe;
+  border-color: #7c3aed;
+  color: #3d1d6e;
+}
+
+/* ── Voeg-toe knop in rekentaal ─────────────────────────────── */
+.voeg-toe-knop {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.15s;
+}
+.voeg-toe-knop:hover {
+  background: #5b21b6;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TRANSFORMEREN (optellingswip) — preview stijlen
+   Volgt exact hetzelfde patroon als compenseren
+══════════════════════════════════════════════════════════ */
+
+.oefeningen-grid.trans-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+/* Oefening: flex row — trans-layout links, schrijflijnen rechts */
+.oefening-trans {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 10px 28px 12px 10px;
+  position: relative;
+}
+.oefening-trans.trans-voorbeeld {
+  background: #FFF3CD !important;
+  border-color: #F0A500 !important;
+}
+
+/* ── Schema-balkjes boven de som ── */
+.trans-balk-rij {
+  display: flex;
+  width: 100%;
+  height: 28px;
+  gap: 3px;
+  margin-bottom: 2px;
+}
+.trans-balk-b {
+  background: #b5d4f4;
+  border-radius: 4px;
+  position: relative;
+  flex-shrink: 0;
+  min-width: 20px;
+}
+.trans-balk-g {
+  background: #fde68a;
+  border-radius: 4px;
+  position: relative;
+  flex-shrink: 0;
+  min-width: 10px;
+}
+.trans-balk-num {
+  position: absolute;
+  top: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 600; color: #1e3a8a;
+  overflow: hidden;
+}
+.trans-balk-num-g {
+  position: absolute;
+  top: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 600; color: #78350f;
+  overflow: hidden;
+}
+.trans-balk-schrijf {
+  position: absolute;
+  bottom: 4px; left: 5px; right: 5px;
+  border-bottom: 1px solid rgba(30,58,138,0.3);
+}
+.trans-balk-schrijf-g {
+  position: absolute;
+  bottom: 4px; left: 5px; right: 5px;
+  border-bottom: 1px solid rgba(120,53,15,0.3);
+}
+.trans-balk-inv {
+  position: absolute;
+  bottom: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 700; color: #1e3a8a;
+}
+.trans-balk-inv-g {
+  position: absolute;
+  bottom: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 700; color: #78350f;
+}
+
+/* ── Som-tabel (pijlen + rijen) ──
+   Exact als comp-grid maar dan een tabel-layout
+   kol1=tg(30%)  kol2=+(8%)  kol3=ag(30%)  kol4==(8%)  kol5=antw
+*/
+.trans-tabel {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tekst);
+}
+.trans-tabel td { padding: 0; }
+.trans-td-getal-l {
+  width: 30%; text-align: right;
+  padding-right: 4px; vertical-align: bottom;
+}
+.trans-td-teken {
+  width: 8%; text-align: center;
+  vertical-align: bottom;
+}
+.trans-td-getal-r {
+  width: 30%; text-align: left;
+  padding-left: 4px; vertical-align: bottom;
+}
+.trans-td-is {
+  width: 8%; text-align: center;
+  vertical-align: bottom;
+}
+.trans-td-antw { vertical-align: bottom; }
+
+/* Pijl-rij */
+.trans-td-pijl-l {
+  width: 30%; text-align: right;
+  padding-right: 4px; vertical-align: top;
+  padding-top: 3px;
+}
+.trans-td-pijl-r {
+  width: 30%; text-align: left;
+  padding-left: 4px; vertical-align: top;
+  padding-top: 3px;
+}
+.trans-pijl-cel-l {
+  display: flex; align-items: flex-start;
+  justify-content: flex-end; gap: 3px;
+}
+.trans-pijl-cel-r {
+  display: flex; align-items: flex-start;
+  justify-content: flex-start; gap: 3px;
+}
+.trans-pijl-svg { color: var(--tekst); display: block; }
+
+/* Schrijflijn naast pijl */
+.trans-schrijflijn-pijl {
+  display: inline-block;
+  min-width: 26px;
+  border-bottom: 1.5px solid #B0C4D8;
+  margin-top: 10px;
+  vertical-align: bottom;
+}
+/* Ingevulde waarde naast pijl (voorbeeld) */
+.trans-pijl-waarde {
+  display: inline-block;
+  min-width: 26px;
+  border-bottom: 1.5px solid currentColor;
+  margin-top: 10px;
+  vertical-align: bottom;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+.trans-pijl-waarde.blauw { color: #1d4ed8; }
+.trans-pijl-waarde.geel  { color: #b45309; }
+
+/* Onderste rij: schrijflijnen of ingevuld */
+.trans-tr-onder td { padding-top: 10px; vertical-align: bottom; font-weight: 400; color: var(--muted); }
+.trans-schrijflijn {
+  display: inline-block;
+  min-width: 44px;
+  border-bottom: 1.5px solid #B0C4D8;
+  vertical-align: bottom;
+  padding-top: 8px;
+}
+.trans-ingevuld {
+  display: inline-block;
+  min-width: 44px;
+  border-bottom: 1.5px solid #B0C4D8;
+  vertical-align: bottom;
+  padding-top: 8px;
+  font-weight: 600;
+  color: var(--tekst);
+}
+
+/* Kaal variant */
+.oefening-trans-kaal {
+  padding: 8px 28px 8px 10px;
+}
+.trans-kaal-som {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  font-size: 15px; font-weight: 600;
+  color: var(--tekst);
+}
+.trans-kaal-getal {
+  min-width: 36px; text-align: right;
+  padding-bottom: 3px;
+}
+.trans-kaal-teken { margin: 0 5px; padding-bottom: 3px; }
+.trans-kaal-lijn {
+  display: inline-block;
+  flex: 1;
+  min-width: 120px;
+  border-bottom: 1.5px solid #B0C4D8;
+}
+.trans-kaal-vb {
+  font-size: 14px; font-weight: 600;
+  color: var(--blauw); line-height: 2;
+  padding: 4px 2px;
+}
+.trans-kaal-stap { color: #1d4ed8; }
+
+/* ══════════════════════════════════════════════════════════════
+   SCHATTEN — preview stijlen
+   ══════════════════════════════════════════════════════════════ */
+
+/* Tab kleur: warm oranje */
+.tab-schatten { background-color: #ffe0b2; color: #1A3A5C; }
+.tab-schatten:hover { background-color: #ffcc80; }
+.tab-schatten.active {
+  background-color: #e8780a !important;
+  color: #ffffff;
+  border-bottom-color: #b35a00 !important;
+  font-weight: 800;
+}
+
+/* Schrijflijn generiek */
+.scht-lijn {
+  display: inline-block;
+  border-bottom: 1.5px solid #555;
+  min-width: 44px;
+  height: 18px;
+  margin: 0 2px;
+  vertical-align: bottom;
+  flex-shrink: 0;
+}
+.scht-lijn.smal  { min-width: 32px; }
+.scht-lijn.breed { min-width: 90px; flex: 1; }
+
+/* Bewerkingsteken (+ of -) in schrijfformules */
+.scht-teken { font-size: 14px; font-weight: 700; color: #e8780a; flex-shrink: 0; }
+
+/* Voorbeeld-klassen */
+.scht-vb-blauw  { font-size: 14px; font-weight: 700; color: #2980b9; }
+.scht-vb-oranje { font-size: 15px; font-weight: 800; color: #e8780a; }
+.scht-vb { background: #fff8e8 !important; border-color: #f0a500 !important; }
+
+/* ── Type 1: Afronden ────────────────────────────────────── */
+.schatten-afronden-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.scht-afronden {
+  flex-direction: column !important; align-items: flex-start !important;
+  padding: 10px 28px 10px 10px; gap: 8px; min-height: 80px;
+}
+.scht-af-getal {
+  font-size: 18px; font-weight: 800; color: #1a3a5c;
+  text-align: center; width: 100%; padding-bottom: 5px;
+  border-bottom: 1px solid #dce8f0;
+}
+.scht-af-rijen { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.scht-af-rij   { display: flex; align-items: flex-end; gap: 6px; }
+.scht-af-label { font-size: 13px; color: #555; white-space: nowrap; flex-shrink: 0; padding-bottom: 2px; }
+
+/* ── Type 2: Schatting tabel ─────────────────────────────── */
+.schatten-tabel-grid {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1.5px solid #b0c4d8; border-radius: 8px; overflow: hidden;
+}
+
+/* Header rij boven tabel */
+.scht-tabel-header {
+  display: grid;
+  grid-template-columns: 140px 150px 1fr 80px;
+  background: #c5d8ec;
+  border-bottom: 2px solid #90aac8;
+}
+.scht-hdr-cel {
+  padding: 7px 8px;
+  font-size: 12px; font-weight: 700; color: #1a3a5c;
+  border-right: 1px solid #90aac8;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 2px;
+}
+.scht-hdr-cel:last-child { border-right: none; justify-content: center; }
+
+/* Data rijen */
+.scht-tabel-rij {
+  display: grid !important;
+  grid-template-columns: 140px 150px 1fr 80px;
+  gap: 0; align-items: center;
+  padding: 0 !important; border: none !important;
+  border-bottom: 1px solid #dce8f5 !important;
+  border-radius: 0 !important; min-height: 40px;
+  position: relative;
+}
+.scht-tabel-rij:last-child { border-bottom: none !important; }
+.scht-tabel-rij > div {
+  padding: 8px 8px; border-right: 1px solid #dce8f5;
+  font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; gap: 4px; min-height: 40px;
+  overflow: hidden;
+}
+.scht-tabel-rij > div:last-child { border-right: none; }
+.scht-t-som  { color: #1a3a5c; font-weight: 700; white-space: nowrap; }
+.scht-t-col4 { justify-content: center; }
+/* Verwijder-knop in tabel */
+.scht-tabel-rij .btn-del-oef { position: absolute !important; top: 4px; right: 4px; }
+
+/* ── Type 3: Schatting compact ───────────────────────────── */
+.schatten-compact-grid {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1.5px solid #a8d5a8; border-radius: 8px; overflow: hidden;
+}
+
+/* Header balk boven compact lijst */
+.scht-compact-header {
+  background: #c8e8c8;
+  padding: 7px 12px;
+  font-size: 12px; font-weight: 700; color: #1a5c1a;
+  border-bottom: 2px solid #88c488;
+  text-align: center;
+}
+
+.scht-compact {
+  display: flex !important; flex-direction: row; align-items: center;
+  gap: 12px; padding: 11px 34px 11px 12px !important;
+  border: none !important; border-bottom: 1px solid #c8e8c8 !important;
+  border-radius: 0 !important; min-height: 44px;
+}
+.scht-compact:last-child { border-bottom: none !important; }
+.scht-comp-som   { font-size: 14px; font-weight: 700; color: #1a3a5c; white-space: nowrap; flex-shrink: 0; min-width: 140px; }
+.scht-pijl       { font-size: 15px; color: #666; flex-shrink: 0; }
+.scht-comp-inhoud { display: flex; align-items: center; gap: 4px; flex: 1; flex-wrap: nowrap; }
+
+/* ── Type 4: Mogelijk/niet mogelijk ─────────────────────── */
+.schatten-mogelijk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* Hogere specificiteit via .oefeningen-grid zodat !important van .oefening-item niet wint */
+.schatten-mogelijk-grid .oefening-item.scht-mogelijk {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  padding: 14px 32px 18px 14px !important;
+  gap: 0 !important;
+  border: 2px solid #e8a040 !important;
+  border-radius: 8px !important;
+  min-height: 210px !important;
+  box-sizing: border-box;
+  font-size: 16px !important;
+}
+
+/* Geel vraagkadertje */
+.schatten-mogelijk-grid .scht-mog-vraag {
+  background: #fff8e8 !important;
+  border: 1.5px solid #f0c050 !important;
+  border-radius: 6px !important;
+  padding: 12px 14px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  line-height: 1.7 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  color: #333 !important;
+}
+
+/* Ik schat rij */
+.schatten-mogelijk-grid .scht-mog-schat {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 6px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  margin-top: 20px !important;
+  margin-bottom: 14px !important;
+}
+.schatten-mogelijk-grid .scht-mog-label {
+  font-size: 13px !important;
+  font-style: italic !important;
+  color: #666 !important;
+  flex-shrink: 0 !important;
+  padding-bottom: 2px !important;
+}
+
+/* Aankruisvakjes */
+.schatten-mogelijk-grid .scht-mog-keuze {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+.schatten-mogelijk-grid .scht-checkbox {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #222 !important;
+  cursor: pointer !important;
+}
+.schatten-mogelijk-grid .scht-checkbox input[type="checkbox"] {
+  width: 17px !important;
+  height: 17px !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Toggle oplossingen knop ─────────────────────────────── */
+.btn-toggle-oplossingen {
+  padding: 9px 20px;
+  background: #f0f0f0;
+  color: #333;
+  border: 1.5px solid #ccc;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all .2s;
+}
+.btn-toggle-oplossingen:hover { background: #e0e0e0; }
+.btn-toggle-oplossingen:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Antwoord-vak in preview — leeg of ingevuld */
+.antwoord-vak {
+  display: inline-block;
+  min-width: 28px;
+  height: 20px;
+  border: 1.5px solid #1a3a5c;
+  border-radius: 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+  transition: background .2s, color .2s;
+}
+
+/* ── Maak eerst 10: schrijflijn en onderstreping ───────────── */
+.eerst10-schrijflijn {
+  display: inline-block;
+  min-width: 120px;
+  height: 20px;
+  border-bottom: 1.5px solid #1a3a5c;
+  margin-left: 4px;
+  padding: 0 4px;
+  vertical-align: middle;
+  line-height: 20px;
+}
+.eerst10-schrijflijn.eerst10-ingevuld {
+  color: #006100;
+  font-weight: 700;
+  border-bottom-color: #00a650;
+}
+.eerst10-onderstreep {
+  display: inline-block;
+  padding-bottom: 1px;
+  transition: border-bottom .15s, color .15s;
+}
+
+/* ── Oplossingssleutel download knop ─────────────────────── */
+.btn-sleutel {
+  padding: 9px 20px;
+  background: #27AE60;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all .2s;
+}
+.btn-sleutel:hover { background: #1e8449; }
+.btn-sleutel:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Breuken */
+.sidebar-tab.tab-breuken { background-color:#dcedc8; color:#1A3A5C; border-color:#83b735 !important; }
+.sidebar-tab.tab-breuken:hover { background-color:#c5e1a5; }
+.sidebar-tab.tab-breuken.active { background-color:#6f9f24 !important; color:#fff; border-bottom-color:#416814 !important; font-weight:800; }
+.sidebar-tab.tab-percentages { background-color:#c9e9f1; color:#1A3A5C; border-color:#56a8ba !important; }
+.sidebar-tab.tab-percentages:hover { background-color:#aee0eb; }
+.sidebar-tab.tab-percentages.active { background-color:#2b93ad !important; color:#fff; border-bottom-color:#17657a !important; font-weight:800; }
+.breuken-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.breuken-grid.mg-grid { grid-template-columns:1fr; }
+.breuken-grid.mg-grid-kijk { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.breuken-grid.mg-grid-zonder { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.breuk-oef-kort,.breuk-oef-schema { position:relative; min-height:86px; padding:18px 34px 16px 14px; flex-direction:column; }
+.breuk-oef-keten { min-height:118px; justify-content:center; }
+.breuk-oef-schema { min-height:230px; align-items:stretch; }
+.breuk-som,.breuk-gelijknamig { display:flex; align-items:center; justify-content:center; gap:8px; font-size:21px; }
+.breuk { display:inline-flex; flex-direction:column; align-items:center; line-height:1.05; min-width:27px; vertical-align:middle; }
+.breuk-teller { width:100%; text-align:center; border-bottom:1.5px solid currentColor; padding:0 3px 2px; min-height:19px; box-sizing:border-box; }
+.breuk-noemer { padding-top:2px; text-align:center; }
+.breuk-invul { position:relative; gap:7px; min-width:34px; }
+.breuk-invul::after { content:""; position:absolute; left:0; right:0; top:50%; border-top:2px solid #263238; transform:translateY(-1px); z-index:2; }
+.breuk-invul .breuk-teller,.breuk-invul .breuk-noemer { border:1.5px solid #adb5bd; border-radius:5px; width:28px; min-width:28px; height:34px; min-height:34px; padding:4px 2px; line-height:24px; box-sizing:border-box; background:#fff; z-index:1; }
+.breuk-invul .breuk-teller { margin-bottom:0; }
+.breuk-som-lang { gap:5px; font-size:18px; flex-wrap:nowrap; }
+.breuken-grid.breuk-vermenigvuldig-uitgewerkt{grid-template-columns:1fr}
+.breuken-grid.breuk-vermenigvuldig-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.breuk-vermenigvuldig-kort{position:relative;min-height:118px;padding:22px 42px;justify-content:center}
+.breuk-vermenigvuldig-som{display:flex;align-items:center;gap:10px;font-size:24px}
+.breuk-vermenigvuldig-antwoord{display:inline-block;min-width:132px;height:30px;border-bottom:1.5px solid #aeb9c4;text-align:center;color:#0783c2;font-weight:700}
+.breuk-van-getal{position:relative;min-height:330px;padding:20px 40px;display:grid;grid-template-rows:auto auto 1fr auto;gap:20px;font-size:22px}
+.breuk-van-uitleg,.breuk-van-formule,.breuk-van-slot{display:flex;align-items:center;justify-content:center;gap:8px}
+.breuk-van-uitleg em{color:#6abf45;font-style:normal}
+.breuk-product-breuk{display:inline-flex;align-items:center;gap:5px;border-bottom:1px solid #333;padding:0 6px 4px}
+.breuk-schrap-product{display:inline-grid;grid-template-rows:auto auto;min-width:116px;text-align:center;color:#0783c2;font-weight:600}
+.breuk-schrap-boven{display:flex;align-items:flex-end;justify-content:center;gap:9px;border-bottom:2px solid #333;padding:0 5px 3px;position:relative}
+.breuk-schrap-onder{padding-top:3px;position:relative}
+.breuk-schrap-product i{font-style:normal;color:#333;font-weight:400}
+.breuk-schrap-product .doorgestreept{position:relative;font-weight:500}
+.breuk-schrap-product .doorgestreept::after{content:"";position:absolute;left:-4px;right:-4px;top:50%;height:2px;background:#0783c2;transform:rotate(48deg);transform-origin:center}
+.breuk-schrap-product sup{font-size:14px;line-height:1;position:relative;top:-10px;margin-left:-7px;color:#0783c2}
+.breuk-schrap-onder sup{top:-7px;margin-left:2px}
+.breuk-product-leeg{color:#222;font-weight:500}
+.breuk-product-leeg .breuk-schrap-boven{min-width:112px}
+.breuk-werklijnen{display:flex;flex-direction:column;justify-content:center;gap:24px;padding:0 15%}
+.breuk-werklijnen span{height:30px;border-bottom:1px solid #ccd3da;color:#0783c2;font-weight:600}
+.breuk-werklijnen span::after{content:attr(data-antwoord);visibility:hidden}
+.toon-oplossingen .breuk-werklijnen span::after{visibility:visible}
+.breuk-verbind-puzzel{position:relative;min-height:560px;padding:24px 68px;display:grid;grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr);column-gap:40px}
+.breuk-verbind-kolom,.breuk-verbind-doelen{display:flex;flex-direction:column;justify-content:space-around;gap:18px}
+.breuk-verbind-doelen{align-items:center}
+.breuk-verbind-item{position:relative;min-height:72px;border:2px solid #46b8df;border-radius:16px;display:flex;align-items:center;gap:8px;padding:8px 16px;font-size:21px}
+.breuk-verbind-kolom .breuk-verbind-item:nth-child(2){border-color:#f05a63}.breuk-verbind-kolom .breuk-verbind-item:nth-child(3){border-color:#e49a2b}.breuk-verbind-kolom .breuk-verbind-item:nth-child(4){border-color:#a96ab2}
+.breuk-verbind-doelen span{width:74px;height:58px;border:2px solid #f2ae22;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:21px;background:#fff}
+.breuk-verbind-item .breuk-vermenigvuldig-antwoord{min-width:72px}
+.breuk-vermenigvuldig-uitwerking{display:inline-flex;align-items:center;gap:7px;color:#0783c2;font-weight:600;white-space:nowrap}
+.breuk-vermenigvuldig-uitwerking .breuk{color:#0783c2}
+.breuken-grid.breuk-vermenigvuldig-gemengd{gap:0}
+.breuk-vermenigvuldig-gemengd .breuk-vermenigvuldig-kort{border:none;border-radius:0;min-height:132px;padding:20px 34px;box-shadow:none}
+.breuk-vermenigvuldig-gemengd .breuk-vermenigvuldig-kort:nth-child(even){border-left:2px solid #7aa5b4}
+.breuk-vermenigvuldig-gemengd .breuk-vermenigvuldig-antwoord{flex:1;min-width:90px}
+.breuk-vraagstuk{min-height:430px;padding:18px 22px;border:1.5px solid #b7c0c7;border-radius:14px;background:#fff;display:flex;flex-direction:column}
+.breuk-vraagstuk-tekst{border:1.5px solid #aeb7bd;border-radius:13px;padding:14px 18px;font-size:18px;line-height:1.45}
+.breuk-vraagstuk-tekst p{margin:0 0 4px}.breuk-vraagstuk-tekst .vraag{margin-top:7px;font-weight:650}
+.breuk-vraagstuk-tekst .breuk{font-size:.9em;vertical-align:middle}
+.breuk-vraagstuk-werk{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:16px}
+.breuk-vraagstuk-werk h4,.breuk-vraagstuk-antwoordzin b{margin:0 0 7px;color:#6d9eaa;font-size:18px}
+.breuk-vraagstuk-raster{height:118px;position:relative;border:1px solid #bdd0d8;background-color:#fff;background-image:linear-gradient(#d7e3e8 1px,transparent 1px),linear-gradient(90deg,#d7e3e8 1px,transparent 1px);background-size:28px 28px;padding:10px;color:#0783c2}
+.breuk-vraagstuk-raster>span,.breuk-vraagstuk-raster>b,.breuk-vraagstuk-raster>em{position:absolute;font-style:normal}
+.breuk-vraagstuk-raster>span{top:8px;left:45%;font-size:20px}.breuk-vraagstuk-raster>b{bottom:9px;left:12%;font-size:18px}.breuk-vraagstuk-raster>em{bottom:9px;left:53%;font-size:18px}
+.breuk-vraagstuk-bewerking{display:flex;flex-direction:column;gap:6px;font-size:16px}
+.breuk-vraagstuk-bewerking>span{position:static}
+.breuk-vraagstuk-bewerking span::after,.breuk-vraagstuk-antwoordzin span::after{content:attr(data-antwoord);visibility:hidden;color:#0783c2;font-weight:650}
+.toon-oplossingen .breuk-vraagstuk-bewerking span::after,.toon-oplossingen .breuk-vraagstuk-antwoordzin span::after{visibility:visible}
+.breuk-vraagstuk-antwoordzin{display:flex;align-items:flex-end;gap:8px;margin-top:18px;border-bottom:1px solid #aeb7bd;min-height:38px;width:100%;font-size:17px}
+.breuk-vraagstuk-antwoordzin span{flex:1}
+.percentage-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px}
+.percentage-oef{position:relative;background:#fff;border:2px solid #aeb4b9;border-radius:17px;color:#242225;box-sizing:border-box}
+.percentage-stappen{display:block!important;width:100%;min-width:0;height:410px;padding:18px 20px 16px;overflow:hidden}
+.percentage-stappen h3{position:absolute;left:20px;top:18px;margin:0;font-size:22px;line-height:1.15;white-space:nowrap}
+.percentage-omzet{position:absolute;right:16px;top:73px;width:170px;height:82px;border:2px solid #6d9eaa;border-radius:19px;display:flex;align-items:center;justify-content:center;gap:7px;color:#6d9eaa;font-size:21px;box-sizing:border-box}
+.percentage-omzet .breuk{font-size:20px;min-width:48px}
+.percentage-omzet .breuk-invul .breuk-teller,.percentage-omzet .breuk-invul .breuk-noemer{min-width:42px;min-height:27px}
+.percentage-pijl{position:absolute;left:130px;top:72px;width:74px;height:45px;border-left:3px solid #6d9eaa;border-bottom:3px solid #6d9eaa;box-sizing:border-box}
+.percentage-pijl::after{content:"";position:absolute;right:-1px;bottom:-7px;border-left:13px solid #6d9eaa;border-top:7px solid transparent;border-bottom:7px solid transparent}
+.percentage-stapregels{margin:164px 0 20px 42px;display:flex;flex-direction:column;gap:17px}
+.percentage-stapregels>div{display:grid;grid-template-columns:max-content minmax(95px,1fr);align-items:end;column-gap:8px;font-size:18px}
+.percentage-stapregels>div>b{font-weight:500;white-space:nowrap}
+.percentage-stapregels span{display:block;min-height:29px;border-bottom:1px solid #adb6bc;padding:0 4px 2px;color:transparent;white-space:nowrap}
+.percentage-stapregels span::after{content:attr(data-antwoord);visibility:hidden;color:#0783c2;font-weight:650}
+.toon-oplossingen .percentage-stapregels span::after{visibility:visible}
+.percentage-slot{position:absolute;left:24px;right:24px;bottom:17px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:21px}
+.percentage-invul{display:inline-flex;min-width:76px;height:45px;border:1.5px solid #88adba;align-items:center;justify-content:center;background:#fff}
+.percentage-invul::after{content:attr(data-antwoord);visibility:hidden;color:#0783c2;font-weight:700}
+.toon-oplossingen .percentage-invul::after{visibility:visible}
+.percentage-puntbreuk,.percentage-lange-breukstreep{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:21px;line-height:1.15}
+.percentage-puntbreuk{min-width:54px}
+.percentage-lange-breukstreep{min-width:150px}
+.percentage-puntbreuk>span:first-child,.percentage-lange-breukstreep>span:first-child{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;border-bottom:2px solid #222;padding:0 8px 4px;box-sizing:border-box}
+.percentage-puntbreuk>span:last-child,.percentage-lange-breukstreep>span:last-child{padding-top:4px}
+.percentage-punt{display:inline-block;min-width:28px;text-align:center;font-style:normal;color:#242225}
+.percentage-punt::after{content:attr(data-antwoord);display:none;color:#0783c2;font-weight:650}
+.toon-oplossingen .percentage-punt{font-size:0}
+.toon-oplossingen .percentage-punt::after{display:inline;font-size:21px}
+.percentage-lang{grid-column:1/-1;min-height:112px;padding:18px 16px 22px;display:flex;align-items:center;justify-content:flex-start;gap:7px;font-size:22px;border:0;border-radius:0;white-space:nowrap}
+.percentage-lang-zin,.percentage-lang-maal,.percentage-lang-gelijk{font-weight:400;white-space:nowrap}
+.percentage-lange-breukstreep{width:168px;min-width:168px;margin:0 1px}
+.percentage-product-oplossing{display:none;color:#0783c2;font-weight:500}
+body.toont-oplossingen .percentage-product-leeg{display:none}
+body.toont-oplossingen .percentage-product-oplossing{display:inline-flex}
+.percentage-product-oplossing i{font-style:normal}
+.percentage-schrap-waarde{position:relative;display:inline-flex;align-items:center;justify-content:center;margin-left:2px}
+.percentage-schrap-waarde::after{content:"";position:absolute;left:-5px;right:-5px;top:50%;height:2px;background:#0783c2;transform:rotate(36deg);transform-origin:center}
+.percentage-schrap-waarde sup{position:absolute;right:-10px;top:-11px;font-size:12px;line-height:1;color:#0783c2;font-weight:700}
+.percentage-schrap{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.percentage-schrap sup{display:none;position:absolute;right:-9px;top:-10px;color:#0783c2;font-size:12px;font-weight:700}
+.toon-oplossingen .percentage-schrap .percentage-punt::before{content:"";position:absolute;width:30px;height:2px;background:#0783c2;transform:rotate(35deg);left:0;top:50%}
+.toon-oplossingen .percentage-schrap sup{display:block}
+.percentage-antwoordlijn{display:inline-block;min-width:68px;min-height:27px;border-bottom:1px solid #adb6bc;color:transparent;text-align:center}
+.percentage-antwoordlijn::after{content:attr(data-antwoord);visibility:hidden;color:#0783c2;font-weight:700}
+.toon-oplossingen .percentage-antwoordlijn::after{visibility:visible}
+@media(max-width:800px){.percentage-grid{grid-template-columns:1fr!important}}
+.breuk-schema { display:flex; justify-content:center; margin:16px 0 0; padding:8px; border:1.5px solid #aab5c0; border-radius:9px; min-height:152px; }
+.breuk-conversie { position:relative; width:210px; height:144px; font-size:18px; }
+.breuk-conv-bron,.breuk-conv-doel { position:absolute; top:48px; z-index:2; }
+.breuk-conv-bron { left:18px; }.breuk-conv-doel { right:18px; }
+.breuk-conv-gelijk { position:absolute; left:99px; top:69px; }
+.breuk-conversie svg { position:absolute; left:20px; top:20px; width:170px; height:108px; overflow:visible; }
+.breuk-conversie path { fill:none; stroke:#222; stroke-width:2; }
+.breuk-conversie polygon { fill:#222; stroke:none; }
+.breuk-factor { position:absolute; left:76px; color:#333; font-size:16px; line-height:20px; z-index:3; }
+.breuk-factor.boven { top:3px; }.breuk-factor.onder { top:130px; }
+.breuk-factor i { display:inline-block; width:36px; min-height:20px; border-bottom:1.5px solid #777; font-style:normal; text-align:center; }
+body.toont-oplossingen .breuk-antwoord { background:#e5f6e8; border-color:#27ae60; color:#006100; }
+body.toont-oplossingen .breuk-factor i { color:#006100; border-bottom-color:#27ae60; font-weight:700; }
+.mg-oef { position:relative; min-height:190px; padding:16px 34px 16px 14px; flex-direction:column; gap:16px; align-items:stretch; }
+.mg-oef.mg-uitgewerkt { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(290px,.85fr); gap:18px; min-height:330px; align-items:stretch; }
+.mg-werk { position:relative; display:flex; flex-direction:column; gap:12px; min-width:0; padding:2px 4px 8px; }
+.mg-vraag { display:flex; align-items:center; gap:8px; font-size:21px; min-height:44px; }
+.mg-schema-start,.mg-schema-rij { display:grid; grid-template-columns:58px minmax(105px,1fr) 22px minmax(105px,1fr) 58px; align-items:center; gap:6px; min-height:48px; }
+.mg-gelijknamig .mg-schema-start,.mg-gelijknamig .mg-schema-rij { grid-template-columns:58px auto 22px auto 58px; justify-content:center; column-gap:8px; }
+.mg-gelijknamig .mg-werk { max-width:520px; width:100%; margin:0 auto; }
+.mg-gelijknamig.mg-uitgewerkt { min-height:285px; }
+.mg-schema-start>.mg-stroken,.mg-schema-rij>.mg-stroken { max-width:none; justify-content:flex-start; }
+.mg-schema-omzet { width:58px; height:126px; margin:-10px 0 -4px; }
+.mg-schema-omzet.mg-omzet-links { align-self:flex-start; }
+.mg-schema-omzet.mg-omzet-rechts { align-self:flex-end; }
+.mg-schema-omzet .mg-omzet { margin:0; }
+.mg-schema-pijl { color:#222; font-size:34px; line-height:24px; text-align:center; margin:-8px 0 -5px; }
+.mg-schema-eind { grid-template-columns:64px minmax(130px,1fr); }
+.mg-schema-totaal { grid-template-columns:64px minmax(130px,1fr); }
+.mg-aftrek-werk{gap:8px}
+.mg-aftrek-rij{display:grid;grid-template-columns:minmax(180px,1fr) minmax(150px,.72fr);align-items:center;gap:14px;min-height:64px}
+.mg-aftrek-rij>.mg-stroken{max-width:none;justify-content:flex-start}
+.mg-aftrek-notatie{display:flex;align-items:center;gap:8px;font-size:20px;white-space:nowrap}
+.mg-aftrek-eerste .mg-schema-pijl{width:60%;margin:-3px 40% -3px 0}
+.mg-aftrek-kijk{display:flex;min-height:310px;justify-content:center;align-items:center;padding:18px 28px 24px;gap:15px}
+.mg-aftrek-plaat{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;max-width:320px}
+.mg-aftrek-vorm{position:relative;display:inline-flex}
+.mg-aftrek-vorm>.mg-stroken{max-width:none}
+.mg-rood-overlay{position:absolute;inset:0;z-index:5;width:100%;height:100%;overflow:visible;pointer-events:none}
+.mg-rood-overlay line{stroke:#ef5350;stroke-width:1.6;stroke-linecap:round;vector-effect:non-scaling-stroke}
+body.pdf-opname .mg-rood-overlay line{stroke-width:2.2}
+.mg-aftrek-zwarte-pijl{font-size:35px;line-height:30px;color:#222;text-align:center}
+.mg-aftrek-kijk-regels{display:flex;flex-direction:column;align-items:center;gap:15px;font-size:20px}
+.mg-aftrek-kijk-regels>div{display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+body.pdf-opname .mg-aftrek-kijk{min-height:410px;padding:24px 34px 38px;gap:22px}
+body.pdf-opname .mg-aftrek-plaat{max-width:390px;gap:11px}
+body.pdf-opname .mg-aftrek-kijk-regels{font-size:26px;gap:22px}
+body.pdf-opname .mg-aftrek-zwarte-pijl{font-size:46px;line-height:40px}
+.komma-header{background:linear-gradient(135deg,#27885a,#3bb978)!important}
+.komma-strategie-keuze{border:2px solid #70b995;background:#f1fbf5}
+.komma-strategie-keuze .kaart-titel{color:#176b45}
+.komma-getallen-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.komma-getallen-grid.komma-splitsen,.komma-getallen-grid.komma-tienden{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-vermenigvuldigen-haakjes,.komma-getallen-grid.komma-vermenigvuldigen-zelf{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-vermenigvuldigen-compenseren-haakjes,.komma-getallen-grid.komma-vermenigvuldigen-compenseren-zelf{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-delen-haakjes,.komma-getallen-grid.komma-delen-zelf{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-vermenigvuldigen-nulregel{grid-template-columns:repeat(3,minmax(0,1fr))}
+.komma-getallen-grid.komma-vermenigvuldigen-factoren{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-delen-nulregel{grid-template-columns:repeat(3,minmax(0,1fr))}
+.komma-getallen-grid.komma-delen-factoren{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-maal-keuzetitel{margin:12px 0 7px;color:#176b45;font-size:13px;font-weight:800}
+.komma-vermenigvuldig-blok .opdrachtzin-wrapper{align-items:flex-start}
+.komma-vermenigvuldig-blok .opdrachtzin-tekst{display:block;min-width:0;max-width:900px;white-space:normal;line-height:1.35;overflow-wrap:break-word}
+.komma-oef.komma-vermenigvuldigen{min-height:205px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:22px;padding:24px 34px 22px 20px}
+.komma-maal-eerste{display:flex;align-items:center;flex-wrap:nowrap;gap:4px;font-size:18px;white-space:nowrap}
+.komma-maal-klein{display:inline-block;min-width:34px;min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8;text-align:center}
+.komma-maal-comp-vak{display:inline-block;min-width:92px;min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8;text-align:center}
+.komma-deel-vak{display:inline-block;min-width:92px;min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8;text-align:center}
+.komma-maal-regel{display:inline-block;flex:1;min-width:170px;min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8}
+.komma-maal-stap{display:grid;width:calc(100% - 55px);grid-template-columns:30px minmax(0,1fr);align-items:end;margin-left:55px;font-size:19px;box-sizing:border-box}
+.komma-maal-stap>span{display:block;min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8;padding-left:8px}
+.komma-maal-product>span{font-weight:700}
+body.pdf-opname .komma-oef.komma-vermenigvuldigen{min-height:280px;gap:31px;padding:32px 45px 30px 27px}
+body.pdf-opname .komma-vermenigvuldig-blok .opdrachtzin-wrapper{min-height:92px;margin-bottom:18px}
+body.pdf-opname .komma-vermenigvuldig-blok .opdrachtzin-tekst{max-width:820px;font-size:21px;line-height:1.45}
+body.pdf-opname .komma-maal-eerste{font-size:22px;gap:4px}
+body.pdf-opname .komma-maal-klein{min-width:38px;min-height:34px}
+body.pdf-opname .komma-vermenigvuldigen-compenseren .komma-maal-eerste{font-size:24px}
+body.pdf-opname .komma-maal-comp-vak{min-width:86px;min-height:38px}
+body.pdf-opname .komma-delen .komma-maal-eerste{font-size:20px}
+body.pdf-opname .komma-deel-vak{min-width:82px;min-height:34px}
+.komma-nulregel{min-height:78px;padding:16px 34px 16px 18px;display:flex;align-items:center;gap:7px;font-size:19px;white-space:nowrap}
+.komma-nulregel .komma-antwoord{flex:1;min-width:55px}
+.komma-getallen-grid.komma-delen-nulregel .komma-nulregel{padding:14px 28px 14px 14px;font-size:17px}
+body.pdf-opname .komma-nulregel{min-height:92px;padding:20px 38px 20px 22px;font-size:23px}
+body.pdf-opname .komma-getallen-grid.komma-delen-nulregel .komma-nulregel{padding:18px 32px 18px 18px;font-size:20px}
+.komma-oef.komma-factoren{min-height:285px;padding:22px 34px 22px 20px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:25px;font-size:18px}
+.komma-factoren>div{display:grid;grid-template-columns:125px 26px minmax(0,1fr);align-items:end}
+.komma-factoren>div:not(:first-child){grid-template-columns:125px 26px minmax(0,1fr)}
+.komma-factoren>div:not(:first-child)>b{grid-column:2}
+.komma-factoren>div>span:last-child{min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8;padding-left:6px}
+.komma-factoren-product>span{font-weight:800}
+body.pdf-opname .komma-factoren{min-height:370px;gap:34px;padding:30px 42px 30px 28px;font-size:23px}
+body.pdf-opname .komma-factoren>div{grid-template-columns:165px 34px minmax(0,1fr)}
+body.pdf-opname .komma-factoren>div:not(:first-child){grid-template-columns:165px 34px minmax(0,1fr)}
+body.pdf-opname .komma-factoren>div>span:last-child{min-height:36px}
+.komma-deel-factoren{min-height:225px}
+.komma-deel-factoren>div:not(:first-child){grid-template-columns:55px 26px minmax(0,1fr)}
+body.pdf-opname .komma-deel-factoren{min-height:305px}
+body.pdf-opname .komma-deel-factoren>div:not(:first-child){grid-template-columns:72px 34px minmax(0,1fr)}
+body.pdf-opname .komma-maal-regel{min-height:37px}
+body.pdf-opname .komma-maal-stap{width:calc(100% - 72px);grid-template-columns:40px minmax(0,1fr);margin-left:72px;font-size:26px}
+body.pdf-opname .komma-maal-stap>span{min-height:37px}
+.komma-getallen-grid.komma-compenseren,.komma-getallen-grid.komma-transformeren{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-oef{position:relative;min-height:92px;padding:22px 34px 20px 20px;font-size:22px;display:flex;align-items:center;gap:10px}
+.komma-kort{justify-content:flex-start}
+.komma-antwoord{display:inline-block;min-width:78px;min-height:28px;border-bottom:1.5px solid #8795a3;color:#0672b8;font-weight:700;text-align:center}
+body.pdf-opname .komma-kort{
+  min-height:64px;
+  padding:10px 18px;
+  font-size:19px;
+  gap:8px;
+  flex-wrap:nowrap;
+}
+body.pdf-opname .komma-kort>span:first-child{white-space:nowrap}
+body.pdf-opname .komma-kort .komma-antwoord{min-width:90px}
+.komma-tienden{min-height:118px;white-space:nowrap;font-size:19px}
+.komma-lijn{display:inline-block;width:58px;height:24px;border-bottom:1.5px solid #9aa5ae}
+.komma-splits{min-height:190px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start}
+.komma-hoofdsom{display:flex;align-items:flex-start;justify-content:flex-start;gap:8px;font-size:22px;white-space:nowrap}
+.komma-term-splits{position:relative;display:inline-flex;justify-content:center;min-width:42px}
+.komma-splitsbeen{position:absolute;display:flex;gap:10px;padding-top:34px;top:30px;left:50%;transform:translateX(-50%)}
+.komma-splitsbeen::before,.komma-splitsbeen::after{content:"";position:absolute;top:4px;width:38px;height:22px;border-top:1.5px solid #8db3c7}
+.komma-splitsbeen::before{left:15px;transform:rotate(-27deg)}.komma-splitsbeen::after{left:50px;transform:rotate(27deg)}
+.komma-vak{width:42px;height:38px;border:1.5px solid #9fbfce;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#0672b8;font-weight:700}
+.komma-tussenlijnen{display:flex;flex-direction:column;align-items:flex-start;gap:27px;padding-top:102px;margin-left:116px}
+.komma-tussenlijnen>span{display:block;width:78%;min-height:25px;border-bottom:1px solid #aeb8c0;color:#0672b8;font-size:17px;padding-left:8px;box-sizing:border-box}
+body.pdf-opname .komma-oef{min-height:145px;font-size:29px;padding:28px 38px}
+body.pdf-opname .komma-antwoord{min-width:110px;min-height:39px;font-size:28px}
+body.pdf-opname .komma-tienden{min-height:165px;font-size:25px}
+body.pdf-opname .komma-lijn{width:78px;height:32px}
+body.pdf-opname .komma-splits{min-height:245px}
+body.pdf-opname .komma-hoofdsom{font-size:29px}
+body.pdf-opname .komma-vak{width:55px;height:50px;font-size:24px}
+body.pdf-opname .komma-splitsbeen{top:42px;gap:14px;padding-top:42px}
+body.pdf-opname .komma-tussenlijnen{padding-top:142px;margin-left:155px;gap:34px}
+body.pdf-opname .komma-tussenlijnen>span{width:76%;min-height:34px;font-size:23px;padding-left:12px}
+.komma-strategie{min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;font-size:19px}
+.komma-strategie-som,.komma-strategie-stap{display:flex;align-items:center;justify-content:center;gap:9px;white-space:nowrap}
+.komma-strategie-lijn{display:inline-block;min-width:55px;min-height:24px;border-bottom:1.4px solid #9ba8b3;color:#0672b8;text-align:center}
+.komma-comp-correctie{padding:6px 14px;border:1.5px solid #b4c9d8;border-radius:7px;color:#0672b8}
+.komma-rond-term{position:relative;padding:1px 5px;border:1.5px solid #707b83;border-radius:50%;text-decoration:none}
+.komma-compenseren .komma-rond-term::before{content:"";position:absolute;left:50%;top:100%;width:64px;border-top:1.5px solid #444;transform:rotate(145deg);transform-origin:left center}
+.komma-compenseren .komma-rond-term::after{content:"";position:absolute;left:10px;top:45px;border-right:6px solid #444;border-top:4px solid transparent;border-bottom:4px solid transparent;transform:rotate(-35deg)}
+.komma-trans-correcties{width:190px;display:flex;justify-content:space-between;color:#0672b8;margin-top:4px}
+.komma-trans-correcties>span{display:flex;align-items:center;gap:3px}
+.komma-trans-pijlen{width:180px;display:flex;justify-content:space-between;font-size:27px;line-height:22px;margin:-8px 0}
+body.pdf-opname .komma-strategie{min-height:315px;gap:19px;font-size:25px;padding:28px 38px}
+body.pdf-opname .komma-strategie-lijn{min-width:75px;min-height:32px;font-size:24px}
+body.pdf-opname .komma-comp-correctie{padding:8px 20px}
+body.pdf-opname .komma-trans-correcties{width:250px}
+body.pdf-opname .komma-trans-pijlen{width:235px;font-size:36px}
+.komma-getallen-grid.komma-aftrek-schijfjes,.komma-getallen-grid.komma-aftrek-tienden,.komma-getallen-grid.komma-aftrek-aanvullen{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-plaats-schema{width:100%;border:1.5px solid #aab3ba}.komma-plaats-kop,.komma-plaats-rij{display:grid;grid-template-columns:1fr 1fr}.komma-plaats-kop b{padding:5px;text-align:center;background:#ffe082;border-right:1px solid #777}.komma-plaats-kop b:last-child{background:#ffecb3;border-right:0}.komma-plaats-rij>span{min-height:56px;padding:7px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:4px;background:#f1f1f1;border-right:1px solid #777}.komma-plaats-rij>span:last-child{border-right:0}
+.komma-schijf{position:relative;width:24px;height:24px;border:1px solid #d5a500;border-radius:50%;background:#ffd400;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-style:normal;font-weight:700}.komma-schijf.weg::after{content:"";display:none;position:absolute;left:-3px;right:-3px;top:11px;border-top:2px solid #e34234;transform:rotate(-35deg)}
+body.toont-oplossingen .komma-schijf.weg::after{display:block}
+.komma-aftrek-schijfjes{min-height:175px;flex-direction:column;align-items:stretch;padding:16px 30px 16px 16px}.komma-aftrek-som{font-size:20px}.komma-aanvullen{min-height:125px;display:grid;grid-template-columns:190px minmax(210px,1fr);align-items:center;justify-content:center;gap:16px;padding:18px 32px 18px 18px}.komma-aanvul-balk{display:grid;grid-template-columns:4fr 1fr;width:190px;border:1px solid #b7c0c8;box-sizing:border-box}.komma-aanvul-balk>div{padding:7px 12px;background:#cce5ef;text-align:center}.komma-aanvul-balk>div:first-child{grid-column:1/3}.komma-aanvul-balk>div:nth-child(2){grid-column:1;grid-row:2;background:#cce8b4}.komma-aanvul-balk .komma-aanvul-vraag{grid-column:2;grid-row:2;background:#ffe49b;font-weight:800;text-align:center;padding-left:5px;padding-right:5px}.komma-aanvul-regels{display:flex;flex-direction:column;align-items:flex-start;gap:14px;font-size:18px;white-space:nowrap}.komma-aanvul-regels>span{display:flex;align-items:center;gap:5px}.komma-aanvul-regels .komma-antwoord,.komma-aanvul-regels .komma-lijn{width:82px;min-width:82px}
+.komma-compenseren .komma-strategie-som{margin-top:8px}.komma-comp-werk{width:100%;display:grid;grid-template-columns:135px 1fr;align-items:start;gap:18px;margin-top:26px}.komma-compenseren .komma-comp-correctie{min-width:115px;height:30px;padding:4px 8px;display:flex;align-items:center;justify-content:center}.komma-schrijfregels{width:100%;display:flex;flex-direction:column;gap:27px;padding-top:0}.komma-schrijfregels i{display:block;min-height:24px;border-bottom:1px solid #aeb8c0;font-style:normal;color:#0672b8;text-align:left}
+body.pdf-opname .komma-comp-werk{grid-template-columns:180px 1fr;gap:24px;margin-top:38px}body.pdf-opname .komma-schrijfregels{gap:38px}body.pdf-opname .komma-compenseren .komma-rond-term::before{width:86px}body.pdf-opname .komma-compenseren .komma-rond-term::after{left:8px;top:56px}
+.komma-trans-balk{display:grid;grid-template-columns:1fr 1fr;width:82%;margin-bottom:4px}.komma-trans-balk span{position:relative;padding:9px;text-align:center}.komma-trans-balk .blauw{background:#ccecf5}.komma-trans-balk .geel{background:#ffedb9}.komma-trans-balk i{position:absolute;left:18%;right:18%;bottom:4px;border-bottom:1px solid #aeb8c0}.komma-transform .komma-trans-pijlen{width:180px;margin:-4px 0;display:flex;justify-content:space-between}.komma-transform .komma-trans-pijlen span{display:flex;flex-direction:column;align-items:center;gap:0}.komma-transform .komma-trans-pijlen b{font-size:28px;line-height:25px}.komma-transform .komma-trans-pijlen i{width:55px;min-height:20px;border-bottom:1px solid #9ba8b3;font-size:14px;font-style:normal;color:#0672b8}
+body.pdf-opname .komma-aftrek-schijfjes{min-height:235px}.pdf-opname .komma-schijf{width:30px;height:30px;font-size:12px}.pdf-opname .komma-plaats-rij>span{min-height:78px}.pdf-opname .komma-aanvullen{min-height:175px;grid-template-columns:245px minmax(275px,1fr);gap:24px;padding:26px 42px 26px 25px}.pdf-opname .komma-aanvul-balk{width:245px}.pdf-opname .komma-aanvul-balk>div{padding:10px 16px;font-size:24px}.pdf-opname .komma-aanvul-regels{gap:20px;font-size:24px}.pdf-opname .komma-aanvul-regels .komma-antwoord,.pdf-opname .komma-aanvul-regels .komma-lijn{width:108px;min-width:108px}
+@media(max-width:900px){.komma-getallen-grid,.komma-getallen-grid.komma-splitsen,.komma-getallen-grid.komma-tienden{grid-template-columns:1fr}}
+body.pdf-opname .mg-aftrek-rij{grid-template-columns:minmax(230px,1fr) minmax(190px,.72fr);min-height:92px;gap:20px}
+body.pdf-opname .mg-aftrek-notatie{font-size:25px;gap:11px}
+body.pdf-opname .mg-aftrek-eerste{min-height:520px}
+.mg-schrijf { border:2px solid #b8bec4; border-radius:14px; padding:18px 20px; display:flex; flex-direction:column; gap:24px; min-height:310px; }
+.mg-schrijf>em { font-size:20px; color:#444; text-align:left; }
+.mg-schrijf-som { display:flex; align-items:center; justify-content:center; gap:10px; font-size:18px; flex-wrap:nowrap; }
+.mg-schrijf-term { position:relative; display:inline-flex; align-items:center; }
+.mg-term-pijl{position:absolute;left:50%;top:calc(100% + 5px);width:48px;height:76px;transform:translateX(-16px);z-index:4;border-left:4px solid #0696d7;border-bottom:4px solid #0696d7;border-radius:0 0 0 2px;box-sizing:border-box}
+.mg-term-pijl::after{content:"";position:absolute;right:-4px;bottom:-9px;border-left:13px solid #0696d7;border-top:7px solid transparent;border-bottom:7px solid transparent}
+.mg-term-pijl.mg-term-pijl-links{transform:translateX(-32px);border-left:0;border-right:4px solid #0696d7;border-radius:0 0 2px 0}
+.mg-term-pijl.mg-term-pijl-links::after{right:auto;left:-4px;border-left:0;border-right:13px solid #0696d7}
+.mg-schrijf-conversie { position:relative; height:122px; margin:18px 0 -8px 4px; }
+.mg-conv-mini { position:absolute; left:calc(50% + 48px); top:0; width:150px; height:98px; transform:translateX(-50%); display:flex; align-items:center; gap:12px; font-size:18px; }
+.mg-schrijf-conversie.mg-conv-links .mg-conv-mini { left:105px; }
+.mg-conv-mini svg { position:absolute; left:0; top:0; width:102px; height:98px; overflow:visible; }
+.mg-conv-mini svg path { fill:none; stroke:#222; stroke-width:2; }
+.mg-conv-mini svg polygon { fill:#222; }
+.mg-conv-mini>span,.mg-conv-mini>b { position:relative; z-index:2; }
+.mg-factor { position:absolute!important; left:36px; font-size:16px; white-space:nowrap; }
+.mg-factor-boven { top:-13px; }.mg-factor-onder { bottom:-14px; }
+.mg-factor i { display:inline-block; width:36px; border-bottom:1.5px solid #777; min-height:18px; }
+.mg-schrijf-uitkomst { margin-top:auto; }
+.mg-zonder { min-height:105px; justify-content:center; }
+.mg-zonder .mg-som{width:100%;justify-content:flex-start;padding-left:18px;font-size:22px}
+.mg-zonder .mg-lange-lijn{flex:1;max-width:260px;margin-left:4px}
+body.pdf-opname .mg-zonder{min-height:145px;padding:24px 30px}
+body.pdf-opname .mg-zonder .mg-som{font-size:28px;gap:13px}
+body.pdf-opname .mg-zonder .mg-lange-lijn{max-width:none;min-width:190px;height:34px}
+.mg-kijk { min-height:300px; padding:18px 34px 18px 18px; display:flex; flex-direction:column; gap:20px; justify-content:flex-start; }
+.mg-kijk-beelden { min-height:115px; display:flex; align-items:center; justify-content:center; gap:10px; }
+.mg-kijk-beelden>span { display:flex; justify-content:center; min-width:125px; }
+.mg-kijk-beelden .mg-stroken { max-width:210px; }
+.mg-kijk-som { display:flex; align-items:center; justify-content:center; gap:7px; min-height:82px; font-size:18px; white-space:nowrap; }
+.mg-kijk-omzet { position:relative; height:112px; width:210px; margin-top:-18px; }
+.mg-kijk-omzet.mg-kijk-links { align-self:flex-start; margin-left:22px; }
+.mg-kijk-omzet.mg-kijk-rechts { align-self:flex-end; margin-right:18px; }
+.mg-kijk-l-pijl { position:absolute; left:8px; top:0; width:29px; height:56px; border-left:4px solid #0696d7; border-bottom:4px solid #0696d7; }
+.mg-kijk-l-pijl::after { content:""; position:absolute; right:-9px; bottom:-9px; border-left:13px solid #0696d7; border-top:7px solid transparent; border-bottom:7px solid transparent; }
+.mg-kijk-omzetregel { position:absolute; left:48px; top:42px; display:flex; align-items:center; gap:12px; font-size:18px; }
+.mg-som,.mg-beelden { display:flex; align-items:center; justify-content:center; gap:9px; font-size:19px; }
+.mg-getal { display:inline-flex; align-items:center; gap:3px; }
+.mg-heel { display:inline-flex; width:25px; height:31px; border:1.5px solid #adb5bd; border-radius:5px; align-items:center; justify-content:center; }
+.mg-stroken { display:flex; gap:5px; flex-wrap:wrap; justify-content:center; max-width:230px; }
+.mg-strook { display:inline-flex; width:88px; height:34px; border:1.5px solid #666; box-sizing:border-box; }
+.mg-strook-heel { background:#fff; }
+.mg-taarten { align-items:center; }
+.mg-taart { display:inline-block; width:62px; height:62px; border:2px solid #444; border-radius:50%; box-sizing:border-box; }
+body.toont-oplossingen .mg-taart:not(.mg-voorgekleurd) path[data-deel-gevuld="true"] { fill:#79a9cf!important; }
+.mg-schrijf-term,.mg-schrijf,.mg-schrijf-som { overflow:visible; }
+.mg-puntbreuk .breuk-teller,.mg-puntbreuk .breuk-noemer { min-width:30px; font-size:20px; }
+.mg-geheel-lijn { display:inline-block; width:30px; height:24px; border-bottom:1.5px solid #888; }
+.mg-puntgetal { gap:5px; }
+.mg-strook i { flex:1; border-right:1px solid #888; }
+.mg-strook i:last-child { border-right:0; }
+.mg-voorgekleurd i[data-gevuld="true"],.mg-voorgekleurd .mg-strook-heel[data-gevuld="true"],body.toont-oplossingen .mg-stroken:not(.mg-voorgekleurd) i[data-gevuld="true"],body.toont-oplossingen .mg-stroken:not(.mg-voorgekleurd) .mg-strook-heel[data-gevuld="true"] { background:#79a9cf; }
+.mg-resultaat { padding-top:8px; border-top:1px solid #d8dee5; }
+.mg-lange-lijn { display:inline-block; min-width:150px; min-height:25px; border-bottom:1.5px solid #888; color:#006100; }
+.mg-omzet { position:relative; width:58px; height:126px; margin:0 auto; }
+.mg-omzet-doel { position:absolute; left:18px; bottom:0; }
+.mg-blauwe-pijl { position:absolute; left:28px; top:0; width:0; height:37px; border-left:4px solid #0696d7; }
+.mg-blauwe-pijl::after { content:""; position:absolute; left:-9px; bottom:-9px; border-top:12px solid #0696d7; border-left:7px solid transparent; border-right:7px solid transparent; }
+body.toont-oplossingen .mg-heel { background:#e5f6e8; border-color:#27ae60; color:#006100; font-weight:700; }
+@media (max-width:700px){.breuken-grid{grid-template-columns:1fr}}
+@media (max-width:900px){.mg-oef.mg-uitgewerkt{grid-template-columns:1fr}.mg-schrijf{min-height:230px}.breuken-grid.mg-grid-kijk{grid-template-columns:1fr}}
+.pdf-progress-overlay{position:fixed;right:24px;bottom:24px;z-index:100000;display:none;background:transparent}
+.pdf-progress-overlay.zichtbaar{display:block}
+.pdf-progress-kaart{width:min(430px,calc(100vw - 40px));padding:24px 26px 22px;border-radius:16px;background:#fff;box-shadow:0 18px 55px rgba(0,0,0,.28);color:#17385d;text-align:center}
+.pdf-progress-titel{margin-bottom:16px;font-size:20px;font-weight:800}
+.pdf-progress-balk{height:18px;overflow:hidden;border:1px solid #b9c9da;border-radius:999px;background:#e9f0f7;box-shadow:inset 0 1px 2px rgba(0,0,0,.08)}
+.pdf-progress-vulling{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#3186d5,#20b879);transition:width .22s ease}
+.pdf-progress-status{min-height:21px;margin-top:12px;font-size:15px;color:#52677d}
+.pdf-progress-percentage{margin-top:3px;font-size:17px;font-weight:800;color:#176db5}
+body.pdf-opname .breuk-invul{min-width:46px;gap:9px}
+body.pdf-opname .breuk-invul .breuk-teller,body.pdf-opname .breuk-invul .breuk-noemer{width:40px;min-width:40px;height:44px;min-height:44px;font-size:23px;line-height:32px}
+body.pdf-opname .mg-heel{width:36px;height:42px;font-size:22px}
+body.pdf-opname .mg-puntbreuk .breuk-teller,body.pdf-opname .mg-puntbreuk .breuk-noemer{min-width:38px;min-height:27px;font-size:23px}
+body.pdf-opname .mg-geheel-lijn{width:42px;height:30px}
+body.pdf-opname .mg-factor{font-size:19px}
+body.pdf-opname .mg-factor{left:14px}
+body.pdf-opname .mg-factor i{width:42px;min-height:23px}
+body.pdf-opname .mg-conv-mini{width:175px;gap:16px}
+body.pdf-opname .mg-schrijf-conversie{height:142px;margin-top:26px;margin-bottom:2px}
+body.pdf-opname .mg-schrijf{min-height:350px;padding-bottom:30px}
+body.pdf-opname .mg-schrijf-uitkomst{padding-bottom:8px}
+body.pdf-opname .mg-kijk{min-height:365px;padding:22px 30px 38px 20px;gap:24px}
+body.pdf-opname .mg-kijk-beelden{min-height:135px}
+body.pdf-opname .mg-kijk-som{font-size:22px;min-height:92px;gap:9px}
+body.pdf-opname .mg-kijk-omzet{height:142px;margin-top:-12px;margin-bottom:6px}
+body.pdf-opname .mg-kijk-omzetregel{top:48px;font-size:21px}
+body.pdf-opname .mg-taart{width:68px;height:68px}
+body.pdf-opname .mg-strook{width:102px;height:40px}
+body.pdf-opname .mg-oef{font-size:24px}
+body.pdf-opname .mg-vraag{font-size:28px;min-height:58px}
+body.pdf-opname .mg-oef .breuk{min-width:38px;font-size:24px}
+body.pdf-opname .mg-oef .breuk-teller{min-height:25px;padding-bottom:3px}
+body.pdf-opname .mg-oef .breuk-noemer{padding-top:3px}
+body.pdf-opname .mg-schrijf>em{font-size:27px}
+body.pdf-opname .mg-schrijf-som{font-size:25px;gap:14px}
+body.pdf-opname .mg-schema-start,body.pdf-opname .mg-schema-rij{font-size:24px;min-height:64px}
+body.pdf-opname .mg-taart{width:88px;height:88px}
+body.pdf-opname .mg-strook{width:124px;height:48px}
+body.pdf-opname .mg-kijk-beelden{min-height:175px;gap:16px}
+body.pdf-opname .mg-kijk-beelden>span{min-width:155px}
+body.pdf-opname .mg-kijk-beelden .mg-stroken{max-width:275px}
+body.pdf-opname .mg-kijk-som{font-size:26px;min-height:108px}
+body.pdf-opname .breuk-invul{min-width:54px}
+body.pdf-opname .breuk-invul .breuk-teller,body.pdf-opname .breuk-invul .breuk-noemer{width:48px;min-width:48px;height:50px;min-height:50px;font-size:27px;line-height:36px}
+body.pdf-opname .mg-heel{width:43px;height:49px;font-size:25px}
+body.pdf-opname .mg-puntbreuk .breuk-teller,body.pdf-opname .mg-puntbreuk .breuk-noemer{min-width:45px;min-height:31px;font-size:27px}
+body.pdf-opname .mg-geheel-lijn{width:50px;height:35px}
+body.pdf-opname .mg-kijk{min-height:455px;padding-bottom:48px}
+body.pdf-opname .mg-schrijf{min-height:430px}
+body.pdf-opname .mg-schrijf-conversie{height:190px;margin-top:34px;margin-bottom:10px}
+body.pdf-opname .mg-conv-mini{left:calc(50% + 62px);top:4px;width:220px;height:142px;gap:22px;font-size:25px}
+body.pdf-opname .mg-schrijf-conversie.mg-conv-links .mg-conv-mini{left:142px}
+body.pdf-opname .mg-conv-mini svg{left:2px;top:0;width:142px;height:136px}
+body.pdf-opname .mg-conv-mini svg path{stroke-width:2.5}
+body.pdf-opname .mg-factor{left:27px;font-size:22px}
+body.pdf-opname .mg-factor-boven{top:-24px}
+body.pdf-opname .mg-factor-onder{bottom:-30px}
+body.pdf-opname .mg-factor i{width:52px;min-height:27px}
+.komma-trans-balk .onder{min-height:24px;padding:5px 9px;color:#0672b8;border-bottom:0}.komma-trans-balk .onder::after{content:"";position:absolute;left:22%;right:22%;bottom:5px;border-bottom:1px solid #aeb8c0}.komma-trans-onder{width:210px;display:flex;justify-content:space-between;margin:-12px 0 -17px}.komma-trans-term{position:relative;width:72px;height:58px;display:block}.komma-trans-term>b{position:absolute;left:50%;top:0;font-size:31px;font-weight:400;line-height:31px}.komma-trans-term>i{position:absolute;right:28px;top:25px;width:58px;min-height:20px;border-bottom:1px solid #aeb8c0;color:#0672b8;font-size:14px;font-style:normal;text-align:right}.komma-trans-nieuw{display:grid;grid-template-columns:60px 18px 60px 18px 72px;align-items:center;justify-content:center;gap:5px}.komma-trans-nieuw>span{min-height:24px;border-bottom:1px solid #aeb8c0;color:#0672b8;text-align:center}
+body.pdf-opname .komma-trans-balk{width:86%}body.pdf-opname .komma-trans-balk span{padding:12px}body.pdf-opname .komma-trans-balk .onder{min-height:32px}body.pdf-opname .komma-trans-onder{width:275px;margin-top:-14px}body.pdf-opname .komma-trans-term{width:92px;height:75px}body.pdf-opname .komma-trans-term>b{font-size:40px;line-height:40px}body.pdf-opname .komma-trans-term>i{top:34px;right:36px;width:76px;font-size:19px}.pdf-opname .komma-trans-nieuw{grid-template-columns:78px 24px 78px 24px 94px;font-size:23px}
+.komma-compenseren .komma-rond-term::before{left:-72px;top:76px;width:90px;transform:rotate(-35deg);transform-origin:left center}
+.komma-compenseren .komma-rond-term::after{left:-78px;top:72px;border:0;border-right:8px solid #444;border-top:5px solid transparent;border-bottom:5px solid transparent;transform:rotate(-35deg)}
+.komma-compenseren .komma-comp-werk{grid-template-columns:180px 1fr;margin-top:35px}.komma-compenseren .komma-comp-correctie{width:160px;min-width:160px;height:40px;box-sizing:border-box}.komma-compenseren .komma-comp-correctie .breuk-antwoord{width:100%;min-height:27px}
+body.pdf-opname .komma-compenseren .komma-comp-werk{grid-template-columns:230px 1fr;margin-top:62px}body.pdf-opname .komma-compenseren .komma-comp-correctie{width:205px;min-width:205px;height:52px}body.pdf-opname .komma-compenseren .komma-rond-term::before{left:-94px;top:96px;width:115px}body.pdf-opname .komma-compenseren .komma-rond-term::after{left:-101px;top:91px}
+.komma-transform .komma-strategie-som,.komma-transform .komma-trans-nieuw,.komma-transform .komma-trans-onder{width:250px;display:grid;grid-template-columns:60px 18px 60px 18px 72px;align-items:center;justify-content:center;gap:5px;box-sizing:border-box}
+.komma-transform .komma-strategie-som{text-align:center}.komma-transform .komma-strategie-som .komma-antwoord{min-width:0;width:72px}
+.komma-transform .komma-trans-onder{height:64px;margin:-10px 0 -15px}.komma-transform .komma-trans-onder .komma-trans-term:first-child{grid-column:1}.komma-transform .komma-trans-onder .komma-trans-term:last-child{grid-column:3}.komma-transform .komma-trans-term{width:60px}.komma-transform .komma-trans-term>b{left:50%;transform:translateX(-50%)}
+.komma-transform .komma-trans-term>i{top:14px;width:54px}.komma-transform .komma-trans-term:first-child>i{right:38px;text-align:right}.komma-transform .komma-trans-term:last-child>i{left:38px;right:auto;text-align:left}
+body.pdf-opname .komma-transform .komma-strategie-som,body.pdf-opname .komma-transform .komma-trans-nieuw,body.pdf-opname .komma-transform .komma-trans-onder{width:330px;grid-template-columns:78px 24px 78px 24px 94px;gap:7px}body.pdf-opname .komma-transform .komma-strategie-som .komma-antwoord{width:94px}body.pdf-opname .komma-transform .komma-trans-onder{height:82px}body.pdf-opname .komma-transform .komma-trans-term>i{top:19px;width:72px}body.pdf-opname .komma-transform .komma-trans-term:first-child>i{right:50px}body.pdf-opname .komma-transform .komma-trans-term:last-child>i{left:50px;right:auto}
+.radio-chip.radio-chip-nog-niet{opacity:.55;cursor:not-allowed}.radio-chip.radio-chip-nog-niet::after{content:"later";margin-left:5px;font-size:10px;font-weight:700;color:#a46b00}
+.komma-voorbeeld-vink{margin-top:8px;padding:8px 10px}.komma-getallen-grid.komma-aftrek-brug-splitsen,.komma-getallen-grid.komma-aftrek-brug-schijfjes{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-aftrek-brug-splits{min-height:225px;display:grid;grid-template-columns:145px 1fr;grid-template-rows:58px 125px;align-items:start;gap:6px 22px;padding:20px 34px 18px 20px}.komma-brug-hoofd{display:flex;align-items:center;gap:10px;font-size:21px;white-space:nowrap}.komma-brug-antwoord{display:inline-flex;width:70px;height:39px;border:1.5px solid #9fbfce;border-radius:3px;align-items:center;justify-content:center;color:#0672b8;font-weight:700}.komma-split-boom{position:relative;grid-column:1;grid-row:2;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:42px}.komma-split-boom>i::before,.komma-split-boom>i::after{content:"";position:absolute;top:12px;width:48px;border-top:1.5px solid #8db3c7}.komma-split-boom>i::before{left:24px;transform:rotate(-38deg)}.komma-split-boom>i::after{right:24px;transform:rotate(38deg)}.komma-split-vak{height:48px;border:1.5px solid #9fbfce;display:flex;align-items:center;justify-content:center;color:#0672b8;font-weight:700}.komma-brug-stappen{grid-column:2;grid-row:1/3;display:flex;flex-direction:column;gap:29px;padding-top:62px}.komma-brug-lijn{display:block;min-height:27px;border-bottom:1px solid #adb8c1;color:#0672b8;font-size:18px}
+.komma-aftrek-brug-schema{min-height:370px;display:flex;flex-direction:column;align-items:stretch;padding:18px 30px 20px 18px}.komma-wissel-schema{border:1.5px solid #777;background:#ddd}.komma-wissel-kop{display:grid;grid-template-columns:1fr 12px 1fr}.komma-wissel-kop b{padding:5px;text-align:center;background:#ffd400}.komma-wissel-kop b:nth-child(2){background:#aaa;padding:5px 0}.komma-wissel-kop b:last-child{background:#ffe49b}.komma-wissel-boven,.komma-wissel-onder{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:7px}.komma-wissel-boven>span,.komma-wissel-onder>span{min-height:48px;padding:5px;background:#fff;display:flex;flex-wrap:wrap;align-content:flex-start;gap:3px}.komma-wissel-onder>span{border:2px solid #c2c6ca;border-radius:10px}.komma-aftrek-brug-schema .komma-brug-hoofd{margin-top:13px}.komma-aftrek-brug-schema .komma-brug-stappen{padding-top:12px;margin-left:145px}.komma-voorbeeld{background:#fff1df!important;border:2px solid #f39a35!important}.komma-voorbeeld-antwoord{color:#087ab7!important;font-weight:700}.komma-voorbeeld .komma-schijf.weg::after{display:block}
+body.pdf-opname .komma-aftrek-brug-splits{min-height:300px;grid-template-columns:190px 1fr;grid-template-rows:75px 165px;padding:28px 42px 24px 26px}.pdf-opname .komma-aftrek-brug-schema{min-height:500px;padding:25px 42px 30px 25px}.pdf-opname .komma-brug-hoofd{font-size:28px}.pdf-opname .komma-brug-antwoord{width:92px;height:52px}.pdf-opname .komma-split-vak{height:62px;font-size:24px}.pdf-opname .komma-brug-lijn{min-height:37px;font-size:24px}.pdf-opname .komma-brug-stappen{gap:39px;padding-top:82px}.pdf-opname .komma-aftrek-brug-schema .komma-brug-stappen{padding-top:16px;margin-left:190px}.pdf-opname .komma-wissel-boven>span,.pdf-opname .komma-wissel-onder>span{min-height:70px;padding:8px;gap:5px}
+.komma-split-boom>i{position:absolute;inset:0;pointer-events:none}
+.komma-voorbeeld-keuze{display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 10px;border:1px solid #e3b06f;border-radius:7px;background:#fff7ea;font-size:13px;font-weight:600;cursor:pointer}.komma-voorbeeld-keuze input{width:17px;height:17px;accent-color:#ef8e24}
+.komma-aftrek-brug-splits{grid-template-columns:190px minmax(0,1fr)}
+.komma-brug-somdelen{display:grid;grid-template-columns:38px 16px 50px 16px 58px;width:178px;margin-left:30px;gap:0;text-align:center}.komma-brug-somdelen>*{justify-self:center}.komma-brug-somdelen .komma-brug-antwoord{width:56px;height:36px}
+.komma-split-boom{width:98px;grid-template-columns:45px 45px;gap:8px;padding-top:30px}.komma-split-boom.split-eerste{margin-left:0}.komma-split-boom.split-tweede{margin-left:60px}.komma-split-vak{width:45px;height:40px;box-sizing:border-box}.komma-split-boom>i::before,.komma-split-boom>i::after{top:8px;width:34px}.komma-split-boom>i::before{left:23px;transform:rotate(-35deg)}.komma-split-boom>i::after{right:23px;transform:rotate(35deg)}
+.komma-voorbeeld::before{content:"Voorbeeld";position:absolute;left:9px;top:7px;padding:2px 7px;border-radius:999px;background:#ef8e24;color:#fff;font-size:11px;font-weight:800;z-index:3}.komma-voorbeeld{padding-top:30px!important}
+.komma-voorbeeld-label{display:none}
+body.pdf-opname .komma-aftrek-brug-splits{grid-template-columns:250px minmax(0,1fr)}body.pdf-opname .komma-brug-somdelen{grid-template-columns:50px 21px 66px 21px 76px;width:234px;margin-left:40px}.pdf-opname .komma-brug-somdelen .komma-brug-antwoord{width:74px;height:48px}.pdf-opname .komma-split-boom{width:130px;grid-template-columns:60px 60px;gap:10px;padding-top:40px}.pdf-opname .komma-split-boom.split-tweede{margin-left:80px}.pdf-opname .komma-split-vak{width:60px;height:53px}.pdf-opname .komma-split-boom>i::before,.pdf-opname .komma-split-boom>i::after{top:11px;width:45px}.pdf-opname .komma-split-boom>i::before{left:30px}.pdf-opname .komma-split-boom>i::after{right:30px}
+.komma-split-boom{top:-36px}.komma-split-boom>i::before,.komma-split-boom>i::after{left:50%;right:auto;top:3px;width:38px;transform-origin:left center}.komma-split-boom>i::before{transform:rotate(145deg)}.komma-split-boom>i::after{transform:rotate(35deg)}
+body.pdf-opname .komma-split-boom{top:-45px}body.pdf-opname .komma-split-boom>i::before,body.pdf-opname .komma-split-boom>i::after{left:50%;right:auto;top:4px;width:50px}body.pdf-opname .komma-split-boom>i::before{transform:rotate(145deg)}body.pdf-opname .komma-split-boom>i::after{transform:rotate(35deg)}
+.komma-getallen-grid.komma-aftrek-brug-tienden{grid-template-columns:1fr}.komma-getallen-grid.komma-aftrek-brug-kort{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-brug-tienden{min-height:105px;padding-left:28px;font-size:20px}.komma-brug-kort{min-height:105px;display:flex;align-items:center;padding:20px 35px 20px 25px;font-size:21px}.komma-brug-lange-lijn{display:inline-block;flex:1;min-width:140px;min-height:28px;margin-left:7px;border-bottom:1.5px solid #9aa5ae;color:#0672b8;font-weight:700}
+body.pdf-opname .komma-brug-tienden{min-height:145px;padding-left:38px;font-size:26px}body.pdf-opname .komma-brug-kort{min-height:145px;padding:28px 45px 28px 34px;font-size:28px}body.pdf-opname .komma-brug-lange-lijn{min-width:190px;min-height:36px}
+/* Rekenroosters kommagetallen */
+.komma-getallen-grid.komma-rooster,
+.komma-getallen-grid.komma-aftrek-rooster{grid-template-columns:minmax(0,1fr)}
+.komma-rooster-oef{padding:18px 22px;overflow-x:auto}
+.komma-rekenrooster{width:100%;max-width:820px;margin:0 auto;border-collapse:collapse;table-layout:fixed;font-size:19px;color:#24384f}
+.komma-rekenrooster th,.komma-rekenrooster td{border:1px solid #aec6d4;text-align:center;height:58px;padding:5px}
+.komma-rekenrooster thead th{background:#bfe8f5;font-weight:700}
+.komma-rekenrooster tbody th{background:#dff2f8;font-weight:700}
+.komma-rekenrooster .rooster-hoek{position:relative;background:#fff}
+.komma-rekenrooster .rooster-hoek::after{content:"";position:absolute;inset:5px;background:linear-gradient(135deg,transparent 49%,#79cde7 50%,#79cde7 51%,transparent 52%)}
+.komma-rekenrooster .rooster-hoek span{position:relative;z-index:1;font-size:25px}
+.komma-rekenrooster td .breuk-antwoord{display:block;width:78%;min-width:42px;height:30px;margin:0 auto;border:0;border-bottom:1.5px solid #aebbc5;border-radius:0}
+body.toont-oplossingen .komma-rekenrooster td .breuk-antwoord{border-bottom-color:#159447}
+@media print{
+  .komma-rooster-oef{padding:10px 14px;overflow:visible;break-inside:avoid}
+  .komma-rekenrooster{max-width:none;font-size:15px}
+  .komma-rekenrooster th,.komma-rekenrooster td{height:43px;padding:3px}
+}
+
+/* Schrijf als tienden: steeds twee per rij en goed leesbaar in de PDF. */
+.komma-getallen-grid.komma-tienden,
+.komma-getallen-grid.komma-aftrek-tienden,
+.komma-getallen-grid.komma-aftrek-brug-tienden{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.komma-tienden,
+.komma-brug-tienden{
+  min-height:132px;
+  padding:22px 24px;
+  font-size:21px;
+  line-height:1.65;
+}
+.komma-tienden .komma-lijn,
+.komma-brug-tienden .komma-lijn{
+  width:66px;
+  height:29px;
+}
+body.pdf-opname .komma-getallen-grid.komma-tienden,
+body.pdf-opname .komma-getallen-grid.komma-aftrek-tienden,
+body.pdf-opname .komma-getallen-grid.komma-aftrek-brug-tienden{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+body.pdf-opname .komma-tienden,
+body.pdf-opname .komma-brug-tienden{
+  min-height:190px;
+  padding:34px 28px;
+  font-size:31px;
+  line-height:1.75;
+}
+body.pdf-opname .komma-tienden .komma-lijn,
+body.pdf-opname .komma-brug-tienden .komma-lijn{
+  width:96px;
+  height:40px;
+  border-bottom-width:2px;
+}
+
+/* Gebogen richtingspijl in de hoek van het rekenrooster. */
+.komma-rekenrooster .rooster-hoek::before{
+  content:"";
+  position:absolute;
+  right:8px;
+  top:8px;
+  width:30%;
+  height:62%;
+  border-top:2px solid #69c9e7;
+  border-left:2px solid #69c9e7;
+  border-radius:95% 0 0 0;
+}
+.komma-rekenrooster .rooster-hoek::after{
+  content:"";
+  position:absolute;
+  left:auto;
+  bottom:auto;
+  right:6px;
+  top:4px;
+  width:9px;
+  height:9px;
+  background:none;
+  border-top:2px solid #69c9e7;
+  border-right:2px solid #69c9e7;
+  transform:rotate(24deg);
+}
+.komma-rekenrooster .rooster-hoek span{
+  position:absolute;
+  left:35%;
+  bottom:12px;
+  z-index:1;
+  font-size:25px;
+  line-height:1;
+}
+body.pdf-opname .komma-rooster-oef{
+  padding:24px 30px;
+  overflow:visible;
+}
+body.pdf-opname .komma-rekenrooster{
+  max-width:none;
+  font-size:29px;
+}
+body.pdf-opname .komma-rekenrooster th,
+body.pdf-opname .komma-rekenrooster td{
+  height:88px;
+  padding:8px;
+}
+body.pdf-opname .komma-rekenrooster td .breuk-antwoord{
+  width:82%;
+  min-width:68px;
+  height:48px;
+  font-size:27px;
+  border-bottom-width:2px;
+}
+body.pdf-opname .komma-rekenrooster .rooster-hoek span{
+  bottom:19px;
+  font-size:35px;
+}
+body.pdf-opname .komma-rekenrooster .rooster-hoek::before{
+  right:12px;
+  top:12px;
+  border-width:3px 0 0 3px;
+}
+body.pdf-opname .komma-rekenrooster .rooster-hoek::after{
+  left:auto;
+  bottom:auto;
+  right:9px;
+  top:7px;
+  width:13px;
+  height:13px;
+  border-width:3px 3px 0 0;
+}
+
+/* Aftrekken met brug via aanvullen. */
+.komma-getallen-grid.komma-aftrek-brug-aanvullen{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.komma-brug-aanvullen{
+  min-height:205px;
+}
+.komma-brug-aanvullen .komma-aanvul-regels{
+  gap:10px;
+  line-height:1.35;
+}
+.komma-brug-aanvullen .komma-aanvul-regels>b{
+  font-weight:500;
+}
+body.pdf-opname .komma-brug-aanvullen{
+  min-height:275px;
+}
+body.pdf-opname .komma-brug-aanvullen .komma-aanvul-regels{
+  gap:14px;
+  font-size:25px;
+}
+
+/* Aftrekken met brug via compenseren. */
+.komma-getallen-grid.komma-aftrek-brug-compenseren{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.komma-aftrek-compenseren{
+  min-height:235px;
+}
+.komma-aftrek-compenseren .komma-schrijfregels{
+  gap:16px;
+}
+body.pdf-opname .komma-aftrek-compenseren{
+  min-height:320px;
+}
+
+/* Aftrekken met brug via transformeren. */
+.komma-getallen-grid.komma-aftrek-brug-transformeren{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.komma-aftrek-transform{
+  min-height:300px;
+  flex-direction:column;
+  justify-content:flex-start;
+  gap:12px;
+  padding:18px 24px 20px;
+}
+.komma-aftrek-trans-schema{
+  width:100%;
+  display:grid;
+  grid-template-columns:92px minmax(120px,1fr) 105px;
+  grid-template-rows:42px 42px;
+  font-size:20px;
+  font-weight:600;
+}
+.komma-aftrek-trans-schema>span{display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.komma-aftrek-trans-schema .correctie{min-height:30px;padding:5px 8px;border:0;border-bottom:1px solid #aeb8c0;color:#087ab7}
+.komma-aftrek-trans-schema .term-a{grid-column:2/4;grid-row:1;background:#c9eaf3}
+.komma-aftrek-trans-schema .term-b{grid-column:2;grid-row:2;background:#c9eaf3}
+.komma-aftrek-trans-schema .vraag{grid-column:3;grid-row:2;background:#e7ecef;font-size:22px}
+.komma-aftrek-trans-schema .correctie:first-child{grid-column:1;grid-row:1}
+.komma-aftrek-trans-schema .correctie:nth-child(3){grid-column:1;grid-row:2}
+.komma-aftrek-transform.transform-plus .komma-aftrek-trans-schema .correctie{background:#fff0bc}
+.komma-aftrek-transform.transform-min .komma-aftrek-trans-schema .correctie{background:#c9eaf3}
+.komma-aftrek-transform.transform-min .komma-aftrek-trans-schema .correctie{border-right:2px dashed #52c5e5}
+.komma-h-aftrek-trans-schema .correctie{background:#fff0bc}
+.komma-h-aftrek-transform:not(.met-schema){min-height:250px}
+.komma-getallen-grid.komma-aftrek-splitsen-honderdsten-brug,
+.komma-getallen-grid.komma-aftrek-compenseren-honderdsten,
+.komma-getallen-grid.komma-aftrek-transformeren-honderdsten{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-aftrek-honderdsten-brug{grid-template-columns:minmax(0,1fr)}
+body.pdf-opname .komma-h-aftrek-transform:not(.met-schema){min-height:320px}
+.komma-getallen-grid.komma-getalpuzzel{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getalpuzzel{min-height:330px;padding:18px;overflow:visible}
+.komma-puzzel-ring{position:relative;width:270px;height:240px;border:3px solid #72a5b3;border-radius:50%;margin:auto}
+.puzzel-getal{position:absolute;display:flex;align-items:center;justify-content:center;width:76px;min-width:76px;height:48px;border:2px solid #00aee9;border-radius:12px;background:#fff;font-size:20px;font-weight:700;box-sizing:border-box}
+.puzzel-getal.boven{left:96px;top:-25px}.puzzel-getal.rechts{right:-40px;top:94px}.puzzel-getal.onder{left:96px;bottom:-25px}.puzzel-getal.links{left:-40px;top:94px}
+.puzzel-bewerking{position:absolute;padding:2px 5px;background:#fff;font-size:17px;white-space:nowrap}
+.puzzel-bewerking.b0{right:-18px;top:34px}.puzzel-bewerking.b1{right:-22px;bottom:34px}.puzzel-bewerking.b2{left:-18px;bottom:34px}.puzzel-bewerking.b3{left:-18px;top:34px}
+body.pdf-opname .komma-getalpuzzel{min-height:350px;padding:28px 18px}
+body.pdf-opname .komma-puzzel-ring{width:300px;height:260px}
+.komma-aftrek-trans-som,.komma-aftrek-trans-nieuw{
+  width:315px;
+  display:grid;
+  grid-template-columns:70px 22px 70px 22px 85px;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  font-size:20px;
+  text-align:center;
+}
+.komma-aftrek-trans-som .komma-antwoord,.komma-aftrek-trans-nieuw .breuk-antwoord{min-height:28px;border-bottom:1px solid #aeb8c0;color:#087ab7}
+.komma-aftrek-trans-pijlen{
+  width:315px;
+  display:grid;
+  grid-template-columns:70px 22px 70px 22px 85px;
+  gap:6px;
+  margin:-8px 0 -7px;
+  justify-content:center;
+}
+.komma-aftrek-trans-pijlen>span{position:relative;height:69px}
+.komma-aftrek-trans-pijlen>span:first-child{grid-column:1}
+.komma-aftrek-trans-pijlen>span:last-child{grid-column:3}
+.komma-aftrek-trans-pijlen b{position:absolute;left:50%;top:8px;transform:translateX(-50%) scaleY(1.25);transform-origin:top center;font-size:38px;font-weight:400;line-height:1}
+.komma-aftrek-trans-pijlen i{position:absolute;top:25px;width:55px;min-height:21px;border-bottom:1px solid #aeb8c0;color:#087ab7;font-style:normal;font-size:15px}
+.komma-aftrek-trans-pijlen>span:first-child i{right:48px;text-align:right}
+.komma-aftrek-trans-pijlen>span:last-child i{left:48px;text-align:left}
+body.pdf-opname .komma-aftrek-transform{min-height:405px;padding:25px 32px 28px;gap:16px}
+body.pdf-opname .komma-aftrek-trans-schema{grid-template-columns:122px minmax(160px,1fr) 140px;grid-template-rows:57px 57px;font-size:27px}
+body.pdf-opname .komma-aftrek-trans-som,body.pdf-opname .komma-aftrek-trans-nieuw{width:420px;grid-template-columns:94px 29px 94px 29px 114px;font-size:27px}
+body.pdf-opname .komma-aftrek-trans-pijlen{width:420px;grid-template-columns:94px 29px 94px 29px 114px;gap:7px;height:78px;margin-left:0}
+body.pdf-opname .komma-aftrek-trans-pijlen b{font-size:49px;top:12px}
+body.pdf-opname .komma-aftrek-trans-pijlen i{top:35px;width:74px;font-size:20px}
+body.pdf-opname .komma-aftrek-trans-pijlen>span:first-child i{right:64px}
+body.pdf-opname .komma-aftrek-trans-pijlen>span:last-child i{left:64px}
+
+/* Optellen zonder brug tot op een honderdste. */
+.komma-getallen-grid.komma-honderdsten,
+.komma-getallen-grid.komma-splitsen-honderdsten{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.komma-getallen-grid.komma-honderdsten,
+.komma-getallen-grid.komma-honderdsten-brug{grid-template-columns:minmax(0,1fr)}
+.komma-honderdsten{
+  min-height:138px;
+  padding:22px 14px;
+  font-size:17px;
+  line-height:1.7;
+  white-space:nowrap;
+}
+.komma-honderdsten .komma-lijn{width:52px;height:29px}
+.komma-honderdsten .komma-antwoord{width:52px;min-width:52px}
+.komma-splits-honderdsten{
+  min-height:270px;
+  display:grid;
+  grid-template-columns:225px minmax(190px,1fr);
+  align-items:start;
+  gap:18px;
+  padding:22px 28px 20px 20px;
+}
+.komma-h-hoofdsom{display:flex;align-items:flex-start;gap:7px;font-size:20px;white-space:nowrap}
+.komma-h-term{position:relative;display:inline-flex;justify-content:center;min-width:58px}
+.komma-h-splitsbeen{
+  position:absolute;
+  left:50%;
+  top:31px;
+  width:180px;
+  transform:translateX(-50%);
+  display:grid;
+  grid-template-columns:repeat(3,54px);
+  gap:9px;
+  padding-top:38px;
+}
+.komma-h-splitsbeen svg{position:absolute;left:0;top:0;width:180px;height:38px;overflow:visible}
+.komma-h-splitsbeen svg line{stroke:#8db3c7;stroke-width:1.5}
+.komma-h-splitsbeen .komma-vak{width:54px;height:46px;box-sizing:border-box;display:flex;align-items:center;justify-content:center}
+.komma-h-stappen{display:flex;flex-direction:column;gap:22px;padding-top:47px}
+.komma-h-stappen>span{display:block;min-height:27px;border-bottom:1px solid #aeb8c0;color:#087ab7;font-size:18px}
+body.pdf-opname .komma-honderdsten{min-height:190px;padding:32px 24px;font-size:27px}
+body.pdf-opname .komma-honderdsten .komma-lijn{width:82px;height:39px}
+body.pdf-opname .komma-honderdsten .komma-antwoord{width:82px;min-width:82px}
+body.pdf-opname .komma-splits-honderdsten{min-height:365px;grid-template-columns:267px minmax(255px,1fr);gap:12px;padding:30px 38px 28px 27px}
+body.pdf-opname .komma-h-hoofdsom{font-size:27px}
+body.pdf-opname .komma-h-splitsbeen{top:42px;width:240px;grid-template-columns:repeat(3,72px);gap:12px;padding-top:51px}
+body.pdf-opname .komma-h-splitsbeen svg{width:240px;height:51px}
+body.pdf-opname .komma-h-splitsbeen .komma-vak{width:72px;height:62px;font-size:23px}
+body.pdf-opname .komma-h-stappen{gap:30px;padding-top:63px}
+body.pdf-opname .komma-h-stappen>span{min-height:37px;font-size:24px}
+
+.komma-getallen-grid.komma-kort-honderdsten{grid-template-columns:repeat(3,minmax(0,1fr))}
+.komma-getallen-grid.komma-kort-honderdsten-brug,
+.komma-getallen-grid.komma-tussenstappen-honderdsten-brug{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-kort-honderdsten{min-height:105px;padding:18px 26px;font-size:20px;gap:9px}
+.komma-kort-honderdsten .komma-brug-lange-lijn{min-width:95px}
+.komma-getallen-grid.komma-rooster-honderdsten{grid-template-columns:minmax(0,1fr)}
+body.pdf-opname .komma-kort-honderdsten{
+  min-height:100px;
+  padding:16px 18px;
+  font-size:23px;
+  flex-direction:row;
+  flex-wrap:nowrap;
+  align-items:center;
+  gap:12px;
+}
+body.pdf-opname .komma-kort-honderdsten>span:first-child{white-space:nowrap;flex:0 0 auto}
+body.pdf-opname .komma-kort-honderdsten .komma-brug-lange-lijn{width:auto;min-width:90px;max-width:125px;flex:1 1 105px}
+.komma-h-werk{min-height:245px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:24px 30px;gap:25px}
+.komma-h-werk-som{display:flex;align-items:center;gap:14px;font-size:21px;white-space:nowrap}
+.komma-h-werk-som .komma-antwoord{min-width:82px;height:36px;border:1px solid #9fc0d0}
+.komma-h-werk-regels{display:flex;flex-direction:column;gap:22px;padding-left:38%}
+.komma-h-werk-regels>span{display:block;min-height:28px;border-bottom:1px solid #aeb8c0;color:#087ab7;text-align:left}
+body.pdf-opname .komma-h-werk{min-height:310px;padding:32px 40px;gap:32px}
+body.pdf-opname .komma-h-werk-som{font-size:28px;gap:18px}
+body.pdf-opname .komma-h-werk-som .komma-antwoord{min-width:110px;height:48px}
+body.pdf-opname .komma-h-werk-regels{gap:29px}
+body.pdf-opname .komma-h-werk-regels>span{min-height:38px;font-size:23px}
+
+/* Optellen met brug tot op een honderdste. */
+.komma-getallen-grid.komma-splitsen-honderdsten-brug,
+.komma-getallen-grid.komma-compenseren-honderdsten,
+.komma-getallen-grid.komma-transformeren-honderdsten{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-h-comp{min-height:235px}
+.komma-transform-h-schema-keuze{align-items:center;gap:8px;margin-top:9px;padding:9px 10px;border:1px solid #8fc9da;border-radius:7px;background:#eefaff;font-size:13px;font-weight:600}
+.komma-transform-h-schema-keuze input{width:17px;height:17px;accent-color:#168fbd}
+.komma-aftrek-transform-h-schema-keuze{align-items:center;gap:8px;margin-top:9px;padding:9px 10px;border:1px solid #8fc9da;border-radius:7px;background:#eefaff;font-size:13px;font-weight:600;cursor:pointer}
+.komma-aftrek-transform-h-schema-keuze input{display:block;width:17px;height:17px;accent-color:#168fbd;flex:0 0 auto}
+.komma-h-transform{min-height:240px;flex-direction:column;justify-content:flex-start;gap:8px;padding:18px 26px 20px}
+.komma-h-transform.met-schema{min-height:325px}
+.komma-h-trans-schema{width:88%;display:grid;grid-template-columns:2fr 1fr;grid-template-rows:43px 43px;margin-bottom:8px;font-size:19px}
+.komma-h-trans-schema>span{display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.komma-trans-balk>span:nth-child(n+3),
+.komma-h-trans-schema>span:nth-child(n+3){border-top:2px solid #fff}
+.komma-h-trans-schema .blauw{background:#c9eaf3}
+.komma-h-trans-schema .geel{background:#fff0bc}
+.komma-h-trans-schema .breuk-antwoord{min-height:29px;padding-top:7px;border-bottom:1px solid #aeb8c0;color:#087ab7}
+.komma-h-trans-som,.komma-h-trans-nieuw{width:320px;display:grid;grid-template-columns:72px 22px 72px 22px 88px;gap:5px;align-items:center;justify-content:center;text-align:center;font-size:20px}
+.komma-h-trans-som .komma-antwoord,.komma-h-trans-nieuw .breuk-antwoord{min-height:28px;border-bottom:1px solid #aeb8c0;color:#087ab7}
+.komma-h-trans-pijlen{width:320px;display:grid;grid-template-columns:72px 22px 72px 22px 88px;gap:5px;justify-content:center;margin:-7px 0 -5px}
+.komma-h-trans-pijlen>span{position:relative;height:67px}
+.komma-h-trans-pijlen>span:first-child{grid-column:1}.komma-h-trans-pijlen>span:last-child{grid-column:3}
+.komma-h-trans-pijlen b{position:absolute;left:50%;top:8px;transform:translateX(-50%) scaleY(1.2);font-size:37px;font-weight:400;line-height:1}
+.komma-h-trans-pijlen i{position:absolute;top:24px;width:58px;min-height:21px;border-bottom:1px solid #aeb8c0;color:#087ab7;font-style:normal;font-size:15px}
+.komma-h-trans-pijlen>span:first-child i{right:48px;text-align:right}.komma-h-trans-pijlen>span:last-child i{left:48px;text-align:left}
+body.pdf-opname .komma-h-comp{min-height:320px}
+body.pdf-opname .komma-h-transform{min-height:325px;padding:25px 35px 28px}
+body.pdf-opname .komma-h-transform.met-schema{min-height:440px}
+body.pdf-opname .komma-h-trans-schema{grid-template-rows:58px 58px;font-size:26px}
+body.pdf-opname .komma-h-trans-som,body.pdf-opname .komma-h-trans-nieuw{width:430px;grid-template-columns:96px 30px 96px 30px 118px;gap:7px;font-size:27px}
+body.pdf-opname .komma-h-trans-pijlen{width:430px;grid-template-columns:96px 30px 96px 30px 118px;gap:7px}
+body.pdf-opname .komma-h-trans-pijlen>span{height:88px}
+body.pdf-opname .komma-h-trans-pijlen b{font-size:49px;top:10px}
+body.pdf-opname .komma-h-trans-pijlen i{top:34px;width:78px;font-size:20px}
+body.pdf-opname .komma-h-trans-pijlen>span:first-child i{right:66px}body.pdf-opname .komma-h-trans-pijlen>span:last-child i{left:66px}
+
+/* Aftrekken zonder brug tot op een honderdste. */
+.komma-getallen-grid.komma-aftrek-schijfjes-honderdsten{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-aftrek-honderdsten,
+.komma-getallen-grid.komma-aftrek-rooster-honderdsten{grid-template-columns:minmax(0,1fr)}
+.komma-getallen-grid.komma-aftrek-splitsen-honderdsten{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-h-schijfjes{min-height:205px;flex-direction:column;align-items:stretch;padding:18px 24px;gap:18px}
+.komma-h-plaats{border:1px solid #777}
+.komma-h-plaats-kop,.komma-h-plaats-rij{display:grid;grid-template-columns:1fr 14px 1fr 1fr}
+.komma-h-plaats-kop>b{padding:7px 4px;text-align:center;background:#ffe498;border-right:1px solid #777}.komma-h-plaats-kop>b:first-child{background:#ffd400}.komma-h-plaats-kop>b:last-child{border-right:0}
+.komma-h-plaats-rij>span{min-height:62px;padding:6px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:3px;background:#eee;border-right:1px solid #777}.komma-h-plaats-rij>span:last-child{border-right:0}
+.komma-h-plaats-kop>b:nth-child(2),.komma-h-plaats-rij>span:nth-child(2){background:#aaa;padding-left:0;padding-right:0;border-right:1px solid #666}
+.komma-h-plaats-rij .komma-schijf{width:21px;height:21px;font-size:8px}
+.komma-h-schijf-som{text-align:center;font-size:20px}
+body.pdf-opname .komma-h-schijfjes{min-height:275px;padding:24px 32px;gap:24px}
+body.pdf-opname .komma-h-plaats-rij>span{min-height:84px;padding:8px;gap:4px}
+body.pdf-opname .komma-h-plaats-rij .komma-schijf{width:28px;height:28px;font-size:10px}
+body.pdf-opname .komma-h-schijf-som{font-size:27px}

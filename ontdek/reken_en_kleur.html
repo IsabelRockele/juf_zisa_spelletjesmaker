@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reken & Kleur Generator (Ontdek)</title>
+  <meta name="google" content="notranslate">
+  
+  <link rel="stylesheet" href="reken_en_kleur.css">
+  <link rel="stylesheet" href="reken-en-kleur-ontdek.css?v=1">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <header class="app-header">
+    <button id="menuBtn" onclick="window.location.href='app.html'">← Keuzemenu alle tools</button>
+    <div><h1>Reken &amp; Kleur Generator</h1><p>Maak een kleurplaat met oefeningen, een natekenblad, pixeltekening of spiegelopdracht.</p></div>
+    <span class="pro-pill">ONTDEK</span>
+  </header>
+
+  <div id="main-content">
+    <div id="left-panel">
+      <div class="settings-tabs"><button type="button" class="active" data-settings-tab="drawing">1. Kies of teken</button><button type="button" data-settings-tab="worksheet">2. Werkblad</button></div>
+      <details class="tool-guide drawing-setting">
+        <summary>Wat kun je met deze tool maken?</summary>
+        <p>Teken zelf een eenvoudige pixeltekening of kies een kant-en-klaar voorbeeld uit de catalogus. Zisa zet je ontwerp daarna om in een afdrukbaar werkblad.</p>
+        <ol>
+          <li>Kies of teken een afbeelding in het raster.</li>
+          <li>Kies hieronder welk soort werkblad je wilt.</li>
+          <li>Bekijk het werkblad en download het als pdf.</li>
+        </ol>
+      </details>
+      <div id="controls">
+
+        <div class="control-group drawing-setting drawing-tools-card">
+          <h3>1. Kies of maak je tekening</h3>
+          <p class="drawing-start-help">Neem een kant-en-klare afbeelding als snelle start, of teken zelf in het raster.</p>
+          <button type="button" id="catalogBtn" class="catalog-start-btn">Kies een tekening uit de catalogus</button>
+          <div class="drawing-choice-divider"><span>of teken zelf</span></div>
+          <h4 class="drawing-colors-title">Tekenkleuren</h4>
+          <div id="colorPalette" class="image-previews-container"></div>
+          <div class="tool-setting">
+            <button id="undoBtn">↶ Ongedaan maken</button>
+            <button id="redoBtn">↷ Opnieuw</button>
+            <button id="clearDrawingBtn" class="small-btn">Wis tekening</button>
+          </div>
+        </div>
+
+        <div class="control-group worksheet-types worksheet-setting">
+          <h3>Soort werkblad</h3>
+          <label class="worksheet-choice"><input type="radio" name="worksheetType" value="oefeningen" checked><span><strong>Reken en kleur</strong><small>Leerlingen lossen oefeningen op en kleuren de vakjes volgens de kleurcode.</small></span></label>
+          <label class="worksheet-choice"><input type="radio" name="worksheetType" value="natekenen"><span><strong>Natekenen</strong><small>De voorbeeldtekening staat boven een leeg raster om vakje per vakje na te tekenen.</small></span></label>
+          <label class="worksheet-choice"><input type="radio" name="worksheetType" value="pixeltekening"><span><strong>Pixeltekening</strong><small>Leerlingen volgen de kleurinstructies per rij en ontdekken zo de afbeelding.</small></span></label>
+          <label class="worksheet-choice"><input type="radio" name="worksheetType" value="spiegelen"><span><strong>Spiegelen</strong><small>Een deel van de tekening is gegeven; leerlingen vullen het spiegelbeeld aan.</small></span></label>
+        </div>
+
+        <div class="control-group worksheet-texts worksheet-setting">
+          <h3>Tekst op het werkblad</h3>
+          <label for="worksheetTitleInput">Titel</label>
+          <input id="worksheetTitleInput" type="text" value="Reken en kleur">
+          <label for="worksheetInstructionInput">Opdrachtzin</label>
+          <input id="worksheetInstructionInput" type="text" value="Los de oefeningen op en kleur de vakjes volgens de kleurcode.">
+        </div>
+
+        <div id="exerciseControlsContainer" class="worksheet-setting">
+          <div class="control-group">
+            <h3>Soort oefeningen</h3>
+            <div style="display: flex; gap: 15px;">
+              <div class="operation-type-group">
+                <h4 style="margin-top: 5px; margin-bottom: 5px;">Optellen/Aftrekken</h4>
+                <label><input type="radio" name="operationType" value="optellen" checked> Optellen</label>
+                <label><input type="radio" name="operationType" value="aftrekken"> Aftrekken</label>
+                <label><input type="radio" name="operationType" value="beide_opt_aft"> Beide</label>
+              </div>
+              <div class="operation-type-group">
+                <h4 style="margin-top: 5px; margin-bottom: 5px;">Vermenigvuldigen/Delen</h4>
+                <label><input type="radio" name="operationType" value="vermenigvuldigen"> Vermenigvuldigen</label>
+                <label><input type="radio" name="operationType" value="delen"> Delen</label>
+                <label><input type="radio" name="operationType" value="beide_verm_del"> Beide</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="control-group" id="rangeControls">
+            <h3>Bereik</h3>
+            <select id="numberRange">
+              <option value="10">Tot 10</option>
+              <option value="20">Tot 20</option>
+              <option value="100">Tot 100</option>
+              <option value="1000">Tot 1000</option>
+            </select>
+          </div>
+
+          <div class="control-group" id="tablesControls">
+            <h3>Tafels</h3>
+            <label><input type="checkbox" name="tafel" value="1"> 1</label>
+            <label><input type="checkbox" name="tafel" value="2"> 2</label>
+            <label><input type="checkbox" name="tafel" value="3"> 3</label>
+            <label><input type="checkbox" name="tafel" value="4"> 4</label>
+            <label><input type="checkbox" name="tafel" value="5"> 5</label>
+            <label><input type="checkbox" name="tafel" value="6"> 6</label>
+            <label><input type="checkbox" name="tafel" value="7"> 7</label>
+            <label><input type="checkbox" name="tafel" value="8"> 8</label>
+            <label><input type="checkbox" name="tafel" value="9"> 9</label>
+            <label><input type="checkbox" name="tafel" value="10"> 10</label>
+            <label><input type="checkbox" name="tafel" value="all" checked> Alle</label>
+          </div>
+        </div>
+
+        <div class="control-group drawing-setting grid-settings-card">
+          <h3>Raster en afmetingen</h3>
+          <div style="display: flex; gap: 10px; justify-content: space-between;">
+            <div class="tool-setting" style="flex-grow: 1;">
+              <label for="gridWidth">Breedte:</label>
+              <input type="number" id="gridWidth" value="25" min="10" max="60">
+            </div>
+            <div class="tool-setting" style="flex-grow: 1;">
+              <label for="gridHeight">Hoogte:</label>
+              <input type="number" id="gridHeight" value="20" min="10" max="60">
+            </div>
+          </div>
+          <div style="display: flex; gap: 20px; margin-top: 15px;">
+            <div class="control-group" style="flex-grow: 1; padding-bottom: 0;">
+              <h4>Aanpasrichting Breedte</h4>
+              <div style="display: flex; gap: 10px;">
+                <label><input type="radio" name="widthAdjustDirection" value="right" checked> Rechts</label>
+                <label><input type="radio" name="widthAdjustDirection" value="left"> Links</label>
+              </div>
+            </div>
+            <div class="control-group" style="flex-grow: 1; padding-bottom: 0;">
+              <h4>Aanpasrichting Hoogte</h4>
+              <div style="display: flex; gap: 10px;">
+                <label><input type="radio" name="heightAdjustDirection" value="bottom" checked> Onder</label>
+                <label><input type="radio" name="heightAdjustDirection" value="top"> Boven</label>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button id="updateGridSizeBtn" style="flex-grow: 1;">Pas raster toe</button>
+          </div>
+        </div>
+
+        <div id="meldingContainer" style="color: #004080; margin-top: 15px; font-weight: bold; min-height: 40px;"></div>
+
+        <div class="workflow-actions">
+          <button type="button" id="nextToWorksheetBtn" class="drawing-setting">2. Kies je werkblad &rarr;</button>
+          <button type="button" id="showPreviewBtn" class="worksheet-setting">3. Bekijk het A4-werkblad &rarr;</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="center-panel">
+      <div class="design-stage-heading"><div><strong>Je tekening</strong><small>Kies links eerst je tekening en daarna de instellingen voor het werkblad.</small></div></div>
+      <div id="drawingCanvasContainer">
+        <canvas id="drawingCanvas" width="900" height="720"></canvas>
+      </div>
+    </div>
+
+    <div id="right-panel-buttons">
+      <div class="control-group">
+        <h3>Tekening exporteren</h3>
+        <button id="downloadPngBtn">Afbeelding</button>
+        <button id="downloadPdfBtn">PDF tekening</button>
+      </div>
+      <div class="control-group">
+        <h3>Tekening beheren</h3>
+        <button id="saveDrawingBtn">Opslaan</button>
+        <button id="loadDrawingBtn">Laden</button>
+        <input type="file" id="loadDrawingInput" accept=".json" style="display: none;">
+      </div>
+    </div>
+  </div>
+
+  <div id="catalogModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <div id="modal-header">
+        <button id="backToThemesBtn" style="display: none;">&leftarrow; Terug naar thema's</button>
+        <h2 id="modal-title">Catalogus</h2>
+      </div>
+      <div id="catalog-themes" class="catalog-view"></div>
+      <div id="catalog-choices" class="catalog-view" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div id="werkblad-modal">
+    <div id="werkblad-content">
+      <header id="werkblad-header">
+        <h2 id="werkblad-title">Werkblad Voorbeeld</h2>
+        <button id="sluit-werkblad-btn">&times;</button>
+      </header>
+
+      <div class="worksheet-paper">
+        <div class="worksheet-identity"><span>Naam: <i></i></span><span>Datum: <i></i></span></div>
+        <h1 id="worksheet-preview-title">Reken en kleur</h1>
+        <p id="worksheet-preview-instruction">Los de oefeningen op en kleur de vakjes volgens de kleurcode.</p>
+        <canvas id="werkblad-canvas"></canvas>
+        <div id="werkblad-legend-container">
+          <h3 id="werkblad-legend-title">Kleurcode:</h3>
+          <div id="werkblad-legend-content"></div>
+        </div>
+      </div>
+
+      <div id="werkblad-knoppen">
+        <button id="werkblad-bewerken">← Terug naar tekening en instellingen</button>
+        <button id="werkblad-download-pdf">Download als PDF</button>
+        <button id="werkblad-download-png">Raster als PNG</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="reken_en_kleur.js?v=ontdek1"></script>
+  <script type="module" src="reken-en-kleur-ontdek.js?v=1"></script>
+</body>
+</html>
+
+
+

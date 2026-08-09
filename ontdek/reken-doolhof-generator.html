@@ -1,0 +1,4120 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Rekenspellen Generator – Zisa Ontdek</title>
+<link rel="stylesheet" href="rekenspellen-ontdek.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+/* PRO-header */
+.pro-header {
+  position: relative;
+  background-color: #3f7fbf;
+  padding: 10px 12px;
+  color: #fff;
+  min-height: 56px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.pro-header .back-link {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  text-decoration: none;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  background: #5a9fd4;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  white-space: nowrap;
+}
+.pro-header .title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  text-align: center;
+  font-size: 26px;
+  font-weight: 800;
+  white-space: nowrap;
+  pointer-events: none;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:#f0f7ff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px;}
+h1{font-size:1.6rem;font-weight:900;color:#1a4e8a;margin-bottom:2px;}
+.subtitle{color:#5a7fa8;font-size:0.88rem;margin-bottom:20px;}
+
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:0;width:100%;max-width:860px;}
+.tab{padding:10px 22px;border-radius:12px 12px 0 0;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:800;cursor:pointer;border:2px solid #c8dff5;border-bottom:none;background:#e8f3fd;color:#5a7fa8;transition:.15s;}
+.tab.active{background:white;color:#1a4e8a;border-color:#c8dff5;}
+
+/* PANELS */
+.panel{display:none;background:white;border-radius:0 16px 16px 16px;padding:22px 26px;box-shadow:0 4px 20px rgba(26,78,138,.1);width:100%;max-width:860px;margin-bottom:18px;}
+.panel.active{display:block;}
+
+.section-title{font-weight:800;font-size:.88rem;color:#1a4e8a;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;}
+.row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px;align-items:flex-end;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-weight:700;font-size:.74rem;color:#1a4e8a;text-transform:uppercase;letter-spacing:.4px;}
+select,input[type=number],input[type=text]{padding:8px 10px;border:2px solid #c8dff5;border-radius:9px;font-family:'Nunito',sans-serif;font-size:.92rem;font-weight:700;color:#1a4e8a;background:white;outline:none;}
+select:focus,input:focus{border-color:#1a7fdd;}
+input[type=text]{width:180px;}
+
+.sub-block{background:#f0f7ff;border:1.5px solid #d0e6f8;border-radius:10px;padding:11px 14px;margin-bottom:12px;}
+.sub-block-title{font-size:.73rem;font-weight:800;color:#1a4e8a;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
+.cb-grid{display:flex;flex-wrap:wrap;gap:7px;}
+.cb-item{display:flex;align-items:center;gap:5px;font-size:.85rem;font-weight:700;color:#1a4e8a;cursor:pointer;white-space:nowrap;}
+.cb-item input{accent-color:#1a7fdd;width:14px;height:14px;cursor:pointer;}
+.radio-group{display:flex;flex-wrap:wrap;gap:7px;}
+.radio-item{display:flex;align-items:center;gap:5px;font-size:.85rem;font-weight:700;color:#1a4e8a;cursor:pointer;}
+.radio-item input{accent-color:#1a7fdd;width:14px;height:14px;cursor:pointer;}
+
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px;}
+button{padding:9px 18px;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:800;cursor:pointer;transition:transform .1s;}
+button:active{transform:scale(.97);}
+.btn-gen{background:#1a7fdd;color:white;box-shadow:0 4px 12px rgba(26,127,221,.3);}
+.btn-gen:hover{background:#1568bb;}
+.btn-pdf{background:#e84c4c;color:white;}
+.btn-pdf:hover{background:#c73a3a;}
+.btn-sec{background:#e8f3fd;color:#1a4e8a;border:2px solid #c8dff5;}
+.btn-sec:hover{background:#d0e8fb;}
+.btn-add{background:#e8f8ef;color:#1a7a40;border:2px solid #b8e8c8;}
+.btn-dl-pdf{background:#7c4dff;color:white;}
+.btn-dl-pdf:hover{background:#6030e0;}
+.btn-dl-png{background:#22b573;color:white;}
+.btn-dl-png:hover{background:#1a9660;}
+.dl-spinner{display:none;font-size:.8rem;color:#5a7fa8;font-weight:700;margin-top:6px;}
+
+/* PDF LOADING OVERLAY */
+#pdf-overlay{display:none;position:fixed;inset:0;background:rgba(10,30,70,.72);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:18px;}
+#pdf-overlay.active{display:flex;}
+.pdf-overlay-box{background:white;border-radius:18px;padding:32px 44px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.3);min-width:280px;}
+.pdf-overlay-title{font-size:1.1rem;font-weight:900;color:#1a4e8a;margin-bottom:6px;}
+.pdf-overlay-sub{font-size:.82rem;color:#5a7fa8;font-weight:700;margin-bottom:18px;}
+.pdf-progress-bar{width:100%;height:10px;background:#e0ecf8;border-radius:10px;overflow:hidden;}
+.pdf-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#1a7fdd,#22b8f0);border-radius:10px;transition:width .3s ease;}
+
+/* WORKFLOW TIP */
+.workflow-tip{display:flex;align-items:flex-start;gap:10px;background:#fff8e6;border:2px solid #f0c040;border-radius:11px;padding:10px 14px;margin-top:14px;font-size:.82rem;color:#7a5000;font-weight:700;line-height:1.5;}
+.workflow-tip .tip-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
+.workflow-tip ol{margin:4px 0 0 14px;padding:0;}
+.workflow-tip ol li{margin-bottom:2px;}
+.btn-add:hover{background:#d0f0e0;}
+
+.err{color:#c00;font-weight:700;font-size:.85rem;margin-top:8px;display:none;background:#fff0f0;padding:7px 12px;border-radius:8px;border:1px solid #fcc;}
+.hidden{display:none!important;}
+.sep{width:1px;background:#e0eaf5;align-self:stretch;margin:0 2px;}
+.combo-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#1a4e8a;color:white;padding:10px 16px;border-radius:12px;margin-bottom:14px;width:100%;max-width:860px;}
+.combo-bar-title{font-weight:900;font-size:.92rem;}
+.page-counter{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:6px;font-size:.8rem;font-weight:800;}
+
+/* PRINT OUTPUT */
+#print-output{width:100%;max-width:860px;margin-top:0;}
+.worksheet{background:white;border-radius:16px;padding:0;box-shadow:0 4px 20px rgba(26,78,138,.1);margin-bottom:18px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;}
+.worksheet svg{display:block;width:100%;height:auto;}
+.ws-footer{display:block;}
+.empty-msg{color:#aac3df;font-size:1rem;font-weight:600;text-align:center;padding:28px;}
+
+/* ANSWER KEY */
+.ans-key{padding:8px 20px 12px;font-size:.8rem;color:#5a7fa8;font-weight:600;line-height:1.8;border-top:1px dashed #dde8f5;}
+.ans-key strong{color:#1a4e8a;}
+
+/* PRINT */
+@media print{
+  @page{margin:8mm;size:A4 portrait;}
+  html,body{background:white!important;padding:0!important;margin:0!important;display:block!important;}
+  h1,p.subtitle,.tabs,.panel,.dl-spinner,#bundel-bar,#preview-area,.combo-bar{display:none!important;}
+  #print-output{max-width:100%!important;margin:0!important;padding:0!important;width:100%!important;display:block!important;}
+  .worksheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important;width:100%!important;page-break-before:always!important;break-before:page!important;page-break-inside:avoid!important;break-inside:avoid!important;}
+  .worksheet:first-child{page-break-before:auto!important;break-before:auto!important;}
+  .worksheet:last-child{margin-bottom:0!important;}
+  .maze-worksheet{page-break-before:always!important;break-before:page!important;}
+  #print-output .maze-worksheet:first-child,
+  #preview-area .maze-worksheet:first-child{page-break-before:auto!important;break-before:auto!important;}
+  .ans-key,.no-print{display:none!important;}
+}
+
+/* ── SPRINGPAD (Grid-doolhof) ──────────────────────────────── */
+
+/* Compacte header per oefening (geen mainTitle/legendBox meer) */
+.sp-worksheet .sp-oef-header {
+  margin-bottom: 4px;
+}
+.sp-worksheet .sp-oef-uitleg {
+  font-size: 0.85rem;
+  color: #444;
+  margin-bottom: 2px;
+}
+.sp-worksheet .sp-oef-sprong {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1a4e8a;
+}
+.sp-worksheet .sp-oef-pijlen {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a4e8a;
+  letter-spacing: 0.2rem;
+  margin-top: 2px;
+}
+/* Gelijke hoogte kolommen in het springpad-grid */
+.sp-worksheet .sp-card-grid {
+  align-items: stretch !important;
+}
+.sp-worksheet .sp-card-grid > div {
+  display: flex;
+  flex-direction: column;
+}
+.sp-worksheet .sp-card-grid > div .exerciseBlock {
+  flex: 1;
+}
+.sp-worksheet .gridRowWrapper {
+  justify-content: flex-start;
+  margin-left: 32px; /* ruimte voor start-label */
+}
+.sp-worksheet .exerciseBlock { margin-bottom: 0; }
+.sp-worksheet .sheet-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  row-gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.sp-worksheet .titles .mainTitle { font-size: 1.1rem; font-weight: bold; color: #1a4e8a; }
+.sp-worksheet .titles .subTitle  { font-size: 0.95rem; color: #3a6a9a; }
+.sp-worksheet .titles .explain   { font-size: 0.85rem; color: #555; margin-top: 0.3rem; max-width: 460px; }
+.sp-worksheet .legendBox {
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  height: fit-content;
+}
+.sp-worksheet .legendRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+.sp-worksheet .arrowBox {
+  font-size: 1.05rem;
+  letter-spacing: 0.3rem;
+  margin: 0.3rem 0;
+  color: #1a4e8a;
+  font-weight: 700;
+}
+.sp-worksheet .gridRowWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 0.4rem;
+  position: relative;
+}
+.sp-worksheet .grid {
+  display: grid;
+  position: relative;
+  background: #fff;
+  border: 2px solid #9da7ad;
+}
+.sp-worksheet .cellSprong,
+.sp-worksheet .cellMaze {
+  position: relative;
+  background: #fff;
+  border: 1px solid #9da7ad;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  width: 52px;
+  height: 52px;
+}
+.sp-worksheet .cellSprong.startCell,
+.sp-worksheet .cellSprong.endCell { background: #f7f2e9; font-weight: bold; }
+.sp-worksheet .cellSprongNumber   { font-size: 0.95rem; color: #000; font-weight: normal; z-index: 10; position: relative; }
+.sp-worksheet .cellMazePlus       { display: none; }
+
+/* Poortjes */
+.sp-worksheet .gate {
+  position: absolute;
+  background: #fff;
+  z-index: 5;
+  pointer-events: none;
+}
+.sp-worksheet .gate-top    { width:12px; height:4px; left:50%; top:-2px; transform:translateX(-50%); }
+.sp-worksheet .gate-bottom { width:12px; height:4px; left:50%; bottom:-2px; transform:translateX(-50%); }
+.sp-worksheet .gate-left   { width:4px; height:12px; left:-2px; top:50%; transform:translateY(-50%); }
+.sp-worksheet .gate-right  { width:4px; height:12px; right:-2px; top:50%; transform:translateY(-50%); }
+
+/* Buitenrand: geen poortjes */
+.sp-worksheet .cellSprong[data-r="0"] .gate-top,
+.sp-worksheet .cellMaze[data-r="0"] .gate-top    { display:none; }
+.sp-worksheet .cellSprong[data-r="4"] .gate-bottom,
+.sp-worksheet .cellMaze[data-r="4"] .gate-bottom { display:none; }
+.sp-worksheet .cellSprong[data-c="0"] .gate-left,
+.sp-worksheet .cellMaze[data-c="0"] .gate-left   { display:none; }
+.sp-worksheet .cellSprong[data-c="4"] .gate-right,
+.sp-worksheet .cellMaze[data-c="4"] .gate-right  { display:none; }
+
+/* Ingang/uitgang */
+.sp-worksheet .cellMaze.mazeEntry[data-c="0"] .gate-left  { display:block !important; background:#fff; }
+.sp-worksheet .cellMaze.mazeExit[data-c="4"]  .gate-right { display:block !important; background:#fff; }
+.sp-worksheet .cellSprong.mazeEntry[data-c="0"] .gate-left  { display:block !important; background:#fff; }
+.sp-worksheet .cellSprong.mazeExit[data-c="4"]  .gate-right { display:block !important; background:#fff; }
+
+/* Labels naast het rooster */
+.sp-worksheet .mazeStartLabel,
+.sp-worksheet .mazeEndLabel {
+  position: absolute;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  color: #000;
+  pointer-events: none;
+}
+.sp-worksheet .oefgrid { position: relative; }
+
+</style>
+</head>
+<body>
+
+<header class="pro-header">
+  <a href="app.html" class="back-link">&larr; Terug naar menu</a>
+  <h1 class="title">Rekenspellen Generator (Zisa)</h1>
+</header>
+
+<h1>🎲 Rekenspellen Generator</h1>
+<p class="subtitle">Doolhof & IN-UIT machine · direct afdrukken als werkblad</p>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('doolhof',this)">🌀 Doolhof</button>
+  <button class="tab" onclick="switchTab('inuit',this)">⚙️ IN-UIT Machine</button>
+  <button class="tab" onclick="switchTab('rekenpad',this)">➡️ Rekenpad</button>
+  <button class="tab" onclick="switchTab('rooster',this)">🔢 Rekenrooster</button>
+  <button class="tab" onclick="switchTab('springpad',this)">🐾 Springpad</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ DOOLHOF PANEL -->
+<div class="panel active" id="panel-doolhof">
+
+  <!-- Werkblad opties -->
+  <div class="section-title">📄 Werkblad</div>
+  <div class="row">
+    <div class="field">
+      <label>Naam leerling</label>
+      <input type="text" id="d-naam" placeholder="Naam: ___________">
+    </div>
+    <div class="field">
+      <label>Datum</label>
+      <input type="text" id="d-datum" placeholder="Datum: ___________">
+    </div>
+    <div class="field">
+      <label>Opdrachtzin</label>
+      <select id="d-opdracht">
+        <option value="Volg de juiste weg! Los elke som op en kleur het pad met het goede antwoord.">Doolhof – kleur het pad</option>
+        <option value="Reken en kleur! Bereken elke som en volg de weg met het juiste antwoord.">Reken en kleur</option>
+        <option value="Zoek de weg van START naar EINDE! Bereken elke som en volg steeds het juiste antwoord.">Van START naar EINDE</option>
+        <option value="custom">Zelf schrijven…</option>
+      </select>
+    </div>
+    <div class="field hidden" id="d-opdracht-custom-wrap">
+      <label>Eigen opdracht</label>
+      <input type="text" id="d-opdracht-custom" placeholder="Typ je eigen opdracht...">
+    </div>
+    <div class="field">
+      <label>Aantal doolhoven</label>
+      <select id="d-aantal">
+        <option value="1">1 doolhof</option>
+        <option value="2">2 doolhoven</option>
+        <option value="3">3 doolhoven</option>
+      </select>
+    </div>
+  </div>
+
+  <hr style="border:none;border-top:1px solid #e5eff8;margin-bottom:14px;">
+
+  <!-- Rekenopties -->
+  <div class="section-title">⚙️ Rekenopties</div>
+  <div class="row">
+    <div class="field">
+      <label>Bewerking</label>
+      <select id="op" onchange="updateUI()">
+        <option value="add">Optellen</option>
+        <option value="sub">Aftrekken</option>
+        <option value="addsub">Optellen én aftrekken</option>
+        <option value="mul">Maaltafels</option>
+        <option value="div">Deeltafels</option>
+      </select>
+    </div>
+    <div class="field" id="f-range">
+      <label>Bereik</label>
+      <select id="range" onchange="updateUI()">
+        <option value="10">Tot 10</option>
+        <option value="20" selected>Tot 20</option>
+        <option value="50">Tot 50</option>
+        <option value="100">Tot 100</option>
+        <option value="1000">Tot 1000</option>
+      </select>
+    </div>
+    <div class="field hidden" id="f-upto">
+      <label>Tot en met</label>
+      <select id="table-upto">
+        <option value="10">× 10</option>
+        <option value="12">× 12</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Doolhof-grootte</label>
+      <select id="maze-size">
+        <option value="auto" selected>Automatisch</option>
+        <option value="s">Klein (3×3)</option>
+        <option value="m">Middel (4×4)</option>
+        <option value="l">Groot (5×4)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Antwoordsleutel</label>
+      <select id="show-ans">
+        <option value="hidden">Verborgen</option>
+        <option value="show">Tonen</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sub-block" id="b-brug">
+    <div class="sub-block-title">Brug</div>
+    <div class="radio-group">
+      <label class="radio-item"><input type="radio" name="brug" value="no" checked> Zonder brug</label>
+      <label class="radio-item"><input type="radio" name="brug" value="yes"> Met brug</label>
+      <label class="radio-item"><input type="radio" name="brug" value="mix"> Gemengd</label>
+    </div>
+  </div>
+
+  <div class="sub-block hidden" id="b-soort">
+    <div class="sub-block-title">Soort sommen (kies één of meer)</div>
+    <div class="cb-grid" id="soort-grid"></div>
+  </div>
+
+  <div class="sub-block hidden" id="b-mixtables">
+    <div class="sub-block-title">Welke tafels? (vink aan)</div>
+    <div class="cb-grid">
+      <label class="cb-item"><input type="checkbox" class="mix-cb" value="2" checked> Tafel van 2</label>
+      <label class="cb-item"><input type="checkbox" class="mix-cb" value="3"> Tafel van 3</label>
+      <label class="cb-item"><input type="checkbox" class="mix-cb" value="4"> Tafel van 4</label>
+      <label class="cb-item"><input type="checkbox" class="mix-cb" value="5"> Tafel van 5</label>
+      <label class="cb-item"><input type="checkbox" class="mix-cb" value="6"> Tafel van 6</label>
+      <label class="cb-item"><input type="checkbox" class="mix-cb" value="7"> Tafel van 7</label>
+      <label class="cb-item"><input type="checkbox" class="mix-cb" value="8"> Tafel van 8</label>
+      <label class="cb-item"><input type="checkbox" class="mix-cb" value="9"> Tafel van 9</label>
+      <label class="cb-item"><input type="checkbox" class="mix-cb" value="10"> Tafel van 10</label>
+    </div>
+  </div>
+
+<div class="sub-block hidden" id="b-tafelvolgorde">
+  <div class="sub-block-title">Volgorde van de tafel</div>
+  <div class="radio-group">
+    <label class="radio-item"><input type="radio" name="d-tafelpos" value="fixed" checked> Tafel vooraan (2 × ..)</label>
+    <label class="radio-item"><input type="radio" name="d-tafelpos" value="flipped"> Tafel achteraan (.. × 2)</label>
+    <label class="radio-item"><input type="radio" name="d-tafelpos" value="mix"> Gemengd</label>
+  </div>
+</div>
+
+  <div class="actions">
+    <button class="btn-gen" onclick="previewDoolhof()">▶ Genereer preview</button>
+    <button class="btn-sec" onclick="previewDoolhof()">🔀 Nieuwe variant</button>
+    <button class="btn-add-d" onclick="addPreviewToBundel()" id="btn-voeg-d" style="display:none;">✅ Voeg toe aan bundel</button>
+  </div>
+  <div class="workflow-tip">
+    <span class="tip-icon">💡</span>
+    <div>Zo maak je een PDF:<ol><li>Stel je opties in en klik <strong>Genereer preview</strong></li><li>Klik <strong>Voeg toe aan bundel</strong> (knop verschijnt na preview)</li><li>Herhaal voor elk werkblad dat je wil toevoegen</li><li>Klik <strong>⬇ PDF</strong> in de bundelbalk om te downloaden</li></ol></div>
+  </div>
+  <div class="dl-spinner" id="dl-spin">⏳ Bezig met genereren…</div>
+  <div class="err" id="d-err"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ IN-UIT PANEL -->
+<div class="panel" id="panel-inuit">
+
+  <div class="section-title">📄 Werkblad</div>
+  <div class="row">
+    <div class="field">
+      <label>Naam leerling</label>
+      <input type="text" id="iu-naam" placeholder="Naam: ___________">
+    </div>
+    <div class="field">
+      <label>Datum</label>
+      <input type="text" id="iu-datum" placeholder="Datum: ___________">
+    </div>
+    <div class="field">
+      <label>Opdrachtzin</label>
+      <select id="iu-opdracht">
+        <option value="Kies een IN-getal. Reken de tafels uit en zoek elke uitkomst in de rij.">Kies IN, zoek UIT in de rij</option>
+        <option value="De rij bevat de IN-getallen én alle uitkomsten. Vul de machine in.">Rij bevat IN + UIT</option>
+        <option value="Schrijf een IN-getal in het vakje en bereken elke tafel. Check je antwoord in de rij.">Schrijf IN, check in de rij</option>
+      </select>
+    </div>
+  </div>
+
+  <hr style="border:none;border-top:1px solid #e5eff8;margin-bottom:14px;">
+
+  <div class="section-title">⚙️ Machine-instellingen</div>
+  <div class="row">
+    <div class="field">
+      <label>Type IN-getallen</label>
+      <select id="iu-intype" onchange="updateIUType()">
+        <option value="tafel">Tafels (1 t/m 10 of 12)</option>
+        <option value="veelvoud">Veelvouden × tafel (10, 20, 30…)</option>
+        <option value="vrij">Willekeurig (bv. 32 × 2)</option>
+      </select>
+    </div>
+    <!-- Sub: tafels -->
+    <div class="field" id="iu-sub-tafel">
+      <label>Tot en met</label>
+      <select id="iu-tafelupto">
+        <option value="10">× 10</option>
+        <option value="12">× 12</option>
+      </select>
+    </div>
+    <!-- Sub: veelvouden -->
+    <div class="field hidden" id="iu-sub-veelvoud">
+      <label>Veelvouden tot</label>
+      <select id="iu-veelvoudmax">
+        <option value="100">t/m 100 (10,20…100)</option>
+        <option value="200">t/m 200 (10,20…200)</option>
+        <option value="500">t/m 500 (10,20…500)</option>
+        <option value="1000">t/m 1000 (10,20…1000)</option>
+      </select>
+    </div>
+    <!-- Sub: vrij bereik -->
+    <div class="field hidden" id="iu-sub-vrij">
+      <label>Bereik IN-getallen</label>
+      <select id="iu-vrijmax">
+        <option value="20">1 – 20</option>
+        <option value="50">1 – 50</option>
+        <option value="100">1 – 100</option>
+      </select>
+    </div>
+    <div style="font-size:.75rem;color:#7a9fc0;font-weight:700;align-self:flex-end;padding-bottom:10px;">
+      💡 UIT mag altijd groter zijn
+    </div>
+    <div class="field">
+      <label>Getallen in rij</label>
+      <div id="iu-count-display" style="padding:8px 12px;background:#f0f7ff;border:2px solid #c8dff5;border-radius:9px;font-weight:800;color:#1a4e8a;font-size:.92rem;">
+        8 getallen (automatisch)
+      </div>
+    </div>
+    <div class="field">
+      <label>Tafels per machine</label>
+      <select id="iu-bolcount" onchange="buildMachineConfig()">
+        <option value="2">2 tafels per machine</option>
+        <option value="3" selected>3 tafels per machine</option>
+        <option value="4">4 tafels per machine</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Machine 1 & 2 config -->
+  <div style="display:flex;gap:14px;flex-wrap:wrap;">
+    <div class="sub-block" style="flex:1;min-width:240px;">
+      <div class="sub-block-title">Machine 1 – tafels</div>
+      <div id="iu-m1-grid" class="cb-grid" style="gap:8px;"></div>
+    </div>
+    <div class="sub-block" style="flex:1;min-width:240px;">
+      <div class="sub-block-title">Machine 2 – tafels</div>
+      <div id="iu-m2-grid" class="cb-grid" style="gap:8px;"></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-gen" onclick="previewInUit()">▶ Genereer preview</button>
+    <button class="btn-sec" onclick="previewInUit()">🔀 Nieuwe variant</button>
+    <button class="btn-add-iu" onclick="addPreviewToBundel()" id="btn-voeg-iu" style="display:none;">✅ Voeg toe aan bundel</button>
+  </div>
+  <div class="workflow-tip"><span class="tip-icon">💡</span><div>Klik eerst <strong>Genereer preview</strong>, daarna <strong>Voeg toe aan bundel</strong> — anders komt het niet in de PDF.</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ REKENPAD PANEL -->
+<div class="panel" id="panel-rekenpad">
+
+  <div class="section-title">📄 Werkblad</div>
+  <div class="row">
+    <div class="field">
+      <label>Naam leerling</label>
+      <input type="text" id="rp-naam" placeholder="Naam: ___________">
+    </div>
+    <div class="field">
+      <label>Datum</label>
+      <input type="text" id="rp-datum" placeholder="">
+    </div>
+    <div class="field">
+      <label>Opdrachtzin</label>
+      <select id="rp-opdracht">
+        <option value="Volg het rekenpad! Vul de ontbrekende getallen in.">Vul de ontbrekende getallen in</option>
+        <option value="Reken verder langs het pad en schrijf de ontbrekende getallen.">Reken verder langs het pad</option>
+        <option value="Volg het pad stap voor stap en vul de lege vakjes in.">Vul de lege vakjes in</option>
+      </select>
+    </div>
+  </div>
+
+  <hr style="border:none;border-top:1px solid #e5eff8;margin-bottom:14px;">
+  <div class="section-title">⚙️ Pad-instellingen</div>
+
+  <div class="row">
+    <div class="field">
+      <label>Bewerking(en)</label>
+      <select id="rp-op" onchange="updateRPUI()">
+        <option value="add">Alleen optellen (+)</option>
+        <option value="sub">Alleen aftrekken (−)</option>
+        <option value="addsub" selected>Gemengd + en −</option>
+        <option value="mul">× en : gemengd (tafels)</option>
+        <option value="all">Alle bewerkingen gemengd</option>
+      </select>
+    </div>
+    <div class="field" id="rp-f-range">
+      <label>Bereik</label>
+      <select id="rp-range">
+        <option value="10">Tot 10</option>
+        <option value="20" selected>Tot 20</option>
+        <option value="50">Tot 50</option>
+        <option value="100">Tot 100</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Padlengte</label>
+      <select id="rp-len" onchange="updateRPHint()">
+        <option value="3">Kort (3 stappen)</option>
+        <option value="5" selected>Middel (5 stappen)</option>
+        <option value="7">Lang (7 stappen)</option>
+        <option value="9">Zeer lang (9 stappen)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Paden per werkblad</label>
+      <select id="rp-count" onchange="updateRPHint()">
+        <option value="1">1 pad</option>
+        <option value="2" selected>2 paden</option>
+        <option value="3">3 paden</option>
+        <option value="4">4 paden</option>
+      </select>
+    </div>
+    <div id="rp-hint" style="align-self:flex-end;padding-bottom:10px;font-size:.75rem;font-weight:700;color:#5a7fa8;"></div>
+  </div>
+
+  <!-- Tafels sub-block voor × en : -->
+  <div class="sub-block hidden" id="rp-b-tafels">
+    <div class="sub-block-title">Welke tafels? (vink aan)</div>
+    <div class="cb-grid">
+      <label class="cb-item"><input type="checkbox" class="rp-tafel-cb" value="2" checked> ×2</label>
+      <label class="cb-item"><input type="checkbox" class="rp-tafel-cb" value="3"> ×3</label>
+      <label class="cb-item"><input type="checkbox" class="rp-tafel-cb" value="4"> ×4</label>
+      <label class="cb-item"><input type="checkbox" class="rp-tafel-cb" value="5" checked> ×5</label>
+      <label class="cb-item"><input type="checkbox" class="rp-tafel-cb" value="6"> ×6</label>
+      <label class="cb-item"><input type="checkbox" class="rp-tafel-cb" value="7"> ×7</label>
+      <label class="cb-item"><input type="checkbox" class="rp-tafel-cb" value="8"> ×8</label>
+      <label class="cb-item"><input type="checkbox" class="rp-tafel-cb" value="9"> ×9</label>
+      <label class="cb-item"><input type="checkbox" class="rp-tafel-cb" value="10" checked> ×10</label>
+    </div>
+    <div style="margin-top:8px;">
+      <label class="radio-item"><input type="radio" name="rp-tafelupto" value="10" checked> Tot ×10</label>
+      &nbsp;&nbsp;
+      <label class="radio-item"><input type="radio" name="rp-tafelupto" value="12"> Tot ×12 (grotere getallen)</label>
+    </div>
+
+    <!-- Niveau-instelling -->
+    <div style="margin-top:12px;border-top:1px solid #d0e6f8;padding-top:10px;">
+      <div class="sub-block-title" style="margin-bottom:6px;">🎓 Niveau (voor : in het pad)</div>
+      <div class="radio-group" style="flex-direction:column;gap:6px;">
+        <label class="radio-item" style="align-items:flex-start;gap:8px;">
+          <input type="radio" name="rp-niveau" value="basis" checked style="margin-top:2px;">
+          <span><strong>2de–3de leerjaar</strong> — enkel delingen die voorkomen in de deeltafel<br>
+          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 20 : 4 = 5 ✓ &nbsp;|&nbsp; 60 : 3 = 20 ✗</span></span>
+        </label>
+        <label class="radio-item" style="align-items:flex-start;gap:8px;">
+          <input type="radio" name="rp-niveau" value="uitgebreid" style="margin-top:2px;">
+          <span><strong>4de leerjaar en hoger</strong> — delingen buiten de deeltafel toegestaan<br>
+          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 60 : 3 = 20 ✓ &nbsp;|&nbsp; 50 : 2 = 25 ✓</span></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub-block">
+    <div class="sub-block-title">Wat moet de leerling invullen?</div>
+    <div class="radio-group">
+      <label class="radio-item"><input type="radio" name="rp-mode" value="uitkomst" checked> Alleen uitkomsten (termen gegeven)</label>
+      <label class="radio-item"><input type="radio" name="rp-mode" value="term"> Alleen ontbrekende termen</label>
+      <label class="radio-item"><input type="radio" name="rp-mode" value="mix"> Gemengd (soms term, soms uitkomst)</label>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-gen" onclick="previewRekenpad()">▶ Genereer preview</button>
+    <button class="btn-sec" onclick="previewRekenpad()">🔀 Nieuwe variant</button>
+    <button class="btn-add-iu" onclick="addPreviewToBundel()" id="btn-voeg-rp" style="display:none;background:#9b59b6;border-color:#8e44ad;">✅ Voeg toe aan bundel</button>
+  </div>
+  <div class="workflow-tip"><span class="tip-icon">💡</span><div>Klik eerst <strong>Genereer preview</strong>, daarna <strong>Voeg toe aan bundel</strong> — anders komt het niet in de PDF.</div></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ ROOSTER PANEL -->
+<div class="panel" id="panel-rooster">
+
+  <div class="section-title">📄 Werkblad</div>
+  <div class="row">
+    <div class="field">
+      <label>Naam leerling</label>
+      <input type="text" id="ro-naam" placeholder="Naam: ___________">
+    </div>
+    <div class="field">
+      <label>Datum</label>
+      <input type="text" id="ro-datum" placeholder="">
+    </div>
+    <div class="field">
+      <label>Opdrachtzin</label>
+      <select id="ro-opdracht">
+        <option value="Vul het rekenrooster in.">Vul het rekenrooster in.</option>
+        <option value="Reken het rooster verder in. Sommige antwoorden zijn al ingevuld.">Sommige antwoorden zijn al ingevuld.</option>
+        <option value="Los het rooster op!">Los het rooster op!</option>
+      </select>
+    </div>
+  </div>
+
+  <hr style="border:none;border-top:1px solid #e5eff8;margin-bottom:14px;">
+
+  <div class="section-title">⚙️ Roosters configureren</div>
+
+  <div id="ro-configs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+
+  <!-- + Rooster knop: altijd zichtbaar onderaan de grid -->
+  <div id="ro-add-btn" style="margin-top:6px;">
+    <button onclick="addRoosterConfig()" style="width:100%;padding:12px;background:#f0f7ff;color:#1a4e8a;border:2px dashed #7ab8e8;border-radius:10px;font-size:.92rem;font-weight:800;cursor:pointer;letter-spacing:.3px;">
+      ＋ Rooster toevoegen (max. 4)
+    </button>
+  </div>
+
+  <div class="actions" style="margin-top:12px;">
+    <button class="btn-gen" onclick="previewRooster()">▶ Genereer preview</button>
+    <button class="btn-sec" onclick="previewRooster()">🔀 Nieuwe variant</button>
+    <button style="background:#e8a030;color:white;border:2px solid #c07820;border-radius:10px;padding:9px 18px;font-weight:800;font-size:.88rem;cursor:pointer;" onclick="addPreviewToBundel()" id="btn-voeg-ro">✅ Voeg toe aan bundel</button>
+  </div>
+  <div class="workflow-tip"><span class="tip-icon">💡</span><div>Klik eerst <strong>Genereer preview</strong>, daarna <strong>Voeg toe aan bundel</strong> — anders komt het niet in de PDF.</div></div>
+
+</div><!-- /panel-rooster -->
+
+<!-- ═══════════════════════════════════════════════════════ SPRINGPAD PANEL -->
+<div class="panel" id="panel-springpad">
+
+  <div class="section-title">📄 Werkblad</div>
+  <div class="row">
+    <div class="field">
+      <label>Naam leerling</label>
+      <input type="text" id="sp-naam" placeholder="Naam: ___________">
+    </div>
+    <div class="field">
+      <label>Datum</label>
+      <input type="text" id="sp-datum" placeholder="">
+    </div>
+  </div>
+
+  <hr style="border:none;border-top:1px solid #e5eff8;margin-bottom:14px;">
+  <div class="section-title">⚙️ Springpaden configureren</div>
+
+  <div id="sp-configs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+
+  <div id="sp-add-btn" style="margin-top:6px;">
+    <button onclick="addSpringpadConfig()" style="width:100%;padding:12px;background:#f0fff4;color:#2e7d32;border:2px dashed #81c784;border-radius:10px;font-size:.92rem;font-weight:800;cursor:pointer;letter-spacing:.3px;">
+      ＋ Springpad toevoegen (max. 4)
+    </button>
+  </div>
+
+  <div class="actions" style="margin-top:12px;">
+    <button class="btn-gen" onclick="previewSpringpad()">▶ Genereer preview</button>
+    <button class="btn-sec" onclick="previewSpringpad()">🔀 Nieuwe variant</button>
+    <button class="btn-add-sp" onclick="addPreviewToBundel()" id="btn-voeg-sp" style="display:none;background:#2e7d32;color:white;border:2px solid #1b5e20;border-radius:10px;padding:9px 18px;font-weight:800;font-size:.88rem;cursor:pointer;">✅ Voeg toe aan bundel</button>
+  </div>
+  <div class="workflow-tip"><span class="tip-icon">💡</span><div>Klik eerst <strong>Genereer preview</strong>, daarna <strong>Voeg toe aan bundel</strong> — anders komt het niet in de PDF.</div></div>
+</div><!-- /panel-springpad -->
+
+
+<!-- PDF LOADING OVERLAY -->
+<div id="pdf-overlay">
+  <div class="pdf-overlay-box">
+    <div class="pdf-overlay-title">⏳ PDF wordt aangemaakt…</div>
+    <div class="pdf-overlay-sub" id="pdf-overlay-sub">Werkblad 1 van 1 verwerken…</div>
+    <div class="pdf-progress-bar"><div class="pdf-progress-fill" id="pdf-progress-fill"></div></div>
+  </div>
+</div>
+
+<!-- BUNDEL BAR -->
+<div class="combo-bar no-print" id="bundel-bar">
+  <span class="combo-bar-title">📚 Bundel:</span>
+  <span class="page-counter" id="page-counter">0 pagina's</span>
+  <button class="btn-clear" onclick="clearAll()">🗑 Wissen</button>
+  <button class="btn-pdf" onclick="window.print()" style="background:#e84c4c;color:white;">🖨 Afdrukken</button>
+  <button class="btn-dl-all" onclick="downloadPDF()">⬇ PDF</button>
+  <button class="btn-dl-png" onclick="downloadPNG()">⬇ PNG</button>
+</div>
+
+<!-- PREVIEW -->
+<div id="preview-area" style="width:100%;max-width:860px;"></div>
+
+<!-- BUNDEL OUTPUT -->
+<div id="print-output" style="width:100%;max-width:860px;"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════
+// switchTab defined in PREVIEW & BUNDEL SYSTEEM
+
+// ══════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function show(id,v){const el=document.getElementById(id);if(el)el.classList.toggle('hidden',!v);}
+
+// ══════════════════════════════════════════════════════════
+// DOOLHOF – UI
+// ══════════════════════════════════════════════════════════
+document.getElementById('d-opdracht').addEventListener('change', function(){
+  document.getElementById('d-opdracht-custom-wrap').classList.toggle('hidden', this.value !== 'custom');
+});
+document.getElementById('range').addEventListener('change', updateUI);
+
+function updateUI(){
+  const op=document.getElementById('op').value;
+  const range=parseInt(document.getElementById('range').value);
+  const isMul=op==='mul'||op==='div';
+  show('f-range',!isMul); show('f-upto',isMul);
+  show('b-brug',!isMul); show('b-mixtables',isMul);
+  const showSoort=!isMul&&range>=50;
+  show('b-soort',showSoort);
+  if(showSoort) buildSoortGrid(op,range);
+  show('b-tafelvolgorde', op === 'mul');
+}
+
+function buildSoortGrid(op,range){
+  const grid=document.getElementById('soort-grid');
+  const prev=[...grid.querySelectorAll('input:checked')].map(i=>i.value);
+  const soorten=getSoorten(op,range);
+  grid.innerHTML=soorten.map(s=>
+    `<label class="cb-item"><input type="checkbox" class="soort-cb" value="${s.key}" ${prev.includes(s.key)||prev.length===0?'checked':''}> ${s.label}</label>`
+  ).join('');
+}
+
+function getSoorten(op,range){
+  const sym=(op==='sub'||op==='addsub')?'−':'+';
+  if(range>=1000) return [
+    {key:'HH',    label:`H ${sym} H (200 ${sym} 300)`},
+    {key:'HTH',   label:`HT ${sym} HT (230 ${sym} 150)`},
+    {key:'HTEH',  label:`HTE ${sym} H (324 ${sym} 200)`},
+    {key:'HTETE', label:`HTE ${sym} TE (324 ${sym} 25)`},
+    {key:'HTEHT', label:`HTE ${sym} HT (324 ${sym} 230)`},
+    {key:'HTEHTE',label:`HTE ${sym} HTE (324 ${sym} 215)`},
+  ];
+  return [
+    {key:'EE',  label:`E ${sym} E (3 ${sym} 5)`},
+    {key:'TE',  label:`TE ${sym} E (24 ${sym} 3)`},
+    {key:'TT',  label:`T ${sym} T (20 ${sym} 30)`},
+    {key:'TTE', label:`TE ${sym} T (34 ${sym} 20)`},
+    {key:'TETE',label:`TE ${sym} TE (34 ${sym} 25)`},
+  ];
+}
+updateUI();
+
+// ══════════════════════════════════════════════════════════
+// DOOLHOF – SOM GENERATIE
+// ══════════════════════════════════════════════════════════
+function hasBrug(a,b,isAdd){
+  return isAdd ? (a%10)+(b%10)>10 : (a%10)<(b%10);
+}
+
+function makeSomBySoort(key,range,isAdd,brug){
+  for(let t=0;t<300;t++){
+    let a,b; const max=range-1;
+    if(key==='EE'){
+      a=rnd(1,Math.min(9,max)); b=rnd(1,isAdd?Math.min(9,max-a):a-1);
+    }else if(key==='TE'){
+      const tens=Math.floor(max/10); a=rnd(1,tens)*10+rnd(1,9); b=rnd(1,9);
+      if(isAdd&&a+b>max)continue; if(!isAdd&&a-b<1)continue;
+    }else if(key==='TT'){
+      const tens=Math.floor(max/10); a=rnd(1,tens-1)*10; b=rnd(1,tens-Math.floor(a/10))*10;
+      if(isAdd&&a+b>max)continue; if(!isAdd&&a<=b)continue;
+    }else if(key==='TTE'){
+      const tens=Math.floor(max/10); a=rnd(1,tens-1)*10+rnd(1,9); b=rnd(1,Math.max(1,tens-Math.floor(a/10)-1))*10;
+      if(b<=0)continue; if(isAdd&&a+b>max)continue; if(!isAdd&&a-b<1)continue;
+    }else if(key==='TETE'){
+      const tens=Math.floor(max/10); a=rnd(1,tens-1)*10+rnd(1,9); b=rnd(1,Math.max(1,tens-Math.floor(a/10)-1))*10+rnd(1,9);
+      if(b<=0)continue; if(isAdd&&a+b>max)continue; if(!isAdd&&a<=b)continue;
+    }else if(key==='HH'){
+      const hMax=Math.floor(max/100); if(hMax<2)continue;
+      a=rnd(1,hMax-1)*100; b=rnd(1,hMax-Math.floor(a/100))*100;
+      if(isAdd&&a+b>max)continue; if(!isAdd&&a<=b)continue;
+    }else if(key==='HTH'){
+      const hMax=Math.floor(max/100); if(hMax<2)continue;
+      a=rnd(1,hMax-1)*100+rnd(0,9)*10; b=rnd(1,hMax-1)*100+rnd(0,9)*10;
+      if(isAdd&&a+b>max)continue; if(!isAdd&&a<=b)continue;
+    }else if(key==='HTEH'){
+      const hMax=Math.floor(max/100); if(hMax<2)continue;
+      a=rnd(1,hMax-1)*100+rnd(1,9)*10+rnd(1,9); b=rnd(1,hMax-Math.floor(a/100))*100;
+      if(b<=0)continue; if(isAdd&&a+b>max)continue; if(!isAdd&&a-b<1)continue;
+    }else if(key==='HTETE'){
+      const hMax=Math.floor(max/100); if(hMax<1)continue;
+      a=rnd(1,hMax)*100+rnd(1,9)*10+rnd(1,9); b=rnd(1,9)*10+rnd(1,9);
+      if(isAdd&&a+b>max)continue; if(!isAdd&&a-b<1)continue;
+    }else if(key==='HTEHT'){
+      const hMax=Math.floor(max/100); if(hMax<2)continue;
+      a=rnd(1,hMax-1)*100+rnd(1,9)*10+rnd(1,9); b=rnd(1,hMax-Math.floor(a/100))*100+rnd(0,9)*10;
+      if(b<=0)continue; if(isAdd&&a+b>max)continue; if(!isAdd&&a-b<1)continue;
+    }else if(key==='HTEHTE'){
+      const hMax=Math.floor(max/100); if(hMax<2)continue;
+      a=rnd(1,hMax-1)*100+rnd(1,9)*10+rnd(1,9); b=rnd(1,hMax-Math.floor(a/100)-1)*100+rnd(1,9)*10+rnd(1,9);
+      if(b<=100)continue; if(isAdd&&a+b>max)continue; if(!isAdd&&a<=b)continue;
+    }else{
+      a=rnd(1,max-1); b=rnd(1,isAdd?max-a:a-1);
+    }
+    if(b<=0)continue; if(!isAdd&&a<=b)continue;
+    const hb=hasBrug(a,b,isAdd);
+    if(brug==='yes'&&!hb)continue; if(brug==='no'&&hb)continue;
+    const ans=isAdd?a+b:a-b;
+    if(ans<=0||ans>range)continue;
+    return{label:isAdd?`${a} + ${b}`:`${a} − ${b}`,ans};
+  }
+  return null;
+}
+
+function makeSums(count){
+  const op=document.getElementById('op').value;
+  const range=parseInt(document.getElementById('range').value);
+  const brug=document.querySelector('input[name="brug"]:checked')?.value||'no';
+  const isMul=op==='mul'||op==='div';
+  if(isMul){
+    const upto=parseInt(document.getElementById('table-upto').value)||10;
+    const tables=[...document.querySelectorAll('.mix-cb:checked')].map(c=>parseInt(c.value));
+    const tafelPos=document.querySelector('input[name="d-tafelpos"]:checked')?.value || 'fixed';
+    if(!tables.length)return[];
+    const pool=[];
+    for(const t of tables)for(let i=1;i<=upto;i++){
+      if(op==='mul') {
+        let lbl;
+        if(tafelPos === 'fixed') lbl = `${t} × ${i}`;
+        else if(tafelPos === 'flipped') lbl = `${i} × ${t}`;
+        else lbl = Math.random() < 0.5 ? `${t} × ${i}` : `${i} × ${t}`;
+        pool.push({label: lbl, ans: t*i});
+      }
+      else pool.push({label:`${t*i} ÷ ${t}`,ans:i});
+    }
+    return shuffle(pool).slice(0,count);
+  }
+  const useAdd=op==='add'?[true]:op==='sub'?[false]:[true,false];
+  let soortKeys=range>=50
+    ?([...document.querySelectorAll('.soort-cb:checked')].map(i=>i.value)||['TETE'])
+    :['any'];
+  if(soortKeys.length===0)soortKeys=['any'];
+  const seen=new Set(), result=[];
+  let tries=0;
+  while(result.length<count&&tries++<count*300){
+    const isAdd=useAdd[rnd(0,useAdd.length-1)];
+    const key=soortKeys[rnd(0,soortKeys.length-1)];
+    let som;
+    if(key==='any'){
+      for(let t2=0;t2<100;t2++){
+        let a,b;
+        if(isAdd){a=rnd(1,range-1);b=rnd(1,range-a);}
+        else{a=rnd(2,range);b=rnd(1,a-1);}
+        const hb=hasBrug(a,b,isAdd);
+        if(brug==='yes'&&!hb)continue; if(brug==='no'&&hb)continue;
+        const ans=isAdd?a+b:a-b;
+        if(ans<=0||ans>range)continue;
+        som={label:isAdd?`${a} + ${b}`:`${a} − ${b}`,ans}; break;
+      }
+    }else{
+      som=makeSomBySoort(key,range,isAdd,brug);
+    }
+    if(!som||seen.has(som.label))continue;
+    seen.add(som.label); result.push(som);
+  }
+  return result;
+}
+
+// ══════════════════════════════════════════════════════════
+// DOOLHOF – BOUW
+// ══════════════════════════════════════════════════════════
+function buildMaze(rows,cols,sums){
+  const N=rows*cols;
+  const nodes=Array.from({length:N},(_,i)=>({
+    r:Math.floor(i/cols),c:i%cols,sum:sums[i],isStart:i===0,isEnd:i===N-1
+  }));
+  const idx=(r,c)=>r*cols+c;
+
+  // Bouw een slingerend pad via random walk met backtracking
+  // Het pad mag alle richtingen op inclusief diagonalen
+  function buildWindingPath() {
+    const visited = new Set([0]);
+    let path = [0], r = 0, c = 0;
+    // Alle 8 richtingen: horizontaal, verticaal én diagonaal
+    const DIRS = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
+    // Diagonale stappen kosten minder "afstand" dus weeg ze iets zwaarder bij slingeren
+    const minSteps = (rows - 1) + (cols - 1);
+    const targetLen = Math.floor(N * 0.65);
+
+    let attempts = 0;
+    while (attempts++ < 5000) {
+      if (r === rows-1 && c === cols-1) {
+        if (path.length >= minSteps + 1) return path;
+      }
+
+      const dirs = shuffle([...DIRS]);
+      const candidates = [];
+      for (const [dr, dc] of dirs) {
+        const nr = r + dr, nc = c + dc;
+        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+        if (visited.has(idx(nr, nc))) continue;
+        // Controleer of deze diagonale stap geen conflicten geeft met al geplande diagonalen
+        const isDiag = dr !== 0 && dc !== 0;
+        if (isDiag) {
+          // Blok linksboven van de diagonaal
+          const blkR = Math.min(r, nr), blkC = Math.min(c, nc);
+          const blk = blkR * cols + blkC;
+          if (plannedDiagBlocks.has(blk)) continue; // kruist een bestaande diagonaal
+        }
+        const distToEnd = Math.abs(nr - (rows-1)) + Math.abs(nc - (cols-1));
+        candidates.push({ nr, nc, distToEnd, isDiag });
+      }
+
+      if (candidates.length === 0) {
+        if (path.length <= 1) break;
+        // Bij backtrack: verwijder ook eventuele geplande diagonaal
+        const prevR = Math.floor(path[path.length-2] / cols);
+        const prevC = path[path.length-2] % cols;
+        const wasDiag = Math.abs(r - prevR) === 1 && Math.abs(c - prevC) === 1;
+        if (wasDiag) {
+          const blkR = Math.min(r, prevR), blkC = Math.min(c, prevC);
+          plannedDiagBlocks.delete(blkR * cols + blkC);
+        }
+        visited.delete(idx(r, c));
+        path.pop();
+        r = Math.floor(path[path.length-1] / cols);
+        c = path[path.length-1] % cols;
+        continue;
+      }
+
+      const wantLong = path.length < targetLen;
+      if (wantLong) {
+        candidates.sort((a,b) => b.distToEnd - a.distToEnd);
+      } else {
+        candidates.sort((a,b) => a.distToEnd - b.distToEnd);
+      }
+      const pick = Math.random() < 0.25 && candidates.length > 1 ? candidates[1] : candidates[0];
+
+      // Registreer diagonaal als gepland zodat geen andere diagonaal kan kruisen
+      if (pick.isDiag) {
+        const blkR = Math.min(r, pick.nr), blkC = Math.min(c, pick.nc);
+        plannedDiagBlocks.add(blkR * cols + blkC);
+      }
+
+      r = pick.nr; c = pick.nc;
+      visited.add(idx(r, c));
+      path.push(idx(r, c));
+    }
+    // Fallback: simpel pad rechts/omlaag
+    plannedDiagBlocks.clear();
+    path = [0]; r = 0; c = 0;
+    while (r < rows-1 || c < cols-1) {
+      const moves = [];
+      if (r < rows-1) moves.push([r+1, c]);
+      if (c < cols-1) moves.push([r, c+1]);
+      shuffle(moves); [r, c] = moves[0]; path.push(idx(r, c));
+    }
+    return path;
+  }
+
+  // Set van 2×2-blokken die al een diagonaal hebben (gedeeld tussen pad en extra verbindingen)
+  const plannedDiagBlocks = new Set();
+  let path = buildWindingPath();
+  const conns=[];
+  // Verbindingen zijn DIRECTIONEEL: from→to EN to→from zijn aparte verbindingen
+  // want het correcte pad kan ook omhoog of naar links lopen
+  const connSet = new Set();
+  function addConn(a, b, dir) {
+    // Voeg beide richtingen toe als aparte verbinding, maar sla visueel duplicaat over
+    const key = Math.min(a,b) + '_' + Math.max(a,b);
+    if (connSet.has(key)) return;
+    connSet.add(key);
+
+    // Zoek of a→b of b→a op het correcte pad zit
+    const posA = path.indexOf(a);
+    const posB = path.indexOf(b);
+    const aToB = posA >= 0 && path[posA + 1] === b;
+    const bToA = posB >= 0 && path[posB + 1] === a;
+
+    // from = het knooppunt dat "vraagt" (waarvan het antwoord op de weg staat)
+    // Als het pad a→b gaat: from=a, to=b, label = antwoord van a
+    // Als het pad b→a gaat: from=b, to=a, label = antwoord van b
+    // Anders: afleiding, from=a (willekeurig), to=b
+    if (aToB) {
+      conns.push({ from: a, to: b, isCorrect: true, dir });
+    } else if (bToA) {
+      conns.push({ from: b, to: a, isCorrect: true, dir });
+    } else {
+      // Afleidingsweg — sla op als a→b maar markeer niet-correct
+      conns.push({ from: a, to: b, isCorrect: false, dir });
+    }
+  }
+
+  // Bijhouden welke 2×2-blokken al een diagonaal hebben (om kruisen te vermijden)
+  // plannedDiagBlocks is al gevuld door buildWindingPath voor correcte diagonalen
+  const diagBlocks = new Set([...plannedDiagBlocks]);
+
+  for(let r2=0;r2<rows;r2++) for(let c2=0;c2<cols;c2++){
+    if(c2<cols-1) addConn(idx(r2,c2), idx(r2,c2+1), 'h');
+    if(r2<rows-1) addConn(idx(r2,c2), idx(r2+1,c2), 'v');
+    // Diagonaal \ — alleen als geen kruising met bestaande diagonaal in dit 2×2-blok
+    if(r2<rows-1 && c2<cols-1 && Math.random()<.45) {
+      const blk = r2 * cols + c2;
+      if(!diagBlocks.has(blk)) {
+        diagBlocks.add(blk);
+        addConn(idx(r2,c2), idx(r2+1,c2+1), 'd');
+      }
+    }
+    // Diagonaal / — zelfde kruischeck
+    if(r2<rows-1 && c2>0 && Math.random()<.35) {
+      const blk = r2 * cols + (c2-1);
+      if(!diagBlocks.has(blk)) {
+        diagBlocks.add(blk);
+        addConn(idx(r2,c2), idx(r2+1,c2-1), 'd2');
+      }
+    }
+  }
+  // Veiligheidscheck: elke stap in het correcte pad moet een isCorrect verbinding hebben
+  // Als dat niet klopt (kan niet meer voorkomen maar voor zekerheid), gebruik fallback
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = path[i], b = path[i+1];
+    const hasCorrect = conns.some(c => c.isCorrect && c.from === a && c.to === b);
+    if (!hasCorrect) {
+      // Voeg alsnog toe
+      conns.push({ from: a, to: b, isCorrect: true, dir: 'h' });
+    }
+  }
+
+  // Lees het bereik uit de UI (voor optellen/aftrekken)
+  const opVal = document.getElementById('op').value;
+  const isDeel = opVal === 'div';
+  const isMulD = opVal === 'mul' || opVal === 'div';
+  const uiRange = isMulD ? (parseInt(document.getElementById('table-upto').value)||10) : (parseInt(document.getElementById('range').value)||20);
+
+  // Verzamel alle uitkomsten van sommen in dit doolhof
+  const allAns = nodes.map(n => n.sum.ans);
+  const allAnsSet = new Set(allAns);
+
+  conns.forEach(conn => {
+    const ca = nodes[conn.from].sum.ans; // correct antwoord op dit knooppunt
+    if (conn.isCorrect) {
+      conn.label = ca;
+    } else {
+      // Afleidingsgetal: bij voorkeur een uitkomst van een ANDERE som in het doolhof,
+      // zodat kinderen écht moeten rekenen (het getal staat ergens, maar niet hier).
+      // Nooit het correcte antwoord (ca) of het antwoord van het doelknooppunt.
+      const toAns = nodes[conn.to].sum.ans;
+
+      // Pool 1: uitkomsten van andere knopen (meest pedagogisch waardevol)
+      const fromOtherNodes = allAns.filter(v => v !== ca && v !== toAns);
+
+      // Pool 2: willekeurige getallen binnen het bereik als aanvulling
+      const maxDecoy = isMulD ? uiRange : Math.min(uiRange, ca + 5);
+      const extra = [];
+      for (let v = 1; v <= maxDecoy; v++) {
+        if (v !== ca && v !== toAns) extra.push(v);
+      }
+
+      // Combineer: geef voorkeur aan andere-knoop-uitkomsten, aangevuld met extra
+      // Filter ook dubbele labels op verbindingen van hetzelfde knooppunt (vermijd verwarring)
+      const usedOnThisNode = conns
+        .filter(c2 => c2.from === conn.from && c2.label !== undefined)
+        .map(c2 => c2.label);
+
+      const pool = [...new Set([...fromOtherNodes, ...extra])]
+        .filter(v => !usedOnThisNode.includes(v));
+
+      conn.label = pool.length > 0
+        ? pool[rnd(0, pool.length - 1)]
+        : (ca === 1 ? 2 : ca - 1);
+    }
+  });
+  return{nodes,conns,path,rows,cols};
+}
+
+// ══════════════════════════════════════════════════════════
+// DOOLHOF – RENDER SVG
+// ══════════════════════════════════════════════════════════
+function renderWorksheetHeader(naam, datum, titel, opdracht, showNaamDatum=true) {
+  const naamTxt  = naam  ? naam  : '';
+  const datumTxt = datum ? datum : '';
+  const titelClean = titel.replace(/[^\w\s\-&]/g, '').trim();
+  const dp = datumTxt.split('/');
+
+  const naamDatumHtml = showNaamDatum ? `
+    <div class="ws-naam-datum" style="display:flex;align-items:baseline;gap:36px;margin-bottom:8px;">
+      <div style="font-size:14pt;font-weight:700;color:#1a4e8a;white-space:nowrap;">
+        Naam:&nbsp;<span style="display:inline-block;border-bottom:1.5px solid #1a4e8a;min-width:200px;padding-bottom:1px;">${naamTxt}</span>
+      </div>
+      <div style="font-size:14pt;font-weight:700;color:#1a4e8a;white-space:nowrap;">
+        Datum:&nbsp;<span style="display:inline-block;border-bottom:1.5px solid #1a4e8a;min-width:34px;padding-bottom:1px;">${dp[0]||''}</span>
+        &nbsp;/&nbsp;<span style="display:inline-block;border-bottom:1.5px solid #1a4e8a;min-width:34px;padding-bottom:1px;">${dp[1]||''}</span>
+        &nbsp;/&nbsp;<span style="display:inline-block;border-bottom:1.5px solid #1a4e8a;min-width:60px;padding-bottom:1px;">${dp[2]||''}</span>
+      </div>
+    </div>` : '';
+
+  return `<div class="ws-header" style="padding:10px 20px 8px;font-family:Arial,sans-serif;">
+    ${naamDatumHtml}
+    <div style="border:2px solid #7ab8e8;border-radius:8px;padding:7px 20px;background:#f0f7ff;text-align:center;margin-top:${showNaamDatum?'10px':'0'};margin-bottom:6px;">
+      <span style="font-size:20px;font-weight:900;color:#1a4e8a;font-family:Arial,sans-serif;">${titelClean}</span>
+    </div>
+    <div style="font-size:14pt;font-weight:700;color:#3a6a9a;margin-bottom:2px;font-style:italic;text-align:left;">
+      ${opdracht}
+    </div>
+  </div>`;
+}
+function renderMazeSVG(maze){
+  const{nodes,conns,rows,cols}=maze;
+  const cellW=130,cellH=105,nW=88,nH=46,pad=24;
+  const W=cols*cellW+pad*2, H=rows*cellH+pad*2;
+  const cx=(r,c)=>pad+c*cellW+cellW/2;
+  const cy=(r,c)=>pad+r*cellH+cellH/2;
+
+  const CR='#cccccc',CS='#a8c8e0',ROAD_W=18;
+  const SF='#fde8d0',SS='#e8a870',ST='#8a4010';
+  const EF='#d8f0e0',ES='#80c898',ET='#1a6030';
+  const NF='#ffffff',NS='#7aa8c8',NT='#2c5f7a';
+  const LF='#f5f0e8',LS='#c8b898',LT='#5a4a30';
+
+  let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" font-family="Nunito,Arial,sans-serif">`;
+  s+=`<rect width="${W}" height="${H}" fill="#fafcff"/>`;
+
+  // wegen
+  conns.forEach(conn=>{
+    const fn=nodes[conn.from],tn=nodes[conn.to];
+    const x1=cx(fn.r,fn.c),y1=cy(fn.r,fn.c),x2=cx(tn.r,tn.c),y2=cy(tn.r,tn.c);
+    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${CR}" stroke-width="${ROAD_W}" stroke-linecap="round"/>`;
+    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="white" stroke-width="${ROAD_W-4}" stroke-linecap="round"/>`;
+  });
+  // labels
+  conns.forEach(conn=>{
+    const fn=nodes[conn.from],tn=nodes[conn.to];
+    const mx=(cx(fn.r,fn.c)+cx(tn.r,tn.c))/2, my=(cy(fn.r,fn.c)+cy(tn.r,tn.c))/2;
+    const lbl=String(conn.label), lw=lbl.length>=3?34:26;
+    s+=`<rect x="${mx-lw/2}" y="${my-10}" width="${lw}" height="20" rx="10" fill="${LF}" stroke="${LS}" stroke-width="1.2"/>`;
+    s+=`<text x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="800" fill="${LT}">${lbl}</text>`;
+  });
+  // nodes
+  nodes.forEach(node=>{
+    const x=cx(node.r,node.c),y=cy(node.r,node.c);
+    const bx=x-nW/2,by=y-nH/2;
+    const f=node.isStart?SF:node.isEnd?EF:NF;
+    const st=node.isStart?SS:node.isEnd?ES:NS;
+    const tc=node.isStart?ST:node.isEnd?ET:NT;
+    s+=`<rect x="${bx+2}" y="${by+3}" width="${nW}" height="${nH}" rx="12" fill="#00000010"/>`;
+    s+=`<rect x="${bx}" y="${by}" width="${nW}" height="${nH}" rx="12" fill="${f}" stroke="${st}" stroke-width="2"/>`;
+    if(node.isStart){
+      s+=`<text x="${x}" y="${y-9}" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="900" fill="${tc}" letter-spacing="1">START</text>`;
+      const fs=node.sum.label.length>7?12:14;
+      s+=`<text x="${x}" y="${y+9}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="800" fill="${tc}">${node.sum.label}</text>`;
+    }else if(node.isEnd){
+      s+=`<text x="${x}" y="${y-8}" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="900" fill="${tc}" letter-spacing="1">EINDE</text>`;
+      s+=`<text x="${x}" y="${y+8}" text-anchor="middle" dominant-baseline="central" font-size="10" fill="${tc}">🏁</text>`;
+    }else{
+      const fs=node.sum.label.length>9?12:node.sum.label.length>7?13:14;
+      s+=`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="800" fill="${tc}">${node.sum.label}</text>`;
+    }
+  });
+  s+=`</svg>`;
+  return s;
+}
+
+// ══════════════════════════════════════════════════════════
+// DOOLHOF – MAIN GENERATE
+// ══════════════════════════════════════════════════════════
+function generateDoolhof(){
+  const sizeOpt=document.getElementById('maze-size').value;
+  const op=document.getElementById('op').value;
+  const range=parseInt(document.getElementById('range').value);
+  const isMul=op==='mul'||op==='div';
+  const upto=isMul?parseInt(document.getElementById('table-upto').value):0;
+  const aantal=parseInt(document.getElementById('d-aantal').value)||1;
+  const naam=document.getElementById('d-naam').value.trim();
+  const datum=document.getElementById('d-datum').value.trim();
+  const opdrachtSel=document.getElementById('d-opdracht').value;
+  const opdracht=opdrachtSel==='custom'
+    ?document.getElementById('d-opdracht-custom').value
+    :opdrachtSel;
+  const showAns=document.getElementById('show-ans').value==='show';
+
+  let rows,cols;
+  if(sizeOpt==='s'){rows=3;cols=3;}
+  else if(sizeOpt==='m'){rows=4;cols=4;}
+  else if(sizeOpt==='l'){rows=5;cols=4;}
+  else{const u=isMul?upto:range;rows=u<=10?3:u<=20?4:5;cols=u<=10?3:4;}
+
+  const needed=rows*cols;
+  const errEl=document.getElementById('d-err');
+  errEl.style.display='none';
+
+  const output=document.getElementById('preview-area');
+  output.innerHTML='';
+
+  for(let n=0;n<aantal;n++){
+    const sums=makeSums(needed+16);
+    if(!sums.length&&isMul){errEl.textContent='Vink minstens één tafel aan!';errEl.style.display='block';return;}
+    if(sums.length<needed){errEl.textContent=`Niet genoeg unieke sommen (${sums.length}/${needed}). Probeer meer soorten of een groter bereik.`;errEl.style.display='block';return;}
+    shuffle(sums);
+    // Probeer sommen met unieke uitkomsten te kiezen (voorkomt verwarring in het doolhof)
+    // Val terug op gewone shuffle als er niet genoeg unieke uitkomsten zijn (bv. brug tot 20)
+    const uniqueAnsSums = [];
+    const usedAns = new Set();
+    for (const s of sums) {
+      if (!usedAns.has(s.ans)) { usedAns.add(s.ans); uniqueAnsSums.push(s); }
+    }
+    const finalSums = uniqueAnsSums.length >= needed ? uniqueAnsSums : sums;
+    const maze=buildMaze(rows,cols,finalSums.slice(0,needed));
+
+    const div=document.createElement('div');
+    div.className='worksheet maze-worksheet';
+
+    // Werkblad kop: naam/datum enkel bij eerste doolhof
+    const titel=`🌀 Doolhof${aantal>1?' '+(n+1):''}`;
+    if(n===0){
+      div.innerHTML=renderWorksheetHeader(naam,datum,titel,opdracht);
+    } else {
+      div.innerHTML=`<div class="ws-header" style="padding:6px 20px 4px;font-family:Arial,sans-serif;text-align:center;">
+        <div style="border:2px solid #7ab8e8;border-radius:8px;padding:5px 20px;background:#f0f7ff;display:inline-block;">
+          <span style="font-size:20px;font-weight:900;color:#1a4e8a;font-family:Arial,sans-serif;">${titel}</span>
+        </div>
+      </div>`;
+    }
+
+    // SVG
+    const svgWrap=document.createElement('div');
+    svgWrap.style.padding='0 24px 16px';
+    svgWrap.innerHTML=renderMazeSVG(maze);
+    div.appendChild(svgWrap);
+
+    // Antwoordsleutel
+    if(showAns){
+      const keyDiv=document.createElement('div');
+      keyDiv.className='ans-key';
+      const ps=maze.path.map(i=>maze.nodes[i]).filter(n=>!n.isEnd)
+        .map(n=>`${n.sum.label} = <strong>${n.sum.ans}</strong>`);
+      keyDiv.innerHTML='<strong>✅ Correct pad:</strong> '+ps.join(' → ');
+      div.appendChild(keyDiv);
+    }
+    output.appendChild(div);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// IN-UIT MACHINE
+// ══════════════════════════════════════════════════════════
+
+// Pastelkleuren voor de bollen (max 4)
+const BOL_COLORS = [
+  {f:'#cce8f4', s:'#3ab0d8', t:'#0a4060'},  // blauw
+  {f:'#f0d0e8', s:'#d060a8', t:'#600040'},  // roze
+  {f:'#d0f0d8', s:'#50b870', t:'#104820'},  // groen
+  {f:'#fde8c0', s:'#e0a030', t:'#604000'},  // geel
+];
+
+const ALL_TAFELS = [2,3,4,5,6,7,8,9,10];
+
+// Bouw de keuzegrid voor machine 1 en 2
+function buildMachineConfig() {
+  const bolCount = parseInt(document.getElementById('iu-bolcount').value)||3;
+  buildMGrid('iu-m1-grid', bolCount, [2,5,10,3].slice(0,bolCount));
+  buildMGrid('iu-m2-grid', bolCount, [2,10,5,4].slice(0,bolCount));
+  // Update het automatische getal-display
+  const total = 2 + bolCount * 2; // 2 IN + bolCount UIT per machine × 2 machines
+  const disp = document.getElementById('iu-count-display');
+  if (disp) disp.textContent = total + ' getallen (automatisch)';
+}
+
+function buildMGrid(gridId, bolCount, defaults) {
+  const grid = document.getElementById(gridId);
+  // Bewaar huidige selecties
+  const prev = [...grid.querySelectorAll('select')].map(s=>parseInt(s.value));
+
+  grid.innerHTML = '';
+  for (let i=0; i<bolCount; i++) {
+    const col = BOL_COLORS[i];
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:6px;';
+
+    // Gekleurde stip als preview
+    const dot = document.createElement('span');
+    dot.style.cssText = `display:inline-block;width:16px;height:16px;border-radius:50%;background:${col.f};border:2px solid ${col.s};flex-shrink:0;`;
+    wrap.appendChild(dot);
+
+    const sel = document.createElement('select');
+    sel.style.cssText = 'font-size:.85rem;padding:5px 8px;';
+    ALL_TAFELS.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = '× ' + t;
+      if ((prev[i] || defaults[i]) === t) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    wrap.appendChild(sel);
+    grid.appendChild(wrap);
+  }
+}
+
+// UI: toon juiste sub-veld afhankelijk van type
+function updateIUType() {
+  const t = document.getElementById('iu-intype').value;
+  document.getElementById('iu-sub-tafel').classList.toggle('hidden',    t !== 'tafel');
+  document.getElementById('iu-sub-veelvoud').classList.toggle('hidden', t !== 'veelvoud');
+  document.getElementById('iu-sub-vrij').classList.toggle('hidden',     t !== 'vrij');
+}
+
+// Genereer getallenrij op basis van type + instellingen
+// UIT-getallen mogen altijd groter zijn!
+// Geef de volledige pool van mogelijke IN-getallen terug (ongeshuffled)
+function getInPool() {
+  const intype = document.getElementById('iu-intype').value;
+  let pool = [];
+  if (intype === 'tafel') {
+    const upto = parseInt(document.getElementById('iu-tafelupto').value) || 10;
+    for (let i=1; i<=upto; i++) pool.push(i);
+  } else if (intype === 'veelvoud') {
+    const vmax = parseInt(document.getElementById('iu-veelvoudmax').value) || 100;
+    for (let i=1; i*10<=vmax; i++) pool.push(i*10);
+  } else {
+    const vmax = parseInt(document.getElementById('iu-vrijmax').value) || 20;
+    for (let i=1; i<=vmax; i++) pool.push(i);
+  }
+  return pool;
+}
+
+// Bouw getallenrij: bevat PRECIES de 2 IN-getallen + alle UIT-uitkomsten.
+// Geen afleiders: elk getal is ofwel een geldig IN, ofwel een correct UIT-antwoord.
+// Dit geeft de leerling ingebouwde zelfcontrole.
+function buildGetallenRijMetUitkomsten(m1tafels, m2tafels, totalCount) {
+  const inPool = [...getInPool()];
+  shuffle(inPool);
+
+  // Kies in1 en in2 uit de pool (verschillend, indien mogelijk)
+  // Vermijd in-getallen die dubbele uitkomsten geven (bv. in=1 → 1×5=5 én 5 staat al in rij)
+  // Simpele aanpak: kies in1, kies dan in2 zodanig dat uitkomstensets zo weinig mogelijk overlappen.
+  let in1 = inPool[0];
+  let in2 = inPool.find(n => n !== in1) || inPool[1] || inPool[0];
+
+  // Probeer een in2 te vinden zodat de totale set (in1, in2, alle uitkomsten) zo dicht mogelijk
+  // bij totalCount unieke waarden heeft. Als de pool dat toelaat.
+  let bestIn2 = in2;
+  let bestUnique = 0;
+  for (const kandidaat of inPool) {
+    if (kandidaat === in1) continue;
+    const set = new Set([in1, kandidaat,
+      ...m1tafels.map(t => in1 * t),
+      ...m2tafels.map(t => kandidaat * t)
+    ]);
+    if (set.size > bestUnique) {
+      bestUnique = set.size;
+      bestIn2 = kandidaat;
+      if (set.size === totalCount) break; // perfect
+    }
+  }
+  in2 = bestIn2;
+
+  // Bereken alle uitkomsten
+  const uits1 = m1tafels.map(t => in1 * t);
+  const uits2 = m2tafels.map(t => in2 * t);
+
+  // Rij = 2 IN + alle UIT (dedupliceren als er toch overlap is)
+  const rijSet = new Set([in1, in2, ...uits1, ...uits2]);
+  const rij = [...rijSet];
+  shuffle(rij);
+
+  return { rij, in1, in2, uits1, uits2 };
+}
+
+// SVG voor 1 machine: 1 IN-vakje bovenaan + N gekleurde bollen + N UIT-vakjes
+// "UIT:" staat IN het vakje als label, invullijn eronder
+function renderMachineSVG(tafels, machineW, markerId) {
+  const n = tafels.length;
+  const colW = machineW / n;
+  const inBoxW = Math.min(90, machineW * 0.38);
+  const inBoxH = 46;
+  const inCX = machineW / 2;
+  const inCY = 50;
+  const ellCY = 155;
+  const uitCY = 268;
+  const uitBoxW = Math.min(80, colW * 0.82);
+  const uitBoxH = 46;
+  const eRY = 40;
+  const arrowColor = '#80a8c8';
+
+  let s = `<defs>
+    <marker id="ar${markerId}" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7 z" fill="${arrowColor}"/>
+    </marker>
+  </defs>`;
+
+  // ── IN vakje: label bovenin, invullijn onderin ──
+  s += `<rect x="${inCX-inBoxW/2}" y="${inCY-inBoxH/2}" width="${inBoxW}" height="${inBoxH}" rx="11"
+    fill="white" stroke="#90b8d8" stroke-width="2"/>`;
+  // "IN:" label bovenaan in het vakje
+  s += `<text x="${inCX}" y="${inCY-inBoxH/2+13}" text-anchor="middle"
+    font-size="11" font-weight="800" fill="#5a7fa8">IN:</text>`;
+  // Invullijn onderin het vakje
+  s += `<line x1="${inCX-22}" y1="${inCY+inBoxH/2-9}" x2="${inCX+22}" y2="${inCY+inBoxH/2-9}"
+    stroke="#c0d0e4" stroke-width="1.4"/>`;
+
+  // Pijlen van IN naar elke bol
+  for (let i=0; i<n; i++) {
+    const eX = colW*i + colW/2;
+    s += `<line x1="${inCX}" y1="${inCY+inBoxH/2+2}" x2="${eX}" y2="${ellCY-eRY-5}"
+      stroke="${arrowColor}" stroke-width="1.5" marker-end="url(#ar${markerId})"/>`;
+  }
+
+  // Bollen + UIT vakjes
+  for (let i=0; i<n; i++) {
+    const col = BOL_COLORS[i];
+    const tafel = tafels[i];
+    const eX = colW*i + colW/2;
+    const eRX = colW * 0.43;
+
+    // Ellips
+    s += `<ellipse cx="${eX}" cy="${ellCY}" rx="${eRX}" ry="${eRY}"
+      fill="${col.f}" stroke="${col.s}" stroke-width="2.5"/>`;
+    s += `<text x="${eX}" y="${ellCY}" text-anchor="middle" dominant-baseline="central"
+      font-size="17" font-weight="900" fill="${col.t}">× ${tafel} =</text>`;
+
+    // Pijl ellips → UIT vakje
+    s += `<line x1="${eX}" y1="${ellCY+eRY+4}" x2="${eX}" y2="${uitCY-uitBoxH/2-5}"
+      stroke="${arrowColor}" stroke-width="1.5" marker-end="url(#ar${markerId})"/>`;
+
+    // ── UIT vakje: "UIT:" label bovenaan, invullijn onderin ──
+    s += `<rect x="${eX-uitBoxW/2}" y="${uitCY-uitBoxH/2}" width="${uitBoxW}" height="${uitBoxH}" rx="11"
+      fill="white" stroke="${col.s}" stroke-width="1.8"/>`;
+    s += `<text x="${eX}" y="${uitCY-uitBoxH/2+13}" text-anchor="middle"
+      font-size="11" font-weight="800" fill="${col.t}">UIT:</text>`;
+    s += `<line x1="${eX-20}" y1="${uitCY+uitBoxH/2-9}" x2="${eX+20}" y2="${uitCY+uitBoxH/2-9}"
+      stroke="${col.s}" stroke-width="1.3" opacity=".6"/>`;
+  }
+
+  return s;
+}
+
+function renderInUitSVG(m1tafels, m2tafels, data) {
+  const { rij } = data;
+  const padX=16, padY=12;
+  const rowH=52;
+  const machineH=330;
+  const machineW=380;
+  const gap=20;
+  const W = padX*2 + machineW*2 + gap;
+  const H = padY*2 + rowH + machineH + 10;
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" font-family="Nunito,Arial,sans-serif">`;
+  s += `<rect width="${W}" height="${H}" fill="white"/>`;
+
+  // Getallenrij bovenaan
+  const nCols = rij.length;
+  const cellW = (W - padX*2) / nCols;
+  rij.forEach((num, i) => {
+    const rx = padX + i*cellW;
+    s += `<rect x="${rx}" y="${padY}" width="${cellW}" height="${rowH-4}"
+      fill="${i%2===0?'#eef5ff':'white'}" stroke="#c8dff5" stroke-width="1.2"/>`;
+    s += `<text x="${rx+cellW/2}" y="${padY+rowH/2-2}" text-anchor="middle" dominant-baseline="central"
+      font-size="14" font-weight="800" fill="#1a4e8a">${num}</text>`;
+  });
+
+  const my = padY + rowH + 12;
+
+  // Machine 1
+  s += `<g transform="translate(${padX},${my})">`;
+  s += renderMachineSVG(m1tafels, machineW, 'm1');
+  s += `</g>`;
+
+  // Machine 2
+  s += `<g transform="translate(${padX+machineW+gap},${my})">`;
+  s += renderMachineSVG(m2tafels, machineW, 'm2');
+  s += `</g>`;
+
+  s += `</svg>`;
+  return s;
+}
+
+function generateInUit() {
+  const naam     = document.getElementById('iu-naam').value.trim();
+  const datum    = document.getElementById('iu-datum').value.trim();
+  const opdracht = document.getElementById('iu-opdracht').value;
+  const m1sels = [...document.querySelectorAll('#iu-m1-grid select')].map(s=>parseInt(s.value));
+  const m2sels = [...document.querySelectorAll('#iu-m2-grid select')].map(s=>parseInt(s.value));
+  // Automatisch: 2 IN-vakjes + alle UIT-vakjes
+  const count = 2 + m1sels.length + m2sels.length;
+
+  const data = buildGetallenRijMetUitkomsten(m1sels, m2sels, count);
+
+  const output = document.getElementById('preview-area');
+  output.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = 'worksheet';
+  div.innerHTML = renderWorksheetHeader(naam, datum, '⚙️ IN-UIT Machine', opdracht);
+
+  const svgWrap = document.createElement('div');
+  svgWrap.style.padding = '0 12px 20px';
+  svgWrap.innerHTML = renderInUitSVG(m1sels, m2sels, data);
+  div.appendChild(svgWrap);
+  output.appendChild(div);
+  }
+
+
+// ══════════════════════════════════════════════════════════
+// REKENPAD
+// ══════════════════════════════════════════════════════════
+
+function getRPTafels() {
+  // Lees aangevinkte tafels uit de UI
+  const checked = [...document.querySelectorAll('.rp-tafel-cb:checked')].map(c => parseInt(c.value));
+  return checked.length > 0 ? checked : [2, 5, 10];
+}
+
+function rpGenOp(opKey, range) {
+  const ops = opKey === 'all'    ? ['+','-','×','÷']
+             : opKey === 'addsub'? ['+','-']
+             : opKey === 'add'   ? ['+']
+             : opKey === 'sub'   ? ['-']
+             : opKey === 'mul'   ? ['×']
+             :                    ['÷'];
+  const op = ops[rnd(0, ops.length-1)];
+  let operand;
+  if (op === '×' || op === '÷') {
+    const tafels = getRPTafels();
+    operand = tafels[rnd(0, tafels.length - 1)];
+  } else {
+    operand = rnd(1, Math.max(9, Math.floor(range / 4)));
+  }
+  return { op, operand };
+}
+
+function buildRekenpad(steps, opKey, range, mode) {
+  const maxTries = 400;
+  const isMulDiv = opKey === 'mul';
+  const tafelUpto = parseInt(document.querySelector('input[name="rp-tafelupto"]:checked')?.value || '10');
+  const niveau = document.querySelector('input[name="rp-niveau"]:checked')?.value || 'basis';
+  const tafels = getRPTafels();
+
+  for (let t = 0; t < maxTries; t++) {
+    const values = [];
+    const ops = [];
+    let ok = true;
+
+    if (isMulDiv) {
+      // ── TAFELMODUS ──────────────────────────────────────────
+      // Getallen in het pad zijn altijd geldige tafelresultaten
+      // Bereik: 1 t/m tafelUpto × max(tafels) bv. 1-100 bij tafels tot 10
+      // Maar startgetal is altijd 1-tafelUpto (wat kinderen kennen)
+      const maxVal = tafelUpto * Math.max(...tafels);
+
+      // Bouw pool van alle geldige getallen = veelvouden van elke tafel t/m maxVal
+      const geldigeGetallen = new Set();
+      for (const t of tafels) {
+        for (let v = t; v <= maxVal; v += t) geldigeGetallen.add(v);
+      }
+      // Voeg ook 1-tafelUpto toe als startgetallen
+      for (let v = 1; v <= tafelUpto; v++) geldigeGetallen.add(v);
+
+      const start = rnd(1, tafelUpto);
+      values.push(start);
+
+      for (let i = 0; i < steps; i++) {
+        const cur = values[values.length - 1];
+        const prevOp = ops.length > 0 ? ops[ops.length-1].op : null;
+        const prevOperand = ops.length > 0 ? ops[ops.length-1].operand : null;
+
+        // Maak lijst van geldige stappen — vermijd directe herhaling (× dan ÷ zelfde tafel)
+        const geldig = [];
+        for (const t of tafels) {
+          const product = cur * t;
+          // × mag als uitkomst in geldige pool zit en niet direct de vorige ÷ terugdraait
+          // Bij basis-niveau: product mag niet groter zijn dan t × tafelUpto
+          // (bv. tafel van 2 gaat maar tot 2×10=20, dus 50×2=100 is niet toegelaten)
+          const maxVoorDezeTafel = niveau === 'basis' ? t * tafelUpto : maxVal;
+          if (product <= maxVoorDezeTafel && geldigeGetallen.has(product)) {
+            if (!(prevOp === '÷' && prevOperand === t && product === values[values.length-2])) {
+              geldig.push({ op: '×', operand: t });
+            }
+          }
+          // ÷ mag als deelbaar en niet direct de vorige × terugdraait
+          if (cur % t === 0 && cur / t >= 1) {
+            const quotient = cur / t;
+            // Bij basis-niveau: uitkomst moet ≤ tafelUpto zijn (staat in de deeltafel)
+            // Bv. 60 ÷ 3 = 20 → 20 > 10 → NIET toegelaten op 2de/3de leerjaar
+            if (niveau === 'basis' && quotient > tafelUpto) continue;
+            if (!(prevOp === '×' && prevOperand === t && quotient === values[values.length-2])) {
+              geldig.push({ op: '÷', operand: t });
+            }
+          }
+        }
+        if (geldig.length === 0) { ok = false; break; }
+        shuffle(geldig);
+        // Kies bij voorkeur een stap die een ander getal geeft dan de vorige uitkomst
+        const geenHerhaling = geldig.filter(s => {
+          const nxt = s.op === '×' ? cur * s.operand : cur / s.operand;
+          return nxt !== (values[values.length-2] || -1);
+        });
+        const step = (geenHerhaling.length > 0 ? geenHerhaling : geldig)[0];
+        const next = step.op === '×' ? cur * step.operand : cur / step.operand;
+        ops.push(step);
+        values.push(next);
+      }
+      if (!ok) continue;
+
+    } else {
+      // ── OPTELLEN / AFTREKKEN / GEMENGD ──────────────────────
+      const startMax = Math.max(1, Math.floor(range / 2));
+      values.push(rnd(1, startMax));
+
+      for (let i = 0; i < steps; i++) {
+        let tries = 0;
+        let found = false;
+        while (tries++ < 100) {
+          const step = rpGenOp(opKey, range);
+          const cur = values[values.length-1];
+          let next;
+          if (step.op === '+') next = cur + step.operand;
+          else if (step.op === '-') {
+            if (cur - step.operand < 1) continue;
+            next = cur - step.operand;
+          } else if (step.op === '×') {
+            next = cur * step.operand;
+            if (next > 9999) continue;
+          } else {
+            if (cur % step.operand !== 0) continue;
+            next = cur / step.operand;
+            // Bij basis-niveau: uitkomst van deling moet ≤ tafelUpto zijn
+            if (niveau === 'basis' && next > tafelUpto) continue;
+          }
+          if (next < 1 || next > range) continue;
+          ops.push(step);
+          values.push(next);
+          found = true;
+          break;
+        }
+        if (!found) { ok = false; break; }
+      }
+      if (!ok) continue;
+    }
+
+    // Bepaal welke vakjes leeg zijn
+    // values: steps+1 getallen (index 0 t/m steps)
+    // ops: steps bewerkingen
+    const vBlanks = new Array(values.length).fill(false);
+    const oBlanks = new Array(ops.length).fill(false);
+
+    if (mode === 'uitkomst') {
+      // ALLE uitkomsten zijn leeg — alleen startgetal en operatoren zijn gegeven
+      // Als de term ook gegeven is, moet leerling enkel de uitkomst berekenen
+      for (let i = 1; i < values.length; i++) {
+        vBlanks[i] = true; // elke uitkomst is leeg
+      }
+    } else if (mode === 'term') {
+      // Alle operatoren leeg — uitkomsten zijn gegeven, leerling vult +/- in
+      for (let i = 0; i < ops.length; i++) {
+        oBlanks[i] = true;
+      }
+    } else { // mix
+      // Afwisselend: elke 2de uitkomst leeg, elke andere operator leeg
+      // Nooit uitkomst én operator op dezelfde stap leeg
+      for (let i = 0; i < ops.length; i++) {
+        if (i % 2 === 0) {
+          vBlanks[i + 1] = true; // uitkomst leeg
+        } else {
+          oBlanks[i] = true;     // operator leeg
+        }
+      }
+    }
+
+    return { values, ops, vBlanks, oBlanks };
+  }
+  return null;
+}
+
+function renderRekenpadSVG(paden) {
+  const n = paden.length;
+  const steps = paden[0].ops.length;
+
+  // A4 breedte = 794px scherm / we gebruiken 800 viewbox
+  // Hoogte: per pad ~100px + label, plus marge
+  const PAD_X  = 24;
+  const SVG_W  = 800;
+  // Per pad: hoogte afhankelijk van of er operand-labels boven pijlen staan
+  const PAD_H  = 108;
+  const GAP    = 22;
+  const TOP    = 10;
+  const SVG_H  = TOP + n * PAD_H + (n-1) * GAP + 16;
+
+  // Bereken breedte vakje en pijl zodat ze exact passen
+  const DRAW_W = SVG_W - PAD_X * 2;
+  const nBoxes = paden[0].values.length;   // steps + 1
+  const nArrows = paden[0].ops.length;     // steps
+  // Verdeel ruimte: pijlen krijgen 40% meer dan vakjes
+  const unit = DRAW_W / (nBoxes + nArrows * 1.4);
+  const BOX_W  = Math.floor(unit);
+  const ARR_W  = Math.floor(unit * 1.4);
+  const BOX_H  = 44;
+  const BOX_RX = 10;
+
+  const COLORS = [
+    {box:'#ddeeff', str:'#4488cc', txt:'#0a3060', arr:'#4488cc'},
+    {box:'#fde4d4', str:'#cc6633', txt:'#5a1800', arr:'#cc6633'},
+    {box:'#d4f0e0', str:'#339966', txt:'#0a3a18', arr:'#339966'},
+    {box:'#f0ddf8', str:'#9944bb', txt:'#3a0860', arr:'#9944bb'},
+  ];
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SVG_W} ${SVG_H}" font-family="Arial,sans-serif">`;
+  s += `<rect width="${SVG_W}" height="${SVG_H}" fill="white"/>`;
+
+  paden.forEach((pad, pi) => {
+    const col  = COLORS[pi % COLORS.length];
+    const { values, ops, vBlanks, oBlanks } = pad;
+    const topY = TOP + pi * (PAD_H + GAP);
+    const midY = topY + PAD_H / 2 + 10; // vertical center of boxes
+    let x = PAD_X;
+
+    // Pad nummer
+    s += `<text x="${PAD_X}" y="${topY + 10}" font-size="11" font-weight="800" fill="${col.str}">Pad ${pi+1}</text>`;
+
+    values.forEach((val, vi) => {
+      const blank = vBlanks[vi];
+
+      // Box
+      s += `<rect x="${x}" y="${midY - BOX_H/2}" width="${BOX_W}" height="${BOX_H}" rx="${BOX_RX}"
+        fill="${blank ? 'white' : col.box}" stroke="${col.str}" stroke-width="${blank ? 2 : 1.5}"/>`;
+
+      if (!blank) {
+        s += `<text x="${x + BOX_W/2}" y="${midY}" text-anchor="middle" dominant-baseline="central"
+          font-size="16" font-weight="800" fill="${col.txt}">${val}</text>`;
+      } else {
+        // Invullijn onderin vakje
+        s += `<line x1="${x + BOX_W*0.2}" y1="${midY + BOX_H/2 - 9}"
+          x2="${x + BOX_W*0.8}" y2="${midY + BOX_H/2 - 9}"
+          stroke="${col.str}" stroke-width="1.3" opacity=".5"/>`;
+      }
+      x += BOX_W;
+
+      // Pijl
+      if (vi < ops.length) {
+        const step    = ops[vi];
+        const opBlank = oBlanks[vi];
+        const ax1 = x + 6;
+        const ax2 = x + ARR_W - 6;
+        const mx  = (ax1 + ax2) / 2;
+
+        // Pijllijn
+        s += `<line x1="${ax1}" y1="${midY}" x2="${ax2 - 6}" y2="${midY}"
+          stroke="${col.arr}" stroke-width="2.2"/>`;
+        // Pijlpunt
+        s += `<polygon points="${ax2},${midY} ${ax2-7},${midY-4} ${ax2-7},${midY+4}" fill="${col.arr}"/>`;
+
+        if (!opBlank) {
+          // Operator + getal boven pijl in klein kader
+          // Toon ":" in plaats van "÷" voor delen (Vlaamse notatie)
+          const opShow = step.op === '÷' ? ':' : step.op;
+          const lbl = `${opShow} ${step.operand}`;
+          const lw  = lbl.length > 4 ? 46 : 38;
+          s += `<rect x="${mx - lw/2}" y="${midY - 26}" width="${lw}" height="20" rx="6"
+            fill="${col.box}" stroke="${col.str}" stroke-width="1.2"/>`;
+          s += `<text x="${mx}" y="${midY - 16}" text-anchor="middle" dominant-baseline="central"
+            font-size="12" font-weight="900" fill="${col.txt}">${lbl}</text>`;
+        } else {
+          // Leeg kader: operator zichtbaar, getal invullen
+          const opShow = step.op === '÷' ? ':' : step.op;
+          const lw = 46;
+          s += `<rect x="${mx - lw/2}" y="${midY - 26}" width="${lw}" height="20" rx="6"
+            fill="white" stroke="${col.str}" stroke-width="1.8"/>`;
+          s += `<text x="${mx - lw/2 + 8}" y="${midY - 16}" dominant-baseline="central"
+            font-size="12" font-weight="900" fill="${col.str}">${opShow}</text>`;
+          // Invullijn
+          s += `<line x1="${mx - lw/2 + 18}" y1="${midY - 10}"
+            x2="${mx + lw/2 - 5}" y2="${midY - 10}"
+            stroke="${col.str}" stroke-width="1.2" opacity=".5"/>`;
+        }
+        x += ARR_W;
+      }
+    });
+  });
+
+  s += `</svg>`;
+  return s;
+}
+
+function generateRekenpad(appendMode) {
+  const naam     = document.getElementById('rp-naam').value.trim();
+  const datum    = document.getElementById('rp-datum').value.trim();
+  const opdracht = document.getElementById('rp-opdracht').value;
+  const opKey    = document.getElementById('rp-op').value;
+  const range    = parseInt(document.getElementById('rp-range').value) || 20;
+  const steps    = parseInt(document.getElementById('rp-len').value) || 6;
+  const nPaden   = parseInt(document.getElementById('rp-count').value) || 2;
+  const mode     = document.querySelector('input[name="rp-mode"]:checked').value;
+
+  const paden = [];
+  for (let i = 0; i < nPaden; i++) {
+    const pad = buildRekenpad(steps, opKey, range, mode);
+    if (!pad) { alert('Kon geen geldig pad genereren. Probeer een kleiner bereik of minder stappen.'); return; }
+    paden.push(pad);
+  }
+
+  const output = document.getElementById('preview-area');
+  output.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = 'worksheet';
+  div.innerHTML = renderWorksheetHeader(naam, datum, 'Rekenpad', opdracht);
+
+  const svgWrap = document.createElement('div');
+  svgWrap.style.padding = '0 16px 20px';
+  svgWrap.innerHTML = renderRekenpadSVG(paden);
+  div.appendChild(svgWrap);
+  output.appendChild(div);
+
+  const btn = document.getElementById('btn-voeg-rp');
+  if (btn) btn.style.display = 'inline-block';
+}
+
+function updateRPUI() {
+  const op = document.getElementById('rp-op').value;
+  const isMul = (op === 'mul');
+  document.getElementById('rp-b-tafels').classList.toggle('hidden', !isMul);
+  document.getElementById('rp-f-range').classList.toggle('hidden', isMul);
+}
+
+function updateRPHint() {
+  const steps  = parseInt(document.getElementById('rp-len').value) || 5;
+  const nPaden = parseInt(document.getElementById('rp-count').value) || 2;
+  const hint   = document.getElementById('rp-hint');
+  if (!hint) return;
+  // Rough height: header 80px + nPaden * 130px
+  const estH = 80 + nPaden * 130;
+  const fits = estH < 720; // A4 ≈ 720px printable
+  hint.style.color = fits ? '#2a8a40' : '#c04000';
+  hint.textContent = fits
+    ? `✓ Past op A4 (${nPaden} × ${steps} stappen)`
+    : `⚠ Mogelijk te hoog voor A4 — probeer minder paden`;
+}
+
+function previewRekenpad() { generateRekenpad(false); updateRPHint(); }
+
+
+// ══════════════════════════════════════════════════════════
+// REKENROOSTER
+// ══════════════════════════════════════════════════════════
+
+let roosterConfigs = []; // array van config-objecten
+let roosterIdCounter = 0;
+
+function addRoosterConfig() {
+  if (roosterConfigs.length >= 4) {
+    alert('Maximum 4 roosters per werkblad.');
+    return;
+  }
+  const id = ++roosterIdCounter;
+  roosterConfigs.push({ id });
+  renderRoosterConfigs();
+}
+
+function removeRoosterConfig(id) {
+  roosterConfigs = roosterConfigs.filter(c => c.id !== id);
+  renderRoosterConfigs();
+}
+
+function saveRoosterConfigsFromDOM() {
+  roosterConfigs.forEach(cfg => {
+    const id = cfg.id;
+    const opEl = document.getElementById(`ro-op-${id}`);
+    if (!opEl) return; // nog niet gerenderd
+    cfg.op     = opEl.value;
+    cfg.rows   = document.getElementById(`ro-rows-${id}`)?.value;
+    cfg.cols   = document.getElementById(`ro-cols-${id}`)?.value;
+    cfg.blanks = document.getElementById(`ro-blanks-${id}`)?.value;
+    cfg.range  = document.getElementById(`ro-range-${id}`)?.value;
+    cfg.brug   = document.getElementById(`ro-brug-${id}`)?.value;
+    cfg.upto   = document.querySelector(`input[name="ro-upto-${id}"]:checked`)?.value;
+    cfg.tafels = [...document.querySelectorAll(`.ro-tafel-cb-${id}:checked`)].map(c => parseInt(c.value));
+  });
+}
+
+function renderRoosterConfigs() {
+  saveRoosterConfigsFromDOM();
+  const container = document.getElementById('ro-configs');
+  container.innerHTML = '';
+  const addBtn = document.getElementById('ro-add-btn');
+  if (addBtn) addBtn.style.display = roosterConfigs.length >= 4 ? 'none' : 'block';
+  if (roosterConfigs.length === 0) return;
+
+  roosterConfigs.forEach((cfg, idx) => {
+    const id = cfg.id;
+    const div = document.createElement('div');
+    div.className = 'sub-block';
+    div.style.cssText = 'margin:0;';
+
+    // Header
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;';
+    hdr.innerHTML = '<span class="sub-block-title" style="margin:0;">Rooster ' + (idx+1) + '</span>';
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '✕ Verwijder';
+    delBtn.style.cssText = 'background:#fdeaea;color:#a02020;border:1px solid #e8b0b0;border-radius:6px;padding:2px 8px;font-size:.75rem;font-weight:800;cursor:pointer;';
+    delBtn.onclick = () => removeRoosterConfig(id);
+    hdr.appendChild(delBtn);
+    div.appendChild(hdr);
+
+    // Controls row
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;';
+
+    function mkField(labelTxt, selectId, options, selectedVal) {
+      const f = document.createElement('div');
+      f.className = 'field';
+      const lbl = document.createElement('label');
+      lbl.textContent = labelTxt;
+      const sel = document.createElement('select');
+      sel.id = selectId;
+      options.forEach(([val, txt]) => {
+        const opt = document.createElement('option');
+        opt.value = val; opt.textContent = txt;
+        if (val === selectedVal) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      f.appendChild(lbl); f.appendChild(sel);
+      return f;
+    }
+
+    const opSel = mkField('Bewerking', 'ro-op-' + id, [
+      ['add','Optellen (+)'],['sub','Aftrekken (−)'],
+      ['mul','× vermenigvuldigen'],['div','÷ delen']
+    ], cfg.op || 'mul');
+    opSel.querySelector('select').onchange = () => toggleRoosterOpties(id);
+    row.appendChild(opSel);
+    row.appendChild(mkField('Rijen', 'ro-rows-' + id, [['3','3'],['4','4'],['5','5'],['6','6']], cfg.rows || '5'));
+    row.appendChild(mkField('Kolommen', 'ro-cols-' + id, [['2','2'],['3','3'],['4','4']], cfg.cols || '3'));
+    row.appendChild(mkField('Moeilijkheid', 'ro-blanks-' + id, [
+      ['none','Alles invullen'],['some','Met hints'],['half','Halve hints']
+    ], cfg.blanks || 'none'));
+    div.appendChild(row);
+
+    // Bereik voor +/−
+    const bereikDiv = document.createElement('div');
+    bereikDiv.id = 'ro-bereik-' + id;
+    bereikDiv.style.cssText = 'display:none;flex-wrap:wrap;gap:10px;margin-top:6px;';
+    const rangeSel = mkField('Bereik', 'ro-range-' + id, [['10','Tot 10'],['20','Tot 20'],['50','Tot 50'],['100','Tot 100']], cfg.range || '20');
+    const brugSel  = mkField('Brug', 'ro-brug-' + id, [['no','Zonder brug'],['yes','Met brug'],['mix','Gemengd']], cfg.brug || 'mix');
+    bereikDiv.appendChild(rangeSel);
+    bereikDiv.appendChild(brugSel);
+    div.appendChild(bereikDiv);
+
+    // Tafels voor ×/÷
+    const tafelsDiv = document.createElement('div');
+    tafelsDiv.id = 'ro-tafels-' + id;
+    tafelsDiv.style.cssText = 'margin-top:8px;';
+    const tafelsTitle = document.createElement('div');
+    tafelsTitle.style.cssText = 'font-size:.73rem;font-weight:800;color:#1a4e8a;text-transform:uppercase;margin-bottom:6px;';
+    tafelsTitle.textContent = 'Tafels (kolomgetallen)';
+    tafelsDiv.appendChild(tafelsTitle);
+
+    // Tot ×10 of ×12
+    const uptoRow = document.createElement('div');
+    uptoRow.style.cssText = 'display:flex;gap:12px;margin-bottom:6px;flex-wrap:wrap;';
+    ['10','12'].forEach(val => {
+      const lbl = document.createElement('label');
+      lbl.className = 'radio-item';
+      const rb = document.createElement('input');
+      rb.type = 'radio'; rb.name = 'ro-upto-' + id; rb.value = val;
+      rb.checked = (val === (cfg.upto || '10'));
+      lbl.appendChild(rb);
+      lbl.appendChild(document.createTextNode(' tot ×' + val + (val==='10' ? ' (2de-3de leerjaar)' : ' (hoger leerjaar)')));
+      uptoRow.appendChild(lbl);
+    });
+    tafelsDiv.appendChild(uptoRow);
+    const cbGrid = document.createElement('div');
+    cbGrid.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+    [1,2,3,4,5,6,7,8,9,10,11,12].forEach(t => {
+      const lbl = document.createElement('label');
+      lbl.style.cssText = 'display:flex;align-items:center;gap:3px;font-size:.82rem;font-weight:700;color:#1a4e8a;background:#f0f7ff;border:1.5px solid #c8dff5;border-radius:6px;padding:3px 8px;cursor:pointer;';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.className = 'ro-tafel-cb-' + id;
+      cb.value = t;
+      cb.checked = (cfg.tafels && cfg.tafels.length > 0) ? cfg.tafels.includes(t) : [2,5,10].includes(t);
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode(' ×' + t));
+      cbGrid.appendChild(lbl);
+    });
+    tafelsDiv.appendChild(cbGrid);
+    div.appendChild(tafelsDiv);
+
+    container.appendChild(div);
+    toggleRoosterOpties(id);
+  });
+}
+
+function toggleRoosterOpties(id) {
+  const op = document.getElementById(`ro-op-${id}`)?.value;
+  const isMul = op === 'mul' || op === 'div';
+  const bereik = document.getElementById(`ro-bereik-${id}`);
+  const tafels = document.getElementById(`ro-tafels-${id}`);
+  if (bereik) bereik.style.display = isMul ? 'none' : 'flex';
+  if (tafels) tafels.style.display = isMul ? 'block' : 'none';
+}
+
+function updateRoosterUI() {
+  // Legacy — niet meer nodig maar bewaard voor init
+}
+
+function getRoosterConfigData(id) {
+  const op     = document.getElementById(`ro-op-${id}`)?.value || 'mul';
+  const nRows  = parseInt(document.getElementById(`ro-rows-${id}`)?.value) || 5;
+  const nCols  = parseInt(document.getElementById(`ro-cols-${id}`)?.value) || 3;
+  const blanks = document.getElementById(`ro-blanks-${id}`)?.value || 'none';
+  const range  = parseInt(document.getElementById(`ro-range-${id}`)?.value) || 20;
+  const brug   = document.getElementById(`ro-brug-${id}`)?.value || 'mix';
+  const isMul  = op === 'mul' || op === 'div';
+  let colNums = [];
+
+  if (isMul) {
+    const checked = [...document.querySelectorAll(`.ro-tafel-cb-${id}:checked`)].map(c => parseInt(c.value));
+    const pool = checked.length > 0 ? checked : [2, 5, 10];
+    const shuffled = [...pool]; shuffle(shuffled);
+    colNums = shuffled.slice(0, Math.min(nCols, shuffled.length));
+    while (colNums.length < nCols) colNums.push(pool[rnd(0, pool.length-1)]);
+    if (colNums.length === 0) colNums = [2, 5, 10].slice(0, nCols);
+  } else {
+    const pool = [];
+    for (let i = 1; i <= range; i++) pool.push(i);
+    shuffle(pool);
+    colNums = pool.slice(0, nCols);
+  }
+
+  // Rijgetallen
+  let rowNums = [];
+  const upto = parseInt(document.querySelector(`input[name="ro-upto-${id}"]:checked`)?.value || '10');
+
+  if (op === 'div') {
+    // Max rijgetal = kleinste deler × upto
+    // Bv. delers=[2,5,10], upto=10 → max = 2×10 = 20
+    // Zo zijn alle rijgetallen deelbaar door de kleinste deler én niet te groot
+    const minDeler = Math.min(...colNums);
+    const maxProd = minDeler * upto;
+    // Pool = alle getallen t/m maxProd die deelbaar zijn door minstens 1 deler
+    const pool = new Set();
+    for (const deler of colNums) {
+      for (let k = 1; k * deler <= maxProd; k++) pool.add(deler * k);
+    }
+    const poolArr = [...pool].sort((a,b) => a-b);
+    shuffle(poolArr);
+    rowNums = poolArr.slice(0, nRows);
+  } else if (op === 'mul') {
+    const pool = [];
+    for (let i = 1; i <= upto; i++) pool.push(i);
+    shuffle(pool);
+    rowNums = pool.slice(0, nRows);
+  } else {
+    // Brugcheck op eenheidscijfers
+    function eenheid(n) { return n % 10; }
+    function heeftBrug(rij, kol) {
+  return op === 'sub' ? eenheid(rij) < eenheid(kol) : eenheid(rij) + eenheid(kol) > 9;
+}
+
+    if (op === 'sub') {
+      // Genereer geldige KOLOMMEN op basis van brugkeuze
+      // Zonder brug: kolomgetallen mogen max eenheidscijfer 9 hebben maar
+      // we beperken eenheidscijfer kolom op basis van wat rijgetallen kunnen bieden
+      // Aanpak: genereer kolomgetallen met een LAAG eenheidscijfer (1-5) zodat
+      // er veel geldige rijgetallen zijn
+      const colPool = [];
+      for (let i = 1; i <= range; i++) {
+        if (brug === 'no'  && eenheid(i) <= 5) colPool.push(i); // lage eenheden → makkelijk zonder brug
+        else if (brug === 'yes' && eenheid(i) >= 5) colPool.push(i); // hoge eenheden → garandeert brug
+        else if (brug === 'mix') colPool.push(i);
+      }
+      if (colPool.length < nCols) for (let i=1;i<=range;i++) colPool.push(i); // fallback
+      shuffle(colPool);
+      colNums = colPool.slice(0, nCols);
+
+      // Rijgetallen: groter dan grootste kolom, gewogen naar lagere getallen,
+      // EN eenheidscijfer rij voldoet aan brugeis met ALLE kolomgetallen
+      const maxKolom = Math.max(...colNums);
+      const gewogen = [];
+      for (let i = maxKolom + 1; i <= range; i++) {
+        const voldoet = brug === 'mix' || colNums.every(k =>
+          brug === 'no' ? !heeftBrug(i, k) : heeftBrug(i, k)
+        );
+        if (!voldoet) continue;
+        // Gewicht: lagere getallen vaker
+        const gewicht = Math.max(1, Math.round(3 * (range - i) / Math.max(1, range - maxKolom) + 1));
+        for (let w = 0; w < gewicht; w++) gewogen.push(i);
+      }
+      shuffle(gewogen);
+      const gezien = new Set();
+      rowNums = [];
+      for (const v of gewogen) {
+        if (!gezien.has(v)) { gezien.add(v); rowNums.push(v); }
+        if (rowNums.length >= nRows) break;
+      }
+      // Fallback zonder brugeis als te weinig gevonden
+      if (rowNums.length < nRows) {
+        for (let i = maxKolom + 1; i <= range; i++) {
+          if (!gezien.has(i)) { gezien.add(i); rowNums.push(i); }
+          if (rowNums.length >= nRows) break;
+        }
+      }
+
+    } else {
+      // Optellen en gemengd: som rij+kolom mag nooit > range uitkomen
+      const colPool = [];
+      for (let i = 1; i <= Math.floor(range / 2); i++) colPool.push(i);
+      shuffle(colPool);
+      colNums = colPool.slice(0, nCols);
+
+      const maxKolom = Math.max(...colNums);
+      const rowPool = [];
+      for (let i = 1; i <= range - maxKolom; i++) {
+        const voldoet = brug === 'mix' || colNums.every(k =>
+          brug === 'no' ? !heeftBrug(i, k) : heeftBrug(i, k)
+        );
+        if (voldoet) rowPool.push(i);
+      }
+      if (rowPool.length < nRows) {
+        for (let i = 1; i <= range - maxKolom; i++) {
+          if (!rowPool.includes(i)) rowPool.push(i);
+        }
+      }
+      shuffle(rowPool);
+      rowNums = rowPool.slice(0, nRows);
+    }
+  }
+
+  // Veiligheidsnet: nooit lege arrays doorgeven aan renderRoosterSVG
+  if (rowNums.length < nRows) {
+    const extra = isMul ? [...Array(upto)].map((_,i)=>i+1) : [...Array(range)].map((_,i)=>i+1);
+    shuffle(extra);
+    for (const v of extra) { if (rowNums.length >= nRows) break; if (!rowNums.includes(v)) rowNums.push(v); }
+    while (rowNums.length < nRows) rowNums.push(rowNums[0] || 1);
+  }
+  if (colNums.length < nCols) {
+    const fallback = isMul ? [2,5,10] : [...Array(range)].map((_,i)=>i+1);
+    while (colNums.length < nCols) colNums.push(fallback[rnd(0, fallback.length-1)]);
+  }
+
+  // Celwaarden
+  const cells = rowNums.map(a => colNums.map(b => {
+    if (op === 'add') return a + b;
+    if (op === 'sub') return a - b; // altijd positief want rij > kolom
+    if (op === 'addsub') return a + b;
+    if (op === 'mul') return a * b;
+    return (a % b === 0) ? a / b : null; // div: null = onmogelijk
+  }));
+
+  // Blank-logica
+  const cellBlanks = cells.map(row => row.map(() => true));
+  const rowBlanks  = rowNums.map(() => false);
+  const colBlanks  = colNums.map(() => false);
+
+  if (blanks === 'some') {
+    const nBR = Math.max(1, Math.round(nRows * 0.4));
+    const nBC = Math.max(1, Math.round(nCols * 0.4));
+    const bRows = shuffle([...Array(nRows).keys()]).slice(0, nBR);
+    const bCols = shuffle([...Array(nCols).keys()]).slice(0, nBC);
+    bRows.forEach(r => rowBlanks[r] = true);
+    bCols.forEach(c => colBlanks[c] = true);
+    const knownCols = [...Array(nCols).keys()].filter(c => !colBlanks[c]);
+    const knownRows = [...Array(nRows).keys()].filter(r => !rowBlanks[r]);
+    bRows.forEach(r => {
+      const hc = knownCols.length > 0 ? knownCols[rnd(0, knownCols.length-1)] : rnd(0, nCols-1);
+      cellBlanks[r][hc] = false;
+    });
+    bCols.forEach(c => {
+      const hr = knownRows.length > 0 ? knownRows[rnd(0, knownRows.length-1)] : rnd(0, nRows-1);
+      cellBlanks[hr][c] = false;
+    });
+  } else if (blanks === 'half') {
+    rowNums.forEach((_, r) => { rowBlanks[r] = (r % 2 === 1); });
+    colNums.forEach((_, c) => { colBlanks[c] = (c % 2 === 1); });
+    const kC = [...Array(nCols).keys()].filter(c => !colBlanks[c]);
+    const kR = [...Array(nRows).keys()].filter(r => !rowBlanks[r]);
+    rowNums.forEach((_, r) => {
+      if (!rowBlanks[r]) return;
+      const hc = kC.length > 0 ? kC[rnd(0, kC.length-1)] : rnd(0, nCols-1);
+      cellBlanks[r][hc] = false;
+    });
+    colNums.forEach((_, c) => {
+      if (!colBlanks[c]) return;
+      const hr = kR.length > 0 ? kR[rnd(0, kR.length-1)] : rnd(0, nRows-1);
+      cellBlanks[hr][c] = false;
+    });
+  }
+
+  return { op, nRows, nCols, rowNums, colNums, cells, cellBlanks, rowBlanks, colBlanks };
+}
+
+function renderRoosterSVG(data) {
+  const { op, nRows, nCols, rowNums, colNums, cells, cellBlanks, rowBlanks, colBlanks } = data;
+  const cellW = 52, cellH = 38, labelW = 52, labelH = 38, pad = 8;
+  const W = pad*2 + labelW + nCols*cellW;
+  const H = pad*2 + labelH + nRows*cellH;
+  const hFill='#fde8c8', hStroke='#e8a060', cFill='#fff', cStroke='#d0dff0', lineCol='#b0c8e0', txtCol='#1a3a6a';
+  const impossibleFill='#e8e8e8'; // kleur voor onmogelijke cellen (bv. niet deelbaar)
+
+  // Hoekcel: bewerkingsteken + gebogen pijl van linksonder → rechtsboven
+  // Pijl buigt via linksboven (bol naar buiten = controle punt linksonder)
+  function cornerArrow(x, y, w, h, opSym) {
+    // Pijl: start = linker-midden, einde = boven-midden
+    // Boog bolt naar BUITEN (linksonder) = controlpunt dichtbij startpunt
+    const sx = x + 8,      sy = y + h - 8;   // start linksonder
+    const ex = x + w - 8,  ey = y + 8;       // einde rechtsboven
+    const cpx = x + 6,     cpy = y + 6;      // controlpunt linksboven → boog bolt naar rechtsonder
+    const arrowSize = 5;
+    const angle = Math.atan2(ey - cpy, ex - cpx);
+    const a1x = ex - arrowSize*Math.cos(angle - 0.45);
+    const a1y = ey - arrowSize*Math.sin(angle - 0.45);
+    const a2x = ex - arrowSize*Math.cos(angle + 0.45);
+    const a2y = ey - arrowSize*Math.sin(angle + 0.45);
+    // Bewerkingsteken klein rechtsonder in de hoekcel
+    const symX = x + w - 9, symY = y + h - 6;
+    return `<path d="M${sx},${sy} Q${cpx},${cpy} ${ex},${ey}" fill="none" stroke="${hStroke}" stroke-width="2" stroke-linecap="round"/>` +
+           `<polygon points="${ex},${ey} ${a1x},${a1y} ${a2x},${a2y}" fill="${hStroke}"/>` +
+           `<text x="${symX}" y="${symY}" text-anchor="middle" font-size="12" font-weight="900" fill="${hStroke}">${opSym}</text>`;
+  }
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" font-family="Arial,sans-serif">`;
+  s += `<rect width="${W}" height="${H}" fill="white"/>`;
+
+  // Hoekcel met gebogen pijl
+  const opSym = op==='add'?'+':op==='sub'?'−':op==='addsub'?'+/−':op==='mul'?'×':'÷';
+  s += `<rect x="${pad}" y="${pad}" width="${labelW}" height="${labelH}" fill="${hFill}" stroke="${hStroke}" stroke-width="1.5"/>`;
+  s += cornerArrow(pad, pad, labelW, labelH, opSym);
+
+  // Kolomheaders
+  for (let c=0;c<nCols;c++) {
+    const x=pad+labelW+c*cellW;
+    s+=`<rect x="${x}" y="${pad}" width="${cellW}" height="${labelH}" fill="${hFill}" stroke="${hStroke}" stroke-width="1.5"/>`;
+    if (colBlanks[c]) s+=`<line x1="${x+10}" y1="${pad+labelH-8}" x2="${x+cellW-10}" y2="${pad+labelH-8}" stroke="${lineCol}" stroke-width="1.5"/>`;
+    else s+=`<text x="${x+cellW/2}" y="${pad+labelH/2+5}" text-anchor="middle" font-size="14" font-weight="800" fill="${txtCol}">${colNums[c]}</text>`;
+  }
+
+  // Rijen + cellen
+  for (let r=0;r<nRows;r++) {
+    const y=pad+labelH+r*cellH;
+    s+=`<rect x="${pad}" y="${y}" width="${labelW}" height="${cellH}" fill="${hFill}" stroke="${hStroke}" stroke-width="1.5"/>`;
+    if (rowBlanks[r]) s+=`<line x1="${pad+10}" y1="${y+cellH-8}" x2="${pad+labelW-10}" y2="${y+cellH-8}" stroke="${lineCol}" stroke-width="1.5"/>`;
+    else s+=`<text x="${pad+labelW/2}" y="${y+cellH/2+5}" text-anchor="middle" font-size="14" font-weight="800" fill="${txtCol}">${rowNums[r]}</text>`;
+
+    for (let c=0;c<nCols;c++) {
+      const x=pad+labelW+c*cellW;
+      const a=rowNums[r], b=colNums[c];
+
+      // Controleer of cel mogelijk is
+      let impossible = false;
+      if (op === 'sub' && a - b < 0) impossible = true;
+      if (op === 'div' && (cells[r][c] === null)) impossible = true;
+
+      if (impossible) {
+        // Gekleurde cel = onmogelijk
+        s+=`<rect x="${x}" y="${y}" width="${cellW}" height="${cellH}" fill="${impossibleFill}" stroke="${cStroke}" stroke-width="1.2"/>`;
+        s+=`<text x="${x+cellW/2}" y="${y+cellH/2+5}" text-anchor="middle" font-size="11" fill="#aaa">—</text>`;
+      } else {
+        s+=`<rect x="${x}" y="${y}" width="${cellW}" height="${cellH}" fill="${cFill}" stroke="${cStroke}" stroke-width="1.2"/>`;
+        if (cellBlanks[r][c]) {
+          s+=`<line x1="${x+10}" y1="${y+cellH-8}" x2="${x+cellW-10}" y2="${y+cellH-8}" stroke="${lineCol}" stroke-width="1.5"/>`;
+        } else {
+          s+=`<text x="${x+cellW/2}" y="${y+cellH/2+5}" text-anchor="middle" font-size="13" font-weight="700" fill="#888">${cells[r][c]}</text>`;
+        }
+      }
+    }
+  }
+  s+=`</svg>`;
+  return s;
+}
+
+function generateRooster() {
+  if (roosterConfigs.length === 0) { alert('Voeg eerst een rooster toe via "+ Rooster toevoegen".'); return; }
+  const naam     = document.getElementById('ro-naam').value.trim();
+  const datum    = document.getElementById('ro-datum').value.trim();
+  const opdracht = document.getElementById('ro-opdracht').value;
+
+  const output = document.getElementById('preview-area');
+  output.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = 'worksheet';
+  div.innerHTML = renderWorksheetHeader(naam, datum, 'Rekenrooster', opdracht);
+
+  const cols = roosterConfigs.length <= 2 ? roosterConfigs.length : 2;
+  const grid = document.createElement('div');
+  grid.style.cssText = `display:grid;grid-template-columns:repeat(${cols},auto);gap:70px;padding:8px 16px 16px;justify-content:center;`;
+
+  roosterConfigs.forEach(cfg => {
+    const data = getRoosterConfigData(cfg.id);
+    const wrap = document.createElement('div');
+    wrap.innerHTML = renderRoosterSVG(data);
+    grid.appendChild(wrap);
+  });
+
+  div.appendChild(grid);
+  output.appendChild(div);
+  const btn = document.getElementById('btn-voeg-ro');
+  if (btn) btn.style.display = 'inline-block';
+}
+
+function previewRooster() { generateRooster(); }
+
+// ══════════════════════════════════════════════════════════
+// PREVIEW & BUNDEL SYSTEEM
+// ══════════════════════════════════════════════════════════
+
+// Huidige actieve tab bijhouden
+let _activeTab = 'doolhof';
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+  _activeTab = name;
+  // Verberg voeg-toe knoppen bij wisselen
+  const bd = document.getElementById('btn-voeg-d');
+  const bi = document.getElementById('btn-voeg-iu');
+  const br = document.getElementById('btn-voeg-rp');
+  const bs = document.getElementById('btn-voeg-sp');
+  if (bd) bd.style.display = 'none';
+  if (bi) bi.style.display = 'none';
+  if (br) br.style.display = 'none';
+  if (bs) bs.style.display = 'none';
+  document.getElementById('preview-area').innerHTML = '';
+}
+
+function previewDoolhof() {
+  generateDoolhof();
+  // Toon "Voeg toe" knop
+  const btn = document.getElementById('btn-voeg-d');
+  if (btn) btn.style.display = 'inline-block';
+}
+
+function previewInUit() {
+  generateInUit();
+  const btn = document.getElementById('btn-voeg-iu');
+  if (btn) btn.style.display = 'inline-block';
+}
+
+function addPreviewToBundel() {
+  const preview = document.getElementById('preview-area');
+  const bundel  = document.getElementById('print-output');
+  const sheets  = [...preview.querySelectorAll('.worksheet')];
+  if (!sheets.length) { alert('Genereer eerst een preview.'); return; }
+
+  // Verplaats alle werkbladen van preview naar bundel
+  const isFirstInBundel = bundel.querySelectorAll('.worksheet').length === 0;
+  sheets.forEach((sheet, idx) => {
+    // Naam/datum enkel op het allereerste blad van de bundel
+    const showND = isFirstInBundel && idx === 0;
+    if (!showND) {
+      const ndRow = sheet.querySelector('.ws-naam-datum');
+      if (ndRow) ndRow.style.display = 'none';
+    }
+    // Voeg verwijderknop toe
+    const del = document.createElement('button');
+    del.textContent = '✕ Verwijder';
+    del.className = 'btn-clear no-print';
+    del.style.cssText = 'margin:6px 16px;font-size:.75rem;padding:4px 10px;border-radius:6px;border:1px solid #e8b0b0;background:#fdeaea;color:#a02020;cursor:pointer;';
+    del.onclick = () => { sheet.remove(); updatePageCounter(); };
+    sheet.appendChild(del);
+    bundel.appendChild(sheet);
+  });
+
+  preview.innerHTML = '';
+  // Verberg voeg-toe knoppen
+  const bd = document.getElementById('btn-voeg-d');
+  const bi = document.getElementById('btn-voeg-iu');
+  if (bd) bd.style.display = 'none';
+  if (bi) bi.style.display = 'none';
+
+  }
+
+function updatePageCounter() {
+  const sheets = document.querySelectorAll('#print-output .worksheet');
+  const c = document.getElementById('page-counter');
+  if (c) c.textContent = sheets.length + (sheets.length === 1 ? ' pagina' : " pagina's");
+}
+
+function clearAll() {
+  document.getElementById('print-output').innerHTML = '';
+  document.getElementById('preview-area').innerHTML = '';
+  const bd = document.getElementById('btn-voeg-d');
+  const bi = document.getElementById('btn-voeg-iu');
+  const br = document.getElementById('btn-voeg-rp');
+  const bs = document.getElementById('btn-voeg-sp');
+  if (bd) bd.style.display = 'none';
+  if (bi) bi.style.display = 'none';
+  if (br) br.style.display = 'none';
+  if (bs) bs.style.display = 'none';
+  updatePageCounter();
+}
+
+// Init
+buildMachineConfig();
+updateRPHint();
+updateIUType();
+updateRPUI();
+updateRoosterUI();
+// Start met 1 leeg rooster-config
+addRoosterConfig();
+
+// ══════════════════════════════════════════════════════════
+// DOWNLOAD: PDF & PNG
+// ══════════════════════════════════════════════════════════
+async function captureWorksheets() {
+  // Gebruik bundel als die gevuld is, anders de preview
+  let sheets = [...document.querySelectorAll('#print-output .worksheet')].filter(s => !s.querySelector('.empty-msg'));
+  if (!sheets.length) {
+    sheets = [...document.querySelectorAll('#preview-area .worksheet')];
+  }
+  if (!sheets.length) { alert('Genereer eerst een werkblad en voeg het toe aan de bundel.'); return null; }
+
+  // Toon overlay
+  const overlay = document.getElementById('pdf-overlay');
+  const overlaySub = document.getElementById('pdf-overlay-sub');
+  const progressFill = document.getElementById('pdf-progress-fill');
+  overlay.classList.add('active');
+  progressFill.style.width = '0%';
+
+  const canvases = [];
+  for (let idx = 0; idx < sheets.length; idx++) {
+    const sheet = sheets[idx];
+
+    // Update overlay tekst en progress
+    overlaySub.textContent = `Werkblad ${idx + 1} van ${sheets.length} verwerken…`;
+    progressFill.style.width = Math.round((idx / sheets.length) * 85) + '%';
+
+    // Maak een off-screen clone zodat het scherm niet verspringt
+    const clone = sheet.cloneNode(true);
+    // Verberg no-print elementen in clone
+    clone.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + sheet.offsetWidth + 'px;background:white;z-index:-1;';
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+
+    await new Promise(r => setTimeout(r, 40));
+
+    const canvas = await html2canvas(clone, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      width: sheet.offsetWidth,
+      height: clone.scrollHeight,
+    });
+
+    document.body.removeChild(wrapper);
+    canvases.push(canvas);
+  }
+
+  // Progress naar 100%
+  progressFill.style.width = '100%';
+  await new Promise(r => setTimeout(r, 300));
+  overlay.classList.remove('active');
+  progressFill.style.width = '0%';
+
+  return canvases;
+}
+
+async function downloadPDF() {
+  const canvases = await captureWorksheets();
+  if (!canvases) return;
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pW = 210, pH = 297;
+  const margin = 10;       // mm rondom
+  const footerH = 8;       // mm voor voettekst onderaan
+  const usableW = pW - margin * 2;
+  const usableH = pH - margin - footerH; // beschikbare hoogte (voettekst uit de weg)
+  const gap = 4;           // mm tussen werkbladen op zelfde pagina
+
+  // Bereken hoogte van elk canvas in mm (geschaald naar usableW breedte)
+  const items = canvases.map(canvas => {
+    const ratio = canvas.width / canvas.height;
+    const iW = usableW;
+    const iH = iW / ratio;
+    return { canvas, iW, iH };
+  });
+
+  let curY = margin;
+
+  for (let i = 0; i < items.length; i++) {
+    const { canvas, iW, iH } = items[i];
+    const fitsH = Math.min(iH, usableH - margin); // nooit buiten de pagina
+
+    // Past het werkblad nog op de huidige pagina?
+    const spaceLeft = usableH - curY;
+    const needsNewPage = (i > 0) && (spaceLeft < fitsH + gap);
+
+    if (needsNewPage) {
+      pdf.addPage();
+      curY = margin;
+    } else if (i > 0) {
+      curY += gap;
+    }
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    pdf.addImage(imgData, 'JPEG', margin, curY, iW, fitsH);
+    curY += fitsH;
+  }
+
+  // Voettekst op elke pagina
+  const totalPages = pdf.getNumberOfPages();
+  if (window.OntdekTrial?.authorizeDownload) {
+    await window.OntdekTrial.authorizeDownload(totalPages);
+  }
+  for (let p = 1; p <= totalPages; p++) {
+    pdf.setPage(p);
+    pdf.setFontSize(8);
+    pdf.setTextColor(170, 170, 170);
+    pdf.text("Juf Zisa's Spelgenerator – www.jufzisa.be", pW / 2, pH - 5, { align: 'center' });
+  }
+
+  const filename = 'werkblad-' + new Date().toISOString().slice(0,10) + '.pdf';
+  pdf.save(filename);
+}
+
+async function downloadPNG() {
+  const canvases = await captureWorksheets();
+  if (!canvases) return;
+
+  canvases.forEach((canvas, i) => {
+    const link = document.createElement('a');
+    const suffix = canvases.length > 1 ? '-' + (i+1) : '';
+    link.download = 'werkblad' + suffix + '-' + new Date().toISOString().slice(0,10) + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
+
+// ══════════════════════════════════════════════════════════
+// SPRINGPAD
+// ══════════════════════════════════════════════════════════
+
+/************************************
+ * Rekendoolhof-generator
+ *
+ * Doelen:
+ * 1. Keuze tussen:
+ *    - "sprongen": getallen volgen met sprongen (2 / 5 / 10)
+ *    - "maze": leeg rooster + pijlen volgen
+ *
+ * 2. Thema (icoontjes, uitlegtekst):
+ *    herfst / sint / pasen / lente / zomer
+ *
+ * 3. Pad niet telkens hetzelfde:
+ *    we kiezen willekeurig uit meerdere voorgeprogrammeerde paden.
+ *
+ * 4. Sprong en bereik werken echt:
+ *    sprong = stapgrootte, bereikMax = max. afleiders / startkeuze.
+ *
+ * 5. Meerdere oefeningen op één blad:
+ *    we bouwen bv. 2 oefenblokken onder elkaar.
+ ************************************/
+
+/* ========= STATE ========== */
+const sp_state = {
+  type: "sprongen",
+  sprong: 5,
+  bereikMax: 100,
+  thema: "herfst",
+  size: 5,
+  startMode: "mooi" // "mooi" of "vrij"
+};
+
+let sp_worksheetItems = [];
+
+
+
+/* ========= THEMA INFO ========== */
+function getThemaInfo(thema){
+  switch (thema) {
+    case "herfst":
+      return {
+        startIcon: "🐿️",
+        endIcon: "🌰",
+        uitleg: "De eekhoorn wil naar zijn eikel."
+      };
+    case "sint":
+      return {
+        startIcon: "🎅",
+        endIcon: "🎁",
+        uitleg: "De Sint wil naar zijn pakje."
+      };
+    case "pasen":
+      return {
+        startIcon: "🐰",
+        endIcon: "🥚",
+        uitleg: "Het konijntje wil naar zijn ei."
+      };
+    case "lente":
+      return {
+        startIcon: "🐦",
+        endIcon: "🌸",
+        uitleg: "Het vogeltje wil naar de bloem."
+      };
+    case "zomer":
+      return {
+        startIcon: "🏖️",
+        endIcon: "🍦",
+        uitleg: "We gaan naar het ijsje."
+      };
+    case "kerst":
+      return {
+        startIcon: "🎄",
+        endIcon: "⭐",
+        uitleg: "De kerstboom wil zijn ster aan de top."
+      };
+    case "halloween":
+      return {
+        startIcon: "🎃",
+        endIcon: "🍬",
+        uitleg: "Het spookje wil naar het snoepje."
+      };
+    case "carnaval":
+      return {
+        startIcon: "🎭",
+        endIcon: "🎉",
+        uitleg: "Het masker wil naar het feest."
+      };
+    default:
+      return {
+        startIcon: "🐿️",
+        endIcon: "🌰",
+        uitleg: "De eekhoorn wil naar zijn eikel."
+      };
+  }
+}
+
+/* ========= PADVARIANTEN ==========
+   We geven meerdere 5x5-routes (start linksonder, eind rechtsboven).
+   Elke route is een lijst van [r,c].
+   We kiezen elke keer één willekeurige route.
+   Alle routes hebben bochten.
+*/
+const PAD_VARIANTEN = [
+  // variant A
+  [
+    [4,0],[4,1],[3,1],[3,2],[2,2],[2,3],[2,4],[1,4],[0,4]
+  ],
+  // variant B
+  [
+    [4,0],[4,1],[4,2],[3,2],[2,2],[1,2],[1,3],[1,4],[0,4]
+  ],
+  // variant C
+  [
+    [4,0],[3,0],[3,1],[3,2],[2,2],[2,3],[1,3],[1,4],[0,4]
+  ],
+  // variant D (de oude die u al zag, ook bochtig)
+  [
+    [4,0],[4,1],[4,2],[3,2],[2,2],[2,3],[2,4],[1,4],[0,4]
+  ]
+];
+// Genereer een pad met variatie voor gegeven rooster-grootte.
+// We starten linksonder (row = size-1, col = 0).
+// We willen ongeveer richting rechtsboven gaan (row = 0, col = size-1).
+// We bouwen stap voor stap. Elke stap is maximaal 1 vakje omhoog, omlaag,
+// links of rechts (geen diagonaal).
+// We vermijden terug- en terug- en terug-lopen in hetzelfde kleine hoekje.
+// We stoppen zodra we voldoende lengte hebben voor een oefening.
+function genereerPadVoorSize(size){
+  // We bouwen het pad zelf stapsgewijs.
+  // Start = linksonder (size-1,0)
+  // Doel = rechtsboven (0,size-1)
+  // We proberen altijd buur-stappen (up/right) en af en toe een kleine zijsprong
+  // (left/down) om bochten te maken, maar we vermijden dubbele cellen.
+
+  const doelR = 0;
+  const doelC = size - 1;
+
+  // hulpfunctie om unieke cellen toe te voegen
+  function pushUniek(padArr, r, c){
+    const last = padArr[padArr.length-1];
+    if (!last || last[0] !== r || last[1] !== c){
+      padArr.push([r,c]);
+    }
+  }
+
+  function maakKandidaat(){
+    let r = size - 1;
+    let c = 0;
+    const padArr = [[r,c]];
+
+    // we bouwen tot we de rechterbovenhoek bereikt hebben
+    // maar om variatie te hebben, kiezen we soms eerst "rechts", soms eerst "omhoog".
+    // We laten max size*size stappen om te voorkomen dat we vastlopen.
+
+    for (let steps = 0; steps < size*size; steps++){
+      if (r === doelR && c === doelC){
+        break; // we zijn al aan het doel
+      }
+
+      // mogelijke richtingen
+      const opties = [];
+
+      // voorkeur: naar rechts als nog niet laatste kolom
+      if (c < doelC) {
+        opties.push("right");
+        opties.push("right"); // dubbel gewicht
+      }
+      // voorkeur: omhoog als we nog niet op rij 0 zitten
+      if (r > doelR){
+        opties.push("up");
+        opties.push("up"); // dubbel gewicht
+      }
+
+      // extra variatie: heel soms een kleine zijsprong "om te kronkelen",
+      // maar alleen als we NIET terug buiten het bord gaan
+      if (c > 0) {
+        opties.push("left");
+      }
+      if (r < size-1){
+        opties.push("down");
+      }
+
+      // we willen niet meteen exact terugkeren (right dan left onmiddellijk, of up dan down)
+      function tegengesteld(a,b){
+        return (
+          (a==="right" && b==="left") ||
+          (a==="left"  && b==="right")||
+          (a==="up"    && b==="down") ||
+          (a==="down"  && b==="up")
+        );
+      }
+
+      // laatste richting?
+      let lastDir = null;
+      if (padArr.length >= 2){
+        const [pr,pc] = padArr[padArr.length-2];
+        if (r === pr && c === pc+1) lastDir = "right";
+        else if (r === pr && c === pc-1) lastDir = "left";
+        else if (c === pc && r === pr-1) lastDir = "up";
+        else if (c === pc && r === pr+1) lastDir = "down";
+      }
+
+      // filter opties die meteen perfect tegengesteld zouden zijn
+      const gefilterd = opties.filter(dir => !(lastDir && tegengesteld(lastDir,dir)));
+
+      if (gefilterd.length === 0){
+        break; // geen geldige richting meer -> stoppen
+      }
+
+      // kies willekeurig uit de gefilterde lijst
+      const dir = gefilterd[Math.floor(Math.random()*gefilterd.length)];
+
+      // voer die stap uit als die binnen het rooster blijft
+      let nr = r;
+      let nc = c;
+      if (dir === "right") nc = c+1;
+      else if (dir === "left") nc = c-1;
+      else if (dir === "up") nr = r-1;
+      else if (dir === "down") nr = r+1;
+
+      if (nr < 0 || nr >= size || nc < 0 || nc >= size){
+        // ongeldige stap, probeer opnieuw door de loop verder te laten draaien
+        continue;
+      }
+
+      // voeg cel toe als nieuwe stap
+      pushUniek(padArr, nr, nc);
+      r = nr;
+      c = nc;
+
+      // als we dichtbij het doel zijn maar nog niet exact,
+      // duwen we de rest gewoon recht naar boven en dan naar rechts (of omgekeerd)
+      if (r === doelR && c !== doelC){
+        while (c < doelC){
+          c++;
+          pushUniek(padArr, r, c);
+        }
+      }
+      if (c === doelC && r !== doelR){
+        while (r > doelR){
+          r--;
+          pushUniek(padArr, r, c);
+        }
+      }
+      if (r === doelR && c === doelC){
+        break;
+      }
+    }
+
+    // als we na de lus nog niet bij het doel zijn, maak rechtstreekse "sluipweg"
+    if (!(r === doelR && c === doelC)){
+      while (r > doelR){
+        r--;
+        pushUniek(padArr, r, c);
+      }
+      while (c < doelC){
+        c++;
+        pushUniek(padArr, r, c);
+      }
+    }
+
+    return padArr;
+  }
+
+  // We proberen een paar keer een kandidaat en kiezen de langste (meer bochten).
+  let beste = null;
+  for (let t=0; t<4; t++){
+    const cand = maakKandidaat();
+    if (!beste || cand.length > beste.length){
+      beste = cand;
+    }
+  }
+  return beste;
+}
+
+
+
+
+function kiesPad(avoidPadIndex = -1){
+  // kies willekeurige index die niet gelijk is aan avoidPadIndex
+  let idx;
+  do {
+    idx = Math.floor(Math.random()*PAD_VARIANTEN.length);
+  } while (idx === avoidPadIndex && PAD_VARIANTEN.length > 1);
+  return { path: PAD_VARIANTEN[idx], index: idx };
+}
+// pad uit 5x5 rekken naar bv. 7x7 of 10x10
+function schaalPad(pad5, size){
+  if (size === 5) return pad5;
+  const maxIdx = 4; // originele pad gebruikt r/c 0..4
+  const factor = (size-1)/maxIdx;
+  const nieuw = [];
+  for (const [r,c] of pad5){
+    const nr = Math.round(r * factor);
+    const nc = Math.round(c * factor);
+    if (
+      !nieuw.length ||
+      nieuw[nieuw.length-1][0] !== nr ||
+      nieuw[nieuw.length-1][1] !== nc
+    ){
+      nieuw.push([nr,nc]);
+    }
+  }
+  // zorg dat eerste echt linksonder zit, laatste echt rechtsboven
+  nieuw[0] = [size-1,0];
+  nieuw[nieuw.length-1] = [0,size-1];
+  return nieuw;
+}
+
+
+/* ========= MAZE PIJLEN ==========
+   Voor het lege doolhof met pijlen. Kinderen volgen pijlen met de vinger.
+   U kunt hier varianten maken of randomiseren als u wenst.
+*/
+// Maak pijlenreeks op basis van het gekozen pad
+// pad is bv. [[4,0],[4,1],[3,1],...]
+// We vertalen beweging per stap:
+// (r,c)->(r,c+1)  = →
+ // (r,c)->(r,c-1)  = ← (komt zelden voor maar kan)
+// (r,c)->(r-1,c)  = ↑
+// (r,c)->(r+1,c)  = ↓
+function pijlenUitPad(pad){
+  const pijlen = [];
+  for (let i=0; i<pad.length-1; i++){
+    const [r1,c1] = pad[i];
+    const [r2,c2] = pad[i+1];
+    if (r2 === r1 && c2 === c1+1) pijlen.push("→");
+    else if (r2 === r1 && c2 === c1-1) pijlen.push("←");
+    else if (c2 === c1 && r2 === r1-1) pijlen.push("↑");
+    else if (c2 === c1 && r2 === r1+1) pijlen.push("↓");
+  }
+  return pijlen;
+}
+// Voeg een extra pijl toe vóór de start (richting in) en na het einde (richting uit)
+function pijlenMetInEnUit(pad) {
+  const pijlen = pijlenUitPad(pad);
+
+  // eerste stap: waar ligt de ingang?
+  const [r1, c1] = pad[0];
+  const [r2, c2] = pad[1];
+  // Bepaal de richting van buiten naar de tweede cel
+  if (r2 === r1 && c2 === c1 + 1) pijlen.unshift("→");
+  else if (r2 === r1 && c2 === c1 - 1) pijlen.unshift("←");
+  else if (c2 === c1 && r2 === r1 - 1) pijlen.unshift("↑");
+  else if (c2 === c1 && r2 === r1 + 1) pijlen.unshift("↓");
+
+  // laatste stap: waar ligt de uitgang?
+  const [rn1, cn1] = pad[pad.length - 2];
+  const [rn2, cn2] = pad[pad.length - 1];
+  // Richting van de voorlaatste naar buiten
+  if (rn2 === rn1 && cn2 === cn1 + 1) pijlen.push("→");
+  else if (rn2 === rn1 && cn2 === cn1 - 1) pijlen.push("←");
+  else if (cn2 === cn1 && rn2 === rn1 - 1) pijlen.push("↑");
+  else if (cn2 === cn1 && rn2 === rn1 + 1) pijlen.push("↓");
+
+  return pijlen;
+}
+
+
+/* ========= HULPFUNCTIES GETALLEN ========= */
+
+function chooseStartValue(step, maxVal, padLength){
+  // We willen een veelvoud van step, of iets dat eindigt op 0 of 5,
+  // en we willen dat start + step*(padLength-1) niet boven 100 gaat.
+  //
+  // We proberen kandidaten zoals 0,5,10,15,20,25,30,...
+  // en kiezen de grootste die nog veilig eindigt.
+  //
+  // "maxVal" = bereikMax (20 of 100), maar we beschermen sowieso tegen 100.
+
+  const kandidaten = [];
+  for (let base = 0; base <= 40; base += 5){
+    kandidaten.push(base);
+  }
+  // ook een paar hogere instappen zodat niet altijd van 0 vertrekt:
+  for (let base = 50; base <= 80; base += 5){
+    kandidaten.push(base);
+  }
+  // voeg eventueel 20, 25 ... al zitten die er eigenlijk al in
+
+  // filter: eindwaarde
+  const geldige = kandidaten.filter(start => {
+    const eind = start + step * (padLength - 1);
+    if (eind > 100) return false;
+    if (eind > maxVal && maxVal < 100) return false; // bv. bereik tot 20
+    return true;
+  });
+
+  if (geldige.length === 0){
+    // fallback: zelfde logica als vroeger
+    if (maxVal <= 20){
+      if (step === 2)  return 0;
+      if (step === 5)  return 5;
+      if (step === 10) return 10;
+      return 0;
+    } else {
+      // maxVal ~100
+      if (step === 2)  return 20;
+      if (step === 5)  return 10;
+      if (step === 10) return 0;
+      return 10;
+    }
+  }
+
+  // kies willekeurig uit de geldige om variatie te geven
+  const pickIndex = Math.floor(Math.random() * geldige.length);
+  return geldige[pickIndex];
+}
+
+
+function makeEmptyGrid(rows, cols){
+  const arr = [];
+  for (let r=0; r<rows; r++){
+    const line = [];
+    for (let c=0; c<cols; c++){
+      line.push(null);
+    }
+    arr.push(line);
+  }
+  return arr;
+}
+
+// Vul eerst het echte pad met correcte sprongen:
+// padCoords = lijst coördinaten zoals [[4,0],[4,1],[3,1],...]
+// startVal = bv. 20
+// step = bv. 2
+function fillPadNumbers(grid, padCoords, startVal, step){
+  if (startVal === null || startVal === undefined){
+    // geen geldige start → we vullen niets in
+    return { laatsteIndex: -1 };
+  }
+
+  let val = startVal;
+  let laatsteIndex = -1;
+
+  for (let i = 0; i < padCoords.length; i++){
+    const [r,c] = padCoords[i];
+
+    // als dit getal >100 zou zijn, stoppen we VOOR we invullen
+    if (val > 100){
+      break;
+    }
+
+    grid[r][c] = val;
+    laatsteIndex = i;
+
+    // bereken volgende mogelijke waarde
+    const volgende = val + step;
+    // als die volgende boven 100 zou gaan, dan stoppen we hier
+    if (volgende > 100){
+      break;
+    }
+    val = volgende;
+  }
+
+  return { laatsteIndex };
+}
+
+
+
+
+// Vul alle andere vakken met 'afleiders' die NIET
+// het juiste volggetal kunnen zijn vanaf een buur op het pad.
+// Zo kan een kind echt de route volgen.
+function fillOtherNumbers(grid, maxVal){
+  const rows = grid.length;
+  const cols = grid[0].length;
+
+  // helper om te kijken of (r,c) grenst aan een padcel met een waarde v
+  // en of het verwachte volgende getal v+step daar zou moeten staan.
+  function forbiddenValuesForCell(rr, cc){
+    // we kijken naar alle buren (boven, onder, links, rechts)
+    const forbids = new Set();
+    const dirs = [
+      [-1,0],[1,0],[0,-1],[0,1]
+    ];
+    for (const [dr,dc] of dirs){
+      const nr = rr+dr;
+      const nc = cc+dc;
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+      const v = grid[nr][nc];
+      // v is een padgetal als het al een getal is in grid[]
+      if (typeof v === "number"){
+        // we willen vermijden dat wij exact v+1, v+2, v+5, v+10
+        // leggen als dat de "logische stap" zou kunnen zijn.
+        // We kennen de sprongen niet hier (2,5,10),
+        // dus we verbieden ALLE v+2, v+5, v+10.
+        forbids.add(v+2);
+        forbids.add(v+5);
+        forbids.add(v+10);
+        forbids.add(v); // ook hetzelfde getal zelf liever niet dupliceren naast het pad
+      }
+    }
+    return forbids;
+  }
+
+  for (let r=0; r<rows; r++){
+    for (let c=0; c<cols; c++){
+      if (grid[r][c] === null){
+        const forb = forbiddenValuesForCell(r,c);
+        let candidate;
+        let tries = 0;
+        do {
+          candidate = Math.floor(Math.random()*maxVal) + 1;
+          if (candidate > 100) candidate = 100;
+          tries++;
+          // veiligheidsrem zodat we niet eindeloos blijven proberen
+          if (tries > 50) break;
+        } while (forb.has(candidate));
+        grid[r][c] = candidate;
+      }
+    }
+  }
+}
+
+
+/* ========= CEL-HTML ========= */
+
+function makeSprongCellHTML(r, c, value, isStart, isEnd){
+  let cls = "cellSprong";
+  if (isStart) cls += " startCell";
+  if (isEnd)   cls += " endCell";
+
+  return `
+    <div class="${cls}" data-r="${r}" data-c="${c}">
+      <div class="cellSprongNumber">${value}</div>
+
+      <span class="gate gate-top"></span>
+      <span class="gate gate-bottom"></span>
+      <span class="gate gate-left"></span>
+      <span class="gate gate-right"></span>
+    </div>
+  `;
+}
+
+function makeMazeCellHTML(r, c, isStart, isEnd){
+  let cls = "cellMaze";
+  if (isStart) cls += " startCell";
+  if (isEnd)   cls += " endCell";
+
+  return `
+    <div class="${cls}" data-r="${r}" data-c="${c}">
+      <div class="cellMazePlus">+</div>
+
+      <span class="gate gate-top"></span>
+      <span class="gate gate-bottom"></span>
+      <span class="gate gate-left"></span>
+      <span class="gate gate-right"></span>
+    </div>
+  `;
+}
+
+/* ========= ÉÉN SPRONGEN-OEFENING BOUWEN ========= */
+// Bepaalt of we een geldig startgetal kunnen kiezen zodat
+// start + sprong * (padLengte-1) <= 100.
+// Geeft een geschikt startgetal terug of null als het onmogelijk is.
+function berekenVeiligeStartwaarde(sprong, padLengte){
+  // We willen dat de eindwaarde niet boven 100 gaat.
+  // eindwaarde = start + sprong*(padLengte-1) <= 100
+  // => start <= 100 - sprong*(padLengte-1)
+
+  const maxStart = 100 - sprong * (padLengte - 1);
+
+  // We willen starts die logisch zijn voor kinderen:
+  // veelvouden van 5, of 0,5,10,15,20,25,...
+  // en ook niet negatief.
+  const kandidaten = [];
+  for (let base = 0; base <= 100; base += 5){
+    kandidaten.push(base);
+  }
+
+  // filter op haalbaar volgens maxStart
+  const geldige = kandidaten.filter(v => v <= maxStart && v >= 0);
+
+  if (geldige.length === 0){
+    return null; // met deze sprong en dit pad wordt de eindwaarde >100
+  }
+
+  // kleine variatie: kies een willekeurige van de geldige
+  const pick = Math.floor(Math.random() * geldige.length);
+  return geldige[pick];
+}
+// kiest een 'mooi' startgetal dat past bij de sprong en onder 100 blijft
+function berekenMooieStartwaarde(sprong, padLengte){
+  // voor sprong 2: we willen een even getal
+  // voor sprong 5 of 10: we willen iets dat eindigt op 0 of 5
+  //
+  // en we eisen dat eind <= 100.
+
+  const maxStart = 100 - sprong * (padLengte - 1);
+
+  const kandidaten = [];
+
+  if (sprong === 2){
+    // even getallen tot maxStart
+    for (let v = 0; v <= maxStart; v++){
+      if (v % 2 === 0) kandidaten.push(v);
+    }
+  } else if (sprong === 5 || sprong === 10){
+    // getallen die eindigen op 0 of 5
+    for (let v = 0; v <= maxStart; v++){
+      const lastDigit = v % 10;
+      if (lastDigit === 0 || lastDigit === 5){
+        kandidaten.push(v);
+      }
+    }
+  } else {
+    // andere sprongen: neem multiples van sprong als 'mooi'
+    for (let v = 0; v <= maxStart; v++){
+      if (v % sprong === 0){
+        kandidaten.push(v);
+      }
+    }
+  }
+
+  if (kandidaten.length === 0){
+    return null;
+  }
+
+  // variatie: kies willekeurig
+  const pick = Math.floor(Math.random() * kandidaten.length);
+  return kandidaten[pick];
+}
+
+// kiest een 'vrije' startwaarde (mag eender wat), zolang eind <= 100
+function berekenVrijeStartwaarde(sprong, padLengte){
+  const maxStart = 100 - sprong * (padLengte - 1);
+
+  // we laten alle waarden 0..maxStart toe
+  if (maxStart < 0){
+    return null;
+  }
+
+  const kandidaten = [];
+  for (let v = 0; v <= maxStart; v++){
+    kandidaten.push(v);
+  }
+
+  if (kandidaten.length === 0){
+    return null;
+  }
+
+  const pick = Math.floor(Math.random() * kandidaten.length);
+  return kandidaten[pick];
+}
+// Neem een volledig pad (lijst coördinaten [r,c])
+// en hou alleen de eerste N stappen.
+// Zo maken we een korter pad als de sprong anders boven 100 zou gaan.
+function knipPadOpLengte(pad, maxStappen){
+  if (pad.length <= maxStappen){
+    return pad.slice();
+  }
+  return pad.slice(0, maxStappen);
+}
+// Probeer een startwaarde te vinden zodat we het HELE pad
+// (van pad[0] = linksonder tot pad[pad.length-1] = rechtsboven)
+// kunnen vullen met sprongen 'sprong'
+// zonder boven limiet (100 of bereikMax) te gaan.
+//
+// mode "mooi" = netjes (even voor sprong 2, op 0/5 voor sprong 5/10, ...)
+// mode "vrij" = eender welke start binnen bereik.
+//
+// Geeft: een startwaarde (number) OF null als het onmogelijk is.
+function berekenStartVoorVolledigPad(sprong, padLength, bereikMax, mode){
+  // We willen eindwaarde <= limiet.
+  // limiet = min(100, bereikMax als die <100 anders 100)
+  const limiet = (bereikMax < 100 ? bereikMax : 100);
+
+  // We willen: start + sprong*(padLength-1) <= limiet
+  // => start <= limiet - sprong*(padLength-1)
+  const maxStart = limiet - sprong * (padLength - 1);
+
+  if (maxStart < 0){
+    // zelfs als we bij 0 starten komen we al boven de limiet
+    return null;
+  }
+
+  // kandidaten opstellen
+  const kandidaten = [];
+
+  if (mode === "mooi"){
+    if (sprong === 2){
+      // mooie start = even getallen
+      for (let v = 0; v <= maxStart; v++){
+        if (v % 2 === 0) kandidaten.push(v);
+      }
+    } else if (sprong === 5 || sprong === 10){
+      // mooie start = getallen die eindigen op 0 of 5
+      for (let v = 0; v <= maxStart; v++){
+        const lastDigit = v % 10;
+        if (lastDigit === 0 || lastDigit === 5){
+          kandidaten.push(v);
+        }
+      }
+    } else {
+      // andere sprongen: veelvoud van sprong
+      for (let v = 0; v <= maxStart; v++){
+        if (v % sprong === 0){
+          kandidaten.push(v);
+        }
+      }
+    }
+  } else {
+    // "vrij": alles 0..maxStart is toegestaan
+    for (let v = 0; v <= maxStart; v++){
+      kandidaten.push(v);
+    }
+  }
+
+  if (kandidaten.length === 0){
+    return null;
+  }
+
+  // kies willekeurig voor variatie
+  const pick = Math.floor(Math.random() * kandidaten.length);
+  return kandidaten[pick];
+}
+
+function buildSprongenOefening(themaInfo, sprong, bereikMax, size, avoidIdx = -1, startMode = "mooi"){
+  // VEILIGHEIDSREGEL:
+  // Voorlopig ondersteunen we alleen een betrouwbaar pad voor 5x5.
+  if (size !== 5){
+    const warningHTML = `
+      <section class="exerciseBlock">
+        <div class="sheet-header">
+          <div class="titles">
+            <div class="mainTitle">Rekendoolhof</div>
+            <div class="subTitle">Maak sprongen van ${sprong}.</div>
+            <div class="explain" style="color:#b00; font-weight:bold;">
+              Voor sprongoefeningen is het doolhof voorlopig alleen beschikbaar in 5×5.
+              Kies 5×5 om een juist pad te krijgen.
+            </div>
+          </div>
+          <div class="legendBox">
+            <div class="legendRow"><span>${themaInfo.startIcon}</span><span>start</span></div>
+            <div class="legendRow"><span>${themaInfo.endIcon}</span><span>einde</span></div>
+          </div>
+        </div>
+      </section>
+    `;
+    return {
+      blockHTML: warningHTML,
+      startCell: [4,0],
+      endCell: [0,4],
+      startIcon: themaInfo.startIcon,
+      endIcon: themaInfo.endIcon,
+      padIndex: -1
+    };
+  }
+
+  // ... de rest van de functie blijft hieronder staan, maar aangepast voor vaste paden ...
+
+  // Vanaf hier weten we: size === 5
+  const rows = 5;
+  const cols = 5;
+
+  // Een lijst van veilige paden voor 5×5.
+  const PAD_VARIANTEN_5X5 = [
+    // variant 1: slinger omhoog en naar rechts
+    [
+      [4,0],[4,1],[4,2],[3,2],[2,2],[2,1],[2,0],[1,0],[0,0],[0,1],[0,2],[0,3],[0,4]
+    ],
+    // variant 2: eerst horizontaal dan zigzag naar boven
+    [
+      [4,0],[4,1],[4,2],[4,3],[4,4],[3,4],[2,4],[2,3],[1,3],[1,2],[1,1],[0,1],[0,2],[0,3],[0,4]
+    ],
+    // variant 3: kronkel via het midden
+    [
+      [4,0],[3,0],[2,0],[2,1],[2,2],[3,2],[4,2],[4,3],[3,3],[2,3],[1,3],[0,3],[0,4]
+    ],
+    // variant 4: langer pad met veel wissels
+    [
+      [4,0],[4,1],[3,1],[3,2],[3,3],[4,3],[4,4],[3,4],[2,4],[1,4],[1,3],[0,3],[0,4]
+    ]
+  ];
+  // Kortere paden speciaal voor sprong 10 (max. 9 getallen op het pad)
+  const PAD_VARIANTEN_5X5_SPRONG10 = [
+    // variant 1: recht omhoog, dan naar rechts
+    [
+      [4,0],[3,0],[2,0],[1,0],[0,0],[0,1],[0,2],[0,3],[0,4]
+    ],
+    // variant 2: via kolom 1 naar boven
+    [
+      [4,0],[4,1],[3,1],[2,1],[1,1],[0,1],[0,2],[0,3],[0,4]
+    ],
+    // variant 3: kleine kronkel in het midden
+    [
+      [4,0],[3,0],[3,1],[3,2],[2,2],[1,2],[0,2],[0,3],[0,4]
+    ]
+  ];
+
+   // Kies passende padvariant (korter pad voor sprong 10)
+  const padVarianten = (sprong === 10)
+    ? PAD_VARIANTEN_5X5_SPRONG10
+    : PAD_VARIANTEN_5X5;
+
+  let padIndex;
+  do {
+    padIndex = Math.floor(Math.random() * padVarianten.length);
+  } while (padIndex === avoidIdx && padVarianten.length > 1);
+
+  const pad = padVarianten[padIndex];
+
+  // Limiet = min(100, bereikMax)
+  const limiet = (bereikMax < 100 ? bereikMax : 100);
+  const maxStart = limiet - sprong*(pad.length-1);
+
+  if (maxStart < 0){
+    const warningHTML = `
+      <section class="exerciseBlock">
+        <div class="sheet-header">
+          <div class="titles">
+            <div class="mainTitle">Rekendoolhof</div>
+            <div class="subTitle">Maak sprongen van ${sprong}.</div>
+            <div class="explain" style="color:#b00; font-weight:bold;">
+              Met sprong ${sprong} lukt het niet binnen ${limiet} om tot aan de eikel te tellen.
+              Kies een andere sprong.
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+    return {
+      blockHTML: warningHTML,
+      startCell: [4,0],
+      endCell: [0,4],
+      startIcon: themaInfo.startIcon,
+      endIcon: themaInfo.endIcon,
+          padIndex
+    };
+  }
+
+  // Kies een startwaarde
+  let mogelijkeStarts = [];
+  for (let s = 0; s <= maxStart; s++){
+    if (startMode === "mooi"){
+      if (sprong === 2 && s % 2 !== 0) continue;
+      if ((sprong === 5 || sprong === 10) && (s % 5 !== 0)) continue;
+      if (sprong !== 2 && sprong !== 5 && sprong !== 10){
+        if (s % sprong !== 0) continue;
+      }
+    }
+    mogelijkeStarts.push(s);
+  }
+
+  if (mogelijkeStarts.length === 0){
+    const warningHTML = `
+      <section class="exerciseBlock">
+        <div class="sheet-header">
+          <div class="titles">
+            <div class="mainTitle">Rekendoolhof</div>
+            <div class="subTitle">Maak sprongen van ${sprong}.</div>
+            <div class="explain" style="color:#b00; font-weight:bold;">
+              Geen geschikt startgetal gevonden binnen ${limiet}.
+              Kies een andere sprong of gebruik "vrij".
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+    return {
+      blockHTML: warningHTML,
+      startCell: [4,0],
+      endCell: [0,4],
+      startIcon: themaInfo.startIcon,
+      endIcon: themaInfo.endIcon,
+          padIndex
+    };
+  }
+
+  const gekozenStart = mogelijkeStarts[Math.floor(Math.random()*mogelijkeStarts.length)];
+
+  const gridData = makeEmptyGrid(rows, cols);
+  let val = gekozenStart;
+  for (let i=0; i<pad.length; i++){
+    const [rr,cc] = pad[i];
+    gridData[rr][cc] = val;
+    val += sprong;
+  }
+
+  fillOtherNumbers(gridData, bereikMax);
+
+  const startCell = [4,0];
+  const endCell   = [0,4];
+
+  let gridCellsHTML = "";
+  for (let r=0; r<rows; r++){
+    for (let c=0; c<cols; c++){
+      const isStart = (r === startCell[0] && c === startCell[1]);
+      const isEnd   = (r === endCell[0]   && c === endCell[1]);
+      gridCellsHTML += makeSprongCellHTML(r,c,gridData[r][c],isStart,isEnd);
+    }
+  }
+
+  const extraUitleg = (startMode === "mooi")
+    ? `(netjes tellen met sprongen van ${sprong})`
+    : `(tel verder vanaf een vrij startgetal)`;
+
+  const headerHTML = `
+    <div class="sp-oef-header">
+      <div class="sp-oef-uitleg">${themaInfo.startIcon} ${themaInfo.uitleg}</div>
+      <div class="sp-oef-sprong">Sprongen van ${sprong}</div>
+    </div>
+  `;
+
+  const gridWrapperHTML = `
+    <div class="gridRowWrapper" style="margin-top:8px;">
+      <div class="grid oefgrid" style="
+        grid-template-columns: repeat(${cols}, 52px);
+        grid-template-rows: repeat(${rows}, 52px);
+      ">
+        ${gridCellsHTML}
+      </div>
+    </div>
+  `;
+
+  return {
+    blockHTML: `<section class="exerciseBlock">${headerHTML}${gridWrapperHTML}</section>`,
+    startCell,
+    endCell,
+    startIcon: themaInfo.startIcon,
+    endIcon: themaInfo.endIcon,
+        padIndex
+  };
+}
+
+/* ========= ÉÉN MAZE-OEFENING BOUWEN ========= */
+// Zet een pad (lijst coördinaten [r,c]) om naar pijlen
+// Elke stap tussen twee opeenvolgende cellen levert één pijl.
+// ↑ = 1 vakje omhoog, ↓ = 1 vakje omlaag,
+// → = 1 vakje naar rechts, ← = 1 vakje naar links.
+function padNaarPijlen(pad){
+  const pijlen = [];
+  for (let i = 0; i < pad.length - 1; i++){
+    const [r1,c1] = pad[i];
+    const [r2,c2] = pad[i+1];
+
+    if (r2 === r1 && c2 === c1+1){
+      pijlen.push("→");
+    } else if (r2 === r1 && c2 === c1-1){
+      pijlen.push("←");
+    } else if (c2 === c1 && r2 === r1-1){
+      pijlen.push("↑");
+    } else if (c2 === c1 && r2 === r1+1){
+      pijlen.push("↓");
+    } else {
+      // veiligheidsval: als er ooit een sprong van 2 cellen zou zitten (mag niet),
+      // tonen we een vraagteken. Dan ziet u meteen dat er iets fout is.
+      pijlen.push("?");
+    }
+  }
+  return pijlen;
+}
+
+function buildMazeOefening(themaInfo, size, avoidIdx = -1){
+  // 1. Alleen 5×5 ondersteund
+  if (size !== 5){
+    const warningHTML = `
+      <section class="exerciseBlock mazeBlock">
+        <div class="sheet-header">
+          <div class="titles">
+            <div class="mainTitle">Doolhof</div>
+            <div class="subTitle">Volg de pijlen met je vinger.</div>
+            <div class="explain" style="color:#b00; font-weight:bold;">
+              Voor dit doolhof is het rooster voorlopig alleen beschikbaar in 5×5.
+              Kies 5×5.
+            </div>
+          </div>
+          <div class="legendBox">
+            <div class="legendRow"><span>${themaInfo.startIcon}</span><span>start</span></div>
+            <div class="legendRow"><span>${themaInfo.endIcon}</span><span>einde</span></div>
+          </div>
+        </div>
+      </section>
+    `;
+    return {
+      blockHTML: warningHTML,
+      startCell: [4,0],
+      endCell: [0,4],
+      startIcon: themaInfo.startIcon,
+      endIcon: themaInfo.endIcon,
+          padIndex
+    };
+  }
+
+  // 2. Roostergrootte
+  const rows = 5;
+  const cols = 5;
+
+  // 3. Veilige paden binnen het rooster (variatie)
+  const PAD_VARIANTEN_MAZE = [
+    [
+      [4,0],[4,1],[4,2],[3,2],[2,2],[1,2],[0,2],[0,3],[0,4]
+    ],
+    [
+      [4,0],[4,1],[3,1],[3,2],[2,2],[2,3],[1,3],[1,4],[0,4]
+    ],
+    [
+      [4,0],[3,0],[3,1],[3,2],[2,2],[2,1],[1,1],[1,2],[1,3],[1,4],[0,4]
+    ],
+    [
+      [4,0],[4,1],[4,2],[3,2],[3,3],[4,3],[4,4],[3,4],[2,4],[1,4],[0,4]
+    ]
+  ];
+
+  // 4. Kies willekeurig pad (niet twee keer na elkaar hetzelfde)
+  let padIndex;
+  do {
+    padIndex = Math.floor(Math.random() * PAD_VARIANTEN_MAZE.length);
+  } while (padIndex === avoidIdx && PAD_VARIANTEN_MAZE.length > 1);
+
+  const pad = PAD_VARIANTEN_MAZE[padIndex];
+
+  // -------- HIER BEGINNEN DE AANPASSINGEN VOOR DE PIJLEN --------
+
+  // Beschrijving van uw layout:
+  // - Het echte doolhof-pad eindigt NIET op het beige vak,
+  //   maar in het witte vak vlak ervoor.
+  // - Daarna moet je 1× naar rechts (wit -> beige),
+  //   en daarna nog 1× naar rechts (beige -> buiten bij de eikel).
+
+  const TOP_ROW = 0;
+  const LAST_COL_IN_GRID = cols - 1; // bij 5x5 is dat 4
+
+  // We maken een kopie van het gekozen pad en vullen eventueel bij.
+  const padGefixt = pad.slice();
+
+  // huidige eindpositie
+  let curR = padGefixt[padGefixt.length - 1][0];
+  let curC = padGefixt[padGefixt.length - 1][1];
+
+  // STAP A. Zorg dat we op de bovenste rij zitten (rij 0),
+  // anders stappen we naar boven tot rij 0.
+  let safetyA = 0;
+  while (curR !== TOP_ROW && safetyA < 50){
+    curR = curR - 1; // omhoog
+    padGefixt.push([curR, curC]);
+    safetyA++;
+  }
+
+  // STAP B. Zorg dat we belanden in het WITTE vak dat net LINKS van de beige uitgang zit.
+  // - Beige uitgangscel binnen het rooster = (0, LAST_COL_IN_GRID).
+  // - Het witte vak net ervoor zit op kolom LAST_COL_IN_GRID - 1.
+  const targetWhiteCol = LAST_COL_IN_GRID - 1;
+  let safetyB = 0;
+  while (curC < targetWhiteCol && safetyB < 50){
+    curC = curC + 1; // naar rechts
+    padGefixt.push([curR, curC]);
+    safetyB++;
+  }
+
+  // STAP C. Stap naar de BEIGE uitgangscel in het rooster (0, LAST_COL_IN_GRID).
+  if (!(curR === TOP_ROW && curC === LAST_COL_IN_GRID)){
+    curC = curC + 1; // wit -> beige
+    padGefixt.push([curR, curC]);
+  }
+
+  // STAP D. Nog 1 stap naar rechts BUITEN het rooster, naar de eikel.
+  curC = curC + 1; // beige -> buiten
+  padGefixt.push([curR, curC]);
+
+  // Nu eindigt padGefixt dus exact bij "einde" buiten het rooster.
+
+  // Definitief start- en eindpunt van de route-met-pijlen
+  const startCell = padGefixt[0];
+  // let absoluteEndCell = padGefixt[padGefixt.length - 1]; // niet nodig voor return
+
+  // Maak pijlenreeks
+  const pijlenLijst = padNaarPijlen(padGefixt);
+  const pijlenHTML  = pijlenLijst.join(" ");
+
+  // Voor het rooster zelf (te tekenen vakjes):
+  // - start in startCell
+  // - einde (het beige vak) = rechtsboven in het rooster = (0, LAST_COL_IN_GRID)
+  const visueelEndR = TOP_ROW;
+  const visueelEndC = LAST_COL_IN_GRID;
+
+  // We gebruiken deze visuele eindcel als "endCell" voor de rest van de app,
+  // want placeIconsForBlock zet daar het label "einde" en de eikel ernaast.
+  const endCell = [visueelEndR, visueelEndC];
+
+  // Bouw de gridcellen
+  let gridCellsHTML = "";
+  for (let r = 0; r < rows; r++){
+    for (let c = 0; c < cols; c++){
+      const isStart = (r === startCell[0] && c === startCell[1]);
+      const isEnd   = (r === visueelEndR && c === visueelEndC);
+
+      gridCellsHTML += makeSprongCellHTML(
+        r,
+        c,
+        "",
+        isStart,
+        isEnd
+      );
+    }
+  }
+
+  // Header met pijlen en uitleg
+  const headerHTML = `
+    <div class="sp-oef-header">
+      <div class="sp-oef-uitleg">${themaInfo.startIcon} ${themaInfo.uitleg}</div>
+      <div class="sp-oef-pijlen">Volg: ${pijlenHTML}</div>
+    </div>
+  `;
+
+  // Rooster-wrapper
+  const gridWrapperHTML = `
+    <div class="gridRowWrapper">
+      <div class="grid oefgrid mazeBlock" style="
+        grid-template-columns: repeat(${cols}, 52px);
+        grid-template-rows: repeat(${rows}, 52px);
+      ">
+        ${gridCellsHTML}
+      </div>
+    </div>
+  `;
+
+  // Teruggeven naar renderWorksheet()
+  return {
+    blockHTML: `<section class="exerciseBlock mazeBlock">${headerHTML}${gridWrapperHTML}</section>`,
+    startCell,
+    endCell,            // <-- nu bestaat endCell weer en is geldig (roosterhoek)
+    startIcon: themaInfo.startIcon,
+    endIcon: themaInfo.endIcon,
+    padIndex            // voor variatie tussen oefeningen
+  };
+}
+
+
+/* ========= START/EINDE ICONEN BUITEN ELKE GRID =========
+   We plaatsen per oefening afzonderlijk de icoontjes naast
+   de juiste cellen. Let op:
+   - We zoeken .oefgrid binnen die oefen-block
+   - We plaatsen iconen daarin.
+*/
+function placeIconsForBlock(blockEl, startCell, endCell, startIcon, endIcon){
+  const gridEl = blockEl.querySelector(".oefgrid");
+  if (!gridEl) return;
+
+  const isMaze = blockEl.classList.contains("mazeBlock");
+
+  function getCell(r, c){
+    return gridEl.querySelector(
+      `.cellSprong[data-r="${r}"][data-c="${c}"],
+       .cellMaze[data-r="${r}"][data-c="${c}"]`
+    );
+  }
+
+  const startDiv = getCell(startCell[0], startCell[1]);
+  const endDiv   = getCell(endCell[0],   endCell[1]);
+  if (!startDiv || !endDiv) return;
+
+  const startBox = startDiv.getBoundingClientRect();
+  const endBox   = endDiv.getBoundingClientRect();
+  const gridBox  = gridEl.getBoundingClientRect();
+
+  // Altijd: poortcellen markeren (voor openingen)
+  startDiv.classList.add("mazeEntry");
+  endDiv.classList.add("mazeExit");
+
+  // STARTLABEL
+  const startLabel = document.createElement("div");
+  startLabel.className = "mazeStartLabel";
+  startLabel.style.display = "flex";
+  startLabel.style.flexDirection = "column";
+  startLabel.style.alignItems = "flex-start";
+  startLabel.innerHTML = `
+    <span>${startIcon}</span>
+    <span class="mazeLabelText">start</span>
+  `;
+  startLabel.style.left = (startBox.left - gridBox.left - 40) + "px";
+  startLabel.style.top  = (
+    startBox.top - gridBox.top +
+    startBox.height/2 - 20
+  ) + "px";
+  gridEl.appendChild(startLabel);
+
+  // EINDELABEL
+  const endLabel = document.createElement("div");
+  endLabel.className = "mazeEndLabel";
+  endLabel.style.display = "flex";
+  endLabel.style.flexDirection = "column";
+  endLabel.style.alignItems = "flex-end";
+  endLabel.innerHTML = `
+  <span class="mazeLabelText">einde</span>
+  <span>${endIcon}</span>
+`;
+
+  endLabel.style.left = (
+    endBox.left - gridBox.left +
+    endBox.width + 8
+  ) + "px";
+  endLabel.style.top  = (
+    endBox.top - gridBox.top +
+    endBox.height/2 - 20
+  ) + "px";
+  gridEl.appendChild(endLabel);
+}
+
+
+
+/* ========= HOOFDFUNCTIE OM HET VOLLE WERKBLAD TE BOUWEN =========
+   We gaan NU meteen 2 oefeningen onder elkaar zetten,
+   zodat u al ziet hoe "meerdere oefeningen op één blad" kan werken.
+   Later kunnen we dit makkelijk uitbreiden naar 3 of meer.
+*/
+function sp_renderWorksheet(){
+  const ws = document.getElementById("worksheet");
+  ws.innerHTML = "";
+
+  let previousPadIndex = -1;
+
+  sp_worksheetItems.forEach((item, idx) => {
+    const themaInfo = getThemaInfo(item.thema);
+
+    let oef;
+  if (item.kind === "sprongen"){
+  oef = buildSprongenOefening(
+    themaInfo,
+    item.sprong,
+    item.bereikMax,
+    item.size,
+    previousPadIndex,
+    item.startMode || "mooi"
+  );
+} else {
+  oef = buildMazeOefening(
+    themaInfo,
+    item.size,
+    previousPadIndex
+  );
+}
+
+    // oefening tonen
+    ws.insertAdjacentHTML("beforeend", oef.blockHTML);
+
+    // lijn tussen blokken (behalve na de laatste)
+    if (idx < worksheetItems.length - 1){
+      ws.insertAdjacentHTML(
+        "beforeend",
+        "<hr style='margin:2rem 0;border:0;border-top:1px solid #999;'>"
+      );
+    }
+
+    // iconen plaatsen en openingen zetten
+    const allBlocks = ws.querySelectorAll(".exerciseBlock");
+    const thisBlock = allBlocks[allBlocks.length-1];
+    placeIconsForBlock(
+      thisBlock,
+      oef.startCell,
+      oef.endCell,
+      oef.startIcon,
+      oef.endIcon
+    );
+
+    // onthoud padIndex zodat de volgende oef een ander pad krijgt
+    previousPadIndex = oef.padIndex;
+  });
+}
+// sp_hookControls: niet gebruikt (eigen generateSpringpad)
+
+// ══════════════════════════════════════════════════════════
+// SPRINGPAD – CONFIG SYSTEEM (zoals rekenrooster)
+// ══════════════════════════════════════════════════════════
+
+let spConfigs = [];
+let spIdCounter = 0;
+
+function saveSpConfigsFromDOM() {
+  spConfigs.forEach(cfg => {
+    const id = cfg.id;
+    const typeEl = document.getElementById(`sp-type-${id}`);
+    if (!typeEl) return;
+    cfg.type      = typeEl.value;
+    cfg.sprong    = document.getElementById(`sp-sprong-${id}`)?.value || '5';
+    cfg.bereik    = document.getElementById(`sp-bereik-${id}`)?.value || '100';
+    cfg.startmode = document.getElementById(`sp-startmode-${id}`)?.value || 'mooi';
+    cfg.thema     = document.getElementById(`sp-thema-${id}`)?.value || 'herfst';
+    cfg.opdracht  = document.getElementById(`sp-opdracht-${id}`)?.value || '';
+  });
+}
+
+function renderSpringpadConfigs() {
+  saveSpConfigsFromDOM();
+  const container = document.getElementById('sp-configs');
+  container.innerHTML = '';
+  const addBtn = document.getElementById('sp-add-btn');
+  if (addBtn) addBtn.style.display = spConfigs.length >= 4 ? 'none' : 'block';
+  if (!spConfigs.length) return;
+
+  spConfigs.forEach((cfg, idx) => {
+    const id = cfg.id;
+    const div = document.createElement('div');
+    div.className = 'sub-block';
+    div.style.cssText = 'margin:0;';
+
+    // Header
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;';
+    hdr.innerHTML = `<span class="sub-block-title" style="margin:0;">Springpad ${idx+1}</span>`;
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '✕ Verwijder';
+    delBtn.style.cssText = 'background:#fdeaea;color:#a02020;border:1px solid #e8b0b0;border-radius:6px;padding:2px 8px;font-size:.75rem;font-weight:800;cursor:pointer;';
+    delBtn.onclick = () => { spConfigs = spConfigs.filter(c => c.id !== id); renderSpringpadConfigs(); };
+    hdr.appendChild(delBtn);
+    div.appendChild(hdr);
+
+    function mkSel(labelTxt, selId, options, selectedVal) {
+      const f = document.createElement('div');
+      f.className = 'field';
+      f.style.cssText = 'margin-bottom:6px;';
+      const lbl = document.createElement('label');
+      lbl.textContent = labelTxt;
+      const sel = document.createElement('select');
+      sel.id = selId;
+      options.forEach(([val, txt]) => {
+        const opt = document.createElement('option');
+        opt.value = val; opt.textContent = txt;
+        if (val === selectedVal) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      f.appendChild(lbl); f.appendChild(sel);
+      return f;
+    }
+
+    // Type
+    const typeF = mkSel('Type', `sp-type-${id}`, [
+      ['sprongen','Springpad (rekenen)'],
+      ['maze','Leeg doolhof (pijlen)']
+    ], cfg.type || 'sprongen');
+    typeF.querySelector('select').onchange = () => toggleSpType(id);
+    div.appendChild(typeF);
+
+    // Sprong-instellingen wrapper
+    const sprongWrap = document.createElement('div');
+    sprongWrap.id = `sp-wrap-${id}`;
+    sprongWrap.appendChild(mkSel('Sprong', `sp-sprong-${id}`, [
+      ['2','+2'],['5','+5'],['10','+10']
+    ], cfg.sprong || '5'));
+    sprongWrap.appendChild(mkSel('Bereik', `sp-bereik-${id}`, [
+      ['20','Tot 20'],['100','Tot 100']
+    ], cfg.bereik || '100'));
+    sprongWrap.appendChild(mkSel('Startgetal', `sp-startmode-${id}`, [
+      ['mooi','Mooi (20, 25, 30…)'],['vrij','Vrij (7, 12, 17…)']
+    ], cfg.startmode || 'mooi'));
+    div.appendChild(sprongWrap);
+
+    // Thema
+    div.appendChild(mkSel('Thema', `sp-thema-${id}`, [
+      ['herfst','Herfst (🐿️→🌰)'],['halloween','Halloween (🎃→🍬)'],
+      ['sint','Sint (🎅→🎁)'],['kerst','Kerst (🎄→⭐)'],
+      ['carnaval','Carnaval (🎭→🎉)'],['pasen','Pasen (🐰→🥚)'],
+      ['lente','Lente (🐦→🌸)'],['zomer','Zomer (🏖️→🍦)']
+    ], cfg.thema || 'herfst'));
+
+    // Opdrachtzin
+    const isMazeType = (cfg.type || 'sprongen') === 'maze';
+    const opdrachtOpties = isMazeType ? [
+      ['Teken het pad! Volg de pijlen en teken je weg.','Teken het pad! Volg de pijlen'],
+      ['Volg de pijlen en teken de weg naar het einde.','Volg de pijlen en teken de weg'],
+      ['Teken de weg door het doolhof.','Teken de weg door het doolhof']
+    ] : [
+      ['Volg het pad en kleur de juiste vakjes!','Volg het pad en kleur de juiste vakjes'],
+      ['Zoek de weg! Kleur de vakjes met de juiste sprongen.','Zoek de weg! Kleur de juiste sprongen'],
+      ['Welke vakjes horen bij het pad? Kleur ze in!','Welke vakjes horen bij het pad?']
+    ];
+    const defaultOpdracht = cfg.opdracht || (isMazeType
+      ? 'Teken het pad! Volg de pijlen en teken je weg.'
+      : 'Volg het pad en kleur de juiste vakjes!');
+    div.appendChild(mkSel('Opdrachtzin', `sp-opdracht-${id}`, opdrachtOpties, defaultOpdracht));
+
+    container.appendChild(div);
+    toggleSpType(id);
+  });
+}
+
+function toggleSpType(id) {
+  const type = document.getElementById(`sp-type-${id}`)?.value;
+  const wrap = document.getElementById(`sp-wrap-${id}`);
+  if (wrap) wrap.style.display = (type === 'maze') ? 'none' : 'block';
+  // Wissel opdrachtzin-opties mee
+  const opdSel = document.getElementById(`sp-opdracht-${id}`);
+  if (!opdSel) return;
+  const isMaze = (type === 'maze');
+  const opties = isMaze ? [
+    ['Teken het pad! Volg de pijlen en teken je weg.','Teken het pad! Volg de pijlen'],
+    ['Volg de pijlen en teken de weg naar het einde.','Volg de pijlen en teken de weg'],
+    ['Teken de weg door het doolhof.','Teken de weg door het doolhof']
+  ] : [
+    ['Volg het pad en kleur de juiste vakjes!','Volg het pad en kleur de juiste vakjes'],
+    ['Zoek de weg! Kleur de vakjes met de juiste sprongen.','Zoek de weg! Kleur de juiste sprongen'],
+    ['Welke vakjes horen bij het pad? Kleur ze in!','Welke vakjes horen bij het pad?']
+  ];
+  opdSel.innerHTML = '';
+  opties.forEach(([val, txt]) => {
+    const opt = document.createElement('option');
+    opt.value = val; opt.textContent = txt;
+    opdSel.appendChild(opt);
+  });
+}
+
+function addSpringpadConfig() {
+  if (spConfigs.length >= 4) { alert('Maximum 4 springpaden per werkblad.'); return; }
+  spConfigs.push({ id: ++spIdCounter });
+  renderSpringpadConfigs();
+}
+
+function removeSpringpadConfig(id) {
+  spConfigs = spConfigs.filter(c => c.id !== id);
+  renderSpringpadConfigs();
+}
+
+function generateSpringpad() {
+  if (!spConfigs.length) { alert('Voeg eerst een springpad toe.'); return; }
+  saveSpConfigsFromDOM();
+
+  const naam  = document.getElementById('sp-naam').value.trim();
+  const datum = document.getElementById('sp-datum').value.trim();
+
+  // Bepaal of alle paden dezelfde opdrachtzin hebben
+  const alleOpdrachten = spConfigs.map(c => c.opdracht || '');
+  const eenOpdracht    = alleOpdrachten.every(o => o === alleOpdrachten[0]);
+
+  const output = document.getElementById('preview-area');
+  output.innerHTML = '';
+
+  const div = document.createElement('div');
+  div.className = 'worksheet sp-worksheet';
+
+  // Werkblad-header: opdrachtzin staat in elk kader afzonderlijk
+  div.innerHTML = renderWorksheetHeader(naam, datum, '🐾 Springpad', '');
+
+  // Grid: 2 kolommen als > 1 pad
+  const cols = spConfigs.length > 1 ? 2 : 1;
+  const grid = document.createElement('div');
+  grid.style.cssText = `display:grid;grid-template-columns:repeat(${cols},1fr);gap:20px 28px;padding:10px 20px 18px;align-items:start;`;
+
+  let prevPadIdx = -1;
+  const pendingIcons = [];
+
+  spConfigs.forEach((cfg, idx) => {
+    const themaInfo = getThemaInfo(cfg.thema || 'herfst');
+    const type      = cfg.type || 'sprongen';
+    const sprong    = parseInt(cfg.sprong) || 5;
+    const bereik    = parseInt(cfg.bereik) || 100;
+    const startmode = cfg.startmode || 'mooi';
+
+    let oef;
+    if (type === 'sprongen') {
+      oef = buildSprongenOefening(themaInfo, sprong, bereik, 5, prevPadIdx, startmode);
+    } else {
+      oef = buildMazeOefening(themaInfo, 5, prevPadIdx);
+    }
+
+    // Kader per springpad
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'border:1.5px solid #c8dff5;border-radius:10px;padding:10px 48px 14px 12px;background:#fafcff;display:flex;flex-direction:column;';
+
+    // Opdrachtzin bovenaan het kader (altijd tonen, ook als ze gelijk zijn)
+    const opDiv = document.createElement('div');
+    opDiv.style.cssText = 'font-size:14pt;font-weight:700;color:#1a4e8a;font-style:italic;margin-bottom:8px;line-height:1.3;';
+    opDiv.textContent = cfg.opdracht || '';
+    wrapper.appendChild(opDiv);
+
+    const oefDiv = document.createElement('div');
+    oefDiv.innerHTML = oef.blockHTML;
+    const block = oefDiv.firstElementChild;
+    // Verwijder de hoofdopdrachtzin uit renderWorksheetHeader want die staat al in het kader
+    wrapper.appendChild(block);
+    grid.appendChild(wrapper);
+
+    pendingIcons.push({ block, startCell: oef.startCell, endCell: oef.endCell,
+                        startIcon: oef.startIcon, endIcon: oef.endIcon });
+    prevPadIdx = oef.padIndex;
+  });
+
+  div.appendChild(grid);
+  output.appendChild(div);
+
+  // Iconen plaatsen na layout
+  setTimeout(() => {
+    pendingIcons.forEach(p => {
+      placeIconsForBlock(p.block, p.startCell, p.endCell, p.startIcon, p.endIcon);
+    });
+  }, 80);
+
+  const btn = document.getElementById('btn-voeg-sp');
+  if (btn) btn.style.display = 'inline-block';
+}
+
+function previewSpringpad() { generateSpringpad(); }
+
+// Init: start met 1 springpad
+addSpringpadConfig();
+
+</script>
+
+  <script>document.querySelector('.pro-header')?.insertAdjacentElement('afterend',document.querySelector('#bundel-bar'));</script>
+  <script type="module" src="./rekenspellen-ontdek.js"></script>
+
+</body>
+</html>

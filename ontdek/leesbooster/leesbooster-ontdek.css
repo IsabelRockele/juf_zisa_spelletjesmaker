@@ -1,0 +1,4 @@
+.game-stage{height:calc(100vh - 150px);min-height:500px;padding-bottom:8px}
+.game-timer{position:sticky;bottom:8px;z-index:20;flex:0 0 24px;width:100%;box-shadow:0 3px 12px rgba(17,55,91,.18)}
+.ontdek-demo-countdown{margin-left:auto;background:#fff3bf;border:2px solid #e0ab22;color:#6d4b00;border-radius:999px;padding:8px 14px;font-size:16px;white-space:nowrap}
+@media(max-height:760px){.game-stage{min-height:420px}.stage-card{padding:18px}.flash-word{font-size:clamp(58px,10vw,130px)}.game-timer{margin-top:10px}}
