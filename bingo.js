@@ -572,8 +572,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const startKnop = document.getElementById('start-schuiven-knop');
         const machineDiv = document.getElementById('schuif-machine');
         const geenSpelMelding = document.getElementById('geen-spel-melding');
+        const knoppenContainer = document.querySelector('.knoppen-container');
         let teTrekkenItems = [];
         let ballenItems = [];
+        let laatsteDoelIndex = -1;
+        let aantalGetrokken = 0;
 
         const opgeslagenSpelJSON = localStorage.getItem('bingoGameState');
         if (!opgeslagenSpelJSON) {
@@ -610,6 +613,21 @@ document.addEventListener('DOMContentLoaded', () => {
             itemSpan.id = `item-${item}`;
             itemsOverzichtDiv.appendChild(itemSpan);
         });
+
+        const overzichtKnop = document.createElement('button');
+        overzichtKnop.type = 'button';
+        overzichtKnop.className = 'overzicht-toggle';
+        overzichtKnop.setAttribute('aria-expanded', 'false');
+        overzichtKnop.textContent = `Toon opdrachten · 0/${huidigeSpelItems.length} geweest`;
+        itemsOverzichtDiv.classList.add('verborgen');
+        knoppenContainer.insertAdjacentElement('afterend', overzichtKnop);
+        overzichtKnop.insertAdjacentElement('afterend', itemsOverzichtDiv);
+        overzichtKnop.addEventListener('click', () => {
+            const wordtZichtbaar = itemsOverzichtDiv.classList.contains('verborgen');
+            itemsOverzichtDiv.classList.toggle('verborgen', !wordtZichtbaar);
+            overzichtKnop.setAttribute('aria-expanded', String(wordtZichtbaar));
+            overzichtKnop.textContent = `${wordtZichtbaar ? 'Verberg' : 'Toon'} opdrachten · ${aantalGetrokken}/${huidigeSpelItems.length} geweest`;
+        });
         
         const kleuren = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'];
         ballenItems = [...huidigeSpelItems];
@@ -628,18 +646,25 @@ document.addEventListener('DOMContentLoaded', () => {
         startKnop.addEventListener('click', () => {
             if (teTrekkenItems.length === 0) { alert("Alle items zijn geweest!"); startKnop.disabled = true; return; }
             startKnop.disabled = true;
+            ballenBandDiv.querySelectorAll('.is-geselecteerd').forEach(bal => bal.classList.remove('is-geselecteerd'));
 
             const randomIndex = Math.floor(Math.random() * teTrekkenItems.length);
             const gekozenItem = teTrekkenItems.splice(randomIndex, 1)[0];
             const itemSpan = document.getElementById(`item-${gekozenItem}`);
-            const alleBallen = document.querySelectorAll('.bal');
+            let alleBallen = ballenBandDiv.querySelectorAll('.bal');
             let doelBal = null;
-            for (let i = Math.floor(ballenItems.length * 1.5); i < alleBallen.length; i++) {
-                if (alleBallen[i]?.dataset.item === String(gekozenItem)) { doelBal = alleBallen[i]; break; }
+            let doelIndex = -1;
+            const minimaleStap = Math.max(3, Math.floor(ballenItems.length * 0.35));
+            const zoekVanaf = Math.max(Math.floor(ballenItems.length * 1.25), laatsteDoelIndex + minimaleStap);
+            for (let i = zoekVanaf; i < alleBallen.length; i++) {
+                if (alleBallen[i]?.dataset.item === String(gekozenItem)) { doelBal = alleBallen[i]; doelIndex = i; break; }
             }
             if (!doelBal) {
-                for (let i = 0; i < alleBallen.length; i++) {
-                    if (alleBallen[i]?.dataset.item === String(gekozenItem)) { doelBal = alleBallen[i]; break; }
+                const extraRonde = Array.from(ballenBandDiv.children).slice(0, ballenItems.length);
+                extraRonde.forEach(bal => ballenBandDiv.appendChild(bal.cloneNode(true)));
+                alleBallen = ballenBandDiv.querySelectorAll('.bal');
+                for (let i = zoekVanaf; i < alleBallen.length; i++) {
+                    if (alleBallen[i]?.dataset.item === String(gekozenItem)) { doelBal = alleBallen[i]; doelIndex = i; break; }
                 }
             }
             
@@ -649,10 +674,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const schuifAfstand = (machineBreedte / 2) - doelPositie;
                 ballenBandDiv.style.transition = 'transform 4s cubic-bezier(0.2, 0.8, 0.2, 1)';
                 ballenBandDiv.style.transform = `translateX(${schuifAfstand}px)`;
+                laatsteDoelIndex = doelIndex;
             }
 
             setTimeout(() => {
+                if (doelBal) doelBal.classList.add('is-geselecteerd');
                 if (itemSpan) itemSpan.classList.add('is-geweest');
+                aantalGetrokken += 1;
+                overzichtKnop.textContent = `${itemsOverzichtDiv.classList.contains('verborgen') ? 'Toon' : 'Verberg'} opdrachten · ${aantalGetrokken}/${huidigeSpelItems.length} geweest`;
                 if (teTrekkenItems.length > 0) { 
                     startKnop.disabled = false; 
                 } else { 

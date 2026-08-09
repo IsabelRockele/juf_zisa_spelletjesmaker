@@ -256,6 +256,10 @@ body {
     box-sizing: border-box;
     background: linear-gradient(145deg, #eef7ff 0%, #f8f4ff 55%, #fff8e8 100%);
 }
+#spel-wrapper {
+    width: min(100%, 1380px);
+    flex: 0 1 1380px;
+}
 .spel-container {
     max-width: 1380px;
     width: 100%;
@@ -286,6 +290,19 @@ body {
     justify-content: center;
     gap: 10px;
 }
+.overzicht-toggle {
+    display: block;
+    margin: 24px auto 12px;
+    padding: 11px 18px;
+    border: 1.5px solid #bdd3e4;
+    border-radius: 999px;
+    background: #f4f9fd;
+    color: #24557e;
+    font-size: 16px;
+    font-weight: 750;
+    cursor: pointer;
+}
+.overzicht-toggle:hover { background: #e7f2fa; }
 #items-overzicht span {
     display: inline-flex;
     align-items: center;
@@ -348,6 +365,13 @@ body {
     font-size: clamp(20px, 2vw, 30px);
     box-shadow: inset -10px -12px 22px rgba(0, 0, 0, .25), inset 7px 8px 14px rgba(255,255,255,.2), 0 7px 15px rgba(0,0,0,.18);
     text-shadow: 1px 2px 3px rgba(0,0,0,.45);
+    transition: transform .3s ease, box-shadow .3s ease, outline-color .3s ease;
+}
+.bal.is-geselecteerd {
+    transform: scale(1.16);
+    z-index: 5;
+    outline: 7px solid rgba(255,255,255,.95);
+    box-shadow: inset -10px -12px 22px rgba(0,0,0,.22), inset 7px 8px 14px rgba(255,255,255,.24), 0 0 0 8px #ffcf33, 0 13px 28px rgba(17,48,75,.3);
 }
 
 /* --- AANGEPASTE KNOPPEN CONTAINER --- */
