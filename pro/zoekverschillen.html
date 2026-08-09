@@ -46,12 +46,12 @@
 
 <div id="main-content">
   <div id="left-panel">
-      <div class="steps-intro"><strong>Zo maak je een werkblad</strong><span>1. Kies een afbeelding</span><span>2. Maak verschillen</span><span>3. Download je werkblad</span></div>
+      <div class="steps-intro"><strong>Zo maak je een werkblad</strong><span>1. Kies een kleurplaat — automatisch kan</span><span>2. Laat verschillen maken of maak ze zelf</span><span>3. Download je werkblad en oplossing</span></div>
       <div class="control-group">
           <h3><span class="step-number">1</span> Afbeelding</h3>
-          <p class="group-help">Kies één duidelijke afbeelding. Die verschijnt meteen twee keer.</p>
-          <button id="uploadImageBtn" class="primary-btn">Afbeelding kiezen</button>
-          <button id="openCatalogBtn" class="catalog-btn">Kies een kleurplaat uit de catalogus</button>
+          <p class="group-help">Kies een eigen afbeelding of neem een kleurplaat met kant-en-klare automatische verschillen.</p>
+          <button id="uploadImageBtn" class="primary-btn">Eigen afbeelding uploaden (PNG of JPG)</button>
+          <div class="catalog-choice"><strong>OF — AUTOMATISCH LATEN MAKEN</strong><p>Kies een kleurplaat met een groen label. De tool maakt 5–10 verschillen en een oplossing.</p><button id="openCatalogBtn" class="catalog-btn">Kleurplatencatalogus openen <span aria-hidden="true">→</span></button></div>
           <input type="file" id="fileInput" accept="image/*" style="display: none;">
       </div>
       
@@ -145,10 +145,12 @@
           <label class="field-label" for="differenceCount">Aantal verschillen</label>
           <select id="differenceCount"><option>5</option><option>6</option><option selected>7</option><option>8</option><option>9</option><option>10</option></select>
           <div id="autoDifferencesPanel" class="auto-differences-panel hidden">
-              <span class="auto-badge">PROEF – HERFST</span>
+              <span class="auto-badge">MAKKELIJK EN AUTOMATISCH</span>
               <strong>Automatische verschillen beschikbaar</strong>
-              <p>De tool maakt de rechterafbeelding automatisch. Je hoeft niet te tekenen of te gummen.</p>
+              <p>Deze kleurplaat is er al met kant-en-klare verschillen. Je hoeft zelf niets te tekenen of te gummen.</p>
+              <ol class="auto-steps"><li>Kies hierboven hoeveel verschillen je wilt.</li><li>Klik op de groene knop hieronder.</li><li>Bekijk daarna de oplossing of download de pdf.</li></ol>
               <button id="makeAutoDifferencesBtn" class="auto-differences-btn">Maak automatisch 7 verschillen</button>
+              <p class="auto-button-help">Na je klik verschijnt rechts meteen de aangepaste afbeelding.</p>
               <div id="solutionActions" class="solution-actions hidden"><button id="toggleSolutionBtn">Bekijk oplossing</button><button id="downloadSolutionPdfBtn">Download oplossing als PDF</button></div>
               <details id="differenceSummary" class="difference-summary"><summary>Welke verschillen zijn gebruikt?</summary><ol id="differenceSummaryList"></ol></details>
           </div>
@@ -167,13 +169,16 @@
 <div id="catalog-modal-overlay" class="dialog-overlay hidden">
   <section class="catalog-dialog" role="dialog" aria-modal="true" aria-labelledby="catalogTitle">
     <div class="dialog-header"><div><h2 id="catalogTitle">Kleurplaten kiezen</h2><p>Kies een thema en klik daarna op een kleurplaat.</p></div><button id="closeCatalogBtn" class="close-dialog" aria-label="Sluiten">×</button></div>
+    <div class="catalog-auto-explanation"><strong>Automatisch laten maken?</strong><span>Kies een kleurplaat met het groene label <b>Automatisch beschikbaar</b>. Daarna kies je 5–10 verschillen en klik je op de automatische knop.</span></div>
     <div id="catalogThemes" class="catalog-themes"></div><div id="catalogImages" class="catalog-images"></div>
   </section>
 </div>
 <div id="help-modal-overlay" class="dialog-overlay hidden">
   <section class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="dialog-header"><h2 id="helpTitle">Zo maak je een zoekplaat</h2><button id="closeHelpBtn" class="close-dialog" aria-label="Sluiten">×</button></div>
-    <ol class="help-steps"><li><strong>Kies een afbeelding.</strong><span>Gebruik een kleurplaat uit de catalogus of upload zelf een afbeelding.</span></li><li><strong>Maak verschillen.</strong><span>Werk alleen in de rechterafbeelding. Gebruik bijvoorbeeld de gum, het potlood of kopieer een onderdeel.</span></li><li><strong>Controleer je puzzel.</strong><span>Vergelijk links en rechts en maak een fout ongedaan als dat nodig is.</span></li><li><strong>Maak je werkblad.</strong><span>Pas eventueel de titel en opdrachtzin aan en download de PDF.</span></li></ol>
+    <div class="help-choice automatic"><strong>De makkelijkste manier: automatisch</strong><span>Open de catalogus en kies een kleurplaat met het groene label. Kies daarna 5–10 verschillen en klik op <b>Maak automatisch … verschillen</b>. De tool maakt de tweede afbeelding en de oplossing voor jou.</span></div>
+    <div class="help-choice manual"><strong>Of maak de verschillen zelf</strong><span>Upload een eigen afbeelding of kies eender welke kleurplaat en bewerk de rechterafbeelding met de gereedschappen.</span></div>
+    <ol class="help-steps"><li><strong>Kies een afbeelding.</strong><span>Voor automatisch: open de catalogus en kies een kleurplaat met het groene label.</span></li><li><strong>Kies het aantal verschillen.</strong><span>Kies 5, 6, 7, 8, 9 of 10.</span></li><li><strong>Maak de puzzel.</strong><span>Klik op de automatische knop, of gebruik de gereedschappen wanneer je alles zelf wilt aanpassen.</span></li><li><strong>Download.</strong><span>Pas titel en opdrachtzin aan. Download daarna het werkblad en eventueel de oplossing als PDF.</span></li></ol>
     <button id="helpDoneBtn" class="primary-btn">Ik begrijp het</button>
   </section>
 </div>
