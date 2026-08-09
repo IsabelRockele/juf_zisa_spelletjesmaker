@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (info) toolExplanation.innerHTML = `<strong>${info.name}</strong><span>${info.text}</span>`;
     }
 
-    const automaticThemes = new Set(['naar-school','herfst','sinterklaas','kerst','pasen','lente','carnaval','winter','zomer','valentijn']);
+    const automaticThemes = new Set(['naar-school','herfst','sinterklaas','kerst','pasen','lente','carnaval','winter','zomer','valentijn','dieren','voertuigen','prehistorie','oudheid','middeleeuwen','vroegmoderne-tijd','moderne-tijd','hedendaagse-tijd','ruimte']);
     function renderCatalog(activeSlug) {
         catalogThemes.innerHTML = catalog.map(([slug,label]) => `<button class="catalog-theme ${slug===activeSlug?'active':''}" data-theme="${slug}">${label}</button>`).join('');
         const [,label,images] = catalog.find(item => item[0] === activeSlug);
@@ -238,6 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'kamperen':['Op het shirt van het meisje staat een hart.','De beker van het meisje heeft grote stippen.','Het haarelastiek van het meisje is een ster geworden.','Op het shirt van de jongen staat een ster.','De marshmallow is een groot hart geworden.','De rugzak bij de tent heeft dikke strepen.','Op de tent staat een grote maan.','Een appel op het bord is een peer geworden.','De lantaarn heeft grote stippen.','De eekhoorn is een konijn geworden.'],
         'vriendschapsfeest':['De bloem in het haar van het meisje is een ster geworden.','Het shirt van de jongen heeft dikke strepen.','Het hart op de eerste kaart is een ster geworden.','Een hart in de slinger is een cirkel geworden.','De hartballon is een sterballon geworden.','Het shirt van het tweede meisje heeft grote stippen.','Het hart op de tweede kaart is een bloem geworden.','Het halsbandhangertje van de hond is een ster geworden.','Het vierkante cadeau rechts heeft dikke strepen.','De kat is een konijn geworden.'],
         'hartjestuin':['Het hart op het shirt van het meisje is een ster geworden.','Het shirt van de jongen heeft grote stippen.','Het hart op de gieter van de jongen is een bloem geworden.','Het hart op de tuinpoort is een grote ster geworden.','De vliegende vogel linksboven is verdwenen.','De vlinder linksboven is een zon geworden.','De rugleuning van de bank heeft dikke strepen.','Het grote cadeau links is een picknickmand geworden.','Het hart op de losse gieter is een cirkel geworden.','Een hartbloem in de grote pot is een sterbloem geworden.'],
+        'dierenpark':['De giraf heeft nog maar één hoorn.','De olifant heeft nog maar één slagtand.','De slurf van de olifant staat omhoog.','De aap in de boom is een papegaai geworden.','De staart van de leeuw is verdwenen.','De staart van de zebra is verdwenen.','De pinguïn heeft een vis in zijn bek.','De emmer met bladeren is een strandbal geworden.','De pet van het kind is een wintermuts geworden.','De schoudertas van de vrouw is een rugzak geworden.'],
+        'boerderijdieren':['Naast de kip staat een extra eendje.','De koe heeft nog maar één hoorn.','De manen van het paard zijn veel korter.','Het varken heeft een rechte staart.','De haan heeft minder grote staartveren.','De boom achter de stal is verdwenen.','Het vierkante stalraam is rond geworden.','Naast het schaap staat een extra lammetje.','De kleine vogel is een konijn geworden.','De bovenste hooibaal is een houten ton geworden.'],
         'dieren-in-het-bos':['Het konijn heeft één slap oor.','De eekhoorn houdt twee eikels vast.','De uil knipoogt.','Het hert heeft minder vlekken.','De vos heeft een streep op zijn staart.','Een paddenstoel is verdwenen.','Er ligt een dennenappel bij de boomstam.','De boomstam heeft een extra knoest.','De egel draagt een appel.','Het boomhol heeft een andere vorm.'],
         'boswandeling':['De eekhoorn houdt twee eikels vast.','De kleinste paddenstoel is verdwenen.','De egel draagt een appel.','De pompon van de muts heeft een andere vorm.','In de mand liggen minder kastanjes.','De laars heeft een extra streep.','Een kastanjebolster is verdwenen.','De grote paddenstoel heeft minder stippen.','Er zit een vogel in de boom.','Een dwarrelend blad is een dennenappel geworden.']
     };
@@ -260,9 +262,40 @@ document.addEventListener('DOMContentLoaded', () => {
         'kamperen':[[.32,.51,.05],[.33,.54,.05],[.245,.40,.05],[.745,.52,.05],[.61,.59,.055],[.55,.53,.05],[.39,.26,.06],[.275,.83,.06],[.39,.74,.06],[.89,.52,.06]],
         'vriendschapsfeest':[[.155,.375,.055],[.42,.50,.07],[.325,.49,.055],[.59,.14,.05],[.095,.18,.08],[.61,.52,.07],[.71,.48,.06],[.33,.78,.05],[.74,.87,.075],[.52,.78,.085]],
         'hartjestuin':[[.215,.54,.055],[.70,.52,.06],[.66,.64,.055],[.49,.27,.065],[.13,.10,.08],[.31,.08,.065],[.87,.35,.075],[.16,.84,.085],[.72,.89,.065],[.91,.70,.06]],
+        'dierenpark':[[.54,.055,.045],[.34,.34,.045],[.37,.24,.07],[.78,.18,.08],[.82,.50,.055],[.57,.62,.045],[.20,.65,.05],[.37,.74,.06],[.71,.69,.06],[.83,.78,.075]],
+        'boerderijdieren':[[.40,.73,.05],[.34,.31,.045],[.53,.20,.07],[.52,.51,.045],[.09,.66,.07],[.09,.12,.08],[.36,.16,.06],[.72,.72,.065],[.37,.87,.065],[.88,.40,.07]],
         'dieren-in-het-bos':[[.58,.73,.075],[.78,.62,.07],[.76,.15,.065],[.58,.42,.09],[.10,.52,.08],[.39,.59,.06],[.70,.91,.06],[.72,.865,.055],[.12,.82,.065],[.12,.20,.075]],
         'boswandeling':[[.14,.48,.065],[.16,.87,.06],[.84,.80,.065],[.30,.30,.06],[.75,.59,.08],[.70,.70,.055],[.50,.87,.06],[.87,.63,.065],[.53,.18,.06],[.40,.18,.055]]
     };
+
+    Object.assign(automaticDifferenceDescriptions, {
+      'drukke-straat':['Schoorsteen weg.','Boograam vierkant.','Boom weg.','Bus is dubbeldekker.','Bestelwagen is pick-up.','Tram mist koplamp.','Scooter heeft bezorgbak.','Auto is taxi.','Verkeerslicht heeft minder lampen.','Hond is kat.'],
+      'bouwwerf':['Wolk weg.','Extra kraanbalk.','Kraanarm korter.','Vrachtwagen mist wiel.','Graafbak is boor.','Buis minder.','Kegel is gereedschapskist.','Kruiwagen mist wiel.','Betonmolen is watertank.','Extra arbeider.'],
+      'prehistorisch-kamp':['Boom weg.','Tent gesloten.','Extra hert.','Vis minder.','Mand is pot.','Kampvuur uit.','Speer is bijl.','Bessenmand weg.','Extra werktuig.','Tent is afdak.'],
+      'grotschilderingen':['Paard is mammoet.','Bizon kijkt andersom.','Extra hert.','Handafdruk veranderd.','Extra handafdruk.','Kom is mand.','Lampje uit.','Speer minder.','Huid is brandhout.','Grotopening erbij.'],
+      'romeinse-markt':['Zuil weg.','Marktdoek recht.','Amfoor is schaal.','Fruitmand weg.','Extra paard.','Kar mist wiel.','Fontein uit.','Brood is vis.','Kruik weg.','Man draagt helm.'],
+      'egyptische-nijl':['Piramide links weg.','Piramide rechts weg.','Extra zeilboot.','Palmboom weg.','Os weg.','Extra ibis.','Papyrusbloem weg.','Kruik weg.','Ploeg is hak.','Krokodil erbij.'],
+      'kasteelleven':['Vlag weg.','Poort half gesloten.','Paard is ezel.','Kar mist wiel.','Smid gebruikt tang.','Vuur uit.','Kip is gans.','Brood minder.','Mand aan put.','Extra kruik.'],
+      'middeleeuwse-markt':['Vlag weg.','Hond is kat.','Luit is trommel.','Fontein uit.','Kar mist wiel.','Broodmand is appelkist.','Luik weg.','Kruik is mand.','Extra ton.','Schoorsteen rond.'],
+      'ontdekkingsreis':['Grote vlag veranderd.','Zeil opgerold.','Meeuw minder.','Verrekijker is kaart.','Stuurman draagt hoed.','Kompasroos weg.','Anker weg.','Zeilboot is roeiboot.','Ton minder.','Reddingsboei erbij.'],
+      'drukkerij':['Raamlat weg.','Boeken minder.','Eén inktpot.','Ander zetwerktuig.','Lettervak leeg.','Inktrol is veerpen.','Man houdt boek.','Pershendel weg.','Bedrukte bladen.','Boek minder.'],
+      'stoomtreinstation':['Wolk weg.','Klok zonder wijzers.','Treinbel weg.','Koplamp vierkant.','Treinwiel weg.','Koffer minder.','Jongen draagt rugzak.','Vrouw heeft paraplu.','Bank weg.','Kat erbij.'],
+      'oude-fabriek':['Hanglamp weg.','Meterwijzer weg.','Spaak weg.','Sleutel is hamer.','Oliekan is gereedschapskist.','Schroevendraaier in hand.','Tandwiel weg.','Twee kisten op kar.','Kar mist wiel.','Losse kist weg.'],
+      'moderne-stad':['Bloembak weg.','Bus is tram.','Verkeerslicht weg.','Balkon weg.','Schommel is wip.','Afvalbak minder.','Fietsmand erbij.','Bezorgdoos weg.','Hond erbij.','Speelraam vierkant.'],
+      'duurzame-buurt':['Windmolenwiek weg.','Zonnepaneel weg.','Vogel weg.','Bus is vrachtwagen.','Laadkabel weg.','Afvalbak minder.','Regenton is compostbak.','Fietser minder.','Schep is hark.','Zonnebloem is boompje.'],
+      'ruimtestation':['Ster weg.','Aarde is maan.','Steeksleutel weg.','Schroevendraaier is tang.','Opbergzak weg.','Bloem in hand.','Tablet is boek.','Robot is drone.','Gieter weg.','Plant weg.'],
+      'maanverkenning':['Aarde weg.','Landerpoot weg.','Antenne is vlag.','Schotel weg.','Maanwagenwiel weg.','Arm omlaag.','Robot is maanwagen.','Stenenkist minder.','Vlag driehoekig.','Grote krater erbij.']
+    });
+    Object.assign(automaticDifferencePoints, {
+      'drukke-straat':[[.43,.055,.06],[.20,.22,.06],[.34,.31,.10],[.22,.44,.14],[.50,.47,.11],[.82,.49,.06],[.68,.50,.08],[.36,.65,.11],[.74,.38,.08],[.24,.83,.08]],'bouwwerf':[[.095,.13,.08],[.43,.29,.09],[.49,.12,.11],[.25,.53,.09],[.37,.69,.10],[.16,.90,.10],[.47,.88,.09],[.69,.87,.08],[.72,.60,.13],[.87,.35,.09]],
+      'prehistorisch-kamp':[[.10,.15,.13],[.25,.38,.14],[.60,.31,.08],[.78,.51,.09],[.89,.68,.08],[.50,.78,.11],[.46,.65,.09],[.10,.84,.10],[.69,.92,.08],[.38,.34,.11]],'grotschilderingen':[[.52,.19,.12],[.78,.17,.12],[.42,.36,.09],[.73,.44,.08],[.90,.28,.08],[.31,.86,.08],[.55,.88,.07],[.12,.82,.09],[.87,.88,.11],[.93,.58,.09]],
+      'romeinse-markt':[[.42,.20,.09],[.20,.16,.13],[.14,.53,.08],[.57,.41,.07],[.74,.31,.10],[.91,.36,.08],[.76,.55,.10],[.88,.62,.08],[.88,.89,.08],[.63,.29,.08]],'egyptische-nijl':[[.36,.24,.09],[.57,.24,.09],[.52,.30,.11],[.31,.28,.09],[.43,.50,.13],[.63,.52,.08],[.90,.33,.09],[.89,.88,.08],[.23,.58,.09],[.35,.43,.10]],
+      'kasteelleven':[[.51,.09,.07],[.30,.40,.13],[.64,.44,.10],[.69,.49,.07],[.78,.41,.07],[.90,.45,.08],[.61,.69,.08],[.85,.78,.08],[.49,.64,.08],[.21,.55,.08]],'middeleeuwse-markt':[[.43,.09,.06],[.42,.84,.09],[.25,.59,.10],[.48,.53,.10],[.64,.52,.08],[.10,.73,.11],[.87,.15,.08],[.88,.55,.08],[.66,.86,.11],[.64,.17,.07]],
+      'ontdekkingsreis':[[.37,.10,.08],[.36,.34,.14],[.13,.11,.08],[.72,.42,.10],[.56,.49,.08],[.36,.60,.10],[.61,.73,.08],[.90,.74,.10],[.23,.82,.10],[.09,.58,.09]],'drukkerij':[[.11,.20,.10],[.31,.14,.10],[.31,.27,.07],[.18,.59,.09],[.15,.67,.09],[.45,.60,.10],[.48,.30,.10],[.80,.33,.09],[.75,.45,.10],[.87,.86,.10]],
+      'stoomtreinstation':[[.36,.09,.10],[.83,.35,.09],[.35,.34,.06],[.18,.33,.08],[.36,.51,.10],[.17,.75,.09],[.61,.68,.09],[.48,.70,.10],[.84,.84,.13],[.76,.85,.09]],'oude-fabriek':[[.38,.10,.10],[.44,.22,.06],[.38,.41,.10],[.08,.38,.08],[.07,.27,.09],[.18,.58,.09],[.27,.66,.07],[.72,.82,.12],[.67,.90,.08],[.90,.89,.10]],
+      'moderne-stad':[[.07,.15,.09],[.43,.40,.15],[.26,.28,.08],[.55,.20,.08],[.91,.50,.11],[.54,.89,.09],[.22,.80,.08],[.90,.77,.10],[.64,.69,.09],[.81,.40,.07]],'duurzame-buurt':[[.41,.13,.10],[.25,.20,.10],[.70,.12,.08],[.43,.47,.15],[.16,.51,.07],[.81,.51,.10],[.93,.52,.11],[.81,.78,.12],[.19,.74,.09],[.06,.66,.10]],
+      'ruimtestation':[[.58,.10,.07],[.51,.28,.16],[.27,.17,.08],[.76,.17,.08],[.11,.42,.09],[.30,.49,.09],[.48,.61,.10],[.64,.64,.10],[.57,.73,.08],[.44,.86,.10]],'maanverkenning':[[.22,.14,.14],[.86,.39,.10],[.79,.18,.08],[.37,.43,.08],[.49,.54,.08],[.20,.48,.10],[.40,.80,.11],[.57,.84,.10],[.90,.57,.10],[.12,.83,.11]]
+    });
 
     function applyAutomaticDifferences() {
         if (!currentCatalogSelection || !automaticThemes.has(currentCatalogSelection.theme)) return;
