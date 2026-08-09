@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const actiePaneel = document.getElementById('actie-paneel');
         const gekozenSpelTitel = document.getElementById('gekozen-spel-titel');
         const kaartenKnop = document.getElementById('maak-kaarten-knop');
+        const startSpelLink = document.getElementById('start-spel-link');
         const exportSpelKnop = document.getElementById('export-spel-knop');
         const modalOverlay = document.getElementById('modal-overlay');
         const modalBody = document.getElementById('modal-body');
@@ -52,6 +53,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const modalAnnulerenKnop = document.getElementById('modal-annuleren-knop');
         const uitlegSpelbestandKnop = document.getElementById('uitleg-spelbestand-knop');
         const uitlegSpelbestandModal = document.getElementById('uitleg-spelbestand-modal');
+
+        startSpelLink?.addEventListener('click', (event) => {
+            try {
+                const spel = JSON.parse(localStorage.getItem('bingoGameState') || 'null');
+                if (!spel || !String(spel.levelNaam || '').trim() || !Array.isArray(spel.kaartItemsLijst) || spel.kaartItemsLijst.length === 0) {
+                    event.preventDefault();
+                    alert('Activeer eerst een spel met geldige leerstof voordat je het trekspel start.');
+                }
+            } catch {
+                event.preventDefault();
+                alert('Het spel kon niet worden gelezen. Activeer het spel opnieuw.');
+            }
+        });
 
         function sluitSpelbestandUitleg() {
             uitlegSpelbestandModal?.classList.add('verborgen');
