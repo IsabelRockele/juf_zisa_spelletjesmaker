@@ -3,54 +3,71 @@
 // - GEEN registratie op apparaten.html
 // - herkent DEVICE_LIMIT (429/resource-exhausted) en stuurt naar apparaten.html
 // - safeGo voorkomt self-redirects
-// - ?guard=off of localStorage['zisa_guard_off']='1' om tijdelijk uit te schakelen
+// - lokale ontwikkelmodus kan de guard tijdelijk uitschakelen; online nooit
 
+const IS_LOCAL_PREVIEW = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
 const GUARD_OFF = (() => {
   try {
     const p = new URLSearchParams(location.search);
-    return p.get("guard") === "off" || localStorage.getItem("zisa_guard_off") === "1";
+    const gevraagd = p.get("guard") === "off" || localStorage.getItem("zisa_guard_off") === "1";
+    return IS_LOCAL_PREVIEW && gevraagd;
   } catch { return false; }
 })();
 if (GUARD_OFF) {
   console.warn("[GUARD] UIT: ?guard=off of localStorage");
 }
 
-const CURRENT_PAGE = (() => {
-  const f = (location.pathname.split("/").pop() || "").toLowerCase();
-  return f || "index.html";
+const PRO_PATH_INFO = (() => {
+  const pad = location.pathname.replace(/\/{2,}/g, "/");
+  const marker = "/pro/";
+  const index = pad.toLowerCase().indexOf(marker);
+  const basis = index >= 0 ? pad.slice(0, index + marker.length) : "/pro/";
+  const relatief = index >= 0 ? pad.slice(index + marker.length) : pad.split("/").pop();
+  return {
+    basis,
+    relatief: (relatief || "index.html").replace(/^\/+/, "").toLowerCase()
+  };
 })();
-const SKIP_PAGES = new Set(["index.html", "koop.html", "bedankt.html", "maand.html", "verlopen.html"]); // publiek
+const CURRENT_PAGE = PRO_PATH_INFO.relatief.split("/").pop() || "index.html";
+const PUBLIC_PATHS = new Set(["index.html", "koop.html", "bedankt.html", "maand.html", "verlopen.html"]);
+const IS_PUBLIC_PAGE = PUBLIC_PATHS.has(PRO_PATH_INFO.relatief);
+
+function proUrl(bestand) {
+  return new URL(PRO_PATH_INFO.basis + bestand.replace(/^\.\//, ""), location.origin).href;
+}
 
 function safeGo(to, reason) {
   try {
-    const dest = (to.split("/").pop() || "").toLowerCase();
-    if (dest === CURRENT_PAGE) {
+    const target = new URL(to, location.origin);
+    if (target.pathname === location.pathname) {
       console.warn("[GUARD] Self-redirect voorkomen:", to, reason);
       return;
     }
+    if (reason) target.searchParams.set("reason", reason);
+    location.href = target.href;
+    return;
   } catch {}
-  const q = reason ? ("?reason=" + encodeURIComponent(reason)) : "";
-  location.href = to + q;
+  location.href = to;
 }
 function safeGoWithUntil(to, reason, untilIso) {
   try {
-    const dest = (to.split("/").pop() || "").toLowerCase();
-    if (dest === CURRENT_PAGE) {
+    const target = new URL(to, location.origin);
+    if (target.pathname === location.pathname) {
       console.warn("[GUARD] Self-redirect voorkomen:", to, reason);
       return;
     }
+    if (reason) target.searchParams.set("reason", reason);
+    if (untilIso) target.searchParams.set("until", untilIso);
+    location.href = target.href;
+    return;
   } catch {}
-  const params = new URLSearchParams();
-  if (reason) params.set("reason", reason);
-  if (untilIso) params.set("until", untilIso);
-  const qs = params.toString();
-  location.href = to + (qs ? ("?" + qs) : "");
+  location.href = to;
 }
-const goLogin    = () => safeGo("./index.html");
-const goApp      = (r) => safeGo("./app.html", r);
-const goDevices  = () => safeGo("./apparaten.html");
-const goKoop     = (r) => safeGo("./koop.html", r);
-const goVerlopen = (r, until) => safeGoWithUntil("./verlopen.html", r, until);
+const goLogin    = () => safeGo(proUrl("index.html"));
+const goApp      = (r) => safeGo(proUrl("app.html"), r);
+const goDevices  = () => safeGo(proUrl("apparaten.html"));
+const goKoop     = (r) => safeGo(proUrl("koop.html"), r);
+const goVerlopen = (r, until) => safeGoWithUntil(proUrl("verlopen.html"), r, until);
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, onIdTokenChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -98,7 +115,7 @@ const appCheck = initializeAppCheck(app, {
 
 if (!GUARD_OFF) {
   onAuthStateChanged(auth, async (user) => {
-    if (SKIP_PAGES.has(CURRENT_PAGE)) return;
+    if (IS_PUBLIC_PAGE) return;
 
     if (!user) { goLogin(); return; }
 
@@ -110,7 +127,7 @@ if (!GUARD_OFF) {
       return;
     }
 
-    const IS_DEVICES_PAGE = CURRENT_PAGE === "apparaten.html";
+    const IS_DEVICES_PAGE = PRO_PATH_INFO.relatief === "apparaten.html";
 
     try {
       await Promise.all([
@@ -163,7 +180,7 @@ if (!GUARD_OFF) {
 
   // ✅ Nieuw: extra vangnet – als token vervalt, stuur naar login
   onIdTokenChanged(auth, (user) => {
-    if (!user && !SKIP_PAGES.has(CURRENT_PAGE)) {
+    if (!user && !IS_PUBLIC_PAGE) {
       console.warn("[GUARD] Sessie verlopen → terug naar login");
       goLogin();
     }
