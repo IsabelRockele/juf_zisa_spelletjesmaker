@@ -3,18 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>Woorden & Getallen Bingo - Keuzemenu</title>
-    <link rel="stylesheet" href="../bingo.css?v=20260809e">
+    <link rel="stylesheet" href="../bingo.css?v=20260809g">
     <style>
         .ontdek-bingo-balk { position:fixed; top:0; left:0; right:0; z-index:1200; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 18px; background:#173f70; color:#fff; font-weight:800; box-sizing:border-box; }
         .ontdek-bingo-balk a { color:#fff; text-decoration:none; background:rgba(255,255,255,.16); padding:7px 12px; border-radius:8px; }
+        .ontdek-bingo-account { border:1px solid rgba(255,255,255,.6); border-radius:8px; background:#fff; color:#173f70; padding:7px 11px; font-weight:800; cursor:pointer; }
+        .ontdek-bingo-account.is-signed-in { background:#dff6e8; color:#155b38; }
+        .ontdek-bingo-info { grid-column:1/-1; display:grid; grid-template-columns:minmax(0,1.35fr) minmax(260px,.85fr); gap:16px; margin-bottom:20px; }
+        .ontdek-bingo-limiet,.ontdek-bingo-pro { padding:18px 20px; border-radius:15px; box-shadow:0 5px 18px rgba(23,63,112,.08); }
+        .ontdek-bingo-limiet { background:#eef6ff; border:2px solid #77addd; color:#173f70; }
+        .ontdek-bingo-pro { background:#fff8dc; border:2px solid #edc451; color:#5c4710; }
+        .ontdek-bingo-info h2 { margin:0 0 7px; font-size:21px; }
+        .ontdek-bingo-info p { margin:5px 0; line-height:1.5; }
+        .ontdek-bingo-pro summary { cursor:pointer; font-weight:900; color:#173f70; margin-top:9px; }
+        .ontdek-bingo-pro a { display:inline-block; margin-top:9px; color:#fff; background:#174f78; border-radius:9px; padding:9px 13px; text-decoration:none; font-weight:800; }
         body { padding-top:54px; }
+        @media(max-width:850px){.ontdek-bingo-balk{position:static;flex-wrap:wrap}.ontdek-bingo-info{grid-template-columns:1fr}body{padding-top:0}}
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
-    <div class="ontdek-bingo-balk"><a href="app.html">← Keuzemenu alle tools</a><span>Bingo — Ontdek-versie</span><span>Geen persoonlijke bibliotheek</span></div>
+    <div class="ontdek-bingo-balk"><a href="app.html">← Keuzemenu alle tools</a><span>Bingo — Ontdek-versie</span><span id="ontdek-bingo-status">3 van 3 bingospellen over</span><button id="ontdek-bingo-account" class="ontdek-bingo-account" type="button">Gratis account / aanmelden</button></div>
 
     <div id="herstel-melding" class="herstel-melding verborgen">
         <span>Er is een vorig spel gevonden. Wilt u doorgaan?</span>
@@ -106,6 +117,18 @@
     </div>
 
     <div class="hoofd-content">
+        <section class="ontdek-bingo-info" aria-label="Grenzen van Bingo Ontdek">
+            <div class="ontdek-bingo-limiet">
+                <h2>Je kunt 3 volledige bingospellen bewaren</h2>
+                <p>Een spel telt pas mee zodra je de <strong>bingokaarten als PDF downloadt</strong> of het <strong>spelbestand (.json) exporteert</strong>.</p>
+                <p>PDF en JSON van <strong>hetzelfde spel</strong> tellen samen maar één keer. Je kunt het spel echt spelen en ook na je 3 beurten nieuwe spellen blijven verkennen; alleen bewaren en downloaden stopt dan.</p>
+            </div>
+            <div class="ontdek-bingo-pro">
+                <h2><span aria-hidden="true">⭐</span> Persoonlijke bibliotheek is PRO</h2>
+                <p>In PRO bewaar je tot <strong>15 bingospellen</strong>, netjes per soort en met je eigen naam.</p>
+                <details><summary>Wat wordt er precies bewaard?</summary><p>De gekozen leerstof, spelinstellingen én exact dezelfde bingokaarten. Je kunt een voorbereid spel later opnieuw openen, spelen en dezelfde kaarten weer afdrukken.</p><p>Importeren en exporteren via JSON blijft ook beschikbaar als reservekopie.</p><a href="https://demo.jufzisa.be/#zg-prijzen" target="_blank" rel="noopener">Bekijk PRO en de prijzen</a></details>
+            </div>
+        </section>
         <div id="instructie-paneel">
             <h2>Welkom bij de Bingo Generator!</h2>
             <p>1. Kies en configureer een speltype uit het menu links.</p>
@@ -159,6 +182,7 @@
         </div>
     </div>
 
-    <script src="../bingo.js?v=20260809e"></script>
+    <script src="../bingo.js?v=20260809g"></script>
+    <script type="module" src="bingo-ontdek.js?v=20260809g"></script>
 </body>
 </html>
