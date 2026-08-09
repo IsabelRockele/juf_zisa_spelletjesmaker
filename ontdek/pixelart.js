@@ -408,6 +408,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setupEventListeners() {
+        window.addEventListener('zisa:pixelart-template', (event) => {
+            const detail = event.detail || {};
+            if (!Array.isArray(detail.matrix)) return;
+            currentMode = detail.mode === 'werkblad' ? 'werkblad' : 'bouwkaart';
+            const radio = document.querySelector(`input[name="mode"][value="${currentMode}"]`);
+            if (radio) radio.checked = true;
+            werkbladToolsDiv.style.display = currentMode === 'werkblad' ? 'block' : 'none';
+            worksheetTypeControls.style.display = currentMode === 'werkblad' ? 'block' : 'none';
+            if (currentMode === 'werkblad') populateColorPalette();
+            gridWidth = detail.matrix[0]?.length || 20;
+            gridHeight = detail.matrix.length || 20;
+            gridWidthInput.value = gridWidth; gridHeightInput.value = gridHeight;
+            drawingMatrix = detail.matrix.map(row => row.map(cell => ({...cell})));
+            history = []; historyPointer = -1; saveState(); redrawDrawing();
+            meldingContainer.textContent = `${detail.label || 'Voorbeeld'} is geladen. Pas gerust bolletjes aan.`;
+            setTimeout(() => { meldingContainer.textContent = ''; }, 3500);
+        });
         updateGridSizeBtn.addEventListener('click', initializeDrawingCanvas);
         modeRadios.forEach(radio => radio.addEventListener('change', updateControlsForMode));
         eyeToolBtn.addEventListener('click', () => {
@@ -492,6 +509,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function init() {
+        const actionPanel = document.getElementById('right-panel-buttons');
+        if (actionPanel && showPreviewBtn && !document.getElementById('previewActionGroup')) {
+            const previewGroup = document.createElement('div');
+            previewGroup.id = 'previewActionGroup';
+            previewGroup.className = 'control-group';
+            previewGroup.innerHTML = '<h3>Werkbladvoorbeeld</h3>';
+            previewGroup.appendChild(showPreviewBtn);
+            previewGroup.appendChild(meldingContainer);
+            actionPanel.prepend(previewGroup);
+        }
+        showPreviewBtn.textContent = 'Voorbeeld bekijken';
+        downloadPngBtn.textContent = 'PNG downloaden';
+        downloadPdfBtn.textContent = 'PDF downloaden';
+        saveDrawingBtn.textContent = 'Ontwerp opslaan';
+        loadDrawingBtn.textContent = 'Ontwerp laden';
         gridWidthInput.value = gridWidth;
         gridHeightInput.value = gridHeight;
         updateControlsForMode();

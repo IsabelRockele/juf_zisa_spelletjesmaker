@@ -42,7 +42,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const generateBtn = document.getElementById('genereerBtn');
     const downloadPngBtn = document.getElementById('downloadPngBtn');
     const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    const toggleSolutionsBtn = document.getElementById('toggleSolutionsBtn');
+    const downloadSolutionsPdfBtn = document.getElementById('downloadSolutionsPdfBtn');
     const meldingContainer = document.getElementById('meldingContainer');
+    let showingSolutions = false;
 
     // --- Thema-afbeeldingpaden ---
     const themeImagePaths = {
@@ -174,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.restore();
     }
 
-    function drawPuzzle(ctx, puzzle, type, imagesToUse, x, y, gridSizePx) {
+    function drawPuzzle(ctx, puzzle, type, imagesToUse, x, y, gridSizePx, originalPuzzle = null) {
         drawGrid(ctx, x, y, gridSizePx);
         const cellSize = gridSizePx / 4;
         ctx.textAlign = 'center';
@@ -184,12 +187,13 @@ document.addEventListener("DOMContentLoaded", () => {
             for (let c = 0; c < 4; c++) {
                 const value = puzzle[r][c];
                 if (value === 0) continue;
+                const isAddedSolution = originalPuzzle && originalPuzzle[r][c] === 0;
 
                 const centerX = x + c * cellSize + cellSize / 2;
                 const centerY = y + r * cellSize + cellSize / 2;
 
                 if (type === 'getallen') {
-                    ctx.fillStyle = '#000';
+                    ctx.fillStyle = isAddedSolution ? '#16834f' : '#000';
                     ctx.font = `${cellSize * 0.6}px Arial`;
                     ctx.fillText(value, centerX, centerY);
                 } else {
@@ -212,6 +216,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         const drawX = x + c * cellSize + (cellSize - newWidth) / 2;
                         const drawY = y + r * cellSize + (cellSize - newHeight) / 2;
                         ctx.drawImage(img, drawX, drawY, newWidth, newHeight);
+                        if (isAddedSolution) {
+                            ctx.save();
+                            ctx.strokeStyle = '#16834f';
+                            ctx.lineWidth = Math.max(3, cellSize * 0.045);
+                            ctx.strokeRect(
+                                x + c * cellSize + cellSize * 0.07,
+                                y + r * cellSize + cellSize * 0.07,
+                                cellSize * 0.86,
+                                cellSize * 0.86
+                            );
+                            ctx.restore();
+                        }
                     }
                 }
             }
@@ -421,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
      * Teken sudoku(’s) + knipblad op het canvas,
      * gebruikmakend van de globale worksheet*-arrays.
      */
-    function drawWorksheetOnCanvas(type, aantal) {
+    function drawWorksheetOnCanvas(type, aantal, showSolutions = false) {
         if (worksheetSudokus.length === 0) {
             // niets om te tekenen
         }
@@ -432,6 +448,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const rows = (aantal === 3) ? 3 : (aantal === 4 ? 2 : 1);
 
         const padding = 20;
+        const headerHeight = 125;
         const availableWidth = canvas.width - (cols + 1) * padding;
         const sudokuSize = availableWidth / cols;
 
@@ -441,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let knipHeight = 0;
         let cutLayout = null;
 
-        if (type === 'afbeeldingen' && worksheetMissingImages.length > 0) {
+        if (!showSolutions && type === 'afbeeldingen' && worksheetMissingImages.length > 0) {
             const marginX = 20;
             const cutSpacing = 10;
             const maxCutSize = 70;
@@ -472,29 +489,53 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Canvashoogte instellen op sudoku’s + knipblad
-        const totalHeight = sudokuAreaHeight + (knipHeight > 0 ? knipHeight : padding * 2);
+        const totalHeight = headerHeight + sudokuAreaHeight + (knipHeight > 0 ? knipHeight : padding * 2);
         canvas.height = totalHeight;
 
         // WITTE ACHTERGROND
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        // Herkenbare werkbladkop, gelijk aan de andere Juf Zisa-tools.
+        ctx.fillStyle = '#173f69';
+        ctx.font = '700 16px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText('Naam:', 28, 30);
+        ctx.fillText('Datum:', 455, 30);
+        ctx.strokeStyle = '#66809a';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(82, 32); ctx.lineTo(320, 32);
+        ctx.moveTo(515, 32); ctx.lineTo(670, 32);
+        ctx.stroke();
+        ctx.font = '900 30px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(showSolutions ? 'OPLOSSINGEN SUDOKU' : (type === 'afbeeldingen' ? 'AFBEELDINGENSUDOKU' : 'SUDOKU'), canvas.width / 2, 72);
+        ctx.fillStyle = '#526b82';
+        ctx.font = '16px Arial';
+        ctx.fillText(showSolutions ? 'Controleblad voor de leerkracht.' : type === 'afbeeldingen'
+            ? 'Knip en plak de afbeeldingen zodat iedere afbeelding één keer per rij en kolom voorkomt.'
+            : 'Vul de lege vakjes in zodat elk getal één keer per rij en kolom voorkomt.', canvas.width / 2, 101);
+        ctx.strokeStyle = '#cbd8e4';
+        ctx.beginPath(); ctx.moveTo(25, 116); ctx.lineTo(675, 116); ctx.stroke();
+
         // Sudoku’s tekenen
         for (let i = 0; i < aantal; i++) {
-            const puzzle = worksheetSudokus[i];
+            const puzzle = showSolutions ? worksheetSolutions[i] : worksheetSudokus[i];
             const imageSet = worksheetImageSets[i];
 
             const col = (cols === 1) ? 0 : (i % cols);
             const row = (cols === 1) ? i : Math.floor(i / cols);
 
             const x = padding + col * (sudokuSize + padding);
-            const y = padding + row * (sudokuSize + padding);
+            const y = headerHeight + padding + row * (sudokuSize + padding);
 
-            drawPuzzle(ctx, puzzle, type, imageSet, x, y, sudokuSize);
+            drawPuzzle(ctx, puzzle, type, imageSet, x, y, sudokuSize, showSolutions ? worksheetSudokus[i] : null);
         }
 
         // Knipblad op canvas
-        if (type === 'afbeeldingen' && worksheetMissingImages.length > 0 && cutLayout) {
+        if (!showSolutions && type === 'afbeeldingen' && worksheetMissingImages.length > 0 && cutLayout) {
             const {
                 marginX,
                 cutSpacing,
@@ -502,7 +543,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 cutImagesPerRow
             } = cutLayout;
 
-            const startY = sudokuAreaHeight + 30;
+            const startY = headerHeight + sudokuAreaHeight + 30;
 
             ctx.fillStyle = '#000';
             ctx.font = "18px Arial";
@@ -565,7 +606,9 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             return;
         }
-        drawWorksheetOnCanvas(type, aantal);
+        showingSolutions = false;
+        if (toggleSolutionsBtn) toggleSolutionsBtn.textContent = 'Oplossingen tonen';
+        drawWorksheetOnCanvas(type, aantal, false);
     }
 
     // opties wijzigen
@@ -684,6 +727,35 @@ document.addEventListener("DOMContentLoaded", () => {
         a.click();
     });
 
+    toggleSolutionsBtn?.addEventListener('click', async () => {
+        if (worksheetSolutions.length === 0) await generateAndDraw();
+        if (worksheetSolutions.length === 0) return;
+        showingSolutions = !showingSolutions;
+        const type = document.querySelector('input[name="sudokuType"]:checked').value;
+        const aantal = parseInt(aantalSelect.value);
+        drawWorksheetOnCanvas(type, aantal, showingSolutions);
+        toggleSolutionsBtn.textContent = showingSolutions ? 'Terug naar werkblad' : 'Oplossingen tonen';
+    });
+
+    downloadSolutionsPdfBtn?.addEventListener('click', async () => {
+        if (worksheetSolutions.length === 0) await generateAndDraw();
+        if (worksheetSolutions.length === 0) return;
+        const type = document.querySelector('input[name="sudokuType"]:checked').value;
+        const aantal = parseInt(aantalSelect.value);
+        drawWorksheetOnCanvas(type, aantal, true);
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const margin = 10;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const ratio = Math.min((pageWidth - 2 * margin) / canvas.width, (pageHeight - 2 * margin) / canvas.height);
+        const width = canvas.width * ratio;
+        const height = canvas.height * ratio;
+        doc.addImage(canvas.toDataURL('image/png'), 'PNG', (pageWidth - width) / 2, margin, width, height);
+        doc.save(`sudoku-oplossingen-${aantal}.pdf`);
+        drawWorksheetOnCanvas(type, aantal, showingSolutions);
+    });
+
     downloadPdfBtn.addEventListener('click', async () => {
         const type = document.querySelector('input[name="sudokuType"]:checked').value;
         const aantal = parseInt(aantalSelect.value);
@@ -699,6 +771,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 10;
+        const topSpace = 30;
+
+        doc.setTextColor(23, 63, 105);
+        doc.setFontSize(11);
+        doc.text('Naam:', margin, 14);
+        doc.line(24, 14.5, 91, 14.5);
+        doc.text('Datum:', 120, 14);
+        doc.line(136, 14.5, pageWidth - margin, 14.5);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(19);
+        doc.text(type === 'afbeeldingen' ? 'AFBEELDINGENSUDOKU' : 'SUDOKU', pageWidth / 2, 24, { align: 'center' });
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(82, 107, 130);
+        doc.setFontSize(11.5);
+        doc.text(type === 'afbeeldingen'
+            ? 'Knip en plak de afbeeldingen zodat iedere afbeelding één keer per rij en kolom voorkomt.'
+            : 'Vul de lege vakjes in zodat elk getal één keer per rij en kolom voorkomt.', pageWidth / 2, 31.5, { align: 'center' });
+        doc.setDrawColor(203, 216, 228);
+        doc.line(margin, 36, pageWidth - margin, 36);
 
         // Hoogte voor knipblad (zelfde principe als canvas, maar nu in mm)
         let knipbladHoogte = 0;
@@ -715,7 +806,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const layouts = calculateLayouts(aantal, pageWidth, pageHeight,
-            margin, knipbladHoogte, 0);
+            margin, knipbladHoogte, topSpace);
 
         // tijdelijke canvas om sudoku's naar PDF te plaatsen
         const tempCanvas = document.createElement('canvas');
@@ -820,21 +911,21 @@ document.addEventListener("DOMContentLoaded", () => {
             sudokuSize = Math.min(availableWidth, availableHeight);
             layouts.push({
                 x: margin + (availableWidth - sudokuSize) / 2,
-                y: contentStartY + (availableHeight - sudokuSize) / 2,
+                y: contentStartY,
                 size: sudokuSize
             });
         } else if (aantal === 2) {
             sudokuSize = Math.min((availableWidth - hPadding) / 2, availableHeight);
             totalContentWidth = 2 * sudokuSize + hPadding;
             startX = margin + (availableWidth - totalContentWidth) / 2;
-            startY = contentStartY + (availableHeight - sudokuSize) / 2;
+            startY = contentStartY;
             layouts.push({ x: startX, y: startY, size: sudokuSize });
             layouts.push({ x: startX + sudokuSize + hPadding, y: startY, size: sudokuSize });
         } else if (aantal === 3) {
             sudokuSize = Math.min(availableWidth, (availableHeight - 2 * vPadding) / 3);
             totalContentHeight = 3 * sudokuSize + 2 * vPadding;
             startX = margin + (availableWidth - sudokuSize) / 2;
-            startY = contentStartY + (availableHeight - totalContentHeight) / 2;
+            startY = contentStartY;
             layouts.push({ x: startX, y: startY, size: sudokuSize });
             layouts.push({ x: startX, y: startY + sudokuSize + vPadding, size: sudokuSize });
             layouts.push({
@@ -850,7 +941,7 @@ document.addEventListener("DOMContentLoaded", () => {
             totalContentWidth = 2 * sudokuSize + hPadding;
             totalContentHeight = 2 * sudokuSize + vPadding;
             startX = margin + (availableWidth - totalContentWidth) / 2;
-            startY = contentStartY + (availableHeight - totalContentHeight) / 2;
+            startY = contentStartY;
             layouts.push({ x: startX, y: startY, size: sudokuSize });
             layouts.push({ x: startX + sudokuSize + hPadding, y: startY, size: sudokuSize });
             layouts.push({

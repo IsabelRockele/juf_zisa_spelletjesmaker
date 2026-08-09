@@ -26,18 +26,17 @@
     </style>
 </head>
 <body>
-<header class="pro-header">
-    <a href="app.html" class="back-link">&larr; Terug naar menu</a>
-</header>
+<header class="tool-header"><a href="app.html" class="back-button">← Pro-menu</a><div><p class="eyebrow">Zisa Pro</p><h1>Pixelart en magneetpatronen</h1><p>Ontwerp een patroon of vertrek vanuit de catalogus.</p></div></header>
 
 <div id="main-content">
     <div id="left-panel">
         <div id="controls">
             <div class="control-group">
                 <h3>Type</h3>
-                <label><input type="radio" name="mode" value="bouwkaart" checked> Bouwkaart (Magneetbord)</label>
-                <label><input type="radio" name="mode" value="werkblad"> Werkblad (Kleuren)</label>
+                <label><input type="radio" name="mode" value="bouwkaart" checked> Zwart magneetbord (grijs patroon)</label>
+                <label><input type="radio" name="mode" value="werkblad"> Wit prikbord (gekleurde prikkers)</label>
             </div>
+            <div class="control-group"><div id="pixelCatalogus"></div></div>
 
             <div id="werkbladTools">
                 <div class="control-group">
@@ -130,6 +129,7 @@
 
 <!-- 3) Projectscript (pas na de guard laden) -->
 <script src="pixelart.js"></script>
+<script src="pixelart-catalogus.js"></script>
 
 </body>
 </html>

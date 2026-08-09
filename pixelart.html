@@ -7,10 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-    <header>
-        <button id="menuBtn" onclick="window.location.href='index.html'">Keuzemenu</button>
-        <h1>Pixel Art Generator</h1>
-    </header>
+    <header class="tool-header"><a id="menuBtn" class="back-button" href="index.html">← Keuzemenu</a><div><p class="eyebrow">Juf Zisa</p><h1>Pixelart en magneetpatronen</h1><p>Ontwerp een patroon of vertrek vanuit de catalogus.</p></div></header>
 
     <div id="main-content">
         <div id="left-panel">
@@ -18,9 +15,11 @@
 
                 <div class="control-group">
                     <h3>Type</h3>
-                    <label><input type="radio" name="mode" value="bouwkaart" checked> Bouwkaart (Magneetbord)</label>
-                    <label><input type="radio" name="mode" value="werkblad"> Werkblad (Kleuren)</label>
+                    <label><input type="radio" name="mode" value="bouwkaart" checked> Zwart magneetbord (grijs patroon)</label>
+                    <label><input type="radio" name="mode" value="werkblad"> Wit prikbord (gekleurde prikkers)</label>
                 </div>
+
+                <div class="control-group"><div id="pixelCatalogus"></div></div>
 
                 <div id="werkbladTools">
                     <div class="control-group">
@@ -106,5 +105,6 @@
     </div>
 
     <script src="pixelart.js"></script>
+    <script src="pixelart-catalogus.js"></script>
 </body>
 </html>
