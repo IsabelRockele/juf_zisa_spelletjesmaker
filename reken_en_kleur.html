@@ -16,7 +16,7 @@
 
     <div id="main-content">
         <div id="left-panel">
-            <div class="settings-tabs"><button type="button" class="active" data-settings-tab="drawing">1. Tekening</button><button type="button" data-settings-tab="worksheet">2. Werkblad</button></div>
+            <div class="settings-tabs"><button type="button" class="active" data-settings-tab="drawing">1. Kies of teken</button><button type="button" data-settings-tab="worksheet">2. Werkblad</button></div>
             <details class="tool-guide drawing-setting">
                 <summary>Wat kun je met deze tool maken?</summary>
                 <p>Teken zelf een eenvoudige pixeltekening of kies een kant-en-klaar voorbeeld uit de catalogus. Zisa zet je ontwerp daarna om in een afdrukbaar werkblad.</p>
@@ -29,7 +29,11 @@
             <div id="controls">
 
                 <div class="control-group drawing-setting drawing-tools-card">
-                    <h3>Tekengereedschap</h3>
+                    <h3>1. Kies of maak je tekening</h3>
+                    <p class="drawing-start-help">Neem een kant-en-klare afbeelding als snelle start, of teken zelf in het raster.</p>
+                    <button type="button" id="catalogBtn" class="catalog-start-btn">Kies een tekening uit de catalogus</button>
+                    <div class="drawing-choice-divider"><span>of teken zelf</span></div>
+                    <h4 class="drawing-colors-title">Tekenkleuren</h4>
                     <div id="colorPalette" class="image-previews-container">
                         </div>
                     <div class="tool-setting">
@@ -135,11 +139,16 @@
 
                 <div id="meldingContainer" style="color: #004080; margin-top: 15px; font-weight: bold; min-height: 40px;"></div>
 
+                <div class="workflow-actions">
+                    <button type="button" id="nextToWorksheetBtn" class="drawing-setting">2. Kies je werkblad &rarr;</button>
+                    <button type="button" id="showPreviewBtn" class="worksheet-setting">3. Bekijk het A4-werkblad &rarr;</button>
+                </div>
+
             </div>
         </div>
 
         <div id="center-panel">
-            <div class="design-stage-heading"><div><strong>1. Kies of teken je afbeelding</strong><small>Je kunt hier blijven aanpassen tot je tevreden bent.</small></div><button id="showPreviewBtn">3. Bekijk het A4-werkblad →</button></div>
+            <div class="design-stage-heading"><div><strong>Je tekening</strong><small>Kies links eerst je tekening en daarna de instellingen voor het werkblad.</small></div></div>
             <div id="drawingCanvasContainer">
                 <canvas id="drawingCanvas" width="900" height="720"></canvas>
             </div>
@@ -156,7 +165,6 @@
                 <button id="saveDrawingBtn">Opslaan</button>
                 <button id="loadDrawingBtn">Laden</button>
                 <input type="file" id="loadDrawingInput" accept=".json" style="display: none;">
-                <button id="catalogBtn">Catalogus</button>
             </div>
         </div>
     </div>

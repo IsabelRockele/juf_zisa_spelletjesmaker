@@ -180,7 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ['prehistorie','Prehistorie',['prehistorisch-kamp','grotschilderingen']], ['oudheid','Oudheid',['romeinse-markt','egyptische-nijl']],
         ['middeleeuwen','Middeleeuwen',['kasteelleven','middeleeuwse-markt']], ['vroegmoderne-tijd','Vroegmoderne tijd',['ontdekkingsreis','drukkerij']],
         ['moderne-tijd','Moderne tijd',['stoomtreinstation','oude-fabriek']], ['hedendaagse-tijd','Hedendaagse tijd',['moderne-stad','duurzame-buurt']],
-        ['ruimte','Ruimte',['ruimtestation','maanverkenning']]
+        ['ruimte','Ruimte',['ruimtestation','maanverkenning']],
+        ['de-zee','De zee',['onderwaterwereld','aan-de-kust']], ['sport','Sport',['sportdag','sporthal']]
     ];
     const toolInfo = {
         potlood:{name:'Potlood',text:'Teken vrij op de rechterafbeelding.'}, gum:{name:'Gum',text:'Wis een deel van de rechterafbeelding.'},
@@ -200,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (info) toolExplanation.innerHTML = `<strong>${info.name}</strong><span>${info.text}</span>`;
     }
 
-    const automaticThemes = new Set(['naar-school','herfst','sinterklaas','kerst','pasen','lente','carnaval','winter','zomer','valentijn','dieren','voertuigen','prehistorie','oudheid','middeleeuwen','vroegmoderne-tijd','moderne-tijd','hedendaagse-tijd','ruimte']);
+    const automaticThemes = new Set(['naar-school','herfst','sinterklaas','kerst','pasen','lente','carnaval','winter','zomer','valentijn','dieren','voertuigen','prehistorie','oudheid','middeleeuwen','vroegmoderne-tijd','moderne-tijd','hedendaagse-tijd','ruimte','de-zee','sport']);
     function renderCatalog(activeSlug) {
         catalogThemes.innerHTML = catalog.map(([slug,label]) => `<button class="catalog-theme ${slug===activeSlug?'active':''}" data-theme="${slug}">${label}</button>`).join('');
         const [,label,images] = catalog.find(item => item[0] === activeSlug);
@@ -269,6 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     Object.assign(automaticDifferenceDescriptions, {
+      'onderwaterwereld':['De waterstraal van de walvis is weg.','Er zwemt een dolfijn minder.','De schildpad is een rog geworden.','De octopus heeft minder armen.','Het zeepaardje is een kwal geworden.','Links zwemt een vis minder.','De krab is een kreeft geworden.','De linker zeester is verdwenen.','De rechter zeester is verdwenen.','Het bootje is een schatkist geworden.'],
+      'aan-de-kust':['De koepel van de vuurtoren is weg.','Het vuurtorenraam is rond.','Links vliegt een meeuw minder.','De vlag van de zeilboot is weg.','De vissersboot is een sleepboot geworden.','Het zandkasteel mist een toren.','De emmer is een strandbal geworden.','Het kind houdt een schep vast.','De krab is een schildpad geworden.','De zeester is verdwenen.'],
+      'sportdag':['Een vlaggetje is verdwenen.','De basketbal is een volleybal geworden.','Het voetbaldoel mist zijn net.','Een kegel is verdwenen.','Het springtouw is een hoepel geworden.','Er loopt een kind minder.','De turnbok is een evenwichtsbalk geworden.','De handstand is een koprol geworden.','Er staat een drinkfles minder.','De sporttas is een ballenmand geworden.'],
+      'sporthal':['De volleybal is verdwenen.','Bij het volleybalnet staat een speler minder.','Een badmintonracket is veranderd.','De shuttle is verdwenen.','De tafeltennistafel mist haar net.','Een batje is een balletje geworden.','Er is een hockeystick minder.','Het hockeydoel is vervangen door kegels.','Op de bank staat een drinkfles minder.','De ballenmand is een sporttas geworden.'],
       'drukke-straat':['Schoorsteen weg.','Boograam vierkant.','Boom weg.','Bus is dubbeldekker.','Bestelwagen is pick-up.','Tram mist koplamp.','Scooter heeft bezorgbak.','Auto is taxi.','Verkeerslicht heeft minder lampen.','Hond is kat.'],
       'bouwwerf':['Wolk weg.','Extra kraanbalk.','Kraanarm korter.','Vrachtwagen mist wiel.','Graafbak is boor.','Buis minder.','Kegel is gereedschapskist.','Kruiwagen mist wiel.','Betonmolen is watertank.','Extra arbeider.'],
       'prehistorisch-kamp':['Boom weg.','Tent gesloten.','Extra hert.','Vis minder.','Mand is pot.','Kampvuur uit.','Speer is bijl.','Bessenmand weg.','Extra werktuig.','Tent is afdak.'],
@@ -287,6 +292,10 @@ document.addEventListener('DOMContentLoaded', () => {
       'maanverkenning':['Aarde weg.','Landerpoot weg.','Antenne is vlag.','Schotel weg.','Maanwagenwiel weg.','Arm omlaag.','Robot is maanwagen.','Stenenkist minder.','Vlag driehoekig.','Grote krater erbij.']
     });
     Object.assign(automaticDifferencePoints, {
+      'onderwaterwereld':[[.37,.06,.07],[.68,.16,.10],[.66,.35,.12],[.56,.62,.11],[.78,.55,.09],[.13,.39,.08],[.68,.85,.09],[.20,.88,.08],[.82,.88,.08],[.30,.68,.14]],
+      'aan-de-kust':[[.21,.08,.09],[.23,.22,.06],[.09,.18,.08],[.88,.27,.07],[.62,.42,.12],[.39,.72,.11],[.52,.76,.08],[.64,.77,.08],[.88,.84,.10],[.44,.88,.08]],
+      'sportdag':[[.15,.10,.09],[.47,.24,.07],[.12,.25,.13],[.04,.43,.07],[.76,.25,.10],[.92,.35,.11],[.37,.75,.14],[.63,.70,.12],[.67,.87,.07],[.86,.87,.12]],
+      'sporthal':[[.29,.10,.07],[.37,.22,.10],[.72,.18,.08],[.78,.20,.06],[.25,.61,.13],[.13,.58,.07],[.78,.73,.11],[.75,.62,.12],[.20,.82,.08],[.93,.66,.11]],
       'drukke-straat':[[.43,.055,.06],[.20,.22,.06],[.34,.31,.10],[.22,.44,.14],[.50,.47,.11],[.82,.49,.06],[.68,.50,.08],[.36,.65,.11],[.74,.38,.08],[.24,.83,.08]],'bouwwerf':[[.095,.13,.08],[.43,.29,.09],[.49,.12,.11],[.25,.53,.09],[.37,.69,.10],[.16,.90,.10],[.47,.88,.09],[.69,.87,.08],[.72,.60,.13],[.87,.35,.09]],
       'prehistorisch-kamp':[[.10,.15,.13],[.25,.38,.14],[.60,.31,.08],[.78,.51,.09],[.89,.68,.08],[.50,.78,.11],[.46,.65,.09],[.10,.84,.10],[.69,.92,.08],[.38,.34,.11]],'grotschilderingen':[[.52,.19,.12],[.78,.17,.12],[.42,.36,.09],[.73,.44,.08],[.90,.28,.08],[.31,.86,.08],[.55,.88,.07],[.12,.82,.09],[.87,.88,.11],[.93,.58,.09]],
       'romeinse-markt':[[.42,.20,.09],[.20,.16,.13],[.14,.53,.08],[.57,.41,.07],[.74,.31,.10],[.91,.36,.08],[.76,.55,.10],[.88,.62,.08],[.88,.89,.08],[.63,.29,.08]],'egyptische-nijl':[[.36,.24,.09],[.57,.24,.09],[.52,.30,.11],[.31,.28,.09],[.43,.50,.13],[.63,.52,.08],[.90,.33,.09],[.89,.88,.08],[.23,.58,.09],[.35,.43,.10]],
