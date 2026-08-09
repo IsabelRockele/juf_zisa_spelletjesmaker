@@ -292,8 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'oude-fabriek':['Hanglamp weg.','Meterwijzer weg.','Spaak weg.','Sleutel is hamer.','Oliekan is gereedschapskist.','Schroevendraaier in hand.','Tandwiel weg.','Twee kisten op kar.','Kar mist wiel.','Losse kist weg.'],
       'moderne-stad':['Bloembak weg.','Bus is tram.','Verkeerslicht weg.','Balkon weg.','Schommel is wip.','Afvalbak minder.','Fietsmand erbij.','Bezorgdoos weg.','Hond erbij.','Speelraam vierkant.'],
       'duurzame-buurt':['Windmolenwiek weg.','Zonnepaneel weg.','Vogel weg.','Bus is vrachtwagen.','Laadkabel weg.','Afvalbak minder.','Regenton is compostbak.','Fietser minder.','Schep is hark.','Zonnebloem is boompje.'],
-      'ruimtestation':['Ster weg.','Aarde is maan.','Steeksleutel weg.','Schroevendraaier is tang.','Opbergzak weg.','Bloem in hand.','Tablet is boek.','Robot is drone.','Gieter weg.','Plant weg.'],
-      'maanverkenning':['Aarde weg.','Landerpoot weg.','Antenne is vlag.','Schotel weg.','Maanwagenwiel weg.','Arm omlaag.','Robot is maanwagen.','Stenenkist minder.','Vlag driehoekig.','Grote krater erbij.']
+      'ruimtestation':['De grote ster bovenaan het raam is weg.','De aarde in het raam is een maan geworden.','De steeksleutel is weg.','De schroevendraaier is een tang geworden.','De opbergzak is weg.','Het meisje houdt een bloem vast.','De tablet is een boek geworden.','De robot met gieter is een vliegende drone geworden.','De middelste plant is weg.','Een rond knopje op het bedieningspaneel is weg.'],
+      'maanverkenning':['De aarde is weg.','Een poot van de maanlander is weg.','De antenne is een vlag geworden.','De schotel is weg.','Eén wiel van de maanwagen is weg.','De arm van de astronaut staat omlaag.','De robot is een maanwagen geworden.','Er staat één stenenkist minder.','De vlag is driehoekig geworden.','Er is een grote krater bijgekomen.']
     });
     Object.assign(automaticDifferencePoints, {
       'onderwaterwereld':[[.30,.68,.14],[.68,.85,.09],[.20,.88,.08],[.82,.88,.08],[.37,.06,.07],[.68,.16,.10],[.66,.35,.12],[.78,.55,.09],[.13,.39,.08],[.40,.21,.06]],
@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'ontdekkingsreis':[[.37,.10,.08],[.36,.34,.14],[.13,.11,.08],[.72,.42,.10],[.56,.49,.08],[.36,.60,.10],[.61,.73,.08],[.90,.74,.10],[.23,.82,.10],[.09,.58,.09]],'drukkerij':[[.11,.20,.10],[.31,.14,.10],[.31,.27,.07],[.18,.59,.09],[.15,.67,.09],[.45,.60,.10],[.48,.30,.10],[.80,.33,.09],[.75,.45,.10],[.87,.86,.10]],
       'stoomtreinstation':[[.36,.09,.10],[.83,.35,.09],[.35,.34,.06],[.18,.33,.08],[.36,.51,.10],[.17,.75,.09],[.61,.68,.09],[.48,.70,.10],[.84,.84,.13],[.76,.85,.09]],'oude-fabriek':[[.38,.10,.10],[.44,.22,.06],[.38,.41,.10],[.08,.38,.08],[.07,.27,.09],[.18,.58,.09],[.27,.66,.07],[.72,.82,.12],[.67,.90,.08],[.90,.89,.10]],
       'moderne-stad':[[.07,.15,.09],[.43,.40,.15],[.26,.28,.08],[.55,.20,.08],[.91,.50,.11],[.54,.89,.09],[.22,.80,.08],[.90,.77,.10],[.64,.69,.09],[.81,.40,.07]],'duurzame-buurt':[[.41,.13,.10],[.25,.20,.10],[.70,.12,.08],[.43,.47,.15],[.16,.51,.07],[.81,.51,.10],[.93,.52,.11],[.81,.78,.12],[.19,.74,.09],[.06,.66,.10]],
-      'ruimtestation':[[.58,.10,.07],[.51,.28,.16],[.27,.17,.08],[.76,.17,.08],[.11,.42,.09],[.30,.49,.09],[.48,.61,.10],[.64,.64,.10],[.57,.73,.08],[.44,.86,.10]],'maanverkenning':[[.22,.14,.14],[.86,.39,.10],[.79,.18,.08],[.37,.43,.08],[.49,.54,.08],[.20,.48,.10],[.40,.80,.11],[.57,.84,.10],[.90,.57,.10],[.12,.83,.11]]
+      'ruimtestation':[[.58,.10,.07],[.51,.28,.16],[.27,.17,.08],[.76,.17,.08],[.11,.42,.09],[.30,.49,.09],[.48,.61,.10],[.64,.64,.12],[.44,.86,.10],[.956,.277,.045]],'maanverkenning':[[.22,.14,.14],[.86,.39,.10],[.79,.18,.08],[.37,.43,.08],[.49,.54,.08],[.20,.48,.10],[.40,.80,.11],[.57,.84,.10],[.90,.57,.10],[.12,.83,.11]]
     });
 
     function applyAutomaticDifferences() {

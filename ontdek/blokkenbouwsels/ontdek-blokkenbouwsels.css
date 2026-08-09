@@ -1,4 +1,10 @@
 body{display:block;overflow-x:hidden}
-.ontdek-trial-bar,.pro-header{margin-left:300px;width:calc(100% - 300px);box-sizing:border-box}
-#preview{margin-left:300px;width:calc(100% - 300px);box-sizing:border-box}
-@media(max-width:800px){.ontdek-trial-bar,.pro-header{margin-left:0;width:100%}#dashboard{position:relative;width:100%;height:auto}#preview{margin-left:0;width:100%;padding:12px}}
+.pro-header,.keuzemenu-btn-pro{display:none!important}
+#dashboard{top:0;left:0}
+.ontdek-trial-bar{margin-left:300px;width:calc(100% - 300px);box-sizing:border-box;position:sticky;top:0;min-height:72px;padding:10px 18px;align-content:center}
+.ontdek-trial-bar .ontdek-info{margin-left:0}
+#preview{margin-left:300px;width:calc(100% - 300px);box-sizing:border-box;padding-top:20px}
+.brand-text p{font-size:0}
+.brand-text p::after{content:'JUF ZISA ONTDEK';font-size:.72rem}
+@media(max-width:1100px){.ontdek-trial-bar{font-size:12px}.ontdek-trial-bar a{padding:7px 10px}.ontdek-trial-bar .ontdek-info{padding:6px 8px}}
+@media(max-width:800px){.ontdek-trial-bar{margin-left:0;width:100%}#dashboard{position:relative;width:100%;height:auto}#preview{margin-left:0;width:100%;padding:12px}}

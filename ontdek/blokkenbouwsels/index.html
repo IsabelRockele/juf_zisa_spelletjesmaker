@@ -281,6 +281,6 @@
     <script src="blokken.js?v=1774251161"></script>
     <script src="pdf-engine.js?v=1774251161"></script>
     <script src="script.js?v=1774251161"></script>
-    <script>window.ONTDEK_TAAL={toolId:'blokkenbouwsels',back:'../app.html',previewSelectors:['#werkblad'],pageCount:()=>{const w=document.querySelector('#werkblad');if(!w)return 0;const pageHeight=Math.max(1,w.clientWidth*297/210);return Math.max(1,Math.ceil(w.scrollHeight/pageHeight));},pdfSelectors:['.download-btn'],proSelectors:['#oplossingen-btn','#download-opl-btn','.print-btn']};</script><script type="module" src="../taal-ontdek.js"></script>
+    <script>window.ONTDEK_TAAL={toolId:'blokkenbouwsels',back:'../app.html',previewSelectors:['#werkblad'],pageCount:()=>{const w=document.querySelector('#werkblad');if(!w)return 0;const pageHeight=Math.max(1,Math.round(w.clientWidth*297/210)+2);return Math.max(1,Math.ceil(w.scrollHeight/pageHeight));},pdfSelectors:['.download-btn'],proSelectors:['#oplossingen-btn','#download-opl-btn','.print-btn']};</script><script type="module" src="../taal-ontdek.js"></script>
 </body>
 </html>

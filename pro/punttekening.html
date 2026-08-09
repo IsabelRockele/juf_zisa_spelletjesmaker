@@ -36,27 +36,30 @@
 
   <main>
     <aside class="panel controls" aria-label="Instellingen">
-      <section><h2>1. Afbeelding</h2><input id="imageInput" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp"><label for="imageInput" class="upload-button">Kies een afbeelding</label><p id="status">Gebruik bij voorkeur een duidelijke kleurplaat.</p></section>
+      <section><h2>1. Afbeelding</h2><input id="imageInput" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp"><label for="imageInput" class="upload-button">Upload een eigen afbeelding</label><div id="puntCatalogus" class="punt-catalogus"></div><p id="status">Upload zelf een duidelijke kleurplaat of kies iets uit de catalogus.</p></section>
 
       <section><h2>2. Verbindingslijn</h2>
         <label>Aantal punten <output id="pointCountValue">30</output></label><input id="pointCount" type="range" min="8" max="100" value="30">
         <label class="toggle"><input id="closedPath" type="checkbox" checked> Gesloten vorm</label>
-        <button id="simplifyButton" type="button">Verdeel punten opnieuw</button>
-        <p class="help">Sleep een punt. Klik en sleep op een blauwe lijn om meteen een nieuw punt te plaatsen.</p>
+        <button id="simplifyButton" type="button">✨ Punten automatisch opnieuw plaatsen</button>
+        <div class="mode-buttons point-tools" aria-label="Punten bewerken">
+          <button type="button" data-mode="points" class="active">✋ Punten bewerken — slepen of toevoegen</button>
+          <button type="button" data-mode="remove">− Punt verwijderen</button>
+        </div>
+        <button id="undoButton" type="button" disabled>↶ Laatste aanpassing ongedaan maken</button>
+        <p class="help"><strong>Klik op een bestaand punt</strong> om het te verslepen. <strong>Klik rechtstreeks op de blauwe lijn</strong> om een nieuw punt te maken en sleep het meteen naar zijn plaats. Met de pijltjestoetsen kun je een geselecteerd punt per stapje verfijnen.</p>
       </section>
 
       <section><h2>3. Lijnen behouden</h2>
         <button id="autoKeepDetails" type="button" class="prominent-action">Binnenlijnen opnieuw zoeken</button>
-        <p class="help">Binnenlijnen worden al automatisch bewaard. De groene aanduiding toont wat zichtbaar blijft, bijvoorbeeld een gezicht, mandje of figuurtje.</p>
-        <div class="mode-buttons">
-          <button type="button" data-mode="points" class="active">Punten verplaatsen</button>
-          <button type="button" data-mode="remove">Punt verwijderen</button>
-          <button type="button" data-mode="keep">Teken over een lijn</button>
-          <button type="button" data-mode="erase">Bewaarde lijn wissen</button>
+        <p class="help">Binnenlijnen worden automatisch bewaard. De <strong>donkere binnenlijnen</strong> in het bewerkingsvenster blijven zichtbaar op het werkblad. Tijdens het tekenen wordt je actieve selectie groen aangeduid.</p>
+        <div class="mode-buttons line-tools" aria-label="Binnenlijnen bewerken">
+          <button type="button" data-mode="keep">🖍 Binnenlijn behouden</button>
+          <button type="button" data-mode="erase">🧽 Binnenlijn weggommen</button>
         </div>
-        <label>Penseeldikte <output id="brushSizeValue">22</output></label><input id="brushSize" type="range" min="6" max="60" value="22">
+        <label>Penseelgrootte — klein is nauwkeuriger <output id="brushSizeValue">8</output></label><input id="brushSize" type="range" min="2" max="40" value="8">
         <button id="clearDetails" type="button">Alle behouden lijnen wissen</button>
-        <p class="help">Bij ‘Teken over een lijn’ blijft je hele afbeelding goed zichtbaar. Ga over de gewenste lijnen heen; alleen de groen aangeduide lijnen komen op het werkblad.</p>
+        <p class="help">Kies <strong>Binnenlijn behouden</strong> en teken met een klein penseel over het ontbrekende stukje. Alleen de echte donkere lijn onder je penseel wordt zwart — niet de witte ruimte ernaast.</p>
       </section>
 
       <section><h2>4. Werkblad</h2>
@@ -68,8 +71,8 @@
     </aside>
 
     <section class="panel editor-panel" aria-label="Bewerken">
-      <div class="panel-heading"><div><strong>Omtrek en details</strong><small id="editorModeLabel">Punten bewerken</small></div><span>Automatisch bewaard tijdens deze sessie</span></div>
-      <div class="canvas-wrap"><canvas id="editorCanvas" width="720" height="720" aria-label="Omtrek van de afbeelding bewerken"></canvas></div>
+      <div class="panel-heading"><div><strong>Omtrek en details</strong><small id="editorModeLabel">Punten bewerken</small></div><span>Lichtgrijs is alleen een hulpmiddel en komt niet op het werkblad</span></div>
+      <div class="canvas-wrap"><canvas id="editorCanvas" width="720" height="720" tabindex="0" aria-label="Punten en lijnen van de afbeelding bewerken"></canvas></div>
     </section>
 
     <section class="panel preview-panel" aria-label="Werkbladvoorbeeld">
@@ -80,6 +83,6 @@
   </main>
   <script src="./device-id.js"></script>
   <script type="module" src="./guard.js"></script>
-  <script src="punttekening.js"></script>
+  <script src="punttekening.js"></script><script src="../punttekening-catalogus.js"></script>
 </body>
 </html>
