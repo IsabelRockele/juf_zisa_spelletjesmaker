@@ -18,7 +18,9 @@ window.VraagstukkenModule = (() => {
       import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js')
     ]);
     const app = getApps()[0];
-    const user = app ? getAuth(app).currentUser : null;
+    const auth = app ? getAuth(app) : null;
+    if (auth) await auth.authStateReady();
+    const user = auth?.currentUser || null;
     if (!user) throw new Error('Meld je opnieuw aan bij Spelgenerator PRO.');
     return user.getIdToken();
   }
