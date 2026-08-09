@@ -181,6 +181,7 @@ body {
     font-weight: 800; cursor: pointer;
 }
 .bingo-library-save-btn { display: block; margin-top: 12px; background: #6b4e9b !important; }
+.bingo-library-ready-help { width:100%; box-sizing:border-box; margin:10px 0 0; padding:12px 14px; border:1px solid #8bc9a8; border-radius:12px; background:#edf9f2; color:#174b32; line-height:1.45; }
 .bingo-library-overlay {
     position: fixed; inset: 0; z-index: 6000; background: rgba(10,31,51,.72);
     display: flex; align-items: center; justify-content: center; padding: 18px; box-sizing: border-box;

@@ -39,6 +39,9 @@ function errorText(error) {
   }
   if (code.includes("unauthenticated")) return "Je bent niet meer aangemeld. Meld je opnieuw aan en probeer opnieuw.";
   if (code.includes("permission-denied")) return "Voor deze bibliotheek is een actief PRO-abonnement nodig.";
+  if (code.includes("internal") || /^internal$/i.test(message)) {
+    return "Het bingospel kon nu niet worden bewaard. Probeer het nog één keer. Blijft dit gebeuren, exporteer het spel dan voorlopig als JSON zodat je niets verliest.";
+  }
   return message || "Dat lukte niet. Probeer het straks opnieuw.";
 }
 
@@ -207,7 +210,7 @@ async function handleAction(event) {
 async function saveCurrent() {
   const data = currentGame();
   if (!data) return notify("Kies eerst welk soort bingo je wilt maken.");
-  if (!hasExactCards(data)) return notify("Maak eerst de bingokaarten. Zo bewaren we exact dezelfde kaarten voor je leerlingen.");
+  if (!hasExactCards(data)) return notify("Maak eerst de bingokaarten. Ze openen in een apart venster. Sluit dat venster daarna en kies hier opnieuw ‘Bewaar in mijn bibliotheek’. Zo bewaren we exact dezelfde kaarten voor je leerlingen.");
   if (!loaded) await loadList(true);
   if (games.length >= LIMIT) return notify("Je bibliotheek is vol (15/15). Exporteer eventueel eerst een oud spel als JSON en verwijder dat spel daarna, of bewaar je huidige spel alleen als JSON.");
   const proposal = uniqueName(data.levelNaam || LABELS[gameType(data)]);

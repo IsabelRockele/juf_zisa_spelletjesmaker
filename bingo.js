@@ -133,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 oefeningenLijst: oefeningen,
                 bingokaarten: Array.isArray(bronSpel?.bingokaarten) ? bronSpel.bingokaarten : [],
                 kaartConfiguratie: bronSpel?.kaartConfiguratie || null,
+                ontdekGebruikId: bronSpel?.ontdekGebruikId || (crypto.randomUUID ? crypto.randomUUID() : `bingo-${Date.now()}-${Math.random().toString(36).slice(2)}`),
                 aangemaaktOp: bronSpel?.aangemaaktOp || new Date().toISOString(),
                 bijgewerktOp: new Date().toISOString()
             };
@@ -145,6 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
             kaartenKnop.textContent = gameState.bingokaarten.length
                 ? '📄 Dezelfde bingokaarten opnieuw openen'
                 : '📄 Maak Bingokaarten';
+            const libraryHelp = document.getElementById('bingo-library-ready-help');
+            libraryHelp?.classList.toggle('verborgen', !gameState.bingokaarten.length);
         }
 
         function maakKaartenset(aantalKaarten, kaartGrootte, vulAanMetDubbels) {
@@ -201,6 +204,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         const downloadBtn = document.getElementById('download-pdf-knop');
                         downloadBtn.disabled = true;
                         downloadBtn.textContent = 'Bezig met genereren...';
+                        if (window.opener?.BingoDownloadPolicy?.authorize) {
+                            const toegestaan = await window.opener.BingoDownloadPolicy.authorize('pdf');
+                            if (!toegestaan) {
+                                downloadBtn.disabled = false;
+                                downloadBtn.textContent = '📄 Download als PDF';
+                                return;
+                            }
+                        }
                         const { jsPDF } = window.jspdf;
                         const bingoKaarten = document.querySelectorAll('.bingokaart');
                         try {
@@ -357,6 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
             opgeslagenSpel.bijgewerktOp = new Date().toISOString();
             localStorage.setItem('bingoGameState', JSON.stringify(opgeslagenSpel));
             kaartenKnop.textContent = '📄 Dezelfde bingokaarten opnieuw openen';
+            document.getElementById('bingo-library-ready-help')?.classList.remove('verborgen');
             const html = genereerPrintbarePagina(kaartenset, kaartGrootte);
             if (html) {
                 const printWindow = window.open('', '_blank');
@@ -368,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         modalAnnulerenKnop.onclick = () => { modalOverlay.classList.add('verborgen'); };
 
-        exportSpelKnop.addEventListener('click', () => {
+        exportSpelKnop.addEventListener('click', async () => {
             const opgeslagenSpel = localStorage.getItem('bingoGameState');
             if (!opgeslagenSpel) {
                 alert('Er is geen actief spel om te exporteren.');
@@ -378,6 +390,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!Array.isArray(spelData.bingokaarten) || spelData.bingokaarten.length === 0) {
                 alert('Maak eerst de bingokaarten. Daarna bevat het spelbestand exact dezelfde kaarten als de PDF.');
                 return;
+            }
+            if (window.BingoDownloadPolicy?.authorize) {
+                const toegestaan = await window.BingoDownloadPolicy.authorize('json');
+                if (!toegestaan) return;
             }
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(opgeslagenSpel);
             const downloadAnchorNode = document.createElement('a');

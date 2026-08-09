@@ -1157,12 +1157,17 @@ export const reserveDiscoverDownload = onCall({ region: REGION, enforceAppCheck:
   const email = String((req.auth.token as any)?.email || "").trim().toLowerCase();
   const toolId = String(req.data?.toolId || "").trim().toLowerCase();
   const pages = Number(req.data?.pages || 0);
+  const reservationKeyRaw = String(req.data?.reservationKey || "").trim();
+  const reservationKey = reservationKeyRaw ? `${toolId}:${reservationKeyRaw}` : "";
 
   if (!/^[a-z0-9-]{2,60}$/.test(toolId)) {
     throw new HttpsError("invalid-argument", "Ongeldige tool.");
   }
   if (!Number.isInteger(pages) || pages < 1 || pages > 100) {
     throw new HttpsError("invalid-argument", "Ongeldig paginatal.");
+  }
+  if (reservationKeyRaw && !/^[A-Za-z0-9_-]{8,100}$/.test(reservationKeyRaw)) {
+    throw new HttpsError("invalid-argument", "Ongeldige reservatiesleutel.");
   }
   if (DISCOVER_LARGE_BUNDLE_TOOLS.has(toolId) && pages > DISCOVER_LARGE_BUNDLE_PAGE_LIMIT) {
     throw new HttpsError("failed-precondition", "PAGE_LIMIT");
@@ -1177,6 +1182,13 @@ export const reserveDiscoverDownload = onCall({ region: REGION, enforceAppCheck:
     const snap = await tx.get(ref);
     const current = discoverPayload(snap.exists ? snap.data() : {});
     const usedForTool = Math.max(0, Number(current.byTool[toolId] || 0));
+    const reservationKeys = Array.isArray(snap.data()?.reservationKeys)
+      ? snap.data()!.reservationKeys.filter((key: unknown) => typeof key === "string").slice(-100)
+      : [];
+
+    if (reservationKey && reservationKeys.includes(reservationKey)) {
+      return { ...current, alreadyReserved: true };
+    }
 
     if (current.totalUsed >= DISCOVER_TOTAL_LIMIT) {
       throw new HttpsError("resource-exhausted", "TOTAL_LIMIT");
@@ -1189,6 +1201,7 @@ export const reserveDiscoverDownload = onCall({ region: REGION, enforceAppCheck:
     const next = {
       totalDownloads: current.totalUsed + 1,
       byTool: nextByTool,
+      ...(reservationKey ? { reservationKeys: [...reservationKeys, reservationKey].slice(-100) } : {}),
       email: email || null,
       updatedAt: Timestamp.now(),
       ...(snap.exists ? {} : { createdAt: Timestamp.now() }),
@@ -1461,7 +1474,15 @@ export const getBingoGame = onCall({ region: REGION, enforceAppCheck: true }, as
   const snap = await bingoGamesRef(uid).doc(gameId).get();
   if (!snap.exists) throw new HttpsError("not-found", "Dit bingospel bestaat niet meer.");
   const data = snap.data() as any;
-  return { id: snap.id, name: data.name, type: data.type, gameData: data.gameData };
+  let gameData = data.gameData;
+  if (typeof data.gameDataJson === "string") {
+    try {
+      gameData = JSON.parse(data.gameDataJson);
+    } catch {
+      throw new HttpsError("data-loss", "Dit opgeslagen bingospel kon niet meer worden gelezen.");
+    }
+  }
+  return { id: snap.id, name: data.name, type: data.type, gameData };
 });
 
 export const saveBingoGame = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
@@ -1471,6 +1492,9 @@ export const saveBingoGame = onCall({ region: REGION, enforceAppCheck: true }, a
   const name = cleanBingoName(req.data?.name);
   const type = cleanBingoType(req.data?.type);
   const gameData = cleanBingoGameData(req.data?.gameData);
+  // Bingokaarten zijn een lijst van lijsten. Firestore ondersteunt geen geneste
+  // arrays als veldwaarde, daarom bewaren we het volledige gevalideerde spel als JSON.
+  const gameDataJson = JSON.stringify(gameData);
   const requestedId = String(req.data?.gameId || "").trim();
   if (requestedId && !/^[A-Za-z0-9_-]{8,80}$/.test(requestedId)) {
     throw new HttpsError("invalid-argument", "Ongeldig spel-ID.");
@@ -1492,7 +1516,7 @@ export const saveBingoGame = onCall({ region: REGION, enforceAppCheck: true }, a
       levelName: String(gameData.levelNaam || "").slice(0, 120),
       cardCount: Number(gameData.kaartConfiguratie?.aantalKaarten || gameData.bingokaarten.length || 0),
       cardSize: Number(gameData.kaartConfiguratie?.kaartGrootte || 0),
-      gameData,
+      gameDataJson,
       createdAt: gameSnap.exists ? (gameSnap.data()?.createdAt || now) : now,
       updatedAt: now,
     });
