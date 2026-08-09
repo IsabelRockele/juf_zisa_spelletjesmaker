@@ -250,28 +250,118 @@ body {
 }
 
 /* --- Spel Pagina & Spel Container --- */
-.spel-pagina-body { padding: 20px; }
-.spel-container { max-width: 900px; width: 100%; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
-#huidig-niveau-titel { color: #2c3e50; }
-#items-overzicht { padding: 15px; margin-bottom: 30px; border: 2px solid #e0e0e0; border-radius: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-#items-overzicht span { display: inline-block; padding: 6px 12px; background-color: #ecf0f1; border-radius: 5px; font-size: 16px; transition: all 0.4s ease; }
-#items-overzicht span.is-geweest { background-color: #bdc3c7; color: #7f8c8d; text-decoration: line-through; transform: scale(0.95); }
-#schuif-machine { position: relative; width: 100%; height: 120px; margin: 20px auto; border: 4px solid #34495e; border-radius: 10px; background: linear-gradient(180deg, #abb7b7, #f0f2f2); box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2); overflow: hidden; }
-#pijl-indicator { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 40px; color: #e74c3c; z-index: 10; text-shadow: 0 2px 3px rgba(0, 0, 0, 0.2); }
+.spel-pagina-body {
+    min-height: 100vh;
+    padding: clamp(18px, 3vw, 46px);
+    box-sizing: border-box;
+    background: linear-gradient(145deg, #eef7ff 0%, #f8f4ff 55%, #fff8e8 100%);
+}
+.spel-container {
+    max-width: 1380px;
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255,255,255,.97);
+    padding: clamp(24px, 3vw, 46px);
+    border: 1px solid #d8e6f2;
+    border-radius: 24px;
+    box-shadow: 0 18px 55px rgba(29, 70, 105, 0.15);
+}
+#huidig-niveau-titel {
+    color: #163b63;
+    margin: 0 0 22px;
+    text-align: center;
+    font-size: clamp(32px, 4vw, 54px);
+    line-height: 1.12;
+}
+#items-overzicht {
+    max-height: 190px;
+    overflow-y: auto;
+    padding: 18px;
+    margin-bottom: 32px;
+    border: 2px solid #cfe0ee;
+    border-radius: 16px;
+    background: #f8fbfe;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+#items-overzicht span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 7px 14px;
+    box-sizing: border-box;
+    background: #e8f2f9;
+    color: #193b5d;
+    border: 1px solid #d2e2ed;
+    border-radius: 999px;
+    font-size: clamp(16px, 1.35vw, 21px);
+    font-weight: 700;
+    transition: all 0.35s ease;
+}
+#items-overzicht span.is-geweest {
+    background: #d8dee3;
+    color: #788691;
+    border-color: #cbd3d9;
+    text-decoration: line-through;
+    opacity: .72;
+    transform: scale(0.96);
+}
+#schuif-machine {
+    position: relative;
+    width: 100%;
+    height: clamp(170px, 18vw, 220px);
+    margin: 24px auto;
+    border: 5px solid #244d73;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #dce8ec 0%, #f8fbfc 48%, #cbdade 100%);
+    box-shadow: inset 0 0 24px rgba(20, 55, 75, .22), 0 10px 24px rgba(22, 64, 94, .12);
+    overflow: hidden;
+}
+#pijl-indicator {
+    position: absolute;
+    top: -17px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 55px;
+    line-height: 1;
+    color: #ef5b45;
+    z-index: 10;
+    filter: drop-shadow(0 3px 2px rgba(0,0,0,.18));
+}
 #ballen-band { position: absolute; top: 0; left: 0; height: 100%; display: flex; align-items: center; transition: transform 4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.bal { flex-shrink: 0; width: 100px; height: 100px; border-radius: 50%; margin: 0 10px; display: flex; text-align: center; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 16px; box-shadow: inset -5px -5px 15px rgba(0, 0, 0, 0.25), 0 2px 5px rgba(0, 0, 0, 0.2); text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4); }
+.bal {
+    flex-shrink: 0;
+    width: clamp(125px, 13vw, 170px);
+    height: clamp(125px, 13vw, 170px);
+    border-radius: 50%;
+    margin: 0 clamp(10px, 1.2vw, 18px);
+    padding: 12px;
+    box-sizing: border-box;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: 850;
+    font-size: clamp(20px, 2vw, 30px);
+    box-shadow: inset -10px -12px 22px rgba(0, 0, 0, .25), inset 7px 8px 14px rgba(255,255,255,.2), 0 7px 15px rgba(0,0,0,.18);
+    text-shadow: 1px 2px 3px rgba(0,0,0,.45);
+}
 
 /* --- AANGEPASTE KNOPPEN CONTAINER --- */
 .knoppen-container {
-    margin-top: 30px;
+    margin-top: 34px;
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
-#start-schuiven-knop { background-color: #2ecc71; color: white; padding: 12px 25px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; }
+#start-schuiven-knop { background: linear-gradient(135deg,#21b96b,#36cf7f); color: white; min-width: 210px; padding: 17px 30px; font-size: 22px; font-weight: 800; border: none; border-radius: 13px; cursor: pointer; box-shadow: 0 8px 20px rgba(33,185,107,.25); }
 #start-schuiven-knop:hover { background-color: #27ae60; }
 #start-schuiven-knop:disabled { background-color: #95a5a6; cursor: not-allowed; }
 
@@ -279,13 +369,26 @@ body {
 .sluiten-knop {
     background-color: #7f8c8d; /* Grijze kleur */
     color: white;
-    padding: 12px 25px;
-    font-size: 18px;
+    min-width: 180px;
+    padding: 17px 28px;
+    box-sizing: border-box;
+    font-size: 20px;
+    font-weight: 750;
     border: none;
-    border-radius: 8px;
+    border-radius: 13px;
     cursor: pointer;
     text-decoration: none; /* Voor de <a> tag */
     display: inline-block;
+}
+
+@media (max-width: 700px) {
+    .spel-pagina-body { padding: 12px; }
+    .spel-container { padding: 20px 14px; border-radius: 17px; }
+    #items-overzicht { max-height: 165px; padding: 12px; margin-bottom: 20px; }
+    #schuif-machine { height: 150px; border-width: 4px; }
+    .bal { width: 112px; height: 112px; margin: 0 8px; font-size: 18px; }
+    #pijl-indicator { font-size: 45px; }
+    #start-schuiven-knop, .sluiten-knop { width: 100%; min-width: 0; }
 }
 .sluiten-knop:hover {
     background-color: #95a5a6;
