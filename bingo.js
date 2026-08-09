@@ -50,9 +50,44 @@ document.addEventListener('DOMContentLoaded', () => {
         const modalBody = document.getElementById('modal-body');
         const modalGenereerKnop = document.getElementById('modal-genereer-knop');
         const modalAnnulerenKnop = document.getElementById('modal-annuleren-knop');
+        const uitlegSpelbestandKnop = document.getElementById('uitleg-spelbestand-knop');
+        const uitlegSpelbestandModal = document.getElementById('uitleg-spelbestand-modal');
+
+        function sluitSpelbestandUitleg() {
+            uitlegSpelbestandModal?.classList.add('verborgen');
+        }
+        uitlegSpelbestandKnop?.addEventListener('click', () => uitlegSpelbestandModal?.classList.remove('verborgen'));
+        uitlegSpelbestandModal?.querySelector('.spelbestand-modal-sluiten')?.addEventListener('click', sluitSpelbestandUitleg);
+        uitlegSpelbestandModal?.querySelector('.spelbestand-modal-ok')?.addEventListener('click', sluitSpelbestandUitleg);
+        uitlegSpelbestandModal?.addEventListener('click', (event) => {
+            if (event.target === uitlegSpelbestandModal) sluitSpelbestandUitleg();
+        });
 
         const opgeslagenSpelJSON = localStorage.getItem('bingoGameState');
-        if (opgeslagenSpelJSON) {
+        const automatischHerstellen = sessionStorage.getItem('bingoAutoRestore') === '1';
+        if (opgeslagenSpelJSON && automatischHerstellen) {
+            try {
+                const opgeslagenSpel = JSON.parse(opgeslagenSpelJSON);
+                activeerSpel(
+                    opgeslagenSpel.levelNaam,
+                    opgeslagenSpel.kaartItemsLijst,
+                    opgeslagenSpel.isGetallenSpel,
+                    opgeslagenSpel.isOefenSpel,
+                    opgeslagenSpel.oefeningenLijst,
+                    opgeslagenSpel
+                );
+                const actie = sessionStorage.getItem('bingoAutoAction');
+                sessionStorage.removeItem('bingoAutoRestore');
+                sessionStorage.removeItem('bingoAutoAction');
+                herstelMelding.classList.add('verborgen');
+                if (actie === 'cards') setTimeout(() => kaartenKnop.click(), 0);
+            } catch (error) {
+                console.error('Bingospel uit bibliotheek kon niet worden hersteld:', error);
+                sessionStorage.removeItem('bingoAutoRestore');
+                sessionStorage.removeItem('bingoAutoAction');
+                herstelMelding.classList.remove('verborgen');
+            }
+        } else if (opgeslagenSpelJSON) {
             herstelMelding.classList.remove('verborgen');
         }
 
@@ -63,7 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 opgeslagenSpel.kaartItemsLijst, 
                 opgeslagenSpel.isGetallenSpel, 
                 opgeslagenSpel.isOefenSpel, 
-                opgeslagenSpel.oefeningenLijst
+                opgeslagenSpel.oefeningenLijst,
+                opgeslagenSpel
             );
             herstelMelding.classList.add('verborgen');
         });
@@ -73,13 +109,18 @@ document.addEventListener('DOMContentLoaded', () => {
             herstelMelding.classList.add('verborgen');
         });
         
-        function activeerSpel(levelNaam, itemsVoorKaart, isGetal = false, isOefening = false, oefeningen = {}) {
+        function activeerSpel(levelNaam, itemsVoorKaart, isGetal = false, isOefening = false, oefeningen = {}, bronSpel = null) {
             const gameState = {
+                formaatVersie: 2,
                 levelNaam: levelNaam,
                 kaartItemsLijst: itemsVoorKaart,
                 isGetallenSpel: isGetal,
                 isOefenSpel: isOefening,
-                oefeningenLijst: oefeningen
+                oefeningenLijst: oefeningen,
+                bingokaarten: Array.isArray(bronSpel?.bingokaarten) ? bronSpel.bingokaarten : [],
+                kaartConfiguratie: bronSpel?.kaartConfiguratie || null,
+                aangemaaktOp: bronSpel?.aangemaaktOp || new Date().toISOString(),
+                bijgewerktOp: new Date().toISOString()
             };
             localStorage.setItem('bingoGameState', JSON.stringify(gameState));
             kaartItemsLijst = [...itemsVoorKaart]; 
@@ -87,11 +128,30 @@ document.addEventListener('DOMContentLoaded', () => {
             gekozenSpelTitel.textContent = levelNaam;
             instructiePaneel.classList.add('verborgen');
             actiePaneel.classList.remove('verborgen');
+            kaartenKnop.textContent = gameState.bingokaarten.length
+                ? '📄 Dezelfde bingokaarten opnieuw openen'
+                : '📄 Maak Bingokaarten';
+        }
+
+        function maakKaartenset(aantalKaarten, kaartGrootte, vulAanMetDubbels) {
+            const aantalVakjes = kaartGrootte * kaartGrootte;
+            const kaarten = [];
+            for (let i = 0; i < aantalKaarten; i++) {
+                let kaartItems;
+                if (vulAanMetDubbels) {
+                    const aangevuldeLijst = [];
+                    while (aangevuldeLijst.length < aantalVakjes) aangevuldeLijst.push(...kaartItemsLijst);
+                    kaartItems = aangevuldeLijst.slice(0, aantalVakjes).sort(() => Math.random() - 0.5);
+                } else {
+                    kaartItems = [...kaartItemsLijst].sort(() => Math.random() - 0.5).slice(0, aantalVakjes);
+                }
+                kaarten.push(kaartItems);
+            }
+            return kaarten;
         }
 
         // --- HIER IS DE ONTBREKENDE FUNCTIE TERUGGEPLAATST ---
-        function genereerPrintbarePagina(aantalKaarten, kaartGrootte, vulAanMetDubbels) {
-            const aantalVakjes = kaartGrootte * kaartGrootte;
+        function genereerPrintbarePagina(kaartenset, kaartGrootte) {
             const actieKnoppenHTML = `
                 <div class="actie-balk">
                     <button onclick="window.print()">🖨️ Afdrukken</button>
@@ -187,16 +247,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 </script>`;
 
             let kaartenHTML = '';
-            for (let i = 0; i < aantalKaarten; i++) {
-                let kaartItems;
-                if (vulAanMetDubbels) {
-                    let aangevuldeLijst = [];
-                    while (aangevuldeLijst.length < aantalVakjes) { aangevuldeLijst.push(...kaartItemsLijst); }
-                    kaartItems = aangevuldeLijst.slice(0, aantalVakjes).sort(() => Math.random() - 0.5);
-                } else {
-                    const geschuddeItems = [...kaartItemsLijst].sort(() => Math.random() - 0.5);
-                    kaartItems = geschuddeItems.slice(0, aantalVakjes);
-                }
+            for (let i = 0; i < kaartenset.length; i++) {
+                const kaartItems = kaartenset[i];
                 kaartenHTML += `<div class="bingokaart"><h3>Bingokaart ${i + 1}</h3><div class="bingo-grid">`;
                 kaartItems.forEach(item => { kaartenHTML += `<div class="bingo-vakje">${item}</div>`; });
                 kaartenHTML += `</div></div>`;
@@ -208,6 +260,14 @@ document.addEventListener('DOMContentLoaded', () => {
         kaartenKnop.addEventListener('click', () => {
             if (kaartItemsLijst.length === 0) {
                 alert('Configureer of importeer eerst een spel.');
+                return;
+            }
+            const opgeslagenSpel = JSON.parse(localStorage.getItem('bingoGameState') || '{}');
+            if (Array.isArray(opgeslagenSpel.bingokaarten) && opgeslagenSpel.bingokaarten.length && opgeslagenSpel.kaartConfiguratie) {
+                const html = genereerPrintbarePagina(opgeslagenSpel.bingokaarten, opgeslagenSpel.kaartConfiguratie.kaartGrootte);
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(html);
+                printWindow.document.close();
                 return;
             }
             toonKaartOptiesModal();
@@ -275,7 +335,15 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 kaartGrootte = parseInt(gekozenGrid);
             }
-            const html = genereerPrintbarePagina(aantalKaarten, kaartGrootte, vulAanMetDubbels);
+            const kaartenset = maakKaartenset(aantalKaarten, kaartGrootte, vulAanMetDubbels);
+            const opgeslagenSpel = JSON.parse(localStorage.getItem('bingoGameState') || '{}');
+            opgeslagenSpel.formaatVersie = 2;
+            opgeslagenSpel.bingokaarten = kaartenset;
+            opgeslagenSpel.kaartConfiguratie = { aantalKaarten, kaartGrootte, vulAanMetDubbels };
+            opgeslagenSpel.bijgewerktOp = new Date().toISOString();
+            localStorage.setItem('bingoGameState', JSON.stringify(opgeslagenSpel));
+            kaartenKnop.textContent = '📄 Dezelfde bingokaarten opnieuw openen';
+            const html = genereerPrintbarePagina(kaartenset, kaartGrootte);
             if (html) {
                 const printWindow = window.open('', '_blank');
                 printWindow.document.write(html);
@@ -292,10 +360,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Er is geen actief spel om te exporteren.');
                 return;
             }
+            const spelData = JSON.parse(opgeslagenSpel);
+            if (!Array.isArray(spelData.bingokaarten) || spelData.bingokaarten.length === 0) {
+                alert('Maak eerst de bingokaarten. Daarna bevat het spelbestand exact dezelfde kaarten als de PDF.');
+                return;
+            }
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(opgeslagenSpel);
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "bingo-spel.json");
+            const veiligeNaam = String(spelData.levelNaam || 'bingospel')
+                .toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-|-$/g, '') || 'bingospel';
+            downloadAnchorNode.setAttribute("download", `${veiligeNaam}-spelbestand.json`);
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
@@ -318,9 +396,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             geimporteerdSpel.kaartItemsLijst,
                             geimporteerdSpel.isGetallenSpel,
                             geimporteerdSpel.isOefenSpel,
-                            geimporteerdSpel.oefeningenLijst
+                            geimporteerdSpel.oefeningenLijst,
+                            geimporteerdSpel
                         );
-                        alert('Spel succesvol geïmporteerd!');
+                        alert(Array.isArray(geimporteerdSpel.bingokaarten) && geimporteerdSpel.bingokaarten.length
+                            ? 'Spel succesvol geïmporteerd. De exact bewaarde bingokaarten zijn klaar om opnieuw te openen.'
+                            : 'Ouder spelbestand geïmporteerd. Maak eenmalig nieuwe bingokaarten en exporteer het spel daarna opnieuw.');
                     } else {
                         alert('Fout: Het gekozen bestand is geen geldig bingospel-bestand.');
                     }

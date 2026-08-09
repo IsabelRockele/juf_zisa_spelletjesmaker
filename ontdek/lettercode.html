@@ -10,6 +10,7 @@
 
   <!-- Styles liggen buiten /pro/ -->
   <link href="lettercode.css?v=2025-08-31" rel="stylesheet"/>
+  <link href="lettercode-modern.css" rel="stylesheet"/>
 
   <!-- Externe libs (ongewijzigd) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -50,6 +51,15 @@
           <textarea id="gecodeerdeZinInput" rows="3" placeholder="Typ hier de zin waarvan letters genummerd worden"></textarea>
           <div id="zinMelding" style="font-size: 0.9em; color: #555; margin-top: 5px;"></div>
         </div>
+        <div class="control-group">
+          <label for="worksheetTitleInput">Thema of titel van het werkblad (optionele zoektip):</label>
+          <input id="worksheetTitleInput" type="text" maxlength="50" placeholder="Bijvoorbeeld: Terug naar school"/>
+        </div>
+        <div class="control-group">
+          <label for="prefilledLettersInput">Letters vooraf tonen (optioneel, maximaal 2):</label>
+          <input id="prefilledLettersInput" type="text" maxlength="3" placeholder="Bijvoorbeeld: Z B"/>
+          <small>Gebruik dit als opnieuw genereren en een extra eenvoudig woord niet helpen. Deze letters staan onderaan al op de juiste plek.</small>
+        </div>
 
         <div class="words-and-feedback-group">
           <div class="control-group words-input-area">
@@ -69,6 +79,8 @@
           <button id="regenereerBtn">Opnieuw Genereren</button>
           <button id="downloadPngBtn">Download als PNG</button>
           <button id="downloadPdfBtn">Download als PDF</button>
+          <button id="toggleSolutionsBtn">Oplossingen tonen</button>
+          <button id="downloadSolutionsPdfBtn">Oplossingen als PDF</button>
         </div>
       </div>
     </div>
@@ -84,7 +96,8 @@
 
   <!-- 1) Stabiele device-id (localStorage + cookie) -->
   <script defer src="lettercode.js?v=2025-08-31"></script>
-  <script>window.ONTDEK_TAAL={toolId:'lettercode',previewSelectors:['#puzzleContainer'],pageSelector:'#puzzleContainer',pdfSelectors:['#downloadPdfBtn'],proSelectors:['#downloadPngBtn']};</script><script type="module" src="taal-ontdek.js"></script>
+  <script defer src="lettercode-modern.js"></script>
+  <script>window.ONTDEK_TAAL={toolId:'lettercode',previewSelectors:['#puzzelOutput'],pageSelector:'#puzzelOutput',pdfSelectors:['#downloadPdfBtn'],proSelectors:['#downloadPngBtn','#toggleSolutionsBtn','#downloadSolutionsPdfBtn']};</script><script type="module" src="taal-ontdek.js"></script>
 </body>
 </html>
 

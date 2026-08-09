@@ -1,6 +1,11 @@
 import {getApp,getApps} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {getFunctions,httpsCallable} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
 import {startOntdekAuth} from './ontdek-auth.js';
+// Sommige oudere tools overschrijven de standaardweergave van het HTML-attribuut
+// `hidden`. Bewaak dit centraal, zodat alleen de uniforme Ontdek-menuknop zichtbaar is.
+const menuVisibilityStyle=document.createElement('style');
+menuVisibilityStyle.textContent='body [hidden]{display:none!important}';
+document.head.appendChild(menuVisibilityStyle);
 const cfg=window.ONTDEK_TAAL||{},toolId=cfg.toolId||'taal-tool';
 const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('./taal-ontdek.css',import.meta.url).href;document.head.appendChild(style);
 let currentUser=null,currentTrial=null,currentPro=false;const $all=s=>[...document.querySelectorAll(s)];

@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const generateBtn = document.getElementById("generateBtn");
     const clearBtn = document.getElementById("clearBtn");
     const downloadPdfBtn = document.getElementById("downloadPdfBtn");
+    const downloadSolutionPdfBtn = document.getElementById("downloadSolutionPdfBtn");
     const meldingContainer = document.getElementById("meldingContainer");
     const instructionsOutput = document.getElementById("instructions-output");
     const toolBtns = document.querySelectorAll(".tool-btn");
@@ -89,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
         instructionsOutput.innerHTML = '';
         worksheetCtx.clearRect(0, 0, worksheetCanvas.width, worksheetCanvas.height);
         downloadPdfBtn.disabled = true;
+        if (downloadSolutionPdfBtn) downloadSolutionPdfBtn.disabled = true;
         meldingContainer.textContent = '';
     }
 
@@ -171,9 +173,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const w = gridWidth * cellSize;
     const h = gridHeight * cellSize;
 
-    // Zwart raster, iets dikker en pixel-crisp
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 1.2;
+    // Fijn lichtgrijs raster: duidelijk genoeg bij zwart-witafdruk,
+    // maar rustiger dan de donkere tekening en details.
+    ctx.strokeStyle = '#aab4bf';
+    ctx.lineWidth = 0.65;
 
     // Verticale lijnen
     for (let i = 0; i <= gridWidth; i++) {
@@ -194,6 +197,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.lineTo(w - 0.5, y);
         ctx.stroke();
     }
+
+    // Een iets donkerdere buitenrand houdt het volledige werkveld herkenbaar.
+    ctx.strokeStyle = '#596675';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, 0.5, Math.max(0, w - 1), Math.max(0, h - 1));
 }
 
 
@@ -562,6 +570,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const instructions = convertPathToInstructions(codedPath);
         displayOutput(instructions);
         downloadPdfBtn.disabled = false;
+        if (downloadSolutionPdfBtn) downloadSolutionPdfBtn.disabled = false;
     }
 
     function convertPathToInstructions(path) {
@@ -640,13 +649,58 @@ document.addEventListener("DOMContentLoaded", () => {
         meldingContainer.textContent = 'Leerlingenblad gemaakt. Je tekening staat nog links; het blad rechts is bewust zonder oplossing.';
     }
 
-    function downloadPdf() {
+    function maakOplossingsCanvas() {
+        const canvas = document.createElement('canvas');
+        canvas.width = drawingCanvas.width;
+        canvas.height = drawingCanvas.height;
+        const ctx = canvas.getContext('2d');
+        drawGridLines(ctx);
+
+        if (codedPath.length > 1) {
+            ctx.strokeStyle = '#188a55';
+            ctx.lineWidth = Math.max(2.4, cellSize / 7);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(codedPath[0].vx * cellSize, codedPath[0].vy * cellSize);
+            codedPath.slice(1).forEach(point => ctx.lineTo(point.vx * cellSize, point.vy * cellSize));
+            ctx.stroke();
+        }
+        if (codedPath.length) {
+            ctx.fillStyle = '#e32626';
+            ctx.beginPath();
+            ctx.arc(codedPath[0].vx * cellSize, codedPath[0].vy * cellSize, cellSize / 3.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        features.forEach(feature => drawFeature(ctx, feature));
+        freehandLines.forEach(path => {
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = Math.max(1.5, cellSize / 10);
+            ctx.beginPath();
+            if (path.length) {
+                ctx.moveTo(path[0].gridX * cellSize, path[0].gridY * cellSize);
+                path.slice(1).forEach(point => ctx.lineTo(point.gridX * cellSize, point.gridY * cellSize));
+            }
+            ctx.stroke();
+        });
+        coloredLines.forEach(line => {
+            ctx.strokeStyle = line.color;
+            ctx.lineWidth = Math.max(1.5, cellSize / 10);
+            ctx.beginPath();
+            ctx.moveTo(line.startGridX * cellSize, line.startGridY * cellSize);
+            ctx.lineTo(line.endGridX * cellSize, line.endGridY * cellSize);
+            ctx.stroke();
+        });
+        return canvas;
+    }
+
+    function downloadPdf(metOplossing = false) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         const pageMargin = 15;
         const pageWidth = doc.internal.pageSize.getWidth();
         const contentWidth = pageWidth - (pageMargin * 2);
-        let currentY = 20;
+        let currentY = 12;
 
         const drawArrow = (doc, x, y, size, direction) => {
             const s = size / 2;
@@ -664,9 +718,33 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         };
 
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(70, 80, 95);
+        doc.text('Naam:', pageMargin, currentY);
+        doc.text('Datum:', 112, currentY);
+        doc.setDrawColor(125, 145, 165);
+        doc.setLineWidth(0.35);
+        doc.line(pageMargin + 14, currentY + 0.5, 98, currentY + 0.5);
+        doc.line(127, currentY + 0.5, pageWidth - pageMargin, currentY + 0.5);
+
+        currentY += 12;
         doc.setFontSize(18);
-        doc.text("Code-tekenen Werkblad", pageWidth / 2, currentY, { align: 'center' });
-        currentY += 15;
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(25, 63, 103);
+        doc.text(metOplossing ? "Code-tekenen — oplossing" : "Code-tekenen", pageWidth / 2, currentY, { align: 'center' });
+        currentY += 5;
+        doc.setDrawColor(74, 144, 217);
+        doc.setLineWidth(0.6);
+        doc.line(pageMargin, currentY, pageWidth - pageMargin, currentY);
+        currentY += 9;
+
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(35, 55, 75);
+        const opdrachtRegels = doc.splitTextToSize('Start bij de rode bol. Voer de codes rij per rij uit. Voorbeeld: 4 --> betekent 4 hokjes naar rechts.', contentWidth);
+        doc.text(opdrachtRegels, pageMargin, currentY);
+        currentY += opdrachtRegels.length * 5 + 6;
 
         doc.setFontSize(12);
         doc.text("Code:", pageMargin, currentY);
@@ -699,7 +777,8 @@ document.addEventListener("DOMContentLoaded", () => {
         currentY += lineHeight + 5;
 
         try {
-            const imageData = worksheetCanvas.toDataURL('image/png');
+            const pdfCanvas = metOplossing ? maakOplossingsCanvas() : worksheetCanvas;
+            const imageData = pdfCanvas.toDataURL('image/png');
             const imgProps = doc.getImageProperties(imageData);
             const imgRatio = imgProps.height / imgProps.width;
             const imgWidth = contentWidth;
@@ -715,7 +794,7 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.text("Fout: Kon de tekening niet toevoegen.", pageMargin, currentY);
         }
         
-        doc.save('code-tekenen-werkblad.pdf');
+        doc.save(metOplossing ? 'code-tekenen-oplossing.pdf' : 'code-tekenen-werkblad.pdf');
     }
 
     // --- BESTANDSBEHEER ---
@@ -882,7 +961,8 @@ document.addEventListener("DOMContentLoaded", () => {
     removeRowTopBtn.addEventListener('click', () => removeRow(true));
     removeRowBottomBtn.addEventListener('click', () => removeRow(false));
     generateBtn.addEventListener('click', generateCode);
-    downloadPdfBtn.addEventListener('click', downloadPdf);
+    downloadPdfBtn.addEventListener('click', () => downloadPdf(false));
+    downloadSolutionPdfBtn?.addEventListener('click', () => downloadPdf(true));
     undoCodeBtn.addEventListener('click', undoLastCodeStep);
 
     toolBtns.forEach(btn => {

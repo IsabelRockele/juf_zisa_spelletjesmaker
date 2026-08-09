@@ -1,0 +1,1804 @@
+/* ============================================
+   PLANBORD — STIJL
+   ============================================ */
+
+/* === RESET === */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Roboto, sans-serif;
+  background: #f5f3ee;
+  color: #2a2a2a;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* === TOPBAR === */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: white;
+  border-bottom: 1px solid #e5e2d8;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-left h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #534AB7;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #888;
+}
+
+.topbar-right {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  border: 1px solid #d4d1c5;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #2a2a2a;
+  transition: background 0.15s, transform 0.1s;
+  font-weight: 500;
+}
+
+.btn:hover {
+  background: #f5f3ee;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: #534AB7;
+  color: white;
+  border-color: #534AB7;
+}
+
+.btn-primary:hover {
+  background: #443B9F;
+}
+
+/* === TERUG NAAR KEUZEMENU KNOP === */
+.btn-terug {
+  background: #0C447C;
+  color: white;
+  border-color: #0C447C;
+  text-decoration: none;
+  margin-right: 16px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-terug:hover {
+  background: #093461;
+  border-color: #093461;
+  color: white;
+}
+
+/* === UITLEG-KNOP === */
+.btn-uitleg {
+  background: #FAEEDA;
+  color: #854F0B;
+  border-color: #FAC775;
+  font-weight: 600;
+}
+
+.btn-uitleg:hover {
+  background: #FAC775;
+}
+
+/* === UITLEG-MODAL === */
+.modal-inhoud-uitleg {
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  line-height: 1.55;
+}
+
+.modal-inhoud-uitleg h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #534AB7;
+  margin-top: 18px;
+  margin-bottom: 8px;
+}
+
+.modal-inhoud-uitleg p,
+.modal-inhoud-uitleg ul {
+  font-size: 13.5px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.modal-inhoud-uitleg ul {
+  padding-left: 20px;
+}
+
+.modal-inhoud-uitleg li {
+  margin-bottom: 6px;
+}
+
+.modal-inhoud-uitleg code {
+  background: #f3f1ea;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 12.5px;
+  color: #534AB7;
+}
+
+.modal-inhoud-uitleg .uitleg-intro {
+  font-size: 14px;
+  color: #555;
+  font-style: italic;
+  margin-bottom: 18px;
+}
+
+.modal-inhoud-uitleg .uitleg-waarschuwing {
+  background: #FFF4E5;
+  border: 1.5px solid #FAC775;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+
+.modal-inhoud-uitleg .uitleg-waarschuwing > strong {
+  color: #993556;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.modal-inhoud-uitleg .uitleg-waarschuwing p strong {
+  color: #993556;
+}
+
+.modal-inhoud-uitleg .uitleg-waarschuwing p {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.modal-inhoud-uitleg .uitleg-waarschuwing p:last-child {
+  margin-bottom: 0;
+}
+
+/* Voorbeeld-sectie */
+.modal-inhoud-uitleg .uitleg-voorbeeld {
+  background: #EEEDFE;
+  border: 1.5px solid #CECBF6;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 16px 0 4px 0;
+  text-align: center;
+}
+
+.modal-inhoud-uitleg .uitleg-voorbeeld > strong {
+  color: #534AB7;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.modal-inhoud-uitleg .uitleg-voorbeeld p {
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.btn-voorbeeld {
+  background: #534AB7;
+  color: white;
+  border-color: #534AB7;
+  font-weight: 600;
+  padding: 8px 18px;
+}
+
+.btn-voorbeeld:hover {
+  background: #443B9F;
+}
+
+.btn-voorbeeld:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* === WERKRUIMTE === */
+.werkruimte {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* === ZIJPANEEL === */
+.zijpaneel {
+  width: 260px;
+  background: white;
+  border-right: 1px solid #e5e2d8;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e2d8;
+  flex-shrink: 0;
+}
+
+.tab {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #888;
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab:hover {
+  color: #534AB7;
+}
+
+.tab.actief {
+  color: #534AB7;
+  border-bottom-color: #534AB7;
+}
+
+.tab-inhoud {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.tab-inhoud.verborgen {
+  display: none;
+}
+
+.hint {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+/* === VAK-KNOPPEN (in zijpaneel) === */
+.vakken-lijst {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vak-knop {
+  background: white;
+  border: 1.5px solid #e5e2d8;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.vak-knop:hover {
+  border-color: #534AB7;
+  background: #FBFAF6;
+  transform: translateX(2px);
+}
+
+.vak-knop-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.vak-knop-naam {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
+.vak-knop-hint {
+  display: block;
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.vak-knop > div + .vak-knop-naam {
+  flex: 1;
+}
+
+.vak-knop {
+  flex-wrap: wrap;
+}
+
+.vak-knop > .vak-knop-naam,
+.vak-knop > .vak-knop-hint {
+  flex-basis: calc(100% - 50px);
+}
+
+.binnenkort {
+  margin-top: 24px;
+  padding: 12px;
+  background: #fafaf6;
+  border-radius: 10px;
+}
+
+.hint-titel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.hint-lijst {
+  list-style: none;
+  font-size: 12px;
+  color: #999;
+}
+
+.hint-lijst li {
+  padding: 2px 0;
+}
+
+.hint-lijst li::before {
+  content: "• ";
+  color: #ccc;
+}
+
+/* === BIBLIOTHEEK === */
+.bib-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.bib-item {
+  aspect-ratio: 1;
+  background: #fafaf6;
+  border: 1.5px solid #e5e2d8;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 6px;
+  transition: all 0.15s;
+}
+
+.bib-item:hover {
+  border-color: #534AB7;
+  background: white;
+  transform: translateY(-2px);
+}
+
+.bib-item img {
+  max-width: 100%;
+  max-height: 50px;
+  object-fit: contain;
+}
+
+.bib-item .naam {
+  font-size: 10px;
+  color: #666;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* === CANVAS-ZONE === */
+.canvas-zone {
+  flex: 1;
+  background: #fefdf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* === HET BORD === */
+/* Vast intern formaat: 1600x900 (16:9). Wordt geschaald via JavaScript
+   in bewerk- en presentatie-modus zodat het identiek werkt op elk scherm. */
+#bord {
+  width: 1600px;
+  height: 900px;
+  background: #fefdf8;
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: center center;
+}
+
+/* === HEADER VAN HET BORD === */
+.bord-header {
+  background: linear-gradient(90deg, #FFE4B5 0%, #FFDAB5 100%);
+  border-bottom: 2px solid #f5c989;
+  padding: 18px 40px;
+  display: flex;
+  align-items: center;
+  gap: 56px;
+  flex-shrink: 0;
+  border-radius: 16px 16px 0 0;
+  min-height: 84px;
+}
+
+.bord-datum {
+  font-size: 13px;
+  color: #854F0B;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bord-welkom {
+  font-size: 38px;
+  color: #633806;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+}
+
+.bord-welkom .zwaaihand {
+  font-size: 40px;
+  display: inline-block;
+  transform-origin: 70% 70%;
+  animation: zwaaien 2.5s ease-in-out infinite;
+}
+
+@keyframes zwaaien {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(-12deg); }
+  20% { transform: rotate(14deg); }
+  30% { transform: rotate(-8deg); }
+  40% { transform: rotate(10deg); }
+  50% { transform: rotate(0deg); }
+}
+
+/* === JARIGE-STROOKJE === */
+.bord-jarige {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 26px;
+  font-weight: 700;
+  font-style: italic;
+  white-space: nowrap;
+  padding: 4px 16px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 100px;
+  animation: jarigeWiebel 3s ease-in-out infinite;
+}
+
+.bord-jarige.verborgen {
+  display: none;
+}
+
+.jarige-icoon {
+  height: 64px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+}
+
+.jarige-emoji {
+  font-size: 36px;
+  line-height: 1;
+}
+
+@keyframes jarigeWiebel {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-2deg) scale(1.02); }
+  75% { transform: rotate(2deg) scale(1.02); }
+}
+
+.weer-widget {
+  background: white;
+  border-radius: 12px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid #f5c989;
+}
+
+.weer-icoon {
+  font-size: 22px;
+}
+
+.weer-temp {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0C447C;
+}
+
+/* === CANVAS-VLAK (waar vakken op staan) === */
+.bord-canvas {
+  flex: 1;
+  position: relative;
+  padding: 16px;
+  overflow: hidden;
+}
+
+/* === VAKKEN === */
+.vak {
+  position: absolute;
+  border-radius: 14px;
+  border: 2px solid;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  cursor: move;
+  user-select: none;
+  transition: box-shadow 0.15s;
+  min-width: 140px;
+  min-height: 100px;
+}
+
+.vak:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.vak.geselecteerd {
+  box-shadow: 0 0 0 3px #534AB7, 0 4px 14px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.vak-titel {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  cursor: text;
+  outline: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.vak-titel:focus {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.vak-titel:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.5;
+}
+
+.vak-inhoud {
+  flex: 1;
+  font-size: 15px;
+  line-height: 1.5;
+  cursor: text;
+  outline: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.vak-inhoud:focus {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.vak-inhoud:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.5;
+}
+
+/* === KLEUREN VOOR VAKKEN === */
+.vak.kleur-paars { background: #EEEDFE; border-color: #CECBF6; }
+.vak.kleur-paars .vak-titel { color: #534AB7; }
+.vak.kleur-paars .vak-inhoud { color: #26215C; }
+
+.vak.kleur-roze { background: #FBEAF0; border-color: #F4C0D1; }
+.vak.kleur-roze .vak-titel { color: #993556; }
+.vak.kleur-roze .vak-inhoud { color: #4B1528; }
+
+.vak.kleur-groen { background: #EAF3DE; border-color: #C0DD97; }
+.vak.kleur-groen .vak-titel { color: #3B6D11; }
+.vak.kleur-groen .vak-inhoud { color: #173404; }
+
+.vak.kleur-teal { background: #E1F5EE; border-color: #9FE1CB; }
+.vak.kleur-teal .vak-titel { color: #0F6E56; }
+.vak.kleur-teal .vak-inhoud { color: #04342C; }
+
+.vak.kleur-blauw { background: #E6F1FB; border-color: #B5D4F4; }
+.vak.kleur-blauw .vak-titel { color: #185FA5; }
+.vak.kleur-blauw .vak-inhoud { color: #042C53; }
+
+.vak.kleur-geel { background: #FAEEDA; border-color: #FAC775; }
+.vak.kleur-geel .vak-titel { color: #854F0B; }
+.vak.kleur-geel .vak-inhoud { color: #412402; }
+
+.vak.kleur-oranje { background: #FAECE7; border-color: #F5C4B3; }
+.vak.kleur-oranje .vak-titel { color: #993C1D; }
+.vak.kleur-oranje .vak-inhoud { color: #4A1B0C; }
+
+.vak.kleur-grijs { background: #F1EFE8; border-color: #D3D1C7; }
+.vak.kleur-grijs .vak-titel { color: #5F5E5A; }
+.vak.kleur-grijs .vak-inhoud { color: #2C2C2A; }
+
+/* === CHECKLIST-VAK === */
+.checklist-items {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: text;
+}
+
+.checklist-item:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Het symbool vóór elk item — past zich aan op stijl van het vak */
+.checklist-item .item-vinkje {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Standaard verborgen, elke stijl maakt hem zichtbaar */
+  width: 0;
+  height: 0;
+}
+
+/* Stijl: HOKJE (default) */
+.vak.stijl-hokje .item-vinkje {
+  width: 1.2em;
+  height: 1.2em;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Stijl: CIJFER — tekst wordt door JS gevuld */
+.vak.stijl-cijfer .item-vinkje {
+  min-width: 1.2em;
+  height: 1.2em;
+  font-weight: 700;
+  font-size: 1em;
+  opacity: 0.85;
+}
+
+/* Stijl: BOLLETJE */
+.vak.stijl-bolletje .item-vinkje {
+  width: 0.5em;
+  height: 0.5em;
+  margin: 0 0.35em;
+  background: currentColor;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+/* Stijl: GEEN — vinkje volledig verbergen */
+.vak.stijl-geen .item-vinkje {
+  display: none;
+}
+
+.checklist-item .item-afbeelding {
+  width: 2.3em;
+  height: 2.3em;
+  object-fit: contain;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: outline 0.1s;
+}
+
+.checklist-item .item-afbeelding:hover {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.checklist-item .item-tekst {
+  flex: 1;
+  outline: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  min-height: 1.4em;
+  cursor: text;
+  font-size: 14px;
+}
+
+.checklist-item .item-tekst:focus {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.checklist-item .item-tekst:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.5;
+}
+
+.checklist-item .item-verwijder {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.checklist-item:hover .item-verwijder {
+  opacity: 1;
+}
+
+/* === DROP-TARGET (afbeelding op item slepen) === */
+.checklist-item.drop-actief {
+  outline: 2px dashed currentColor;
+  outline-offset: -2px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* === WITREGEL === */
+.checklist-witregel {
+  height: 18px;
+  min-height: 8px;
+  border-radius: 4px;
+  position: relative;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.35),
+    rgba(255, 255, 255, 0.35) 4px,
+    rgba(0, 0, 0, 0.04) 4px,
+    rgba(0, 0, 0, 0.04) 8px
+  );
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  opacity: 0.55;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.checklist-witregel:hover {
+  background: rgba(255, 255, 255, 0.7);
+  opacity: 1;
+}
+
+/* Verwijder-knopje (×) — alleen zichtbaar bij hover */
+.witregel-verwijder {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #993556;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+  font-family: inherit;
+  padding: 0;
+  line-height: 1;
+}
+
+.checklist-witregel:hover .witregel-verwijder {
+  opacity: 1;
+}
+
+.witregel-verwijder:hover {
+  background: white;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Resize-greep onderaan — vooral zichtbaar bij hover */
+.witregel-resize {
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.25);
+  cursor: ns-resize;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.checklist-witregel:hover .witregel-resize {
+  opacity: 1;
+}
+
+.witregel-resize:hover {
+  background: #534AB7;
+}
+
+/* Flash bij toevoegen — zodat leerkracht ziet dat hij verschenen is */
+.checklist-witregel.net-toegevoegd {
+  animation: witregelFlash 1.5s ease-out;
+}
+
+@keyframes witregelFlash {
+  0% {
+    background: #FFE4B5;
+    opacity: 1;
+    transform: scaleX(0.7);
+  }
+  30% {
+    background: #FFE4B5;
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0.55;
+    transform: scaleX(1);
+  }
+}
+
+/* === KNOPPEN-RIJ (+ Item, + Witregel) === */
+.checklist-knoppen {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.checklist-toevoegen {
+  flex: 1;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px dashed currentColor;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0.7;
+  font-family: inherit;
+  color: inherit;
+}
+
+.checklist-toevoegen:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* === GREPEN (om vak/afbeelding te schalen) === */
+.greep {
+  position: absolute;
+  background: white;
+  border: 2px solid #534AB7;
+}
+
+/* Hoekgrepen: rond, schalen in beide richtingen */
+.greep-tl, .greep-tr, .greep-bl, .greep-br {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.greep-tl { top: -7px; left: -7px; cursor: nwse-resize; }
+.greep-tr { top: -7px; right: -7px; cursor: nesw-resize; }
+.greep-bl { bottom: -7px; left: -7px; cursor: nesw-resize; }
+.greep-br { bottom: -7px; right: -7px; cursor: nwse-resize; }
+
+/* Zijgrepen: rechthoekig, schalen in één richting */
+.greep-n, .greep-s {
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 10px;
+  border-radius: 3px;
+  cursor: ns-resize;
+}
+.greep-e, .greep-w {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 22px;
+  border-radius: 3px;
+  cursor: ew-resize;
+}
+
+.greep-n { top: -6px; }
+.greep-s { bottom: -6px; }
+.greep-e { right: -6px; }
+.greep-w { left: -6px; }
+
+/* === ROTATIE-GREEP === */
+.rotatie-greep {
+  position: absolute;
+  top: -38px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  background: white;
+  border: 2px solid #534AB7;
+  border-radius: 50%;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #534AB7;
+  font-weight: 700;
+  user-select: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rotatie-greep:hover {
+  background: #534AB7;
+  color: white;
+}
+
+.rotatie-greep:active {
+  cursor: grabbing;
+}
+
+/* Lijntje van rotatie-greep naar element (visueel verband) */
+.rotatie-greep::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 10px;
+  background: #534AB7;
+}
+
+/* === ACTIE-KNOPPEN OP GESELECTEERD VAK === */
+.vak-acties {
+  position: absolute;
+  top: -36px;
+  left: 0;
+  display: flex;
+  gap: 4px;
+  background: white;
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid #e5e2d8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.vak-actie {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #555;
+}
+
+.vak-actie:hover {
+  background: #f5f3ee;
+  color: #534AB7;
+}
+
+.vak-actie.actief {
+  background: #534AB7;
+  color: white;
+}
+
+.vak-actie.actief:hover {
+  background: #443B9F;
+  color: white;
+}
+
+.kleur-puntje {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid white;
+  box-shadow: 0 0 0 1px #d4d1c5;
+}
+
+/* === KLEURKIEZER POPOVER === */
+.kleurkiezer {
+  position: fixed;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e5e2d8;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+  z-index: 100;
+}
+
+.kleurkiezer.verborgen {
+  display: none;
+}
+
+.kleurkiezer-titel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.kleur-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.kleur-knop {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.kleur-knop:hover {
+  transform: scale(1.1);
+  border-color: #534AB7;
+}
+
+/* === LOSSE AFBEELDINGEN OP CANVAS === */
+.canvas-afbeelding {
+  position: absolute;
+  cursor: move;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.canvas-afbeelding.geselecteerd {
+  outline: 3px solid #534AB7;
+  outline-offset: 3px;
+  border-radius: 4px;
+  z-index: 20;
+}
+
+.canvas-afbeelding img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* === PRESENTATIE-MODUS ===
+   We schalen het echte bord met transform: scale() en plaatsen het op
+   fixed positie midden op het scherm. Geen kloon, geen aanpassingen aan
+   de bord-grootte zelf — vakken behouden hun relatieve posities.
+*/
+
+/* De overlay zelf wordt enkel als drager gebruikt voor de × knop */
+.presentatie {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 1100;
+  pointer-events: none; /* clicks gaan door behalve op de × knop */
+}
+
+.presentatie.verborgen {
+  display: none;
+}
+
+.presentatie .btn-sluit {
+  pointer-events: auto; /* knop blijft klikbaar */
+}
+
+/* In presentatie-modus: crème achtergrond zodat eventuele randen visueel doorlopen */
+body.in-presentatie {
+  background: #fefdf8;
+  overflow: hidden;
+}
+
+/* Verberg de bewerk-UI (maar laat canvas-zone bestaan, want het bord zit erin) */
+body.in-presentatie .topbar,
+body.in-presentatie .zijpaneel {
+  display: none !important;
+}
+
+body.in-presentatie .werkruimte {
+  display: block;
+  height: 100vh;
+}
+
+body.in-presentatie .canvas-zone {
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Geen afgeronde hoeken, geen border, geen schaduw op bord in presentatie */
+body.in-presentatie #bord {
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Header in presentatie: ook geen ronde hoeken bovenaan */
+body.in-presentatie .bord-header {
+  border-radius: 0 !important;
+}
+
+/* Verberg alle bewerk-affordances op het bord */
+body.in-presentatie .greep,
+body.in-presentatie .vak-acties,
+body.in-presentatie .checklist-knoppen,
+body.in-presentatie .checklist-toevoegen,
+body.in-presentatie .item-verwijder,
+body.in-presentatie .rotatie-greep {
+  display: none !important;
+}
+
+body.in-presentatie .vak,
+body.in-presentatie .vak-titel,
+body.in-presentatie .vak-inhoud,
+body.in-presentatie .item-tekst,
+body.in-presentatie .bord-header,
+body.in-presentatie .canvas-afbeelding {
+  cursor: default !important;
+}
+
+body.in-presentatie [contenteditable] {
+  -webkit-user-modify: read-only;
+  pointer-events: none;
+}
+
+body.in-presentatie .checklist-witregel {
+  background: none !important;
+  border: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+body.in-presentatie .checklist-witregel::after,
+body.in-presentatie .witregel-verwijder,
+body.in-presentatie .witregel-resize {
+  display: none !important;
+}
+
+body.in-presentatie .geselecteerd {
+  box-shadow: none !important;
+}
+
+/* === SLUITKNOP === */
+.btn-sluit {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-size: 28px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-sluit:hover {
+  background: white;
+}
+
+/* === HEADER BEWERKEN === */
+.bord-header {
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.bord-header:hover {
+  filter: brightness(0.97);
+}
+
+/* === MODAL OVERLAY (voor header-bewerker en timer-instellen) === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.verborgen {
+  display: none;
+}
+
+.modal-overlay .modal-inhoud {
+  background: white;
+  border-radius: 14px;
+  padding: 24px;
+  min-width: 360px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-overlay h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #534AB7;
+  margin-bottom: 16px;
+}
+
+.modal-overlay label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.modal-overlay input[type="text"],
+.modal-overlay input[type="number"] {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 4px;
+  border: 1px solid #d4d1c5;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.modal-overlay input[type="color"] {
+  display: inline-block;
+  margin-top: 4px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d4d1c5;
+  border-radius: 6px;
+  cursor: pointer;
+  background: none;
+}
+
+.modal-overlay .kleur-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.modal-overlay .kleur-knop {
+  width: 100%;
+  aspect-ratio: 1.6;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.modal-overlay .kleur-knop:hover {
+  transform: scale(1.05);
+}
+
+.modal-overlay .kleur-knop.actief {
+  border-color: #534AB7;
+  box-shadow: 0 0 0 2px white inset;
+}
+
+.modal-knoppen {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* ============================================
+   TIMER-VAK
+   ============================================ */
+.vak[data-vaktype="timer"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.timer-inhoud {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+}
+
+.timer-visueel {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  max-height: 60%;
+}
+
+.timer-visueel:empty {
+  display: none;
+}
+
+.timer-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 130px;
+}
+
+.timer-cijfers {
+  font-size: 36px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.vak.kleur-groen .timer-cijfers { color: #3B6D11; }
+.vak.kleur-paars .timer-cijfers { color: #534AB7; }
+.vak.kleur-roze .timer-cijfers { color: #993556; }
+.vak.kleur-teal .timer-cijfers { color: #0F6E56; }
+.vak.kleur-blauw .timer-cijfers { color: #185FA5; }
+.vak.kleur-geel .timer-cijfers { color: #854F0B; }
+.vak.kleur-oranje .timer-cijfers { color: #993C1D; }
+.vak.kleur-grijs .timer-cijfers { color: #5F5E5A; }
+
+.timer-knoppen {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.timer-knop {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid currentColor;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 14px;
+  color: inherit;
+  font-family: inherit;
+  opacity: 0.75;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-knop:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.timer-knop:active {
+  transform: scale(0.95);
+}
+
+.timer-geluidsicoon {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 20px;
+  cursor: pointer;
+  user-select: none;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.timer-geluidsicoon:hover {
+  opacity: 1;
+}
+
+/* === KLOK-STIJL === */
+/* Time-timer rood-roze look, zoals een echte klassiek time-timer */
+.timer-klok .klok-rand {
+  fill: #fefdf8;
+  stroke: #d4d1c5;
+  stroke-width: 2;
+  opacity: 1;
+}
+
+.timer-klok .klok-sector {
+  fill: #E76F51;
+  opacity: 0.9;
+}
+
+.timer-klok .klok-midden {
+  fill: #2a2a2a;
+}
+
+/* === TAART-STIJL === */
+.timer-taart .taart-segment {
+  stroke: white;
+  stroke-width: 1;
+}
+.timer-taart .taart-segment-0 { fill: #F4A261; }
+.timer-taart .taart-segment-1 { fill: #E76F51; }
+.timer-taart .taart-segment-2 { fill: #E9C46A; }
+.timer-taart .taart-segment-3 { fill: #F4A261; }
+.timer-taart .taart-midden {
+  fill: #b85820;
+}
+
+/* === ZANDLOPER-STIJL === */
+.timer-zandloper .zandloper-glas {
+  fill: rgba(255, 255, 255, 0.5);
+  stroke: #7F77DD;
+  stroke-width: 2;
+  opacity: 1;
+}
+
+.timer-zandloper .zandloper-zand-boven,
+.timer-zandloper .zandloper-zand-onder {
+  fill: #E9C46A;
+  opacity: 0.95;
+}
+
+.timer-zandloper .zandloper-deksel,
+.timer-zandloper .zandloper-bodem {
+  fill: #534AB7;
+  opacity: 0.85;
+}
+
+/* === VOORTGANGSBALK === */
+/* Lavendel-paars met paarsere vulling — vriendelijk en helder */
+.balk-buiten {
+  width: 90%;
+  height: 28px;
+  background: #EEEDFE;
+  border: 2px solid #CECBF6;
+  border-radius: 14px;
+  overflow: hidden;
+  opacity: 1;
+}
+
+.balk-vulling {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #7F77DD 0%, #534AB7 100%);
+  opacity: 1;
+  transition: width 0.3s;
+}
+
+/* === TIJD OM (knipperen) === */
+.vak.tijd-om {
+  animation: tijdomKnipper 0.6s ease-in-out 5;
+}
+
+@keyframes tijdomKnipper {
+  0%, 100% { background-color: var(--vak-bg, currentColor); }
+  50% { background-color: #FCEBEB; box-shadow: 0 0 0 4px #E24B4A; }
+}
+
+.vak.tijd-om .timer-cijfers {
+  color: #A32D2D !important;
+}
+
+/* === TIMER MODAL STIJL-KEUZE === */
+.timer-stijl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.timer-stijl-knop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border: 2px solid #e5e2d8;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.timer-stijl-knop:hover {
+  border-color: #534AB7;
+  background: #FBFAF6;
+}
+
+.timer-stijl-knop.actief {
+  border-color: #534AB7;
+  background: #EEEDFE;
+  color: #534AB7;
+}
+
+.timer-stijl-knop .stijl-icoon {
+  font-size: 24px;
+}
+
+.timer-stijl-knop .stijl-naam {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* ============================================
+   WEER-VAK
+   ============================================ */
+.vak[data-vaktype="weer"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.weer-inhoud {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  user-select: none;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.weer-rij {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.weer-icoon-groot {
+  font-size: 48px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.weer-temperatuur {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.weer-omschrijving {
+  font-size: 12px;
+  opacity: 0.7;
+  text-align: center;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Locatie-label onder weer (klein, subtiel) */
+.weer-locatie-label {
+  font-size: 10px;
+  opacity: 0.55;
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  margin-top: 2px;
+}
+
+.weer-locatie-label:empty {
+  display: none;
+}
+
+/* Instellen-knop ⚙ rechtsboven in weer-vak */
+.weer-instellen {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+  font-family: inherit;
+  padding: 0;
+  color: inherit;
+}
+
+.vak[data-vaktype="weer"]:hover .weer-instellen,
+.vak[data-vaktype="weer"].geselecteerd .weer-instellen {
+  opacity: 0.75;
+}
+
+.weer-instellen:hover {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* In presentatie: ⚙ verbergen, leerkracht stelt vooraf in */
+body.in-presentatie .weer-instellen {
+  display: none !important;
+}
+
+/* Kleuren per vak-kleur (gebruikt currentColor via .kleur-* op de vak) */
+.vak.kleur-blauw .weer-temperatuur { color: #185FA5; }
+.vak.kleur-blauw .weer-omschrijving { color: #185FA5; }
+.vak.kleur-paars .weer-temperatuur { color: #534AB7; }
+.vak.kleur-paars .weer-omschrijving { color: #534AB7; }
+.vak.kleur-roze .weer-temperatuur { color: #993556; }
+.vak.kleur-roze .weer-omschrijving { color: #993556; }
+.vak.kleur-groen .weer-temperatuur { color: #3B6D11; }
+.vak.kleur-groen .weer-omschrijving { color: #3B6D11; }
+.vak.kleur-teal .weer-temperatuur { color: #0F6E56; }
+.vak.kleur-teal .weer-omschrijving { color: #0F6E56; }
+.vak.kleur-geel .weer-temperatuur { color: #854F0B; }
+.vak.kleur-geel .weer-omschrijving { color: #854F0B; }
+.vak.kleur-oranje .weer-temperatuur { color: #993C1D; }
+.vak.kleur-oranje .weer-omschrijving { color: #993C1D; }
+.vak.kleur-grijs .weer-temperatuur { color: #5F5E5A; }
+.vak.kleur-grijs .weer-omschrijving { color: #5F5E5A; }
+
+/* ============================================
+   WERKSTIJL-VAK
+   ============================================ */
+.vak[data-vaktype="werkstijl"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.werkstijl-inhoud {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  user-select: none;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.werkstijl-visueel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  max-height: 70%;
+}
+
+.werkstijl-afbeelding {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.werkstijl-emoji {
+  font-size: 72px;
+  line-height: 1;
+}
+
+.werkstijl-label {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.werkstijl-knoppen {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.werkstijl-knop {
+  flex: 1;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1.5px solid currentColor;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: inherit;
+  font-family: inherit;
+  opacity: 0.65;
+  transition: all 0.15s;
+}
+
+.werkstijl-knop:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.werkstijl-knop.actief {
+  opacity: 1;
+  background: currentColor;
+  color: white !important;
+  border-color: currentColor;
+}
+
+.vak.kleur-roze .werkstijl-knop.actief { background: #993556; }
+.vak.kleur-paars .werkstijl-knop.actief { background: #534AB7; }
+.vak.kleur-groen .werkstijl-knop.actief { background: #3B6D11; }
+.vak.kleur-teal .werkstijl-knop.actief { background: #0F6E56; }
+.vak.kleur-blauw .werkstijl-knop.actief { background: #185FA5; }
+.vak.kleur-geel .werkstijl-knop.actief { background: #854F0B; }
+.vak.kleur-oranje .werkstijl-knop.actief { background: #993C1D; }
+.vak.kleur-grijs .werkstijl-knop.actief { background: #5F5E5A; }
+
+/* In presentatie: knoppen blijven zichtbaar zodat juf kan wisselen */

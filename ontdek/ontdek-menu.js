@@ -41,6 +41,13 @@ const BESCHIKBAAR = new Map([
   ['Coderen', './coderen.html'],
   ['Blokkenbouwsels', './blokkenbouwsels/index.html'],
   ['Plattegrond', './plattegrond.html'],
+  ['Bundel kloklezen', './kloklezen/kloklezen.html'],
+  ['Bundel kalenders', './kalender/kalender.html'],
+  ['Timer', './timer.html'],
+  ['Opvolging huistaken', './opvolging_huistaken/opvolging_huistaken.html'],
+  ['Takenbord', './Takenbord_v2/klasbord.html'],
+  ['Planbord', './planbord/index.html'],
+  ['Bingo', './bingo.html'],
 ]);
 
 const toolDescriptions = {

@@ -95,7 +95,7 @@
         </div>
 
         <hr>
-        <button id="import-spel-knop" class="menu-knop">🔄 Importeer Spel</button>
+        <button id="import-spel-knop" class="menu-knop">🔄 Importeer spelbestand (.json)</button>
         <input type="file" id="import-spel-input" class="verborgen" accept=".json">
     </div>
 
@@ -114,10 +114,30 @@
             <a href="spel.html" id="start-spel-link" class="actie-knop">▶️ Start Spel</a>
             <button id="maak-kaarten-knop" class="actie-knop">📄 Maak Bingokaarten</button>
             <div class="export-container">
-                <button id="export-spel-knop" class="actie-knop">📥 Exporteer Spel (.json)</button>
-                <span class="tooltip-trigger" 
-                      data-tooltip="Sla dit exacte spel op als een klein bestandje.&#10;Waarom?&#10;• Voor een extra back-up.&#10;• Om te delen met een collega.&#10;• Om mee te nemen naar een andere computer (bv. van thuis naar school).">❓</span>
+                <button id="export-spel-knop" class="actie-knop">📥 Exporteer spelbestand (.json)</button>
+                <button id="uitleg-spelbestand-knop" class="uitleg-spelbestand-knop" type="button">❓ Wat is een spelbestand?</button>
             </div>
+        </div>
+    </div>
+
+    <div id="uitleg-spelbestand-modal" class="spelbestand-modal verborgen" role="dialog" aria-modal="true" aria-labelledby="spelbestand-uitleg-titel">
+        <div class="spelbestand-modal-kaart">
+            <button class="spelbestand-modal-sluiten" type="button" aria-label="Uitleg sluiten">×</button>
+            <h2 id="spelbestand-uitleg-titel">Wat is een JSON-spelbestand?</h2>
+            <p>Een JSON-bestand is een klein spelbestand waarin Bingo je gekozen leerstof, instellingen én de exacte bingokaarten bewaart.</p>
+            <div class="spelbestand-waarschuwing"><strong>Open het bestand niet zelf.</strong> Als je erop dubbelklikt, zie je mogelijk vreemde tekens en codes. Dat is normaal: het bestand is bedoeld om opnieuw in Bingo te laden.</div>
+            <h3>Zo bewaar je het</h3>
+            <ol>
+                <li>Maak eerst je bingokaarten.</li>
+                <li>Klik op <strong>Exporteer spelbestand (.json)</strong>.</li>
+                <li>Het bestand komt meestal in de map <strong>Downloads</strong>.</li>
+                <li>Verplaats het eventueel naar een herkenbare map, bijvoorbeeld <strong>Bingospellen</strong>.</li>
+                <li>Je mag de naam aanpassen, maar laat <strong>.json</strong> achteraan staan.</li>
+            </ol>
+            <h3>Later opnieuw gebruiken</h3>
+            <p>Klik op <strong>Importeer spelbestand</strong> en kies het bewaarde bestand. Bingo opent dan hetzelfde trekspel en, bij nieuwe bestanden, exact dezelfde bingokaarten.</p>
+            <p class="spelbestand-tip"><strong>Waarom bewaren?</strong> Zo kun je het spel 's morgens voorbereiden, de kaarten afdrukken en het later op dezelfde of een andere computer spelen.</p>
+            <button class="spelbestand-modal-ok" type="button">Ik begrijp het</button>
         </div>
     </div>
 

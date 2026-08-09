@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <title>Lettercode Puzzel Generator</title>
 <link href="lettercode.css" rel="stylesheet"/>
+<link href="lettercode-modern.css" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -19,6 +20,15 @@
 <label for="gecodeerdeZinInput">Zin voor de geheime boodschap:</label>
 <textarea id="gecodeerdeZinInput" rows="3" placeholder="Typ hier de zin waarvan letters genummerd worden"></textarea>
 <div id="zinMelding" style="font-size: 0.9em; color: #555; margin-top: 5px;"></div>
+</div>
+<div class="control-group">
+<label for="worksheetTitleInput">Thema of titel van het werkblad (optionele zoektip):</label>
+<input id="worksheetTitleInput" type="text" maxlength="50" placeholder="Bijvoorbeeld: Terug naar school"/>
+</div>
+<div class="control-group">
+<label for="prefilledLettersInput">Letters vooraf tonen (optioneel, maximaal 2):</label>
+<input id="prefilledLettersInput" type="text" maxlength="3" placeholder="Bijvoorbeeld: Z B"/>
+<small>Gebruik dit als opnieuw genereren en een extra eenvoudig woord niet helpen. Deze letters staan onderaan al op de juiste plek.</small>
 </div>
 
 <div class="words-and-feedback-group">
@@ -41,6 +51,8 @@
     <button id="regenereerBtn">Opnieuw Genereren</button>
     <button id="downloadPngBtn">Download als PNG</button>
     <button id="downloadPdfBtn">Download als PDF</button>
+    <button id="toggleSolutionsBtn">Oplossingen tonen</button>
+    <button id="downloadSolutionsPdfBtn">Oplossingen als PDF</button>
 </div>
 
 </div>
@@ -53,5 +65,6 @@
 </div>
 </div>
 <script src="lettercode.js"></script>
+<script src="lettercode-modern.js"></script>
 </body>
 </html>

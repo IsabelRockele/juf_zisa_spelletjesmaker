@@ -100,6 +100,9 @@ function genereerLettercodePuzzel() {
     // 2. Process the coded sentence
     const fullGecodeerdeZin = gecodeerdeZinInput.toUpperCase();
     const zinLettersOnly = fullGecodeerdeZin.split('').filter(char => /^[A-Z]$/.test(char));
+    const prefilledLetters = [...new Set((document.getElementById('prefilledLettersInput')?.value || '')
+        .toUpperCase().match(/[A-Z]/g) || [])].slice(0, 2);
+    const prefilledSet = new Set(prefilledLetters);
     updateZinMessage(zinLettersOnly.length);
 
     const MIN_ZIN_LENGTH = 5;
@@ -111,86 +114,124 @@ function genereerLettercodePuzzel() {
         return;
     }
 
-    // --- Toewijzingslogica ---
-    // Structure to hold final assignments: { originalWordIndex: { letterIndexInWord: assignedNumber } }
-    const assignedLettersToWords = {}; 
-    // To track which specific instances of letters in words are used for assignment
-    const usedWordLetterInstances = {}; // {`originalWordIdx-letterIdx`: true}
-
-    // Array to store the mapping for the sentence grid
-    const sentenceAssignments = Array(zinLettersOnly.length).fill(null); // Will store {char: 'A', number: 1, originalWordIdx: 0, originalLetterIdx: 0}
-
-    // Available numbers for assignment (these will be popped as they are used)
-    const availableNumbers = Array.from({ length: zinLettersOnly.length }, (_, i) => i + 1);
-    
-    // Attempt to assign all letters from the sentence
-    const MAX_TOTAL_ASSIGNMENT_ATTEMPTS = zinLettersOnly.length * 200; // Increased attempts for robustness
-    let totalAssignmentAttempts = 0;
-
-    // Loop until all sentence letters are assigned or max attempts reached
-    while (availableNumbers.length > 0 && totalAssignmentAttempts < MAX_TOTAL_ASSIGNMENT_ATTEMPTS) {
-        const unassignedZinIndices = sentenceAssignments
-            .map((val, idx) => val === null ? idx : -1)
-            .filter(idx => idx !== -1);
-        
-        if (unassignedZinIndices.length === 0) break; // All letters assigned
-
-        const zinCharIdxToAssign = unassignedZinIndices[getRandomInt(0, unassignedZinIndices.length - 1)];
-        const targetLetter = zinLettersOnly[zinCharIdxToAssign];
-        let assignedInThisAttempt = false;
-
-        // Shuffle words for this attempt (using original indices from the `woorden` array)
-        const shuffledWordsIndices = Array.from({ length: woorden.length }, (_, i) => i).sort(() => Math.random() - 0.5);
-
-        for (const currentWordArrIndex of shuffledWordsIndices) { // This `currentWordArrIndex` corresponds to index in `woorden` array
-            const word = woorden[currentWordArrIndex];
-            const originalWordLetters = word.split('');
-
-            // Determine max assignments for this specific word based on its length
-            let maxAssignmentsForThisWord = 3; 
-            if (word.length <= 4) { // For words of 3 or 4 letters, max 2 assignments
-                maxAssignmentsForThisWord = 2;
-            }
-
-            // Check current assignments in this word (using its original index in `woorden` array)
-            const currentAssignmentsInWord = Object.values(assignedLettersToWords[currentWordArrIndex] || {}).length;
-            if (currentAssignmentsInWord >= maxAssignmentsForThisWord) {
-                continue; // Skip if max assignments reached for this word
-            }
-
-            // Find all available instances of the targetLetter in the current word
-            const potentialLetterIndices = originalWordLetters
-                .map((char, idx) => (char === targetLetter && !usedWordLetterInstances[`${currentWordArrIndex}-${idx}`] ? idx : -1))
-                .filter(idx => idx !== -1);
-            
-            if (potentialLetterIndices.length > 0) {
-                // Choose a random available instance
-                const selectedLetterIndexInWord = potentialLetterIndices[getRandomInt(0, potentialLetterIndices.length - 1)];
-
-                if (availableNumbers.length > 0) {
-                    const randomIndexForNumber = getRandomInt(0, availableNumbers.length - 1);
-                    const assignedNumber = availableNumbers.splice(randomIndexForNumber, 1)[0];
-                    
-                    if (!assignedLettersToWords[currentWordArrIndex]) {
-                        assignedLettersToWords[currentWordArrIndex] = {};
-                    }
-                    assignedLettersToWords[currentWordArrIndex][selectedLetterIndexInWord] = assignedNumber;
-                    usedWordLetterInstances[`${currentWordArrIndex}-${selectedLetterIndexInWord}`] = true;
-                    sentenceAssignments[zinCharIdxToAssign] = { 
-                        char: targetLetter, 
-                        number: assignedNumber, 
-                        originalWordIdx: currentWordArrIndex, // Store the index from the `woorden` array
-                        originalLetterIdx: selectedLetterIndexInWord 
-                    };
-                    assignedInThisAttempt = true;
-                    break; // Move to the next sentence letter (or continue overall loop)
-                }
-            }
-        }
-        if (!assignedInThisAttempt) {
-            totalAssignmentAttempts++; // Increment if no assignment was made in this iteration
-        }
+    // --- Betrouwbare toewijzingslogica ---
+    // We zoeken de volledige combinatie in één keer. Daardoor kan een bruikbare
+    // letter niet meer toevallig te vroeg worden opgebruikt.
+    const assignedLettersToWords = {};
+    const sentenceAssignments = zinLettersOnly.map(char =>
+        prefilledSet.has(char) ? { char, number: null, prefilled: true } : null
+    );
+    const codedLetters = zinLettersOnly.filter(char => !prefilledSet.has(char));
+    const neededLetterSet = new Set(codedLetters);
+    const contributingWordIndices = woorden
+        .map((word, index) => word.split('').some(char => neededLetterSet.has(char)) ? index : -1)
+        .filter(index => index >= 0);
+    const shuffledWordOrder = [...contributingWordIndices];
+    for (let i = shuffledWordOrder.length - 1; i > 0; i--) {
+        const j = getRandomInt(0, i);
+        [shuffledWordOrder[i], shuffledWordOrder[j]] = [shuffledWordOrder[j], shuffledWordOrder[i]];
     }
+    // Letterplaatsen worden per positie over de woorden verdeeld. Daardoor krijgt
+    // niet eerst één woord alle codes voordat een volgend woord aan bod komt.
+    const letterSlots = [];
+    const maxWordLength = Math.max(0, ...woorden.map(word => word.length));
+    for (let letterIndex = 0; letterIndex < maxWordLength; letterIndex++) {
+        shuffledWordOrder.forEach(wordIndex => {
+            const char = woorden[wordIndex][letterIndex];
+            if (char) letterSlots.push({ char, wordIndex, letterIndex });
+        });
+    }
+
+    const sentenceOffset = 1;
+    const slotOffset = sentenceOffset + zinLettersOnly.length;
+    const wordOffset = slotOffset + letterSlots.length;
+    const source = 0;
+    const sink = wordOffset + woorden.length;
+    // Probeer eerst met maximaal 1 code per woord, daarna 2, enzovoort.
+    // De eerste volledige oplossing is daardoor automatisch de meest gelijkmatige:
+    // woorden met weinig codes worden benut voordat een eerder woord er veel krijgt.
+    const runBalancedMatching = (wordLimit) => {
+        const candidateGraph = Array.from({ length: sink + 1 }, () => []);
+        const addEdge = (from, to, capacity) => {
+            const forward = { to, rev: candidateGraph[to].length, cap: capacity, initial: capacity };
+            const reverse = { to: from, rev: candidateGraph[from].length, cap: 0, initial: 0 };
+            candidateGraph[from].push(forward);
+            candidateGraph[to].push(reverse);
+        };
+
+        zinLettersOnly.forEach((char, sentenceIndex) => {
+            if (prefilledSet.has(char)) return;
+            addEdge(source, sentenceOffset + sentenceIndex, 1);
+            letterSlots.forEach((slot, slotIndex) => {
+                if (slot.char === char) addEdge(sentenceOffset + sentenceIndex, slotOffset + slotIndex, 1);
+            });
+        });
+        letterSlots.forEach((slot, slotIndex) => addEdge(slotOffset + slotIndex, wordOffset + slot.wordIndex, 1));
+        woorden.forEach((word, wordIndex) => {
+            addEdge(wordOffset + wordIndex, sink, Math.min(word.length, wordLimit));
+        });
+
+        let flow = 0;
+        while (true) {
+            const parent = Array(candidateGraph.length).fill(null);
+            const queue = [source];
+            parent[source] = { node: -1, edge: -1 };
+            for (let q = 0; q < queue.length && !parent[sink]; q++) {
+                const node = queue[q];
+                candidateGraph[node].forEach((edge, edgeIndex) => {
+                    if (edge.cap > 0 && !parent[edge.to]) {
+                        parent[edge.to] = { node, edge: edgeIndex };
+                        queue.push(edge.to);
+                    }
+                });
+            }
+            if (!parent[sink]) break;
+            for (let node = sink; node !== source;) {
+                const step = parent[node];
+                const edge = candidateGraph[step.node][step.edge];
+                edge.cap -= 1;
+                candidateGraph[node][edge.rev].cap += 1;
+                node = step.node;
+            }
+            flow += 1;
+        }
+        return { graph: candidateGraph, flow };
+    };
+
+    let graph;
+    let matchingFlow = 0;
+    for (let wordLimit = 1; wordLimit <= maxWordLength; wordLimit++) {
+        const attempt = runBalancedMatching(wordLimit);
+        graph = attempt.graph;
+        matchingFlow = attempt.flow;
+        if (matchingFlow === codedLetters.length) break;
+    }
+
+    const codedLetterCount = codedLetters.length;
+    const availableNumbers = Array.from({ length: codedLetterCount }, (_, i) => i + 1);
+    for (let i = availableNumbers.length - 1; i > 0; i--) {
+        const j = getRandomInt(0, i);
+        [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
+    }
+    let assignedNumberIndex = 0;
+    zinLettersOnly.forEach((char, sentenceIndex) => {
+        if (prefilledSet.has(char)) return;
+        const node = sentenceOffset + sentenceIndex;
+        const usedEdge = graph[node].find(edge =>
+            edge.to >= slotOffset && edge.to < wordOffset && edge.initial === 1 && edge.cap === 0
+        );
+        if (!usedEdge) return;
+        const slot = letterSlots[usedEdge.to - slotOffset];
+        const assignedNumber = availableNumbers[assignedNumberIndex++];
+        if (!assignedLettersToWords[slot.wordIndex]) assignedLettersToWords[slot.wordIndex] = {};
+        assignedLettersToWords[slot.wordIndex][slot.letterIndex] = assignedNumber;
+        sentenceAssignments[sentenceIndex] = {
+            char,
+            number: assignedNumber,
+            originalWordIdx: slot.wordIndex,
+            originalLetterIdx: slot.letterIndex
+        };
+    });
 
 
     // Filter out words that ultimately didn't contribute at least 1 letter
@@ -220,7 +261,7 @@ function genereerLettercodePuzzel() {
     if (wordsNotUsedWarning) {
         if (meldingContainer.innerHTML !== "") meldingContainer.innerHTML += "<br>";
         meldingContainer.style.color = "orange";
-        meldingContainer.innerHTML += `Sommige ingevoerde woorden konden niet worden gebruikt omdat ze geen letters konden bijdragen aan de geheime zin (min. 1 toewijzing per woord, of geen matchende letters/limiet bereikt).`;
+        meldingContainer.innerHTML += `Sommige ingevoerde woorden staan niet op het werkblad omdat geen van hun letters nog nodig is voor de geheime boodschap.`;
     }
 
     // Determine missing letters from the sentence that couldn't be assigned
@@ -235,7 +276,7 @@ function genereerLettercodePuzzel() {
         meldingContainer.style.color = "red";
         if (meldingContainer.innerHTML !== "") meldingContainer.innerHTML += "<br>";
         const uniqueMissingChars = [...new Set(unassignedSentenceChars)].sort().join(', ');
-        meldingContainer.innerHTML += `De volgende letters van de geheime zin ontbreken of konden niet worden toegewezen: <b>${uniqueMissingChars}</b>. Voeg woorden toe met deze letters.`;
+        meldingContainer.innerHTML += `De volgende letters ontbreken nog of komen niet vaak genoeg voor: <b>${uniqueMissingChars}</b>.<span class="letter-tip"><strong>Wat kun je nu doen?</strong><span class="letter-tip-step"><b>1</b><span>Denk je dat alle letters toch aanwezig zijn? Klik dan eerst op <strong>Opnieuw genereren</strong>. Je woorden en boodschap blijven staan.</span></span><span class="letter-tip-step"><b>2</b><span>Blijft deze melding verschijnen? Voeg een extra eenvoudig woord toe waarin de ontbrekende letter voorkomt.</span></span><span class="letter-tip-step"><b>3</b><span>Vind je voor één of twee letters geen geschikt woord? Vul die letters bovenaan in bij <strong>Letters vooraf tonen</strong>. Ze verschijnen dan al op de juiste plaats in de geheime boodschap onderaan.</span></span><small>Let op: dezelfde letter kan meerdere keren nodig zijn. Iedere afzonderlijke letterplaats in een woord kan maar één code krijgen.</small></span>`;
     }
 
     // 4. Generate HTML for each word and its grid (using the `finalWoordenForDisplay` list)
@@ -258,6 +299,7 @@ function genereerLettercodePuzzel() {
         originalLetters.forEach((letter, letterIndex) => {
             const vakDiv = document.createElement("div");
             vakDiv.className = "vak";
+            vakDiv.dataset.answer = letter;
             
             // Look up assignment using currentWordArrIndex (which is the index in the `woorden` array)
             if (assignedLettersToWords[currentWordArrIndex] && assignedLettersToWords[currentWordArrIndex][letterIndex]) {
@@ -345,6 +387,11 @@ function genereerLettercodePuzzel() {
                 }
                 const letterSpan = document.createElement("span");
                 letterSpan.className = "letter";
+                letterSpan.dataset.answer = wordChar;
+                if (assignedInfo?.prefilled) {
+                    letterSpan.textContent = wordChar;
+                    letterSpan.classList.add('prefilled-letter');
+                }
                 letterVakDiv.appendChild(letterSpan); // Placeholder for the actual letter
                 woordGroepDiv.appendChild(letterVakDiv); // Voeg vakje toe aan woordGroep
                 currentZinLetterActualIndex++;
@@ -375,6 +422,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("bronWoordenInput").addEventListener("input", genereerLettercodePuzzel);
     document.getElementById("gecodeerdeZinInput").addEventListener("input", genereerLettercodePuzzel);
+    document.getElementById('prefilledLettersInput')?.addEventListener('input', event => {
+        const letters = [...new Set((event.target.value.toUpperCase().match(/[A-Z]/g) || []))].slice(0, 2);
+        event.target.value = letters.join(' ');
+        genereerLettercodePuzzel();
+    });
     
     // Event listener voor de "Opnieuw Genereren" knop
     document.getElementById("regenereerBtn").addEventListener("click", genereerLettercodePuzzel);
