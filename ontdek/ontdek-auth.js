@@ -11,6 +11,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js';
+import './ontdek-analytics.js';
 
 function laadAccountOpmaak() {
   if (document.querySelector('link[data-ontdek-auth-styles]')) return;
@@ -115,15 +116,24 @@ export function startOntdekAuth({ onState } = {}) {
     submit.disabled = true;
     feedback.textContent = 'Even controleren…';
     try {
-      if (modus === 'registreren') await createUserWithEmailAndPassword(auth, email.value.trim(), password.value);
-      else await signInWithEmailAndPassword(auth, email.value.trim(), password.value);
+      if (modus === 'registreren') {
+        await createUserWithEmailAndPassword(auth, email.value.trim(), password.value);
+        window.zisaTrack?.('sign_up', { method: 'email', omgeving: 'ontdek' });
+      } else {
+        await signInWithEmailAndPassword(auth, email.value.trim(), password.value);
+        window.zisaTrack?.('login', { method: 'email', omgeving: 'ontdek' });
+      }
       dialoog.close();
     } catch (error) {
       feedback.textContent = fouttekst(error);
     } finally { submit.disabled = false; }
   });
   dialoog.querySelector('#ontdekGoogle').addEventListener('click', async () => {
-    try { await signInWithPopup(auth, googleProvider); dialoog.close(); }
+    try {
+      await signInWithPopup(auth, googleProvider);
+      window.zisaTrack?.('login', { method: 'google', omgeving: 'ontdek' });
+      dialoog.close();
+    }
     catch (error) { feedback.textContent = fouttekst(error); }
   });
   reset.addEventListener('click', async () => {
