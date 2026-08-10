@@ -466,7 +466,7 @@
     installeerProefBibliotheek(win);
     installeerRustigeEditor(win);
     frameKlaar = true;
-    if (set) { tekenEigenBibliotheek(win); laadActiefBord(); }
+    if (set) { tekenEigenBibliotheek(win); laadActiefBord(); document.body.classList.add('frame-klaar'); }
   });
 
   naamveld.addEventListener('change', () => {
@@ -642,7 +642,7 @@
   });
 
   document.getElementById('herstel-borden').addEventListener('click', async () => {
-    if (!confirm('Alle aanpassingen in deze proefversie worden gewist. De voorbeeldborden herstellen?')) return;
+    if (!confirm('Alle aanpassingen worden gewist. De voorbeeldborden herstellen?')) return;
     localStorage.removeItem(OPSLAGSLEUTEL);
     await wisDatabase().catch(() => {});
     set = window.maakProefSjablonen();
@@ -658,7 +658,7 @@
     set.eigenBibliotheek=set.eigenBibliotheek||[];
     actiefId = set.borden.some((bord) => bord.id === set.actiefId) ? set.actiefId : set.borden[0].id;
     tekenNavigatie();
-    if (frameKlaar) { tekenEigenBibliotheek(frame.contentWindow); laadActiefBord(); }
+    if (frameKlaar) { tekenEigenBibliotheek(frame.contentWindow); laadActiefBord(); document.body.classList.add('frame-klaar'); }
   }
 
   start();
