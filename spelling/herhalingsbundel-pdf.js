@@ -5011,8 +5011,12 @@ window.SpellingHerhalingsbundelPDF = (function() {
       // Emoji-combo uit DOM lezen als fallback (als woordObj niets oplevert,
       // of er gewoon een emoji-span staat).
       let emojiCombo = "";
+      let emojiTokens = [];
       if (emojiEl) {
         emojiCombo = emojiEl.textContent.trim();
+        emojiTokens = Array.from(emojiEl.querySelectorAll(".ov10-afb-emoji-deel, .ov10-afb-emoji-plus"))
+          .map(el => el.textContent.trim())
+          .filter(Boolean);
       }
       
       // Zorg dat woordObj de samenstellingen-categorie heeft als die ontbreekt;
@@ -5023,7 +5027,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
         woordObj = { tekst: woordTekst, categorie: "samenstellingen" };
       }
       
-      afbeeldingen.push({ woordObj, emojiCombo });
+      afbeeldingen.push({ woordObj, emojiCombo, emojiTokens });
     });
     
     // Verzamel rooster (letter per cel)
@@ -5061,7 +5065,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     const AFB_SPACING = 3;
     const AFB_BREEDTE_CEL = (breedte - (AFB_KOLOMMEN - 1) * AFB_SPACING) / AFB_KOLOMMEN;
     // Lagere afbeeldingskaders houden ook de onderste schrijflijnen binnen A4.
-    const AFB_HOOGTE_CEL = 14;
+    const AFB_HOOGTE_CEL = 18;
     const afbRijen = Math.ceil(afbeeldingen.length / AFB_KOLOMMEN);
     const afbSectieHoogte = afbRijen * AFB_HOOGTE_CEL + (afbRijen - 1) * AFB_SPACING;
     
@@ -5123,15 +5127,22 @@ window.SpellingHerhalingsbundelPDF = (function() {
           maxBreedte: AFB_BREEDTE_CEL - 4
         });
       } else if (afb.emojiCombo) {
-        // Split emoji-combo in losse emoji's en teken ze naast elkaar.
-        // Gebruik Array.from() omdat emoji's vaak multi-byte zijn.
-        const emojis = Array.from(afb.emojiCombo).filter(c => c.trim());
-        const emojiGrootte = Math.min(AFB_HOOGTE_CEL - 4, 12);
-        const totBreedte = emojis.length * emojiGrootte + (emojis.length - 1) * 1;
+        // Houd elke deelprent als één token. Array.from() splitst samengestelde
+        // emoji's (variation selectors/ZWJ) en kon tekeningen afsnijden.
+        const emojis = afb.emojiTokens.length ? afb.emojiTokens : [afb.emojiCombo];
+        const emojiGrootte = Math.min(AFB_HOOGTE_CEL - 6, 9);
+        const totBreedte = emojis.length * emojiGrootte + (emojis.length - 1) * 1.5;
         const startX = cx + (AFB_BREEDTE_CEL - totBreedte) / 2;
         const startY = cy + (AFB_HOOGTE_CEL - emojiGrootte) / 2;
         for (let k = 0; k < emojis.length; k++) {
-          tekenEmoji(pdf, startX + k * (emojiGrootte + 1), startY, emojiGrootte, emojis[k]);
+          const tokenX = startX + k * (emojiGrootte + 1.5);
+          if (emojis[k] === "+") {
+            tekenTekst(pdf, tokenX + emojiGrootte / 2, startY + emojiGrootte * 0.68, "+", {
+              size: 15, kleur: KLEUR_TEKST, vet: true, gecentreerd: true
+            });
+          } else {
+            tekenEmoji(pdf, tokenX, startY, emojiGrootte, emojis[k]);
+          }
         }
       } else if (afb.woordObj?.tekst) {
         // Allerlaatste fallback: tekst
