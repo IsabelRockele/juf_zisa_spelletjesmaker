@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function genereerPrintbarePagina(bordHTML) {
+        const isOntdek = Boolean(window.VierOpRijDownloadPolicy);
         // --- AANGEPASTE STYLES ---
         const printStyles = `<style>
             @page { size: A4 landscape; margin: 1cm }
@@ -129,12 +130,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         </style>`;
         
-        const actieKnoppenHTML = `<div class="actie-balk"><button onclick="window.print()">🖨️ Afdrukken</button><button id="download-pdf-knop">📄 Download als PDF</button><button onclick="window.close()">❌ Sluiten</button></div>`;
-        const containerHTML = `<div class="bord-container">${bordHTML}</div>`;
+        const actieKnoppenHTML = `<div class="actie-balk"><button id="print-knop">🖨️ Afdrukken</button><button id="download-pdf-knop">📄 Download als PDF</button><button onclick="window.close()">❌ Sluiten</button></div>`;
+        const watermerkHTML = isOntdek ? `<div id="ontdek-watermerk" style="position:absolute;inset:0;z-index:5;pointer-events:none;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);place-items:center;overflow:hidden">${'<span style="font:900 32px Arial;color:rgba(151,38,111,.32);transform:rotate(-25deg)">ONTDEK<br><small style="font-size:12px">voorbeeldweergave</small></span>'.repeat(9)}</div>` : '';
+        const containerHTML = `<div class="bord-container" style="position:relative">${bordHTML}${watermerkHTML}</div>`;
         const pdfScript = `<script>window.onload=()=>{const e=document.getElementById("download-pdf-knop"),t=document.querySelector(".vier-op-rij-bord");e.addEventListener("click",()=>{e.textContent="Bezig met genereren...",e.disabled=!0,html2canvas(t,{scale:3,useCORS:!0}).then(t=>{const n=t.toDataURL("image/png"),{jsPDF:o}=window.jspdf,d=new o({orientation:"landscape",unit:"mm",format:"a4"}),a=10,l=d.internal.pageSize.getWidth(),s=d.internal.pageSize.getHeight(),i=l-2*a,c=s-2*a;let r=i,u=r/1.1666666666666667;u>c&&(u=c,r=u*1.1666666666666667);const p=a+(i-r)/2,m=a+(c-u)/2;d.addImage(n,"PNG",p,m,r,u),d.save("4-op-een-rij-spelbord.pdf")}).catch(t=>{console.error("Fout bij het genereren van de PDF:",t),alert("Er is een fout opgetreden bij het genereren van de PDF. Controleer de console voor details.")}).finally(()=>{e.textContent="📄 Download als PDF",e.disabled=!1})})}<\/script>`;
         
+        const policyScript = `<script>window.addEventListener("load",()=>{const p=document.getElementById("print-knop"),e=document.getElementById("download-pdf-knop"),w=document.getElementById("ontdek-watermerk"),policy=window.opener?.VierOpRijDownloadPolicy;p.addEventListener("click",async()=>{if(policy?.authorize&&!await policy.authorize("print"))return;if(w)w.style.display="none";window.addEventListener("afterprint",()=>{if(w)w.style.display="grid"},{once:true});window.print()});if(policy?.authorize)e.addEventListener("click",async event=>{if(e.dataset.toegestaan==="ja"){delete e.dataset.toegestaan;return}event.preventDefault();event.stopImmediatePropagation();if(!await policy.authorize("pdf"))return;if(w)w.style.display="none";e.dataset.toegestaan="ja";e.click();const herstel=setInterval(()=>{if(!e.disabled){clearInterval(herstel);if(w)w.style.display="grid"}},250)},true)})<\/script>`;
         // Voeg lang="nl" toe voor eventuele automatische woordafbreking door de browser
-        return `<html lang="nl"><head><title>4-op-een-Rij Spelbord</title>${printStyles}<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script></head><body>${actieKnoppenHTML}${containerHTML}${pdfScript}</body></html>`;
+        return `<html lang="nl"><head><title>4-op-een-Rij Spelbord</title>${printStyles}<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script></head><body>${actieKnoppenHTML}${containerHTML}${pdfScript}${policyScript}</body></html>`;
     }
 
     // Helper: maak veilige ID zonder spaties/accents e.d.
@@ -143,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function genereerSpelbord() {
+        window.VierOpRijDownloadPolicy?.newBoard?.();
         let itemList = [];
     
         if (gekozenSpeltype === 'woorden') {

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="google" content="notranslate">
+  <title>Vier op een rij — Ontdek</title>
+  <link rel="stylesheet" href="../vieropeenrij.css?v=20260810a">
+  <style>
+    body{margin-top:64px}.ontdek-kop{position:fixed;inset:0 0 auto;z-index:1000;min-height:48px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 16px;background:#173f70;color:#fff;font-weight:800}.ontdek-kop a{color:#fff;text-decoration:none;background:#ffffff25;padding:8px 11px;border-radius:8px}.ontdek-status{margin-left:auto}.account-knop{border:0;border-radius:8px;padding:8px 11px;background:#fff;color:#173f70;font-weight:800;cursor:pointer}.account-knop.is-signed-in{background:#dff6e8;color:#155b38}.ontdek-uitleg{margin:0 0 18px;padding:16px 18px;border:2px solid #77addd;border-radius:14px;background:#eef6ff;color:#173f70;line-height:1.5}.ontdek-uitleg h2{margin:0 0 6px;font-size:20px}.pro-regel{margin-top:9px;padding:10px 12px;border-radius:10px;background:#fff5cf;border:1px solid #e4bd38;color:#604700}@media(max-width:750px){.ontdek-kop{position:static}.ontdek-status{margin-left:0}body{margin-top:0}}
+  </style>
+</head>
+<body>
+  <header class="ontdek-kop"><a href="app.html">← Keuzemenu alle tools</a><span>Vier op een rij — Ontdek</span><span id="vier-status" class="ontdek-status">3 van 3 spelborden over</span><button id="vier-account" class="account-knop" type="button">Gratis account / aanmelden</button></header>
+  <div class="hoofd-menu"><hr><h3>Vier op een rij</h3><p>Kies woorden, getallen of tafels en maak een echt speelbaar spelbord.</p></div>
+  <main class="main-content"><div class="container">
+    <section class="ontdek-uitleg"><h2>Probeer de volledige werkwijze</h2><p>Je mag onbeperkt nieuwe borden samenstellen en bekijken. Je kunt <strong>3 verschillende spelborden</strong> zonder watermerk afdrukken of als PDF downloaden. Afdrukken en PDF van hetzelfde bord tellen samen maar één keer.</p><div class="pro-regel"><strong>PRO:</strong> onbeperkt spelborden maken, afdrukken en downloaden.</div></section>
+    <h1>Spelbord Maker</h1><p>Stel je eigen 4-op-een-rij-spelbord samen met woorden, getallen of tafels.</p><hr>
+    <div class="keuzemenu"><h2>Stap 1: Kies je speltype</h2><div class="knoppen-groep"><button id="kies-woorden-knop" class="type-knop">Woorden</button><button id="kies-getallen-knop" class="type-knop">Getallen</button><button id="kies-tafels-knop" class="type-knop">Maal- en deeltafels</button></div></div>
+    <div id="woorden-opties" class="optie-groep verborgen"><h2>Stap 2: Stel je woordenbord samen</h2><label for="avi-niveau">Kies AVI-niveau:</label><select id="avi-niveau"></select><label>Kies één of meer spellingmoeilijkheden:</label><div id="moeilijkheid-checkboxes"></div></div>
+    <div id="getallen-opties" class="optie-groep verborgen"><h2>Stap 2: Stel je getallenbord samen</h2><div class="knoppen-groep"><button class="getal-knop" data-max="20">Getallen tot 20</button><button class="getal-knop" data-max="42">Getallen tot 42</button><button class="getal-knop" data-max="100">Getallen tot 100</button><button class="getal-knop" data-max="1000">Getallen tot 1000</button></div></div>
+    <div id="tafels-opties" class="optie-groep verborgen"><h2>Stap 2: Kies één of meer tafels</h2><div id="tafel-checkboxes"></div><h2>Stap 3: Kies de soort oefening</h2><div id="tafel-type-radios" class="radio-groep"><div class="radio-container"><input type="radio" id="type-maal" name="tafel-type" value="maal" checked><label for="type-maal">Enkel maal</label></div><div class="radio-container"><input type="radio" id="type-deel" name="tafel-type" value="deel"><label for="type-deel">Enkel deel</label></div><div class="radio-container"><input type="radio" id="type-beide" name="tafel-type" value="beide"><label for="type-beide">Maal en deel</label></div></div></div>
+    <hr><button id="genereer-bord-knop" class="genereer-knop verborgen">Genereer spelbord</button>
+  </div></main>
+  <script type="module" src="vieropeenrij-ontdek.js?v=20260810a"></script>
+  <script src="../vieropeenrij.js?v=20260810a"></script>
+</body>
+</html>
