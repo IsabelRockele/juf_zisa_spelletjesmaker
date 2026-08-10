@@ -172,7 +172,7 @@
     ['tafel-taakje-opruimen','tafel en taakje opruimen'],['stoel-onder-tafel','stoel onder tafel'],['stoel-op-tafel','stoel op tafel'],
     ['bakje-netjes','bakje netjes'],['bakje-in-kast','bakje in de kast'],['losse-drinkbus','drinkbus'],
     ['losse-brooddoos','brooddoos'],['losse-koekendoos','koekendoos'],['losse-fruitdoos','fruitdoos'],
-    ['losse-agendamap','agendamap'],['losse-huistaken','huistaken'],
+    ['losse-agendamap','agendamap'],['losse-huistaken','huistaken'],['losse-pennenzak','pennenzak'],
     ['boom-lente','boom in de lente'],['boom-zomer','boom in de zomer'],['boom-herfst','boom in de herfst'],['boom-winter','boom in de winter'],
     ['decor-terug-school', 'terug naar school'], ['decor-herfst', 'herfstdecoratie'], ['decor-winter', 'winterdecoratie'],
     ['decor-lente', 'lentedecoratie'], ['decor-zomer', 'zomerdecoratie'], ['decor-kerst', 'kerstdecoratie'],
@@ -383,6 +383,13 @@
     paneel.classList.add('proef-paneel-open');paneel.dataset.proefTab=tabnaam;
     const tab = doc.querySelector(`.tab[data-tab="${tabnaam}"]`);
     if (tab) tab.click();
+    if(tabnaam==='afbeeldingen'){
+      const zoek=doc.querySelector('.proef-afbeeldingen-zoeken');
+      if(zoek){
+        zoek.value='';
+        zoek.dispatchEvent(new frame.contentWindow.Event('input',{bubbles:true}));
+      }
+    }
   }
 
   function installeerEigenAfbeeldingen(win) {
