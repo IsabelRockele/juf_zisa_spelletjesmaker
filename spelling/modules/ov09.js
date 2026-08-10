@@ -635,17 +635,17 @@
     _opdracht: function (niveau) {
       const map = {
         basis: [
-          "Kijk naar de prent of lees het grondwoord.",
+          "Kijk naar de prent of naar het woord.",
           "Welke schrijfwijze is juist?",
           "Kruis het juiste antwoord aan en schrijf het woord op de lijn."
         ],
         kern: [
-          "Kijk naar de prent of lees het grondwoord.",
+          "Kijk naar de prent of naar het woord.",
           "Klap het woord.",
           "Schrijf het juist op de lijn."
         ],
         verdieping: [
-          "Kijk naar elke prent of lees het grondwoord.",
+          "Kijk naar elke prent of naar elk woord.",
           "Klap het woord.",
           "Schrijf het woord in de juiste kolom."
         ],

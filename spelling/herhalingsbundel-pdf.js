@@ -648,12 +648,13 @@ window.SpellingHerhalingsbundelPDF = (function() {
   function afbeeldingPad(woord) {
     if (!woord || !woord.tekst || !woord.categorie) return null;
     // Ondersteun zowel "graad" als "leerjaar" naamgeving
-    const graadNr = woord.graad || woord.leerjaar || 1;
+    const graadNr = woord.afbeelding_graad || woord.graad || woord.leerjaar || 1;
+    const afbeeldingCategorie = woord.afbeelding_categorie || woord.categorie;
     // Optioneel afbeelding_bestand veld voor Windows-gereserveerde namen
     // (nul, con, aux, prn, ...) of andere uitzonderingen.
     // Valt terug op {tekst}.png als afbeelding_bestand niet gezet is.
     const bestandsnaam = woord.afbeelding_bestand || `${woord.tekst}.png`;
-    return `afbeeldingen/graad${graadNr}/${woord.categorie}/${bestandsnaam}`;
+    return `afbeeldingen/graad${graadNr}/${afbeeldingCategorie}/${bestandsnaam}`;
   }
   
   /* Laad één PNG via fetch + canvas → dataURL.

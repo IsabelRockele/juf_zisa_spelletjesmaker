@@ -357,7 +357,8 @@ window.SpellingModules.g2_ov01 = {
   },
 
   _afbeeldingsPad: function(w) {
-    return `afbeeldingen/graad2/stukjeswoorden/${w.tekst}.png`;
+    return window.SpellingAfbHelper?.pad(w, 2)
+      || `afbeeldingen/graad2/${w.categorie}/${w.afbeelding_bestand || `${w.tekst}.png`}`;
   },
 
   /* Maak een canvas-schrijflijn HTML zoals graad 1 doet.

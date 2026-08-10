@@ -18,9 +18,10 @@
     pad: function (woord, graad) {
       if (!woord || !woord.tekst) return null;
       if (!woord.afbeelding) return null;
-      graad = woord.afbeelding_graad || graad || woord.leerjaar || 1;
+      graad = woord.afbeelding_graad || graad || woord.graad || woord.leerjaar || 1;
       const map = woord.afbeelding_categorie || woord.categorie || "stukjes";
-      return `afbeeldingen/graad${graad}/${map}/${woord.tekst}.png`;
+      const bestandsnaam = woord.afbeelding_bestand || `${woord.tekst}.png`;
+      return `afbeeldingen/graad${graad}/${map}/${bestandsnaam}`;
     },
 
     /* Geeft HTML voor de afbeelding van een woord, met fallback.
