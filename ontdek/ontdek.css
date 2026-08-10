@@ -74,6 +74,16 @@ body {
 .ontdek-status.later { color: #876b53; }
 .ontdek-label { align-self: flex-start; padding: 4px 9px; border-radius: 999px; background: var(--ontdek-geel); color: #463400; font-size: .75rem; font-weight: 900; }
 .ontdek-voet { margin-top: 34px; padding: 20px; border-radius: 18px; background: var(--ontdek-roze); line-height: 1.55; }
+.ontdek-seo { margin-top:34px;padding:30px;border:1px solid var(--ontdek-lijn);border-radius:22px;background:#fff;box-shadow:0 10px 28px rgba(20,54,93,.06); }
+.ontdek-seo h2 { margin:0 0 8px;color:#173f73;font-size:1.7rem; }
+.ontdek-seo > p { color:#586f83;line-height:1.65; }
+.ontdek-seo-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px; }
+.ontdek-seo-grid article { padding:20px;border-radius:16px;background:#f3f8fc; }
+.ontdek-seo-grid article > span { font-size:1.8rem; }
+.ontdek-seo-grid h3 { margin:8px 0 6px;color:#173f73; }
+.ontdek-seo-grid p { margin:0;color:#61778a;line-height:1.55; }
+.ontdek-seo-slot { margin:22px 0 0!important;padding-top:18px;border-top:1px solid var(--ontdek-lijn); }
+.ontdek-seo-slot a { color:#1768ac;font-weight:900; }
 @media (max-width: 800px) {
   .ontdek-top { align-items: flex-start; gap: 14px; }
   .ontdek-top nav { flex-direction: column; align-items: flex-end; gap: 8px; }
@@ -81,4 +91,6 @@ body {
   .ontdek-intro { grid-template-columns: 100px minmax(0, 1fr); gap: 16px; }
   .ontdek-hero-zisa { width: 100px; height: 100px; }
   .ontdek-grid { grid-template-columns: 1fr; }
+  .ontdek-seo-grid { grid-template-columns:1fr; }
+  .ontdek-seo { padding:23px; }
 }

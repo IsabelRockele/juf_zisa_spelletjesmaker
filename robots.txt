@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /ontdek/index.html
+Allow: /ontdek/$
+Disallow: /pro/
+Disallow: /ontdek/
+Disallow: /ontdek/app.html
+
+Sitemap: https://tools.jufzisa.be/sitemap.xml
