@@ -456,18 +456,21 @@
     if (huidigBord()?.rijk) window.renderRijkBord(frame.contentWindow, huidigBord(), true, () => bewaarSet());
   }
 
-  frame.addEventListener('load', () => {
+  function initialiseerFrame() {
+    if(frameKlaar)return true;
     const win = frame.contentWindow;
     if (typeof win.importeerBord !== 'function') {
-      status.textContent = 'Het planbord kon niet worden geladen.';
-      return;
+      return false;
     }
     installeerEigenAfbeeldingen(win);
     installeerProefBibliotheek(win);
     installeerRustigeEditor(win);
     frameKlaar = true;
     if (set) { tekenEigenBibliotheek(win); laadActiefBord(); document.body.classList.add('frame-klaar'); }
-  });
+    return true;
+  }
+  frame.addEventListener('load',initialiseerFrame);
+  let framePogingen=0;const frameWachter=setInterval(()=>{framePogingen++;if(initialiseerFrame()){clearInterval(frameWachter);return;}if(framePogingen>=100){clearInterval(frameWachter);status.textContent='Het planbord kon niet worden geladen.';const melding=document.querySelector('.bordlader strong');if(melding)melding.textContent='Het klasbord kon niet worden geladen. Ververs de pagina.';}},100);
 
   naamveld.addEventListener('change', () => {
     const bord = huidigBord();
