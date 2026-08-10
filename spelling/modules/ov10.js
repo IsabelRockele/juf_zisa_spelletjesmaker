@@ -540,9 +540,11 @@ window.SpellingModules.ov10 = {
       `<span class="ov10-afb-emoji-plus">+</span>` +
       `<span class="ov10-afb-emoji-deel">${e[1] || "?"}</span>`;
     if (w.afbeelding) {
+      const src = window.SpellingAfbHelper?.pad(w, w.leerjaar || 1)
+        || `afbeeldingen/graad1/${w.categorie}/${w.afbeelding_bestand || `${w.tekst}.png`}`;
       return `<span class="ov10-afb-met-fallback">
         <img class="ov10-afb-img"
-             src="afbeeldingen/graad1/samenstellingen/${w.tekst}.png"
+             src="${src}"
              alt="${w.tekst}"
              onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex'">
         <span class="ov10-afb-emoji-combo" style="display:none" aria-label="${w.tekst}">${fallback}</span>
@@ -579,7 +581,10 @@ window.SpellingModules.ov10 = {
           delen: orig.delen,
           delenEmoji: orig.delenEmoji,
           beschrijving: orig.beschrijving,
-          afbeelding: orig.afbeelding
+          afbeelding: orig.afbeelding,
+          afbeelding_graad: orig.afbeelding_graad,
+          afbeelding_categorie: orig.afbeelding_categorie,
+          afbeelding_bestand: orig.afbeelding_bestand
         });
       }
       return w;
