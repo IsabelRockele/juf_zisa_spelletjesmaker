@@ -868,12 +868,15 @@ window.SpellingZijbalk = (function() {
       }
 
       if (["ov40", "ov41", "ov42", "ov43", "ov44"].includes(oef.id)) {
-        const alleenHoorwoorden = gekozen.length > 0 && gekozen.every(id =>
+        const hoorwoordDoelen = gekozen.filter(id =>
           window.SpellingWoordenbibliotheek?.graad2?.[id]?.hoofdgroep === "hoorwoord"
         );
-        if (!alleenHoorwoorden) return false;
-        if (["ov40", "ov41"].includes(oef.id)) return gekozen.length >= 2;
-        return true;
+        if (hoorwoordDoelen.length === 0) return false;
+        // Sorteren en kiezen hebben minstens twee verschillende
+        // hoorwoordcategorieën nodig. Andere geselecteerde doelen mogen de
+        // passende hoorwoordoefeningen niet verbergen.
+        if (["ov40", "ov41"].includes(oef.id)) return hoorwoordDoelen.length >= 2;
+        return hoorwoordDoelen.length >= 1;
       }
 
       if (oef.id === "ov04" || oef.id === "ov05") {

@@ -531,6 +531,12 @@
 
     /* Voorbeeld: handen → hannden (extra n erbij) */
     _maakOnnodigVerdubbeld: function (woord) {
+      // Staat in de juiste vorm al een dubbele medeklinker, dan is de
+      // geloofwaardige fout juist één medeklinker te weinig:
+      // bedden -> beden (nooit beddden).
+      if (/([bcdfghjklmnpqrstvwxz])\1/i.test(woord)) {
+        return woord.replace(/([bcdfghjklmnpqrstvwxz])\1/i, "$1");
+      }
       // Verdubbel de eerste medeklinker na de eerste klinker
       const m = woord.match(/^([bcdfghjklmnpqrstvwxz]*[aeiou]+)([bcdfghjklmnpqrstvwxz])/i);
       if (m) {
