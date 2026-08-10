@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Pentomino Studio</title>
+<link rel="icon" href="start_afbeeldingen/Zisa_spelgenerator-32.png" sizes="32x32" type="image/png">
+<link rel="stylesheet" href="pentomino-studio.css">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f5f6f8;--card:#fff;--line:#d8d8d8;--text:#222;--muted:#666}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:1100px;margin:auto;padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+h1{font-size:24px;margin:0 0 6px}h2{font-size:18px;margin:0 0 10px}
+.small{font-size:13px;color:var(--muted);line-height:1.45}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.tab{padding:13px;border-radius:12px;border:1px solid #bbb;background:#fff;font-weight:700;cursor:pointer}
+.tab.active{background:#222;color:#fff;border-color:#222}
+.view{display:none}.view.active{display:block}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:end}
+label{font-size:13px;font-weight:700;display:block;margin-bottom:5px}
+select,input,button{font:inherit;padding:10px;border:1px solid #bbb;border-radius:10px;background:#fff}
+select,input{width:100%}
+button{cursor:pointer;font-weight:700}
+button.primary{background:#222;color:#fff;border-color:#222}
+.previewGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box{overflow:auto;text-align:center}
+.info{padding:10px 12px;background:#f2f2f2;border-radius:10px;font-size:13px;line-height:1.45;margin-top:10px}
+.levels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.level{border:1px solid #bbb;border-radius:12px;padding:10px;background:#fff;cursor:pointer}
+.level.active{border:2px solid #222}
+.level b{display:block;margin-bottom:3px}
+.pieces{display:flex;flex-wrap:wrap;gap:10px}
+.pieceCard{border:1px solid #ddd;border-radius:8px;padding:6px}
+.printButtons{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.printButtons button{min-width:160px}
+.gameTop{display:grid;grid-template-columns:1.4fr .6fr;gap:10px;align-items:end}
+.boardwrap{display:flex;justify-content:center;overflow:auto}
+#gameBoard{position:relative;background:white;touch-action:none;user-select:none}
+#gameBg{position:absolute;inset:0;pointer-events:none}
+.tray{min-height:190px;position:relative;border:2px dashed #d2d2d2;border-radius:14px;background:#fafafa;overflow:hidden;touch-action:none}
+.gamePiece{position:absolute;touch-action:none;cursor:grab;filter:drop-shadow(0 2px 2px rgba(0,0,0,.12))}
+.gamePiece.selected{filter:drop-shadow(0 0 5px rgba(0,0,0,.6))}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.actions button{min-height:52px}
+.helpbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.status{padding:10px;border-radius:10px;background:#f1f1f1;font-size:14px;margin-top:9px}
+.stars{font-size:23px}.done{background:#e9f7e9}
+.printArea{display:none}
+@media(max-width:750px){
+ .controls,.previewGrid,.levels,.gameTop{grid-template-columns:1fr}
+ .actions{grid-template-columns:1fr 1fr}
+ .helpbar{grid-template-columns:1fr}
+ .actions button,.helpbar button{font-size:16px;min-height:54px}
+}
+@media print{
+ body{background:#fff}
+ header,.tabs,.view,.screenOnly{display:none!important}
+ .printArea.printing{display:block!important}
+ @page{size:A4 portrait;margin:10mm}
+ .printPage{page-break-after:always;min-height:270mm}
+ .printPage:last-child{page-break-after:auto}
+ .printPage h2{font-size:16pt;margin:0 0 6mm}
+}
+</style>
+</head>
+<body>
+<main>
+<nav class="studio-nav screenOnly" aria-label="Hoofdnavigatie">
+  <a id="menuLink" class="nav-home" href="index.html">← Keuzemenu</a>
+  <button id="studioHome" class="nav-studio" type="button" hidden>⌂ Pentomino Studio</button>
+</nav>
+
+<section id="studioStart" class="studio-start screenOnly">
+  <div class="start-hero">
+    <span class="eyebrow">CREATIEF EN BOUWEN</span>
+    <h1>Pentomino Studio</h1>
+    <p>Bouw verrassende figuren met 12 puzzelstukken. Kies of je materiaal maakt of meteen gaat puzzelen.</p>
+  </div>
+  <div class="start-actions">
+    <button class="start-card maker-card" type="button" data-open="maker">
+      <span class="start-icon">✂️</span><span><b>Bouwkaarten maken</b><small>Maak, pas aan en print puzzelmateriaal voor je klas.</small></span><strong>Open de maker →</strong>
+    </button>
+    <button class="start-card game-card" type="button" data-open="choices">
+      <span class="start-icon">🧩</span><span><b>Spel klaarzetten</b><small>Kies een figuur en open een rustig, schermvullend spel voor het digibord.</small></span><strong>Kies een puzzel →</strong>
+    </button>
+  </div>
+  <aside class="play-notice" aria-label="Zisa Spelen">
+    <span>📱</span><div><b>Ook beschikbaar voor leerlingen</b><p>Het puzzelspel staat in elk leerjaar van <strong>Zisa Spelen</strong>. Daar zien kinderen alleen de figurenkeuze en het schermvullende iPad-spel, niet de bouwkaartenmaker.</p></div>
+  </aside>
+</section>
+
+<section id="puzzleChoices" class="choice-screen screenOnly" hidden>
+  <div class="choice-heading"><div><span class="eyebrow">KIES JE PUZZEL</span><h1>Wat wil je bouwen?</h1><p>Je ziet vooraf precies welke figuur je gaat maken.</p></div><button id="choiceBack" type="button">← Vorige</button></div>
+  <div id="puzzleGrid" class="puzzle-grid"></div>
+</section>
+
+<header id="toolHeader" class="card" hidden>
+<h1>Pentomino Studio</h1>
+<div class="small">Maak bouwkaarten op maat én laat kinderen online puzzelen met dezelfde figuren en dezelfde 12 pentomino's.</div>
+<div class="tabs">
+<button class="tab active" data-tab="maker">🖨️ Bouwkaarten maken</button>
+<button class="tab" data-tab="game">🎮 Online spel</button>
+</div>
+</header>
+
+<section id="maker" class="view">
+<div class="card">
+<h2>1. Kies figuur en formaat</h2>
+<div class="controls">
+<div><label>Figuur</label><select id="mFig"></select></div>
+<div><label>Max. breedte kaart (cm)</label><input id="mW" type="number" step=".1" value="14"></div>
+<div><label>Max. hoogte kaart (cm)</label><input id="mH" type="number" step=".1" value="10"></div>
+<div><label>Marge rondom (mm)</label><input id="mMargin" type="number" step="1" value="5"></div>
+</div>
+</div>
+
+<div class="card">
+<h2>2. Kies moeilijkheidsgraad</h2>
+<div class="levels">
+<div class="level active" data-level="1"><b>⭐ Niveau 1</b><span class="small">Raster + grijze omtrekken van de puzzelstukken.</span></div>
+<div class="level" data-level="2"><b>⭐⭐ Niveau 2</b><span class="small">Raster + alleen de buitenvorm.</span></div>
+<div class="level" data-level="3"><b>⭐⭐⭐ Niveau 3</b><span class="small">Alleen de buitenomtrek, zonder raster.</span></div>
+<div class="level" data-level="4"><b>🏆 Expert</b><span class="small">Klein voorbeeld; het kind bouwt ernaast.</span></div>
+</div>
+<div id="makerInfo" class="info"></div>
+</div>
+
+<div class="card previewGrid">
+<div><h2>Bouwkaart</h2><div id="makerTarget" class="box"></div></div>
+<div><h2>Oplossing</h2><div id="makerSolution" class="box"></div></div>
+</div>
+
+<div class="card">
+<h2>3. De 12 vaste puzzelstukken</h2>
+<div class="small">De blokmaat wordt automatisch exact gelijk aan die van de bouwkaart.</div>
+<div id="makerPieces" class="pieces" style="margin-top:10px"></div>
+<div class="printButtons screenOnly">
+<button class="primary" id="printAll">Print alles</button>
+<button id="printCard">Alleen bouwkaart</button>
+<button id="printPieces">Alleen puzzelstukken</button>
+<button id="printSolution">Alleen oplossing</button>
+</div>
+</div>
+</section>
+
+<section id="game" class="view game-workspace">
+<div class="card">
+<h2>Online puzzelen</h2>
+<div class="small">Tik een stuk aan, draai of spiegel het en sleep het naar de figuur. Het stuk klikt vanzelf in het raster.</div>
+<div class="gameTop" style="margin-top:10px">
+<div><label>Kies een figuur</label><select id="gFig"></select></div>
+<div><button id="gNew" class="primary" style="width:100%">Opnieuw starten</button></div>
+</div>
+<div id="gScore" class="status"></div>
+</div>
+
+<div class="card">
+<div class="boardwrap"><div id="gameBoard"><svg id="gameBg"></svg></div></div>
+<div id="gMessage" class="status">Kies een puzzelstuk onderaan.</div>
+</div>
+
+<div class="card">
+<div id="gTray" class="tray"></div>
+<div class="actions">
+<button id="gRotate">↻ Draai</button>
+<button id="gFlip">↔ Spiegel</button>
+<button id="gOrient">💡 Draai goed</button>
+<button id="gPlace">✨ Leg 1 stuk</button>
+</div>
+<div class="helpbar">
+<button id="gOutline">👀 Toon omtreklijnen</button>
+<button id="gBack">↩ Zet stuk terug</button>
+</div>
+</div>
+</section>
+
+<section id="printArea" class="printArea"></section>
+</main>
+
+<script>
+const FIG={"butterfly": {"label": "Vlinder", "rows": ["###.....###", "####.#.####", "###########", ".#########.", "..#######..", ".#########.", ".###.#.###.", "...#...#..."], "solution": [{"name": "F", "cells": [[2, 6], [3, 5], [3, 6], [3, 7], [4, 5]]}, {"name": "W", "cells": [[1, 5], [1, 6], [2, 4], [2, 5], [3, 4]]}, {"name": "Z", "cells": [[7, 6], [7, 7], [8, 6], [9, 5], [9, 6]]}, {"name": "L", "cells": [[5, 5], [5, 6], [6, 5], [7, 5], [8, 5]]}, {"name": "P", "cells": [[9, 0], [9, 1], [10, 0], [10, 1], [10, 2]]}, {"name": "N", "cells": [[8, 0], [8, 1], [8, 2], [9, 2], [9, 3]]}, {"name": "T", "cells": [[6, 3], [7, 1], [7, 2], [7, 3], [8, 3]]}, {"name": "I", "cells": [[4, 4], [5, 4], [6, 4], [7, 4], [8, 4]]}, {"name": "X", "cells": [[4, 2], [5, 1], [5, 2], [5, 3], [6, 2]]}, {"name": "Y", "cells": [[1, 3], [2, 2], [2, 3], [3, 3], [4, 3]]}, {"name": "U", "cells": [[1, 1], [1, 2], [2, 1], [3, 1], [3, 2]]}, {"name": "V", "cells": [[0, 0], [0, 1], [0, 2], [1, 0], [2, 0]]}]}, "fish": {"label": "Vis", "rows": ["....##......", "...####....#", "..#######..#", ".########.##", "############", ".########.##", "..######...#", "...###.....#", "....##......"], "solution": [{"name": "N", "cells": [[10, 3], [10, 4], [11, 1], [11, 2], [11, 3]]}, {"name": "Y", "cells": [[10, 5], [11, 4], [11, 5], [11, 6], [11, 7]]}, {"name": "W", "cells": [[0, 4], [1, 3], [1, 4], [2, 2], [2, 3]]}, {"name": "X", "cells": [[1, 5], [2, 4], [2, 5], [2, 6], [3, 5]]}, {"name": "F", "cells": [[7, 3], [8, 3], [8, 4], [8, 5], [9, 4]]}, {"name": "T", "cells": [[6, 1], [6, 2], [6, 3], [7, 2], [8, 2]]}, {"name": "U", "cells": [[4, 0], [4, 2], [5, 0], [5, 1], [5, 2]]}, {"name": "L", "cells": [[3, 1], [3, 2], [3, 3], [3, 4], [4, 1]]}, {"name": "V", "cells": [[4, 3], [4, 4], [4, 5], [5, 5], [6, 5]]}, {"name": "Z", "cells": [[5, 3], [5, 4], [6, 4], [7, 4], [7, 5]]}, {"name": "I", "cells": [[3, 6], [4, 6], [5, 6], [6, 6], [7, 6]]}, {"name": "P", "cells": [[3, 7], [4, 7], [4, 8], [5, 7], [5, 8]]}]}, "rocket": {"label": "Raket", "rows": ["....#....", "...###...", "..#####..", "..#####..", "..#####..", "..#####..", ".#######.", "#########", "#########", "..#####..", "...###...", "...###..."], "solution": [{"name": "F", "cells": [[3, 1], [3, 2], [4, 0], [4, 1], [5, 1]]}, {"name": "I", "cells": [[2, 2], [2, 3], [2, 4], [2, 5], [2, 6]]}, {"name": "P", "cells": [[0, 7], [0, 8], [1, 6], [1, 7], [1, 8]]}, {"name": "T", "cells": [[6, 7], [6, 8], [6, 9], [7, 8], [8, 8]]}, {"name": "W", "cells": [[6, 5], [6, 6], [7, 6], [7, 7], [8, 7]]}, {"name": "U", "cells": [[5, 2], [5, 4], [6, 2], [6, 3], [6, 4]]}, {"name": "X", "cells": [[3, 3], [4, 2], [4, 3], [4, 4], [5, 3]]}, {"name": "Z", "cells": [[3, 4], [3, 5], [4, 5], [5, 5], [5, 6]]}, {"name": "V", "cells": [[3, 9], [3, 10], [3, 11], [4, 11], [5, 11]]}, {"name": "N", "cells": [[2, 7], [2, 8], [2, 9], [3, 6], [3, 7]]}, {"name": "Y", "cells": [[3, 8], [4, 6], [4, 7], [4, 8], [4, 9]]}, {"name": "L", "cells": [[4, 10], [5, 7], [5, 8], [5, 9], [5, 10]]}]}, "heart": {"label": "Hart", "rows": [".###...###.", "#####.#####", "###########", "###########", ".#########.", "..#######..", "...#####...", ".....#....."], "solution": [{"name": "F", "cells": [[4, 6], [5, 6], [5, 7], [6, 5], [6, 6]]}, {"name": "I", "cells": [[7, 2], [7, 3], [7, 4], [7, 5], [7, 6]]}, {"name": "W", "cells": [[8, 4], [8, 5], [9, 3], [9, 4], [10, 3]]}, {"name": "T", "cells": [[8, 1], [8, 2], [8, 3], [9, 2], [10, 2]]}, {"name": "N", "cells": [[7, 0], [8, 0], [9, 0], [9, 1], [10, 1]]}, {"name": "L", "cells": [[6, 1], [6, 2], [6, 3], [6, 4], [7, 1]]}, {"name": "Z", "cells": [[3, 5], [3, 6], [4, 5], [5, 4], [5, 5]]}, {"name": "Y", "cells": [[1, 4], [2, 4], [2, 5], [3, 4], [4, 4]]}, {"name": "P", "cells": [[3, 3], [4, 2], [4, 3], [5, 2], [5, 3]]}, {"name": "X", "cells": [[2, 1], [3, 0], [3, 1], [3, 2], [4, 1]]}, {"name": "U", "cells": [[1, 0], [1, 1], [1, 2], [2, 0], [2, 2]]}, {"name": "V", "cells": [[0, 1], [0, 2], [0, 3], [1, 3], [2, 3]]}]}, "elephant": {"label": "Olifant", "rows": ["..###.......", ".#########..", ".###########", ".###########", ".#..########", "##...#######", ".....##...##", ".....##...##"], "solution": [{"name": "L", "cells": [[0, 5], [1, 2], [1, 3], [1, 4], [1, 5]]}, {"name": "I", "cells": [[5, 3], [5, 4], [5, 5], [5, 6], [5, 7]]}, {"name": "V", "cells": [[6, 5], [6, 6], [6, 7], [7, 5], [8, 5]]}, {"name": "P", "cells": [[10, 6], [10, 7], [11, 5], [11, 6], [11, 7]]}, {"name": "F", "cells": [[2, 3], [3, 2], [3, 3], [4, 3], [4, 4]]}, {"name": "X", "cells": [[1, 1], [2, 0], [2, 1], [2, 2], [3, 1]]}, {"name": "Z", "cells": [[3, 0], [4, 0], [4, 1], [4, 2], [5, 2]]}, {"name": "Y", "cells": [[5, 1], [6, 1], [6, 2], [7, 1], [8, 1]]}, {"name": "W", "cells": [[6, 3], [6, 4], [7, 2], [7, 3], [8, 2]]}, {"name": "N", "cells": [[7, 4], [8, 4], [9, 4], [9, 5], [10, 5]]}, {"name": "T", "cells": [[8, 3], [9, 1], [9, 2], [9, 3], [10, 3]]}, {"name": "U", "cells": [[10, 2], [10, 4], [11, 2], [11, 3], [11, 4]]}]}, "eagle": {"label": "Adelaar", "rows": [".......#.......", "......##.......", "#####..#..#####", ".####..#..####.", "..###########..", "...#########...", "....#######....", ".....#####.....", ".......#.......", "......###......", ".......#......."], "solution": [{"name": "Y", "cells": [[6, 1], [7, 0], [7, 1], [7, 2], [7, 3]]}, {"name": "X", "cells": [[6, 9], [7, 8], [7, 9], [7, 10], [8, 9]]}, {"name": "I", "cells": [[0, 2], [1, 2], [2, 2], [3, 2], [4, 2]]}, {"name": "W", "cells": [[1, 3], [2, 3], [2, 4], [3, 4], [3, 5]]}, {"name": "N", "cells": [[3, 3], [4, 3], [4, 4], [5, 4], [6, 4]]}, {"name": "P", "cells": [[12, 2], [12, 3], [13, 2], [13, 3], [14, 2]]}, {"name": "Z", "cells": [[10, 2], [11, 2], [11, 3], [11, 4], [12, 4]]}, {"name": "T", "cells": [[9, 5], [10, 3], [10, 4], [10, 5], [11, 5]]}, {"name": "F", "cells": [[8, 5], [8, 6], [9, 6], [9, 7], [10, 6]]}, {"name": "V", "cells": [[7, 4], [7, 5], [7, 6], [8, 4], [9, 4]]}, {"name": "L", "cells": [[5, 6], [5, 7], [6, 7], [7, 7], [8, 7]]}, {"name": "U", "cells": [[4, 5], [4, 6], [5, 5], [6, 5], [6, 6]]}]}, "dog": {"label": "Hond", "rows": ["....#.........", "..###.........", "#####.........", "#####.........", "...###########", "...#########..", "...#########..", "...#########..", "...##.....##..", "...##.....##.."], "solution": [{"name": "N", "cells": [[10, 5], [11, 4], [11, 5], [12, 4], [13, 4]]}, {"name": "T", "cells": [[2, 1], [3, 1], [4, 0], [4, 1], [4, 2]]}, {"name": "P", "cells": [[0, 2], [0, 3], [1, 2], [1, 3], [2, 2]]}, {"name": "X", "cells": [[2, 3], [3, 2], [3, 3], [3, 4], [4, 3]]}, {"name": "L", "cells": [[7, 4], [7, 5], [8, 4], [9, 4], [10, 4]]}, {"name": "Z", "cells": [[9, 7], [10, 7], [10, 8], [10, 9], [11, 9]]}, {"name": "V", "cells": [[9, 6], [10, 6], [11, 6], [11, 7], [11, 8]]}, {"name": "F", "cells": [[7, 6], [8, 5], [8, 6], [8, 7], [9, 5]]}, {"name": "W", "cells": [[5, 5], [5, 6], [6, 6], [6, 7], [7, 7]]}, {"name": "U", "cells": [[4, 4], [4, 5], [5, 4], [6, 4], [6, 5]]}, {"name": "Y", "cells": [[4, 6], [4, 7], [4, 8], [4, 9], [5, 7]]}, {"name": "I", "cells": [[3, 5], [3, 6], [3, 7], [3, 8], [3, 9]]}]}, "kangaroo": {"label": "Kangoeroe", "rows": ["..#.........", "###.........", "###.........", ".##.........", ".###........", ".####.......", ".####.......", "######......", "#.#####.....", "..######....", "..######....", "..##..##....", "..##...##...", "####....####"], "solution": [{"name": "L", "cells": [[8, 12], [8, 13], [9, 13], [10, 13], [11, 13]]}, {"name": "V", "cells": [[0, 13], [1, 13], [2, 11], [2, 12], [2, 13]]}, {"name": "I", "cells": [[3, 9], [3, 10], [3, 11], [3, 12], [3, 13]]}, {"name": "N", "cells": [[2, 8], [2, 9], [2, 10], [3, 7], [3, 8]]}, {"name": "Z", "cells": [[0, 7], [0, 8], [1, 7], [2, 6], [2, 7]]}, {"name": "Y", "cells": [[6, 11], [7, 9], [7, 10], [7, 11], [7, 12]]}, {"name": "T", "cells": [[0, 1], [1, 1], [2, 0], [2, 1], [2, 2]]}, {"name": "F", "cells": [[0, 2], [1, 2], [1, 3], [1, 4], [2, 3]]}, {"name": "W", "cells": [[1, 5], [1, 6], [2, 4], [2, 5], [3, 4]]}, {"name": "P", "cells": [[3, 5], [3, 6], [4, 5], [4, 6], [4, 7]]}, {"name": "X", "cells": [[4, 8], [5, 7], [5, 8], [5, 9], [6, 8]]}, {"name": "U", "cells": [[4, 9], [4, 10], [5, 10], [6, 9], [6, 10]]}]}, "ostrich": {"label": "Struisvogel", "rows": ["##..........", ".#..........", ".#..........", ".#..........", ".#.#####....", ".##########.", ".###########", "..##########", "..##########", ".....##...##", "......#.....", "......#.....", "......#.....", "......#....."], "solution": [{"name": "I", "cells": [[6, 9], [6, 10], [6, 11], [6, 12], [6, 13]]}, {"name": "L", "cells": [[0, 0], [1, 0], [1, 1], [1, 2], [1, 3]]}, {"name": "T", "cells": [[1, 4], [1, 5], [1, 6], [2, 5], [3, 5]]}, {"name": "W", "cells": [[3, 4], [4, 4], [4, 5], [5, 5], [5, 6]]}, {"name": "P", "cells": [[5, 4], [6, 4], [6, 5], [7, 4], [7, 5]]}, {"name": "V", "cells": [[9, 7], [10, 7], [11, 7], [11, 8], [11, 9]]}, {"name": "Z", "cells": [[8, 7], [8, 8], [9, 8], [10, 8], [10, 9]]}, {"name": "N", "cells": [[8, 5], [9, 5], [10, 5], [10, 6], [11, 6]]}, {"name": "Y", "cells": [[6, 6], [7, 6], [7, 7], [8, 6], [9, 6]]}, {"name": "F", "cells": [[5, 8], [5, 9], [6, 7], [6, 8], [7, 8]]}, {"name": "X", "cells": [[3, 7], [4, 6], [4, 7], [4, 8], [5, 7]]}, {"name": "U", "cells": [[2, 6], [2, 7], [2, 8], [3, 6], [3, 8]]}]}, "shark": {"label": "Haai", "rows": [".........#..........", "........##.........#", ".....########.....##", "..##############.##.", "##################..", "....##########...##."], "solution": [{"name": "W", "cells": [[17, 3], [18, 2], [18, 3], [19, 1], [19, 2]]}, {"name": "N", "cells": [[15, 4], [16, 4], [17, 4], [17, 5], [18, 5]]}, {"name": "Y", "cells": [[0, 4], [1, 4], [2, 3], [2, 4], [3, 4]]}, {"name": "L", "cells": [[12, 2], [12, 3], [13, 3], [14, 3], [15, 3]]}, {"name": "P", "cells": [[12, 4], [12, 5], [13, 4], [13, 5], [14, 4]]}, {"name": "F", "cells": [[8, 1], [9, 0], [9, 1], [9, 2], [10, 2]]}, {"name": "T", "cells": [[9, 3], [10, 3], [11, 2], [11, 3], [11, 4]]}, {"name": "I", "cells": [[7, 5], [8, 5], [9, 5], [10, 5], [11, 5]]}, {"name": "V", "cells": [[8, 2], [8, 3], [8, 4], [9, 4], [10, 4]]}, {"name": "Z", "cells": [[3, 3], [4, 3], [4, 4], [4, 5], [5, 5]]}, {"name": "X", "cells": [[5, 4], [6, 3], [6, 4], [6, 5], [7, 4]]}, {"name": "U", "cells": [[5, 2], [5, 3], [6, 2], [7, 2], [7, 3]]}]}, "brachio": {"label": "Brachiosaurus", "rows": [".##...................", "#####.................", "....##................", ".....##...............", ".....###..............", "......###.###.........", "......##########......", ".......###############", "........#######.......", "........##...##.......", "........##...##......."], "solution": [{"name": "I", "cells": [[17, 7], [18, 7], [19, 7], [20, 7], [21, 7]]}, {"name": "P", "cells": [[0, 1], [1, 0], [1, 1], [2, 0], [2, 1]]}, {"name": "W", "cells": [[3, 1], [4, 1], [4, 2], [5, 2], [5, 3]]}, {"name": "X", "cells": [[5, 4], [6, 3], [6, 4], [6, 5], [7, 4]]}, {"name": "N", "cells": [[13, 6], [14, 6], [15, 6], [15, 7], [16, 7]]}, {"name": "L", "cells": [[13, 10], [14, 7], [14, 8], [14, 9], [14, 10]]}, {"name": "T", "cells": [[11, 8], [12, 8], [13, 7], [13, 8], [13, 9]]}, {"name": "Z", "cells": [[8, 10], [9, 8], [9, 9], [9, 10], [10, 8]]}, {"name": "V", "cells": [[8, 7], [8, 8], [8, 9], [9, 7], [10, 7]]}, {"name": "F", "cells": [[6, 6], [7, 5], [7, 6], [7, 7], [8, 5]]}, {"name": "Y", "cells": [[8, 6], [9, 6], [10, 5], [10, 6], [11, 6]]}, {"name": "U", "cells": [[11, 5], [11, 7], [12, 5], [12, 6], [12, 7]]}]}, "dimetrodon": {"label": "Dimetrodon", "rows": ["......###.......", ".....#####......", "....#######.....", "...#########....", ".############...", "################", "....##...##.....", "....##...##....."], "solution": [{"name": "I", "cells": [[11, 5], [12, 5], [13, 5], [14, 5], [15, 5]]}, {"name": "N", "cells": [[0, 5], [1, 4], [1, 5], [2, 4], [3, 4]]}, {"name": "T", "cells": [[2, 5], [3, 5], [4, 4], [4, 5], [4, 6]]}, {"name": "Z", "cells": [[4, 7], [5, 5], [5, 6], [5, 7], [6, 5]]}, {"name": "P", "cells": [[3, 3], [4, 2], [4, 3], [5, 2], [5, 3]]}, {"name": "W", "cells": [[10, 2], [10, 3], [11, 3], [11, 4], [12, 4]]}, {"name": "L", "cells": [[9, 4], [10, 4], [10, 5], [10, 6], [10, 7]]}, {"name": "V", "cells": [[7, 5], [8, 5], [9, 5], [9, 6], [9, 7]]}, {"name": "Y", "cells": [[5, 4], [6, 3], [6, 4], [7, 4], [8, 4]]}, {"name": "F", "cells": [[5, 1], [6, 0], [6, 1], [6, 2], [7, 0]]}, {"name": "X", "cells": [[7, 1], [8, 0], [8, 1], [8, 2], [9, 1]]}, {"name": "U", "cells": [[7, 2], [7, 3], [8, 3], [9, 2], [9, 3]]}]}, "dromeo": {"label": "Dromaeosaurus", "rows": [".##...................", "####..................", "..#####...............", "...##########.........", ".....#################", "......##########......", "........#####.........", ".........##...........", "..........#...........", "..........#...........", "..........#...........", ".........##..........."], "solution": [{"name": "L", "cells": [[9, 11], [10, 8], [10, 9], [10, 10], [10, 11]]}, {"name": "I", "cells": [[17, 4], [18, 4], [19, 4], [20, 4], [21, 4]]}, {"name": "N", "cells": [[13, 5], [14, 5], [15, 4], [15, 5], [16, 4]]}, {"name": "Y", "cells": [[11, 4], [12, 3], [12, 4], [13, 4], [14, 4]]}, {"name": "P", "cells": [[0, 1], [1, 0], [1, 1], [2, 0], [2, 1]]}, {"name": "X", "cells": [[2, 2], [3, 1], [3, 2], [3, 3], [4, 2]]}, {"name": "U", "cells": [[10, 3], [10, 4], [10, 5], [11, 3], [11, 5]]}, {"name": "Z", "cells": [[10, 6], [10, 7], [11, 6], [12, 5], [12, 6]]}, {"name": "W", "cells": [[7, 5], [8, 5], [8, 6], [9, 6], [9, 7]]}, {"name": "T", "cells": [[7, 4], [8, 4], [9, 3], [9, 4], [9, 5]]}, {"name": "V", "cells": [[6, 3], [6, 4], [6, 5], [7, 3], [8, 3]]}, {"name": "F", "cells": [[4, 3], [5, 2], [5, 3], [5, 4], [6, 2]]}]}, "iguano": {"label": "Iguanodon", "rows": [".#..........", "###.........", ".##.........", ".###........", ".###........", ".####.......", ".#####......", "#######.....", "#.#####.....", "..######....", "..##.###....", "..##..##....", "..##...##...", ".###....####"], "solution": [{"name": "L", "cells": [[8, 12], [8, 13], [9, 13], [10, 13], [11, 13]]}, {"name": "N", "cells": [[0, 7], [0, 8], [1, 5], [1, 6], [1, 7]]}, {"name": "Y", "cells": [[6, 11], [7, 9], [7, 10], [7, 11], [7, 12]]}, {"name": "X", "cells": [[0, 1], [1, 0], [1, 1], [1, 2], [2, 1]]}, {"name": "V", "cells": [[1, 13], [2, 13], [3, 11], [3, 12], [3, 13]]}, {"name": "I", "cells": [[2, 8], [2, 9], [2, 10], [2, 11], [2, 12]]}, {"name": "T", "cells": [[3, 8], [3, 9], [3, 10], [4, 9], [5, 9]]}, {"name": "U", "cells": [[5, 8], [5, 10], [6, 8], [6, 9], [6, 10]]}, {"name": "W", "cells": [[4, 5], [4, 6], [5, 6], [5, 7], [6, 7]]}, {"name": "Z", "cells": [[2, 6], [2, 7], [3, 7], [4, 7], [4, 8]]}, {"name": "P", "cells": [[2, 4], [2, 5], [3, 4], [3, 5], [3, 6]]}, {"name": "F", "cells": [[1, 3], [1, 4], [2, 2], [2, 3], [3, 3]]}]}, "stego": {"label": "Stegosaurus", "rows": ["......#.#.#.......", ".....#######......", "....#########.....", ".#############..#.", "##################", "....##....##....#.", "....##....##......"], "solution": [{"name": "X", "cells": [[15, 4], [16, 3], [16, 4], [16, 5], [17, 4]]}, {"name": "I", "cells": [[0, 4], [1, 4], [2, 4], [3, 4], [4, 4]]}, {"name": "L", "cells": [[1, 3], [2, 3], [3, 3], [4, 2], [4, 3]]}, {"name": "P", "cells": [[4, 5], [4, 6], [5, 4], [5, 5], [5, 6]]}, {"name": "W", "cells": [[12, 2], [12, 3], [13, 3], [13, 4], [14, 4]]}, {"name": "Z", "cells": [[10, 6], [11, 4], [11, 5], [11, 6], [12, 4]]}, {"name": "V", "cells": [[8, 3], [9, 3], [10, 3], [10, 4], [10, 5]]}, {"name": "Y", "cells": [[6, 4], [7, 3], [7, 4], [8, 4], [9, 4]]}, {"name": "T", "cells": [[9, 2], [10, 2], [11, 1], [11, 2], [11, 3]]}, {"name": "U", "cells": [[8, 0], [8, 1], [9, 1], [10, 0], [10, 1]]}, {"name": "F", "cells": [[6, 2], [6, 3], [7, 1], [7, 2], [8, 2]]}, {"name": "N", "cells": [[5, 1], [5, 2], [5, 3], [6, 0], [6, 1]]}]}, "trex": {"label": "T-rex", "rows": [".##...............", "####..............", "..####............", "...######.........", "....########......", "...############...", "...#.#############", ".......#####......", ".........#........", ".........#........", ".........#........", "........##........"], "solution": [{"name": "L", "cells": [[8, 11], [9, 8], [9, 9], [9, 10], [9, 11]]}, {"name": "I", "cells": [[13, 6], [14, 6], [15, 6], [16, 6], [17, 6]]}, {"name": "Y", "cells": [[11, 5], [12, 5], [12, 6], [13, 5], [14, 5]]}, {"name": "P", "cells": [[0, 1], [1, 0], [1, 1], [2, 0], [2, 1]]}, {"name": "N", "cells": [[3, 5], [3, 6], [4, 3], [4, 4], [4, 5]]}, {"name": "X", "cells": [[2, 2], [3, 1], [3, 2], [3, 3], [4, 2]]}, {"name": "F", "cells": [[5, 2], [5, 3], [6, 3], [6, 4], [7, 3]]}, {"name": "V", "cells": [[5, 4], [5, 5], [5, 6], [6, 6], [7, 6]]}, {"name": "W", "cells": [[6, 5], [7, 4], [7, 5], [8, 3], [8, 4]]}, {"name": "Z", "cells": [[7, 7], [8, 5], [8, 6], [8, 7], [9, 5]]}, {"name": "U", "cells": [[9, 6], [9, 7], [10, 7], [11, 6], [11, 7]]}, {"name": "T", "cells": [[9, 4], [10, 4], [10, 5], [10, 6], [11, 4]]}]}, "nessie": {"label": "Nessie", "rows": [".##.................", "####................", "..##................", "..##................", "..##....##..##......", "..##..##########....", "..###.###########...", "..##################"], "solution": [{"name": "L", "cells": [[16, 6], [16, 7], [17, 7], [18, 7], [19, 7]]}, {"name": "P", "cells": [[0, 1], [1, 0], [1, 1], [2, 0], [2, 1]]}, {"name": "N", "cells": [[2, 2], [2, 3], [2, 4], [3, 1], [3, 2]]}, {"name": "Y", "cells": [[2, 5], [3, 3], [3, 4], [3, 5], [3, 6]]}, {"name": "U", "cells": [[2, 6], [2, 7], [3, 7], [4, 6], [4, 7]]}, {"name": "Z", "cells": [[5, 7], [6, 5], [6, 6], [6, 7], [7, 5]]}, {"name": "I", "cells": [[7, 7], [8, 7], [9, 7], [10, 7], [11, 7]]}, {"name": "T", "cells": [[7, 6], [8, 4], [8, 5], [8, 6], [9, 6]]}, {"name": "F", "cells": [[9, 4], [9, 5], [10, 5], [10, 6], [11, 5]]}, {"name": "W", "cells": [[12, 4], [13, 4], [13, 5], [14, 5], [14, 6]]}, {"name": "V", "cells": [[13, 7], [14, 7], [15, 5], [15, 6], [15, 7]]}, {"name": "X", "cells": [[11, 6], [12, 5], [12, 6], [12, 7], [13, 6]]}]}, "butterfly2": {"label": "Vlinder 2", "rows": ["###.......###", ".###..#..###.", ".###########.", "..#########..", "..#########..", "..#########..", "..###.#.###..", "...#.....#..."], "solution": [{"name": "N", "cells": [[9, 1], [10, 0], [10, 1], [11, 0], [12, 0]]}, {"name": "F", "cells": [[9, 2], [10, 2], [10, 3], [11, 1], [11, 2]]}, {"name": "T", "cells": [[0, 0], [1, 0], [1, 1], [1, 2], [2, 0]]}, {"name": "P", "cells": [[3, 5], [3, 6], [3, 7], [4, 5], [4, 6]]}, {"name": "I", "cells": [[2, 2], [2, 3], [2, 4], [2, 5], [2, 6]]}, {"name": "L", "cells": [[2, 1], [3, 1], [3, 2], [3, 3], [3, 4]]}, {"name": "X", "cells": [[8, 6], [9, 5], [9, 6], [9, 7], [10, 6]]}, {"name": "U", "cells": [[8, 4], [8, 5], [9, 4], [10, 4], [10, 5]]}, {"name": "V", "cells": [[7, 3], [7, 4], [7, 5], [8, 3], [9, 3]]}, {"name": "Y", "cells": [[5, 2], [6, 1], [6, 2], [7, 2], [8, 2]]}, {"name": "W", "cells": [[4, 4], [5, 4], [5, 5], [6, 5], [6, 6]]}, {"name": "Z", "cells": [[4, 2], [4, 3], [5, 3], [6, 3], [6, 4]]}]}, "butterfly3": {"label": "Vlinder 3", "rows": ["###.......###", ".###..#..###.", ".###########.", ".###########.", "..#########..", "...#######...", "...##.#.##...", "..##.....##.."], "solution": [{"name": "L", "cells": [[2, 7], [3, 4], [3, 5], [3, 6], [3, 7]]}, {"name": "W", "cells": [[8, 5], [8, 6], [9, 6], [9, 7], [10, 7]]}, {"name": "T", "cells": [[10, 0], [11, 0], [11, 1], [11, 2], [12, 0]]}, {"name": "V", "cells": [[0, 0], [1, 0], [2, 0], [2, 1], [2, 2]]}, {"name": "N", "cells": [[1, 1], [1, 2], [1, 3], [2, 3], [2, 4]]}, {"name": "P", "cells": [[3, 1], [3, 2], [3, 3], [4, 2], [4, 3]]}, {"name": "U", "cells": [[4, 5], [4, 6], [5, 5], [6, 5], [6, 6]]}, {"name": "F", "cells": [[4, 4], [5, 2], [5, 3], [5, 4], [6, 3]]}, {"name": "Z", "cells": [[6, 1], [6, 2], [7, 2], [8, 2], [8, 3]]}, {"name": "Y", "cells": [[10, 1], [10, 2], [10, 3], [10, 4], [11, 3]]}, {"name": "X", "cells": [[6, 4], [7, 3], [7, 4], [7, 5], [8, 4]]}, {"name": "I", "cells": [[9, 1], [9, 2], [9, 3], [9, 4], [9, 5]]}]}, "butterfly4": {"label": "Vlinder 4", "rows": ["###.......###", ".###..#..###.", ".###########.", ".###########.", "..#########..", "...#######...", "...##.#.##...", "...#.....#...", "...#.....#..."], "solution": [{"name": "I", "cells": [[9, 4], [9, 5], [9, 6], [9, 7], [9, 8]]}, {"name": "Y", "cells": [[3, 5], [3, 6], [3, 7], [3, 8], [4, 6]]}, {"name": "N", "cells": [[9, 1], [10, 0], [10, 1], [11, 0], [12, 0]]}, {"name": "T", "cells": [[9, 2], [10, 2], [11, 1], [11, 2], [11, 3]]}, {"name": "Z", "cells": [[8, 2], [8, 3], [9, 3], [10, 3], [10, 4]]}, {"name": "P", "cells": [[0, 0], [1, 0], [1, 1], [2, 0], [2, 1]]}, {"name": "U", "cells": [[6, 5], [6, 6], [7, 5], [8, 5], [8, 6]]}, {"name": "L", "cells": [[5, 4], [5, 5], [6, 4], [7, 4], [8, 4]]}, {"name": "F", "cells": [[5, 2], [6, 1], [6, 2], [7, 2], [7, 3]]}, {"name": "V", "cells": [[4, 3], [4, 4], [4, 5], [5, 3], [6, 3]]}, {"name": "W", "cells": [[1, 2], [1, 3], [2, 3], [2, 4], [3, 4]]}, {"name": "X", "cells": [[2, 2], [3, 1], [3, 2], [3, 3], [4, 2]]}]}};
+const BASE={"F": [[1, 0], [0, 1], [1, 1], [1, 2], [2, 2]], "I": [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]], "L": [[0, 0], [0, 1], [0, 2], [0, 3], [1, 3]], "P": [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2]], "N": [[0, 0], [0, 1], [1, 1], [1, 2], [1, 3]], "T": [[0, 0], [1, 0], [2, 0], [1, 1], [1, 2]], "U": [[0, 0], [2, 0], [0, 1], [1, 1], [2, 1]], "V": [[0, 0], [0, 1], [0, 2], [1, 2], [2, 2]], "W": [[0, 0], [0, 1], [1, 1], [1, 2], [2, 2]], "X": [[1, 0], [0, 1], [1, 1], [2, 1], [1, 2]], "Y": [[0, 0], [0, 1], [0, 2], [0, 3], [1, 1]], "Z": [[0, 0], [1, 0], [1, 1], [1, 2], [2, 2]]};
+const COLORS=["#ef9a9a", "#ffd166", "#8fd3c7", "#f4b183", "#90caf9", "#b39ddb", "#8bc34a", "#4db6ac", "#f48fb1", "#81c784", "#ffb74d", "#ce93d8"];
+const NAMES=Object.keys(BASE);
+const $=id=>document.getElementById(id);
+
+function norm(a){let x=Math.min(...a.map(c=>c[0])),y=Math.min(...a.map(c=>c[1]));return a.map(c=>[c[0]-x,c[1]-y])}
+function sig(a){return JSON.stringify(norm(a).sort((p,q)=>p[1]-q[1]||p[0]-q[0]))}
+function transforms(a){let z=[],seen=new Set;for(let f=0;f<2;f++)for(let r=0;r<4;r++){let b=a.map(([ox,oy])=>{let x=f?-ox:ox,y=oy;for(let k=0;k<r;k++){let t=x;x=-y;y=t}return[x,y]});b=norm(b).sort((p,q)=>p[1]-q[1]||p[0]-q[0]);let s=JSON.stringify(b);if(!seen.has(s)){seen.add(s);z.push(b)}}return z}
+function dims(rows){return{w:Math.max(...rows.map(r=>r.length)),h:rows.length}}
+function ownerMap(data){let m={};data.solution.forEach((p,i)=>p.cells.forEach(c=>m[c[0]+','+c[1]]=i));return m}
+function solutionMap(data){let m={};data.solution.forEach(p=>m[p.name]=p.cells);return m}
+
+Object.entries(FIG).forEach(([k,v])=>{ $('mFig').add(new Option(v.label,k)); $('gFig').add(new Option(v.label,k)); });
+
+/* ---------- MATERIAL MAKER ---------- */
+let makerLevel=1;
+
+function makerCell(data){
+ const d=dims(data.rows), usableW=+$('mW').value*10-2*(+$('mMargin').value), usableH=+$('mH').value*10-2*(+$('mMargin').value);
+ return Math.min(usableW/d.w,usableH/d.h);
+}
+function silhouetteEdges(rows,cell,pad,stroke='#111',width=.7){
+ let d=dims(rows),q='',dirs=[[1,0,1,0,1,1],[-1,0,0,0,0,1],[0,1,0,1,1,1],[0,-1,0,0,1,0]];
+ for(let y=0;y<d.h;y++)for(let x=0;x<rows[y].length;x++)if(rows[y][x]=='#')for(const z of dirs){
+  let nx=x+z[0],ny=y+z[1];
+  if(ny<0||ny>=d.h||nx<0||nx>=rows[ny].length||rows[ny][nx]!='#')
+   q+=`<line x1="${pad+(x+z[2])*cell}" y1="${pad+(y+z[3])*cell}" x2="${pad+(x+z[4])*cell}" y2="${pad+(y+z[5])*cell}" stroke="${stroke}" stroke-width="${width}"/>`;
+ }
+ return q;
+}
+function pieceOutlines(data,cell,pad,stroke='#999',width=.6){
+ let q='';
+ data.solution.forEach(p=>{let set=new Set(p.cells.map(c=>c[0]+','+c[1]));p.cells.forEach(([x,y])=>[[1,0,1,0,1,1],[-1,0,0,0,0,1],[0,1,0,1,1,1],[0,-1,0,0,1,0]].forEach(z=>{
+  if(!set.has((x+z[0])+','+(y+z[1]))) q+=`<line x1="${pad+(x+z[2])*cell}" y1="${pad+(y+z[3])*cell}" x2="${pad+(x+z[4])*cell}" y2="${pad+(y+z[5])*cell}" stroke="${stroke}" stroke-width="${width}"/>`;
+ }))});
+ return q;
+}
+function makerSvg(data,mode,forPrint=false){
+ const rows=data.rows,d=dims(rows),cell=makerCell(data),pad=2,owner=ownerMap(data);
+ let factor=(mode==='expert')?.48:1;
+ let c=cell*factor,W=d.w*c+4,H=d.h*c+4;
+ let q=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}mm" height="${H}mm" viewBox="0 0 ${W} ${H}">`;
+ if(mode==='solution'){
+  for(let y=0;y<d.h;y++)for(let x=0;x<rows[y].length;x++)if(rows[y][x]=='#'){let i=owner[x+','+y];q+=`<rect x="${pad+x*c}" y="${pad+y*c}" width="${c}" height="${c}" fill="${COLORS[i]}" stroke="#555" stroke-width=".3"/>`}
+  q+=pieceOutlines(data,c,pad,'#111',.75);
+  q+=silhouetteEdges(rows,c,pad,'#111',.75);
+ } else if(mode==='level1'||mode==='level2'){
+  for(let y=0;y<d.h;y++)for(let x=0;x<rows[y].length;x++)if(rows[y][x]=='#')q+=`<rect x="${pad+x*c}" y="${pad+y*c}" width="${c}" height="${c}" fill="#fff" stroke="#d0d0d0" stroke-width=".2"/>`;
+  if(mode==='level1') q+=pieceOutlines(data,c,pad,'#aaa',.55);
+  q+=silhouetteEdges(rows,c,pad,'#111',.75);
+ } else {
+  q+=`<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/>`;
+  q+=silhouetteEdges(rows,c,pad,'#111',.75);
+ }
+ return q+'</svg>';
+}
+function makerPieceSvg(name,i,cell){
+ let a=norm(BASE[name]),mx=Math.max(...a.map(c=>c[0]))+1,my=Math.max(...a.map(c=>c[1]))+1;
+ let q=`<svg xmlns="http://www.w3.org/2000/svg" width="${mx*cell+3}mm" height="${my*cell+3}mm" viewBox="0 0 ${mx*cell+3} ${my*cell+3}">`;
+ a.forEach(([x,y])=>q+=`<rect x="${1.5+x*cell}" y="${1.5+y*cell}" width="${cell}" height="${cell}" fill="${COLORS[i]}" stroke="#222" stroke-width=".35"/>`);
+ return q+'</svg>';
+}
+function renderMaker(){
+ const data=FIG[$('mFig').value], cell=makerCell(data), d=dims(data.rows);
+ let mode=makerLevel===1?'level1':makerLevel===2?'level2':makerLevel===3?'level3':'expert';
+ $('makerTarget').innerHTML=makerSvg(data,mode);
+ $('makerSolution').innerHTML=makerSvg(data,'solution');
+ $('makerPieces').innerHTML=NAMES.map((n,i)=>`<div class="pieceCard"><b>${n}</b><br>${makerPieceSvg(n,i,cell)}</div>`).join('');
+ $('makerInfo').innerHTML=`<b>${data.label}</b> · ${d.w} × ${d.h} vakjes · blokmaat <b>${cell.toFixed(2)} mm</b>.<br>${makerLevel===1?'Veel steun: de grijze lijnen tonen waar de 12 stukken komen.':makerLevel===2?'Gemiddeld: alleen het raster helpt.':makerLevel===3?'Moeilijk: alleen de buitenvorm is zichtbaar.':'Expert: klein voorbeeld; de stukken worden ernaast gelegd.'}`;
+}
+document.querySelectorAll('.level').forEach(el=>el.onclick=()=>{makerLevel=+el.dataset.level;document.querySelectorAll('.level').forEach(x=>x.classList.toggle('active',x===el));renderMaker()});
+['mFig','mW','mH','mMargin'].forEach(id=>$(id).addEventListener('input',renderMaker));
+
+function makePrint(type){
+ const data=FIG[$('mFig').value], cell=makerCell(data);
+ let mode=makerLevel===1?'level1':makerLevel===2?'level2':makerLevel===3?'level3':'expert';
+ let pages=[];
+ if(type==='all'||type==='card') pages.push(`<div class="printPage"><h2>Bouwkaart – ${data.label}</h2>${makerSvg(data,mode,true)}<p class="small">Print op 100% / ware grootte.</p></div>`);
+ if(type==='all'||type==='pieces') pages.push(`<div class="printPage"><h2>Puzzelstukken</h2><div style="display:flex;flex-wrap:wrap;gap:5mm">${NAMES.map((n,i)=>`<div><b>${n}</b><br>${makerPieceSvg(n,i,cell)}</div>`).join('')}</div><p class="small">De vakjes zijn exact even groot als op de bouwkaart.</p></div>`);
+ if(type==='all'||type==='solution') pages.push(`<div class="printPage"><h2>Oplossing – ${data.label}</h2>${makerSvg(data,'solution',true)}</div>`);
+ $('printArea').innerHTML=pages.join('');$('printArea').classList.add('printing');window.print();setTimeout(()=>$('printArea').classList.remove('printing'),500);
+}
+$('printAll').onclick=()=>makePrint('all');$('printCard').onclick=()=>makePrint('card');$('printPieces').onclick=()=>makePrint('pieces');$('printSolution').onclick=()=>makePrint('solution');
+
+/* ---------- GAME ---------- */
+let gState={},gSelected=null,gOutlines=false,gHelp=0,gCell=28,gPad=7,gDrag=null;
+function gCorrectOri(n){let target=sig(solutionMap(FIG[$('gFig').value])[n]);return transforms(BASE[n]).find(o=>sig(o)===target)}
+function gOccupied(except){let s=new Set;Object.entries(gState).forEach(([n,p])=>{if(n!==except&&p.placed)p.cells.forEach(c=>s.add(c[0]+','+c[1]))});return s}
+function gValid(n,cells){let rows=FIG[$('gFig').value].rows,occ=gOccupied(n);return cells.every(([x,y])=>y>=0&&y<rows.length&&x>=0&&x<rows[y].length&&rows[y][x]=='#'&&!occ.has(x+','+y))}
+function gDrawBoard(){
+ let data=FIG[$('gFig').value],d=dims(data.rows),q='';
+ for(let y=0;y<d.h;y++)for(let x=0;x<data.rows[y].length;x++)if(data.rows[y][x]=='#')q+=`<rect x="${gPad+x*gCell}" y="${gPad+y*gCell}" width="${gCell}" height="${gCell}" fill="#fff" stroke="#d0d0d0"/>`;
+ if(gOutlines) q+=pieceOutlines(data,gCell,gPad,'#999',2);
+ $('gameBg').innerHTML=q;
+}
+function gPieceSvg(n){
+ let p=gState[n],a=p.ori,mx=Math.max(...a.map(c=>c[0]))+1,my=Math.max(...a.map(c=>c[1]))+1,q=`<svg width="${mx*gCell}" height="${my*gCell}">`;
+ a.forEach(([x,y])=>q+=`<rect x="${x*gCell+1}" y="${y*gCell+1}" width="${gCell-2}" height="${gCell-2}" rx="2" fill="${p.color}" stroke="#333"/>`);
+ return q+'</svg>';
+}
+function gLayout(){
+ let x=8,y=8,rowH=0,W=$('gTray').clientWidth||700;
+ NAMES.forEach(n=>{let p=gState[n];if(p.placed)return;p.el.innerHTML=gPieceSvg(n);let a=p.ori,mx=(Math.max(...a.map(c=>c[0]))+1)*gCell,my=(Math.max(...a.map(c=>c[1]))+1)*gCell;if(x+mx+8>W){x=8;y+=rowH+10;rowH=0}p.el.style.cssText+=`;position:absolute;left:${x}px;top:${y}px;z-index:1`;x+=mx+10;rowH=Math.max(rowH,my)});
+ $('gTray').style.height=Math.max(190,y+rowH+12)+'px';
+}
+function gChoose(n){gSelected=n;document.querySelectorAll('.gamePiece').forEach(e=>e.classList.toggle('selected',e.dataset.n===n))}
+function gMakePiece(n,i){
+ let e=document.createElement('div');e.className='gamePiece';e.dataset.n=n;e.addEventListener('pointerdown',gDown);$('gTray').appendChild(e);
+ gState[n]={ori:norm(BASE[n]),placed:false,cells:[],color:COLORS[i],el:e};e.innerHTML=gPieceSvg(n);
+}
+function gDown(e){
+ let n=e.currentTarget.dataset.n;gChoose(n);let r=e.currentTarget.getBoundingClientRect();gDrag={n,dx:e.clientX-r.left,dy:e.clientY-r.top};
+ e.currentTarget.setPointerCapture(e.pointerId);e.currentTarget.onpointermove=gMove;e.currentTarget.onpointerup=gUp;
+}
+function gMove(e){if(!gDrag)return;let el=gState[gDrag.n].el;el.style.position='fixed';el.style.zIndex=99;el.style.left=e.clientX-gDrag.dx+'px';el.style.top=e.clientY-gDrag.dy+'px'}
+function gUp(e){
+ if(!gDrag)return;let n=gDrag.n,p=gState[n],el=p.el,br=$('gameBoard').getBoundingClientRect();el.onpointermove=null;
+ let gx=Math.round((e.clientX-gDrag.dx-br.left-gPad)/gCell),gy=Math.round((e.clientY-gDrag.dy-br.top-gPad)/gCell),cells=p.ori.map(([x,y])=>[x+gx,y+gy]);
+ if(gValid(n,cells)){p.placed=true;p.cells=cells;$('gameBoard').appendChild(el);el.style.cssText+=`;position:absolute;left:${gPad+gx*gCell}px;top:${gPad+gy*gCell}px;z-index:5`;$('gMessage').textContent='Goed! Probeer het volgende stuk.'}
+ else{p.placed=false;p.cells=[];$('gTray').appendChild(el);$('gMessage').textContent='Daar past het niet. Probeer opnieuw.';gLayout()}
+ gDrag=null;gCheck();
+}
+function gResetOne(n,layout=true){let p=gState[n];p.placed=false;p.cells=[];$('gTray').appendChild(p.el);if(layout)gLayout()}
+function gRefresh(){if(!gSelected)return;gState[gSelected].el.innerHTML=gPieceSvg(gSelected);if(!gState[gSelected].placed)gLayout()}
+function gSetup(){
+ gSelected=null;gOutlines=false;gHelp=0;$('gOutline').textContent='👀 Toon omtreklijnen';$('gTray').innerHTML='';
+ let data=FIG[$('gFig').value],d=dims(data.rows),mw=Math.min(innerWidth-45,620),mh=Math.min(innerHeight*.4,450);
+ gCell=Math.max(18,Math.floor(Math.min(mw/d.w,mh/d.h)));
+ $('gameBoard').style.width=d.w*gCell+gPad*2+'px';$('gameBoard').style.height=d.h*gCell+gPad*2+'px';
+ $('gameBg').setAttribute('width',d.w*gCell+gPad*2);$('gameBg').setAttribute('height',d.h*gCell+gPad*2);
+ gState={};NAMES.forEach(gMakePiece);gDrawBoard();gLayout();gScore();$('gMessage').className='status';$('gMessage').textContent='Kies een puzzelstuk onderaan.';
+}
+$('gRotate').onclick=()=>{if(!gSelected)return;let p=gState[gSelected];if(p.placed)gResetOne(gSelected,false);p.ori=norm(p.ori.map(([x,y])=>[-y,x]));gRefresh()};
+$('gFlip').onclick=()=>{if(!gSelected)return;let p=gState[gSelected];if(p.placed)gResetOne(gSelected,false);p.ori=norm(p.ori.map(([x,y])=>[-x,y]));gRefresh()};
+$('gOrient').onclick=()=>{if(!gSelected){$('gMessage').textContent='Tik eerst een puzzelstuk aan.';return}gHelp=Math.max(gHelp,1);let p=gState[gSelected];if(p.placed)gResetOne(gSelected,false);p.ori=gCorrectOri(gSelected);gRefresh();$('gMessage').textContent='Ik heb dit stuk juist gedraaid. Zoek nu zelf waar het hoort.';gScore()};
+$('gOutline').onclick=()=>{gOutlines=!gOutlines;if(gOutlines)gHelp=Math.max(gHelp,2);$('gOutline').textContent=gOutlines?'🙈 Verberg omtreklijnen':'👀 Toon omtreklijnen';gDrawBoard();gScore()};
+$('gPlace').onclick=()=>{if(!gSelected){$('gMessage').textContent='Tik eerst een puzzelstuk aan.';return}gHelp=3;let p=gState[gSelected],sol=solutionMap(FIG[$('gFig').value])[gSelected],minx=Math.min(...sol.map(c=>c[0])),miny=Math.min(...sol.map(c=>c[1]));if(p.placed)gResetOne(gSelected,false);p.ori=gCorrectOri(gSelected);p.placed=true;p.cells=sol.map(c=>[...c]);$('gameBoard').appendChild(p.el);p.el.innerHTML=gPieceSvg(gSelected);p.el.style.cssText+=`;position:absolute;left:${gPad+minx*gCell}px;top:${gPad+miny*gCell}px;z-index:5`;$('gMessage').textContent='Dit stuk heb ik voor jou gelegd.';gLayout();gScore();gCheck()};
+$('gBack').onclick=()=>{if(gSelected)gResetOne(gSelected)};$('gNew').onclick=gSetup;$('gFig').onchange=gSetup;
+function gScore(){let s=gHelp===0?'★★★':gHelp===1?'★★☆':'★☆☆';$('gScore').innerHTML=`<span class="stars">${s}</span> ${gHelp===0?'Zonder hulp':gHelp===1?'Draaihulp gebruikt':'Extra hulp gebruikt'}`}
+function gCheck(){if(NAMES.every(n=>gState[n].placed)){$('gMessage').className='status done';$('gMessage').textContent='🎉 Fantastisch! Je hebt de figuur helemaal gevuld!'}}
+
+/* ---------- TABS ---------- */
+document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===btn.dataset.tab));if(btn.dataset.tab==='game')setTimeout(gSetup,20)});
+
+renderMaker();gSetup();
+</script>
+<script src="pentomino-studio-ui.js"></script>
+</body>
+</html>
