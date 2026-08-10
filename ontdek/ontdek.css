@@ -22,6 +22,12 @@ body {
   background: #123f73;
   color: #fff;
 }
+
+.ontdek-top nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
 .ontdek-merk { font-weight: 900; letter-spacing: .01em; }
 .ontdek-top a { color: #fff; text-decoration: none; font-weight: 700; }
 .ontdek-wrap { width: min(1120px, calc(100% - 32px)); margin: 34px auto 70px; }
@@ -67,6 +73,8 @@ body {
 .ontdek-label { align-self: flex-start; padding: 4px 9px; border-radius: 999px; background: var(--ontdek-geel); color: #463400; font-size: .75rem; font-weight: 900; }
 .ontdek-voet { margin-top: 34px; padding: 20px; border-radius: 18px; background: var(--ontdek-roze); line-height: 1.55; }
 @media (max-width: 800px) {
+  .ontdek-top { align-items: flex-start; gap: 14px; }
+  .ontdek-top nav { flex-direction: column; align-items: flex-end; gap: 8px; }
   .ontdek-hero { grid-template-columns: 1fr; padding: 25px; }
   .ontdek-grid { grid-template-columns: 1fr; }
 }

@@ -187,7 +187,7 @@ search.addEventListener('input', () => {
 
 const sidebarActions = document.createElement('div');
 sidebarActions.className = 'ontdek-sidebar-actions';
-sidebarActions.innerHTML = '<a class="ontdek-pro-cta" href="https://demo.jufzisa.be/#zg-prijzen" target="_blank" rel="noopener">⭐ PRO bekijken en kopen</a><a class="ontdek-terug" href="../pro/index.html">Ik heb al PRO</a><a class="ontdek-terug" href="./index.html">← Over Ontdek</a>';
+sidebarActions.innerHTML = '<a class="ontdek-pro-cta" href="https://demo.jufzisa.be/#zg-prijzen" target="_blank" rel="noopener">⭐ PRO bekijken en kopen</a><a class="ontdek-terug" href="../pro/index.html">Ik heb al PRO</a><a class="ontdek-terug" href="https://demo.jufzisa.be/#zg-probeer">← Alle info en prijzen</a>';
 document.querySelector('.sidebar').appendChild(sidebarActions);
 
 const status = document.getElementById('status');
