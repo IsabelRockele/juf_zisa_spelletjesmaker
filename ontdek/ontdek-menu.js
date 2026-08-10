@@ -48,6 +48,9 @@ const BESCHIKBAAR = new Map([
   ['Takenbord', './Takenbord_v2/klasbord.html'],
   ['Planbord', './planbord/index.html'],
   ['Bingo', './bingo.html'],
+  ['Vier op een rij', './vieropeenrij.html'],
+  ['Rad', './rad.html'],
+  ['QR-generator', './QR.html'],
 ]);
 
 const toolDescriptions = {

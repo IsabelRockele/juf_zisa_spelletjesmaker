@@ -75,7 +75,7 @@
   <!-- Vaste topbalk -->
   <div class="topbar-fixed" role="navigation" aria-label="Bovenbalk">
     <div class="topbar-inner">
-      <a class="btn" href="index.html">Keuzemenu</a>
+      <a class="btn" id="qrMenuLink" href="index.html">Keuzemenu</a>
     </div>
   </div>
 
@@ -285,6 +285,23 @@ withGroup = withGroup.replace('>', `><g transform="translate(${translate},${tran
     urlEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') { e.preventDefault(); makeQR(); }
     });
+  </script>
+  <script>
+    if (new URLSearchParams(location.search).get('mode') === 'ontdek') {
+      document.title = 'QR-code generator — Ontdek';
+      const menu = document.getElementById('qrMenuLink');
+      menu.href = 'ontdek/app.html';
+      menu.textContent = '← Keuzemenu alle tools';
+      const top = document.querySelector('.topbar-inner');
+      const label = document.createElement('strong');
+      label.textContent = 'QR-generator — Ontdek · onbeperkt gratis';
+      label.style.cssText = 'margin-left:auto;color:#173f70;text-align:right';
+      top.appendChild(label);
+      const info = document.createElement('section');
+      info.style.cssText = 'max-width:860px;margin:24px auto -10px;padding:15px 18px;box-sizing:border-box;border:2px solid #77addd;border-radius:14px;background:#eef6ff;color:#173f70;line-height:1.5';
+      info.innerHTML = '<strong style="font-size:19px">Onbeperkt gratis</strong><br>Maak en download zoveel QR-codes als je wilt, als PNG én SVG. Hiervoor heb je geen account nodig.';
+      document.querySelector('.wrap').before(info);
+    }
   </script>
 </body>
 </html>
