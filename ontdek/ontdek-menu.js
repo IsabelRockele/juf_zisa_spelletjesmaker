@@ -67,6 +67,57 @@ const toolDescriptions = {
   'Pentomino Studio': 'Probeer drie bouwkaarten en drie schermvullende puzzelfiguren.',
 };
 
+const DOWNLOAD_TOOL_IDS = new Map([
+  ['Bundel bewerkingen', 'rekenbundel'], ['Tempotoetsen', 'tempotoetsen'],
+  ['Bundel getalinzicht', 'getalinzicht'], ['Werkblad cijferen', 'cijferen'],
+  ['Bundel geld', 'geldbundel'], ['Bundel meetkunde', 'meetkundebundel'],
+  ['Reken en kleur', 'reken-en-kleur'], ['Rekenweg', 'rekenweg'],
+  ['Rekenvierkant', 'rekenvierkant'], ['Rekenpiramide', 'rekenpiramide'],
+  ['Rekendriehoek', 'rekendriehoek'], ['Rekencirkel', 'rekencirkel'],
+  ['Rekenrooster', 'rekenrooster'], ['Rekenspellen', 'rekenspellen'],
+  ['Verliefde harten', 'verliefde-harten'], ['Bundel spelling', 'spellingbundel'],
+  ['Leesbooster', 'leesbooster'], ['Leeskaartjes per AVI', 'leeskaartjes'],
+  ['Handschrift', 'handschrift'], ['Woordzoeker', 'woordzoeker'],
+  ['Kruiswoordpuzzel', 'kruiswoordpuzzel'], ['Geheime boodschap', 'geheime-boodschap'],
+  ['Lettercode', 'lettercode'], ['Lettertetris', 'lettertetris'],
+  ['Sudoku', 'sudoku'], ['Zoek de verschillen', 'zoek-verschillen'],
+  ['Doolhof', 'doolhof'], ['Slangendoolhof', 'slangendoolhof'],
+  ['Hexagonaal raster', 'hexagonaal-raster'], ['Schaduw', 'schaduw'],
+  ['Punttekening', 'punttekening'], ['Pixelart', 'pixelart'],
+  ['Bouwplaten', 'bouwplaten'], ['Coderen', 'coderen'],
+  ['Blokkenbouwsels', 'blokkenbouwsels'], ['Plattegrond', 'plattegrond'],
+  ['Bundel kloklezen', 'kloklezenbundel'], ['Bundel kalenders', 'kalenderbundel'],
+]);
+
+function updateDownloadBadges({ user = null, pro = false, trial = null } = {}) {
+  document.querySelectorAll('a.img-link').forEach((link) => {
+    const label = link.querySelector('.img-label')?.textContent.trim() || link.querySelector('img')?.alt || '';
+    const toolId = DOWNLOAD_TOOL_IDS.get(label);
+    let badge = link.querySelector('.ontdek-card-downloads');
+    if (!toolId) { badge?.remove(); return; }
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'ontdek-card-downloads';
+      link.appendChild(badge);
+    }
+    if (pro) {
+      badge.textContent = 'PRO · onbeperkt downloaden';
+      badge.dataset.status = 'pro';
+      return;
+    }
+    if (!user || !trial) {
+      badge.textContent = 'PDF · 3/3 na gratis login';
+      badge.dataset.status = 'login';
+      return;
+    }
+    const limiet = Number(trial.toolLimit || 3);
+    const gebruikt = Math.max(0, Number(trial.byTool?.[toolId] || 0));
+    const over = Math.max(0, limiet - gebruikt);
+    badge.textContent = `PDF · ${over}/${limiet} over`;
+    badge.dataset.status = over > 0 ? 'goed' : 'op';
+  });
+}
+
 const main = document.querySelector('.main');
 const search = document.getElementById('proToolSearch');
 const resultCount = document.getElementById('proSearchCount');
@@ -203,6 +254,7 @@ lastCategory === 'overview' ? overview(false) : category(lastCategory, false);
 startOntdekAuth({
   onState: ({ user, pro, trial }) => {
     const zone = status.querySelector('.ontdek-account-zone');
+    updateDownloadBadges({ user, pro, trial });
     if (!user) {
       zone.innerHTML = '<button type="button" data-auth="registreren">Gratis account maken</button><button type="button" data-auth="aanmelden">Aanmelden</button>';
       zone.querySelectorAll('[data-auth]').forEach(button => button.addEventListener('click', () => window.openOntdekAuth?.(button.dataset.auth)));
@@ -213,7 +265,8 @@ startOntdekAuth({
       return;
     }
     const resterend = Number.isFinite(Number(trial?.totalRemaining)) ? Number(trial.totalRemaining) : 15;
-    zone.innerHTML = `<span>${user.email || 'Aangemeld'} · <strong>${resterend} downloads over</strong></span><button type="button" id="ontdekLogout">Uitloggen</button>`;
+    const totaal = Number.isFinite(Number(trial?.totalLimit)) ? Number(trial.totalLimit) : 15;
+    zone.innerHTML = `<span>${user.email || 'Aangemeld'} · <strong>${resterend} van ${totaal} totale downloads over</strong></span><button type="button" id="ontdekLogout">Uitloggen</button>`;
     zone.querySelector('#ontdekLogout').addEventListener('click', () => window.ontdekSignOut?.());
   },
 });

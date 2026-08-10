@@ -89,6 +89,20 @@ a.img-link.ontdek-beschikbaar::after {
   font-size: .58rem;
   font-weight: 900;
 }
+.ontdek-card-downloads {
+  display: block;
+  align-self: stretch;
+  margin-top: auto;
+  padding: 6px 8px;
+  border-radius: 9px;
+  background: #e9f7ef;
+  color: #17623e;
+  font: 900 .65rem/1.25 Arial, sans-serif;
+  text-align: center;
+}
+.ontdek-card-downloads[data-status="login"] { background:#eef4fa;color:#315a7d; }
+.ontdek-card-downloads[data-status="op"] { background:#fff0f0;color:#a12626; }
+.ontdek-card-downloads[data-status="pro"] { background:#fff1bd;color:#6b4900; }
 .play-nav-link.ontdek-nog-niet small { display: inline-block; }
 @media (max-width: 900px) {
   .ontdek-sidebar-actions { margin-top: 0; grid-template-columns: 1fr 1fr; width: 100%; }
