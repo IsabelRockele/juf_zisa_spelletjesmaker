@@ -272,8 +272,8 @@ window.SpellingZijbalk = (function() {
       niveaus: [], defaultAantal: 6, graad: 2
     },
     {
-      id: "ov42", label: "🔀 Bouw het hoorwoord",
-      korteUitleg: "Zet woordstukken in de juiste volgorde en schrijf het woord",
+      id: "ov42", label: "🔎 Zoek de fout",
+      korteUitleg: "Onderstreep het foute hoorwoord in de zin en schrijf het correct",
       niveaus: [], defaultAantal: 6, graad: 2
     },
     {
