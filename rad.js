@@ -393,6 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resetWheel();
         resetSession();
         updateSelectionStatus(source);
+        window.dispatchEvent(new CustomEvent('rad:configured', { detail: { source } }));
 
         itemInput?.addEventListener('input', updateItemsFromTextarea);
     };
@@ -999,6 +1000,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateItemsFromTextarea = () => {
         const lines = itemInput.value.split('\n').filter(i => i.trim() !== '');
         items = lines;
+        window.dispatchEvent(new CustomEvent('rad:configured', { detail: { source: 'Eigen lijst' } }));
         if (items.length > 0) {
             showWheelBtn.disabled = false;
             resetWheel();

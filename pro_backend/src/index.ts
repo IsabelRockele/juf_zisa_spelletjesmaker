@@ -1093,6 +1093,16 @@ if (!isActive) {
 // aangepast door deze tellers.
 const DISCOVER_TOTAL_LIMIT = 15;
 const DISCOVER_TOOL_LIMIT = 3;
+const DISCOVER_SINGLE_USE_TOOLS = new Set([
+  "rad-afbeeldingen",
+  "rad-tafels",
+  "rad-rekensommen",
+  "rad-executieve-functies",
+  "rad-beweging",
+  "rad-taal",
+  "rad-technisch-lezen",
+  "rad-mix",
+]);
 const DISCOVER_LARGE_BUNDLE_PAGE_LIMIT = 3;
 const DISCOVER_LARGE_BUNDLE_TOOLS = new Set([
   "rekenbundel",
@@ -1193,7 +1203,8 @@ export const reserveDiscoverDownload = onCall({ region: REGION, enforceAppCheck:
     if (current.totalUsed >= DISCOVER_TOTAL_LIMIT) {
       throw new HttpsError("resource-exhausted", "TOTAL_LIMIT");
     }
-    if (usedForTool >= DISCOVER_TOOL_LIMIT) {
+    const toolLimit = DISCOVER_SINGLE_USE_TOOLS.has(toolId) ? 1 : DISCOVER_TOOL_LIMIT;
+    if (usedForTool >= toolLimit) {
       throw new HttpsError("resource-exhausted", "TOOL_LIMIT");
     }
 
