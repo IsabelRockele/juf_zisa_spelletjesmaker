@@ -30,10 +30,29 @@ function voorbereidDownloaden() {
   const knop = document.getElementById('btn-pdf');
   if (!knop) return;
 
+  const quota = document.createElement('section');
+  quota.className = 'ontdek-quota-panel';
+  quota.setAttribute('aria-label', 'Gratis downloadtegoed');
+  quota.innerHTML = `
+    <strong>Jouw gratis downloadtegoed</strong>
+    <span id="ontdek-quota-tool">Bundel bewerkingen: aanmelden om je teller te zien</span>
+    <span id="ontdek-quota-total">Totaal: aanmelden om je teller te zien</span>
+    <span id="ontdek-quota-pages">Deze PDF: voeg oefeningen toe · maximaal 3 pagina's</span>`;
+  document.querySelector('.ontdek-pilot-notice')?.insertAdjacentElement('afterend', quota);
+
   const uitleg = document.createElement('span');
   uitleg.className = 'ontdek-download-uitleg';
   uitleg.textContent = `PDF zonder watermerk · Ontdek: max. ${ONTDEK_CONFIG.maxPaginasGroteBundel} pagina's · PRO: geen paginalimiet`;
   knop.insertAdjacentElement('afterend', uitleg);
+
+  const paginaStatus = document.getElementById('ontdek-pagina-status');
+  const quotaPages = document.getElementById('ontdek-quota-pages');
+  const spiegelPaginaStatus = () => {
+    const tekst = paginaStatus?.textContent?.trim();
+    if (quotaPages && tekst) quotaPages.textContent = `Deze PDF: ${tekst}`;
+  };
+  if (paginaStatus) new MutationObserver(spiegelPaginaStatus).observe(paginaStatus, { childList: true, characterData: true, subtree: true, attributes: true });
+  spiegelPaginaStatus();
 }
 
 function start() {
