@@ -30,6 +30,7 @@ button.primary{background:#222;color:#fff;border-color:#222}
 .levels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .level{border:1px solid #bbb;border-radius:12px;padding:10px;background:#fff;cursor:pointer}
 .level.active{border:2px solid #222}
+.level.selected{border-color:#27ae60;background:#effaf2;box-shadow:inset 0 0 0 1px #27ae60}.level input{width:auto;margin:0 7px 0 0;vertical-align:middle}.level b{display:flex;align-items:center}
 .level b{display:block;margin-bottom:3px}
 .pieces{display:flex;flex-wrap:wrap;gap:10px}
 .pieceCard{border:1px solid #ddd;border-radius:8px;padding:6px}
@@ -62,6 +63,7 @@ button.primary{background:#222;color:#fff;border-color:#222}
  .printPage{page-break-after:always;min-height:270mm}
  .printPage:last-child{page-break-after:auto}
  .printPage h2{font-size:16pt;margin:0 0 6mm}
+ .printPair{page-break-after:always;break-after:page;display:flex;flex-direction:column;align-items:center;gap:5mm}.printPair:last-child{page-break-after:auto;break-after:auto}.printPairTitle{width:100%;font-size:15pt;font-weight:800;text-align:center;margin:0 0 1mm}.printCardFrame{display:flex;flex-direction:column;align-items:center;justify-content:center;border:.55mm solid #173f73;border-radius:2.5mm;background:#fff;overflow:hidden;break-inside:avoid}.printCardFrame.solution{border-color:#159668}.printCardLabel{align-self:stretch;padding:2.2mm 3mm;border-bottom:.35mm solid #173f73;font-size:10pt;font-weight:800;text-align:left}.printCardFrame.solution .printCardLabel{border-color:#159668;color:#0b6b49}.printDifficulty{display:inline-block;margin-left:2mm;padding:.8mm 2mm;border-radius:99px;background:#fff1b8;color:#6d4a00;font-weight:900;letter-spacing:.25mm}.printCardHint{font-size:8.5pt;font-weight:700;text-align:center;color:#173f73;margin:1mm 3mm 0}.printCardDrawing{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}.printCardDrawing svg{display:block;max-width:100%;max-height:100%}
 }
 </style>
 </head>
@@ -82,9 +84,9 @@ button.primary{background:#222;color:#fff;border-color:#222}
     <button class="start-card maker-card" type="button" data-open="maker">
       <span class="start-icon">✂️</span><span><b>Bouwkaarten maken</b><small>Maak, pas aan en print puzzelmateriaal voor je klas.</small></span><strong>Open de maker →</strong>
     </button>
-    <button class="start-card game-card" type="button" data-open="choices">
-      <span class="start-icon">🧩</span><span><b>Spel klaarzetten</b><small>Kies een figuur en open een rustig, schermvullend spel voor het digibord.</small></span><strong>Kies een puzzel →</strong>
-    </button>
+    <a class="start-card game-card" id="openGameWindow" href="#" target="_blank" rel="noopener" data-open="choices">
+      <span class="start-icon">🧩</span><span><b>Spel klaarzetten</b><small>In het aparte spelvenster kies je eerst het figuur dat de kinderen gaan bouwen.</small></span><strong>↗ Opent in apart venster</strong>
+    </a>
   </div>
   <aside class="play-notice" aria-label="Zisa Spelen">
     <span>📱</span><div><b>Ook beschikbaar voor leerlingen</b><p>Het puzzelspel staat in elk leerjaar van <strong>Zisa Spelen</strong>. Daar zien kinderen alleen de figurenkeuze en het schermvullende iPad-spel, niet de bouwkaartenmaker.</p></div>
@@ -117,13 +119,14 @@ button.primary{background:#222;color:#fff;border-color:#222}
 </div>
 
 <div class="card">
-<h2>2. Kies moeilijkheidsgraad</h2>
+<h2>2. Kies één of meer moeilijkheidsgraden</h2>
 <div class="levels">
-<div class="level active" data-level="1"><b>⭐ Niveau 1</b><span class="small">Raster + grijze omtrekken van de puzzelstukken.</span></div>
-<div class="level" data-level="2"><b>⭐⭐ Niveau 2</b><span class="small">Raster + alleen de buitenvorm.</span></div>
-<div class="level" data-level="3"><b>⭐⭐⭐ Niveau 3</b><span class="small">Alleen de buitenomtrek, zonder raster.</span></div>
-<div class="level" data-level="4"><b>🏆 Expert</b><span class="small">Klein voorbeeld; het kind bouwt ernaast.</span></div>
+<div class="level active selected" data-level="1" role="button" tabindex="0" aria-pressed="true"><b><input type="checkbox" checked tabindex="-1">⭐ Niveau 1</b><span class="small">Raster + grijze omtrekken van de puzzelstukken.</span></div>
+<div class="level" data-level="2" role="button" tabindex="0" aria-pressed="false"><b><input type="checkbox" tabindex="-1">⭐⭐ Niveau 2</b><span class="small">Raster + alleen de buitenvorm.</span></div>
+<div class="level" data-level="3" role="button" tabindex="0" aria-pressed="false"><b><input type="checkbox" tabindex="-1">⭐⭐⭐ Niveau 3</b><span class="small">Alleen de buitenomtrek, zonder raster.</span></div>
+<div class="level" data-level="4" role="button" tabindex="0" aria-pressed="false"><b><input type="checkbox" tabindex="-1">⭐⭐⭐⭐ Expert</b><span class="small">Vaste, kleine voorbeeldkaart; het kind bouwt ernaast op tafel.</span></div>
 </div>
+<p class="small">Je kunt meerdere niveaus aanvinken. Bij het afdrukken komt per niveau eerst de bouwkaart en daar direct onder de even grote oplossing.</p>
 <div id="makerInfo" class="info"></div>
 </div>
 
@@ -134,11 +137,11 @@ button.primary{background:#222;color:#fff;border-color:#222}
 
 <div class="card">
 <h2>3. De 12 vaste puzzelstukken</h2>
-<div class="small">De blokmaat wordt automatisch exact gelijk aan die van de bouwkaart.</div>
+<div class="small">Bij niveau 1–3 wordt de blokmaat automatisch exact gelijk aan die van de bouwkaart. Expert is een kleine voorbeeldkaart: daarbij bouwt het kind ernaast op tafel.</div>
 <div id="makerPieces" class="pieces" style="margin-top:10px"></div>
 <div class="printButtons screenOnly">
 <button class="primary" id="printAll">Print alles</button>
-<button id="printCard">Alleen bouwkaart</button>
+<button id="printCard">Bouwkaarten + oplossingen</button>
 <button id="printPieces">Alleen puzzelstukken</button>
 <button id="printSolution">Alleen oplossing</button>
 </div>
@@ -157,6 +160,15 @@ button.primary{background:#222;color:#fff;border-color:#222}
 </div>
 
 <div class="card">
+<div class="puzzle-help" aria-label="Hulp bij de puzzel">
+<strong>💡 Hulp nodig?</strong>
+<span>Probeer eerst zelf. Kies daarna eventueel één stapje hulp:</span>
+<div class="puzzle-help-actions">
+<button id="gOutline">1. Toon de plaatsen van de stukken</button>
+<button id="gOrient">2. Draai mijn gekozen stuk goed</button>
+<button id="gPlace">3. Zet een passend stuk voor mij</button>
+</div>
+</div>
 <div class="boardwrap"><div id="gameBoard"><svg id="gameBg"></svg></div></div>
 <div id="gMessage" class="status">Kies een puzzelstuk onderaan.</div>
 </div>
@@ -166,11 +178,6 @@ button.primary{background:#222;color:#fff;border-color:#222}
 <div class="actions">
 <button id="gRotate">↻ Draai</button>
 <button id="gFlip">↔ Spiegel</button>
-<button id="gOrient">💡 Draai goed</button>
-<button id="gPlace">✨ Leg 1 stuk</button>
-</div>
-<div class="helpbar">
-<button id="gOutline">👀 Toon omtreklijnen</button>
 <button id="gBack">↩ Zet stuk terug</button>
 </div>
 </div>
@@ -197,6 +204,7 @@ Object.entries(FIG).forEach(([k,v])=>{ $('mFig').add(new Option(v.label,k)); $('
 
 /* ---------- MATERIAL MAKER ---------- */
 let makerLevel=1;
+const selectedMakerLevels=new Set([1]);
 
 function makerCell(data){
  const d=dims(data.rows), usableW=+$('mW').value*10-2*(+$('mMargin').value), usableH=+$('mH').value*10-2*(+$('mMargin').value);
@@ -220,10 +228,10 @@ function pieceOutlines(data,cell,pad,stroke='#999',width=.6){
 }
 function makerSvg(data,mode,forPrint=false){
  const rows=data.rows,d=dims(rows),cell=makerCell(data),pad=2,owner=ownerMap(data);
- let factor=(mode==='expert')?.48:1;
- let c=cell*factor,W=d.w*c+4,H=d.h*c+4;
+ const compact=mode==='expert'||mode==='expertSolution';
+ let c=compact?Math.min(70/d.w,42/d.h):cell,W=d.w*c+4,H=d.h*c+4;
  let q=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}mm" height="${H}mm" viewBox="0 0 ${W} ${H}">`;
- if(mode==='solution'){
+ if(mode==='solution'||mode==='expertSolution'){
   for(let y=0;y<d.h;y++)for(let x=0;x<rows[y].length;x++)if(rows[y][x]=='#'){let i=owner[x+','+y];q+=`<rect x="${pad+x*c}" y="${pad+y*c}" width="${c}" height="${c}" fill="${COLORS[i]}" stroke="#555" stroke-width=".3"/>`}
   q+=pieceOutlines(data,c,pad,'#111',.75);
   q+=silhouetteEdges(rows,c,pad,'#111',.75);
@@ -249,18 +257,32 @@ function renderMaker(){
  $('makerTarget').innerHTML=makerSvg(data,mode);
  $('makerSolution').innerHTML=makerSvg(data,'solution');
  $('makerPieces').innerHTML=NAMES.map((n,i)=>`<div class="pieceCard"><b>${n}</b><br>${makerPieceSvg(n,i,cell)}</div>`).join('');
- $('makerInfo').innerHTML=`<b>${data.label}</b> · ${d.w} × ${d.h} vakjes · blokmaat <b>${cell.toFixed(2)} mm</b>.<br>${makerLevel===1?'Veel steun: de grijze lijnen tonen waar de 12 stukken komen.':makerLevel===2?'Gemiddeld: alleen het raster helpt.':makerLevel===3?'Moeilijk: alleen de buitenvorm is zichtbaar.':'Expert: klein voorbeeld; de stukken worden ernaast gelegd.'}`;
+ $('makerInfo').innerHTML=`<b>${data.label}</b> · ${d.w} × ${d.h} vakjes · ${makerLevel===4?'vaste voorbeeldkaart van <b>9 × 6,5 cm</b>.':'blokmaat <b>'+cell.toFixed(2)+' mm</b>.'}<br>${makerLevel===1?'Veel steun: de grijze lijnen tonen waar de 12 stukken komen.':makerLevel===2?'Gemiddeld: alleen het raster helpt.':makerLevel===3?'Moeilijk: alleen de buitenvorm is zichtbaar.':'Expert: bekijk het kleine voorbeeld en bouw de figuur ernaast op tafel.'}`;
 }
-document.querySelectorAll('.level').forEach(el=>el.onclick=()=>{makerLevel=+el.dataset.level;document.querySelectorAll('.level').forEach(x=>x.classList.toggle('active',x===el));renderMaker()});
+function toggleMakerLevel(el){
+ const level=+el.dataset.level,wasSelected=selectedMakerLevels.has(level);
+ if(wasSelected&&selectedMakerLevels.size===1)return;
+ wasSelected?selectedMakerLevels.delete(level):selectedMakerLevels.add(level);
+ makerLevel=level;
+ document.querySelectorAll('.level').forEach(x=>{const selected=selectedMakerLevels.has(+x.dataset.level);x.classList.toggle('selected',selected);x.classList.toggle('active',x===el);x.setAttribute('aria-pressed',String(selected));x.querySelector('input').checked=selected});
+ renderMaker();
+}
+document.querySelectorAll('.level').forEach(el=>{el.onclick=()=>toggleMakerLevel(el);el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleMakerLevel(el)}}});
 ['mFig','mW','mH','mMargin'].forEach(id=>$(id).addEventListener('input',renderMaker));
 
 function makePrint(type){
  const data=FIG[$('mFig').value], cell=makerCell(data);
- let mode=makerLevel===1?'level1':makerLevel===2?'level2':makerLevel===3?'level3':'expert';
+ const cardW=Math.max(6,Math.min(18,+$('mW').value||14)),cardH=Math.max(5,Math.min(11.5,+$('mH').value||10)),innerMargin=Math.max(2,+$('mMargin').value||5);
  let pages=[];
- if(type==='all'||type==='card') pages.push(`<div class="printPage"><h2>Bouwkaart – ${data.label}</h2>${makerSvg(data,mode,true)}<p class="small">Print op 100% / ware grootte.</p></div>`);
+ if(type==='all'||type==='card') [...selectedMakerLevels].sort().forEach(level=>{
+  const expert=level===4,mode=level===1?'level1':level===2?'level2':level===3?'level3':'expert';
+  const stars='★'.repeat(level),levelLabel=expert?'Expert':`Niveau ${level}`;
+  const printedW=expert?9:cardW,printedH=expert?6.5:cardH,printedMargin=expert?4:innerMargin;
+  const hint=expert?'<div class="printCardHint">Bekijk het voorbeeld en bouw de figuur ernaast op tafel.</div>':'';
+  pages.push(`<section class="printPair"><div class="printPairTitle">${data.label} · ${levelLabel} <span class="printDifficulty">${stars}</span></div><article class="printCardFrame" style="width:${printedW}cm;height:${printedH}cm;padding:${printedMargin}mm"><div class="printCardLabel">Bouwkaart · ${data.label} <span class="printDifficulty">${stars} ${levelLabel}</span></div>${hint}<div class="printCardDrawing">${makerSvg(data,mode,true)}</div></article><article class="printCardFrame solution" style="width:${printedW}cm;height:${printedH}cm;padding:${printedMargin}mm"><div class="printCardLabel">Oplossing · ${data.label} <span class="printDifficulty">${stars} ${levelLabel}</span></div><div class="printCardDrawing">${makerSvg(data,expert?'expertSolution':'solution',true)}</div></article></section>`)
+ });
  if(type==='all'||type==='pieces') pages.push(`<div class="printPage"><h2>Puzzelstukken</h2><div style="display:flex;flex-wrap:wrap;gap:5mm">${NAMES.map((n,i)=>`<div><b>${n}</b><br>${makerPieceSvg(n,i,cell)}</div>`).join('')}</div><p class="small">De vakjes zijn exact even groot als op de bouwkaart.</p></div>`);
- if(type==='all'||type==='solution') pages.push(`<div class="printPage"><h2>Oplossing – ${data.label}</h2>${makerSvg(data,'solution',true)}</div>`);
+ if(type==='solution') pages.push(`<section class="printPair"><div class="printPairTitle">Oplossing · ${data.label}</div><article class="printCardFrame solution" style="width:${cardW}cm;height:${cardH}cm;padding:${innerMargin}mm"><div class="printCardLabel">Oplossing · ${data.label}</div><div class="printCardDrawing">${makerSvg(data,'solution',true)}</div></article></section>`);
  $('printArea').innerHTML=pages.join('');$('printArea').classList.add('printing');window.print();setTimeout(()=>$('printArea').classList.remove('printing'),500);
 }
 $('printAll').onclick=()=>makePrint('all');$('printCard').onclick=()=>makePrint('card');$('printPieces').onclick=()=>makePrint('pieces');$('printSolution').onclick=()=>makePrint('solution');
@@ -306,7 +328,7 @@ function gUp(e){
 function gResetOne(n,layout=true){let p=gState[n];p.placed=false;p.cells=[];$('gTray').appendChild(p.el);if(layout)gLayout()}
 function gRefresh(){if(!gSelected)return;gState[gSelected].el.innerHTML=gPieceSvg(gSelected);if(!gState[gSelected].placed)gLayout()}
 function gSetup(){
- gSelected=null;gOutlines=false;gHelp=0;$('gOutline').textContent='👀 Toon omtreklijnen';$('gTray').innerHTML='';
+ gSelected=null;gOutlines=false;gHelp=0;$('gOutline').textContent='1. Toon de plaatsen van de stukken';$('gTray').innerHTML='';
  let data=FIG[$('gFig').value],d=dims(data.rows),mw=Math.min(innerWidth-45,620),mh=Math.min(innerHeight*.4,450);
  gCell=Math.max(18,Math.floor(Math.min(mw/d.w,mh/d.h)));
  $('gameBoard').style.width=d.w*gCell+gPad*2+'px';$('gameBoard').style.height=d.h*gCell+gPad*2+'px';
@@ -316,8 +338,8 @@ function gSetup(){
 $('gRotate').onclick=()=>{if(!gSelected)return;let p=gState[gSelected];if(p.placed)gResetOne(gSelected,false);p.ori=norm(p.ori.map(([x,y])=>[-y,x]));gRefresh()};
 $('gFlip').onclick=()=>{if(!gSelected)return;let p=gState[gSelected];if(p.placed)gResetOne(gSelected,false);p.ori=norm(p.ori.map(([x,y])=>[-x,y]));gRefresh()};
 $('gOrient').onclick=()=>{if(!gSelected){$('gMessage').textContent='Tik eerst een puzzelstuk aan.';return}gHelp=Math.max(gHelp,1);let p=gState[gSelected];if(p.placed)gResetOne(gSelected,false);p.ori=gCorrectOri(gSelected);gRefresh();$('gMessage').textContent='Ik heb dit stuk juist gedraaid. Zoek nu zelf waar het hoort.';gScore()};
-$('gOutline').onclick=()=>{gOutlines=!gOutlines;if(gOutlines)gHelp=Math.max(gHelp,2);$('gOutline').textContent=gOutlines?'🙈 Verberg omtreklijnen':'👀 Toon omtreklijnen';gDrawBoard();gScore()};
-$('gPlace').onclick=()=>{if(!gSelected){$('gMessage').textContent='Tik eerst een puzzelstuk aan.';return}gHelp=3;let p=gState[gSelected],sol=solutionMap(FIG[$('gFig').value])[gSelected],minx=Math.min(...sol.map(c=>c[0])),miny=Math.min(...sol.map(c=>c[1]));if(p.placed)gResetOne(gSelected,false);p.ori=gCorrectOri(gSelected);p.placed=true;p.cells=sol.map(c=>[...c]);$('gameBoard').appendChild(p.el);p.el.innerHTML=gPieceSvg(gSelected);p.el.style.cssText+=`;position:absolute;left:${gPad+minx*gCell}px;top:${gPad+miny*gCell}px;z-index:5`;$('gMessage').textContent='Dit stuk heb ik voor jou gelegd.';gLayout();gScore();gCheck()};
+$('gOutline').onclick=()=>{gOutlines=!gOutlines;if(gOutlines)gHelp=Math.max(gHelp,2);$('gOutline').textContent=gOutlines?'1. Verberg de plaatsen weer':'1. Toon de plaatsen van de stukken';gDrawBoard();gScore()};
+$('gPlace').onclick=()=>{const chosen=NAMES.find(n=>!gState[n].placed);if(!chosen){$('gMessage').textContent='Alle stukken liggen al in de puzzel.';return}gChoose(chosen);gHelp=3;let p=gState[chosen],sol=solutionMap(FIG[$('gFig').value])[chosen],minx=Math.min(...sol.map(c=>c[0])),miny=Math.min(...sol.map(c=>c[1]));p.ori=gCorrectOri(chosen);p.placed=true;p.cells=sol.map(c=>[...c]);$('gameBoard').appendChild(p.el);p.el.innerHTML=gPieceSvg(chosen);p.el.style.cssText+=`;position:absolute;left:${gPad+minx*gCell}px;top:${gPad+miny*gCell}px;z-index:5`;$('gMessage').textContent='Ik koos zelf een passend stuk en legde het voor jou op de juiste plaats.';gLayout();gScore();gCheck()};
 $('gBack').onclick=()=>{if(gSelected)gResetOne(gSelected)};$('gNew').onclick=gSetup;$('gFig').onchange=gSetup;
 function gScore(){let s=gHelp===0?'★★★':gHelp===1?'★★☆':'★☆☆';$('gScore').innerHTML=`<span class="stars">${s}</span> ${gHelp===0?'Zonder hulp':gHelp===1?'Draaihulp gebruikt':'Extra hulp gebruikt'}`}
 function gCheck(){if(NAMES.every(n=>gState[n].placed)){$('gMessage').className='status done';$('gMessage').textContent='🎉 Fantastisch! Je hebt de figuur helemaal gevuld!'}}

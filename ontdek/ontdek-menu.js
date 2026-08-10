@@ -40,6 +40,7 @@ const BESCHIKBAAR = new Map([
   ['Bouwplaten', './bouwplaat.html'],
   ['Coderen', './coderen.html'],
   ['Blokkenbouwsels', './blokkenbouwsels/index.html'],
+  ['Pentomino Studio', '../pentomino_studio_volledige_tool.html?ontdek=1&teacher=1'],
   ['Plattegrond', './plattegrond.html'],
   ['Bundel kloklezen', './kloklezen/kloklezen.html'],
   ['Bundel kalenders', './kalender/kalender.html'],
@@ -63,6 +64,7 @@ const toolDescriptions = {
   'Rekencirkel': 'Reken vanuit het midden naar buiten.',
   'MAB en schema': 'Visualiseer getallen met MAB-materiaal en schema’s.',
   'Zisa Spelen': 'Ontdek speelse oefeningen voor leerlingen en het smartboard.',
+  'Pentomino Studio': 'Probeer drie bouwkaarten en drie schermvullende puzzelfiguren.',
 };
 
 const main = document.querySelector('.main');
@@ -111,14 +113,22 @@ function category(target, remember = true) {
   }
 }
 
+const VERNIEUWDE_KNOPPEN = new Set(['sudoku','zoek_de_verschillen','doolhof','slangendoolhof','hexagon','schaduw','pixelart','coderen','punttekening','blokkenbouwsels','bouwplaat','plattegrond','bingo','vieropeenrij','rad','QR','werkblad_kloklezen','kalender','timer','planbord','takenbord','huistaken']);
+
 document.querySelectorAll('a.img-link').forEach((link) => {
   const img = link.querySelector('.drukknop-afbeelding');
+  if (img) {
+    const filename = (img.getAttribute('src').split('/').pop() || '').replace(/\.webp$/i, '');
+    if (VERNIEUWDE_KNOPPEN.has(filename)) img.src = `../drukknop_afbeeldingen_v3/${filename}.png`;
+  }
   if (img && !img.parentElement.classList.contains('tool-image-stage')) {
     const stage = document.createElement('span');
     stage.className = 'tool-image-stage';
     img.parentNode.insertBefore(stage, img);
     stage.appendChild(img);
   }
+  const category = link.closest('.section-panel')?.id.replace('panel-', '');
+  if (category) link.querySelector('.tool-image-stage')?.classList.add(`stage-${category}`);
   const label = link.querySelector('.img-label')?.textContent.trim() || img?.alt || 'Tool';
   const description = toolDescriptions[label];
   if (description && !link.querySelector('.tool-description')) {
