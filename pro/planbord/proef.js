@@ -233,6 +233,7 @@
       wis.onclick=e=>{e.stopPropagation();if(!confirm(`“${item.naam}” uit je eigen bibliotheek verwijderen? Afbeeldingen die al op een bord staan blijven staan.`))return;set.eigenBibliotheek=set.eigenBibliotheek.filter(x=>x.id!==item.id);tekenEigenBibliotheek(win);bewaarSet();};
       kaart.style.position='relative';kaart.append(img,label,wis);kaart.onclick=()=>win.voegAfbeeldingToe(item.bron,item.naam);grid.prepend(kaart);
     });
+    win._proefOrdenAfbeeldingen?.();
   }
 
   function installeerRustigeEditor(win) {
@@ -330,7 +331,7 @@
       Object.entries(dozen).forEach(([categorie,x])=>{const toon=selectie.some(r=>r.categorie===categorie);x.detail.hidden=!toon;x.detail.open=toon;});
       if(letterlijk.length){leeg.hidden=true;}else{leeg.hidden=false;leeg.textContent=benaderd?'Geen letterlijke afbeelding gevonden. We openen de categorie die het dichtst aansluit; misschien vind je ze daar. Anders kun je via “Eigen afbeelding + bibliotheek” zelf een afbeelding toevoegen.':'Geen passende afbeelding gevonden. Voeg eventueel zelf een afbeelding toe via “Eigen afbeelding + bibliotheek”.';}
     }
-    zoek.addEventListener('input',filter);new win.MutationObserver(()=>setTimeout(orden,0)).observe(grid,{childList:true,subtree:false});
+    zoek.addEventListener('input',filter);win._proefOrdenAfbeeldingen=orden;
     const tip=doc.createElement('p');tip.className='hint';tip.textContent='Klik een categorie open of typ hierboven een zoekwoord.';
     inhoud.querySelector('.hint')?.after(zoek,tip);inhoud.appendChild(leeg);
     orden();
@@ -339,7 +340,7 @@
   function installeerVrijPlaatsenEnDeselecteren(win){
     const doc=win.document;if(doc.body.dataset.proefVrijPlaatsen)return;doc.body.dataset.proefVrijPlaatsen='ja';
     const maakKruisjes=()=>doc.querySelectorAll('.vak-actie[aria-label*="Verwijder"]').forEach(knop=>{if(knop.classList.contains('proef-verwijder-kruis'))return;knop.textContent='×';knop.title='Onderdeel verwijderen';knop.classList.add('proef-verwijder-kruis');});
-    new win.MutationObserver(maakKruisjes).observe(doc.body,{childList:true,subtree:true});maakKruisjes();
+    maakKruisjes();win.setInterval(maakKruisjes,500);
     doc.addEventListener('pointerdown',event=>{
       const element=event.target.closest?.('.vak,.canvas-afbeelding');
       if(!element){
