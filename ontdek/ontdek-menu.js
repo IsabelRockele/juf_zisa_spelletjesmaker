@@ -192,8 +192,11 @@ document.querySelector('.sidebar').appendChild(sidebarActions);
 
 const status = document.getElementById('status');
 status.className = 'status ontdek-status';
-status.innerHTML = '<span><strong>Ontdek-versie</strong> · dezelfde werkwijze als PRO</span><span class="ontdek-account-zone"><button type="button" data-auth="registreren">Gratis account maken</button><button type="button" data-auth="aanmelden">Aanmelden</button></span>';
+status.innerHTML = '<span><strong>Ontdek-versie</strong> · dezelfde werkwijze als PRO</span><span class="ontdek-status-actions"><button type="button" class="ontdek-feedback-top">💡 Foutje of idee melden</button><span class="ontdek-account-zone"><button type="button" data-auth="registreren">Gratis account maken</button><button type="button" data-auth="aanmelden">Aanmelden</button></span></span>';
 status.querySelectorAll('[data-auth]').forEach(button => button.addEventListener('click', () => window.openOntdekAuth?.(button.dataset.auth)));
+status.querySelector('.ontdek-feedback-top').addEventListener('click', () => {
+  document.getElementById('suggestOverlay').classList.add('open');
+});
 main.style.display = 'flex';
 lastCategory === 'overview' ? overview(false) : category(lastCategory, false);
 
