@@ -14,6 +14,7 @@ const loading=document.getElementById("loadingState"),error=document.getElementB
 const params=new URLSearchParams(location.search);
 const explicitTeacherPreview=params.get('teacher')==='1';
 const explicitStudentLink=!!params.get('code')&&!explicitTeacherPreview;
+if(explicitTeacherPreview||explicitStudentLink)sessionStorage.removeItem('zisa_discover_preview');
 
 // Een echte QR- of leerlinglink moet altijd leerlingstand openen. Zo kan een
 // eerder leerkrachtvoorbeeld in dezelfde browser de QR-code niet overschrijven.

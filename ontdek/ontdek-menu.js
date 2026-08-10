@@ -51,6 +51,7 @@ const BESCHIKBAAR = new Map([
   ['Vier op een rij', './vieropeenrij.html'],
   ['Rad', './rad.html'],
   ['QR-generator', './QR.html'],
+  ['Zisa Spelen', './zisa-spelen.html'],
 ]);
 
 const toolDescriptions = {
@@ -173,16 +174,6 @@ search.addEventListener('input', () => {
   noResults.classList.toggle('visible', visible === 0);
   resultCount.textContent = `${visible} ${visible === 1 ? 'tool' : 'tools'} gevonden`;
 });
-
-const playLink = document.querySelector('.play-nav-link');
-if (playLink) {
-  playLink.href = '#';
-  playLink.classList.add('ontdek-nog-niet');
-  playLink.addEventListener('click', event => {
-    event.preventDefault();
-    alert('De beperkte demonstratie van Zisa Spelen wordt nog voorbereid.');
-  });
-}
 
 const sidebarActions = document.createElement('div');
 sidebarActions.className = 'ontdek-sidebar-actions';

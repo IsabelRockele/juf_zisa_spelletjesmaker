@@ -2,6 +2,7 @@
   'use strict';
 
   const grade = Number(document.body.dataset.grade || 2);
+  const discoverMode = new URLSearchParams(location.search).get('ontdek') === '1' || sessionStorage.getItem('zisa_discover_preview') === '1';
   const theme = grade === 2 ? {
     title: "Zisa's Zebrawinkel", subtitle: 'Speel met euro’s en centen',
     mascot: 'tafels_afbeeldingen/speel_zisa.png', happy: 'tafels_afbeeldingen/zisa_wint.png',
@@ -50,17 +51,21 @@
   function showSetup(focusPayLevels=false){
     shell(`<section class="panel"><span class="eyebrow">${theme.gradeLabel.toUpperCase()}</span><h2>Kies wat je wilt oefenen</h2><p class="muted">Kies een bedrag en een spel. Daarna helpt ${grade===2?'Zisa':'Karl'} je stap voor stap.</p><div class="selection-grid"><div class="choice-group"><h3>1. Tot hoeveel euro?</h3><div class="choice-buttons" id="levelChoices">${theme.levels.map(v=>`<button class="choice" data-level="${v}"><span>€</span>tot ${v} euro</button>`).join('')}</div></div><div class="choice-group"><h3>2. Welk geldspel?</h3><div class="choice-buttons" id="modeChoices"><button class="choice" data-mode="mixed"><span>🎲</span>Alles door elkaar</button><button class="choice" data-mode="direct"><span>💶</span>Betaal gepast</button><button class="choice" data-mode="shop"><span>🛒</span>Winkelen en optellen</button><button class="choice" data-mode="change"><span>🧾</span>Geld teruggeven</button><button class="choice" data-mode="cent"><span>🪙</span>Spelen met centen</button></div></div><div class="choice-group pay-levels" id="payLevels" hidden><h3>3. Hoe wil je gepast betalen?</h3><div class="choice-buttons"><button class="choice" data-pay-level="1"><span>1</span>Leg het bedrag</button><button class="choice" data-pay-level="2"><span>2</span>Zo weinig mogelijk</button><button class="choice" data-pay-level="3"><span>3</span>Op 2 manieren</button></div></div></div><div class="start-row"><button class="primary" id="startMoney" disabled>▶ Start het geldspel</button></div></section>`);
     root.querySelectorAll('[data-level]').forEach(button => button.onclick = () => {
+      if(discoverMode && Number(button.dataset.level) !== theme.levels[0]) return showProNotice();
       chosenLevel = Number(button.dataset.level);
       root.querySelectorAll('[data-level]').forEach(item => item.classList.toggle('active', item === button));
       updateStart();
     });
     root.querySelectorAll('[data-mode]').forEach(button => button.onclick = () => {
+      const discoverModeAllowed = grade === 2 ? 'direct' : 'change';
+      if(discoverMode && button.dataset.mode !== discoverModeAllowed) return showProNotice();
       chosenMode = button.dataset.mode;
       root.querySelectorAll('[data-mode]').forEach(item => item.classList.toggle('active', item === button));
       document.getElementById('payLevels').hidden = chosenMode !== 'direct';
       updateStart();
     });
     root.querySelectorAll('[data-pay-level]').forEach(button => button.onclick = () => {
+      if(discoverMode && Number(button.dataset.payLevel) !== 1) return showProNotice();
       chosenPayLevel = Number(button.dataset.payLevel);
       root.querySelectorAll('[data-pay-level]').forEach(item => item.classList.toggle('active', item === button));
       updateStart();
@@ -73,12 +78,21 @@
     }
     if(chosenPayLevel) root.querySelector(`[data-pay-level="${chosenPayLevel}"]`)?.classList.add('active');
     updateStart();
+    if(discoverMode){
+      root.querySelectorAll('[data-level]').forEach(button=>markPro(button,Number(button.dataset.level)!==theme.levels[0]));
+      root.querySelectorAll('[data-mode]').forEach(button=>markPro(button,button.dataset.mode!==(grade===2?'direct':'change')));
+      root.querySelectorAll('[data-pay-level]').forEach(button=>markPro(button,Number(button.dataset.payLevel)!==1));
+      const note=document.createElement('p');note.className='muted';note.style.cssText='text-align:center;font-weight:800;color:#1768ac';note.textContent=grade===2?'Ontdek: betaal gepast tot 20 euro · de andere geldspellen zijn PRO.':'Ontdek: geld teruggeven tot 100 euro · de andere geldspellen zijn PRO.';root.querySelector('.selection-grid').before(note);
+    }
     if(focusPayLevels){
       const levels = document.getElementById('payLevels');
       levels.classList.add('level-focus');
       levels.scrollIntoView({behavior:'smooth',block:'center'});
     }
   }
+
+  function markPro(button,locked){if(!locked)return;button.classList.add('discover-pro');button.insertAdjacentHTML('beforeend',' <small style="background:#ffd45c;color:#493300;border-radius:999px;padding:2px 6px;font-weight:900">PRO</small>')}
+  function showProNotice(){if(confirm('Deze geldkeuze hoort bij PRO. Wil je de mogelijkheden van PRO bekijken?'))window.open('https://demo.jufzisa.be/#zg-prijzen','_blank','noopener')}
 
   function updateStart(){ document.getElementById('startMoney').disabled = !(chosenLevel && chosenMode && (chosenMode!=='direct'||chosenPayLevel)); }
 

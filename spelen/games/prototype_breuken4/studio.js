@@ -11,6 +11,8 @@ const modes=[
  {id:'line',icon:'📍',name:'Breuken op de getallenlijn',desc:'Plaats en lees breuken op getallenlijnen tot 3.'},
  {id:'mixed',icon:'🍕',name:'Gemengde getallen bouwen',desc:'Bouw gehelen en breukdelen en ontdek de onechte breuk.'}
 ];
+const discoverMode=new URLSearchParams(location.search).get('ontdek')==='1'||sessionStorage.getItem('zisa_discover_preview')==='1';
+const discoverModes=new Set(['build','compare','cup']);
 let mode='build',round=0,score=0,state={},activeRounds=[],practice=false,demoRun=0,demoReturnRound=0;
 const rounds={
  build:[[3,4,'pizza'],[2,3,'taart'],[3,5,'pizza'],[5,8,'taart'],[1,2,'pizza'],[4,5,'taart'],[5,6,'pizza'],[3,8,'taart'],[2,5,'pizza'],[7,8,'taart'],[1,3,'pizza'],[4,6,'taart']],
@@ -24,12 +26,12 @@ const rounds={
 };
 function $(id){return document.getElementById(id)}function img(src){const i=new Image;i.onload=()=>{if(!menu||menu.hidden)show()};i.src=src;return i}
 const modeTags={build:'BOUWEN',whole:'PUZZELEN',add:'SAMENVOEGEN',equal:'ONTDEKKEN',compare:'VERGELIJKEN',cup:'METEN',line:'PLAATSEN',mixed:'UITDAGING'};
-function menuButtons(){return modes.map(m=>`<button class="mode-card mode-${m.id}" data-mode="${m.id}"><span class="mode-art" aria-hidden="true"><i></i><i></i><i></i><strong>${m.icon}</strong></span><span class="mode-copy"><em>${modeTags[m.id]}</em><b>${m.name}</b><span>${m.desc}</span></span><span class="mode-start">Spelen <i aria-hidden="true">→</i></span></button>`).join('')}
+function menuButtons(){return modes.map(m=>`<button class="mode-card mode-${m.id}${discoverMode&&!discoverModes.has(m.id)?' discover-pro':''}" data-mode="${m.id}"><span class="mode-art" aria-hidden="true"><i></i><i></i><i></i><strong>${m.icon}</strong></span><span class="mode-copy"><em>${modeTags[m.id]}</em><b>${m.name}</b><span>${m.desc}</span></span><span class="mode-start">${discoverMode&&!discoverModes.has(m.id)?'PRO':'Spelen'} <i aria-hidden="true">→</i></span></button>`).join('')}
 $('modeGrid').innerHTML=menuButtons();$('quick').innerHTML=modes.map(m=>`<button data-mode="${m.id}">${m.icon} ${m.name}</button>`).join('');
-document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>start(b.dataset.mode));$('studioMenu').onclick=()=>menu.hidden=false;$('other').onclick=()=>{done.hidden=true;menu.hidden=false};$('again').onclick=()=>start(mode);
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{if(discoverMode&&!discoverModes.has(b.dataset.mode)){if(confirm('Deze oefenvorm hoort bij PRO. Wil je PRO bekijken?'))window.open('https://demo.jufzisa.be/#zg-prijzen','_blank','noopener');return}start(b.dataset.mode)});$('studioMenu').onclick=()=>menu.hidden=false;$('other').onclick=()=>{done.hidden=true;menu.hidden=false};$('again').onclick=()=>start(mode);
 window.addEventListener('zisa:breuken-menu',()=>{stopDemoRun();done.hidden=true;['calcPicker','calcIntro','calcFinish','modeDemo'].forEach(id=>{const el=$(id);if(el)el.hidden=true});menu.hidden=false});
 function shuffled(list){const copy=list.map(x=>[...x]);for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}
-function start(id){if(id==='add'&&window.BreukenRekenen){menu.hidden=true;done.hidden=true;window.BreukenRekenen.open();return}mode=id;round=0;score=0;practice=false;demoReturnRound=0;activeRounds=shuffled(rounds[id]).slice(0,10);menu.hidden=true;done.hidden=true;showDemo(id)}
+function start(id){if(discoverMode&&!discoverModes.has(id))return;if(id==='add'&&window.BreukenRekenen){menu.hidden=true;done.hidden=true;window.BreukenRekenen.open();return}mode=id;round=0;score=0;practice=false;demoReturnRound=0;activeRounds=shuffled(rounds[id]).slice(0,10);menu.hidden=true;done.hidden=true;showDemo(id)}
 const demos={
  build:{title:'Zo bouw je een breuk',text:'Kies links het juiste soort stuk. Tik daarna evenveel keer op + als de teller aangeeft.',visual:'<div class="demo-parts"><span>1/4</span><span>＋</span><span>1/4</span><span>＋</span><span>1/4</span><b>＝ 3/4</b></div>'},
  whole:{title:'Zo maak je één geheel',text:'Kijk wat er al ligt. Kies links stukken die de lege plaats precies opvullen.',visual:'<div class="demo-parts"><span>3/4</span><span>＋</span><span>1/4</span><b>＝ 1 geheel</b></div>'},

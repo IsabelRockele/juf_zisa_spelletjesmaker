@@ -222,7 +222,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 foutAntwoord = correctAntwoord - offset;
             }
-            foutAntwoord = Math.max(0, Math.min(foutAntwoord, maxGetal + 10));
+            // Ook de afleiders moeten binnen het gekozen getalbereik blijven.
+            // Bij "tot 10" ziet een kind dus nooit 11 of hoger; bij "tot 20"
+            // nooit 21 of hoger.
+            foutAntwoord = Math.max(0, Math.min(foutAntwoord, maxGetal));
             if (!antwoorden.has(foutAntwoord)) {
                 antwoorden.add(foutAntwoord);
             }

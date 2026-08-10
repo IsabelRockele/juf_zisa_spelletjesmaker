@@ -265,12 +265,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // Genereer een fout antwoord, zorg ervoor dat het niet negatief wordt, zelfs voor aftrekken
             let correctNum = parseInt(correctAnswer);
-            let wrongNum = correctNum + (Math.random() > 0.5 ? 1 : -1);
-            
-            // Zorg dat het foute antwoord niet negatief wordt, vooral bij aftrekken
-            if (wrongNum < 0) {
-                wrongNum = 0; // Of een andere kleine positieve waarde
-            }
+            const canGoHigher = correctNum < gameLevel;
+            const canGoLower = correctNum > 0;
+            let wrongNum = canGoHigher && canGoLower
+                ? correctNum + (Math.random() > 0.5 ? 1 : -1)
+                : canGoHigher ? correctNum + 1 : correctNum - 1;
+            wrongNum = Math.max(0, Math.min(gameLevel, wrongNum));
             computerAnswer = wrongNum.toString();
         }
         

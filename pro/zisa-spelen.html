@@ -73,6 +73,7 @@
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
     const firebaseConfig={apiKey:"AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",authDomain:"zisa-spelletjesmaker-pro.firebaseapp.com",projectId:"zisa-spelletjesmaker-pro",storageBucket:"zisa-spelletjesmaker-pro.appspot.com",messagingSenderId:"828063957776",appId:"1:828063957776:web:8d8686b478846fe980db95"};
+    sessionStorage.removeItem('zisa_discover_preview');
     const firebaseApp=getApps().length?getApp():initializeApp(firebaseConfig);
     const fns=getFunctions(firebaseApp,"europe-west1");let current=null;
     const call=name=>httpsCallable(fns,name);const el=id=>document.getElementById(id);
