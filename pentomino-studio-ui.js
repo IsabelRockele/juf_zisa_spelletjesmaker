@@ -5,10 +5,9 @@
   const isDiscover=params.get('ontdek')==='1';
   const isFree=!isPro&&!isPlay&&!isDiscover;
   if(isPro)import('./pro/guard.js');
-  // Alleen de afgeschermde PRO-leerlingroute heeft de Zisa Spelen-controle
-  // nodig. Een leerkracht die vanuit Gratis of Ontdek een spelpopup opent,
-  // moet onmiddellijk kunnen spelen.
-  if(isPlay&&isPro)import('./spelen/games/zisa-play-guard.js');
+  // De PRO-tool wordt al door de gewone PRO-controle beschermd. De aparte
+  // Zisa Spelen-controle hoort hier niet: die verwacht een leerlingensessie
+  // en blokkeerde daardoor het spelvenster van een ingelogde leerkracht.
   const home=document.getElementById('studioStart');
   const choices=document.getElementById('puzzleChoices');
   const header=document.getElementById('toolHeader');
