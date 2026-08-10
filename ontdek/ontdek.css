@@ -42,6 +42,8 @@ body {
   box-shadow: 0 18px 50px rgba(20, 54, 93, .09);
 }
 .ontdek-kicker { color: #a35b00; font-size: .78rem; font-weight: 900; letter-spacing: .12em; }
+.ontdek-intro { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 24px; }
+.ontdek-hero-zisa { width: 150px; height: 150px; object-fit: contain; filter: drop-shadow(0 12px 20px rgba(20, 54, 93, .14)); }
 .ontdek-hero h1 { margin: 7px 0 12px; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.02; }
 .ontdek-hero p { max-width: 680px; color: #586f83; font-size: 1.05rem; line-height: 1.65; }
 .ontdek-regels { display: grid; gap: 10px; align-content: center; }
@@ -76,5 +78,7 @@ body {
   .ontdek-top { align-items: flex-start; gap: 14px; }
   .ontdek-top nav { flex-direction: column; align-items: flex-end; gap: 8px; }
   .ontdek-hero { grid-template-columns: 1fr; padding: 25px; }
+  .ontdek-intro { grid-template-columns: 100px minmax(0, 1fr); gap: 16px; }
+  .ontdek-hero-zisa { width: 100px; height: 100px; }
   .ontdek-grid { grid-template-columns: 1fr; }
 }
