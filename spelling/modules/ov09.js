@@ -44,6 +44,9 @@
       2: ["stukjes-verdubbelaars-g2", "stukjes-verenkelaars-g2", "stukjes-kort-2mk-g2", "stukjes-lang-2mk-g2"]
     },
 
+    _optieId: "ov09",
+    _variant: "meervoud",
+
     CAT_NAAR_REGEL: {
       "stukjes-verdubbelen": "verdubbelen",
       "stukjes-verdubbelaars-g2": "verdubbelen",
@@ -73,7 +76,8 @@
         ? this._seed
         : ((opties && typeof opties.seed === "number") ? opties.seed : Math.floor(Math.random() * 1e9));
 
-      const o = (opties && opties.ov09) || opties || {};
+      const optieId = this._optieId || "ov09";
+      const o = (opties && opties[optieId]) || opties || {};
       const niveaus = (o.niveaus && o.niveaus.length > 0) ? o.niveaus : [o.niveau || (opties && opties.niveau) || "basis"];
       const niveau = niveaus[0];
       
@@ -417,6 +421,11 @@
     },
 
     _regelType: function (woordOfCategorie) {
+      if (typeof woordOfCategorie === "object" && woordOfCategorie?.klanktype) {
+        if (woordOfCategorie.klanktype === "kort-verdubbeld") return "verdubbelen";
+        if (woordOfCategorie.klanktype === "lang-verenkeld") return "verenkelen";
+        return "hoort";
+      }
       const categorie = typeof woordOfCategorie === "string"
         ? woordOfCategorie
         : woordOfCategorie?.categorie;
@@ -466,6 +475,7 @@
     /* Geef de meervoud-vorm (of stukjesvorm bij werkwoorden).
        Bij werkwoorden zoals "lopen" is dat al de stukjesvorm zelf. */
     _geefMeervoud: function (w) {
+      if (this._variant === "direct") return w.tekst;
       if (w.meervoud) return w.meervoud;
       // Werkwoorden in stukjes-cats: tekst is al de stukjesvorm
       if (this._isWerkwoord(w)) return w.tekst;
@@ -481,6 +491,10 @@
         // Fout: niet verdubbelen (1 medeklinker ipv 2)
         return this._maakNietVerdubbeld(juist);
       } else if (regel === "verenkelen") {
+        // Bij directe stukjeswoorden is het doelwoord al gevormd. Test daar
+        // de regel zelf (hamer/haamer, kamer/kaamer), niet een fictief
+        // meervoud zoals "hamerer".
+        if (this._variant === "direct") return this._maakKlinkerDubbel(juist);
         // Fout: niet verenkelen (klinker dubbel laten staan)
         return this._maakNietVerenkeld(w.tekst, juist);
       } else if (regel === "hoort") {
@@ -488,6 +502,12 @@
         return this._maakOnnodigVerdubbeld(juist);
       }
       return juist + "?";
+    },
+
+    /* Direct verenkelwoord: verdubbel de eerste klinker van het woord.
+       hamer -> haamer, kamer -> kaamer, lepel -> leepel. */
+    _maakKlinkerDubbel: function (woord) {
+      return woord.replace(/[aeiou]/i, klinker => klinker + klinker);
     },
 
     /* Voorbeeld: katten → katen (1 t weghalen) */
@@ -629,25 +649,46 @@
 
     /* ---------- TEKSTEN PER NIVEAU ---------- */
     _titel: function (niveau) {
-      return "Klinkerdief";
+      return this._variant === "direct" ? "Stukjeswoorden bij prenten" : "Maak het meervoud en klap";
     },
 
     _opdracht: function (niveau) {
+      if (this._variant === "direct") {
+        const direct = {
+          basis: [
+            "Kijk naar de prent en zeg het woord hardop.",
+            "Klap het woord in stukjes.",
+            "Kruis de juiste schrijfwijze aan en schrijf het woord op."
+          ],
+          kern: [
+            "Kijk naar de prent en zeg het woord hardop.",
+            "Klap het woord in stukjes.",
+            "Schrijf het woord juist op de lijn."
+          ],
+          verdieping: [
+            "Kijk naar elke prent, zeg en klap het woord.",
+            "Schrijf het woord in de juiste kolom."
+          ]
+        };
+        return direct[niveau] || direct.basis;
+      }
       const map = {
         basis: [
-          "Kijk naar de prent of naar het woord.",
-          "Welke schrijfwijze is juist?",
-          "Kruis het juiste antwoord aan en schrijf het woord op de lijn."
+          "Kijk naar het grondwoord.",
+          "Maak het meervoud en zeg het hardop.",
+          "Klap het meervoud in stukjes.",
+          "Kruis de juiste schrijfwijze aan en schrijf het meervoud op."
         ],
         kern: [
-          "Kijk naar de prent of naar het woord.",
-          "Klap het woord.",
-          "Schrijf het juist op de lijn."
+          "Kijk naar het grondwoord.",
+          "Maak het meervoud en zeg het hardop.",
+          "Klap het meervoud in stukjes.",
+          "Schrijf het meervoud juist op de lijn."
         ],
         verdieping: [
-          "Kijk naar elke prent of naar elk woord.",
-          "Klap het woord.",
-          "Schrijf het woord in de juiste kolom."
+          "Kijk naar elk grondwoord.",
+          "Maak en klap het meervoud.",
+          "Schrijf het meervoud in de juiste kolom."
         ],
         uitbreiding: [
           "Lees elke zin goed.",
@@ -677,4 +718,12 @@
 
   window.SpellingModules = window.SpellingModules || {};
   window.SpellingModules.ov09 = OV09;
+  const OV45 = Object.create(OV09);
+  OV45.naam = "ov45";
+  OV45._optieId = "ov45";
+  OV45._variant = "direct";
+  OV45.oefenvormenPerNiveau = ["basis", "kern", "verdieping"];
+  OV45._maxPerNiveau = { basis: 6, kern: 9, verdieping: 8 };
+  OV45.CAT_PER_GRAAD = { 2: ["stukjeswoorden-direct-g2"] };
+  window.SpellingModules.ov45 = OV45;
 })();

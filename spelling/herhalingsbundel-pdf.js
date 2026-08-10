@@ -5771,6 +5771,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     ov07: function(state, item) { tekenOV07(state, item); },
     ov08: function(state, item) { tekenOV08(state, item); },
     ov09: function(state, item) { tekenOV09(state, item); },
+    ov45: function(state, item) { tekenOV09(state, item); },
     ov10: function(state, item) { tekenOV10(state, item); },
     weekdictee: function(state, item) { _tekenStubOV(state, item, "weekdictee"); }
   };

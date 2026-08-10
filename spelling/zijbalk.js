@@ -82,10 +82,18 @@ window.SpellingZijbalk = (function() {
       enkelVoor: ["meervouden"]
     },
     {
-      id: "ov09", label: "🦹 Klinkerdief: verdubbelen & verenkelen",
-      korteUitleg: "De verdubbel- en verenkelregel toepassen",
+      id: "ov09", label: "🦹 Maak het meervoud en klap",
+      korteUitleg: "Van grondwoord naar meervoud: zeggen, klappen en schrijven",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
       defaultAantal: 8,
+      enkelVoor: ["stukjeswoorden"]
+    },
+    {
+      id: "ov45", label: "🖼️ Stukjeswoorden bij prenten",
+      korteUitleg: "Een bestaand stukjeswoord bij de prent klappen en schrijven",
+      niveaus: ["basis", "kern", "verdieping"],
+      defaultAantal: 8,
+      graad: 2,
       enkelVoor: ["stukjeswoorden"]
     },
     {
@@ -337,10 +345,15 @@ window.SpellingZijbalk = (function() {
       uitbreiding: "Genummerde invul-zinnen + kind schrijft zelf 3 zinnen met meervouden. Toepassing in context."
     },
     ov09: {
-      basis: "Prent of grondwoord + 2 keuzes. Kind kiest welke schrijfwijze juist is.",
-      kern: "Prent of grondwoord + lijn. Kind schrijft zelf de juiste vorm.",
-      verdieping: "Prenten en woordkaarten + 3 sorteerkolommen. Kind sorteert volgens de regel.",
+      basis: "Kind leest het grondwoord, maakt en klapt het meervoud, kiest de juiste spelling en schrijft die op.",
+      kern: "Kind leest het grondwoord, zegt en klapt het meervoud en schrijft het zelfstandig op.",
+      verdieping: "Kind vormt het meervoud en sorteert het volgens verdubbelen, verenkelen of niets veranderen.",
       uitbreiding: "Kind streept de fout door en schrijft de juiste zin over. Volledige toepassing in context."
+    },
+    ov45: {
+      basis: "Kind benoemt de prent, klapt het woord, kiest de juiste spelling en schrijft het op.",
+      kern: "Kind benoemt de prent, klapt het woord en schrijft het zelfstandig op.",
+      verdieping: "Kind benoemt en klapt de prentwoorden en sorteert ze volgens hun spellingregel."
     },
     ov10: {
       basis: "Woordzoeker met plaatjes. Kind zoekt elk samengesteld woord en schrijft het onderaan op de lijn.",
@@ -787,7 +800,12 @@ window.SpellingZijbalk = (function() {
       }
 
       if (oef.id === "ov09") {
-        return soorten.specifiekeGroepen.has("stukjeswoorden");
+        return gekozen.some(id => id !== "stukjeswoorden-direct-g2" &&
+          window.SpellingWoordenbibliotheek?.graad2?.[id]?.groep === "stukjeswoorden");
+      }
+
+      if (oef.id === "ov45") {
+        return gekozen.includes("stukjeswoorden-direct-g2");
       }
 
       if (oef.id === "ov07") {
