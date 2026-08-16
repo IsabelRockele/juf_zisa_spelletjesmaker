@@ -1,7 +1,8 @@
 (()=>{
 const stage=$('stage'),menu=$('menu'),done=$('done'),feedback=()=>$('feedback');
 const imgs={pizza:img('assets/pizza.png'),taart:img('assets/taart.png'),chocolade:img('assets/chocolade.png')};
-const colleagueMode=sessionStorage.getItem('zisa_colleague_play')==='1';
+const localHost=['localhost','::1','0.0.0.0'].includes(location.hostname)||location.hostname.startsWith('127.')||location.hostname.startsWith('192.168.')||location.hostname.startsWith('10.')||(/^172\.(1[6-9]|2\d|3[01])\./).test(location.hostname);
+const colleagueMode=sessionStorage.getItem('zisa_colleague_play')==='1'||localHost;
 const modes=[
  {id:'build',icon:'🍕',name:'Bouw de breuk',desc:'Leg zelf de juiste stukken en klik daarna op Klaar.'},
  {id:'whole',icon:'🧩',name:'Maak één geheel',desc:'Vul aan tot een volledige pizza, taart of reep.'},

@@ -10,7 +10,10 @@ const app=getApps().length?getApp():initializeApp(cfg);getAuth(app);const functi
 const code=sessionStorage.getItem("zisa_play_code")||new URLSearchParams(location.search).get("code")||"";const deviceId=localStorage.getItem("zisa_play_device_id")||"";
 const host=location.hostname.toLowerCase();
 const isPrivateHost=host==='localhost'||host==='::1'||host==='0.0.0.0'||host.startsWith('127.')||host.startsWith('192.168.')||host.startsWith('10.')||(/^172\.(1[6-9]|2\d|3[01])\./).test(host);
-const isLocalPreview=isPrivateHost&&(new URLSearchParams(location.search).get('preview')==='1'||sessionStorage.getItem('zisa_play_allowed')==='1');
+// Op een lokale ontwikkelserver mag elke spelpagina rechtstreeks openen.
+// Zo hoeft een leerkracht tijdens testen niet eerst via de QR- of loginflow te gaan.
+// Online blijft de gewone leerling-, collega- of PRO-controle volledig actief.
+const isLocalPreview=isPrivateHost;
 const isTeacherPreview=sessionStorage.getItem('zisa_teacher_preview')==='1';
 const discoverParams=new URLSearchParams(location.search);
 if(discoverParams.get('ontdek')==='1')sessionStorage.setItem('zisa_discover_preview','1');
