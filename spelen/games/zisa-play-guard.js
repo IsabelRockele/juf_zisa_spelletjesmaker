@@ -15,12 +15,13 @@ const isTeacherPreview=sessionStorage.getItem('zisa_teacher_preview')==='1';
 const discoverParams=new URLSearchParams(location.search);
 if(discoverParams.get('ontdek')==='1')sessionStorage.setItem('zisa_discover_preview','1');
 const isDiscoverPreview=sessionStorage.getItem('zisa_discover_preview')==='1';
+const isColleaguePlay=sessionStorage.getItem('zisa_colleague_play')==='1';
 const gamesRootUrl=new URL('./',import.meta.url);
 const playHomeUrl=new URL('../index.html',import.meta.url).href;
 const proHomeUrl=new URL('../../pro/zisa-spelen.html',import.meta.url).href;
 document.documentElement.style.webkitTextSizeAdjust='100%';
 addEventListener('DOMContentLoaded',()=>document.querySelectorAll('button,a,input,select,[role="button"]').forEach(el=>el.style.touchAction='manipulation'));
-async function check(){try{if(!isLocalPreview&&!isDiscoverPreview){if(isTeacherPreview)await teacherCheck({});else await join({code,deviceId})}gate.remove();return true}catch(e){gate.classList.add("error");gate.innerHTML=`<div><span>🔒</span><strong>Dit spel is momenteel niet beschikbaar.</strong><a href="${playHomeUrl}">Terug naar Zisa Spelen</a></div>`;return false}}
+async function check(){try{if(!isLocalPreview&&!isDiscoverPreview&&!isColleaguePlay){if(isTeacherPreview)await teacherCheck({});else await join({code,deviceId})}gate.remove();return true}catch(e){gate.classList.add("error");gate.innerHTML=`<div><span>🔒</span><strong>Dit spel is momenteel niet beschikbaar.</strong><a href="${playHomeUrl}">Terug naar Zisa Spelen</a></div>`;return false}}
 const file=(location.pathname.split('/').pop()||'').toLowerCase();
 const folder=(location.pathname.split('/').filter(Boolean).at(-2)||'').toLowerCase();
 const discoverAllowed=new Set([
@@ -116,4 +117,4 @@ function suppressDuplicateTabletKeyboard(){
   });
 }
 function readyUi(){const build=()=>{clarifyExistingBackButtons();addZisaNavigation();improveSettingsScreen();suppressDuplicateTabletKeyboard();protectDiscoverChoices()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build,{once:true});else build()}
-check().then(ok=>{if(ok){if(isDiscoverPreview&&!discoverAllowed.has(file)&&!discoverFolderAllowed){gate.classList.add('error');gate.innerHTML=`<div><span>⭐</span><strong>Dit spel is beschikbaar in PRO.</strong><a href="${new URL('../../ontdek/zisa-spelen.html',import.meta.url).href}">Terug naar de Ontdek-spellen</a></div>`;document.documentElement.append(gate);return}readyUi();if(help&&!sessionStorage.getItem('zisa_help_seen_'+file)){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>showHelp(),{once:true});else showHelp()}if(!isLocalPreview&&!isTeacherPreview&&!isDiscoverPreview)setInterval(()=>join({code,deviceId}).catch(()=>location.href=playHomeUrl),120000)}});
+check().then(ok=>{if(ok){if(isDiscoverPreview&&!discoverAllowed.has(file)&&!discoverFolderAllowed){gate.classList.add('error');gate.innerHTML=`<div><span>⭐</span><strong>Dit spel is beschikbaar in PRO.</strong><a href="${new URL('../../ontdek/zisa-spelen.html',import.meta.url).href}">Terug naar de Ontdek-spellen</a></div>`;document.documentElement.append(gate);return}readyUi();if(help&&!sessionStorage.getItem('zisa_help_seen_'+file)){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>showHelp(),{once:true});else showHelp()}if(!isLocalPreview&&!isTeacherPreview&&!isDiscoverPreview&&!isColleaguePlay)setInterval(()=>join({code,deviceId}).catch(()=>location.href=playHomeUrl),120000)}});
