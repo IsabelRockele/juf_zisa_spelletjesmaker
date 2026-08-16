@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kies Hulpschema</title>
     <link rel="stylesheet" href="keuze-hulpschema.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+    <style>
+      .collega-qr{position:fixed;right:14px;bottom:14px;z-index:20;width:min(300px,calc(100vw - 28px));padding:14px;background:#fff;border:1px solid #dce7f2;border-radius:14px;box-shadow:0 8px 26px rgba(0,0,0,.12);font-family:Arial,sans-serif;color:#17324d}.collega-qr h2{margin:0 0 5px;font-size:1rem}.collega-qr p{margin:0 0 10px;color:#5b6f80;font-size:.82rem;line-height:1.4}.collega-qr button,.collega-qr a{display:block;width:100%;margin-top:7px;padding:10px;border:0;border-radius:9px;background:#1768ac;color:#fff;text-align:center;text-decoration:none;font-weight:800;cursor:pointer}.collega-qr .secondary{background:#eef5fb;color:#174d79}.collega-qr-code{display:none;margin-top:10px;text-align:center}.collega-qr-code.visible{display:block}.collega-qr-code>div{display:inline-block;padding:6px;background:#fff}.collega-qr-note{margin-top:8px!important;color:#08764a!important;font-weight:700}@media(max-width:700px){.collega-qr{position:static;margin:18px auto}}@media print{body>*:not(.collega-qr){display:none!important}.collega-qr{position:static;width:100%;border:0;box-shadow:none;text-align:center}.collega-qr>button,.collega-qr>a,.collega-qr>p{display:none!important}.collega-qr-code{display:block!important}}
+      .smartboard-test{margin-top:34px;padding:18px;border:2px solid #8ab9e8;border-radius:18px;background:#eef7ff}.smartboard-test h2{margin:0 0 5px;color:#174d79;font-size:1.35rem}.smartboard-test p{margin:0 0 14px;color:#53697b}.smartboard-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.smartboard-btn{display:inline-flex;align-items:center;justify-content:center;min-width:220px;padding:13px 18px;border-radius:12px;background:#1768ac;color:#fff;text-decoration:none;font-weight:800;font-size:1rem;box-shadow:0 4px 10px rgba(23,104,172,.24)}
+    </style>
 </head>
 <body>
     <div class="panel">
@@ -24,8 +29,29 @@
                 <a href="plus_versie2.html?terug=keuze-hulpschema.html#stap2" class="choice-btn plus">+</a>
                 <a href="min_versie2.html?terug=keuze-hulpschema.html#stap2" class="choice-btn min">-</a>
             </div>
+            <section class="smartboard-test" aria-labelledby="smartboard-title">
+                <h2 id="smartboard-title">📺 Smartboardproef met schrijfvlak</h2>
+                <p>Schrijf de oefening links met de bordstiften en leg ze rechts met MAB-materiaal.</p>
+                <div class="smartboard-actions">
+                    <a class="smartboard-btn" href="plus_versie3.html">Open schrijfblad voor +</a>
+                    <a class="smartboard-btn" href="min_versie3.html">Open schrijfblad voor −</a>
+                </div>
+            </section>
         </div>
     </div>
+
+    <aside class="collega-qr" aria-label="QR-code voor kinderen">
+      <h2>📱 MAB en hulpschema voor kinderen</h2>
+      <p>Maak een QR die leerlingen rechtstreeks naar de kindvriendelijke oefenomgeving brengt.</p>
+      <button id="maak-mab-qr" type="button">Maak QR</button>
+      <div class="collega-qr-code" id="mab-qr-wrap">
+        <div id="mab-qr-box"></div>
+        <a id="mab-qr-download" class="secondary" download="mab-hulpschema-qr.png">Download als PNG</a>
+        <button id="mab-qr-copy" class="secondary" type="button">Leerlinglink kopiëren</button>
+        <button id="mab-qr-print" class="secondary" type="button">QR afdrukken</button>
+        <p class="collega-qr-note" id="mab-qr-feedback">Onbeperkt geldig en onbeperkt te gebruiken.</p>
+      </div>
+    </aside>
 
     <script>
         const stap1 = document.getElementById('stap1');
@@ -59,6 +85,23 @@
             // Optioneel: verwijder de #stap2 uit de URL
             history.pushState("", document.title, window.location.pathname + window.location.search);
         });
+
+        const qrUrl = new URL('pro/hulpschema-kid.html?kid=1&range=100', window.location.href).href;
+        const qrButton = document.getElementById('maak-mab-qr');
+        const qrWrap = document.getElementById('mab-qr-wrap');
+        const qrBox = document.getElementById('mab-qr-box');
+        const qrDownload = document.getElementById('mab-qr-download');
+        const qrFeedback = document.getElementById('mab-qr-feedback');
+        function maakMabQr() {
+            if (typeof QRCode !== 'function') { qrFeedback.textContent = 'De QR-bibliotheek kon niet worden geladen.'; qrWrap.classList.add('visible'); return; }
+            qrBox.replaceChildren();
+            new QRCode(qrBox, { text: qrUrl, width: 220, height: 220, colorDark: '#17324d', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+            qrWrap.classList.add('visible');
+            setTimeout(() => { const canvas=qrBox.querySelector('canvas'); const image=qrBox.querySelector('img'); qrDownload.href=canvas?.toDataURL('image/png')||image?.src||'#'; }, 80);
+        }
+        qrButton.addEventListener('click', maakMabQr);
+        document.getElementById('mab-qr-copy').addEventListener('click', async () => { await navigator.clipboard.writeText(qrUrl); qrFeedback.textContent='De leerlinglink is gekopieerd.'; });
+        document.getElementById('mab-qr-print').addEventListener('click', () => window.print());
     </script>
 </body>
 </html>
