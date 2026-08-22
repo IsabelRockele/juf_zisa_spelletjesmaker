@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bureau: "Bureau juf",
         leerlingBureau: "Bureau",
         schoolbank: "Schoolbank",
+        dubbeleSchoolbank: "Schoolbank voor 2 leerlingen",
         kast: "Kast",
         wastafel: "Wastafel",
         schoolbord: "Schoolbord",
@@ -63,7 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return wrapper;
         }
         let svg = '';
-        if (type === 'leerlingBureau') {
+        if (type === 'dubbeleSchoolbank') {
+            svg = `<svg viewBox="0 0 120 65" xmlns="http://www.w3.org/2000/svg">
+                     <rect x="2" y="25" width="116" height="36" rx="3" fill="#fff" stroke="#3f4a54" stroke-width="2"/>
+                     <rect x="18" y="2" width="32" height="17" rx="3" fill="#fff" stroke="#3f4a54" stroke-width="2"/>
+                     <rect x="70" y="2" width="32" height="17" rx="3" fill="#fff" stroke="#3f4a54" stroke-width="2"/>
+                   </svg>`;
+        } else if (type === 'leerlingBureau') {
             svg = `<svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
                      <rect x="2" y="2" width="56" height="36" fill="none" stroke="#333" stroke-width="2"/>
                      <circle cx="45" cy="20" r="6" fill="none" stroke="#333" stroke-width="2"/>
@@ -121,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const metersPerGrid = 0.5;
     let metrischeModusActief = false;
     const meubelMaten = {
-        schoolbank: [1.2, 0.5], bureau: [1.4, 0.7], kast: [1.0, 0.45],
+        schoolbank: [0.7, 0.5], dubbeleSchoolbank: [1.2, 0.5], bureau: [1.4, 0.7], kast: [1.0, 0.45],
         wastafel: [0.6, 0.5], kring: [3.0, 3.0], leerlingBureau: [0.7, 0.5],
         tafel: [1.6, 0.8], schoolbord: [2.4, 0.15], schoolbordFlappen: [3.0, 0.15],
         deur: [0.9, 0.9], raam: [1.5, 0.1]
@@ -132,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let history = [];
     let redoStack = [];
     let isUpdatingState = false;
-    const customProperties = ['studentNaam', 'voorwerpType', 'isNaam', 'gekoppeldAan', 'echteBreedteM', 'echteDiepteM', 'metrischeSchaal', 'gridPixelSize', 'metersPerGrid'];
+    const customProperties = ['studentNaam', 'voorwerpType', 'isNaam', 'gekoppeldAan', 'echteBreedteM', 'echteDiepteM', 'metrischeSchaal', 'gridPixelSize', 'metersPerGrid', 'standaardVulling', 'nietInkleuren'];
 
     // --- STANDAARD STIJLEN (VOOR HERSTELLEN) ---
     const defaultStyles = {
@@ -152,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const verwijderKnop = document.getElementById('verwijderKnop');
     const dupliceerKnop = document.getElementById('dupliceerKnop');
     const spiegelKnop = document.getElementById('spiegelKnop');
+    const draaiKwartslagKnop = document.getElementById('draaiKwartslagKnop');
     const zoomUitKnop = document.getElementById('zoomUitKnop');
     const zoomResetKnop = document.getElementById('zoomResetKnop');
     const zoomInKnop = document.getElementById('zoomInKnop');
@@ -286,6 +294,17 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', pasCanvasInWerkruimte);
 
     // --- LEGENDE KLEUREN TOEPASSEN / VERWIJDEREN ---
+    function verzamelZichtbareOnderdelen(obj) {
+        const onderdelen = [];
+        const bezoek = (item) => {
+            if (!item || item.isNaam) return;
+            if (item.isType?.('group')) item.getObjects().forEach(bezoek);
+            else onderdelen.push(item);
+        };
+        bezoek(obj);
+        return onderdelen;
+    }
+
     function setCanvasColorsFromLegend(show) {
         canvas.forEachObject(obj => {
             const type = obj.voorwerpType;
@@ -303,17 +322,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 obj.applyFilters();
             } else if (obj.isType('group')) {
                 if (type === 'deur') {
-                    const path = obj.getObjects().find(o => o.type === 'path');
+                    const path = verzamelZichtbareOnderdelen(obj).find(o => o.type === 'path');
                     if(path) path.set('stroke', show && color ? color : defaultStyles.deur.pathStroke);
                 } else if (type === 'schoolbordFlappen') {
-                    const objectsToColor = obj.getObjects().filter(o => !o.isNaam);
+                    const objectsToColor = verzamelZichtbareOnderdelen(obj);
                     objectsToColor.forEach((item, i) => {
-                        item.set('fill', show && color ? color : defaultStyles.schoolbordFlappen[i].fill);
+                        item.set('fill', show && color ? color : (item.standaardVulling ?? defaultStyles.schoolbordFlappen[i]?.fill ?? 'transparent'));
                     });
                 } else {
-                    obj.getObjects().forEach(item => {
-                         if (item.isNaam) return;
-
+                    verzamelZichtbareOnderdelen(obj).forEach(item => {
+                         if (item.nietInkleuren) return;
                          if (item.isType('image')) {
                              let newFilters = [];
                              if (show && color) {
@@ -322,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
                              item.filters = newFilters;
                              item.applyFilters();
                          } else {
-                             item.set('fill', show && color ? color : 'transparent');
+                             item.set('fill', show && color ? color : (item.standaardVulling ?? 'transparent'));
                          }
                     });
                 }
@@ -670,6 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
         naamObject.setCoords(); canvas.requestRenderAll();
     });
     function schakelModus(nieuweModus) {
+        if (nieuweModus !== 'bouw' && bouwTool === 'gom') zetBouwTool('');
         modus = nieuweModus; canvas.isDrawingMode = false;
         updateModusUitleg(nieuweModus);
         Object.values(modusKnoppen).forEach(knop => knop.classList.remove('actief'));
@@ -917,7 +936,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const maat = meubelMaten[knop.dataset.type];
         if (maat) knop.title = `In schaalmodus: ${maat[0].toString().replace('.', ',')} × ${maat[1].toString().replace('.', ',')} m`;
     });
-    function zetBouwTool(nieuweTool) { bouwTool = nieuweTool; canvas.isDrawingMode = (bouwTool === 'gom'); }
+    const gomKnop = document.getElementById('plaatsGomKnop');
+    function zetBouwTool(nieuweTool) {
+        bouwTool = nieuweTool;
+        canvas.isDrawingMode = (bouwTool === 'gom');
+        gomKnop.classList.toggle('actief', bouwTool === 'gom');
+        gomKnop.textContent = bouwTool === 'gom' ? '✓ Gom actief' : 'Gom';
+        if (bouwTool !== 'gom') canvas.defaultCursor = 'default';
+    }
     document.getElementById('tekenMuurKnop').addEventListener('click', () => zetBouwTool('muur'));
     document.getElementById('plaatsKlasKnop').addEventListener('click', () => {
         zetBouwTool('klas');
@@ -927,7 +953,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('plaatsDeurKnop').addEventListener('click', () => {
         zetBouwTool('deur');
         const deurSymbol = new fabric.Path('M 0 0 L 0 40 M 0 0 Q 40 0 40 40', { fill: '', stroke: 'black', strokeWidth: 2 });
-        const achtergrond = new fabric.Rect({ left: 0, top: 0, width: 42, height: 8, fill: canvas.backgroundColor, originX: 'left', originY: 'top' });
+        const achtergrond = new fabric.Rect({ left: -2, top: -3, width: 46, height: 12, fill: canvas.backgroundColor, originX: 'left', originY: 'top' });
         const deur = new fabric.Group([achtergrond, deurSymbol], { left: 50, top: 50, voorwerpType: 'deur', originX: 'left', originY: 'top' });
         maakInteractief(deur); if (metrischeModusActief) schaalMeubelOpWerkelijkeMaat(deur, 'deur'); canvas.add(deur); deur.setCoords(); canvas.setActiveObject(deur); canvas.renderAll(); werkMaatPaneelBij();
     });
@@ -939,8 +965,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const raam = new fabric.Group([raamAchtergrond, glasBoven, glasOnder], { left: 50, top: 100, voorwerpType: 'raam' });
         maakInteractief(raam); if (metrischeModusActief) schaalMeubelOpWerkelijkeMaat(raam, 'raam'); canvas.add(raam); raam.setCoords(); canvas.setActiveObject(raam); canvas.renderAll(); werkMaatPaneelBij();
     });
-    document.getElementById('plaatsGomKnop').addEventListener('click', () => {
-        zetBouwTool('gom'); canvas.freeDrawingBrush.color = canvas.backgroundColor; canvas.freeDrawingBrush.width = 10; canvas.freeDrawingCursor = 'square';
+    gomKnop.addEventListener('click', () => {
+        if (bouwTool === 'gom') {
+            zetBouwTool('');
+            return;
+        }
+        zetBouwTool('gom');
+        canvas.freeDrawingBrush.color = canvas.backgroundColor;
+        canvas.freeDrawingBrush.width = 12;
+        canvas.freeDrawingBrush.strokeLineCap = 'square';
+        canvas.freeDrawingBrush.strokeLineJoin = 'miter';
+        canvas.freeDrawingCursor = 'crosshair';
     });
     document.getElementById('plaatsPaalKnop').addEventListener('click', () => {
         zetBouwTool('paal');
@@ -999,27 +1034,131 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.tagName !== 'BUTTON') return;
         const type = e.target.dataset.type;
         const renderCallback = (obj) => { if (metrischeModusActief) schaalMeubelOpWerkelijkeMaat(obj, type); canvas.add(obj); obj.setCoords(); canvas.setActiveObject(obj); canvas.renderAll(); werkMaatPaneelBij(); };
-        if (['schoolbank','bureau','kast','wastafel', 'kring'].includes(type)) {
-            fabric.Image.fromURL(`${IMG_PATH}${type}.png`, (img) => {
-                img.set({ left: 100, top: 100, voorwerpType: type, originX: 'left', originY: 'top' });
-                if (!metrischeModusActief) img.scaleToWidth(80);
-                maakInteractief(img); renderCallback(img);
-            }, { crossOrigin: 'Anonymous' });
+        if (type === 'schoolbank') {
+            const tafelblad = new fabric.Rect({
+                left: 0, top: 24, width: 110, height: 38, rx: 2, ry: 2,
+                fill: '#fff', standaardVulling: '#fff', stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true
+            });
+            const stoel = new fabric.Rect({
+                left: 34, top: 0, width: 42, height: 18, rx: 3, ry: 3,
+                fill: '#fff', standaardVulling: '#fff', stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true
+            });
+            const stoelZitting = new fabric.Line([39, 15, 71, 15], {
+                stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true
+            });
+            const bank = new fabric.Group([tafelblad, stoel, stoelZitting], {
+                left: 100, top: 100, voorwerpType: type, originX: 'left', originY: 'top', objectCaching: false
+            });
+            if (!metrischeModusActief) bank.scaleToWidth(80);
+            maakInteractief(bank); renderCallback(bank);
+        } else if (type === 'dubbeleSchoolbank') {
+            const dubbelBlad = new fabric.Rect({
+                left: 0, top: 24, width: 120, height: 38, rx: 2, ry: 2,
+                fill: '#fff', standaardVulling: '#fff', stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true
+            });
+            const stoelLinks = new fabric.Rect({
+                left: 17, top: 0, width: 34, height: 18, rx: 3, ry: 3,
+                fill: '#fff', standaardVulling: '#fff', stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true
+            });
+            const stoelRechts = new fabric.Rect({
+                left: 69, top: 0, width: 34, height: 18, rx: 3, ry: 3,
+                fill: '#fff', standaardVulling: '#fff', stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true
+            });
+            const dubbeleBank = new fabric.Group([dubbelBlad, stoelLinks, stoelRechts], {
+                left: 100, top: 100, voorwerpType: type, originX: 'left', originY: 'top', objectCaching: false
+            });
+            if (!metrischeModusActief) dubbeleBank.scaleToWidth(100);
+            maakInteractief(dubbeleBank); renderCallback(dubbeleBank);
+        } else if (type === 'bureau') {
+            const bureaublad = new fabric.Rect({
+                left: 0, top: 20, width: 140, height: 50, rx: 2, ry: 2,
+                fill: '#fff', standaardVulling: '#fff', stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true
+            });
+            const ladeLijn = new fabric.Line([100, 22, 100, 68], {
+                stroke: '#7b8791', strokeWidth: 1.4, strokeUniform: true
+            });
+            const stoelJuf = new fabric.Rect({
+                left: 50, top: 0, width: 40, height: 16, rx: 4, ry: 4,
+                fill: '#fff', standaardVulling: '#fff', stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true
+            });
+            const bureau = new fabric.Group([bureaublad, ladeLijn, stoelJuf], {
+                left: 100, top: 100, voorwerpType: type, originX: 'left', originY: 'top', objectCaching: false
+            });
+            if (!metrischeModusActief) bureau.scaleToWidth(80);
+            maakInteractief(bureau); renderCallback(bureau);
+        } else if (type === 'kast') {
+            const kastOmtrek = new fabric.Rect({
+                left: 0, top: 0, width: 100, height: 45, rx: 1, ry: 1,
+                fill: '#fff', standaardVulling: '#fff', stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true
+            });
+            const deurScheiding = new fabric.Line([50, 2, 50, 43], {
+                stroke: '#7b8791', strokeWidth: 1.4, strokeUniform: true
+            });
+            const handvatLinks = new fabric.Circle({
+                left: 43, top: 21, radius: 1.8, fill: '#3f4a54', standaardVulling: '#3f4a54', originX: 'center', originY: 'center'
+            });
+            const handvatRechts = new fabric.Circle({
+                left: 57, top: 21, radius: 1.8, fill: '#3f4a54', standaardVulling: '#3f4a54', originX: 'center', originY: 'center'
+            });
+            const kast = new fabric.Group([kastOmtrek, deurScheiding, handvatLinks, handvatRechts], {
+                left: 100, top: 100, voorwerpType: type, originX: 'left', originY: 'top', objectCaching: false
+            });
+            if (!metrischeModusActief) kast.scaleToWidth(80);
+            maakInteractief(kast); renderCallback(kast);
+        } else if (type === 'wastafel') {
+            const blad = new fabric.Rect({
+                left: 0, top: 0, width: 60, height: 50, rx: 2, ry: 2,
+                fill: '#fff', standaardVulling: '#fff', stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true
+            });
+            const waskom = new fabric.Ellipse({
+                left: 11, top: 12, rx: 19, ry: 13,
+                fill: '#eef8fc', standaardVulling: '#eef8fc', stroke: '#4f8da8', strokeWidth: 1.7, strokeUniform: true
+            });
+            const afvoer = new fabric.Circle({
+                left: 30, top: 25, radius: 2.3, fill: '#4f8da8', standaardVulling: '#4f8da8', originX: 'center', originY: 'center'
+            });
+            const kraan = new fabric.Path('M 30 12 L 30 6 Q 30 2 35 2 L 40 2', {
+                fill: '', stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true
+            });
+            const wastafel = new fabric.Group([blad, waskom, afvoer, kraan], {
+                left: 100, top: 100, voorwerpType: type, originX: 'left', originY: 'top', objectCaching: false
+            });
+            if (!metrischeModusActief) wastafel.scaleToWidth(80);
+            maakInteractief(wastafel); renderCallback(wastafel);
+        } else if (type === 'kring') {
+            const kringOnderdelen = [];
+            kringOnderdelen.push(new fabric.Circle({
+                left: 50, top: 50, radius: 31, originX: 'center', originY: 'center',
+                fill: 'transparent', standaardVulling: 'transparent', nietInkleuren: true, stroke: '#6b7782', strokeWidth: 1.5, strokeDashArray: [4, 4], strokeUniform: true
+            }));
+            for (let i = 0; i < 8; i++) {
+                const hoek = (Math.PI * 2 * i) / 8;
+                kringOnderdelen.push(new fabric.Circle({
+                    left: 50 + Math.cos(hoek) * 42, top: 50 + Math.sin(hoek) * 42, radius: 7,
+                    originX: 'center', originY: 'center', fill: '#fff', standaardVulling: '#fff',
+                    stroke: '#3f4a54', strokeWidth: 1.8, strokeUniform: true
+                }));
+            }
+            const kring = new fabric.Group(kringOnderdelen, {
+                left: 100, top: 100, voorwerpType: type, originX: 'left', originY: 'top', objectCaching: false
+            });
+            if (!metrischeModusActief) kring.scaleToWidth(80);
+            maakInteractief(kring); renderCallback(kring);
         } else if (type === 'leerlingBureau') {
             const bureauRect = new fabric.Rect({ width: 60, height: 40, fill: 'transparent', stroke: '#333', strokeWidth: 1, originX: 'center', originY: 'center' });
             const stoelCirkel = new fabric.Circle({ radius: 8, fill: 'transparent', stroke: '#333', strokeWidth: 1, left: 20, top: -10, originX: 'center', originY: 'center' });
             const leerlingBureauGroep = new fabric.Group([bureauRect, stoelCirkel], { left: 100, top: 100, voorwerpType: 'leerlingBureau', originX: 'left', originY: 'top' });
             maakInteractief(leerlingBureauGroep); renderCallback(leerlingBureauGroep);
         } else if (type === 'tafel') {
-            const item = new fabric.Rect({ left: 100, top: 100, width: 80, height: 50, fill: 'transparent', stroke: '#333', strokeWidth: 1, voorwerpType: type, originX: 'left', originY: 'top' });
+            const item = new fabric.Rect({ left: 100, top: 100, width: 80, height: 50, rx: 3, ry: 3, fill: '#fff', standaardVulling: '#fff', stroke: '#3f4a54', strokeWidth: 2, strokeUniform: true, voorwerpType: type, originX: 'left', originY: 'top' });
             maakInteractief(item); renderCallback(item);
         } else if (type === 'schoolbord') {
-            const bord = new fabric.Rect({ left: 150, top: 50, width: 150, height: 10, fill: '#e6e6e6', stroke: 'black', strokeWidth: 2, voorwerpType: 'schoolbord', originX: 'left', originY: 'top' });
+            const bord = new fabric.Rect({ left: 150, top: 50, width: 150, height: 10, fill: '#e6e6e6', standaardVulling: '#e6e6e6', stroke: '#263238', strokeWidth: 2, strokeUniform: true, voorwerpType: 'schoolbord', originX: 'left', originY: 'top' });
             maakInteractief(bord); renderCallback(bord);
         } else if (type === 'schoolbordFlappen') {
-            const midden = new fabric.Rect({ width: 100, height: 10, fill: '#e6e6e6', stroke: 'black', strokeWidth: 2 });
-            const flapL = new fabric.Rect({ width: 50, height: 10, fill: '#f2f2f2', stroke: 'black', strokeWidth: 2, left: -50 });
-            const flapR = new fabric.Rect({ width: 50, height: 10, fill: '#f2f2f2', stroke: 'black', strokeWidth: 2, left: 100 });
+            const midden = new fabric.Rect({ width: 100, height: 10, fill: '#e6e6e6', standaardVulling: '#e6e6e6', stroke: '#263238', strokeWidth: 2, strokeUniform: true });
+            const flapL = new fabric.Rect({ width: 50, height: 10, fill: '#f2f2f2', standaardVulling: '#f2f2f2', stroke: '#263238', strokeWidth: 2, strokeUniform: true, left: -50 });
+            const flapR = new fabric.Rect({ width: 50, height: 10, fill: '#f2f2f2', standaardVulling: '#f2f2f2', stroke: '#263238', strokeWidth: 2, strokeUniform: true, left: 100 });
             const bordMetFlappen = new fabric.Group([midden, flapL, flapR], { left: 200, top: 100, voorwerpType: 'schoolbordFlappen', originX: 'left', originY: 'top' });
             maakInteractief(bordMetFlappen); renderCallback(bordMetFlappen);
         }
@@ -1112,7 +1251,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const deurSymbol = obj.getObjects && obj.getObjects().find(o => o.type === 'path');
                 if (deurSymbol && deurSymbol.stroke && !defaultKleuren.includes(deurSymbol.stroke)) kleur = deurSymbol.stroke;
             } else if (obj.isType('group')) {
-                const gekleurdItem = obj.getObjects().find(item => {
+                const gekleurdItem = verzamelZichtbareOnderdelen(obj).find(item => {
                     if (item.isType('image') && item.filters && item.filters.length > 0) {
                         return item.filters.some(f => f.type === 'BlendColor');
                     }
@@ -1158,22 +1297,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (actieveLegendeType === 'schoolbord' && obj.voorwerpType === 'schoolbordFlappen') typeMatch = true;
         if (typeMatch) {
             const kleurItem = (item) => {
-                if (!item || item.isNaam) return;
-                if (item.isType('image')) {
+                if (!item || item.isNaam || item.nietInkleuren) return;
+                if (item.voorwerpType === 'deur' && actieveLegendeType === 'deur') {
+                    const deurSymbol = verzamelZichtbareOnderdelen(item).find(o => o.type === 'path');
+                    if(deurSymbol) deurSymbol.set('stroke', kleur);
+                } else if (item.isType('group')) {
+                    item.getObjects().forEach(kleurItem);
+                } else if (item.isType('image')) {
                     item.filters = [new fabric.Image.filters.BlendColor({ color: kleur, mode: 'multiply', alpha: 1.0 })];
                     item.applyFilters();
-                } else if (item.voorwerpType === 'deur' && actieveLegendeType === 'deur') {
-                    const deurSymbol = item.getObjects && item.getObjects().find(o => o.type === 'path');
-                    if(deurSymbol) deurSymbol.set('stroke', kleur);
                 } else if (item.voorwerpType !== 'muur' && item.voorwerpType !== 'raam') {
                     item.set('fill', kleur);
                 }
             };
             if (obj.isType('group')) {
                 if (obj.voorwerpType === 'deur' && actieveLegendeType === 'deur') kleurItem(obj);
-                else {
-                    obj.getObjects().forEach(item => kleurItem(item));
-                }
+                else obj.getObjects().forEach(item => kleurItem(item));
             } else kleurItem(obj);
             const type = obj.voorwerpType;
             const setKleur = (type === 'muur' || type === 'raam') ? null : kleur;
@@ -1220,6 +1359,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }, customProperties);
     }
     dupliceerKnop.addEventListener('click', dupliceerSelectie);
+    draaiKwartslagKnop.addEventListener('click', () => {
+        const selectie = canvas.getActiveObjects();
+        if (!selectie || selectie.length === 0) {
+            alert('Selecteer eerst het raam of object dat je wilt draaien.');
+            return;
+        }
+        selectie.forEach(obj => {
+            const huidigeHoek = Number(obj.angle) || 0;
+            obj.rotate((Math.round(huidigeHoek / 90) * 90 + 90) % 360);
+            obj.setCoords();
+        });
+        canvas.requestRenderAll();
+        saveStateImmediate();
+    });
     spiegelKnop.addEventListener('click', () => {
         const selectie = canvas.getActiveObjects();
         if (!selectie || selectie.length === 0) {
@@ -1234,6 +1387,10 @@ document.addEventListener('DOMContentLoaded', () => {
         saveStateImmediate();
     });
     window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && bouwTool === 'gom') {
+            zetBouwTool('');
+            return;
+        }
         if (e.key === 'Escape' && workspace.classList.contains('presentatie-weergave')) {
             workspace.classList.remove('presentatie-weergave');
             grootTonenKnop.textContent = '⛶ Groot tonen';
@@ -1251,7 +1408,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- PDF GENERATIE ---
     const iconCache = new Map();
     function svgStringForType(type){
-        if (type === 'leerlingBureau') {
+        if (type === 'dubbeleSchoolbank') {
+            return `<svg viewBox="0 0 120 65" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="25" width="116" height="36" rx="3" fill="#fff" stroke="#3f4a54" stroke-width="2"/><rect x="18" y="2" width="32" height="17" rx="3" fill="#fff" stroke="#3f4a54" stroke-width="2"/><rect x="70" y="2" width="32" height="17" rx="3" fill="#fff" stroke="#3f4a54" stroke-width="2"/></svg>`;
+        } else if (type === 'leerlingBureau') {
             return `<svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="56" height="36" fill="none" stroke="#333" stroke-width="2"/><circle cx="45" cy="20" r="6" fill="none" stroke="#333" stroke-width="2"/></svg>`;
         } else if (type === 'tafel') {
             return `<svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="76" height="46" fill="none" stroke="#333" stroke-width="2"/></svg>`;
@@ -1356,34 +1515,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (toonLegende && gebruikteLegendeItems.size > 0) {
                 doc.addPage();
-                doc.setFontSize(18);
-                doc.text("Legende", A4_WIDTH / 2, MARGIN + 6, { align: 'center' });
-
-                const FONT_SIZE_PT = 16;
-                const PT_TO_MM = 0.352778;
-
-                doc.setFont("Arial", "normal");
-                doc.setFontSize(FONT_SIZE_PT);
-
                 const items = Array.from(gebruikteLegendeItems.entries()).filter(([type]) => !!legendeNamen[type]);
+                const kolommen = items.length > 4 ? 2 : 1;
+                const rijen = Math.ceil(items.length / kolommen);
+                const rijHoogte = 22;
+                const kaartBreedte = Math.min(A4_WIDTH - 30, kolommen === 2 ? 185 : 105);
+                const kaartHoogte = 31 + rijen * rijHoogte;
+                const kaartX = (A4_WIDTH - kaartBreedte) / 2;
+                const kaartY = Math.max(10, (A4_HEIGHT - kaartHoogte) / 2);
+                const binnenMarge = 10;
+                const kolomTussenruimte = 10;
+                const kolomBreedte = (kaartBreedte - binnenMarge * 2 - kolomTussenruimte * (kolommen - 1)) / kolommen;
+                const kleurVak = 8;
+                const icoonGrootte = 15;
 
-                const outerColCount = 2;
-                const rowH = 25;
-                const startY = MARGIN + 20;
-                const startX = MARGIN;
-                const outerColGap = 16;
-                const outerColWidth = (A4_WIDTH - 2*MARGIN - outerColGap) / outerColCount;
-                const colorColW = 12;
-                const iconColW  = 20;
-                const innerGap  = 4;
-                const colorBox   = 10;
-                const iconSizeMm = 18;
-                let col = 0, row = 0;
+                doc.setFillColor(248, 252, 255);
+                doc.setDrawColor(190, 211, 226);
+                doc.setLineWidth(0.6);
+                doc.roundedRect(kaartX, kaartY, kaartBreedte, kaartHoogte, 4, 4, 'FD');
+                doc.setFillColor(228, 242, 251);
+                doc.roundedRect(kaartX, kaartY, kaartBreedte, 23, 4, 4, 'F');
+                doc.setFillColor(228, 242, 251);
+                doc.rect(kaartX, kaartY + 17, kaartBreedte, 6, 'F');
+                doc.setDrawColor(190, 211, 226);
+                doc.line(kaartX, kaartY + 23, kaartX + kaartBreedte, kaartY + 23);
+                doc.setTextColor(23, 59, 97);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(18);
+                doc.text('Legende', A4_WIDTH / 2, kaartY + 15, { align: 'center' });
 
-                for (const [type, waarde] of items) {
-                    const baseX = startX + col * (outerColWidth + outerColGap);
-                    const baseY = startY + row * rowH;
-                    const centerY = baseY + (rowH / 2);
+                for (let index = 0; index < items.length; index++) {
+                    const [type, waarde] = items[index];
+                    const kolom = Math.floor(index / rijen);
+                    const rij = index % rijen;
+                    const baseX = kaartX + binnenMarge + kolom * (kolomBreedte + kolomTussenruimte);
+                    const centerY = kaartY + 27 + rij * rijHoogte + rijHoogte / 2;
 
                     const kleur = (waarde && waarde.kleur && type !== 'muur' && type !== 'raam') ? waarde.kleur : null;
                     if (kleur) {
@@ -1394,21 +1560,25 @@ document.addEventListener('DOMContentLoaded', () => {
                             r = (num >> 16) & 255; g = (num >> 8) & 255; b = num & 255;
                         }
                         doc.setFillColor(r,g,b);
-                        doc.rect(baseX, centerY - (colorBox / 2), colorBox, colorBox, 'F');
+                        doc.setDrawColor(110, 127, 140);
+                        doc.roundedRect(baseX, centerY - kleurVak / 2, kleurVak, kleurVak, 1, 1, 'FD');
+                    } else {
+                        doc.setFillColor(255, 255, 255);
+                        doc.setDrawColor(205, 217, 226);
+                        doc.roundedRect(baseX, centerY - kleurVak / 2, kleurVak, kleurVak, 1, 1, 'FD');
                     }
 
-                    const iconX = baseX + colorColW + innerGap;
-                    const iconY = centerY - (iconSizeMm / 2);
+                    const iconX = baseX + kleurVak + 4;
+                    const iconY = centerY - icoonGrootte / 2;
                     const iconDataUrl = await iconToDataUrl(type, 160);
-                    doc.addImage(iconDataUrl, 'PNG', iconX, iconY, iconSizeMm, iconSizeMm);
+                    doc.addImage(iconDataUrl, 'PNG', iconX, iconY, icoonGrootte, icoonGrootte);
 
-                    const textX = iconX + iconColW + innerGap;
-                    const textY = centerY + (FONT_SIZE_PT * PT_TO_MM) / 3.5;
+                    const textX = iconX + icoonGrootte + 4;
+                    const textY = centerY + 1.8;
+                    doc.setTextColor(32, 59, 87);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(11);
                     doc.text(legendeNamen[type] || type, textX, textY);
-                    
-                    row++;
-                    const maxRows = Math.floor((A4_HEIGHT - startY - MARGIN) / rowH);
-                    if (row >= maxRows) { row = 0; col++; if (col >= outerColCount) { doc.addPage(); col = 0; } }
                 }
             }
             doc.save(`plattegrond${toonLegende ? '_met_legende' : (toonNamen ? '_met_namen' : '')}.pdf`);
