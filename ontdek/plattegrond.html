@@ -42,6 +42,10 @@
             <button id="dupliceerKnop" class="btn btn-oranje">⧉ Dupliceren</button>
             <button id="spiegelKnop">⇋ Spiegelen</button>
             <button id="verwijderKnop" class="btn btn-rood-outline">✕ Verwijderen</button>
+            <button id="zoomUitKnop" title="Plattegrond kleiner tonen">−</button>
+            <button id="zoomResetKnop" title="Passend tonen">100%</button>
+            <button id="zoomInKnop" title="Plattegrond groter tonen">＋</button>
+            <button id="grootTonenKnop" class="btn btn-blauw">⛶ Groot tonen</button>
             <label><input type="checkbox" id="namenTonenToggle" checked/> Namen tonen</label>
             <label><input type="checkbox" id="legendeTonenToggle" checked/> Legende tonen</label>
         </div>
@@ -51,6 +55,7 @@
 
 <div id="bouw-werkbalk" class="werkbalk werkbalk-context">
     <strong>Bouwmodus:</strong>
+    <button id="meetWizardKnop" class="btn btn-groen">📏 Klas op maat tekenen</button>
     <button id="plaatsKlasKnop">Rechthoekige Klas</button>
     <button id="tekenMuurKnop">Muur per Muur</button>
     <div class="separator"></div>
@@ -58,7 +63,8 @@
     <button id="plaatsRaamKnop">Raam</button>
     <button id="plaatsGomKnop">Gom</button>
     <button id="plaatsPaalKnop">Steunpaal</button>
-    <label><input type="checkbox" id="rasterToggle"/> Raster Tonen</label>
+    <label><input type="checkbox" id="rasterToggle"/> Ruitjes tonen</label>
+    <small id="schaalInfo" class="schaal-info">1 ruitje = 0,5 m</small>
 </div>
 
 <div id="meubel-werkbalk" class="werkbalk werkbalk-context verborgen">
@@ -79,6 +85,14 @@
     <strong>Namenmodus:</strong>
     <input type="text" id="naamInput" placeholder="Typ naam..."/>
     <button id="naamToevoegenKnop">Naam Toevoegen aan Selectie</button>
+</div>
+
+<div id="maatPaneel" class="maat-paneel verborgen">
+    <div><strong>📐 Afmetingen van selectie</strong><small id="maatType">Selecteer een deur, raam of meubel.</small></div>
+    <label>Breedte (m)<input id="maatBreedte" type="number" min="0.05" max="30" step="0.01"></label>
+    <label>Diepte (m)<input id="maatDiepte" type="number" min="0.05" max="30" step="0.01"></label>
+    <label class="maat-vast"><input id="maatVast" type="checkbox" checked> Grootte vastzetten</label>
+    <button id="maatStandaardKnop" type="button">Standaardmaat</button>
 </div>
 
 <section class="download-panel">
@@ -146,6 +160,31 @@
     </div>
 </div>
 </main>
+
+<dialog id="meetWizard" class="meet-wizard">
+    <form id="meetWizardForm" method="dialog">
+        <div class="meet-wizard-kop"><div><span>📏</span><div><h2>Klas op maat tekenen</h2><p>Vul alleen in wat jullie al gemeten hebben.</p></div></div><button type="button" id="meetWizardSluiten" aria-label="Sluiten">×</button></div>
+        <section>
+            <h3>1. Buitenmuren</h3>
+            <div class="meet-grid">
+                <label>Lengte van de klas (m)<input id="klasLengte" type="number" min="1" max="50" step="0.01" value="12" required></label>
+                <label>Breedte van de klas (m)<input id="klasBreedte" type="number" min="1" max="50" step="0.01" value="8" required></label>
+            </div>
+            <p class="meet-tip">De tool tekent met <strong>1 ruitje = 0,5 meter</strong>. Bij een erg grote klas worden de ruitjes visueel kleiner zodat alles op het blad past.</p>
+        </section>
+        <section>
+            <label class="meet-check"><input id="heeftBinnenlokaal" type="checkbox"> Er is een lokaaltje in de klas gebouwd</label>
+            <div id="binnenlokaalVelden" class="meet-grid verborgen">
+                <label>Lengte lokaaltje (m)<input id="binnenLengte" type="number" min="0.5" max="30" step="0.01" value="3"></label>
+                <label>Breedte lokaaltje (m)<input id="binnenBreedte" type="number" min="0.5" max="30" step="0.01" value="2"></label>
+                <label>Afstand vanaf linkermuur (m)<input id="binnenLinks" type="number" min="0" max="50" step="0.01" value="0"></label>
+                <label>Afstand vanaf bovenmuur (m)<input id="binnenBoven" type="number" min="0" max="50" step="0.01" value="0"></label>
+            </div>
+        </section>
+        <div id="meetWizardFout" class="meet-fout" role="alert"></div>
+        <div class="meet-acties"><button type="button" id="meetWizardAnnuleren">Annuleren</button><button type="submit" class="btn btn-groen">Teken de klas</button></div>
+    </form>
+</dialog>
 
 <input type="file" id="json-file-input" accept=".json" style="display:none"/>
 
