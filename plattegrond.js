@@ -535,6 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else rebuildLegendFromCanvas();
             setCanvasColorsFromLegend(legendeTonenToggle.checked);
             canvas.renderAll();
+            requestAnimationFrame(() => requestAnimationFrame(pasCanvasInWerkruimte));
 
             // --- DE FIX ---
             // De veiligheidsvlag wordt pas hier uitgezet, nadat ALLE operaties klaar zijn.
