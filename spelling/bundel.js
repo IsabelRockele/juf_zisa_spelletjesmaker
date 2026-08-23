@@ -169,8 +169,11 @@ window.SpellingBundel = {
     const zb = window.SpellingZijbalk;
     const graad = zb ? zb.getActieveGraad() : 1;
     
-    // Globale lijntype uit zijbalk-knop
-    const lijntypeGlobaal = document.querySelector(".lijn-knop.actief")?.dataset.lijn || "vier";
+    // Lees de zichtbare globale opmaakkeuze. De generieke `.lijn-knop`
+    // selector kwam uit de oude UI en vond steeds de eerste, verborgen
+    // legacy-knop (`vier`), ongeacht wat de leerkracht bij Opmaak koos.
+    const lijntypeGlobaal = document.querySelector("#zb-lt-grid .zb-lt-knop.actief")?.dataset.lt || "type3";
+    const lijnhoogteGlobaal = document.querySelector("#zb-globale-hoogte .zb-hoogte-btn.actief")?.dataset.hoogte || "middel";
     
     // Bepaal initieel aantal woorden. Als de module een _maxPerNiveau-object
     // heeft (bv. OV10), gebruik dan dat voor dit specifieke niveau —
@@ -185,8 +188,8 @@ window.SpellingBundel = {
       niveaus: [niveau],
       aantalWoorden: initieelAantal,
       aantalZinnen: initieelAantal,    // ov06 gebruikt zinnen
-      lijnhoogte: oef.lijnhoogte || "middel",
-      lijntype: oef.lijntype || "type3",
+      lijnhoogte: lijnhoogteGlobaal,
+      lijntype: lijntypeGlobaal,
       ondertitel: ""
     };
     
