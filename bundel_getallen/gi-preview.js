@@ -154,9 +154,13 @@ window.GI_Preview = (() => {
     const start = parseInt($('#start').value, 10);
     const end   = parseInt($('#end').value,   10);
     const inp   = $('#dragList');
-    if (!inp || end <= start) return;
+    // Een number-input is tijdens het wissen/overschrijven kort leeg. In dat
+    // geval zijn start/end NaN. Zonder deze controle bleef de while-lus
+    // hieronder eindeloos dezelfde NaN toevoegen en bevroor de hele tool.
+    if (!inp || !Number.isFinite(start) || !Number.isFinite(end) || end <= start) return;
+    const wanted = Math.min(3, end - start + 1);
     const set = new Set();
-    while (set.size < 3) {
+    while (set.size < wanted) {
       set.add(Math.floor(Math.random() * (end - start + 1)) + start);
     }
     inp.value = Array.from(set).sort((a, b) => a - b).join(', ');
