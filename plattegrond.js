@@ -19,8 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
         raam: "Raam",
         muur: "Muur",
         kring: "Kring",
+        kringZitbank: "Zitbank voor kring",
         tafel: "Tafel"
     };
+
+    // Los geplaatste zitbanken vormen samen één kring in de legende.
+    const normaliseerLegendeType = type => type === 'kringZitbank' ? 'kring' : type;
 
     // --- HELPER: INTERACTIEVE OBJECTEN ---
     function maakInteractief(obj) {
@@ -129,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let metrischeModusActief = false;
     const meubelMaten = {
         schoolbank: [0.7, 0.5], dubbeleSchoolbank: [1.2, 0.5], bureau: [1.4, 0.7], kast: [1.0, 0.45],
-        wastafel: [0.6, 0.5], kring: [3.0, 3.0], leerlingBureau: [0.7, 0.5],
+        wastafel: [0.6, 0.5], kring: [3.0, 3.0], kringZitbank: [1.2, 0.4], leerlingBureau: [0.7, 0.5],
         tafel: [1.6, 0.8], schoolbord: [2.4, 0.15], schoolbordFlappen: [3.0, 0.15],
         deur: [0.9, 0.9], raam: [1.5, 0.1]
     };
@@ -307,8 +311,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setCanvasColorsFromLegend(show) {
         canvas.forEachObject(obj => {
-            const type = obj.voorwerpType;
-            if (!type || obj.isNaam) return;
+            const objectType = obj.voorwerpType;
+            if (!objectType || obj.isNaam) return;
+            const type = normaliseerLegendeType(objectType);
 
             const legendInfo = gebruikteLegendeItems.get(type);
             const color = (legendInfo && legendInfo.kleur) ? legendInfo.kleur : null;
@@ -1145,6 +1150,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (!metrischeModusActief) kring.scaleToWidth(80);
             maakInteractief(kring); renderCallback(kring);
+        } else if (type === 'kringZitbank') {
+            const zitting = new fabric.Rect({
+                left: 0, top: 0, width: 120, height: 40, rx: 5, ry: 5,
+                fill: '#fff', standaardVulling: '#fff', stroke: '#3f4a54',
+                strokeWidth: 2, strokeUniform: true
+            });
+            const middenLijn = new fabric.Line([60, 3, 60, 37], {
+                stroke: '#a1abb4', strokeWidth: 1.2, strokeUniform: true,
+                nietInkleuren: true
+            });
+            const zitbank = new fabric.Group([zitting, middenLijn], {
+                left: 100, top: 100, voorwerpType: type, originX: 'left', originY: 'top', objectCaching: false
+            });
+            if (!metrischeModusActief) zitbank.scaleToWidth(80);
+            maakInteractief(zitbank); renderCallback(zitbank);
         } else if (type === 'leerlingBureau') {
             const bureauRect = new fabric.Rect({ width: 60, height: 40, fill: 'transparent', stroke: '#333', strokeWidth: 1, originX: 'center', originY: 'center' });
             const stoelCirkel = new fabric.Circle({ radius: 8, fill: 'transparent', stroke: '#333', strokeWidth: 1, left: 20, top: -10, originX: 'center', originY: 'center' });
@@ -1240,9 +1260,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function rebuildLegendFromCanvas() {
         gebruikteLegendeItems.clear();
         const defaultKleuren = ['#fff', 'transparent', '#4a536b', '#5c6784', '#e6e6e6', '#f2f2f2', 'darkgray', '', 'black', '#333'];
+        const heeftEchteLegendeKleur = item => {
+            if (!item || item.nietInkleuren || item.standaardVulling === undefined) return false;
+            return String(item.fill ?? '') !== String(item.standaardVulling ?? '');
+        };
         canvas.forEachObject(obj => {
-            const type = obj.voorwerpType;
-            if (!type || obj.isNaam) return;
+            const objectType = obj.voorwerpType;
+            if (!objectType || obj.isNaam) return;
+            const type = normaliseerLegendeType(objectType);
             if (!gebruikteLegendeItems.has(type)) gebruikteLegendeItems.set(type, { kleur: null });
             let kleur = null;
             if (obj.isType('image') && obj.filters && obj.filters.length > 0) {
@@ -1256,7 +1281,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (item.isType('image') && item.filters && item.filters.length > 0) {
                         return item.filters.some(f => f.type === 'BlendColor');
                     }
-                    return item.fill && !defaultKleuren.includes(item.fill);
+                    // Donkere vaste details (bv. kasthandvatten en meubellijnen)
+                    // zijn geen legendekleur. Alleen een vulling die werkelijk
+                    // afwijkt van de opgeslagen standaardvulling telt mee.
+                    return heeftEchteLegendeKleur(item);
                 });
                 if (gekleurdItem) {
                     if (gekleurdItem.isType('image')) {
@@ -1266,7 +1294,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         kleur = gekleurdItem.fill;
                     }
                 }
-            } else if (obj.fill && !defaultKleuren.includes(obj.fill)) {
+            } else if (heeftEchteLegendeKleur(obj)) {
                 kleur = obj.fill;
             }
             if (type === 'muur' || type === 'raam') kleur = null;
@@ -1294,7 +1322,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modus !== 'legende' || !actieveLegendeType || !o.target) return;
         const obj = o.target.group ? o.target.group : o.target;
         const kleur = actieveLegendeKleur;
-        let typeMatch = (obj.voorwerpType === actieveLegendeType);
+        let typeMatch = (normaliseerLegendeType(obj.voorwerpType) === actieveLegendeType);
         if (actieveLegendeType === 'schoolbord' && obj.voorwerpType === 'schoolbordFlappen') typeMatch = true;
         if (typeMatch) {
             const kleurItem = (item) => {
@@ -1315,7 +1343,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (obj.voorwerpType === 'deur' && actieveLegendeType === 'deur') kleurItem(obj);
                 else obj.getObjects().forEach(item => kleurItem(item));
             } else kleurItem(obj);
-            const type = obj.voorwerpType;
+            const type = normaliseerLegendeType(obj.voorwerpType);
             const setKleur = (type === 'muur' || type === 'raam') ? null : kleur;
             gebruikteLegendeItems.set(type, { kleur: setKleur });
             if (!legendeTonenToggle.checked) { setCanvasColorsFromLegend(false); }
