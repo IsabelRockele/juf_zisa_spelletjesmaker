@@ -25,6 +25,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Los geplaatste zitbanken vormen samen één kring in de legende.
     const normaliseerLegendeType = type => type === 'kringZitbank' ? 'kring' : type;
+    const kleurNaarRgba = kleur => {
+        if (kleur === undefined || kleur === null || kleur === '') return null;
+        try {
+            const bron = new fabric.Color(String(kleur)).getSource();
+            return Array.isArray(bron) && bron.length >= 3 ? bron : null;
+        } catch (_) {
+            return null;
+        }
+    };
+    const kleurenZijnGelijk = (a, b) => {
+        const kleurA = kleurNaarRgba(a);
+        const kleurB = kleurNaarRgba(b);
+        if (!kleurA || !kleurB) return String(a ?? '') === String(b ?? '');
+        return kleurA.every((waarde, index) => waarde === kleurB[index]);
+    };
 
     // --- HELPER: INTERACTIEVE OBJECTEN ---
     function maakInteractief(obj) {
@@ -236,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Houd het volledige tekenblad zichtbaar zonder een scrollbar in de werkzone.
+    let canvasResizeFrame = null;
     function pasCanvasInWerkruimte() {
         const werkruimte = document.querySelector('.workspace .pagina-container');
         const canvasHost = canvas.wrapperEl?.parentElement;
@@ -246,8 +262,12 @@ document.addEventListener('DOMContentLoaded', () => {
             element !== canvasHost && !element.classList.contains('verborgen')
         );
         const zijbreedte = zijpanelen.reduce((totaal, element) => totaal + element.offsetWidth + 18, 0);
-        const beschikbareBreedte = Math.max(260, werkruimte.clientWidth - zijbreedte - 24);
-        const beschikbareHoogte = Math.max(320, werkruimte.clientHeight - 32);
+        // getBoundingClientRect blijft gelijk wanneer een scrollbar verschijnt.
+        // clientWidth/clientHeight wisselen dan wel en konden het canvas na een
+        // JSON-import eindeloos laten groeien en krimpen.
+        const werkruimteRect = werkruimte.getBoundingClientRect();
+        const beschikbareBreedte = Math.max(260, Math.floor(werkruimteRect.width) - zijbreedte - 48);
+        const beschikbareHoogte = Math.max(320, Math.floor(werkruimteRect.height) - 56);
         const basisBreedte = canvas.getWidth();
         const basisHoogte = canvas.getHeight();
         const passendeSchaal = Math.min(1, beschikbareBreedte / basisBreedte, beschikbareHoogte / basisHoogte);
@@ -255,16 +275,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const zichtbareBreedte = Math.round(basisBreedte * schaal);
         const zichtbareHoogte = Math.round(basisHoogte * schaal);
 
-        fabricWrapper.style.width = `${zichtbareBreedte}px`;
-        fabricWrapper.style.height = `${zichtbareHoogte}px`;
+        const breedteCss = `${zichtbareBreedte}px`;
+        const hoogteCss = `${zichtbareHoogte}px`;
+        fabricWrapper.style.width = breedteCss;
+        fabricWrapper.style.height = hoogteCss;
         fabricWrapper.querySelectorAll('canvas').forEach(element => {
-            element.style.width = `${zichtbareBreedte}px`;
-            element.style.height = `${zichtbareHoogte}px`;
+            element.style.width = breedteCss;
+            element.style.height = hoogteCss;
         });
         canvasHost.style.width = `${zichtbareBreedte + 24}px`;
         canvasHost.style.height = `${zichtbareHoogte + 24}px`;
         workspace.classList.toggle('zoom-modus', weergaveZoom > 1.001);
         canvas.calcOffset();
+    }
+
+    function planCanvasAanpassing() {
+        if (canvasResizeFrame !== null) return;
+        canvasResizeFrame = requestAnimationFrame(() => {
+            canvasResizeFrame = null;
+            pasCanvasInWerkruimte();
+        });
     }
 
     function stelWeergaveZoomIn(nieuweZoom) {
@@ -293,9 +323,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const werkruimteElement = document.querySelector('.workspace .pagina-container');
     if (werkruimteElement && 'ResizeObserver' in window) {
-        new ResizeObserver(() => pasCanvasInWerkruimte()).observe(werkruimteElement);
+        new ResizeObserver(planCanvasAanpassing).observe(werkruimteElement);
     }
-    window.addEventListener('resize', pasCanvasInWerkruimte);
+    window.addEventListener('resize', planCanvasAanpassing);
 
     // --- LEGENDE KLEUREN TOEPASSEN / VERWIJDEREN ---
     function verzamelZichtbareOnderdelen(obj) {
@@ -1259,7 +1289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const defaultKleuren = ['#fff', 'transparent', '#4a536b', '#5c6784', '#e6e6e6', '#f2f2f2', 'darkgray', '', 'black', '#333'];
         const heeftEchteLegendeKleur = item => {
             if (!item || item.nietInkleuren || item.standaardVulling === undefined) return false;
-            return String(item.fill ?? '') !== String(item.standaardVulling ?? '');
+            return !kleurenZijnGelijk(item.fill, item.standaardVulling);
         };
         canvas.forEachObject(obj => {
             const objectType = obj.voorwerpType;
@@ -1364,6 +1394,7 @@ document.addEventListener('DOMContentLoaded', () => {
     legendeTonenToggle.addEventListener('change', (e) => {
         setCanvasColorsFromLegend(e.target.checked);
         updateLegendeWeergave();
+        planCanvasAanpassing();
     });
     function verwijderSelectie() {
         const sel = canvas.getActiveObjects(); if (!sel || sel.length === 0) return;
@@ -1579,12 +1610,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const kleur = (waarde && waarde.kleur && type !== 'muur' && type !== 'raam') ? waarde.kleur : null;
                     if (kleur) {
-                        let r=255,g=235,b=59;
-                        if (kleur.startsWith('#')) {
-                            const hex = kleur.length===4 ? `#${kleur[1]}${kleur[1]}${kleur[2]}${kleur[2]}${kleur[3]}${kleur[3]}` : kleur;
-                            const num = parseInt(hex.slice(1), 16);
-                            r = (num >> 16) & 255; g = (num >> 8) & 255; b = num & 255;
-                        }
+                        const [r, g, b] = kleurNaarRgba(kleur) || [255, 255, 255];
                         doc.setFillColor(r,g,b);
                         doc.setDrawColor(110, 127, 140);
                         doc.roundedRect(baseX, centerY - kleurVak / 2, kleurVak, kleurVak, 1, 1, 'FD');
