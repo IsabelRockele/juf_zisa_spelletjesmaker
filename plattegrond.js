@@ -1240,13 +1240,10 @@ document.addEventListener('DOMContentLoaded', () => {
             itemDiv.className = 'legende-weergave-item';
             const kleurDiv = document.createElement('div');
             kleurDiv.className = 'legende-weergave-kleur';
-            if (kleur && type !== 'muur' && type !== 'raam') {
-                kleurDiv.style.backgroundColor = kleur;
-                kleurDiv.style.visibility = 'visible';
-            } else {
-                kleurDiv.style.backgroundColor = 'transparent';
-                kleurDiv.style.visibility = 'hidden';
-            }
+            // Ook zonder gekozen kleur blijft het vakje zichtbaar. Zo kan een
+            // leerling de afgedrukte legende zelf met kleurpotloden invullen.
+            kleurDiv.style.backgroundColor = kleur || '#fff';
+            kleurDiv.style.visibility = 'visible';
             const icoonEl = maakIcoonElement(type);
             const tekstSpan = document.createElement('span');
             tekstSpan.className = 'legende-weergave-tekst';
