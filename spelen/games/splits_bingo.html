@@ -325,14 +325,50 @@
        function generateTrackData() {
             const trackData = [];
             const availableAnswers = [];
+            const aantalBloemen = pathOrder.length - Object.keys(specialSpaces).length;
+            const schud = lijst => {
+                for (let i = lijst.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [lijst[i], lijst[j]] = [lijst[j], lijst[i]];
+                }
+                return lijst;
+            };
+            const gewoneSplitsingenPerTotaal = new Map();
+            const nulSplitsingen = [];
+            for (let total = 2; total <= targetNumber; total++) {
+                const splitsingen = [];
+                for (let given = 1; given < total; given++) {
+                    splitsingen.push({ total, given, answer: total - given });
+                }
+                gewoneSplitsingenPerTotaal.set(total, schud(splitsingen));
+                nulSplitsingen.push({ total, given: 0, answer: total });
+                nulSplitsingen.push({ total, given: total, answer: 0 });
+            }
+            const aantalNulsplitsingen = Math.max(1, Math.floor(aantalBloemen / 10));
+            const gekozenSplitsingen = [];
+            const totalen = [...gewoneSplitsingenPerTotaal.keys()];
+            while (gekozenSplitsingen.length < aantalBloemen - aantalNulsplitsingen) {
+                for (const total of schud([...totalen])) {
+                    let voorraad = gewoneSplitsingenPerTotaal.get(total);
+                    if (!voorraad.length) {
+                        voorraad = schud(Array.from({ length: total - 1 }, (_, i) => ({
+                            total, given: i + 1, answer: total - i - 1
+                        })));
+                        gewoneSplitsingenPerTotaal.set(total, voorraad);
+                    }
+                    gekozenSplitsingen.push(voorraad.pop());
+                    if (gekozenSplitsingen.length === aantalBloemen - aantalNulsplitsingen) break;
+                }
+            }
+            gekozenSplitsingen.push(...schud(nulSplitsingen).slice(0, aantalNulsplitsingen));
+            schud(gekozenSplitsingen);
+
             pathOrder.forEach((domIndex, pathIndex) => {
                 let spaceData = { domIndex };
                 if (specialSpaces[pathIndex]) {
                     spaceData = {...spaceData, ...specialSpaces[pathIndex] };
-                } else { 
-                    const total = Math.floor(Math.random() * (targetNumber - 1)) + 2; 
-                    const given = Math.floor(Math.random() * (total + 1)); 
-                    const answer = total - given;
+                } else {
+                    const { total, given, answer } = gekozenSplitsingen.pop();
                     spaceData = {...spaceData, type: 'flower', question: `${given} + ? = ${total}`, answer: answer };
                     availableAnswers.push(answer);
                 }

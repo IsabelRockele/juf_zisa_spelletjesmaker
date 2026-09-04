@@ -25,21 +25,56 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 function genereerOefeningen() {
-  oefeningen = [];
-  for (let i = 0; i < 20; i++) {
-    const getal = Math.floor(Math.random() * maxGetal) + 1;
-    const deel1 = Math.floor(Math.random() * (getal + 1));
-    const deel2 = getal - deel1;
-    const vraagLinks = Math.random() < 0.5;
+  const schud = lijst => {
+    for (let i = lijst.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [lijst[i], lijst[j]] = [lijst[j], lijst[i]];
+    }
+    return lijst;
+  };
+  const gewoneSplitsingenPerTotaal = new Map();
+  const nulSplitsingen = [];
 
-    oefeningen.push({
-      totaal: getal,
+  for (let totaal = 2; totaal <= maxGetal; totaal++) {
+    const splitsingen = [];
+    for (let deel1 = 1; deel1 < totaal; deel1++) {
+      splitsingen.push({ totaal, deel1, deel2: totaal - deel1 });
+    }
+    gewoneSplitsingenPerTotaal.set(totaal, schud(splitsingen));
+    nulSplitsingen.push({ totaal, deel1: 0, deel2: totaal });
+    nulSplitsingen.push({ totaal, deel1: totaal, deel2: 0 });
+  }
+
+  // Hoogstens twee nulsplitsingen per spel; de overige oefeningen komen
+  // gespreid uit alle gekozen totalen en alle mogelijke niet-nulsplitsingen.
+  const gekozen = [];
+  const totalen = [...gewoneSplitsingenPerTotaal.keys()];
+  while (gekozen.length < 18) {
+    for (const totaal of schud([...totalen])) {
+      let voorraad = gewoneSplitsingenPerTotaal.get(totaal);
+      if (!voorraad.length) {
+        voorraad = schud(Array.from({ length: totaal - 1 }, (_, i) => ({
+          totaal, deel1: i + 1, deel2: totaal - i - 1
+        })));
+        gewoneSplitsingenPerTotaal.set(totaal, voorraad);
+      }
+      gekozen.push(voorraad.pop());
+      if (gekozen.length === 18) break;
+    }
+  }
+  gekozen.push(...schud(nulSplitsingen).slice(0, 2));
+  schud(gekozen);
+
+  oefeningen = gekozen.map(({ totaal, deel1, deel2 }) => {
+    const vraagLinks = Math.random() < 0.5;
+    return {
+      totaal,
       bekend: vraagLinks ? deel2 : deel1,
       onbekend: vraagLinks ? deel1 : deel2,
       vraagLinks: vraagLinks,
       origineel: true
-    });
-  }
+    };
+  });
 }
 
 function toonVolgendeOefening() {
