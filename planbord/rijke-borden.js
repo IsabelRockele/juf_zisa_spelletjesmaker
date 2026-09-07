@@ -18,8 +18,9 @@
   }
 
   function bewerkbaar(element, object, sleutel, bewerken, wijzig) {
+    const grootteSleutel = `${sleutel}Grootte`;
+    if (object[grootteSleutel]) element.style.fontSize = `${object[grootteSleutel]}px`;
     if (!bewerken) return element;
-    const grootteSleutel=`${sleutel}Grootte`;if(object[grootteSleutel])element.style.fontSize=`${object[grootteSleutel]}px`;
     element.contentEditable = 'true';
     element.spellcheck = true;
     element.title = 'Klik om de tekst te wijzigen';
