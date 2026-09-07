@@ -608,6 +608,7 @@
 
   window.renderRijkBord = function (win, bord, bewerken, wijzig) {
     const doc=win.document, canvas=doc.getElementById('bord-canvas'); if(!canvas||!bord.rijk)return;
+    doc.querySelector('.tekstgereedschap')?.remove();
     injecteerStijl(doc); canvas.querySelectorAll('.rijk-bord').forEach(el=>el.remove());
     const root=node(doc,'div',`rijk-bord rijk-${bord.rijk.type}`);canvas.appendChild(root);
     const opnieuw=()=>window.renderRijkBord(win,bord,bewerken,wijzig);
