@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#5b43d6">
+  <title>De Splitsmachine — Juf Zisa</title>
+  <link rel="icon" href="../../../start_afbeeldingen/Zisa_spelgenerator-32.png" type="image/png">
+  <link rel="stylesheet" href="style.css?v=17">
+  <script type="module" src="../zisa-play-guard.js?v=7"></script>
+</head>
+<body class="bee-theme">
+  <header class="topbar">
+    <a class="back" id="backLink" href="../start_leerjaar1.html">← Terug</a>
+    <div class="brand"><span>⚙️</span><div><strong>De Splitsmachine</strong><small>Stop het juiste getal in de machine</small></div></div>
+    <button class="sound-button" id="soundButton" type="button" aria-pressed="true" title="Geluid aan of uit">🔊</button>
+  </header>
+
+  <main>
+    <section class="settings-card" id="settingsPanel" aria-labelledby="settingsTitle">
+      <div class="settings-intro">
+        <span class="eyebrow">KIES JE OPDRACHT</span>
+        <h1 id="settingsTitle">Hoe wil je splitsen?</h1>
+        <p>Stel de machine in en kies zelf hoe lang je wilt spelen.</p>
+      </div>
+
+      <div class="settings-grid">
+        <fieldset>
+          <legend>1. Tot hoeveel?</legend>
+          <div class="choices four" id="levelChoices">
+            <label><input type="radio" name="level" value="5"><span><b>tot 5</b><small>eerste splitsingen</small></span></label>
+            <label><input type="radio" name="level" value="10" checked><span><b>tot 10</b><small>vriendjes van 10</small></span></label>
+            <label><input type="radio" name="level" value="20"><span><b>tot 20</b><small>met of zonder brug</small></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset id="bridgeField" hidden>
+          <legend>2. Welke splitsingen?</legend>
+          <div class="choices" id="bridgeChoices"></div>
+          <p class="field-help" id="bridgeHelp"></p>
+        </fieldset>
+
+        <fieldset>
+          <legend><span id="positionStep">2.</span> Welk vak is leeg?</legend>
+          <div class="choices position-choices">
+            <label><input type="radio" name="position" value="parts"><span><i class="choice-split parts-icon"><em></em><em></em><em></em></i><b>Links en rechts</b><small>een deel onderaan is leeg</small></span></label>
+            <label><input type="radio" name="position" value="total"><span><i class="choice-split total-icon"><em></em><em></em><em></em></i><b>Het totaal</b><small>het vak bovenaan is leeg</small></span></label>
+            <label><input type="radio" name="position" value="mixed" checked><span><i class="choice-split mixed-icon"><em></em><em></em><em></em></i><b>Alles door elkaar</b><small>boven of onder is leeg</small></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Hoeveel oefeningen?</legend>
+          <div class="choices round-choices">
+            <label><input type="radio" name="rounds" value="10" checked><span><b>10</b><small>een korte ronde</small></span></label>
+            <label><input type="radio" name="rounds" value="20"><span><b>20</b><small>goed dooroefenen</small></span></label>
+            <label><input type="radio" name="rounds" value="30"><span><b>30</b><small>een echte uitdaging</small></span></label>
+          </div>
+        </fieldset>
+      </div>
+
+      <button class="primary start" id="startButton" type="button">Start de machine <span>▶</span></button>
+    </section>
+
+    <section class="game" id="gamePanel" hidden aria-live="polite">
+      <div class="game-toolbar">
+        <button class="secondary" id="changeButton" type="button">← Andere keuze</button>
+        <div class="round-status"><span id="roundLabel">Opdracht 1 van 10</span><div class="progress"><i id="progressBar"></i></div></div>
+        <div class="score" title="Aantal juiste antwoorden">⭐ <b id="scoreValue">0</b></div>
+      </div>
+
+      <div class="machine-wrap">
+        <div class="machine" id="machine">
+          <button class="machine-lever" id="machineLever" type="button" disabled aria-label="Trek de hendel voor de volgende oefening"><span class="lever-stick"></span><span class="lever-knob"></span><b>VOLGENDE</b></button>
+          <img class="theme-mascot" id="themeMascot" src="bibi-splitsmachine.png" alt="Bibi het bijtje">
+          <div class="machine-lights" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="moving-gears" aria-hidden="true"><i>⚙</i><i>⚙</i></div>
+          <div class="machine-title">SPLIT-O-MATIC <span>3000</span></div>
+          <p class="instruction" id="instruction">Vul het lege vak en trek aan de hendel!</p>
+
+          <div class="number-bond" aria-label="Splitsing">
+            <div class="number-cell total" id="totalCell"></div>
+            <svg viewBox="0 0 260 115" role="presentation"><path d="M130 4v34M130 38L52 105M130 38l78 67"/></svg>
+            <div class="number-cell part left" id="leftCell"></div>
+            <div class="number-cell part right" id="rightCell"></div>
+          </div>
+
+          <form class="answer-area" id="answerForm">
+            <label for="answerInput">Vul het gele vak in</label>
+            <div class="answer-row">
+              <input id="answerInput" type="text" inputmode="numeric" autocomplete="off" maxlength="3" aria-describedby="feedback">
+              <button class="primary" id="checkButton" type="submit">Controleer ✓</button>
+            </div>
+            <div class="feedback" id="feedback" role="status"></div>
+          </form>
+
+          <div class="keypad" id="keypad" aria-label="Cijfertoetsen">
+            <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
+            <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>
+            <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button>
+            <button type="button" class="erase" data-key="back" aria-label="Wis laatste cijfer">⌫</button><button type="button" data-key="0">0</button><button type="button" class="ok" data-key="ok" aria-label="Controleer">✓</button>
+          </div>
+        </div>
+
+        <aside class="energy-card">
+          <h2>Machine-energie</h2>
+          <div class="energy-tube"><div class="energy-fill" id="energyFill"></div><span>⚡</span></div>
+          <div class="bolts" id="bolts" aria-label="Voortgang"></div>
+          <p id="encouragement">Daar gaan we!</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="finish-card" id="finishPanel" hidden>
+      <div class="energy-orb">⚡</div>
+      <img class="finish-mascot" id="finishMascot" src="../leerjaar1_afbeeldingen/juichende_bibi.png" alt="Blije mascotte">
+      <span class="eyebrow">MISSIE GESLAAGD</span>
+      <h1>De splitsmachine zit vol energie!</h1>
+      <p id="finishText">Je loste alle splitsingen op. Knap gerekend!</p>
+      <div class="finish-badge" id="finishBadge">Splitskampioen</div>
+      <div class="finish-stars">⭐ ⭐ ⭐</div>
+      <div class="finish-actions"><button class="primary" id="againButton" type="button">Nog eens spelen</button><button class="secondary" id="finishChangeButton" type="button">Andere keuze</button></div>
+    </section>
+  </main>
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+  <script src="app.js?v=10"></script>
+</body>
+</html>
