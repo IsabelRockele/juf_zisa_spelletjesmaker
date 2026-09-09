@@ -273,10 +273,13 @@
       .programma-linkicoon { position:absolute; right:10px; top:9px; display:grid!important; place-items:center; width:27px; height:27px; border-radius:50%; color:#fff!important; background:#397d70; font-size:14px; box-shadow:0 2px 7px rgba(33,89,77,.25); }
       .programma-kiezer { position:fixed; z-index:99999; inset:0; display:grid; place-items:center; padding:24px; background:rgba(31,25,55,.48); }
       .programma-kiezer-paneel { width:min(850px,95vw); max-height:86vh; overflow:auto; padding:20px; border-radius:24px; background:#fff; box-shadow:0 22px 70px rgba(25,18,57,.4); }
+      .programma-keuzelaag { position:fixed; z-index:99999; inset:0; display:grid; place-items:center; padding:24px; background:rgba(31,25,55,.48); }
+      .programma-keuzelaag > .programma-kiezer { position:static; display:block; width:min(850px,95vw); max-height:86vh; overflow:auto; padding:20px; border-radius:24px; background:#fff; box-shadow:0 22px 70px rgba(25,18,57,.4); }
       .programma-kiezer-kop { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-      .programma-kiezer-kop h3 { margin:0; color:#4f3e9d; font-size:25px; }.programma-kiezer-kop button { width:40px; height:40px; border:0; border-radius:50%; color:#fff; background:#6653bd; font-size:23px; }
+      .programma-kiezer-kop h2,.programma-kiezer-kop h3 { margin:0; color:#4f3e9d; font-size:25px; }.programma-kiezer-kop button { width:40px; height:40px; border:0; border-radius:50%; color:#fff; background:#6653bd; font-size:23px; }
       .programma-zoeken { width:100%; margin-bottom:13px; padding:12px 15px; border:2px solid #d9d2ef; border-radius:13px; font:inherit; font-size:16px; }
       .programma-keuze-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+      .programma-keuzegrid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
       .programma-keuze { min-height:125px; border:2px solid transparent; border-radius:15px; padding:8px; color:#403955; background:#f6f4fc; font-weight:900; cursor:pointer; }
       .programma-keuze:hover { border-color:#6653bd; }.programma-keuze img { display:block; width:78px; height:78px; margin:auto; object-fit:contain; }
       .programma-livebediening { grid-column:1/-1; display:flex; align-items:center; justify-content:center; gap:5px; margin-top:5px; }
@@ -334,6 +337,7 @@
       const tekst = node(doc, 'div', 'routine-tekst');
       tekst.append(bewerkbaar(node(doc, 'strong', '', item.titel), item, 'titel', bewerken, wijzig), bewerkbaar(node(doc, 'span', '', item.tekst), item, 'tekst', bewerken, wijzig));
       const icoonGrootte=item.icoonGrootte||108,stap=node(doc,'span','stapnummer',`stap ${index+1}`),beeld=node(doc,bewerken?'button':'span','routine-icoonknop'),routineIcoon=icoon(doc,item.icoon);stap.style.fontSize=`${item.stapGrootte||15}px`;rij.style.gridTemplateColumns=`72px ${Math.max(112,icoonGrootte+8)}px 1fr`;rij.style.minHeight=`${Math.max(125,icoonGrootte+17)}px`;beeld.style.width=`${icoonGrootte+8}px`;beeld.style.height=`${icoonGrootte+8}px`;routineIcoon.style.setProperty('width',`${icoonGrootte}px`,'important');routineIcoon.style.setProperty('height',`${icoonGrootte}px`,'important');if(bewerken){beeld.type='button';beeld.title='Afbeelding, tekst en groottes aanpassen';beeld.onclick=()=>openRoutineKiezer(item);}beeld.appendChild(routineIcoon);
+      if(bewerken){stap.title='Klik om het stapnummer groter of kleiner te maken';stap.style.cursor='pointer';stap.onclick=e=>{e.stopPropagation();toonTekstgereedschap(stap,item,'stapGrootte',wijzig);};}
       rij.append(stap,beeld,tekst);
       const wis = verwijderKnop(doc, () => { data.items.splice(index, 1); wijzig(); opnieuw(); }, bewerken);
       if (wis) rij.appendChild(wis);
