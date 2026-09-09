@@ -245,7 +245,7 @@
       body.proef-editor:not(.in-presentatie) { overflow:auto !important; }
       body.proef-editor .werkruimte { height: 100vh !important; }
       body.proef-editor:not(.in-presentatie) .werkruimte { overflow:auto !important; }
-      body.proef-editor .zijpaneel { display: none; width: 290px; min-width: 290px; box-shadow: 8px 0 22px rgba(42,34,88,.12); z-index: 20; }
+      body.proef-editor .zijpaneel { position:relative; display:none; width:290px; min-width:290px; box-shadow:8px 0 22px rgba(42,34,88,.12); z-index:20; }
       body.proef-editor .zijpaneel.proef-paneel-open { display: flex; }
       body.proef-editor .proef-paneel-sluiten { position:absolute; z-index:5; right:10px; top:9px; width:38px; height:38px; border:0; border-radius:50%; color:#fff; background:#c94f68; font-size:25px; font-weight:900; cursor:pointer; }
       body.proef-editor .zijpaneel .tabs { padding-right:48px; }

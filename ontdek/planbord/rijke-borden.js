@@ -113,6 +113,7 @@
       .stappenkiezer { position:absolute; z-index:90; left:270px; bottom:24px; }
       .stappenkiezer summary { list-style:none; padding:10px 14px; border-radius:11px; color:#fff; background:#4f3e9d; font-weight:900; cursor:pointer; box-shadow:0 5px 15px rgba(40,30,90,.25); }
       .stappenkiezer > div { position:absolute; left:0; bottom:48px; display:grid; grid-template-columns:repeat(5,130px); gap:7px; padding:10px; border-radius:16px; background:#fff; box-shadow:0 12px 35px rgba(35,25,80,.3); }
+      .stappenkiezer .stappenkiezer-sluiten { position:absolute; z-index:2; right:-14px; top:-14px; width:36px; height:36px; min-height:0; padding:0; border:2px solid #fff; border-radius:50%; color:#fff; background:#c94f68; font-size:23px; font-weight:900; box-shadow:0 4px 12px rgba(35,25,80,.3); cursor:pointer; }
       .stappenkiezer button { min-height:95px; border:1px solid #ddd7f3; border-radius:11px; padding:5px; color:#4d4568; background:#f8f7fd; font-size:11px; font-weight:800; }
       .stappenkiezer img { display:block; width:62px; height:62px; margin:auto; object-fit:contain; }
       .ochtend-zij { display:grid; grid-template-rows:1fr 1fr; gap:18px; }
@@ -347,6 +348,7 @@
     grid.append(datum, routines); root.appendChild(grid);
     if(bewerken){const woorden=node(doc,'button','woordenknop',data.toonTekst?'Woorden verbergen':'Woorden tonen');woorden.type='button';woorden.onclick=()=>{data.toonTekst=!data.toonTekst;wijzig();opnieuw();};root.appendChild(woorden);}
     if(bewerken){const kiezer=node(doc,'details','stappenkiezer');const sam=node(doc,'summary','', '+ Kies een stap');const bak=node(doc,'div');const keuzes=[['brooddoos-broodbak','Brooddoos','Leg je brooddoos in de broodbak'],['drinkbus-vaste-plek','Drinkbus','Zet je drinkbus op de vaste plek'],['snack-fruit-bak','Koek en fruit','Leg je koek en fruit in hun bak'],['agendamap-tafel','Agendamap','Leg je agendamap op tafel'],['brieven-afgeven','Brieven','Geef je brieven af'],['huistaak-afgeven','Huistaak','Geef je huistaak af'],['boekentas-opbergen','Boekentas','Berg je boekentas op'],['stille-dagstarter','Stille dagstarter','Begin stil aan de dagstarter'],['lezen','Lezen in boekje','Lees stil in je boekje'],['naar-de-kring','Naar de kring','Ga rustig in de kring zitten']];keuzes.forEach(([icon,titelTekst,uitleg])=>{const knop=node(doc,'button');knop.type='button';knop.append(icoon(doc,icon),node(doc,'span','',titelTekst));knop.onclick=()=>{data.items.push({icoon:icon,titel:titelTekst,tekst:uitleg});wijzig();opnieuw();};bak.appendChild(knop);});kiezer.append(sam,bak);root.appendChild(kiezer);}
+    if(bewerken){const kiezer=root.querySelector('.stappenkiezer'),bak=kiezer?.querySelector(':scope > div');if(bak){const sluit=node(doc,'button','stappenkiezer-sluiten','×');sluit.type='button';sluit.title='Stappen sluiten';sluit.setAttribute('aria-label','Stappen sluiten');sluit.onclick=e=>{e.preventDefault();e.stopPropagation();kiezer.open=false;};bak.prepend(sluit);}}
   }
 
   function maakWelkomTimer(doc, root, data, bewerken, wijzig) {
