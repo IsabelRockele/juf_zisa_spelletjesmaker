@@ -193,7 +193,9 @@ function _updateVisueel(vak, fractie) {
   const stijl = visueel.dataset.stijl;
 
   if (stijl === 'klok') {
-    _updateKlok(visueel, fractie);
+    const status = _actieveTimers.get(vak.id);
+    const klokFractie = status ? status.resterend / (60 * 60 * 1000) : fractie;
+    _updateKlok(visueel, klokFractie);
   } else if (stijl === 'taart') {
     _updateTaart(visueel, fractie);
   } else if (stijl === 'zandloper') {
