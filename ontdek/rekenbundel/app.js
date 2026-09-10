@@ -669,6 +669,7 @@ const App = (() => {
       ? (document.getElementById('cb-trans-voorbeeld')?.checked || false)
       : (document.getElementById('cb-metvoorbeeld')?.checked || false);
     const splitsVariant       = document.querySelector('[name="splits-variant"]:checked')?.value || 'afwisselend';
+    const puntBewerking       = document.querySelector('[name="punt-bewerking"]:checked')?.value || 'optellen';
     const splitsConfig  = isSplitsingen ? _getSplitsConfig() : null;
     const wilGroot = types.some(t => t.includes('Groot'));
     // Bij groot splitshuis: gebruik de aparte getallenkeuze
@@ -706,6 +707,7 @@ const App = (() => {
       schrijflijnenAantal,
       metVoorbeeld,
       splitsVariant,
+      puntBewerking,
       strategie: _getStrategie(),
     });
 
@@ -858,10 +860,11 @@ const App = (() => {
     const wilGroot       = gekozen.some(t => t.includes('Groot'));
 
     const toonNiveau   = wilKleinOfBeen || wilBewerkingen || wilPunt;
-    const toonVariant  = wilKleinOfBeen || wilBewerkingen || wilPunt;
+    const toonVariant  = wilKleinOfBeen || wilBewerkingen;
     const toonPuntBrug = (wilPunt || wilKleinOfBeen || wilBewerkingen) && _splitsTot > 10;
 
     document.getElementById('kaart-splits-variant').style.display = toonVariant  ? 'block' : 'none';
+    document.getElementById('kaart-punt-bewerking').style.display = wilPunt ? 'block' : 'none';
     document.getElementById('kaart-splits-niveau').style.display  = toonNiveau   ? 'block' : 'none';
     document.getElementById('kaart-groot-getallen').style.display = wilGroot     ? 'block' : 'none';
     const kb = document.getElementById('kaart-punt-brug');

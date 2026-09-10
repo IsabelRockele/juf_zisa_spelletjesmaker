@@ -491,6 +491,16 @@
         </div>
       </div>
 
+      <!-- Bewerking voor puntoefeningen -->
+      <div class="config-kaart" id="kaart-punt-bewerking" style="display:none">
+        <div class="kaart-titel"><div class="icon">➕➖</div>Bewerking</div>
+        <div class="form-rij"><label>Welke puntoefeningen?</label><div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('punt-bewerking','optellen',this)"><input type="radio" name="punt-bewerking" value="optellen" checked>Optellen</label>
+          <label class="radio-chip" onclick="App.selecteerRadio('punt-bewerking','aftrekken',this)"><input type="radio" name="punt-bewerking" value="aftrekken">Aftrekken</label>
+          <label class="radio-chip" onclick="App.selecteerRadio('punt-bewerking','gemengd',this)"><input type="radio" name="punt-bewerking" value="gemengd">Gemengd +/−</label>
+        </div></div>
+      </div>
+
       <!-- Splits-niveau: voor Klein splitshuis / Splitsbeen -->
       <div class="config-kaart" id="kaart-splits-niveau" style="display:none">
         <div class="kaart-titel">
@@ -2271,7 +2281,7 @@
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="modules/splitsingen.js?v=1"></script>
+<script src="modules/splitsingen.js?v=2"></script>
 <script src="modules/cijferen.js?v=99"></script>
 <script src="modules/tafels.js?v=1"></script>
 <script src="modules/tafels-inzicht.js?v=1"></script>
@@ -2313,14 +2323,14 @@
 <script src="modules/breuken.js?v=5"></script>
 <script src="modules/percentages.js?v=1"></script>
 <script src="modules/kommagetallen.js?v=3"></script>
-<script src="generator.js?v=99"></script>
+<script src="generator.js?v=100"></script>
 <script src="preview.js?v=64"></script>
 <script src="pdf-engine.js?v=117"></script>
 <script src="vraagstukken.js?v=38"></script>
 
 <script src="modules/rekentaal.js?v=15"></script>
 
-<script src="app.js?v=43"></script>
+<script src="app.js?v=44"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {

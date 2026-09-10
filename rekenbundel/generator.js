@@ -47,7 +47,7 @@ const Generator = (() => {
   }
 
   /* ── Maak een nieuw blok ─────────────────────────────────── */
-  function maakBlok({ bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', transformerenVariant = 'schema', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', splitsGetallen = null, splitsModus = 'tot', tafels = null, tafelPositie = 'vooraan', tafelMax = 10, strategie = 'aftrekker' }) {
+  function maakBlok({ bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', transformerenVariant = 'schema', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', puntBewerking = 'optellen', splitsGetallen = null, splitsModus = 'tot', tafels = null, tafelPositie = 'vooraan', tafelMax = 10, strategie = 'aftrekker' }) {
     const isHerken        = bewerking === 'herken-brug';
     const isSplitsingen   = bewerking === 'splitsingen';
     const isTafels        = bewerking === 'tafels';
@@ -89,7 +89,7 @@ const Generator = (() => {
     // Genereer oefeningen
     let oefeningen;
     if (isTafels)           oefeningen = Tafels.genereer({ tafels, oefeningstypes, aantalOefeningen, tafelPositie, tafelMax });
-    else if (isSplitsingen) oefeningen = Splitsingen.genereer({ oefeningstypes, aantalOefeningen, niveau, splitsVariant, splitsGetallen, splitsModus, brug });
+    else if (isSplitsingen) oefeningen = Splitsingen.genereer({ oefeningstypes, aantalOefeningen, niveau, splitsVariant, puntBewerking, splitsGetallen, splitsModus, brug });
     else if (isHerken)      oefeningen = module.genereer({ oefeningstypes, aantalOefeningen });
     else if (isAanvullen)   oefeningen = module.genereer({ aantalOefeningen, oefeningstypes });
     else if (isCompenseren) oefeningen = module.genereer({ aantalOefeningen, oefeningstypes });
@@ -184,7 +184,7 @@ const Generator = (() => {
       tafelPositie,
       tafelMax,
       strategie,
-      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie: effectiefSplitspositie, aanvullenVariant, compenserenVariant, transformerenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax, strategie },
+      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie: effectiefSplitspositie, aanvullenVariant, compenserenVariant, transformerenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, puntBewerking, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax, strategie },
       oefeningen,
     };
   }
@@ -458,3 +458,4 @@ const Generator = (() => {
 
   return { maakBlok, maakGemengdBlok, voegOefeningToe, getTypes };
 })();
+window.DKRekenGenerator = Generator;

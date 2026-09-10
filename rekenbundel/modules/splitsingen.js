@@ -62,7 +62,7 @@ const Splitsingen = (() => {
     return a;
   }
 
-  function genereer({ oefeningstypes, aantalOefeningen, niveau, splitsVariant = 'afwisselend', splitsGetallen = null, splitsModus = 'tot', brug = 'zonder' }) {
+  function genereer({ oefeningstypes, aantalOefeningen, niveau, splitsVariant = 'afwisselend', puntBewerking = 'optellen', splitsGetallen = null, splitsModus = 'tot', brug = 'zonder' }) {
     const pool = (splitsModus === 'specifiek' && splitsGetallen?.length > 0)
       ? splitsGetallen
       : _getallen(niveau);
@@ -139,13 +139,14 @@ const Splitsingen = (() => {
           if (brug === 'naar-tiental' && !heeftBrug) continue;
           if (brug === 'zonder'       &&  heeftBrug) continue;
 
-          if (splitsVariant === 'afwisselend' || splitsVariant === 'gemengd') {
+          if (puntBewerking === 'optellen' || puntBewerking === 'gemengd') {
             kandidaten2.push({ n, a, b, vorm: 'plus-r', tekst: [a, '+', null, '=', n] });
             kandidaten2.push({ n, a, b, vorm: 'plus-l', tekst: [null, '+', b, '=', n] });
           }
-          if (splitsVariant === 'dak-leeg' || splitsVariant === 'gemengd') {
-            kandidaten2.push({ n, a, b, vorm: 'min-res', tekst: [n, '-', a, '=', null] });
-            kandidaten2.push({ n, a, b, vorm: 'min-afw', tekst: [n, '-', null, '=', b] });
+          if (puntBewerking === 'aftrekken' || puntBewerking === 'gemengd') {
+            kandidaten2.push({ n, a, b, vorm: 'min-omgekeerd', tekst: [b, '=', null, '-', a] });
+            kandidaten2.push({ n, a, b, vorm: 'min-aftrekker', tekst: [n, '-', null, '=', b] });
+            kandidaten2.push({ n, a, b, vorm: 'min-aftrektal', tekst: [null, '-', a, '=', b] });
           }
         }
       }
