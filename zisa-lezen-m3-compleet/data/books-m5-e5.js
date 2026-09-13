@@ -1,5 +1,5 @@
 (()=>{
-const S=(folder,i)=>`images/${folder}/${String(i+1).padStart(2,"0")}.webp?v=2`;
+const S=(folder,i)=>`images/${folder}/${String(i+1).padStart(2,"0")}.webp?v=3`;
 const C=(q,a,correct,hint)=>({q,a,correct,hint});
 const I=(folder,i)=>S(folder,i);
 const B=(id,level,title,blurb,folder,texts,tasks)=>({id,level,title,blurb,cover:S(folder,0),pages:texts.map((text,i)=>({text,image:I(folder,i),...(tasks[i]?{task:tasks[i]}:{})}))});
@@ -27,12 +27,12 @@ B("m5-grot-van-echo","M5","De grot van de echo","Een verdwaald zeehondje en een 
 "Mina logeert op een klein eiland bij haar oom Tuur.\nSamen met haar vriend Otis verzamelt ze afval op het strand.\nNa de storm ligt er veel hout tussen de rotsen.",
 "Tussen twee planken horen ze een klagend geluid.\nVerderop ligt een jong zeehondje alleen.\nOm zijn vin zit een stuk groen touw.",
 "Oom Tuur belt de dierenopvang.\nDe boot kan pas bij hoog water komen.\nTot dan moeten ze het dier rustig bewaken.",
-"Het zeehondje schuifelt plots naar een smalle grot.\nMina en Otis volgen op veilige afstand.\nBinnen klinkt het klagende geluid van drie kanten.",
+"Het zeehondje schuifelt plots naar een smalle grot.\nMina, Otis en oom Tuur volgen op veilige afstand.\nBinnen klinkt het klagende geluid van drie kanten.",
 "‘Dat is de echo,’ fluistert Otis.\nHet geluid kaatst tegen de stenen wanden.\nDaardoor lijkt het alsof er meer dieren roepen.",
 "Het water in de grot stijgt langzaam.\nMina ziet een stuk groen touw aan een scherpe rots.\nHet touw rond de vin moet daar zijn gescheurd.",
 "Achter de rots ligt een tweede opening.\nEr stroomt fel daglicht doorheen.\nMaar een hoop stormhout verspert de doorgang.",
 "Otis wil meteen aan een zware balk trekken.\nMina houdt hem tegen.\nZe merkt dat losse stenen boven de balk kunnen vallen.",
-"Ze keren terug naar oom Tuur.\nMet helmen, handschoenen en een lang touw gaan ze opnieuw naar binnen.\nOom Tuur maakt eerst de losse stenen veilig.",
+"Ze lopen terug naar de ingang om veiligheidsmateriaal te halen.\nMet helmen, handschoenen en een lang touw gaan ze opnieuw naar binnen.\nOom Tuur maakt eerst de losse stenen veilig.",
 "Daarna trekken ze het stormhout één voor één weg.\nDe tweede opening wordt steeds groter.\nHet zeehondje ruikt de frisse zeelucht.",
 "Buiten horen ze een diepe roep vanaf het water.\nHet jong antwoordt meteen.\nEen volwassen zeehond zwemt vlak bij de rotsen.",
 "De boot van de opvang komt aan.\nEen verzorger snijdt het groene touw los.\nGelukkig is de vin alleen wat geschramd.",
@@ -44,11 +44,11 @@ B("m5-grot-van-echo","M5","De grot van de echo","Een verdwaald zeehondje en een 
 B("e5-station-code","E5","De code van het oude station","Een stilstaande klok verbergt een bericht dat al jaren wacht.","e5-station",[
 "Aya en Milan helpen bij de opening van het spoorwegmuseum.\nIn de oude wachtzaal hangt een klok die al jaren stilstaat.\nDe wijzers staan precies op tien over acht.",
 "Onder de klok vinden ze een vergeelde foto.\nOp de achterkant staat: ‘Begin waar de tijd stopte.’\nMilan denkt dat het een raadsel is.",
-"Aya bekijkt de wijzers aandachtig.\nIn kast tien, lade acht vinden ze een koperen kaartje.\nDaarin zijn vijf kleine gaatjes geprikt.",
-"Als Aya het kaartje voor de lamp houdt, verschijnen lichtpunten op de muur.\nZe vormen samen het cijfer 24.\nIn vak 24 ligt een oud dienstrooster.",
+"Aya bekijkt de wijzers aandachtig.\nIn kast tien, lade acht vinden ze een koperen fiche.\nOp de fiche staat duidelijk het cijfer 24.",
+"Aan de andere kant van de zaal zien ze genummerde vakken.\nDe koperen fiche past bij vak 24.\nIn dat vak ligt een oud dienstrooster.",
 "Op het rooster is één naam rood omcirkeld: conducteur Elias Vos.\nNaast zijn naam staat perron drie.\nAya en Milan lopen naar het nagebouwde perron.",
 "Bij de derde bank ontdekken ze een losse plank.\nDaaronder zit een blikken doos, maar het slot heeft vier draaischijven.\nOp elke schijf staan de letters A tot en met Z.",
-"In een vak onder de bank ligt ook een oud kaartjesboek.\nVier stationsnamen zijn onderstreept.\nHun eerste letters vormen het woord NOOR.",
+"In een vak onder de derde bank ligt ook een oud kaartjesboek.\nVier stationsnamen zijn rood onderstreept.\nHun eerste letters vormen het woord NOOR.",
 "Milan draait de schijven naar N-O-O-R.\nHet slot klikt open.\nIn de doos ligt geen geld, maar een stapel brieven.",
 "De brieven zijn door Elias aan zijn dochter Noor geschreven.\nHij had ze na haar plotselinge verhuizing nooit verstuurd.\nOp elke gesloten envelop staat haar naam.",
 "Aya leest alleen de naam op de envelop.\nDe inhoud is privé, vindt ze.\nMuseumbeheerder mevrouw Kim zoekt in het archief naar Noor.",
@@ -88,6 +88,15 @@ window.ZISA_LEVEL_GAMES["m5-robot-lokaal-7"][2].parts=[{text:"Zoë",role:"wie"},
 window.ZISA_LEVEL_GAMES["m5-grot-van-echo"][2].parts=[{text:"De verzorger",role:"wie"},{text:"verwijdert",role:"doet"},{text:"het groene touw",role:"wat"},{text:"bij de grot",role:"waar"}];
 window.ZISA_LEVEL_GAMES["e5-station-code"][2].parts=[{text:"Aya",role:"wie"},{text:"overhandigt",role:"doet"},{text:"de gesloten brief",role:"wat"},{text:"in het museum",role:"waar"}];
 window.ZISA_LEVEL_GAMES["e5-ijsdraak"][2].parts=[{text:"Mara",role:"wie"},{text:"breekt",role:"doet"},{text:"de metalen ring",role:"wat"},{text:"met een sterke tang",role:"waar"}];
+
+// Houd het raadselspoor concreet: klok -> kast/lade -> fiche 24 -> vak 24.
+const stationBook=window.ZISA_BOOKS.find(book=>book.id==="e5-station-code");
+if(stationBook){
+  stationBook.pages[3].task=C("Hoe vinden Aya en Milan het juiste vak?",["De fiche draagt hetzelfde nummer.","De klok wijst naar het vak.","Mevrouw Kim geeft hun een sleutel."],0,"Vergelijk het nummer op de fiche met het nummer van het vak.");
+}
+if(window.ZISA_LEVEL_GAMES["e5-station-code"]?.[1]){
+  window.ZISA_LEVEL_GAMES["e5-station-code"][1].items=["De stilstaande klok geeft 10 en 8.","De koperen fiche leidt naar vak 24.","De stationsnamen vormen NOOR.","De doos met brieven gaat open."];
+}
 
 window.ZISA_SPEED_GAMES={...(window.ZISA_SPEED_GAMES||{}),
 "m5-robot-lokaal-7":{type:"speed",words:["uitvindersbeurs","robot","gesloten","verdwenen","verfspoor","magazijn","metalen","kelderdeur","knipperen","halsband","voorzichtig","ventilatieklep","schroefjes","omwegen","speciale","helper"]},
