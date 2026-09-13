@@ -687,23 +687,12 @@ function addFluencyNext(total){
   const button=document.createElement("button");button.className="fluency-next fluency-next-page";button.textContent=fluencyIndex===total-1?"Boekje uit! ›":"Sla de bladzijde om ›";button.onclick=()=>{if(fluencyIndex===total-1){document.body.classList.remove("fluency-mode");renderFinish()}else{fluencyIndex++;renderFluencyBook()}};document.querySelector(".mini-right").append(button)
 }
 
+const startPhonemeAudio={};
 function playStartPhoneme(chunk){
-  const AudioCtx=window.AudioContext||window.webkitAudioContext;
-  if(!AudioCtx){speak(chunk);return}
-  const ctx=playStartPhoneme.ctx||(playStartPhoneme.ctx=new AudioCtx());
-  if(ctx.state==="suspended")ctx.resume();
-  const now=ctx.currentTime,duration=.9,gain=ctx.createGain();
-  gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.24,now+.04);gain.gain.setValueAtTime(.24,now+duration-.08);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);gain.connect(ctx.destination);
-  const voiced=!['s','v'].includes(chunk);
-  if(voiced){
-    const source=ctx.createOscillator();source.type="sawtooth";source.frequency.value=chunk==="i"?185:chunk==="n"?155:130;
-    const low=ctx.createBiquadFilter();low.type="lowpass";low.frequency.value=chunk==="m"?520:chunk==="n"?850:3200;low.Q.value=1.2;
-    source.connect(low);low.connect(gain);source.start(now);source.stop(now+duration);
-  }else{
-    const length=Math.ceil(ctx.sampleRate*duration),buffer=ctx.createBuffer(1,length,ctx.sampleRate),data=buffer.getChannelData(0);
-    for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*(.7-i/length*.15);
-    const noise=ctx.createBufferSource();noise.buffer=buffer;const band=ctx.createBiquadFilter();band.type="bandpass";band.frequency.value=chunk==="s"?5200:1800;band.Q.value=chunk==="s"?.8:1.5;noise.connect(band);band.connect(gain);noise.start(now);noise.stop(now+duration);
-  }
+  Object.values(startPhonemeAudio).forEach(audio=>{audio.pause();audio.currentTime=0});
+  const audio=startPhonemeAudio[chunk]||(startPhonemeAudio[chunk]=new Audio(`audio/phonemes/${encodeURIComponent(chunk)}.wav`));
+  audio.currentTime=0;
+  audio.play().catch(error=>console.warn("De letterklank kon niet worden afgespeeld.",error));
 }
 
 function renderFinish(){
