@@ -1,5 +1,5 @@
 (()=>{
-const S=(folder,i)=>({src:`images/${folder}/storyboard-remade.png?v=${folder==="m4-wolkenwolf"?3:1}`,x:(i%3)*50,y:Math.floor(i/3)*(100/3)});
+const S=(folder,i)=>`images/${folder}/${String(i+1).padStart(2,"0")}.webp?v=2`;
 const C=(q,a,correct,hint)=>({q,a,correct,hint});
 const B=(id,level,title,blurb,folder,texts,tasks)=>({id,level,title,blurb,cover:S(folder,0),pages:texts.map((text,i)=>({text,image:S(folder,i),...(tasks[i]?{task:tasks[i]}:{})}))});
 
