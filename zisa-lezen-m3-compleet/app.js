@@ -646,9 +646,21 @@ function renderFluencyPage(page,total){
   if(page.focus){const focus=document.createElement("div");focus.className="fluency-focus";focus.textContent=page.focus;activity.append(focus)}
   if(page.chunks){
     const train=document.createElement("div");train.className="word-train";
-    const sound={m:"mmm",aa:"aaa",n:"nnn",v:"vvv",i:"iii",s:"sss"};
-    page.chunks.forEach(chunk=>{const button=document.createElement("button");button.textContent=chunk;button.onclick=()=>{button.classList.add("heard");speak(sound[chunk]||chunk)};train.append(button)});activity.append(train);
-    const make=document.createElement("button");make.className="fluency-next make-word";make.textContent="Maak het woord";make.onclick=()=>{if(train.querySelectorAll(".heard").length<page.chunks.length){document.querySelector("#fluencyFeedback").textContent="Tik eerst op elk stukje.";return}train.innerHTML=`<strong>${page.word}</strong>`;make.remove();document.querySelector("#fluencyFeedback").textContent=`Goed! Lees nu zelf: ${page.word}.`;fluencyScore++;addFluencyNext(total)};activity.append(make)
+    const instruction=document.createElement("p");instruction.className="train-instruction";activity.append(instruction,train);
+    let step=0;
+    const showStep=()=>{
+      const chunk=page.chunks[step];train.innerHTML="";instruction.textContent=`Tik op ${chunk}. Luister en zoem mee.`;
+      const button=document.createElement("button");button.textContent=chunk;button.onclick=()=>{
+        if(button.disabled)return;button.disabled=true;button.classList.add("heard");playStartPhoneme(chunk);
+        setTimeout(()=>{step++;if(step<page.chunks.length)showStep();else joinWord()},950)
+      };train.append(button)
+    };
+    const joinWord=()=>{
+      instruction.textContent="De stukjes plakken nu aan elkaar.";
+      train.innerHTML=`<div class="joining-word">${page.chunks.map(chunk=>`<span>${chunk}</span>`).join("")}</div>`;
+      setTimeout(()=>{train.innerHTML=`<strong>${page.word}</strong>`;instruction.textContent=`Lees nu zelf: ${page.word}.`;document.querySelector("#fluencyFeedback").textContent="Knap! Je maakte het hele woord.";fluencyScore++;addFluencyNext(total)},900)
+    };
+    showStep()
   }else if(page.a){
     const choices=document.createElement("div");choices.className="fluency-choices";activity.append(choices);
     shuffled(page.a.map((answer,index)=>({answer,index}))).forEach(({answer,index})=>{
@@ -673,6 +685,25 @@ function renderFluencyPage(page,total){
 function addFluencyNext(total){
   if(document.querySelector(".fluency-next-page"))return;
   const button=document.createElement("button");button.className="fluency-next fluency-next-page";button.textContent=fluencyIndex===total-1?"Boekje uit! ›":"Sla de bladzijde om ›";button.onclick=()=>{if(fluencyIndex===total-1){document.body.classList.remove("fluency-mode");renderFinish()}else{fluencyIndex++;renderFluencyBook()}};document.querySelector(".mini-right").append(button)
+}
+
+function playStartPhoneme(chunk){
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx){speak(chunk);return}
+  const ctx=playStartPhoneme.ctx||(playStartPhoneme.ctx=new AudioCtx());
+  if(ctx.state==="suspended")ctx.resume();
+  const now=ctx.currentTime,duration=.9,gain=ctx.createGain();
+  gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.24,now+.04);gain.gain.setValueAtTime(.24,now+duration-.08);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);gain.connect(ctx.destination);
+  const voiced=!['s','v'].includes(chunk);
+  if(voiced){
+    const source=ctx.createOscillator();source.type="sawtooth";source.frequency.value=chunk==="i"?185:chunk==="n"?155:130;
+    const low=ctx.createBiquadFilter();low.type="lowpass";low.frequency.value=chunk==="m"?520:chunk==="n"?850:3200;low.Q.value=1.2;
+    source.connect(low);low.connect(gain);source.start(now);source.stop(now+duration);
+  }else{
+    const length=Math.ceil(ctx.sampleRate*duration),buffer=ctx.createBuffer(1,length,ctx.sampleRate),data=buffer.getChannelData(0);
+    for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*(.7-i/length*.15);
+    const noise=ctx.createBufferSource();noise.buffer=buffer;const band=ctx.createBiquadFilter();band.type="bandpass";band.frequency.value=chunk==="s"?5200:1800;band.Q.value=chunk==="s"?.8:1.5;noise.connect(band);band.connect(gain);noise.start(now);noise.stop(now+duration);
+  }
 }
 
 function renderFinish(){
