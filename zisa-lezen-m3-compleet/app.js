@@ -208,7 +208,7 @@ function renderLibrary(){
       <div class="cover">
         <span class="badge">${book.level}</span>
         ${locked?`<span class="pro-lock">🔒 Enkel in Pro</span>`:""}
-        ${book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="background-image:url('${book.cover.src}');--sprite-x:${book.cover.x}%;--sprite-y:${book.cover.y}%"></div>`:`<div class="cover-image" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="background-image:url('${book.cover}')"></div>`}
+        ${book.startBook?`<div class="start-card-cover tone-${book.coverTone||"blue"}"><span>${book.coverIcon||"📖"}</span><strong>${book.title}</strong><small>AVI START</small></div>`:book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="background-image:url('${book.cover.src}');--sprite-x:${book.cover.x}%;--sprite-y:${book.cover.y}%"></div>`:`<div class="cover-image" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="background-image:url('${book.cover}')"></div>`}
       </div>
       <div class="cardtext">
         <h3>${book.title}</h3>
@@ -633,8 +633,8 @@ function renderFluencyBook(){
   app.innerHTML=`<section class="fluency-shell">
     <header class="fluency-head"><button id="fluencyBack">‹ Taalreis</button><div><b>${currentBook.startBook?"Mijn leesstartboekje":"Mijn vlotleesboekje"}</b><span>${cover?"Voorkaft":`${fluencyIndex+1} van ${pages.length}`}</span></div><div class="fluency-dots">${pages.map((_,i)=>`<i class="${i===fluencyIndex?"on":""}"></i>`).join("")}</div></header>
     <div class="mini-book ${cover?"mini-cover":""}">
-      <div class="mini-left">${cover?`<img src="images/zisa-leest.png" alt="Zisa leest"><span>AVI ${currentBook.level}</span>`:`<div class="fluency-icon">${page.icon}</div><h2>${page.title}</h2><p>${currentBook.title}</p>`}</div>
-      <article class="mini-right">${cover?`<small>${currentBook.startBook?"AVI START":"BONUSBOEKJE"}</small><h1>${currentBook.startBook?"Mijn eerste<br>leeswoorden":"Lees vlot<br>en mooi"}</h1><p>${currentBook.startBook?`${pages.length} korte bladzijden om klanken, woorden, rijm en leestekens te oefenen.`:`${pages.length} korte leesbladzijden met woorden en zinnen uit jouw verhaal.`}</p><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2><div class="fluency-question-row"><p class="fluency-question">${page.q}</p>${currentBook.startBook?`<button class="listen-btn" data-say="${escapeAttr(page.q)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
+      <div class="mini-left">${cover&&currentBook.startBook?`<div class="start-mini-cover tone-${currentBook.coverTone||"blue"}"><b>${currentBook.coverIcon||"📖"}</b><strong>${currentBook.title}</strong><span>AVI START</span></div>`:cover?`<img src="images/zisa-leest.png" alt="Zisa leest"><span>AVI ${currentBook.level}</span>`:`<div class="fluency-icon">${page.icon}</div><h2>${page.title}</h2><p>${currentBook.title}</p>`}</div>
+      <article class="mini-right">${cover?`<small>${currentBook.startBook?"AVI START":"BONUSBOEKJE"}</small><h1>${currentBook.startBook?currentBook.title:"Lees vlot<br>en mooi"}</h1><p>${currentBook.startBook?currentBook.blurb:`${pages.length} korte leesbladzijden met woorden en zinnen uit jouw verhaal.`}</p><small>${pages.length} oefenbladzijden</small><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2><div class="fluency-question-row"><p class="fluency-question">${page.q}</p>${currentBook.startBook?`<button class="listen-btn" data-say="${escapeAttr(page.q)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
     </div></section>`;
   document.querySelector("#fluencyBack").textContent=currentBook.startBook?"‹ Bibliotheek":"‹ Taalreis";
   document.querySelector("#fluencyBack").onclick=()=>{document.body.classList.remove("fluency-mode");if(currentBook.startBook)renderLibrary();else{missionIndex=Math.max(0,(bookGames[currentBook.id]?.length||1)-1);renderMission()}};
@@ -676,7 +676,10 @@ function renderFluencyPage(page,total){
       const button=document.createElement("button");button.textContent=answer;button.onclick=()=>{
         if(index!==page.correct){button.classList.add("wrong");document.querySelector("#fluencyFeedback").textContent="Kijk of lees nog eens rustig.";setTimeout(()=>button.classList.remove("wrong"),500);return}
         button.classList.add("correct");choices.querySelectorAll("button").forEach(item=>item.disabled=true);fluencyScore++;
-        if(page.punctuation){const sentence=document.querySelector(".fluency-focus");if(sentence)sentence.textContent=`${page.focus}${answer}`}
+        if(page.punctuation){
+          const sentence=document.querySelector(".fluency-focus");if(sentence)sentence.textContent=`${page.focus}${answer}`;
+          const listen=document.querySelector(".fluency-focus-wrap .mini-listen");if(listen)listen.onclick=event=>{event.stopPropagation();speak(`${page.focus}${answer}`)}
+        }
         document.querySelector("#fluencyFeedback").textContent=page.good||"Goed gelezen!";
         if(page.read){const read=document.createElement("div");read.className="fluency-read";read.textContent=page.read;activity.append(read)}
         addFluencyNext(total);
