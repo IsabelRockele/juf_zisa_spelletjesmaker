@@ -2,8 +2,8 @@
 const app = document.querySelector("#app");
 const allBooks = window.ZISA_BOOKS || [];
 const books = allBooks;
-const levels = ["M3","E3","M4","E4","M5","E5","M6","E6"];
-let currentLevel = "M3";
+const levels = ["START","M3","E3","M4","E4","M5","E5","M6","E6"];
+let currentLevel = "START";
 let currentBook = null;
 let pageIndex = 0;
 let pageTaskPassed = false;
@@ -133,7 +133,7 @@ function makeListenButton(text,label="Beluister dit woord"){
 }
 function hasAudioSupport(kind="task"){
   if(!currentBook)return false;
-  return currentBook.level==="M3"||(currentBook.level==="E3"&&kind!=="story");
+  return currentBook.level==="START"||currentBook.level==="M3"||(currentBook.level==="E3"&&kind!=="story");
 }
 
 function storyTextMarkup(text){
@@ -176,7 +176,7 @@ function renderLibrary(){
       </div>
     </section>
     <div class="levels">
-      ${levels.map(l=>`<button class="level ${l===currentLevel?"active":""}" data-level="${l}">${l}</button>`).join("")}
+      ${levels.map(l=>`<button class="level ${l===currentLevel?"active":""}" data-level="${l}">${l==="START"?"AVI Start":l}</button>`).join("")}
     </div>
     <section class="grid" id="bookGrid"></section>`;
 
@@ -224,6 +224,7 @@ function openBook(book){
   pageIndex = 0;
   pageTaskPassed = false;
   reviewMode = false;
+  if(book.startBook){startFluencyBook();return}
   renderBookCover();
 }
 
@@ -629,12 +630,13 @@ function renderFluencyBook(){
   if(!pages.length){renderFinish();return}
   const cover=fluencyIndex<0,page=cover?null:pages[fluencyIndex];
   app.innerHTML=`<section class="fluency-shell">
-    <header class="fluency-head"><button id="fluencyBack">‹ Taalreis</button><div><b>Mijn vlotleesboekje</b><span>${cover?"Voorkaft":`${fluencyIndex+1} van ${pages.length}`}</span></div><div class="fluency-dots">${pages.map((_,i)=>`<i class="${i===fluencyIndex?"on":""}"></i>`).join("")}</div></header>
+    <header class="fluency-head"><button id="fluencyBack">‹ Taalreis</button><div><b>${currentBook.startBook?"Mijn leesstartboekje":"Mijn vlotleesboekje"}</b><span>${cover?"Voorkaft":`${fluencyIndex+1} van ${pages.length}`}</span></div><div class="fluency-dots">${pages.map((_,i)=>`<i class="${i===fluencyIndex?"on":""}"></i>`).join("")}</div></header>
     <div class="mini-book ${cover?"mini-cover":""}">
       <div class="mini-left">${cover?`<img src="images/zisa-leest.png" alt="Zisa leest"><span>AVI ${currentBook.level}</span>`:`<div class="fluency-icon">${page.icon}</div><h2>${page.title}</h2><p>${currentBook.title}</p>`}</div>
-      <article class="mini-right">${cover?`<small>BONUSBOEKJE</small><h1>Lees vlot<br>en mooi</h1><p>Drie korte leesbladzijden met woorden en zinnen uit jouw verhaal.</p><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2><p class="fluency-question">${page.q}</p><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
+      <article class="mini-right">${cover?`<small>${currentBook.startBook?"AVI START":"BONUSBOEKJE"}</small><h1>${currentBook.startBook?"Mijn eerste<br>leeswoorden":"Lees vlot<br>en mooi"}</h1><p>${currentBook.startBook?`${pages.length} korte bladzijden om letters, woorden en rijm te oefenen.`:`${pages.length} korte leesbladzijden met woorden en zinnen uit jouw verhaal.`}</p><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2><p class="fluency-question">${page.q}</p><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
     </div></section>`;
-  document.querySelector("#fluencyBack").onclick=()=>{document.body.classList.remove("fluency-mode");missionIndex=Math.max(0,(bookGames[currentBook.id]?.length||1)-1);renderMission()};
+  document.querySelector("#fluencyBack").textContent=currentBook.startBook?"‹ Bibliotheek":"‹ Taalreis";
+  document.querySelector("#fluencyBack").onclick=()=>{document.body.classList.remove("fluency-mode");if(currentBook.startBook)renderLibrary();else{missionIndex=Math.max(0,(bookGames[currentBook.id]?.length||1)-1);renderMission()}};
   if(cover){document.querySelector("#fluencyStart").onclick=()=>{fluencyIndex=0;renderFluencyBook()};return}
   renderFluencyPage(page,pages.length);
 }
@@ -642,7 +644,12 @@ function renderFluencyBook(){
 function renderFluencyPage(page,total){
   const activity=document.querySelector("#fluencyActivity");
   if(page.focus){const focus=document.createElement("div");focus.className="fluency-focus";focus.textContent=page.focus;activity.append(focus)}
-  if(page.a){
+  if(page.chunks){
+    const train=document.createElement("div");train.className="word-train";
+    const sound={m:"mmm",aa:"aaa",n:"nnn",v:"vvv",i:"iii",s:"sss"};
+    page.chunks.forEach(chunk=>{const button=document.createElement("button");button.textContent=chunk;button.onclick=()=>{button.classList.add("heard");speak(sound[chunk]||chunk)};train.append(button)});activity.append(train);
+    const make=document.createElement("button");make.className="fluency-next make-word";make.textContent="Maak het woord";make.onclick=()=>{if(train.querySelectorAll(".heard").length<page.chunks.length){document.querySelector("#fluencyFeedback").textContent="Tik eerst op elk stukje.";return}train.innerHTML=`<strong>${page.word}</strong>`;make.remove();document.querySelector("#fluencyFeedback").textContent=`Goed! Lees nu zelf: ${page.word}.`;fluencyScore++;addFluencyNext(total)};activity.append(make)
+  }else if(page.a){
     const choices=document.createElement("div");choices.className="fluency-choices";activity.append(choices);
     shuffled(page.a.map((answer,index)=>({answer,index}))).forEach(({answer,index})=>{
       const button=document.createElement("button");button.textContent=answer;button.onclick=()=>{
@@ -674,8 +681,8 @@ function renderFinish(){
   app.innerHTML = `
     <section class="finish">
       <div class="cup">🏆</div>
-      <h2>Boek uitgelezen!</h2>
-      <p>Je hebt <strong>${currentBook.title}</strong> gelezen, ${missionScore} taalspellen opgelost en je vlotleesboekje uitgelezen.</p>
+      <h2>${currentBook.startBook?"Leesstartboekje uit!":"Boek uitgelezen!"}</h2>
+      <p>${currentBook.startBook?`Je hebt alle bladzijden van <strong>${currentBook.title}</strong> geoefend.`:`Je hebt <strong>${currentBook.title}</strong> gelezen, ${missionScore} taalspellen opgelost en je vlotleesboekje uitgelezen.`}</p>
       <button class="btn next" id="backBooks">Kies een nieuw boek</button>
     </section>`;
   document.querySelector("#backBooks").addEventListener("click",renderLibrary);
