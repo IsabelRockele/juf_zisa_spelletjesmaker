@@ -95,7 +95,11 @@ const targetedReviewPages={
   "m3-pip-draak":{0:6,2:9,7:2},
   "m3-bo-maan":{0:7,2:4,7:3},
   "e3-noor-rode-laars":{0:6,2:2,7:4},
-  "e3-milo-nest":{0:4,2:2,7:6}
+  "e3-milo-nest":{0:4,2:2,7:6},
+  "m5-robot-lokaal-7":{2:9,3:13,4:13,5:12,6:0},
+  "m5-grot-van-echo":{2:11,3:6,4:14,5:1,6:14},
+  "e5-station-code":{2:9,3:1,4:10,5:2,6:5},
+  "e5-ijsdraak":{2:9,3:9,4:11,5:14,6:5}
 };
 
 document.querySelector("#brandBtn").addEventListener("click", renderLibrary);
@@ -156,8 +160,9 @@ function isDiscoverLocked(book){
   return books.find(candidate=>candidate.level===book.level)?.id!==book.id;
 }
 
+function spriteStyle(src){return `background-image:url('${src.src}');--sprite-x:${src.x}%;--sprite-y:${src.y}%;--sprite-w:${src.w||300}%;--sprite-h:${src.h||400}%`}
 function imageBlock(src, alt){
-  if(src&&typeof src==="object")return `<div class="story-sprite" role="img" aria-label="${escapeAttr(alt)}" style="background-image:url('${src.src}');--sprite-x:${src.x}%;--sprite-y:${src.y}%"></div>`;
+  if(src&&typeof src==="object")return `<div class="story-sprite" role="img" aria-label="${escapeAttr(alt)}" style="${spriteStyle(src)}"></div>`;
   return `<div class="story-image" role="img" aria-label="${escapeAttr(alt)}" style="background-image:url('${src}')"></div>`;
 }
 
@@ -214,7 +219,7 @@ function renderLibrary(){
       <div class="cover">
         <span class="badge">${book.level}</span>
         ${locked?`<span class="pro-lock">🔒 Enkel in Pro</span>`:""}
-        ${book.startBook?`<div class="start-card-cover tone-${book.coverTone||"blue"}"><img src="${book.coverImage}" alt=""><strong>${book.title}</strong><small>AVI START</small></div>`:book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="background-image:url('${book.cover.src}');--sprite-x:${book.cover.x}%;--sprite-y:${book.cover.y}%"></div>`:`<div class="cover-image" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="background-image:url('${book.cover}')"></div>`}
+        ${book.startBook?`<div class="start-card-cover tone-${book.coverTone||"blue"}"><img src="${book.coverImage}" alt=""><strong>${book.title}</strong><small>AVI START</small></div>`:book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="${spriteStyle(book.cover)}"></div>`:`<div class="cover-image" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="background-image:url('${book.cover}')"></div>`}
       </div>
       <div class="cardtext">
         <h3>${book.title}</h3>
@@ -248,7 +253,7 @@ function renderBookCover(){
   app.innerHTML=`<div class="reader cover-reader">
     <aside class="rail">
       <span class="lvl">${currentBook.level}</span><small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
-      <div class="book-thumbs">${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="background-image:url('${book.cover.src}');--sprite-x:${book.cover.x}%;--sprite-y:${book.cover.y}%"></span>`:`<span class="thumb-image" aria-hidden="true" style="background-image:url('${book.cover}')"></span>`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}</div>
+      <div class="book-thumbs">${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="${spriteStyle(book.cover)}"></span>`:`<span class="thumb-image" aria-hidden="true" style="background-image:url('${book.cover}')"></span>`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}</div>
     </aside>
     <div><section class="book book-cover-stage">
       <div class="bookhead"><h2>${currentBook.title}</h2><div class="count">Voorkaft</div></div>
@@ -310,7 +315,7 @@ function renderReader(){
         <span class="lvl">${currentBook.level}</span>
         <small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
         <div class="book-thumbs">
-          ${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="background-image:url('${book.cover.src}');--sprite-x:${book.cover.x}%;--sprite-y:${book.cover.y}%"></span>`:`<span class="thumb-image" aria-hidden="true" style="background-image:url('${book.cover}')"></span>`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}
+          ${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="${spriteStyle(book.cover)}"></span>`:`<span class="thumb-image" aria-hidden="true" style="background-image:url('${book.cover}')"></span>`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}
         </div>
       </aside>
 

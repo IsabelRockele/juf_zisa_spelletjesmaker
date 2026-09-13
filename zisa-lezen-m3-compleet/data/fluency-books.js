@@ -54,5 +54,33 @@ window.ZISA_FLUENCY_BOOKS={
 {icon:"🎵",title:"Zoek het rijmwoord",q:"Welk woord rijmt op kaart?",focus:"kaart",a:["vaart","kust","grot"],correct:0,good:"Juist! kaart en vaart rijmen."},
 {icon:"🔤",title:"Kies ei of ij",q:"Maak elk woord goed. Kies in elk woord ei of ij.",eiij:[{before:"k",after:"k",correct:"ij"},{before:"kl",after:"n",correct:"ei"},{before:"tr",after:"n",correct:"ei"},{before:"t",after:"d",correct:"ij"}],good:"Knap! Je maakte kijk, klein, trein en tijd goed."},
 {icon:"🧠",title:"Kies de betekenis",q:"Wat is een aanwijzing op een schatkaart?",focus:"aanwijzing",a:["een spoor dat je helpt zoeken","een deel van de boot","een soort vis"],correct:0,good:"Juist! Een aanwijzing helpt je zoeken."},
-{icon:"❗",title:"Kies het leesteken",q:"Welk leesteken hoort achter de zin?",focus:"kijk naar die rotsen",punctuation:true,a:["?",".","!"],correct:2,good:"Juist! Dit is een enthousiaste uitroep."}]
+{icon:"❗",title:"Kies het leesteken",q:"Welk leesteken hoort achter de zin?",focus:"kijk naar die rotsen",punctuation:true,a:["?",".","!"],correct:2,good:"Juist! Dit is een enthousiaste uitroep."}],
+"m5-robot-lokaal-7":[
+{icon:"🌈",title:"Lees in woordgroepen",q:"Welke leesbogen maken de zin vloeiend?",a:["Na / de laatste test zetten / ze Blik in / lokaal zeven.","Na de laatste test / zetten ze Blik / in lokaal zeven.","Na de laatste / test zetten ze / Blik in lokaal zeven."],correct:1,good:"Juist! Je leest woorden die bij elkaar horen samen."},
+{icon:"🧩",title:"Lees de woorddelen",q:"Uit welke delen bestaat kelderdeur?",focus:"kelderdeur",a:["kel en derdeur","kelder en deur","kelde en rdeur"],correct:1,good:"Juist! kelderdeur bestaat uit kelder en deur."},
+{icon:"🔎",title:"Verbeter de leesfout",q:"Welk woord is verkeerd gelezen?",focus:"Blik volgt het verfspoor. → Blik volgt het verspoor.",a:["Blik","volgt","verspoor"],correct:2,good:"Juist! Er moet verfspoor staan."},
+{icon:"🧠",title:"Lees nauwkeurig",q:"Welk woord past in de zin?",focus:"Het blauwe lampje … in het donker.",a:["knippert","knikkert","knabbelt"],correct:0,good:"Juist! Het lampje knippert."},
+{icon:"🔤",title:"Leenwoord lezen",q:"Welk woord komt uit een andere taal?",focus:"robot – kelder – sleutel",a:["sleutel","robot","kelder"],correct:1,good:"Juist! robot is een leenwoord."},
+{icon:"❗",title:"Lees met intonatie",q:"Welk leesteken past bij de verbaasde uitroep?",focus:"Blik is verdwenen",punctuation:true,a:[".","!","?"],correct:1,good:"Juist! Een uitroepteken helpt je met nadruk lezen."}],
+"m5-grot-van-echo":[
+{icon:"🌈",title:"Lees in woordgroepen",q:"Welke leesbogen maken de zin vloeiend?",a:["Tussen / twee planken horen / ze een klagend / geluid.","Tussen twee / planken horen ze een / klagend geluid.","Tussen twee planken / horen ze / een klagend geluid."],correct:2,good:"Juist! Zo klinkt de zin natuurlijk."},
+{icon:"🧩",title:"Lees de woorddelen",q:"Uit welke delen bestaat stormhout?",focus:"stormhout",a:["stor en mhout","storm en hout","stormh en out"],correct:1,good:"Juist! stormhout bestaat uit storm en hout."},
+{icon:"🔎",title:"Verbeter de leesfout",q:"Welk woord is verkeerd gelezen?",focus:"Het geluid kaatst terug. → Het geluid kaast terug.",a:["geluid","kaast","terug"],correct:1,good:"Juist! Er moet kaatst staan."},
+{icon:"🧠",title:"Lees nauwkeurig",q:"Welk woord past in de zin?",focus:"Het hout … de opening.",a:["versiert","verspert","verandert"],correct:1,good:"Juist! Het hout verspert de opening."},
+{icon:"🔤",title:"Open lettergreep",q:"Welk woord begint met een open lettergreep?",focus:"water – helm – strand",a:["strand","water","helm"],correct:1,good:"Juist! Je splitst water als wa-ter."},
+{icon:"❓",title:"Lees met intonatie",q:"Welk leesteken hoort bij de vraag?",focus:"waar komt die roep vandaan",punctuation:true,a:["!","?","."],correct:1,good:"Juist! Bij een vraag gaat je stem aan het einde vaak omhoog."}],
+"e5-station-code":[
+{icon:"🌈",title:"Lees in woordgroepen",q:"Welke leesbogen maken de zin vloeiend?",a:["Onder / de oude klok vinden / ze een vergeelde / foto.","Onder de oude klok / vinden ze / een vergeelde foto.","Onder de oude / klok vinden ze een / vergeelde foto."],correct:1,good:"Juist! Je leest betekenisvolle groepen samen."},
+{icon:"🧩",title:"Lees lange woorden",q:"Welke verdeling helpt bij het lezen?",focus:"spoorwegmuseum",a:["spoor-weg-mu-se-um","spo-orweg-muse-um","spoorwe-gmu-seum"],correct:0,good:"Juist! De woorddelen en lettergrepen helpen je."},
+{icon:"🔎",title:"Verbeter jezelf",q:"Welk woord is verkeerd gelezen?",focus:"Het kaartje is van koper. → Het kaartje is van koker.",a:["kaartje","koker","is"],correct:1,good:"Juist! Kijk opnieuw: er staat koper."},
+{icon:"🧠",title:"Betekenis uit de zin",q:"Wat betekent archief hier?",focus:"Mevrouw Kim zoekt in het archief naar oude gegevens.",a:["een plek met bewaarde documenten","een zaal met nieuwe treinen","een winkel met klokken"],correct:0,good:"Juist! In een archief worden documenten bewaard."},
+{icon:"🔤",title:"Lees de lettercombinatie",q:"In welk woord klinkt ti als tsie?",focus:"station – stil – tijd",a:["tijd","station","stil"],correct:1,good:"Juist! Je leest station als sta-tsion."},
+{icon:"❗",title:"Lees met gevoel",q:"Welk leesteken past bij Noors verbazing?",focus:"Hebben jullie de doos echt gevonden",punctuation:true,a:[".","?","!"],correct:1,good:"Juist! Dit is een verbaasde vraag."}],
+"e5-ijsdraak":[
+{icon:"🌈",title:"Lees in woordgroepen",q:"Welke leesbogen maken de zin vloeiend?",a:["Bij / zonsopgang zien / ze een blauwe / gloed onder het ijs.","Bij zonsopgang zien ze / een blauwe gloed onder / het ijs.","Bij zonsopgang / zien ze een blauwe gloed / onder het ijs."],correct:2,good:"Juist! Zo blijft de betekenis duidelijk."},
+{icon:"🧩",title:"Lees lange woorden",q:"Welke verdeling helpt bij het lezen?",focus:"meetapparatuur",a:["meet-ap-pa-ra-tuur","mee-tap-pa-ratuur","meeta-ppara-tuur"],correct:0,good:"Juist! Lees eerst meet en daarna ap-pa-ra-tuur."},
+{icon:"🔎",title:"Verbeter jezelf",q:"Welk woord is verkeerd gelezen?",focus:"De draak ademt gelijkmatig. → De draak ademt gelijknamig.",a:["draak","ademt","gelijknamig"],correct:2,good:"Juist! Kijk opnieuw: er staat gelijkmatig."},
+{icon:"🧠",title:"Betekenis uit de zin",q:"Wat betekent verroest?",focus:"Mara opent de verroeste schuif.",a:["door roest aangetast","pas geverfd","van helder glas"],correct:0,good:"Juist! Oud metaal kan verroesten."},
+{icon:"🔤",title:"Lees de woordbouw",q:"Uit welke woorden bestaat bronwater?",focus:"bronwater",a:["bron en water","bro en nwater","bronnen en water"],correct:0,good:"Juist! bronwater bestaat uit bron en water."},
+{icon:"❓",title:"Lees met intonatie",q:"Welk leesteken past bij de vraag?",focus:"waarom blijft het meer bevroren",punctuation:true,a:["!",".","?"],correct:2,good:"Juist! Lees de zin vragend."}]
 };
