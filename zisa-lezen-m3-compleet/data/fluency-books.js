@@ -1,12 +1,12 @@
 window.ZISA_FLUENCY_BOOKS={
 "m3-pip-draak":[
-{icon:"👀",title:"Kijk goed",q:"Welk woord is precies hetzelfde als vuur?",focus:"vuur",a:["vier","vuur","voer"],correct:1,good:"Juist! Je keek naar het hele woord."},
+{icon:"👀",title:"Zoek hetzelfde woord",q:"Tik precies hetzelfde woord aan.",focus:"vuur",a:["muur","vuur","duur"],correct:1,good:"Juist! Je keek naar het hele woord."},
 {icon:"🎵",title:"Rijmduo",q:"Welk woord rijmt op bos?",focus:"bos",a:["boos","vos","bes"],correct:1,good:"Mooi! bos en vos rijmen."},
-{icon:"🌬️",title:"Lees mooi door",q:"Lees eerst juist. Lees daarna vlot.",text:"Pip rent naar het hol.\nHij ziet de draak.",tip:"Stop kort bij de punt."}],
+{icon:"🌬️",title:"Lees mooi door",q:"Lees twee keer: eerst juist, daarna vlot. Kies dan hoe het ging.",text:"Pip rent naar het hol.\nHij ziet de draak.",tip:"Stop kort bij de punt."}],
 "m3-bo-maan":[
-{icon:"👀",title:"Kijk goed",q:"Welk woord is precies hetzelfde als maan?",focus:"maan",a:["man","mijn","maan"],correct:2,good:"Juist! Je keek naar de lange aa."},
+{icon:"👀",title:"Zoek hetzelfde woord",q:"Tik precies hetzelfde woord aan.",focus:"maan",a:["baan","haan","maan"],correct:2,good:"Juist! Je keek naar het hele woord."},
 {icon:"🎵",title:"Rijmduo",q:"Welk woord rijmt op maan?",focus:"maan",a:["haan","man","mijn"],correct:0,good:"Mooi! maan en haan rijmen."},
-{icon:"🌬️",title:"Lees mooi door",q:"Lees eerst juist. Lees daarna vlot.",text:"Bo kijkt naar de maan.\nDe maan schijnt weer.",tip:"Lees iedere zin rustig tot aan de punt."}],
+{icon:"🌬️",title:"Lees mooi door",q:"Lees twee keer: eerst juist, daarna vlot. Kies dan hoe het ging.",text:"Bo kijkt naar de maan.\nDe maan schijnt weer.",tip:"Lees iedere zin rustig tot aan de punt."}],
 "e3-noor-rode-laars":[
 {icon:"🧩",title:"Lees de delen",q:"Waar kun je modder goed splitsen?",focus:"modder",a:["mo-dder","mod-der","modd-er"],correct:1,good:"Juist! Lees nu het hele woord: modder."},
 {icon:"🎵",title:"Maak het rijm af",q:"Noor loopt vlug naar huis. Daar ziet ze plots een …",focus:"huis",a:["boom","muis","heg"],correct:1,good:"Juist! huis en muis rijmen."},
