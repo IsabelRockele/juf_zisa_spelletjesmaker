@@ -633,7 +633,7 @@ function renderFluencyBook(){
     <header class="fluency-head"><button id="fluencyBack">‹ Taalreis</button><div><b>${currentBook.startBook?"Mijn leesstartboekje":"Mijn vlotleesboekje"}</b><span>${cover?"Voorkaft":`${fluencyIndex+1} van ${pages.length}`}</span></div><div class="fluency-dots">${pages.map((_,i)=>`<i class="${i===fluencyIndex?"on":""}"></i>`).join("")}</div></header>
     <div class="mini-book ${cover?"mini-cover":""}">
       <div class="mini-left">${cover?`<img src="images/zisa-leest.png" alt="Zisa leest"><span>AVI ${currentBook.level}</span>`:`<div class="fluency-icon">${page.icon}</div><h2>${page.title}</h2><p>${currentBook.title}</p>`}</div>
-      <article class="mini-right">${cover?`<small>${currentBook.startBook?"AVI START":"BONUSBOEKJE"}</small><h1>${currentBook.startBook?"Mijn eerste<br>leeswoorden":"Lees vlot<br>en mooi"}</h1><p>${currentBook.startBook?`${pages.length} korte bladzijden om letters, woorden en rijm te oefenen.`:`${pages.length} korte leesbladzijden met woorden en zinnen uit jouw verhaal.`}</p><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2><p class="fluency-question">${page.q}</p><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
+      <article class="mini-right">${cover?`<small>${currentBook.startBook?"AVI START":"BONUSBOEKJE"}</small><h1>${currentBook.startBook?"Mijn eerste<br>leeswoorden":"Lees vlot<br>en mooi"}</h1><p>${currentBook.startBook?`${pages.length} korte bladzijden om klanken, woorden, rijm en leestekens te oefenen.`:`${pages.length} korte leesbladzijden met woorden en zinnen uit jouw verhaal.`}</p><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2><p class="fluency-question">${page.q}</p><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
     </div></section>`;
   document.querySelector("#fluencyBack").textContent=currentBook.startBook?"‹ Bibliotheek":"‹ Taalreis";
   document.querySelector("#fluencyBack").onclick=()=>{document.body.classList.remove("fluency-mode");if(currentBook.startBook)renderLibrary();else{missionIndex=Math.max(0,(bookGames[currentBook.id]?.length||1)-1);renderMission()}};
@@ -647,26 +647,29 @@ function renderFluencyPage(page,total){
   if(page.chunks){
     const train=document.createElement("div");train.className="word-train";
     const instruction=document.createElement("p");instruction.className="train-instruction";activity.append(instruction,train);
+    instruction.textContent="Zoem elke klank zolang je ze ziet.";
+    const boxes=page.chunks.map(()=>{const box=document.createElement("span");box.className="sound-box";train.append(box);return box});
+    const start=document.createElement("button");start.className="start-zoom";start.textContent="Start met zoemen";activity.append(start);
     let step=0;
     const showStep=()=>{
-      const chunk=page.chunks[step];train.innerHTML="";instruction.textContent=`Tik op ${chunk}. Luister en zoem mee.`;
-      const button=document.createElement("button");button.textContent=chunk;button.onclick=()=>{
-        if(button.disabled)return;button.disabled=true;button.classList.add("heard");playStartPhoneme(chunk);
-        setTimeout(()=>{step++;if(step<page.chunks.length)showStep();else joinWord()},950)
-      };train.append(button)
+      boxes.forEach(box=>{box.textContent="";box.classList.remove("active")});
+      if(step>=page.chunks.length){start.remove();joinWord();return}
+      boxes[step].textContent=page.chunks[step];boxes[step].classList.add("active");
+      step++;setTimeout(showStep,1700)
     };
     const joinWord=()=>{
-      instruction.textContent="De stukjes plakken nu aan elkaar.";
+      instruction.textContent="Lees nu het hele woord.";
       train.innerHTML=`<div class="joining-word">${page.chunks.map(chunk=>`<span>${chunk}</span>`).join("")}</div>`;
       setTimeout(()=>{train.innerHTML=`<strong>${page.word}</strong>`;instruction.textContent=`Lees nu zelf: ${page.word}.`;document.querySelector("#fluencyFeedback").textContent="Knap! Je maakte het hele woord.";fluencyScore++;addFluencyNext(total)},900)
     };
-    showStep()
+    start.onclick=()=>{start.disabled=true;start.textContent="Zoem mee…";showStep()}
   }else if(page.a){
     const choices=document.createElement("div");choices.className="fluency-choices";activity.append(choices);
     shuffled(page.a.map((answer,index)=>({answer,index}))).forEach(({answer,index})=>{
       const button=document.createElement("button");button.textContent=answer;button.onclick=()=>{
         if(index!==page.correct){button.classList.add("wrong");document.querySelector("#fluencyFeedback").textContent="Kijk of lees nog eens rustig.";setTimeout(()=>button.classList.remove("wrong"),500);return}
         button.classList.add("correct");choices.querySelectorAll("button").forEach(item=>item.disabled=true);fluencyScore++;
+        if(page.punctuation){const sentence=document.querySelector(".fluency-focus");if(sentence)sentence.textContent=`${page.focus}${answer}`}
         document.querySelector("#fluencyFeedback").textContent=page.good||"Goed gelezen!";
         if(page.read){const read=document.createElement("div");read.className="fluency-read";read.textContent=page.read;activity.append(read)}
         addFluencyNext(total);
@@ -685,14 +688,6 @@ function renderFluencyPage(page,total){
 function addFluencyNext(total){
   if(document.querySelector(".fluency-next-page"))return;
   const button=document.createElement("button");button.className="fluency-next fluency-next-page";button.textContent=fluencyIndex===total-1?"Boekje uit! ›":"Sla de bladzijde om ›";button.onclick=()=>{if(fluencyIndex===total-1){document.body.classList.remove("fluency-mode");renderFinish()}else{fluencyIndex++;renderFluencyBook()}};document.querySelector(".mini-right").append(button)
-}
-
-const startPhonemeAudio={};
-function playStartPhoneme(chunk){
-  Object.values(startPhonemeAudio).forEach(audio=>{audio.pause();audio.currentTime=0});
-  const audio=startPhonemeAudio[chunk]||(startPhonemeAudio[chunk]=new Audio(`audio/phonemes/${encodeURIComponent(chunk)}.wav`));
-  audio.currentTime=0;
-  audio.play().catch(error=>console.warn("De letterklank kon niet worden afgespeeld.",error));
 }
 
 function renderFinish(){
