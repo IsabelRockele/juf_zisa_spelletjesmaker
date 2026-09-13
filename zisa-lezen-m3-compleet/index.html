@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Zisa Lezen</title>
+  <link rel="stylesheet" href="style.css?v=17">
+</head>
+<body>
+<header class="topbar">
+  <button id="brandBtn" class="brand" type="button" aria-label="Naar de bibliotheek">
+    <span class="zisa">Zisa</span><span class="lezen">LEZEN</span>
+  </button>
+  <div class="tagline">Kleine lezers,<br><strong>grote avonturen!</strong> <span>♥</span></div>
+  <button id="libraryBtn" class="library-btn" type="button">⌂ <span>Bibliotheek</span></button>
+  <div class="level-display">📖 <span>AVI M3</span></div>
+  <img class="header-zebra" src="images/zisa-zebra.png" alt="Zisa de zebra">
+  <div class="speech">Lezen<br>is leuk! <span>♥</span></div>
+</header>
+
+<main id="app"></main>
+
+<!-- De bestaande M3- en E3-boeken worden eerst geladen. De volgende niveaus
+     worden er daarna aan toegevoegd en kunnen ze dus nooit vervangen. -->
+<script src="data/books-v2.js?v=17"></script>
+  <script src="data/books-m4-e4-remade.js?v=5"></script>
+<script src="access.js?v=1"></script>
+</body>
+</html>
