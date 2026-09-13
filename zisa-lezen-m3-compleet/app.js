@@ -108,7 +108,7 @@ function speak(text,highlightRoot=null){
   if(!("speechSynthesis" in window))return;
   speechSynthesis.cancel();
   clearWordHighlight();
-  const spokenText=highlightRoot?String(text):String(text).replaceAll("-","");
+  const spokenText=highlightRoot?String(text):String(text).replaceAll("-","").replaceAll("–",", ");
   const voice=new SpeechSynthesisUtterance(spokenText);
   voice.lang="nl-BE";voice.rate=.82;voice.pitch=1.05;
   const voices=speechSynthesis.getVoices();
@@ -131,6 +131,7 @@ function bindSpeechButtons(root=document){root.querySelectorAll("[data-say]").fo
 function makeListenButton(text,label="Beluister dit woord"){
   const button=document.createElement("button");button.type="button";button.className="mini-listen";button.textContent="🔊";button.title=label;button.setAttribute("aria-label",label);button.onclick=event=>{event.stopPropagation();speak(text)};return button;
 }
+function spokenStartChoice(text){return text==="."?"punt":text==="?"?"vraagteken":text==="!"?"uitroepteken":text}
 function hasAudioSupport(kind="task"){
   if(!currentBook)return false;
   return currentBook.level==="START"||currentBook.level==="M3"||(currentBook.level==="E3"&&kind!=="story");
@@ -633,17 +634,23 @@ function renderFluencyBook(){
     <header class="fluency-head"><button id="fluencyBack">‹ Taalreis</button><div><b>${currentBook.startBook?"Mijn leesstartboekje":"Mijn vlotleesboekje"}</b><span>${cover?"Voorkaft":`${fluencyIndex+1} van ${pages.length}`}</span></div><div class="fluency-dots">${pages.map((_,i)=>`<i class="${i===fluencyIndex?"on":""}"></i>`).join("")}</div></header>
     <div class="mini-book ${cover?"mini-cover":""}">
       <div class="mini-left">${cover?`<img src="images/zisa-leest.png" alt="Zisa leest"><span>AVI ${currentBook.level}</span>`:`<div class="fluency-icon">${page.icon}</div><h2>${page.title}</h2><p>${currentBook.title}</p>`}</div>
-      <article class="mini-right">${cover?`<small>${currentBook.startBook?"AVI START":"BONUSBOEKJE"}</small><h1>${currentBook.startBook?"Mijn eerste<br>leeswoorden":"Lees vlot<br>en mooi"}</h1><p>${currentBook.startBook?`${pages.length} korte bladzijden om klanken, woorden, rijm en leestekens te oefenen.`:`${pages.length} korte leesbladzijden met woorden en zinnen uit jouw verhaal.`}</p><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2><p class="fluency-question">${page.q}</p><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
+      <article class="mini-right">${cover?`<small>${currentBook.startBook?"AVI START":"BONUSBOEKJE"}</small><h1>${currentBook.startBook?"Mijn eerste<br>leeswoorden":"Lees vlot<br>en mooi"}</h1><p>${currentBook.startBook?`${pages.length} korte bladzijden om klanken, woorden, rijm en leestekens te oefenen.`:`${pages.length} korte leesbladzijden met woorden en zinnen uit jouw verhaal.`}</p><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2><div class="fluency-question-row"><p class="fluency-question">${page.q}</p>${currentBook.startBook?`<button class="listen-btn" data-say="${escapeAttr(page.q)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
     </div></section>`;
   document.querySelector("#fluencyBack").textContent=currentBook.startBook?"‹ Bibliotheek":"‹ Taalreis";
   document.querySelector("#fluencyBack").onclick=()=>{document.body.classList.remove("fluency-mode");if(currentBook.startBook)renderLibrary();else{missionIndex=Math.max(0,(bookGames[currentBook.id]?.length||1)-1);renderMission()}};
   if(cover){document.querySelector("#fluencyStart").onclick=()=>{fluencyIndex=0;renderFluencyBook()};return}
   renderFluencyPage(page,pages.length);
+  bindSpeechButtons(app);
 }
 
 function renderFluencyPage(page,total){
   const activity=document.querySelector("#fluencyActivity");
-  if(page.focus){const focus=document.createElement("div");focus.className="fluency-focus";focus.textContent=page.focus;activity.append(focus)}
+  if(page.focus){
+    const wrap=document.createElement("div");wrap.className="fluency-focus-wrap";
+    const focus=document.createElement("div");focus.className="fluency-focus";focus.textContent=page.focus;wrap.append(focus);
+    if(currentBook.startBook)wrap.append(makeListenButton(page.focus,`Beluister ${page.focus}`));
+    activity.append(wrap)
+  }
   if(page.chunks){
     const train=document.createElement("div");train.className="word-train";
     const instruction=document.createElement("p");instruction.className="train-instruction";activity.append(instruction,train);
@@ -673,7 +680,9 @@ function renderFluencyPage(page,total){
         document.querySelector("#fluencyFeedback").textContent=page.good||"Goed gelezen!";
         if(page.read){const read=document.createElement("div");read.className="fluency-read";read.textContent=page.read;activity.append(read)}
         addFluencyNext(total);
-      };choices.append(button)
+      };
+      if(currentBook.startBook){const wrap=document.createElement("div");wrap.className="fluency-choice-wrap";button.classList.add("fluency-answer");wrap.append(button,makeListenButton(spokenStartChoice(answer),`Beluister ${spokenStartChoice(answer)}`));choices.append(wrap)}
+      else choices.append(button)
     });
   }else{
     if(page.moods){const moods=document.createElement("div");moods.className="fluency-moods";page.moods.forEach((mood,index)=>{const button=document.createElement("button");button.textContent=mood;button.onclick=()=>{moods.querySelectorAll("button").forEach(item=>item.classList.remove("chosen","wrong"));button.classList.add(index===page.correctMood?"chosen":"wrong");document.querySelector("#fluencyFeedback").textContent=index===page.correctMood?"Goed gekozen. Lees de zin nu met die stem.":"Denk aan wat het personage net ontdekt."};moods.append(button)});activity.append(moods)}

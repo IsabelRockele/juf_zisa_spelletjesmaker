@@ -5,7 +5,7 @@ window.ZISA_BOOKS.unshift(
 );
 window.ZISA_FLUENCY_BOOKS=window.ZISA_FLUENCY_BOOKS||{};
 window.ZISA_FLUENCY_BOOKS["start-maan"]=[
-  {icon:"🚂",title:"Maak het woord",q:"Tik op elk stukje. Maak daarna het woord.",chunks:["m","aa","n"],word:"maan"},
+  {icon:"🚂",title:"Maak het woord",q:"Tik op Start met zoemen. Lees elke klank zoemend zolang je ze ziet. Lees daarna het hele woord.",chunks:["m","aa","n"],word:"maan"},
   {icon:"👀",title:"Zoek hetzelfde woord",q:"Tik precies hetzelfde woord aan.",focus:"maan",a:["haan","maan","baan"],correct:1,good:"Juist! Dit is maan."},
   {icon:"🎵",title:"Zoek het rijmwoord",q:"Welk woord rijmt op maan?",focus:"maan",a:["man","haan","min"],correct:1,good:"Juist! maan en haan rijmen."},
   {icon:"🎵",title:"Zoek het rijmwoord",q:"Welk woord rijmt op baan?",focus:"baan",a:["ban","ben","maan"],correct:2,good:"Juist! baan en maan rijmen."},
@@ -14,7 +14,7 @@ window.ZISA_FLUENCY_BOOKS["start-maan"]=[
   {icon:"❓",title:"Kies het leesteken",q:"Welk leesteken hoort achter deze zin?",focus:"is dat de maan",punctuation:true,a:[".","!","?"],correct:2,good:"Juist! Dit is een vraag. Er hoort een vraagteken achter."}
 ];
 window.ZISA_FLUENCY_BOOKS["start-vis"]=[
-  {icon:"🚂",title:"Maak het woord",q:"Tik op elk stukje. Maak daarna het woord.",chunks:["v","i","s"],word:"vis"},
+  {icon:"🚂",title:"Maak het woord",q:"Tik op Start met zoemen. Lees elke klank zoemend zolang je ze ziet. Lees daarna het hele woord.",chunks:["v","i","s"],word:"vis"},
   {icon:"👀",title:"Zoek hetzelfde woord",q:"Tik precies hetzelfde woord aan.",focus:"vis",a:["vos","vis","mis"],correct:1,good:"Juist! Dit is vis."},
   {icon:"🎵",title:"Zoek het rijmwoord",q:"Welk woord rijmt op vis?",focus:"vis",a:["vos","mus","mis"],correct:2,good:"Juist! vis en mis rijmen."},
   {icon:"🎵",title:"Zoek het rijmwoord",q:"Welk woord rijmt op mis?",focus:"mis",a:["mus","is","mes"],correct:1,good:"Juist! mis en is rijmen."},
