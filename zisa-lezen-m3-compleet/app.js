@@ -91,6 +91,31 @@ Object.entries(window.ZISA_LEVEL_GAMES||{}).forEach(([id,games])=>{bookGames[id]
 Object.entries(window.ZISA_SPEED_GAMES||{}).forEach(([id,game])=>{
   preReadingGames[id]={icon:"⏱️",title:"Tempolezen",q:"Lees drie keer één minuut en probeer jezelf te verslaan.",...game};
 });
+
+// Verdeel juiste antwoorden per oefensoort bewust over links, midden en rechts.
+// De inhoud blijft gelijk; alleen de zichtbare plaats wisselt voorspelbaar af.
+function spreadCorrectAnswerPositions(){
+  const counters=new Map();
+  const visited=new Set();
+  const visit=(value)=>{
+    if(!value||typeof value!=="object"||visited.has(value))return;
+    visited.add(value);
+    if(Array.isArray(value.a)&&value.a.length>1&&Number.isInteger(value.correct)){
+      const bucket=String(value.type||value.title||"leesvraag").toLowerCase();
+      const sequence=counters.get(bucket)||0;
+      const desired=sequence%value.a.length;
+      counters.set(bucket,sequence+1);
+      if(desired!==value.correct){
+        [value.a[value.correct],value.a[desired]]=[value.a[desired],value.a[value.correct]];
+        value.correct=desired;
+      }
+    }
+    Object.values(value).forEach(visit);
+  };
+  [allBooks,bookGames,window.ZISA_FLUENCY_BOOKS,window.ZISA_START_BOOKS].forEach(visit);
+}
+spreadCorrectAnswerPositions();
+
 const targetedReviewPages={
   "m3-pip-draak":{0:6,2:9,7:2},
   "m3-bo-maan":{0:7,2:4,7:3},
