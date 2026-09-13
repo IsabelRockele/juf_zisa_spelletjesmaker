@@ -16,8 +16,8 @@ window.ZISA_FLUENCY_BOOKS["start-zoemen"]=[
   {icon:"🚌",title:"Zoem en plak",q:zoomOpdracht,chunks:["b","u","s"],word:"bus"},
   {icon:"🖊️",title:"Zoem en plak",q:zoomOpdracht,chunks:["p","e","n"],word:"pen"},
   {icon:"🌹",title:"Zoem en plak",q:zoomOpdracht,chunks:["r","oo","s"],word:"roos"},
-  {icon:"👀",title:"Lees nu zelf",q:"Welk woord heb je zonet zoemend gelezen?",focus:"kat",a:["kat","kam","kan"],correct:0,good:"Juist! Dit is kat."},
-  {icon:"⭐",title:"Lees nu zelf",q:"Welk woord heb je zonet zoemend gelezen?",focus:"roos",a:["room","roos","rook"],correct:1,good:"Juist! Dit is roos."}
+  {icon:"🐱",title:"Lees en kies",q:"Lees de woorden. Welk woord hoort bij de prent?",a:["kat","kam","kan"],correct:0,good:"Juist! Bij de prent hoort kat."},
+  {icon:"🌹",title:"Lees en kies",q:"Lees de woorden. Welk woord hoort bij de prent?",a:["room","roos","rook"],correct:1,good:"Juist! Bij de prent hoort roos."}
 ];
 
 window.ZISA_FLUENCY_BOOKS["start-rijmen"]=[
