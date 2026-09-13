@@ -1,9 +1,7 @@
 
 const app = document.querySelector("#app");
 const allBooks = window.ZISA_BOOKS || [];
-const books = ["discover","free"].includes(window.ZISA_ACCESS_MODE)
-  ? allBooks.filter((book,index)=>allBooks.findIndex(candidate=>candidate.level===book.level)===index)
-  : allBooks;
+const books = allBooks;
 const levels = ["M3","E3","M4","E4","M5","E5","M6","E6"];
 let currentLevel = "M3";
 let currentBook = null;
@@ -15,6 +13,8 @@ let missionScore = 0;
 let reviewMode = false;
 let reviewEndPage = 0;
 let speedTimer = null;
+let fluencyIndex = 0;
+let fluencyScore = 0;
 
 const roleColors = {wie:"#f4d94e",doet:"#ef6b67",waar:"#a985d6",wat:"#9a6b45",hoe:"#67c98f",wanneer:"#f3a04b"};
 const bookGames = {
@@ -150,6 +150,11 @@ function shuffledWrong(list,key=item=>item){
   return copy;
 }
 
+function isDiscoverLocked(book){
+  if(window.ZISA_ACCESS_MODE!=="discover")return false;
+  return books.find(candidate=>candidate.level===book.level)?.id!==book.id;
+}
+
 function imageBlock(src, alt){
   if(src&&typeof src==="object")return `<div class="story-sprite" role="img" aria-label="${escapeAttr(alt)}" style="background-image:url('${src.src}');--sprite-x:${src.x}%;--sprite-y:${src.y}%"></div>`;
   return `<div class="story-image" role="img" aria-label="${escapeAttr(alt)}" style="background-image:url('${src}')"></div>`;
@@ -191,23 +196,30 @@ function renderLibrary(){
   }
 
   list.forEach(book=>{
+    const locked=isDiscoverLocked(book);
     const card = document.createElement("button");
-    card.className = "card";
+    card.className = `card${locked?" pro-locked":""}`;
+    if(locked){
+      card.setAttribute("aria-disabled","true");
+      card.setAttribute("aria-label",`${book.title} – enkel beschikbaar in Pro`);
+    }
     card.innerHTML = `
       <div class="cover">
         <span class="badge">${book.level}</span>
+        ${locked?`<span class="pro-lock">🔒 Enkel in Pro</span>`:""}
         ${book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="background-image:url('${book.cover.src}');--sprite-x:${book.cover.x}%;--sprite-y:${book.cover.y}%"></div>`:`<div class="cover-image" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="background-image:url('${book.cover}')"></div>`}
       </div>
       <div class="cardtext">
         <h3>${book.title}</h3>
         <p>${book.blurb}</p>
       </div>`;
-    card.addEventListener("click",()=>openBook(book));
+    if(!locked)card.addEventListener("click",()=>openBook(book));
     grid.appendChild(card);
   });
 }
 
 function openBook(book){
+  if(!book||isDiscoverLocked(book))return;
   currentBook = book;
   pageIndex = 0;
   pageTaskPassed = false;
@@ -226,7 +238,7 @@ function renderBookCover(){
   app.innerHTML=`<div class="reader cover-reader">
     <aside class="rail">
       <span class="lvl">${currentBook.level}</span><small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
-      <div class="book-thumbs">${booksAtLevel.map(book=>`<button class="book-thumb ${book.id===currentBook.id?"on":""}" data-book="${book.id}" aria-label="Open ${book.title}">${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="background-image:url('${book.cover.src}');--sprite-x:${book.cover.x}%;--sprite-y:${book.cover.y}%"></span>`:`<span class="thumb-image" aria-hidden="true" style="background-image:url('${book.cover}')"></span>`}<span>${book.title}</span></button>`).join("")}</div>
+      <div class="book-thumbs">${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="background-image:url('${book.cover.src}');--sprite-x:${book.cover.x}%;--sprite-y:${book.cover.y}%"></span>`:`<span class="thumb-image" aria-hidden="true" style="background-image:url('${book.cover}')"></span>`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}</div>
     </aside>
     <div><section class="book book-cover-stage">
       <div class="bookhead"><h2>${currentBook.title}</h2><div class="count">Voorkaft</div></div>
@@ -239,7 +251,7 @@ function renderBookCover(){
   </div>`;
   document.querySelector("#coverBack").onclick=renderLibrary;
   document.querySelector("#coverStart").onclick=hasWordStart?renderWordStart:renderReader;
-  document.querySelectorAll(".book-thumb").forEach(btn=>btn.onclick=()=>openBook(books.find(book=>book.id===btn.dataset.book)));
+  document.querySelectorAll(".book-thumb:not(.pro-locked)").forEach(btn=>btn.onclick=()=>openBook(books.find(book=>book.id===btn.dataset.book)));
 }
 
 function renderWordStart(){
@@ -286,7 +298,7 @@ function renderReader(){
         <span class="lvl">${currentBook.level}</span>
         <small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
         <div class="book-thumbs">
-          ${booksAtLevel.map(book=>`<button class="book-thumb ${book.id===currentBook.id?"on":""}" data-book="${book.id}" aria-label="Open ${book.title}">${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="background-image:url('${book.cover.src}');--sprite-x:${book.cover.x}%;--sprite-y:${book.cover.y}%"></span>`:`<span class="thumb-image" aria-hidden="true" style="background-image:url('${book.cover}')"></span>`}<span>${book.title}</span></button>`).join("")}
+          ${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="background-image:url('${book.cover.src}');--sprite-x:${book.cover.x}%;--sprite-y:${book.cover.y}%"></span>`:`<span class="thumb-image" aria-hidden="true" style="background-image:url('${book.cover}')"></span>`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}
         </div>
       </aside>
 
@@ -329,7 +341,7 @@ function renderReader(){
   });
   document.querySelector("#returnTask")?.addEventListener("click",()=>{reviewMode=false;renderMission()});
 
-  document.querySelectorAll(".book-thumb").forEach(btn=>{
+  document.querySelectorAll(".book-thumb:not(.pro-locked)").forEach(btn=>{
     btn.addEventListener("click",()=>openBook(books.find(book=>book.id===btn.dataset.book)));
   });
 
@@ -605,7 +617,55 @@ function renderSpeedGame(game,activity,onComplete=null){
 function setMissionFeedback(text,kind){const el=document.querySelector("#missionFeedback");el.textContent=text;el.className=`mission-feedback ${kind||""}`}
 function finishGame(button,message){
   document.querySelectorAll("#missionActivity .game-choice").forEach(btn=>btn.disabled=true);document.querySelector(".reread-btn")?.remove();button?.classList.add("correct");missionScore++;setMissionFeedback(message,"good");
-  const next=document.createElement("button");next.className="mission-next";next.textContent=missionIndex===(bookGames[currentBook.id]?.length||1)-1?"Bekijk mijn diploma ›":"Volgende opdracht ›";next.onclick=()=>{missionIndex++;missionIndex>=(bookGames[currentBook.id]?.length||1)?renderFinish():renderMission()};document.querySelector(".mission-card").append(next);
+  const next=document.createElement("button");next.className="mission-next";next.textContent=missionIndex===(bookGames[currentBook.id]?.length||1)-1?"Open mijn vlotleesboekje ›":"Volgende opdracht ›";next.onclick=()=>{missionIndex++;missionIndex>=(bookGames[currentBook.id]?.length||1)?startFluencyBook():renderMission()};document.querySelector(".mission-card").append(next);
+}
+
+function startFluencyBook(){fluencyIndex=-1;fluencyScore=0;renderFluencyBook()}
+
+function renderFluencyBook(){
+  clearInterval(speedTimer);speedTimer=null;
+  document.body.classList.add("reading-mode","fluency-mode");document.body.classList.remove("mission-mode");
+  const pages=window.ZISA_FLUENCY_BOOKS?.[currentBook.id]||[];
+  if(!pages.length){renderFinish();return}
+  const cover=fluencyIndex<0,page=cover?null:pages[fluencyIndex];
+  app.innerHTML=`<section class="fluency-shell">
+    <header class="fluency-head"><button id="fluencyBack">‹ Taalreis</button><div><b>Mijn vlotleesboekje</b><span>${cover?"Voorkaft":`${fluencyIndex+1} van ${pages.length}`}</span></div><div class="fluency-dots">${pages.map((_,i)=>`<i class="${i===fluencyIndex?"on":""}"></i>`).join("")}</div></header>
+    <div class="mini-book ${cover?"mini-cover":""}">
+      <div class="mini-left">${cover?`<img src="images/zisa-leest.png" alt="Zisa leest"><span>AVI ${currentBook.level}</span>`:`<div class="fluency-icon">${page.icon}</div><h2>${page.title}</h2><p>${currentBook.title}</p>`}</div>
+      <article class="mini-right">${cover?`<small>BONUSBOEKJE</small><h1>Lees vlot<br>en mooi</h1><p>Drie korte leesbladzijden met woorden en zinnen uit jouw verhaal.</p><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2><p class="fluency-question">${page.q}</p><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
+    </div></section>`;
+  document.querySelector("#fluencyBack").onclick=()=>{document.body.classList.remove("fluency-mode");missionIndex=Math.max(0,(bookGames[currentBook.id]?.length||1)-1);renderMission()};
+  if(cover){document.querySelector("#fluencyStart").onclick=()=>{fluencyIndex=0;renderFluencyBook()};return}
+  renderFluencyPage(page,pages.length);
+}
+
+function renderFluencyPage(page,total){
+  const activity=document.querySelector("#fluencyActivity");
+  if(page.focus){const focus=document.createElement("div");focus.className="fluency-focus";focus.textContent=page.focus;activity.append(focus)}
+  if(page.a){
+    const choices=document.createElement("div");choices.className="fluency-choices";activity.append(choices);
+    shuffled(page.a.map((answer,index)=>({answer,index}))).forEach(({answer,index})=>{
+      const button=document.createElement("button");button.textContent=answer;button.onclick=()=>{
+        if(index!==page.correct){button.classList.add("wrong");document.querySelector("#fluencyFeedback").textContent="Kijk of lees nog eens rustig.";setTimeout(()=>button.classList.remove("wrong"),500);return}
+        button.classList.add("correct");choices.querySelectorAll("button").forEach(item=>item.disabled=true);fluencyScore++;
+        document.querySelector("#fluencyFeedback").textContent=page.good||"Goed gelezen!";
+        if(page.read){const read=document.createElement("div");read.className="fluency-read";read.textContent=page.read;activity.append(read)}
+        addFluencyNext(total);
+      };choices.append(button)
+    });
+  }else{
+    if(page.moods){const moods=document.createElement("div");moods.className="fluency-moods";page.moods.forEach((mood,index)=>{const button=document.createElement("button");button.textContent=mood;button.onclick=()=>{moods.querySelectorAll("button").forEach(item=>item.classList.remove("chosen","wrong"));button.classList.add(index===page.correctMood?"chosen":"wrong");document.querySelector("#fluencyFeedback").textContent=index===page.correctMood?"Goed gekozen. Lees de zin nu met die stem.":"Denk aan wat het personage net ontdekt."};moods.append(button)});activity.append(moods)}
+    const text=document.createElement("div");text.className="fluency-read main";text.textContent=page.text;activity.append(text);
+    if(hasAudioSupport()){const listen=makeListenButton(page.text,"Beluister de zin");listen.classList.add("fluency-listen");activity.append(listen)}
+    const tip=document.createElement("p");tip.className="fluency-tip";tip.textContent=page.tip;activity.append(tip);
+    const actions=document.createElement("div");actions.className="fluency-self";
+    ["Nog eens lezen","Goed gelukt"].forEach((label,index)=>{const button=document.createElement("button");button.textContent=label;button.onclick=()=>{if(index===0){text.classList.add("try-again");setTimeout(()=>text.classList.remove("try-again"),600)}else{fluencyScore++;actions.querySelectorAll("button").forEach(item=>item.disabled=true);document.querySelector("#fluencyFeedback").textContent="Mooi! Je las bewust en met aandacht.";addFluencyNext(total)}};actions.append(button)});activity.append(actions)
+  }
+}
+
+function addFluencyNext(total){
+  if(document.querySelector(".fluency-next-page"))return;
+  const button=document.createElement("button");button.className="fluency-next fluency-next-page";button.textContent=fluencyIndex===total-1?"Boekje uit! ›":"Sla de bladzijde om ›";button.onclick=()=>{if(fluencyIndex===total-1){document.body.classList.remove("fluency-mode");renderFinish()}else{fluencyIndex++;renderFluencyBook()}};document.querySelector(".mini-right").append(button)
 }
 
 function renderFinish(){
@@ -615,7 +675,7 @@ function renderFinish(){
     <section class="finish">
       <div class="cup">🏆</div>
       <h2>Boek uitgelezen!</h2>
-      <p>Je hebt <strong>${currentBook.title}</strong> gelezen en ${missionScore} taalspellen opgelost.</p>
+      <p>Je hebt <strong>${currentBook.title}</strong> gelezen, ${missionScore} taalspellen opgelost en je vlotleesboekje uitgelezen.</p>
       <button class="btn next" id="backBooks">Kies een nieuw boek</button>
     </section>`;
   document.querySelector("#backBooks").addEventListener("click",renderLibrary);
