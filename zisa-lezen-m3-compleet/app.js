@@ -244,7 +244,7 @@ function renderLibrary(){
       <div class="cover">
         <span class="badge">${book.level}</span>
         ${locked?`<span class="pro-lock">🔒 Enkel in Pro</span>`:""}
-        ${book.startBook?`<div class="start-card-cover tone-${book.coverTone||"blue"}"><img src="${book.coverImage}" alt=""><strong>${book.title}</strong><small>AVI START</small></div>`:book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="${spriteStyle(book.cover)}"></div>`:`<div class="cover-image" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="background-image:url('${book.cover}')"></div>`}
+        ${book.startBook?`<div class="start-card-cover tone-${book.coverTone||"blue"}"><img src="${book.coverImage}" alt=""><strong>${book.title}</strong><small>AVI START</small></div>`:book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="${spriteStyle(book.cover)}"></div>`:`<img class="cover-image" src="${book.cover}" alt="Voorkaft van ${escapeAttr(book.title)}">`}
       </div>
       <div class="cardtext">
         <h3>${book.title}</h3>
@@ -278,7 +278,7 @@ function renderBookCover(){
   app.innerHTML=`<div class="reader cover-reader">
     <aside class="rail">
       <span class="lvl">${currentBook.level}</span><small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
-      <div class="book-thumbs">${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="${spriteStyle(book.cover)}"></span>`:`<span class="thumb-image" aria-hidden="true" style="background-image:url('${book.cover}')"></span>`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}</div>
+      <div class="book-thumbs">${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="${spriteStyle(book.cover)}"></span>`:`<img class="thumb-image" src="${book.cover}" alt="">`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}</div>
     </aside>
     <div><section class="book book-cover-stage">
       <div class="bookhead"><h2>${currentBook.title}</h2><div class="count">Voorkaft</div></div>
@@ -340,7 +340,7 @@ function renderReader(){
         <span class="lvl">${currentBook.level}</span>
         <small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
         <div class="book-thumbs">
-          ${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="${spriteStyle(book.cover)}"></span>`:`<span class="thumb-image" aria-hidden="true" style="background-image:url('${book.cover}')"></span>`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}
+          ${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="${spriteStyle(book.cover)}"></span>`:`<img class="thumb-image" src="${book.cover}" alt="">`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}
         </div>
       </aside>
 

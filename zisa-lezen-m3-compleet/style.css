@@ -64,7 +64,7 @@ main{width:min(1420px,100%);margin:auto;padding:24px clamp(12px,2.6vw,34px) 50px
   height:300px;background:linear-gradient(145deg,#fff3d3,#dff3fa);
   position:relative;overflow:hidden;display:grid;place-items:center
 }
-.cover-image,.story-image{width:100%;height:100%;background-size:cover;background-position:center;background-repeat:no-repeat}.cover-sprite,.story-sprite{width:100%;height:100%;background-repeat:no-repeat;background-size:var(--sprite-w,300%) var(--sprite-h,400%);background-position:var(--sprite-x) var(--sprite-y)}.story-image,.story-sprite{position:absolute;inset:0}
+.cover-image,.story-image{width:100%;height:100%;background-size:cover;background-position:center;background-repeat:no-repeat}.cover-image{display:block;object-fit:cover}.cover-sprite,.story-sprite{width:100%;height:100%;background-repeat:no-repeat;background-size:var(--sprite-w,300%) var(--sprite-h,400%);background-position:var(--sprite-x) var(--sprite-y)}.story-image,.story-sprite{position:absolute;inset:0}
 .card.pro-locked{cursor:not-allowed}.card.pro-locked .cover-image,.card.pro-locked .cover-sprite{filter:saturate(.72) brightness(.78)}.pro-lock{position:absolute;z-index:5;right:14px;bottom:14px;padding:9px 13px;border-radius:999px;background:#173e70;color:#fff;font-size:14px;font-weight:900;box-shadow:0 5px 14px rgba(12,43,77,.28)}.book-thumb.pro-locked{cursor:not-allowed;opacity:.72}.book-thumb.pro-locked span:last-child{color:#173e70;font-weight:900}
 .cover-fallback{font-size:78px}
 .badge{
