@@ -3,11 +3,25 @@ const practiceTask=(type,prompt,goals,extra={})=>({type,prompt,goals,...extra});
 const mediaGoals=['IT.027','IT.035'];
 const fileGoals=['IT.028','IT.029'];
 const mediaTasks=[
- practiceTask('media','Start het bloemenfilmpje. Kijk even. Pauzeer en kies de kleur van de bloem. Speel verder en stop daarna.',mediaGoals,{question:'Welke kleur heeft de bloem?',answers:['Geel','Rood','Wit'],answer:'Rood'}),
- practiceTask('media','Het konijnenfilmpje staat heel stil. Start het en zet het geluid een stap luider. Stop als je klaar bent en klik op Klaar.',mediaGoals,{adjust:'volumeUp',clip:'rabbit'}),
- practiceTask('media','Je wilt het bloemenfilmpje stiller beluisteren. Start het en zet het geluid een stap zachter. Stop daarna en klik op Klaar.',mediaGoals,{adjust:'volumeDown'}),
- practiceTask('media','Bekijk het konijn. Pauzeer om goed te kijken en beantwoord de vraag. Speel verder, stop en klik op Klaar.',mediaGoals,{clip:'rabbit',question:'Welke kleur heeft het konijn?',answers:['Bruin','Zwart','Wit'],answer:'Wit'})
+ practiceTask('media','Doe alle stappen van de kijkopdracht. Start het filmpje en kijk wat er met de bloem gebeurt. Volg daarna steeds de stap die oplicht.',mediaGoals,{age:'6-7',clip:'flower',watchUntil:10,question:'Wat verandert er aan de bloem tijdens het filmpje?',answers:['De bloem gaat dicht','De bloem gaat open','De bloem valt van de plant'],answer:'De bloem gaat open'}),
+ practiceTask('media','Je hoort het konijnenfilmpje niet goed. Start het en zet het geluid een stap luider. Luister even. Druk daarna op stop en op Klaar.',mediaGoals,{age:'6-7',adjust:'volumeUp',clip:'rabbit'}),
+ practiceTask('media','Het vlinderfilmpje klinkt te luid. Start het en zet het geluid een stap zachter. Luister even. Druk daarna op stop en op Klaar.',mediaGoals,{age:'6-7',adjust:'volumeDown',clip:'monarch'}),
+ practiceTask('media','Je wilt even stoppen met kijken. Start het beekfilmpje, druk op pauze en speel weer verder. Druk daarna op stop en op Klaar.',mediaGoals,{age:'6-7',clip:'stream',pausePractice:true}),
+ practiceTask('media','Bekijk hoe de eend eten zoekt. Pauzeer het filmpje en beantwoord de Kijkvraag. Speel daarna verder en druk op stop.',mediaGoals,{age:'7-8',clip:'duck',question:'Waar zoekt de eend eten in dit filmpje?',answers:['Op de oever','Onder water','In de lucht'],answer:'Onder water'}),
+ practiceTask('media','Je maatje wil rustig werken. Start de waterval en zet het geluid zachter. Pauzeer even voor je maatje. Speel daarna verder en druk op stop.',mediaGoals,{age:'7-8',clip:'waterfall',adjust:'volumeDown',pausePractice:true}),
+ practiceTask('media','Je hoort de uitleg over de vis niet goed. Start het filmpje en zet het geluid luider. Pauzeer en beantwoord de Kijkvraag. Speel verder en druk op stop.',mediaGoals,{age:'7-8',clip:'fish',adjust:'volumeUp',question:'Wat beweegt de vis om te zwemmen?',answers:['Zijn vinnen','Zijn mond','Zijn ogen'],answer:'Zijn vinnen'}),
+ practiceTask('media','Bekijk de bijzondere vleugels van deze vlinder. Pauzeer en beantwoord de Kijkvraag. Speel daarna verder en druk op stop.',mediaGoals,{age:'7-8',clip:'glasswing',question:'Wat is bijzonder aan de grote vlakken van de vleugels?',answers:['Ze zijn helemaal zwart','Je kunt erdoorheen kijken','Ze zijn helemaal geel'],answer:'Je kunt erdoorheen kijken'})
 ];
+const mediaClips={
+ flower:{title:'Een bloem gaat open',file:'flower-v3.mp4',credit:'MDN, CC0. Vertraagd; nieuwe Nederlandse vertelstem.'},
+ rabbit:{title:'Het konijn en de vlinder',file:'konijn.mp4',credit:'Big Buck Bunny — Blender Foundation, CC BY 3.0. Kort fragment via W3Schools.'},
+ monarch:{title:'Een vlinder op een plant',file:'monarch-v3.mp4',credit:'Truem, Monarch butterfly 1, CC0.',source:'Monarch_butterfly_1.webm'},
+ stream:{title:'Water over de stenen',file:'stream-v3.mp4',credit:'leeroy / LIFEOFVIDS, Tiny Water Fall-HD, CC BY 3.0.',source:'Tiny_Water_Fall-HD.ogv'},
+ duck:{title:'Een eend zoekt eten',file:'duck-v3.mp4',credit:'Whpq, Canvas back duck diving, CC BY-SA 4.0. Vertraagd; bewerking onder dezelfde licentie.',source:'Canvas_back_duck_diving.webm'},
+ waterfall:{title:'Bij de waterval',file:'waterfall-v3.mp4',credit:'Kbmotswagole, Mma Legage Waterfall video, CC0.',source:'Mma_Legage_Waterfall_video.webm'},
+ fish:{title:'Een vis tussen de rotsen',file:'fish-v3.mp4',credit:'Uusijani, Boxfish at Artis, CC0.',source:'Boxfish_at_Artis.ogv'},
+ glasswing:{title:'Een vlinder met doorzichtige vleugels',file:'glasswing-v3.mp4',credit:'Brandon, Glasswinged butterfly, CC BY 2.0.',source:'Glasswinged_butterfly.webm'}
+};
 const observeTask=(prompt,goals,criteria)=>practiceTask('observe',prompt,goals,{criteria});
 const files=[
  {name:'bloemenfoto',kind:'Beeld',src:'assets/video-vlinderweide.png'},
@@ -17,14 +31,15 @@ const files=[
  {name:'kleurenmenger',kind:'Programma'}
 ];
 missions.find(m=>m.id==='systemen').tasks=[
- practiceTask('transform','Typ het woord zon. Druk op de knop en ontdek wat de computer met jouw letters doet.',['IT.003','IT.014'],{word:'zon'}),
- practiceTask('transform','Maak nu een woordkaart van bloem. Kijk wat jij invoert en wat het scherm teruggeeft.',['IT.003','IT.014'],{word:'bloem'}),
- practiceTask('calculator','Probeer een rekenmachine uit: voer 8 + 4 in en laat de computer rekenen.',['IT.003','IT.014'],{a:8,b:4}),
- practiceTask('calculator','Onderzoek de rekenmachine opnieuw met 15 + 7. Wat voer jij in en wat rekent de computer uit?',['IT.003','IT.014'],{a:15,b:7,age:'7-8'}),
- Q('Je wilt de kleur van de bloem naast je weten. Wat doe je eerst?',['De bloem bekijken','Een foto maken en inzoomen','Een zoektool openen','Iemand videobellen'],0,['IT.004'],'Je kunt de bloem vlak naast je rechtstreeks bekijken. Daarvoor is geen toestel nodig.'),
- Q('Je wilt opa ver weg jouw tekening laten zien. Wat helpt?',['Samen met een volwassene videobellen','De tekening tegen het raam houden','De tekening scannen zonder ze te versturen','De tekening op jouw scherm openen'],0,['IT.002','IT.004'],'Bij videobellen gaan beeld en geluid via het internet naar opa. Alleen openen op jouw scherm toont opa nog niets.'),
- observeTask('Laat aan je leerkracht zien hoe je een tekening op jouw scherm toont. Vertel wat anders is wanneer opa op afstand moet meekijken.',['IT.002','IT.004','IT.014'],'Kan het kind lokaal tonen onderscheiden van contact via internet en een passende keuze uitleggen?')
+ practiceTask('system-photo','Maak een foto van een voorwerp voor de gevonden-voorwerpentafel. Vergroot een detail en bewaar je foto.',['IT.003','IT.014'],{subject:'Leg een voorwerp op tafel. Zorg dat er geen mensen op de foto staan.',name:'gevonden-voorwerp'}),
+ practiceTask('system-sound','Maak een dierenraadsel voor je maatje. Neem een dierengeluid op en luister het terug.',['IT.003','IT.014'],{message:'Bedenk een dier. Doe het geluid na. Je maatje mag straks raden.'}),
+ practiceTask('system-photo','Maak een detailfoto van je bouwwerk of tekening. Vergroot het stukje dat je aan je maatje wilt tonen.',['IT.003','IT.014'],{subject:'Leg een bouwwerk of tekening klaar. Zet het belangrijke stukje midden in de foto.',name:'mijn-detailfoto'}),
+ practiceTask('system-sound','Spreek een opruimtip in voor de klas. Luister of je boodschap goed te horen is.',['IT.003','IT.014'],{message:'Vertel waar iets hoort. Bijvoorbeeld: de blokken horen in de doos.'}),
+ observeTask('Je maatje zit naast je. Toon je echte voorwerp. Toon daarna je detailfoto. Wanneer helpt de foto? Probeer beide manieren.',['IT.004','IT.014'],'Laat het kind beide manieren echt gebruiken en uitleggen waarom rechtstreeks tonen of vergroten nuttig is. Laat het bij de eigen foto aanwijzen: camera levert beeld, app vergroot, scherm toont resultaat.'),
+ observeTask('Je wilt je werk tonen aan iemand die niet in de klas is. Bekijk met je leerkracht hoe een foto via jullie klasapp gedeeld kan worden. Vergelijk dit met tonen op je eigen scherm.',['IT.002','IT.004'],'Geen nepverzending: bekijk een echte, door de school toegelaten deelroute met de leerkracht. Verstuur alleen met diens toestemming. Alleen lokaal tonen bereikt de andere persoon niet.'),
+ observeTask('Neem samen een bericht op in de gewone opname-app van het toestel. Luister terug en wijs aan: waar ging je stem naar binnen en waar komt het geluid uit?',['IT.003','IT.014'], 'Controleer transfer naar een andere app en of het kind microfoon, opname/verwerking en luidspreker aan de eigen handeling kan koppelen.')
 ];
+missions.find(m=>m.id==='systemen').tasks[6].age='7-8';
 const robotMission=missions.find(m=>m.id==='robot');
 robotMission.tasks[1]=R('De rots blokkeert de weg. Bouw zelf een route eromheen. Elke pijl is één vakje.',4,3,[0,1],[3,1],['↑','→','→','→','↓'],['IT.015','IT.019'],[[1,1]]);
 robotMission.tasks[2]=R('Maak twee keer hetzelfde stukje: rechts, omlaag. Voer je plan uit en kijk waar de robot komt.',3,3,[0,0],[2,2],['→','↓','→','↓'],['IT.015','IT.019']);
@@ -69,13 +84,15 @@ missions.find(m=>m.id==='creatie').tasks=[
  practiceTask('record','Maak nog een luisterbericht voor je maatje: Veel plezier! Neem op, stop en luister terug.',['IT.092','IT.093','IT.042'],{sentence:'Veel plezier!'})
 ];
 missions.forEach(m=>{m.goals=[...new Set(m.tasks.flatMap(t=>t.goals))];m.tasks.forEach((t,i)=>t.id=m.id+'-'+i)});
+missions.find(m=>m.id==='systemen').tasks.forEach((t,i)=>t.id='systemen-praktijk-v3-'+i);
+mediaTasks.forEach(t=>t.id='bedienen-media-v3-'+t.age+'-'+t.clip);
 const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let cleanupPractice=()=>{};
 const originalRenderTask=renderTask;
 renderTask=function(){cleanupPractice();cleanupPractice=()=>{};document.querySelectorAll('video,audio').forEach(el=>el.pause());window.speechSynthesis?.cancel();const task=session.tasks[session.index];if(!task)return finishMission();
  if(['choice','typing','route','drawing','external-search'].includes(task.type)){originalRenderTask();if(task.prefill)$('#taskArea input').value=task.prefill;return}
  session.answered=false;body.innerHTML=`<div class="round-head">Opdracht ${session.index+1} van ${session.tasks.length} · ${state.age} jaar</div><div class="mission-scene scene-${session.mission.id}"><img class="scene-art" src="${session.mission.image}" alt=""><div><small>ZISA’S DOE-OPDRACHT</small><p>${escapeHtml(task.prompt)}</p><button class="speak-answer" aria-label="Lees de opdracht voor">${speakerIcon}</button></div></div><div id="taskArea" class="practice-area"></div><div class="feedback" hidden></div>`;body.querySelector('.speak-answer').onclick=()=>speak(task.prompt);
- const handlers={'media':renderRealMedia,'file-open':renderFileOpen,'file-edit':renderFileEdit,'file-delete':renderFileDelete,'create':renderCreate,'record':renderRecorder,'launcher':renderLauncher,'transform':renderTransform,'calculator':renderCalculator,'observe':renderObservation,'break':renderBreak,'search-lab':renderSearchLab};handlers[task.type](task);
+ const handlers={'system-photo':renderSystemPhoto,'system-sound':renderSystemSound,'media':renderRealMedia,'file-open':renderFileOpen,'file-edit':renderFileEdit,'file-delete':renderFileDelete,'create':renderCreate,'record':renderRecorder,'launcher':renderLauncher,'transform':renderTransform,'calculator':renderCalculator,'observe':renderObservation,'break':renderBreak,'search-lab':renderSearchLab};handlers[task.type](task);
 };
 dialog.addEventListener('close',()=>{cleanupPractice();cleanupPractice=()=>{};document.querySelectorAll('video,audio').forEach(el=>el.pause());window.speechSynthesis?.cancel()});
 function completePractice(task,message){if(session.answered)return;session.answered=true;showFeedback(true,message,task.goals)}
@@ -85,34 +102,78 @@ function wireRead(){document.querySelectorAll('[data-say]').forEach(b=>b.onclick
 function mediaRequirements(task, progress){
  const checks=[['Gestart',progress.started]];
  if(task.adjust)checks.push([task.adjust==='volumeUp'?'Geluid luider gezet':'Geluid stiller gezet',progress.adjusted]);
- if(task.question)checks.push(['Zelf gepauzeerd',progress.paused],['Kijkvraag beantwoord',progress.answered],['Verder afgespeeld',progress.resumed]);
+ if(task.question||task.pausePractice)checks.push(['Zelf gepauzeerd',progress.paused]);
+ if(task.question)checks.push(['Kijkvraag beantwoord',progress.answered]);
+ if(task.question||task.pausePractice)checks.push(['Verder afgespeeld',progress.resumed]);
  checks.push(['Op stop gedrukt',progress.stopped]);return checks;
 }
 function renderRealMedia(task){
  const area=$('#taskArea'),progress={started:false,adjusted:false,paused:false,answered:false,resumed:false,stopped:false};
- const rabbit=task.clip==='rabbit',label=rabbit?'Het konijn en de vlinder':'Een bloem gaat open';
+ const clip=mediaClips[task.clip],label=task.clip==='flower'?'Kijk wat er verandert':task.question&&task.clip==='glasswing'?'Een bijzondere vlinder':clip.title;
  let busy=false,resumeAt=null;
  const title={play:'Afspelen',pause:'Pauze',stop:'Stop',volumeDown:'Stiller',volumeUp:'Luider'};
- area.innerHTML=`<div class="work-panel media-exercise"><h3>${label}</h3><video class="real-video" playsinline preload="metadata" src="assets/${rabbit?'konijn.mp4':'bloemen-kijken.mp4'}">${rabbit?'':'<track kind="captions" src="assets/bloemen.vtt" srclang="nl" label="Nederlands" default>'}</video><div class="media-timeline"><progress max="1" value="0" aria-label="Voortgang filmpje"></progress><output class="clock">0:00</output></div><div class="media-controls">${['play','pause','stop','volumeDown','volumeUp'].map(a=>`<button data-action="${a}" aria-label="${title[a]}" title="${title[a]}">${mediaIcon(a)}</button>`).join('')}</div><p class="volume-status"></p><p class="practice-note" role="status">Start het filmpje met de driehoek.</p><div class="pause-question" hidden>${task.question?`<h3>${task.question}</h3>${task.answers.map(a=>`<button class="tool-choice" data-answer="${a}">${a}</button>${sayButton(a)}`).join('')}`:''}</div><ul class="media-checks" aria-label="Jouw oefenstappen"></ul><div class="media-ready-bar"><button class="primary-button" data-ready>Klaar – volgende opdracht →</button><small data-next></small></div><details><summary>Hulp bij de knoppen</summary><p>Driehoek: afspelen. Twee streepjes: pauze. Vierkant: stoppen en terug naar het begin. Luidspreker − / +: stiller / luider.</p></details><small>${rabbit?'Big Buck Bunny — Blender Foundation, CC BY 3.0. Kort fragment via W3Schools.':'Bloemenopname: MDN CC0-voorbeeld, met Nederlandse gesproken opdracht.'}</small></div>`;
+ area.innerHTML=`<div class="work-panel media-exercise"><h3>${label}</h3><video class="real-video" playsinline preload="metadata" src="assets/${clip.file}"></video><div class="media-timeline"><progress max="1" value="0" aria-label="Voortgang filmpje"></progress><output class="clock">0:00</output></div><div class="media-controls">${['play','pause','stop','volumeDown','volumeUp'].map(a=>`<button data-action="${a}" aria-label="${title[a]}" title="${title[a]}">${mediaIcon(a)}</button>`).join('')}</div><p class="volume-status"></p><p class="practice-note" role="status">${task.question?'Bekijk eerst de Kijkvraag. Start daarna het filmpje.':'Start het filmpje met de driehoek.'}</p><section class="pause-question" ${task.question?'':'hidden'} aria-label="Kijkvraag">${task.question?`<strong>Kijkvraag</strong><h3 tabindex="-1">${task.question}</h3>${sayButton('Kijkvraag. '+task.question+' Start het filmpje en pauzeer om te antwoorden.')}<p class="question-hint">Pauzeer het filmpje om te antwoorden.</p>${task.answers.map(a=>`<button class="tool-choice" disabled data-answer="${a}">${a}</button>${sayButton(a)}`).join('')}`:''}</section><ul class="media-checks" aria-label="Jouw oefenstappen"></ul><div class="media-ready-bar"><button class="primary-button" data-ready>Klaar – volgende opdracht →</button><small data-next></small></div><details><summary>Hulp bij de knoppen</summary><p>Driehoek: afspelen. Twee streepjes: pauze. Vierkant: stoppen en terug naar het begin. Luidspreker − / +: stiller / luider.</p></details><small>${clip.credit} ${clip.source?`Ingekort en voorzien van Nederlandse vertelstem. <a href="https://commons.wikimedia.org/wiki/File:${clip.source}" target="_blank" rel="noopener">Bron en licentie</a>`:''}</small></div>`;
  const video=area.querySelector('video'),ready=area.querySelector('[data-ready]');
+ area.querySelector('.media-exercise').classList.add('media-guided');
+ let guideKey='',guideWords='',alive=true,voiceVersion=0;
+ const cancelGuide=()=>{voiceVersion++;window.speechSynthesis?.cancel();video.muted=false;};
+ const readGuide=(words=guideWords)=>{
+  cancelGuide();
+  if(!window.speechSynthesis||typeof SpeechSynthesisUtterance==='undefined')return;
+  const version=voiceVersion,utterance=new SpeechSynthesisUtterance(words);
+  utterance.lang='nl-BE';utterance.rate=.85;
+  // Keep the film narration from competing with the instruction.
+  video.muted=true;
+  const restore=()=>{if(alive&&version===voiceVersion)video.muted=false;};
+  utterance.onend=restore;utterance.onerror=restore;
+  speechSynthesis.speak(utterance);
+ };
+ function guideStep(){
+  let key,words,icon='play';
+  if(!progress.started){key='start';words='Tik op de driehoek. Dan begint het filmpje.';}
+  else if(progress.stopped&&mediaRequirements(task,progress).every(([,done])=>done)){key='done';words='Goed gedaan! Tik op Klaar voor het volgende filmpje.';icon='done';}
+  else if(video.paused&&(!progress.paused||progress.stopped)){key='restart';words='Tik op de driehoek om verder te kijken.';}
+  else if(task.adjust&&!progress.adjusted){key=task.adjust;icon=key;words=key==='volumeUp'?'Tik op de luidspreker met het plusje. Dan klinkt het luider.':'Tik op de luidspreker met het minnetje. Dan klinkt het zachter.';}
+  else if(!watchedEnough()){key='watch';words='Kijk goed. Wat verandert er? Ik zeg wanneer je mag pauzeren.';icon='watch';}
+  else if((task.question||task.pausePractice)&&!progress.paused){key='pause';icon='pause';words='Tik nu op de twee streepjes. Dan staat het beeld stil.';}
+  else if(task.question&&!progress.answered){key='answer';icon='answer';words='Beantwoord nu de vraag. '+task.question+' '+task.answers.map((a,i)=>(i+1)+': '+a).join('. ')+'. Tik op jouw antwoord. Je kunt elk antwoord ook beluisteren.';}
+  else if((task.question||task.pausePractice)&&!progress.resumed){key='resume';words='Tik weer op de driehoek. Dan speelt het filmpje verder.';}
+  else {key='stop';icon='stop';words='Tik op het vierkant. Daarmee stop je het filmpje.';}
+  const short={start:'Start het filmpje',restart:'Speel verder',volumeUp:'Zet het geluid luider',volumeDown:'Zet het geluid zachter',watch:'Kijk wat er verandert',pause:'Zet het beeld stil',answer:task.question,resume:'Speel verder',stop:'Stop het filmpje',done:'Klaar!'};
+  const answerNow=key==='answer';
+  area.querySelector('.pause-question').hidden=!answerNow;
+  const control={start:'play',restart:'play',resume:'play',pause:'pause',stop:'stop',volumeUp:'volumeUp',volumeDown:'volumeDown'}[key];
+  area.querySelectorAll('[data-action]').forEach(b=>b.classList.toggle('next-control',b.dataset.action===control));
+  const changed=key!==guideKey;
+  guideKey=key;guideWords=words;
+  const symbol=['watch','answer','done'].includes(icon)?speakerIcon:mediaIcon(icon);
+  const guide=area.querySelector('.practice-note');
+  guide.innerHTML=`<span class="guide-symbol" aria-hidden="true">${symbol}</span><strong>${escapeHtml(short[key])}</strong><button type="button" class="guide-repeat" aria-label="Luister nog eens">${speakerIcon}</button>`;
+  guide.querySelector('.guide-repeat').onclick=()=>readGuide();
+  if(changed)readGuide();
+ }
+ video.poster='assets/video-start.svg';
+ let watchedUntil=0;
+ const watchedEnough=()=>watchedUntil>=(task.watchUntil||0);
  video.volume=task.adjust==='volumeUp'?.2:task.adjust==='volumeDown'?.6:.4;
- const update=()=>{area.querySelector('progress').value=video.duration?video.currentTime/video.duration:0;area.querySelector('.clock').textContent='0:'+String(Math.floor(video.currentTime)).padStart(2,'0');area.querySelector('.volume-status').textContent='Geluid: '+Math.round(video.volume*100)+'%';area.querySelector('.media-checks').innerHTML=mediaRequirements(task,progress).map(([text,done])=>`<li class="${done?'done':''}">${done?'✓':'○'} ${text}</li>`).join('');const all=mediaRequirements(task,progress).every(([,done])=>done);ready.classList.toggle('ready',all);area.querySelector('[data-next]').textContent=all?'Deze oefening is klaar. Klik om door te gaan.':'Hier ga je verder zodra de oefenstappen gelukt zijn.';};
- const missingHelp=()=>{if(!progress.started)return 'Druk op afspelen om te beginnen.';if(task.adjust&&!progress.adjusted)return 'Speel het filmpje af en druk op de luidspreker met '+(task.adjust==='volumeUp'?'+ om het luider te zetten.':'− om het stiller te zetten.');if(task.question&&!progress.paused)return 'Speel het filmpje opnieuw af en druk tijdens het kijken op pauze.';if(task.question&&!progress.answered)return 'Pauzeer het beeld en beantwoord de kijkvraag.';if(task.question&&!progress.resumed)return 'Druk op afspelen om na de kijkvraag verder te kijken.';if(!progress.stopped)return 'Druk op het vierkant om te stoppen. Daarna kun je op Klaar klikken.';return 'Goed gedaan. Klik op Klaar – volgende opdracht.';};
- video.ontimeupdate=()=>{if(resumeAt!==null&&!video.paused&&video.currentTime>resumeAt+.2)progress.resumed=true;update()};
+ const update=()=>{area.querySelector('progress').value=video.duration?video.currentTime/video.duration:0;area.querySelector('.clock').textContent='0:'+String(Math.floor(video.currentTime)).padStart(2,'0');area.querySelector('.volume-status').textContent='Geluid: '+Math.round(video.volume*100)+'%';const checks=mediaRequirements(task,progress),next=checks.findIndex(([,done])=>!done),all=next===-1;const actions=['play',...(task.adjust?[task.adjust]:[]),...(task.question||task.pausePractice?['pause']:[]),...(task.question?['answer']:[]),...(task.question||task.pausePractice?['resume']:[]),'stop'];const labels={play:'Druk op afspelen',volumeUp:'Zet het geluid luider',volumeDown:'Zet het geluid stiller',pause:watchedEnough()?'Druk op pauze':'Kijk nog even wat er verandert',answer:'Beantwoord de Kijkvraag',resume:'Speel weer verder',stop:'Druk op stop'};area.querySelector('.media-checks').innerHTML=`<li class="steps-title">Doe alle ${checks.length} stappen</li>`+checks.map(([text,done],i)=>`<li class="${done?'done':i===next?'current-step':''}" ${i===next?'aria-current="step"':''}>${done?'✓':i+1+'.'} ${done?text:labels[actions[i]]}${i===next?' — nu jij':''}</li>`).join('');area.querySelectorAll('[data-action]').forEach(b=>b.classList.toggle('next-control',!all&&(actions[next]==='resume'?'play':actions[next])===b.dataset.action&&(actions[next]!=='pause'||watchedEnough())));ready.classList.toggle('ready',all);ready.disabled=!all;area.querySelector('[data-next]').textContent=all?'Deze oefening is klaar. Klik om door te gaan.':'Doe eerst alle stappen hierboven.';syncQuestion();};
+ const missingHelp=()=>{if(!progress.started)return 'Druk op afspelen om te beginnen.';if(task.adjust&&!progress.adjusted)return 'Speel het filmpje af en druk op de luidspreker met '+(task.adjust==='volumeUp'?'+ om het luider te zetten.':'− om het stiller te zetten.');if(!watchedEnough())return 'Kijk wat er verandert. Druk op pauze wanneer die stap oplicht.';if((task.question||task.pausePractice)&&!progress.paused)return 'Druk tijdens het kijken op pauze.';if(task.question&&!progress.answered)return 'Beantwoord de vraag in het vak Kijkvraag. Pauzeer eerst als het filmpje nog speelt.';if((task.question||task.pausePractice)&&!progress.resumed)return 'Druk op afspelen om verder te kijken.';if(!progress.stopped)return 'Druk op het vierkant om te stoppen. Daarna kun je op Klaar klikken.';return 'Goed gedaan. Klik op Klaar – volgende opdracht.';};
+ const syncQuestion=()=>{area.querySelectorAll('[data-answer]').forEach(b=>b.disabled=!progress.paused||!video.paused||progress.stopped||progress.answered);if(task.question){area.querySelector('.pause-question').classList.toggle('question-active',progress.paused&&video.paused&&!progress.stopped&&!progress.answered);area.querySelector('.question-hint').textContent=progress.answered?'Kijkvraag klaar.':'Tik op je antwoord. De luidspreker leest het voor.';}guideStep();};
+ video.ontimeupdate=()=>{if(!video.paused)watchedUntil=Math.max(watchedUntil,video.currentTime);if(resumeAt!==null&&!video.paused&&video.currentTime>resumeAt+.2)progress.resumed=true;update()};
  video.onended=()=>{if(resumeAt!==null&&video.currentTime>resumeAt)progress.resumed=true;note('Het filmpje is afgelopen. '+missingHelp());update()};
  video.onerror=()=>note('Het filmpje kon niet laden. Heropen de opdracht of vraag hulp. Je krijgt geen oefenbewijs voor een filmpje dat niet afspeelt.');
- area.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{if(!video.paused||!progress.paused)return note('Pauzeer eerst om rustig te kijken.');if(b.dataset.answer!==task.answer)return note('Kijk nog eens naar het stilstaande beeld.');progress.answered=true;b.classList.add('selected');note('Goed gekeken. Druk nu op afspelen om verder te kijken.');update()});
+ area.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{if(!video.paused||!progress.paused||progress.stopped||progress.answered)return;if(b.dataset.answer!==task.answer){readGuide('Dat klopt nog niet. Kijk nog eens goed. '+task.question);return}progress.answered=true;b.classList.add('selected');update()});
  area.querySelectorAll('[data-action]').forEach(b=>b.onclick=async()=>{
-  if(session.answered||busy)return;const action=b.dataset.action;
-  if(action==='play'){if(!video.paused)return;busy=true;try{if(video.ended)video.currentTime=0;const from=video.currentTime;await video.play();if(!area.isConnected){video.pause();return}progress.started=true;progress.stopped=false;if(progress.answered)resumeAt=from;note(task.adjust&&!progress.adjusted?missingHelp():task.question&&!progress.paused?'Het filmpje speelt. Druk op pauze om goed te kijken.':'Het filmpje speelt. Druk op stop wanneer je klaar bent.')}catch{note('Afspelen lukt niet. Probeer opnieuw.')}finally{busy=false}}
-  if(action==='pause'){if(!progress.started||video.paused)return note(video.ended?'Het filmpje is afgelopen. Speel het opnieuw af en pauzeer tijdens het kijken.':'Start eerst het filmpje.');video.pause();progress.paused=true;if(task.question)area.querySelector('.pause-question').hidden=false;note(task.question?'Het beeld staat stil. Beantwoord de vraag.':'Gepauzeerd. Je kunt verder afspelen.')}
-  if(action==='volumeUp'||action==='volumeDown'){const before=video.volume;video.volume=Math.max(0,Math.min(.8,before+(action==='volumeUp'?.2:-.2)));if(action===task.adjust&&progress.started&&!video.paused&&video.volume!==before)progress.adjusted=true;note(progress.adjusted?'Je hebt het geluid aangepast. Stop het filmpje en klik op Klaar.':!progress.started||video.paused?'Speel het filmpje af om het verschil in geluid te horen.':'Het geluid is aangepast.')}
+  if(session.answered||busy)return;cancelGuide();const action=b.dataset.action;
+  if(action==='play'){if(!video.paused)return;window.speechSynthesis?.cancel();busy=true;try{if(video.ended)video.currentTime=0;const from=video.currentTime;await video.play();if(!area.isConnected){video.pause();return}progress.started=true;progress.stopped=false;if(progress.answered||(task.pausePractice&&progress.paused))resumeAt=from;note('Het filmpje speelt. '+(resumeAt!==null?'Kijk nog even verder en druk daarna op stop.':missingHelp()))}catch{note('Afspelen lukt niet. Probeer opnieuw.')}finally{busy=false}}
+  if(action==='pause'){if(!progress.started||video.paused)return note(video.ended?'Het filmpje is afgelopen. Speel het opnieuw af en pauzeer tijdens het kijken.':'Start eerst het filmpje.');video.pause();if(!watchedEnough()){update();return}progress.paused=true;}
+  if(action==='volumeUp'||action==='volumeDown'){const before=video.volume;video.volume=Math.max(0,Math.min(.8,before+(action==='volumeUp'?.2:-.2)));if(action===task.adjust&&progress.started&&!video.paused&&video.volume!==before)progress.adjusted=true;note(progress.adjusted?'Je hebt het geluid aangepast. '+missingHelp():!progress.started||video.paused?'Speel het filmpje af om het verschil in geluid te horen.':'Het geluid is aangepast.')}
   if(action==='stop'){if(resumeAt!==null&&video.currentTime>resumeAt+.2)progress.resumed=true;video.pause();video.currentTime=0;progress.stopped=progress.started;resumeAt=null;note('Gestopt. '+missingHelp())}
-  update();
+  syncQuestion();update();
  });
  ready.onclick=()=>{if(session.answered)return;if(!mediaRequirements(task,progress).every(([,done])=>done)){note(missingHelp());area.querySelector('.practice-note').scrollIntoView({block:'nearest',behavior:'smooth'});return}video.pause();session.answered=true;session.correct++;task.goals.forEach(addHit);save();session.index++;renderTask();body.scrollTop=0;dialog.scrollTop=0;};
  const help=area.querySelector("details");help.querySelector("summary").textContent="Hulp en videobron";help.appendChild(area.querySelector(".media-exercise>small"));
- wireRead();update();cleanupPractice=()=>video.pause();
+ wireRead();update();cleanupPractice=()=>{alive=false;cancelGuide();video.pause();};
 }
 function fileContent(file){if(file.kind==='Beeld')return `<img class="file-picture" src="${file.src}" alt="Vlinder in een bloemenweide">`;if(file.kind==='Tekst')return `<article class="paper">${file.text}</article>`;if(file.kind==='Video')return `<video class="real-video" controls playsinline src="${file.src}"></video>`;if(file.kind==='Geluid')return `<audio controls src="${file.src}"></audio>`;return '<label>Kies de kleur van je scherm <input type="color" value="#e4f3fb"></label><div class="color-output">Jouw kleur verschijnt hier.</div>'}
 function renderFileOpen(task){

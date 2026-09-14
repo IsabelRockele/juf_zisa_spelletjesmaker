@@ -1,0 +1,35 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const nodes=new Map();const node=()=>({hidden:false,disabled:false,value:'',textContent:'',innerHTML:'',classList:{add(){},toggle(){}},addEventListener(){},querySelectorAll(){return []},cloneNode:node,replaceWith(){},getContext:()=>({fillRect(){},drawImage(){},fillStyle:''}),toDataURL:()=> 'data:image/jpeg;base64,test',querySelector:s=>get(s)});
+const get=s=>{if(!nodes.has(s)){const el=node();el.style={};nodes.set(s,el);}return nodes.get(s)};
+const store=new Map(),completed=[];
+const ctx=vm.createContext({console,document:{querySelector:get,querySelectorAll:()=>[]},window:{speechSynthesis:{cancel(){}}},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},Set,setTimeout,clearTimeout,Image:class{naturalWidth=1200;naturalHeight=900;set src(s){this._src=s;this.onload()}get src(){return this._src}},SpeechSynthesisUtterance:class{},speechSynthesis:{cancel(){},speak(){}},completed});
+for(const f of ['app.js','practice.js','systemen.js'])vm.runInContext(fs.readFileSync(__dirname+'/'+f,'utf8'),ctx);
+vm.runInContext(`completePractice=(t,msg)=>completed.push(t.id);state.age='6-7';renderSystemPhoto(missions.find(m=>m.id==='systemen').tasks[0]);`,ctx);
+assert(!get('.system-work').innerHTML.includes('data-library'));
+assert(!get('.system-work').innerHTML.includes('Foto kiezen'));
+get('[data-finish]').onclick();assert.equal(completed.length,0);
+get('[data-save]').onclick();assert.equal(store.has('zisa-work-6-7'),false);
+get('[data-camera]').onchange({target:{files:[{type:'image/jpeg',size:1000}]}});
+assert.equal(get('.system-photo-edit').hidden,false);
+get('[data-save]').onclick();assert.equal(store.has('zisa-work-6-7'),false,'Moet eerst vergroten');
+get('[data-zoom]').value='1.8';get('[data-zoom]').oninput();get('[data-save]').onclick();
+assert(store.has('zisa-work-6-7'));get('[data-finish]').onclick();assert.equal(completed.length,0,'Moet bewaard resultaat heropenen');
+get('[data-open]').onclick();assert.equal(get('.system-result').src,'data:image/jpeg;base64,test');get('[data-finish]').onclick();assert.equal(completed.length,1);
+console.log('Fotoatelier: geen afronding zonder beeld, vergroten, bewaren en heropenen; resultaat blijft lokaal.');
+async function soundTest(){
+ let now=0,stopped=0;
+ ctx.Date={now:()=>now};ctx.Blob=class{constructor(){}};
+ ctx.navigator={mediaDevices:{getUserMedia:async()=>({getTracks:()=>[{stop(){stopped++}}]})}};
+ ctx.MediaRecorder=class{state='inactive';mimeType='audio/webm';start(){this.state='recording'}stop(){this.state='inactive';this.ondataavailable({data:{size:10}});this.onstop()}};
+ ctx.window.MediaRecorder=ctx.MediaRecorder;
+ get('audio').pause=()=>{};get('audio').play=async()=>{};
+ vm.runInContext(`renderSystemSound(missions.find(m=>m.id==='systemen').tasks[1])`,ctx);
+ get('[data-finish]').onclick();assert.equal(completed.length,1);
+ await get('[data-record]').onclick();assert(get('[data-repeat]').disabled);
+ now=2000;get('[data-stop]').onclick();assert.equal(stopped,1);assert.equal(get('[data-play]').disabled,false);
+ get('[data-finish]').onclick();assert.equal(completed.length,1,'Niet klaar zonder terugluisteren');
+ await get('[data-play]').onclick();get('audio').onended();get('[data-finish]').onclick();assert.equal(completed.length,2);
+ vm.runInContext('cleanupPractice()',ctx);
+ console.log('Geluidsatelier: echte opnamecyclus vereist; geen afronding voor terugluisteren; microfoon wordt gestopt.');
+}
+soundTest().catch(e=>{console.error(e);process.exitCode=1});

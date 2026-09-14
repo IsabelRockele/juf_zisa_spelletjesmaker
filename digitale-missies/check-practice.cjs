@@ -1,8 +1,12 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-function element(){return {addEventListener(){},querySelectorAll(){return []},replaceWith(){},cloneNode:element};}
+function element(){return {style:{},addEventListener(){},querySelectorAll(){return []},replaceWith(){},cloneNode:element};}
 const storage=new Map(),context=vm.createContext({console,document:{querySelector:element,querySelectorAll:()=>[]},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},window:{},setTimeout,clearTimeout,Set,URL});
 vm.runInContext(fs.readFileSync(__dirname+'/app.js','utf8'),context);
 vm.runInContext(fs.readFileSync(__dirname+'/practice.js','utf8'),context);
+vm.runInContext(fs.readFileSync(__dirname+'/systemen.js','utf8'),context);
+assert.equal(vm.runInContext(`missions.find(m=>m.id==='systemen').tasks.some(t=>['transform','calculator','choice'].includes(t.type))`,context),false);
+assert.equal(vm.runInContext(`missions.find(m=>m.id==='systemen').tasks.filter(t=>t.type==='system-photo').length`,context),2);
+assert.equal(vm.runInContext(`missions.find(m=>m.id==='systemen').tasks.filter(t=>t.type==='system-sound').length`,context),2);
 const result=vm.runInContext(`['6-7','7-8'].map(age=>{state.age=age;return {age,missions:missions.filter(available).map(m=>({id:m.id,tasks:tasksFor(m).map(t=>({id:t.id,type:t.type,goals:t.goals.filter(goalForAge),cols:t.cols,rows:t.rows,start:t.start,finish:t.finish,solution:t.solution,rocks:t.rocks}))}))}})`,context);
 const expected={'6-7':['002','003','004','014','015','019','027','035','037','042','044','045','046','055','058','061','064','092','093'],'7-8':['003','004','014','015','019','027','028','029','030','035','037','042','044','046','055','058','061','064','092','093']};
 for(const group of result){const tasks=group.missions.flatMap(m=>m.tasks),goals=[...new Set(tasks.flatMap(t=>t.goals))].sort();assert.deepEqual(JSON.parse(JSON.stringify(goals)),expected[group.age].map(g=>'IT.'+g));assert.equal(new Set(tasks.map(t=>t.id)).size,tasks.length);
@@ -21,3 +25,48 @@ assert.equal(vm.runInContext(`mediaRequirements({adjust:'volumeUp'},{started:tru
 assert.equal(vm.runInContext(`mediaRequirements({question:'Kijkvraag'},{started:true,paused:true,answered:true,resumed:true,stopped:false}).every(([,done])=>done)`,context),false);
 assert.equal(vm.runInContext(`mediaRequirements({question:'Kijkvraag'},{started:true,paused:true,answered:true,resumed:true,stopped:true}).every(([,done])=>done)`,context),true);
 console.log('Media: ontbrekende handelingen blokkeren afronding; complete kijk- en volumetaken kunnen verder.');
+const media=vm.runInContext(`mediaTasks.map(t=>({age:t.age,clip:t.clip,id:t.id,file:mediaClips[t.clip].file}))`,context);
+assert.equal(media.length,8);
+assert.equal(new Set(media.map(t=>t.clip)).size,8,'Geen hergebruik van dezelfde video');
+for(const age of ['6-7','7-8'])assert.equal(media.filter(t=>t.age===age).length,4);
+for(const task of media)assert(fs.statSync(__dirname+'/assets/'+task.file).size>10000);
+assert.equal(vm.runInContext(`mediaRequirements({pausePractice:true},{started:true,paused:false,resumed:false,stopped:true}).every(([,done])=>done)`,context),false);
+assert.equal(vm.runInContext(`mediaRequirements({pausePractice:true,adjust:'volumeDown'},{started:true,adjusted:true,paused:true,resumed:true,stopped:true}).every(([,done])=>done)`,context),true);
+assert.equal(vm.runInContext(`mediaRequirements({question:'Vis',adjust:'volumeUp'},{started:true,adjusted:false,paused:true,answered:true,resumed:true,stopped:true}).every(([,done])=>done)`,context),false);
+console.log('Acht unieke beschikbare filmpjes: vier per leeftijd; combinatietaken vereisen alle handelingen.');
+
+async function testMediaUI(){
+ const classList={toggle(){},add(){}};
+ const node=()=>({textContent:'',innerHTML:'',classList,focus(){},scrollIntoView(){},appendChild(){},querySelector:()=>node()});
+ const selectors=new Map();
+ const video={paused:true,ended:false,currentTime:0,duration:18,volume:.4,pause(){this.paused=true},async play(){this.paused=false}};
+ selectors.set('video',video);
+ const actions=['play','pause','stop','volumeUp','volumeDown'].map(action=>({...node(),dataset:{action}}));
+ const answers=['De bloem gaat dicht','De bloem gaat open','De bloem valt van de plant'].map(answer=>({...node(),disabled:true,dataset:{answer}}));
+ const area={innerHTML:'',isConnected:true,querySelector:s=>{if(!selectors.has(s))selectors.set(s,node());return selectors.get(s)},querySelectorAll:s=>s==='[data-action]'?actions:s==='[data-answer]'?answers:[]};
+ const spoken=[];
+ context.document.querySelector=s=>s==='#taskArea'?area:s==='#taskArea .practice-note'?area.querySelector('.practice-note'):node();
+ context.window.speechSynthesis={cancel(){}};
+ context.speechSynthesis={cancel(){},speak:u=>spoken.push(u.text)};
+ context.SpeechSynthesisUtterance=function(text){this.text=text};
+ vm.runInContext(`session={answered:false};renderRealMedia(mediaTasks[0])`,context);
+ assert(area.innerHTML.includes('aria-label="Kijkvraag"'));
+ assert(!area.innerHTML.includes('class="pause-question" hidden'));
+ assert(!area.innerHTML.includes('<track'),'Geen verouderde pauze-ondertitels');
+ const click=action=>actions.find(b=>b.dataset.action===action).onclick();
+ await click('play');assert(answers.every(b=>b.disabled));
+ await click('pause');assert(answers.every(b=>b.disabled),'Te vroeg pauzeren ontsluit de vraag niet');
+ await click('play');video.currentTime=11;video.ontimeupdate();
+ await click('pause');assert(answers.every(b=>!b.disabled));
+ assert(spoken.some(s=>s.includes('Beantwoord nu de vraag.')));
+ assert(spoken.some(s=>s.includes('Tik op de driehoek.')));
+ assert(spoken.some(s=>s.includes('Tik nu op de twee streepjes.')));
+ assert(spoken.some(s=>s.includes('1: De bloem gaat dicht')));
+ answers[1].onclick();await click('play');video.currentTime=13;video.ontimeupdate();await click('stop');
+ assert(area.querySelector('[data-next]').textContent.includes('Deze oefening is klaar'));
+ assert(answers.every(b=>b.disabled));
+ assert(!area.querySelector('.question-hint').textContent.includes('Speel nu verder'));
+ assert(area.querySelector('.media-checks').innerHTML.includes('Doe alle 5 stappen'));
+ console.log('Interactie getest: automatisch gesproken stappen en antwoorden, antwoorden geblokkeerd tijdens afspelen en werkende afronding.');
+}
+testMediaUI().catch(error=>{console.error(error);process.exitCode=1});
