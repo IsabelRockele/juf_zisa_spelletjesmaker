@@ -713,7 +713,7 @@
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.target;
-      localStorage.setItem('laatsteCategorie', target);
+      localStorage.setItem('zisa-collegas-laatste-categorie', target);
 
       // Zijbalk: actieve knop wisselen
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -736,7 +736,15 @@
   // Laatste categorie herstellen bij laden
 window.addEventListener('load', () => {
   const gevraagd = location.hash.slice(1);
-  const laatst = document.getElementById('panel-' + gevraagd) ? gevraagd : localStorage.getItem('laatsteCategorie');
+  const bewaard = localStorage.getItem('zisa-collegas-laatste-categorie');
+  // Herstel alleen de gratis categorie die de vorige versie mogelijk deelde.
+  // Andere oude waarden kunnen van PRO zijn en blijven onaangeroerd.
+  const oudDigitaal = localStorage.getItem('laatsteCategorie') === 'digitaal';
+  if (oudDigitaal) localStorage.removeItem('laatsteCategorie');
+  const geldig = waarde => Array.from(document.querySelectorAll('.nav-btn')).some(btn => btn.dataset.target === waarde)
+    && !!document.getElementById('panel-' + waarde);
+  const laatst = geldig(gevraagd) ? gevraagd : geldig(bewaard) ? bewaard : oudDigitaal ? 'digitaal' : 'reken';
+  localStorage.setItem('zisa-collegas-laatste-categorie', laatst);
 
   if (laatst) {
     // juiste knop activeren
