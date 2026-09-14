@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#145a7b">
+  <title>Zisa's Digitale Missies</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23145a7b'/%3E%3Cpath d='M17 18h30L25 46h24' fill='none' stroke='%23ffd45c' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="practice.css">
+  <link rel="stylesheet" href="screen-layout.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Terug naar de missies">
+      <span class="brand-mark">Z</span>
+      <span><strong>Zisa's Digitale Missies</strong><small>Leer, probeer en verdien sterren</small></span>
+    </a>
+    <button id="teacherBtn" class="quiet-button">Voor de leerkracht</button>
+  </header>
+
+  <main>
+    <section id="welcome" class="welcome" aria-labelledby="welcomeTitle">
+      <div class="welcome-copy">
+        <span class="eyebrow">KIES JE ROUTE</span>
+        <h1 id="welcomeTitle">Klaar voor een digitale missie?</h1>
+        <p>Kies je leeftijd. Daarna helpt Zisa je stap voor stap.</p>
+        <div class="age-buttons" role="group" aria-label="Kies je leeftijd">
+          <button class="age-button" data-age="6-7"><strong>6–7 jaar</strong><span>Ik leer met korte opdrachten</span></button>
+          <button class="age-button" data-age="7-8"><strong>7–8 jaar</strong><span>Ik ga een stapje verder</span></button>
+        </div>
+      </div>
+      <div class="zisa-frame"><img src="zisa-digitale-missie.png" alt="Zisa trekt met haar tablet en rugzak op digitale missie"></div>
+    </section>
+
+    <section id="dashboard" class="dashboard" hidden aria-labelledby="dashboardTitle">
+      <div class="dashboard-head">
+        <div><span class="eyebrow">JOUW MISSIES</span><h1 id="dashboardTitle">Waar wil je beginnen?</h1></div>
+        <div class="progress-card" aria-live="polite"><strong id="starCount">0 / 8</strong><span>missiesterren</span></div>
+      </div>
+      <div class="progress-track" aria-hidden="true"><span id="progressFill"></span></div>
+      <div id="missionGrid" class="mission-grid"></div>
+      <button id="viewWork" class="quiet-button">Mijn bewaarde werk bekijken</button>
+      <button id="changeAge" class="text-button">← Andere leeftijd kiezen</button>
+    </section>
+  </main>
+
+  <dialog id="missionDialog" class="mission-dialog">
+    <div class="dialog-bar">
+      <div><span id="missionNumber" class="eyebrow"></span><h2 id="missionTitle"></h2></div>
+      <button id="closeMission" class="icon-button" aria-label="Missie sluiten">×</button>
+    </div>
+    <div id="missionBody" class="mission-body"></div>
+  </dialog>
+
+  <dialog id="teacherDialog" class="teacher-dialog">
+    <div class="dialog-bar"><div><span class="eyebrow">LEERKRACHTENOVERZICHT</span><h2>Doelen in deze lokale versie</h2></div><button id="closeTeacher" class="icon-button" aria-label="Overzicht sluiten">×</button></div>
+    <p class="teacher-intro">De voortgang wordt per leeftijd op dit toestel bewaard. Bekijk bij elk doel de doe-opdrachten en noteer je observaties. Een missiester betekent dat de route doorlopen is, niet dat een doel al beheerst is.</p>
+    <div class="teacher-summary" id="teacherSummary" aria-live="polite"></div>
+    <div id="teacherGoals" class="teacher-goals"></div>
+    <button id="resetProgress" class="danger-button">Wis de voortgang op dit toestel</button>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+  <script src="practice.js"></script>
+  <script src="work-output.js"></script>
+  <script>
+    if (new URLSearchParams(location.search).get('van') === 'collegas') {
+      const back = document.createElement('a');
+      back.href = '../index.html#digitaal';
+      back.textContent = 'Terug naar de gratis tools';
+      back.className = 'text-button';
+      document.querySelector('.topbar').append(back);
+    }
+  </script>
+</body>
+</html>

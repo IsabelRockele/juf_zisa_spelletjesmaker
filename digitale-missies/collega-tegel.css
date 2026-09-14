@@ -1,0 +1,16 @@
+/* Scoped to the free colleague index; existing tool tiles remain unchanged. */
+.nav-btn.active.cat-digitaal{background:#127da0}.cat-digitaal .nav-icon{display:flex;align-items:center}
+#panel-digitaal .digital-tools-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),360px))}
+a.img-link.digital-mission-card{padding:12px;border:2px solid #7fc4db;border-radius:22px;background:linear-gradient(145deg,#fff,#edf8ff);box-shadow:0 8px 24px #145a7b18;gap:8px}
+a.img-link.digital-mission-card:hover{border-color:#137da0;box-shadow:0 12px 28px #145a7b30}
+a.img-link.digital-mission-card:focus-visible{outline:4px solid #145a7b;outline-offset:4px}
+.digital-mission-card .tool-image-stage.stage-digitaal{position:relative;height:240px;margin:0;border-radius:15px;background:radial-gradient(ellipse at 52% 38%,#fff 0%,#c7edfc 65%,#9dd6ed 100%);border-bottom:4px solid #ffd451;overflow:hidden}
+.digital-mission-card .drukknop-afbeelding{width:180px;max-width:70%;height:232px;max-height:232px;object-fit:contain;filter:drop-shadow(0 7px 7px #173f5f22)}
+.digital-mission-card .digital-robot{position:absolute;right:6px;bottom:10px;width:82px;height:94px;object-fit:contain;filter:drop-shadow(0 4px 4px #173f5f22)}
+.digital-age{position:absolute;left:10px;top:10px;background:#153f59;color:white;border-radius:20px;padding:5px 11px;font-size:14px;font-weight:900;z-index:1}
+.digital-do{position:absolute;left:10px;bottom:12px;padding:5px 10px;background:#ffda63;color:#423719;border-radius:8px;font-size:14px;font-weight:900}
+.digital-mission-card .img-label{font-size:1.25rem;line-height:1.3;color:#143e58;min-height:0;padding:5px 3px}
+.digital-mission-card .tool-description{font-size:1rem;line-height:1.5;color:#425e70;min-height:0;margin:0;padding:0 9px}
+.digital-open{display:flex;justify-content:space-between;align-items:center;margin-top:4px;padding:11px 15px;background:#143e58;color:white;border-radius:11px;font-size:1rem;font-weight:800}
+@media(max-width:700px){.digital-mission-card .tool-image-stage.stage-digitaal{height:210px}.digital-mission-card .drukknop-afbeelding{height:205px;max-height:205px}.digital-mission-card .digital-robot{width:66px}}
+@media(prefers-reduced-motion:reduce){a.img-link.digital-mission-card,a.img-link.digital-mission-card .drukknop-afbeelding{transition:none;transform:none}}

@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Juf Zisa's Spelgenerator</title>
+<link rel="stylesheet" href="digitale-missies/collega-tegel.css">
 
 <link rel="icon" href="start_afbeeldingen/Zisa_spelgenerator-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="start_afbeeldingen/Zisa_spelgenerator-192.png" sizes="192x192" type="image/png">
@@ -378,6 +379,10 @@
     <span class="nav-icon">👩‍🏫</span> Klasmanagement
   </button>
 
+  <button class="nav-btn cat-digitaal" data-target="digitaal">
+    <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="13" rx="2"/><path d="M8 21h8M12 16v5"/></svg></span> Digitale vaardigheden
+  </button>
+
   <div class="sidebar-help">
     <a href="Handleiding spelletjesmaker.pdf" class="help-btn" download>
       ❓ Handleiding
@@ -622,6 +627,27 @@
 
   <div class="no-results" id="noToolResults">Geen tool gevonden. Probeer een andere zoekterm.</div>
 
+  <!-- Alleen het gratis collega-overzicht: geen toevoeging aan PRO. -->
+  <div class="section-panel" id="panel-digitaal">
+    <div class="section-header">
+      <h2>Digitale vaardigheden</h2>
+      <div class="section-bar" style="background:#127da0"></div>
+    </div>
+    <div class="button-grid digital-tools-grid">
+      <a class="img-link digital-mission-card" href="digitale-missies/index.html?van=collegas">
+        <span class="tool-image-stage stage-digitaal">
+          <span class="digital-age">6–8 jaar</span>
+          <img class="drukknop-afbeelding" src="digitale-missies/zisa-digitale-missie.png" alt="Zisa met haar tablet" loading="lazy" width="1024" height="1536">
+          <img class="digital-robot" src="digitale-missies/assets/robot-zisa.png" alt="" loading="lazy">
+          <span class="digital-do">Zelf aan de slag</span>
+        </span>
+        <span class="img-label">Zisa’s Digitale Missies</span>
+        <span class="tool-description">Leer typen, zoeken, filmpjes bedienen, een robot sturen en digitaal werk maken. ICT-doe-opdrachten voor 6–7 en 7–8 jaar.</span>
+        <span class="digital-open">Ontdek de missies <span aria-hidden="true">→</span></span>
+      </a>
+    </div>
+  </div>
+
 <script>
   const toolDescriptions = {
     'Leesbooster':'Maak leeswerkbladen, verhalen en een klassikaal smartboardspel.','Zisa Lezen':'Digitale AVI-leesboeken met verhaalvragen, taalopdrachten en een leerling-QR.',
@@ -709,7 +735,8 @@
   }
   // Laatste categorie herstellen bij laden
 window.addEventListener('load', () => {
-  const laatst = localStorage.getItem('laatsteCategorie');
+  const gevraagd = location.hash.slice(1);
+  const laatst = document.getElementById('panel-' + gevraagd) ? gevraagd : localStorage.getItem('laatsteCategorie');
 
   if (laatst) {
     // juiste knop activeren
