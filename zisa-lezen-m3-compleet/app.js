@@ -589,7 +589,7 @@ function renderSequenceGame(game,activity){
     handle.onpointerdown=event=>{
       event.preventDefault();handle.setPointerCapture(event.pointerId);piece.classList.add("dragging");
       handle.onpointerup=endEvent=>{
-        const target=document.elementFromPoint(endEvent.clientX,endEvent.clientY)?.closest(".sequence-bank,.sequence-build");
+        const target=document.elementFromPoint(endEvent.clientX,endEvent.clientY)?.closest(".sequence-bank,.sequence-drop,.sequence-slot");
         piece.classList.remove("dragging");handle.releasePointerCapture(endEvent.pointerId);handle.onpointerup=null;if(target)move(piece,target);
       };
       handle.onpointercancel=()=>{piece.classList.remove("dragging");handle.onpointerup=null};
