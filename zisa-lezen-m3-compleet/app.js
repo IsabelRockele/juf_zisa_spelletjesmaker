@@ -498,12 +498,24 @@ function renderMission(){
   const games=bookGames[currentBook.id]||[currentBook.endTask];
   const game=games[missionIndex];
   app.innerHTML=`<section class="mission-stage">
-    <header class="mission-progress"><button id="missionBack" aria-label="Terug naar het boek">‹ Boek</button><div><b>Taalreis na het verhaal</b><span>${missionIndex+1} van ${games.length}</span></div><div class="mission-bar"><i style="width:${missionIndex/games.length*100}%"></i></div></header>
+    <header class="mission-progress"><button id="missionBack" aria-label="Terug naar het boek">‹ Boek</button><div><b>Taalreis na het verhaal</b><span>${missionIndex+1} van ${games.length}</span></div><button id="missionFullscreen" class="mission-fullscreen" type="button" aria-label="Open volledig scherm">⛶ <span>Volledig scherm</span></button><div class="mission-bar"><i style="width:${missionIndex/games.length*100}%"></i></div></header>
     <div class="mission-card"><img class="mission-zebra" src="images/zisa-zebra.png" alt=""><div class="mission-icon">${game.icon||"⭐"}</div><h2>${game.title||"Leesmissie"}</h2><div class="mission-question-row"><p class="mission-question">${game.q}</p>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(game.q)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="missionActivity"></div><p id="missionFeedback" class="mission-feedback" aria-live="polite"></p></div>
   </section>`;
   document.querySelector("#missionBack").onclick=()=>{reviewMode=false;renderReader()};
+  bindMissionFullscreen();
   renderGame(game);
   bindSpeechButtons(app);
+}
+
+function bindMissionFullscreen(){
+  const button=document.querySelector("#missionFullscreen");
+  if(!button)return;
+  const canFullscreen=document.fullscreenEnabled&&document.documentElement.requestFullscreen;
+  if(!canFullscreen){button.hidden=true;return}
+  const update=()=>{const active=Boolean(document.fullscreenElement);button.innerHTML=active?'⛶ <span>Verlaat volledig scherm</span>':'⛶ <span>Volledig scherm</span>';button.setAttribute("aria-label",active?"Verlaat volledig scherm":"Open volledig scherm")};
+  button.onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+  document.onfullscreenchange=update;
+  update();
 }
 
 function renderGame(game){
