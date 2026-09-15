@@ -572,15 +572,28 @@ function renderSequenceGame(game,activity){
   const line=document.createElement("div");line.className="sequence-build";
   game.items.forEach((_,index)=>{const slot=document.createElement("div");slot.className="sequence-slot";slot.dataset.index=index;slot.innerHTML=`<span class="sequence-number">${index+1}</span><div class="sequence-drop"><small>Sleep hier</small></div>`;line.append(slot)});
   let dragged=null;
+  const dropTargetAt=(x,y)=>{
+    const hit=document.elementFromPoint(x,y);
+    const direct=hit?.closest(".sequence-bank,.sequence-drop,.sequence-slot");
+    if(direct)return direct;
+    if(!hit?.closest(".sequence-build"))return null;
+    const slots=[...line.querySelectorAll(".sequence-slot")];
+    return slots.reduce((nearest,slot)=>{
+      const rect=slot.getBoundingClientRect();
+      const distance=Math.abs(y-(rect.top+rect.height/2));
+      return !nearest||distance<nearest.distance?{slot,distance}:nearest;
+    },null)?.slot||null;
+  };
   const move=(piece,target)=>{
-    if(line.classList.contains("locked"))return;
+    if(line.classList.contains("locked")||!target)return;
     const destination=target.classList.contains("sequence-slot")?target.querySelector(".sequence-drop"):target;
+    if(!destination?.matches(".sequence-bank,.sequence-drop"))return;
     if(destination.classList.contains("sequence-drop")&&destination.querySelector(".sequence-piece"))bank.append(destination.querySelector(".sequence-piece"));
     destination.append(piece);checkSequenceGame(game,line);
   };
-  [bank,...line.querySelectorAll(".sequence-slot")].forEach(zone=>{
+  [bank,line,...line.querySelectorAll(".sequence-slot")].forEach(zone=>{
     zone.ondragover=event=>event.preventDefault();
-    zone.ondrop=event=>{event.preventDefault();if(dragged)move(dragged,zone);dragged=null};
+    zone.ondrop=event=>{event.preventDefault();event.stopPropagation();if(dragged)move(dragged,zone===line?dropTargetAt(event.clientX,event.clientY):zone);dragged=null};
   });
   shuffledWrong(game.items).forEach(item=>{
     const piece=document.createElement("div");piece.className="sequence-piece";piece.draggable=true;piece.dataset.text=item;
@@ -589,7 +602,7 @@ function renderSequenceGame(game,activity){
     handle.onpointerdown=event=>{
       event.preventDefault();handle.setPointerCapture(event.pointerId);piece.classList.add("dragging");
       handle.onpointerup=endEvent=>{
-        const target=document.elementFromPoint(endEvent.clientX,endEvent.clientY)?.closest(".sequence-bank,.sequence-drop,.sequence-slot");
+        const target=dropTargetAt(endEvent.clientX,endEvent.clientY);
         piece.classList.remove("dragging");handle.releasePointerCapture(endEvent.pointerId);handle.onpointerup=null;if(target)move(piece,target);
       };
       handle.onpointercancel=()=>{piece.classList.remove("dragging");handle.onpointerup=null};
