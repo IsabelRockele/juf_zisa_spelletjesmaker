@@ -93,6 +93,7 @@
     const keyTotalen = {};
     const selectors = [
       '.exercise', '.jump-exercise-block', '.mixed-exercise-block',
+      '.rekentaal-exercise-block',
       '.sequence-exercise-block', '.honderdveld-exercise-block',
       '.mab-exercise-block', '.placevalue-exercise-block',
       '.hvp-block', '.hvicons-block', '.gb1000-exercise-block',
@@ -2782,6 +2783,77 @@ placeAfterLastOfKey(block, key);
     requestAnimationFrame(()=>requestAnimationFrame(()=>{if(window.GI_Toets){window.GI_Toets.scanEnVoeg();window.GI_Toets.updateScoreVakken();}}));
   }
 
+  /* ══ Rekentaal: voor en na ════════════════════════════════ */
+  function _rekentaalOpgave(vorm, afstand, max) {
+    const stapTekst = afstand === 1 ? 'net' : '2 plaatsen';
+    let basis, antwoord, tekst;
+    if (vorm === 'beforeAfter') {
+      basis = Math.floor(Math.random() * (max - afstand + 1));
+      antwoord = basis + afstand; tekst = `${basis} komt ${stapTekst} voor`;
+    } else if (vorm === 'blankBefore') {
+      basis = afstand + Math.floor(Math.random() * (max - afstand + 1));
+      antwoord = basis - afstand; tekst = `komt ${stapTekst} voor ${basis}`;
+    } else if (vorm === 'afterBlank') {
+      basis = afstand + Math.floor(Math.random() * (max - afstand + 1));
+      antwoord = basis - afstand; tekst = `${basis} komt ${stapTekst} na`;
+    } else {
+      basis = Math.floor(Math.random() * (max - afstand + 1));
+      antwoord = basis + afstand; tekst = `komt ${stapTekst} na ${basis}`;
+    }
+    return { vorm, tekst, antwoord };
+  }
+
+  function _maakRekentaalItem(vorm, afstand, max) {
+    const opgave = _rekentaalOpgave(vorm, afstand, max);
+    const item = document.createElement('div');
+    item.className = 'rekentaal-item row-delete-wrap';
+    item.dataset.antwoord = String(opgave.antwoord);
+    item.appendChild(createRowDeleteButton(item));
+    const input = document.createElement('input');
+    input.type = 'text'; input.className = 'rekentaal-box';
+    if (vorm === 'blankBefore' || vorm === 'blankAfter') item.append(input, document.createTextNode(` ${opgave.tekst}.`));
+    else item.append(document.createTextNode(`${opgave.tekst} `), input, document.createTextNode('.'));
+    return item;
+  }
+
+  function _voegRekentaalItemToe(key, vormen, afstandKeuze, max) {
+    const blokken = Array.from(sheet.querySelectorAll(`.rekentaal-exercise-block[data-title-key="${key}"]`));
+    if (!blokken.length) { addRekentaalExercises(); return; }
+    const grid = blokken.at(-1).querySelector('.rekentaal-grid');
+    const vorm = vormen[Math.floor(Math.random() * vormen.length)];
+    const afstand = afstandKeuze === 'mix' ? (Math.random() < .5 ? 1 : 2) : Number(afstandKeuze);
+    const item = _maakRekentaalItem(vorm, afstand, max);
+    if (grid.children.length < 2) item.classList.add('rekentaal-eerste-rij');
+    grid.appendChild(item);
+    requestAnimationFrame(() => window.GI_Toets?.updateScoreVakken());
+  }
+
+  function addRekentaalExercises() {
+    const max = parseInt($('#rekentaalMax')?.value, 10) || 20;
+    const count = clamp(parseInt($('#rekentaalCount')?.value, 10) || 8, 2, 30);
+    const afstandKeuze = document.querySelector('input[name="rekentaalAfstand"]:checked')?.value || '1';
+    const vormen = $$('.rekentaal-vorm:checked').map(el => el.value);
+    if (!vormen.length) { alert('Kies minstens één zinsvorm.'); return; }
+    const key = `rekentaal_${max}_${afstandKeuze}_${vormen.join('_')}`;
+    const titel = afstandKeuze === '2' ? 'Vul het getal 2 plaatsen voor of na in.'
+      : afstandKeuze === 'mix' ? 'Vul het juiste getal voor of na in.' : 'Vul het getal net voor of net na in.';
+    ensureTitleOnce(sheet, key, titel);
+    _registerAddFn(key, () => _voegRekentaalItemToe(key, vormen, afstandKeuze, max));
+    const block = document.createElement('div');
+    block.className = 'rekentaal-exercise-block'; block.dataset.titleKey = key;
+    block.appendChild(createDeleteButton(block));
+    const grid = document.createElement('div'); grid.className = 'rekentaal-grid';
+    for (let i = 0; i < count; i++) {
+      const vorm = vormen[i % vormen.length];
+      const afstand = afstandKeuze === 'mix' ? (i % 2) + 1 : Number(afstandKeuze);
+      grid.appendChild(_maakRekentaalItem(vorm, afstand, max));
+    }
+    // De eerste twee oefeningen vormen samen de rij die bij de opdrachtzin hoort.
+    Array.from(grid.children).slice(0, 2).forEach(item => item.classList.add('rekentaal-eerste-rij'));
+    block.appendChild(grid); sheet.appendChild(block);
+    requestAnimationFrame(() => window.GI_Toets?.scanEnVoeg());
+  }
+
   /* ── Header & events ───────────────────────────────────── */
   function renderSheetHeader(){ if (sheet.querySelector('.sheetHeader')) return;
     const h=document.createElement('div'); h.className='sheetHeader';
@@ -2809,6 +2881,7 @@ placeAfterLastOfKey(block, key);
 bindThrottled($('#btnAddToSheet'),      addExerciseToSheet);
 bindThrottled($('#btnAddJumpExercise'), addJumpExercise);
 bindThrottled($('#btnAddMixed'),        addMixedExercises);
+bindThrottled($('#btnAddRekentaal'),     addRekentaalExercises);
 bindThrottled($('#btnAddSequence'),     addSequenceExercise);
 bindThrottled($('#btnAddHonderdveld'),  addHonderdveldExercise);
 bindThrottled($('#btnAddMab'),          addMabExercise);

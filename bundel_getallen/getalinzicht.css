@@ -16,7 +16,7 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
     .sheetHeader{margin:4px 0 12px 0; border-bottom: 2px solid #1A3A5C; padding-bottom: 8px;}
 
     /* Opdrachtblokken */
-    .exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block, .honderdveld-exercise-block, .mab-exercise-block, .placevalue-exercise-block{
+    .exercise, .jump-exercise-block, .mixed-exercise-block, .rekentaal-exercise-block, .sequence-exercise-block, .honderdveld-exercise-block, .mab-exercise-block, .placevalue-exercise-block{
   position:relative;
   margin:2px 0 12px 0;
   padding:4px 12px 12px 12px;
@@ -355,6 +355,13 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
     .mix-eq{font-weight:700;margin:0 2px}
     .mix-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
     .mix-box.small{width:40px}
+
+    /* Rekentaal: korte, goed leesbare zinnen in twee kolommen */
+    .rekentaal-exercise-block{position:relative;margin:2px 0 12px;padding:4px 12px 12px;background:#fff;overflow:visible}
+    .rekentaal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+    .rekentaal-item{min-height:48px;padding:8px 34px 8px 12px;border:1px dashed #d9e2ec;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;white-space:nowrap}
+    .rekentaal-box{width:54px;height:36px;margin:0 5px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;font-weight:700;box-sizing:border-box}
+    @media (max-width:760px){.rekentaal-grid{grid-template-columns:1fr}}
 
     /* Getallenrij */
     .seq-row{display:flex;gap:8px;flex-wrap:nowrap;align-items:center;padding:8px 4px}

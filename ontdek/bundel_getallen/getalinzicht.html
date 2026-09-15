@@ -8,9 +8,9 @@
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <!-- Volgorde: eerst oefeningen, dan preview, dan pdf -->
-  <script defer src="getalinzicht.js"></script>
+  <script defer src="getalinzicht.js?v=rekentaal1"></script>
   <script defer src="gi-preview.js?v=range-freeze-fix-1"></script>
-  <script defer src="gi-pdf.js"></script>
+  <script defer src="gi-pdf.js?v=pagepack3"></script>
 
   <link rel="stylesheet" href="getalinzicht.css">
   <link rel="stylesheet" href="getalinzicht-ui.css">
@@ -45,6 +45,9 @@
 
       <div><strong>🔀 Gemengd</strong><br>
       Buurgetallen, vergelijken, samenstellen (T en E / H T E), rangschikken en aanvullen tot tiental of honderdtal.</div>
+
+      <div><strong>💬 Rekentaal</strong><br>
+      Oefen de zinnen <em>net voor</em>, <em>net na</em>, <em>2 plaatsen voor</em> en <em>2 plaatsen na</em> tot 10, 20, 100 of 1000.</div>
 
       <div><strong>🔢 Getallenrij</strong><br>
       Een reeks getallen met één of meerdere ontbrekende getallen die leerlingen aanvullen.</div>
@@ -110,6 +113,7 @@
       <div class="sidebar-tab tab-getallenlijn active"   onclick="GI_UI.toonTab('getallenlijn',this)">📏 Getallenlijn</div>
       <div class="sidebar-tab tab-sprongen"              onclick="GI_UI.toonTab('sprongen',this)">🦘 Sprongen</div>
       <div class="sidebar-tab tab-gemengd"               onclick="GI_UI.toonTab('gemengd',this)">🔀 Gemengd</div>
+      <div class="sidebar-tab tab-rekentaal"             onclick="GI_UI.toonTab('rekentaal',this)">💬 Rekentaal</div>
       <div class="sidebar-tab tab-getallenrij"           onclick="GI_UI.toonTab('getallenrij',this)">🔢 Getallenrij</div>
       <div class="sidebar-tab tab-honderdveld"           onclick="GI_UI.toonTab('honderdveld',this)">🗂️ 100-veld</div>
       <div class="sidebar-tab tab-mab"                   onclick="GI_UI.toonTab('mab',this)">🟦 MAB</div>
@@ -367,6 +371,32 @@
       <button class="btn-toevoegen" id="btnAddMixed">➕ Voeg oefeningen toe</button>
     </div>
 
+
+    <!-- ══ TAB: REKENTAAL ════════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-rekentaal" style="display:none">
+      <div class="sectie-titel">Rekentaal: voor en na</div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">🎓</span> Leerjaar &amp; bereik</div>
+        <div class="veld-rij">
+          <label>Leerjaar <select id="rekentaalLeerjaar" style="width:130px"><option value="1">1ste leerjaar</option><option value="2">2de leerjaar</option><option value="3">3de leerjaar</option></select></label>
+          <label>Getallen tot <select id="rekentaalMax" style="width:100px"><option value="10">10</option><option value="20" selected>20</option><option value="100">100</option><option value="1000">1000</option></select></label>
+          <label>Aantal <input id="rekentaalCount" type="number" value="8" min="2" max="30" style="width:56px"></label>
+        </div>
+        <div class="harm-beschrijving" style="margin-top:8px">Richtlijn: 1ste leerjaar tot 10/20, 2de tot 20/100 en 3de tot 100/1000. Je kunt elk bereik vrij kiezen.</div>
+      </div>
+      <div class="config-kaart"><div class="kaart-titel"><span class="icon">↔️</span> Afstand</div><div class="chips-rij">
+        <label class="radio-chip geselecteerd"><input type="radio" name="rekentaalAfstand" value="1" checked> Net voor / net na</label>
+        <label class="radio-chip"><input type="radio" name="rekentaalAfstand" value="2"> 2 plaatsen voor / na</label>
+        <label class="radio-chip"><input type="radio" name="rekentaalAfstand" value="mix"> Beide door elkaar</label>
+      </div></div>
+      <div class="config-kaart"><div class="kaart-titel"><span class="icon">💬</span> Zinsvormen</div>
+        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="beforeAfter" checked> 6 komt net voor …</label>
+        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="blankBefore" checked> … komt net voor 7</label>
+        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="afterBlank" checked> 8 komt net na …</label>
+        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="blankAfter" checked> … komt net na 7</label>
+      </div>
+      <button class="btn-toevoegen" id="btnAddRekentaal">➕ Voeg rekentaal toe</button>
+    </div>
 
     <!-- ══ TAB: GETALLENRIJ ═══════════════════════════════════ -->
     <div class="sidebar-content" id="tab-getallenrij" style="display:none">
@@ -710,7 +740,7 @@ const GI_UI = (() => {
 
   const TABS = {
     getallenlijn: 'tab-getallenlijn', sprongen: 'tab-sprongen',
-    gemengd: 'tab-gemengd', getallenrij: 'tab-getallenrij',
+    gemengd: 'tab-gemengd', rekentaal: 'tab-rekentaal', getallenrij: 'tab-getallenrij',
     honderdveld: 'tab-honderdveld', mab: 'tab-mab',
     plaatswaarde: 'tab-plaatswaarde', vulaanvol: 'tab-vulaanvol',
     getalbeelden: 'tab-getalbeelden', pictogrammen: 'tab-pictogrammen',
@@ -874,6 +904,11 @@ const GI_UI = (() => {
 
   document.addEventListener('DOMContentLoaded', () => {
     initChips();
+    document.getElementById('rekentaalLeerjaar')?.addEventListener('change', e => {
+      const advies = { '1': '20', '2': '100', '3': '1000' };
+      const bereik = document.getElementById('rekentaalMax');
+      if (bereik) bereik.value = advies[e.target.value] || '20';
+    });
     toonTab('getallenlijn', document.querySelector('.tab-getallenlijn'));
   });
 

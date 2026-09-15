@@ -139,8 +139,14 @@ window.GI_Pdf = (() => {
       '.gi4-fraction-equiv-axis', '.gi4-fraction-compare-card', '.gi4-fraction-compare-order',
       '.gi4-fraction-estimate-card',
       '.gi4-mixed-order-card', '.gi4-mixed-order-explain', '.gi4-mixed-sequence-card', '.gi4-mixed-before-after-card',
-      '.row-delete-wrap', '.exercise', '.jump-row', '.seq-row', '.mix-item'
+      '.rekentaal-item', '.row-delete-wrap', '.exercise', '.jump-row', '.seq-row', '.mix-item'
     ].join(', ');
+
+    function blokHoortBijTitel(blok, key) {
+      if (!blok || !key) return false;
+      if (blok.dataset?.titleKey === key) return true;
+      return Array.from(blok.querySelectorAll?.('[data-title-key]') || []).some(el => el.dataset.titleKey === key);
+    }
 
     function eersteOefenItemNaTitel(titleRow) {
       const titleEl = titleRow.querySelector('.exercise-title[data-title-key]');
@@ -148,7 +154,7 @@ window.GI_Pdf = (() => {
       if (!key) return null;
       let el = titleRow.nextElementSibling;
       while (el && el.classList.contains('title-row')) el = el.nextElementSibling;
-      if (!el || el.dataset.titleKey !== key) return null;
+      if (!blokHoortBijTitel(el, key)) return null;
       return el.querySelector(EERSTE_ITEM_SEL) || el;
     }
 
@@ -158,7 +164,7 @@ window.GI_Pdf = (() => {
       if (!key) return [];
       let blok = titleRow.nextElementSibling;
       while (blok && blok.classList.contains('title-row')) blok = blok.nextElementSibling;
-      if (!blok || blok.dataset.titleKey !== key) return [];
+      if (!blokHoortBijTitel(blok, key)) return [];
 
       const items = Array.from(blok.querySelectorAll(EERSTE_ITEM_SEL));
       if (!items.length) return [blok];
@@ -379,7 +385,10 @@ window.GI_Pdf = (() => {
         if (g > snij && g <= maxY && !isVerbodenSnede(g) && !isKaartRand(g)) snij = g;
       }
 
-      const startVanBlokDatNietPast = verboden
+      const gedwongenPakketStart = startPakketten
+        .filter(p => p.start > startY + 1 && p.start < maxY && p.end > maxY)
+        .sort((a, b) => a.start - b.start)[0]?.start;
+      const startVanBlokDatNietPast = gedwongenPakketStart || verboden
         .filter(iv => iv.start > startY + 1 && iv.start < maxY && iv.end > maxY)
         .sort((a, b) => a.start - b.start)[0]?.start;
       if (startVanBlokDatNietPast && snij > startVanBlokDatNietPast) {
@@ -394,7 +403,7 @@ window.GI_Pdf = (() => {
           snij <= k.top + 48 * factor
         )
         .sort((a, b) => b.before - a.before)[0];
-      if (snedeOpKaartRand) {
+      if (snedeOpKaartRand && !gedwongenPakketStart) {
         snij = snedeOpKaartRand.before;
       }
 
@@ -406,7 +415,7 @@ window.GI_Pdf = (() => {
           !isKaartRand(p.end)
         )
         .sort((a, b) => b.end - a.end)[0];
-      if (volgendeStarter && maxY - snij > pageH_px * 0.18) {
+      if (volgendeStarter && !gedwongenPakketStart && maxY - snij > pageH_px * 0.18) {
         snij = volgendeStarter.end;
       }
 
@@ -421,7 +430,7 @@ window.GI_Pdf = (() => {
 
       const isBijnaLegePagina = snij - startY < pageH_px * (startY === 0 ? 0.66 : 0.52);
       const isNietLaatstePagina = canvas.height - startY > pageH_px * 0.65;
-      if (isBijnaLegePagina && isNietLaatstePagina) {
+      if (isBijnaLegePagina && isNietLaatstePagina && !gedwongenPakketStart) {
         const minimumY = startY + pageH_px * (startY === 0 ? 0.66 : 0.52);
         const latereSnede = alleKandidaten
           .filter(g => g > minimumY && g <= maxY && !isVerbodenSnede(g) && !isKaartRand(g))
@@ -433,6 +442,8 @@ window.GI_Pdf = (() => {
         }
       }
 
+      const pakketOpSnede = startPakketten.filter(p => snij > p.start && snij < p.end && p.start > startY + 1).sort((a,b)=>a.start-b.start)[0];
+      if (pakketOpSnede) snij = pakketOpSnede.start;
       if (snij <= startY) snij = Math.min(maxY, canvas.height);
       plakjes.push({ y: startY, h: snij - startY });
       startY = snij;
@@ -466,6 +477,7 @@ window.GI_Pdf = (() => {
     '.exercise', '.jump-row', '.seq-row',
     '.title-row',
     '.mixed-first', '.honderdveld-row', '.honderdveld-exercise-block',
+    '.rekentaal-grid .rekentaal-item:nth-child(2n)',
     '.fillnext-row', '.fillnext-first',
     '.hvicons-card', '.hvicons-first',
     '.hvp-first', '.hvp-card',
@@ -565,9 +577,7 @@ window.GI_Pdf = (() => {
         const onderTrimPx = i < plakjes.length - 1
           ? Math.min(Math.round(pxPerMm * 3), Math.max(0, sl.h - 1))
           : 0;
-        const bovenHerstelPx = i > 0
-          ? Math.min(Math.round(pxPerMm * 3.5), sl.y)
-          : 0;
+        const bovenHerstelPx = 0;
         const bronY = Math.max(0, sl.y - bovenHerstelPx);
         const renderH = Math.max(
           1,
