@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fizz — voorbeeld van het einde</title>
+  <link rel="stylesheet" href="style.css?v=fizz9">
+  <link rel="stylesheet" href="ending.css" id="endingStyle">
+  <style>.previewLabel{position:fixed;bottom:0;left:0;right:0;z-index:40;text-align:center;background:#102b45;color:#fff;padding:6px;font:12px Arial;pointer-events:none}.fizzEnding{padding-bottom:45px}</style>
+</head>
+<body>
+  <div id="gameUI"></div>
+  <div class="previewLabel">VOORBEELD · fictieve scores · je echte spel verandert niet</div>
+  <script type="module">
+    import {showEnding} from './ending.js';
+    import {WORLDS} from './core.mjs';
+    function preview() {
+      showEnding({
+        player: {score: 2450, coins: 38, solved: 50, firstTry: 42},
+        worlds: WORLDS.map(world => world.name),
+        replay: preview,
+        menu: () => location.assign('./index.html'),
+        sound: () => {}
+      });
+      document.querySelector('.endingReplay').textContent = 'BEKIJK HET EINDE OPNIEUW ↻';
+    }
+    preview();
+  </script>
+</body>
+</html>

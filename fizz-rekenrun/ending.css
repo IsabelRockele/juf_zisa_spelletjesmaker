@@ -1,0 +1,21 @@
+.fizzEnding{position:fixed;inset:0;z-index:30;overflow:auto;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 20%,#396674,#102b45 65%);color:#f9f6e8;text-align:center}
+.endingCard{position:relative;width:min(720px,100%);margin:auto;z-index:1}
+.endingKicker{font-size:12px;letter-spacing:3px;color:#ffe18b;font-weight:900}
+.endingCard h2{font-size:clamp(27px,5vw,43px);line-height:1.1;margin:14px 0;color:#fff5ce}
+.endingCard p{line-height:1.5}.endingScene{height:210px;display:flex;justify-content:center;align-items:end;gap:30px;margin:12px 0}
+.endingFox{width:150px;height:220px;background:url('./fox-sheet.png') -595px -260px / 768px 512px no-repeat;filter:drop-shadow(0 12px 8px #081b4570);animation:endingBounce 2s ease-in-out infinite}
+.endingTreasure{font-size:100px;line-height:1.5;filter:drop-shadow(0 0 28px #ffd86a70);transform:rotate(-7deg)}
+.revealed .endingTreasure{animation:endingPop .55s ease-out forwards}
+.endingWorlds{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:0;list-style:none;margin:20px 0}
+.endingWorlds li{font-size:12px;padding:7px 10px;background:#ffffff12;border:1px solid #8deacb55;border-radius:20px;color:#b9fbe5}
+.endingCard .playButton{width:min(430px,100%);margin:12px auto;display:block}.endingCard .secondary{display:block;margin:12px auto;color:#fff;background:#ffffff12;border:1px solid #ffffff35;padding:12px 22px;border-radius:14px}
+.endingReward h3{font-size:24px;color:#ffe18b;margin:8px}.endingReward p{margin:8px 0}.endingStats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+.endingStats div{background:#ffffff10;border:1px solid #ffffff25;border-radius:18px;padding:16px 5px}.endingStats strong{display:block;font-size:clamp(24px,5vw,36px);color:#ffe18b}.endingStats span{font-size:13px}.endingAccuracy{font-size:13px;color:#c7dedc}
+.endingStars{position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(circle,#fff6 1px,transparent 2px),radial-gradient(circle,#ffe18b66 2px,transparent 3px);background-size:83px 97px,173px 157px;background-position:0 0,37px 53px}
+.endingConfetti{position:fixed;pointer-events:none;z-index:2;top:-20px;left:var(--x);width:9px;height:16px;background:var(--color);animation:endingFall 3s var(--delay) ease-in forwards}
+.fizzEnding button:focus-visible{outline:3px solid #ffe18b;outline-offset:4px}
+@keyframes endingBounce{50%{transform:translateY(-10px) rotate(3deg)}}
+@keyframes endingPop{from{transform:scale(.6) rotate(-15deg)}to{transform:scale(1.1) rotate(0)}}
+@keyframes endingFall{to{transform:translateY(110vh) rotate(var(--turn));opacity:0}}
+@media(max-height:750px){.endingScene{height:140px;margin:0}.endingFox{transform:scale(.7);transform-origin:bottom;animation:none}.endingTreasure{font-size:75px}.endingWorlds{margin:12px 0}}
+@media(prefers-reduced-motion:reduce){.endingFox,.revealed .endingTreasure{animation:none}.endingConfetti{display:none}}
