@@ -897,6 +897,11 @@ const Preview = (() => {
     const splAantal  = heeftSplits ? (splIsHTE ? 3 : 2) : 0;
     // Gebruik grotere vakjes bij niveau tot 10.000
     const splGroot   = (blok.niveau || 0) >= 10000;
+    const voorbeeldDelen = oef.vraag.replace(' =', '').trim().split(' ');
+    const voorbeeldAftrekker = parseInt(voorbeeldDelen[2]) || 0;
+    const isTwintigMinTEVoorbeeld = isVoorbeeld && bewerking === 'aftrekken' &&
+      parseInt(voorbeeldDelen[0]) === 20 && voorbeeldAftrekker >= 11 && voorbeeldAftrekker <= 19;
+    const voorbeeldEenheid = voorbeeldAftrekker % 10;
     const boomKlasse = splAantal === 3 ? 'splitsbeen-boom splitsbeen-3' :
                        splGroot ? 'splitsbeen-boom splitsbeen-boom-groot' : 'splitsbeen-boom';
     const vakKlasse  = splGroot ? 'splits-vak-groot' : 'splits-vak';
@@ -919,7 +924,9 @@ const Preview = (() => {
       <div class="oefening-item oefening-hulp${isVoorbeeld ? ' tussenstappen-voorbeeld' : ''}${isAftrektal ? ' aftrektal-hulp' : ''}${isAftrektalGroot ? ' aftrektal-hulp-groot' : ''}${splGroot ? ' niveau-10000' : ''}">
         <div class="hulp-som-rij">
           <span class="oef-tekst">${somHTML}</span>
-          <span class="antwoord-vak${isVoorbeeld ? ' antwoord-ingevuld' : ''}" style="margin-left:4px;" data-antwoord="${oef.antwoord ?? ''}">${isVoorbeeld ? esc(oef.antwoord ?? '') : ''}</span>
+          ${isTwintigMinTEVoorbeeld
+            ? `<span class="tussenstappen-start-ingevuld">(20 − 10) − ${voorbeeldEenheid}</span>`
+            : `<span class="antwoord-vak${isVoorbeeld ? ' antwoord-ingevuld' : ''}" style="margin-left:4px;" data-antwoord="${oef.antwoord ?? ''}">${isVoorbeeld ? esc(oef.antwoord ?? '') : ''}</span>`}
         </div>
         ${heeftSplits ? `
         <div class="hulp-splits-rij" data-splits="${splAantal}">
@@ -932,7 +939,9 @@ const Preview = (() => {
         <div class="hulp-schrijflijnen">
           ${(() => {
             const _spH = _berekenSplits(oef, blok.bewerking || 'optellen', blok.splitspositie || 'aftrekker', blok.config?.strategie, schrijflijnenAantal);
-            const antw = [_spH.sl1, _spH.sl2, _spH.sl3];
+            const antw = isTwintigMinTEVoorbeeld
+              ? [`= 10 − ${voorbeeldEenheid}`, `= ${oef.antwoord}`, '']
+              : [_spH.sl1, _spH.sl2, _spH.sl3];
             return Array(schrijflijnenAantal).fill(0).map((_, si) =>
               `<div class="schrijflijn${isVoorbeeld ? ' schrijflijn-ingevuld' : ''}" data-antwoord="${antw[si] ?? ''}">${isVoorbeeld ? esc(antw[si] ?? '') : ''}</div>`
             ).join('');

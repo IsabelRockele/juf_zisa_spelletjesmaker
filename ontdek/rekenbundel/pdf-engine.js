@@ -324,6 +324,10 @@ y += 5;
 const oefBewerking = (bewerking === 'gemengd')
   ? (oef.vraag.includes('−') || oef.vraag.includes('-') ? 'aftrekken' : 'optellen')
   : bewerking;
+const pdfAftrekker = parseInt(delen[2]) || 0;
+const isTwintigMinTEVoorbeeld = isVoorbeeld && oefBewerking === 'aftrekken' &&
+  parseInt(delen[0]) === 20 && pdfAftrekker >= 11 && pdfAftrekker <= 19;
+const pdfEenheid = pdfAftrekker % 10;
 const doelIdx = (oefBewerking === 'optellen') ? 2 : (splitspositie === 'aftrekker' ? 2 : 0);
 const doelGetal = parseInt(delen[doelIdx]) || 0;
 
@@ -379,8 +383,11 @@ const somTekst = (delen.length >= 3)
       const vakW  = blokNiveau >= 10000 ? 18 : blokNiveau >= 1000 ? 14 : blokNiveau >= 100 ? 12 : 10;
       const vakH  = 9;
       const vakX  = somStartX + somBreedte + 2;
-      _antwoordVak(vakX, vakY, vakW, vakH, oef.antwoord);
-      if (isVoorbeeld && !_metAntwoorden) {
+      if (!isTwintigMinTEVoorbeeld) _antwoordVak(vakX, vakY, vakW, vakH, oef.antwoord);
+      if (isTwintigMinTEVoorbeeld) {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(0, 112, 178);
+        doc.text(`(20 - 10) - ${pdfEenheid}`, vakX, vakY + 6.3);
+      } else if (isVoorbeeld && !_metAntwoorden) {
         doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(0, 112, 178);
         doc.text(String(oef.antwoord ?? ''), vakX + vakW / 2, vakY + 6.3, { align: 'center' });
       }
@@ -403,7 +410,9 @@ const somTekst = (delen.length >= 3)
 
           doc.setDrawColor(160, 185, 210);
           doc.setLineWidth(0.4);
-          const lijnAntw3 = _spLijn ? [_spLijn.sl1, _spLijn.sl2, _spLijn.sl3] : [];
+          const lijnAntw3 = isTwintigMinTEVoorbeeld
+            ? [`= 10 - ${pdfEenheid}`, `= ${oef.antwoord}`, '']
+            : (_spLijn ? [_spLijn.sl1, _spLijn.sl2, _spLijn.sl3] : []);
           for (let li = 0; li < schrijflijnenAantal; li++) {
             const lY = lY1 + li * lijnGap;
             doc.line(lX1, lY, lX2, lY);
