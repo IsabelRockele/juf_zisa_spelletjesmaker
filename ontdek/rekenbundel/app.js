@@ -1470,6 +1470,9 @@ function _getSplitsConfig() {
 
   /* ── Initialisatie ───────────────────────────────────────── */
   function init() {
+    const kaartTypes = document.getElementById('cg-types')?.closest('.config-kaart');
+    const kaartHulp = document.getElementById('kaart-hulpmiddelen');
+    if (kaartTypes && kaartHulp) kaartTypes.after(kaartHulp);
     _updateTypesUI(20, 'zonder');
     Preview.render(bundelData);
 
