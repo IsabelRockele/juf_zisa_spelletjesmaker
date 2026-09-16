@@ -574,10 +574,11 @@ const App = (() => {
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     const isBrug = ['naar-tiental','naar-honderdtal','beide','met','gemengd','naar-duizendtal'].includes(brug);
     const isZonderTot1000 = brug === 'zonder' && niveau >= 1000;
+    const isTussenstappenTot20 = brug === 'zonder' && niveau === 20 && actieveBewerking === 'aftrekken';
     if (niveau < 20) { kaart.style.display = 'none'; return; }
 
     // Toon bij brug (alle niveaus) of bij zonder+tot1000
-    const toon = (isBrug || isZonderTot1000) && (actieveBewerking !== 'herken-brug');
+    const toon = (isBrug || isZonderTot1000 || isTussenstappenTot20) && (actieveBewerking !== 'herken-brug');
     kaart.style.display = toon ? 'block' : 'none';
 
     if (!toon) {
@@ -606,7 +607,13 @@ const App = (() => {
     const chipComp      = document.getElementById('chip-compenseren');
     const chipTrans     = document.getElementById('chip-transformeren');
 
-    if (isZonderTot1000) {
+    if (isTussenstappenTot20) {
+      if (chipSplits)    { chipSplits.style.display = 'none'; _resetChip(chipSplits, 'rij-splitspositie'); }
+      if (chipLijnen)    chipLijnen.style.display = '';
+      if (chipAanvullen) { chipAanvullen.style.display = 'none'; _resetChip(chipAanvullen, 'rij-aanvullen'); }
+      if (chipComp)      { chipComp.style.display = 'none'; _resetChip(chipComp, 'rij-compenseren'); }
+      if (chipTrans)     { chipTrans.style.display = 'none'; _resetChip(chipTrans, 'rij-transformeren'); }
+    } else if (isZonderTot1000) {
       // Zonder brug: splitsbeen enkel tot 1000, niet bij hogere niveaus
       const isZonderBovén1000 = brug === 'zonder' && niveau > 1000;
       if (chipSplits)    { 
@@ -625,7 +632,7 @@ const App = (() => {
 
     // Splitspositie enkel bij aftrekken
     const rijPos = document.getElementById('rij-splitspositie');
-    if (rijPos) rijPos.style.display = (toon && actieveBewerking === 'aftrekken') ? 'block' : 'none';
+    if (rijPos) rijPos.style.display = (toon && actieveBewerking === 'aftrekken' && !isTussenstappenTot20) ? 'block' : 'none';
   }
 
   function _resetChip(chip, rijId) {
