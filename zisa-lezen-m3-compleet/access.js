@@ -5,7 +5,7 @@
   const mode=params.get('ontdek')==='1'?'discover':params.get('gratis')==='1'?'free':params.get('teacher')==='1'?'teacher':params.get('code')?'pro':'discover';
   window.ZISA_ACCESS_MODE=local&&mode==='discover'&&!params.has('ontdek')?'full':mode;
   const gate=document.createElement('div');gate.id='accessGate';gate.style.cssText='position:fixed;z-index:99999;inset:0;display:grid;place-items:center;background:#eefaff;color:#173f73;font:700 18px Arial;text-align:center;padding:24px';gate.innerHTML='<div><img src="images/zisa-leest.png" alt="" style="width:130px;display:block;margin:auto"><p>De boekenkast wordt geopend…</p></div>';document.body.append(gate);
-  const start=()=>{gate.remove();const style=document.querySelector('link[href^="style.css"]');if(style)style.href='style.css?v=34';const script=document.createElement('script');script.src='app.js?v=42';document.body.append(script)};
+  const start=()=>{gate.remove();const style=document.querySelector('link[href^="style.css"]');if(style)style.href='style.css?v=35';const script=document.createElement('script');script.src='app.js?v=43';document.body.append(script)};
   const fail=message=>{gate.innerHTML=`<div><div style="font-size:54px">🔒</div><h2>Deze leeslink is niet actief</h2><p style="font-weight:400">${message}</p><a href="../ontdek/zisa-spelen.html" style="color:#1768ac">Probeer de voorbeeldboeken</a></div>`};
   if(local||mode==='free'||mode==='discover'){start();return}
   Promise.all([

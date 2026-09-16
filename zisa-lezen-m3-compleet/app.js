@@ -17,6 +17,20 @@ let fluencyIndex = 0;
 let fluencyScore = 0;
 
 const roleColors = {wie:"#f4d94e",doet:"#ef6b67",waar:"#a985d6",wat:"#9a6b45",hoe:"#67c98f",wanneer:"#f3a04b"};
+const storyGlossaries={
+  "m6-raadsel-nachtcamera":{
+    nachtcamera:{text:"Een camera die automatisch foto's of filmpjes maakt wanneer er in het donker een dier voorbijkomt.",image:"images/m6-nachtcamera/01.png"},sporengids:"Een boek waarmee je kunt herkennen van welk dier een spoor is.",splitsing:"Een plek waar een weg of pad in twee richtingen verdergaat.",omheining:"Een hek of afsluiting rond een plek.",dassenburcht:{text:"Het ondergrondse gangenstelsel waarin dassen wonen.",image:"images/m6-nachtcamera/07.png"},veiligheidslijn:"Een lijn die aangeeft tot waar je veilig mag komen.",grijpstok:{text:"Een lange stok met een grijper waarmee je iets vanop afstand kunt pakken.",image:"images/m6-nachtcamera/11.png"},geheugenkaart:"Een klein kaartje waarop een camera foto's en filmpjes bewaart.",bevestiging:"Het onderdeel waarmee iets stevig vastzit."
+  },
+  "m6-boomhut-beek":{
+    buurttuin:"Een tuin die mensen uit de buurt samen gebruiken en verzorgen.",bouwplan:"Een tekening die toont hoe iets gebouwd is.",risico:"Een kans dat er iets gevaarlijks of ongewensts gebeurt.","risico's":"Mogelijke gevaren waarmee je rekening moet houden.",steunpaal:"Een paal die een bouwwerk helpt dragen.",afvoerrooster:{text:"Een metalen rooster waardoor water kan wegstromen.",image:"images/m6-boomhut/04.png"},fundering:"Het stevige onderste deel waarop een bouwwerk rust.",gekeurde:"Gecontroleerd en veilig bevonden.",veiligheidsharnas:{text:"Stevige riemen die iemand beschermen tegen vallen.",image:"images/m6-boomhut/08.png"},serre:"Een glazen huis waarin planten groeien.",draagbare:"Zo gemaakt dat je het kunt meenemen.",vrijwilligers:"Mensen die uit eigen keuze helpen zonder ervoor betaald te worden.",ondergrond:"De grond waarop iets staat.",waterpas:"Helemaal recht en niet scheef.",goedgekeurd:"Na controle veilig en in orde bevonden.",controlelijst:"Een lijst waarop staat wat je één voor één moet nakijken."
+  },
+  "e6-kompas-onder-stad":{
+    archivaris:"Iemand die oude documenten en andere bronnen bewaart en ordent.",instrument:"Een hulpmiddel waarmee je iets kunt meten of onderzoeken.",beïnvloeden:"Ervoor zorgen dat iets verandert of anders werkt.",legenda:{text:"De uitleg van kleuren en tekens op een kaart.",image:"images/e6-kompas/03.png"},windroos:{text:"Een teken op een kaart dat de windrichtingen toont.",image:"images/e6-kompas/04.png"},gietijzeren:"Gemaakt van ijzer dat in een vorm is gegoten.",leidingenplan:"Een kaart waarop ondergrondse buizen en leidingen staan.",inspectiedeur:{text:"Een afgesloten deur voor mensen die iets moeten controleren of onderhouden.",image:"images/e6-kompas/08.png"},gemetselde:"Opgebouwd uit stenen die met specie aan elkaar vastzitten.",inspectieluik:{text:"Een kleine opening waardoor een vakmens iets kan nakijken.",image:"images/e6-kompas/10.png"},verzegeling:"Een sluiting waaraan je kunt zien of iets al geopend is.",stadsingenieur:"Een deskundige die technische werken voor een stad ontwerpt of controleert.",verstopping:"Een blokkering waardoor water niet meer goed kan doorstromen.",reconstrueren:"Met alle gegevens opnieuw stap voor stap tonen wat er gebeurd is."
+  },
+  "e6-code-rood-marsbasis":{
+    ruimtevaartcentrum:"Een plaats waar mensen ruimtevaart onderzoeken, oefenen en besturen.",noodprotocol:"Vaste veiligheidsstappen die je bij gevaar in de juiste volgorde uitvoert.",simulatie:{text:"Een nagebootste situatie waarmee je veilig kunt oefenen.",image:"images/e6-marsbasis/02.png"},zuurstofsensoren:{text:"Meettoestellen die controleren hoeveel zuurstof er aanwezig is.",image:"images/e6-marsbasis/04.png"},waarschuwingslicht:"Een lamp die toont dat er mogelijk een probleem is.",tegenstrijdig:"Niet met elkaar overeenkomend.",tijdlijn:{text:"Een overzicht waarop gebeurtenissen in volgorde van tijd staan.",image:"images/e6-marsbasis/06.png"},koeling:"Een systeem dat iets kouder maakt.",condens:{text:"Kleine waterdruppels die ontstaan wanneer vochtige lucht afkoelt.",image:"images/e6-marsbasis/07.png"},optische:"Werkend met licht.",reservesensor:"Een extra sensor die klaarstaat als de gewone sensor niet betrouwbaar is.",dienstsluis:"Een afsluitbare doorgang waarmee een technicus veilig een ruimte binnengaat.",geïsoleerde:"Beschermd tegen warmte of koude van buitenaf.",afdichting:{text:"Een rubberen rand die een opening lucht- of waterdicht afsluit.",image:"images/e6-marsbasis/13.png"},bewijsreeks:"Een rij aanwijzingen die samen laten zien dat een uitleg klopt.",onderhoudsverslag:"Een document waarin staat welke controle of reparatie is uitgevoerd.",controleerbaar:"Zo duidelijk dat iemand anders kan nagaan of het klopt."
+  }
+};
 const bookGames = {
   "m3-pip-draak": [
     {type:"choice",icon:"🧠",title:"Wat weet je nog?",q:"Wat helpt de draak?",a:["Hij denkt aan de zon.","Hij eet het mos.","Hij slaapt in het hol."],correct:0,hint:"Denk aan wat Pip zegt."},
@@ -91,6 +105,25 @@ Object.entries(window.ZISA_LEVEL_GAMES||{}).forEach(([id,games])=>{bookGames[id]
 Object.entries(window.ZISA_SPEED_GAMES||{}).forEach(([id,game])=>{
   preReadingGames[id]={icon:"⏱️",title:"Tempolezen",q:"Lees drie keer één minuut en probeer jezelf te verslaan.",...game};
 });
+const vocabularyGames={
+  "m6-raadsel-nachtcamera":[
+    {type:"choice",icon:"🔵",title:"Moeilijk woord",q:"Wat is een dassenburcht?",a:["Een ondergronds gangenstelsel waar dassen wonen.","Een camera die alleen overdag werkt.","Een hek rond een bezoekerscentrum."],correct:0,hint:"Open het blauwe woord op de bladzijde.",reviewPage:6},
+    {type:"vocabulary-image",icon:"🖼️",title:"Woord en beeld",q:"Op welke afbeelding zie je een grijpstok?",a:[{text:"Een lange grijpstok",image:"images/m6-nachtcamera/11.png"},{text:"Pootafdrukken in modder",image:"images/m6-nachtcamera/03.png"},{text:"Een camera aan een paal",image:"images/m6-nachtcamera/14.png"}],correct:0,hint:"Lees de bladzijde met het blauwe woord grijpstok opnieuw.",reviewPage:10}
+  ],
+  "m6-boomhut-beek":[
+    {type:"vocabulary-image",icon:"🖼️",title:"Woord en beeld",q:"Op welke afbeelding zie je het afvoerrooster?",a:[{text:"Het rooster bij de beek",image:"images/m6-boomhut/04.png"},{text:"De ladder bij de boomhut",image:"images/m6-boomhut/08.png"},{text:"Het houten kistje",image:"images/m6-boomhut/09.png"}],correct:0,hint:"Open het blauwe woord afvoerrooster op de bladzijde.",reviewPage:3},
+    {type:"choice",icon:"🔵",title:"Moeilijk woord",q:"Wat is een fundering?",a:["Het stevige onderste deel waarop iets gebouwd wordt.","Een touw waarmee je een brug sluit.","Een lijst met namen van vrijwilligers."],correct:0,hint:"Open het blauwe woord fundering op de bladzijde.",reviewPage:12}
+  ],
+  "e6-kompas-onder-stad":[
+    {type:"choice",icon:"🔵",title:"Moeilijk woord",q:"Wat is een legenda op een kaart?",a:["De uitleg van kleuren en tekens.","Een verhaal dat zeker verzonnen is.","De naam van de oudste straat."],correct:0,hint:"Open het blauwe woord legenda op de bladzijde.",reviewPage:2},
+    {type:"vocabulary-image",icon:"🖼️",title:"Woord en beeld",q:"Op welke afbeelding zie je het inspectieluik?",a:[{text:"Het kleine luik in de tunnel",image:"images/e6-kompas/10.png"},{text:"De windroos op het marktplein",image:"images/e6-kompas/04.png"},{text:"De tentoonstelling",image:"images/e6-kompas/15.png"}],correct:0,hint:"Lees de bladzijde met het blauwe woord inspectieluik opnieuw.",reviewPage:9}
+  ],
+  "e6-code-rood-marsbasis":[
+    {type:"choice",icon:"🔵",title:"Moeilijk woord",q:"Wat is condens?",a:["Waterdruppels die ontstaan wanneer vochtige lucht afkoelt.","Een alarm dat vanzelf uitgaat.","Een extra voorraad zuurstof."],correct:0,hint:"Open het blauwe woord condens op de bladzijde.",reviewPage:7},
+    {type:"vocabulary-image",icon:"🖼️",title:"Woord en beeld",q:"Op welke afbeelding onderzoekt Leila de afdichting?",a:[{text:"De rubberen afdichting",image:"images/e6-marsbasis/13.png"},{text:"Druppels op sensor A",image:"images/e6-marsbasis/07.png"},{text:"De geïsoleerde sensorkap",image:"images/e6-marsbasis/12.png"}],correct:0,hint:"Lees de bladzijde met het blauwe woord afdichting opnieuw.",reviewPage:12}
+  ]
+};
+Object.entries(vocabularyGames).forEach(([id,games])=>{if(bookGames[id])bookGames[id].push(...games)});
 
 // Verdeel juiste antwoorden per oefensoort bewust over links, midden en rechts.
 // De inhoud blijft gelijk; alleen de zichtbare plaats wisselt voorspelbaar af.
@@ -167,7 +200,25 @@ function hasAudioSupport(kind="task"){
 }
 
 function storyTextMarkup(text){
-  return [...String(text).matchAll(/\S+|\s+/g)].map(match=>/\s/.test(match[0])?match[0]:`<span class="read-word" data-start="${match.index}" data-end="${match.index+match[0].length}">${escapeAttr(match[0])}</span>`).join("");
+  const glossary=storyGlossaries[currentBook?.id]||{};
+  return [...String(text).matchAll(/\S+|\s+/g)].map(match=>{
+    if(/\s/.test(match[0]))return match[0];
+    const key=match[0].toLocaleLowerCase("nl-BE").replace(/^[^\p{L}]+|[^\p{L}']+$/gu,"");
+    const common=`class="read-word${glossary[key]?" difficult-word":""}" data-start="${match.index}" data-end="${match.index+match[0].length}"`;
+    return glossary[key]?`<button type="button" ${common} data-word="${escapeAttr(key)}" aria-label="Verklaring van ${escapeAttr(key)}">${escapeAttr(match[0])}</button>`:`<span ${common}>${escapeAttr(match[0])}</span>`;
+  }).join("");
+}
+function bindGlossaryWords(root=document){
+  root.querySelectorAll(".difficult-word").forEach(button=>button.onclick=event=>{
+    event.stopPropagation();
+    document.querySelector(".word-explanation-layer")?.remove();
+    const key=button.dataset.word;const entry=storyGlossaries[currentBook?.id]?.[key];if(!entry)return;
+    const explanation=typeof entry==="object"?entry.text:entry;const explanationImage=typeof entry==="object"?entry.image:null;
+    const layer=document.createElement("div");layer.className="word-explanation-layer";
+    layer.innerHTML=`<section class="word-explanation${explanationImage?" has-image":""}" role="dialog" aria-modal="true" aria-labelledby="wordExplanationTitle"><button class="word-explanation-close" type="button" aria-label="Sluiten">×</button>${explanationImage?`<div class="word-explanation-image">${imageBlock(explanationImage,`Voorbeeld van ${key}`)}</div>`:""}<div><small>Moeilijk woord</small><h3 id="wordExplanationTitle">${escapeAttr(key)}</h3><p>${escapeAttr(explanation)}</p></div></section>`;
+    const close=()=>layer.remove();layer.onclick=event=>{if(event.target===layer)close()};layer.querySelector(".word-explanation-close").onclick=close;
+    document.body.append(layer);layer.querySelector(".word-explanation-close").focus();
+  });
 }
 function shuffled(list){
   const copy=[...list];
@@ -389,6 +440,7 @@ function renderReader(){
 
   if(page.task&&!reviewMode) bindInlineTask(page.task);
   bindSpeechButtons(app);
+  bindGlossaryWords(app);
 }
 
 function bindInlineTask(task){
@@ -530,12 +582,16 @@ function renderGame(game){
   }
   const choices=document.createElement("div");choices.className="game-choices";activity.append(choices);
   shuffled(answers.map((answer,index)=>({answer,index}))).forEach(({answer,index})=>{
-    const btn=document.createElement("button");btn.className="game-choice";btn.textContent=game.type==="article"?`${answer} ${game.word}`:answer;btn.onclick=()=>{
+    const btn=document.createElement("button");btn.className=`game-choice${game.type==="vocabulary-image"?" picture-choice":""}`;
+    const answerText=typeof answer==="object"?answer.text:answer;
+    if(game.type==="vocabulary-image")btn.innerHTML=`${imageBlock(answer.image,answer.text)}<span>${escapeAttr(answer.text)}</span>`;
+    else btn.textContent=game.type==="article"?`${answer} ${game.word}`:answerText;
+    btn.onclick=()=>{
       const correct=game.type==="article"?answer===game.correct:index===game.correct;
       if(correct) finishGame(btn,game.type==="sound"?`Juist! In ${answers[index]} hoor je de ${game.kind}.`:"Juist! Goed gekeken. ⭐");
       else{btn.classList.add("wrong");setTimeout(()=>btn.classList.remove("wrong"),450);setMissionFeedback(game.hint||"Kijk nog eens goed en probeer opnieuw.","bad");offerReread(game)}
     };
-    if(hasAudioSupport()){const wrap=document.createElement("div");wrap.className="game-choice-wrap";wrap.append(btn,makeListenButton(btn.textContent,`Beluister ${btn.textContent}`));choices.append(wrap)}
+    if(hasAudioSupport()){const wrap=document.createElement("div");wrap.className="game-choice-wrap";wrap.append(btn,makeListenButton(answerText,`Beluister ${answerText}`));choices.append(wrap)}
     else choices.append(btn);
   });
 }
@@ -641,6 +697,7 @@ function checkSequenceGame(game,line){
 
 function reviewPageForGame(game){
   if(game.type==="sequence")return {start:0,end:currentBook.pages.length-1};
+  if(Number.isInteger(game.reviewPage))return {start:game.reviewPage,end:game.reviewPage};
   const page=targetedReviewPages[currentBook.id]?.[missionIndex];
   return Number.isInteger(page)?{start:page,end:page}:null;
 }
