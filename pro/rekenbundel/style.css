@@ -774,6 +774,9 @@ header .badge {
 .oefening-hulp.tot20-aftrekken-lijnen .hulp-som-rij {
   width: calc(100% - 24px);
 }
+.oefening-hulp.tot20-aftrekken-lijnen .oef-tekst {
+  flex: 0 0 77px;
+}
 .tussenstappen-eerste-lijn {
   flex: 1;
   min-width: 90px;
@@ -834,7 +837,7 @@ header .badge {
   padding: 0;
 }
 .oefening-hulp.tot20-aftrekken-lijnen .hulp-schrijflijnen {
-  left: 128px;
+  left: 92px;
   top: 54px;
 }
 

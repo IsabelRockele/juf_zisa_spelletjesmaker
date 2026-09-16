@@ -389,7 +389,7 @@ const somTekst = (delen.length >= 3)
         doc.line(vakX, vakY + vakH, kadEindX - 6, vakY + vakH);
         if (_metAntwoorden || isVoorbeeld) {
           doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(0, isVoorbeeld ? 112 : 100, isVoorbeeld ? 178 : 0);
-          doc.text(isTwintigMinTE ? `(20 - 10) - ${pdfEenheid}` : String(oef.antwoord ?? ''), vakX + 1, vakY + 6.3);
+          doc.text(isTwintigMinTE ? `(20 - 10) - ${pdfEenheid}` : String(oef.antwoord ?? ''), vakX + 1, vakY + vakH - 1.2);
         }
       } else {
         _antwoordVak(vakX, vakY, vakW, vakH, oef.antwoord);
@@ -406,7 +406,7 @@ const somTekst = (delen.length >= 3)
         const rechtsteVak = aantalTakken === 3
           ? centreX + span3 + vakjW / 2
           : centreX + span2 + vakjW / 2;
-        const lX1    = isTot20AftrekkenMetLijnen ? vakX + 15 : rechtsteVak + 3;
+        const lX1    = isTot20AftrekkenMetLijnen ? vakX : rechtsteVak + 3;
         const lX2    = ox + kadW - 6;
         const lY1    = vakY + vakH + 10;
         const lijnGap = 12;
