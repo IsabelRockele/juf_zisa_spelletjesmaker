@@ -3801,7 +3801,8 @@ body.pdf-opname .komma-h-plaats-rij .komma-schijf{width:28px;height:28px;font-si
 body.pdf-opname .komma-h-schijf-som{font-size:27px}
 /* Rekenrelaties */
 .rr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
-.rr-grid.rr-rooster,.rr-grid.rr-kader{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.rr-grid.rr-rooster{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.rr-grid.rr-kader{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .oefening-item.rr-familie,.oefening-item.rr-rooster,.oefening-item.rr-kader{display:block;position:relative;padding:14px;min-height:0}
 .oefening-item.rr-familie{min-height:255px;border:0;border-radius:0;background:transparent;padding:10px 18px 18px}
 .oefening-item.rr-familie:not(:nth-child(3n)){border-right:2px solid #6fa8cf}

@@ -5587,7 +5587,7 @@ doc.setTextColor(26, 58, 92);
   }
 
   function _tekenRekenrelatiesBlok(blok) {
-    const soort=blok.config?.soort||'familie', kolommen=soort==='familie'?3:2, kolB=CW/kolommen, kadW=kolB-5, kadH=soort==='familie'?62:soort==='rooster'?62:76;
+    const soort=blok.config?.soort||'familie', kolommen=soort==='familie'||soort==='kader'?3:2, kolB=CW/kolommen, kadW=kolB-5, kadH=soort==='familie'?62:soort==='rooster'?62:76;
     checkRuimte(ZINRUIMTE+kadH+8); doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(40,60,80);doc.text(blok.opdrachtzin||'Los op.',ML,y+4);y+=9;
     blok.oefeningen.forEach((o,i)=>{
       if(i>0&&i%kolommen===0){y+=kadH+6;if(y+kadH>PH-MB)nieuweBladzijde();}

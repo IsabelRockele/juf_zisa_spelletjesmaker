@@ -2419,7 +2419,7 @@ function _getSplitsConfig() {
     document.querySelectorAll(`[name="${naam}"]`).forEach(r => r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
     const radio = el.querySelector('input'); if (radio) radio.checked = true;
-    if (naam === 'rr-soort') { const aantal=document.getElementById('rr-aantal'); if(aantal) aantal.value=waarde==='familie'?'6':'2'; }
+    if (naam === 'rr-soort') { const aantal=document.getElementById('rr-aantal'); if(aantal) aantal.value=waarde==='familie'?'6':waarde==='kader'?'3':'2'; }
     _updateRelatieUI();
   }
   function _updateRelatieUI() {
@@ -2469,14 +2469,14 @@ function _getSplitsConfig() {
     }
     return _rrRooster(niveau,'beide',bewerking);
   }
-  function _rrKader(niveau, keuze) {
+  function _rrKader(niveau, keuze, index=0) {
     const bewerking=keuze==='aftrekken'?'aftrekken':'optellen';
     let cellen, legeSleutels;
     if(bewerking==='optellen'){
       const tl=_rrRnd(1,Math.max(2,Math.floor(niveau*.35))), boven=_rrRnd(1,Math.max(1,Math.floor(niveau*.28))), links=_rrRnd(1,Math.max(1,Math.floor(niveau*.28)));
       const tr=tl+boven, bl=tl+links, br=_rrRnd(Math.max(tr,bl)+1,niveau);
       cellen={tl,boven,tr,links,bl,rechts:br-tr,br,onder:br-bl};
-      legeSleutels=['boven','links','bl','rechts','br','onder'];
+      legeSleutels=index%2===0?['boven','links','bl','rechts','br','onder']:['tl','boven','tr','rechts','br','onder'];
     }else{
       const tl=_rrRnd(Math.max(6,Math.ceil(niveau*.6)),niveau), boven=_rrRnd(1,Math.max(1,Math.floor(tl*.35))), links=_rrRnd(1,Math.max(1,Math.floor(tl*.35)));
       const tr=tl-boven, bl=tl-links, br=_rrRnd(1,Math.max(1,Math.min(tr,bl)-1));
@@ -2491,7 +2491,7 @@ function _getSplitsConfig() {
     const brug=soort==='kader'?'beide':(document.querySelector('[name="rr-brug"]:checked')?.value||'zonder');
     const roosterBewerking=document.querySelector('[name="rr-bewerking"]:checked')?.value||'optellen';
     const aantal=Math.max(1,Math.min(12,Number(document.getElementById('rr-aantal')?.value||6)));
-    const oefeningen=Array.from({length:aantal},(_,i)=>soort==='familie'?_rrFamilie(niveau,brug):soort==='kader'?_rrKader(niveau,roosterBewerking):_rrRooster(niveau,brug,roosterBewerking,i));
+    const oefeningen=Array.from({length:aantal},(_,i)=>soort==='familie'?_rrFamilie(niveau,brug):soort==='kader'?_rrKader(niveau,roosterBewerking,i):_rrRooster(niveau,brug,roosterBewerking,i));
     bundelData.push({id:`blok-rekenrelaties-${Date.now()}`,bewerking:'rekenrelaties',niveau,brug,opdrachtzin:soort==='familie'?'Schrijf alle bewerkingen met de 3 getallen.':'Los op.',hulpmiddelen:[],oefeningen,config:{soort,roosterBewerking}});
     Preview.render(bundelData); toonToast('✓ Rekenrelaties toegevoegd');
   }
