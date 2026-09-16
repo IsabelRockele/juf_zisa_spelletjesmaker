@@ -123,7 +123,9 @@ const vocabularyGames={
     {type:"vocabulary-image",icon:"🖼️",title:"Woord en beeld",q:"Op welke afbeelding onderzoekt Leila de afdichting?",a:[{text:"De rubberen afdichting",image:"images/e6-marsbasis/13.png"},{text:"Druppels op sensor A",image:"images/e6-marsbasis/07.png"},{text:"De geïsoleerde sensorkap",image:"images/e6-marsbasis/12.png"}],correct:0,hint:"Lees de bladzijde met het blauwe woord afdichting opnieuw.",reviewPage:12}
   ]
 };
-Object.entries(vocabularyGames).forEach(([id,games])=>{if(bookGames[id])bookGames[id].push(...games)});
+// Woordenschatoefeningen horen midden in de taalreis, niet als verwarrend
+// beeldscherm vlak vóór het vlotleesboekje.
+Object.entries(vocabularyGames).forEach(([id,games])=>{if(bookGames[id])bookGames[id].splice(Math.min(3,bookGames[id].length),0,...games)});
 
 const meaningContexts={
   "Wat betekent stoffig?":"In de oude berging zijn de kasten en dozen stoffig.",
