@@ -564,6 +564,22 @@ const App = (() => {
   }
 
   /* ── Hulpmiddelen UI ────────────────────────────────────── */
+  function _updateSchrijflijnenAantalUI(isTussenstappenTot20) {
+    const rij = document.getElementById('rij-schrijflijnen-aantal');
+    if (!rij) return;
+    const titel = rij.querySelector(':scope > label');
+    const groep = rij.querySelector('.radio-groep');
+    if (titel) titel.textContent = isTussenstappenTot20 ? 'Vast: 3 schrijflijnen' : 'Aantal schrijflijnen';
+    if (groep) groep.style.display = isTussenstappenTot20 ? 'none' : '';
+    if (isTussenstappenTot20) {
+      rij.querySelectorAll('[name="schrijflijnen-aantal"]').forEach(radio => {
+        const gekozen = radio.value === '3';
+        radio.checked = gekozen;
+        radio.closest('.radio-chip')?.classList.toggle('geselecteerd', gekozen);
+      });
+    }
+  }
+
   function _updateHulpmiddelenUI(brug) {
     const kaart = document.getElementById('kaart-hulpmiddelen');
     if (!kaart) return;
@@ -575,6 +591,7 @@ const App = (() => {
     const isBrug = ['naar-tiental','naar-honderdtal','beide','met','gemengd','naar-duizendtal'].includes(brug);
     const isZonderTot1000 = brug === 'zonder' && niveau >= 1000;
     const isTussenstappenTot20 = brug === 'zonder' && niveau === 20 && actieveBewerking === 'aftrekken';
+    _updateSchrijflijnenAantalUI(isTussenstappenTot20);
     if (niveau < 20) { kaart.style.display = 'none'; return; }
 
     // Toon bij brug (alle niveaus) of bij zonder+tot1000
@@ -678,7 +695,9 @@ const App = (() => {
     const aanvullenVariant    = document.querySelector('[name="aanvullen-variant"]:checked')?.value || 'zonder-schema';
     const compenserenVariant  = document.querySelector('[name="compenseren-variant"]:checked')?.value || 'met-tekens';
     const transformerenVariant = document.querySelector('[name="transformeren-variant"]:checked')?.value || 'schema';
-    const schrijflijnenAantal = parseInt(document.querySelector('[name="schrijflijnen-aantal"]:checked')?.value || '2');
+    const schrijflijnenAantal = hulpmiddelen.includes('schrijflijnen') && actieveBewerking === 'aftrekken' && niveau === 20
+      ? 3
+      : parseInt(document.querySelector('[name="schrijflijnen-aantal"]:checked')?.value || '2');
     const isTransformeren     = hulpmiddelen.includes('transformeren');
     const metVoorbeeld        = hulpmiddelen.includes('schrijflijnen')
       ? (document.getElementById('cb-schrijflijnen-voorbeeld')?.checked || false)
@@ -838,6 +857,7 @@ const App = (() => {
       const rijAantal = document.getElementById('rij-schrijflijnen-aantal');
       if (rijAantal) rijAantal.style.display = !was ? 'block' : 'none';
       const isTussenstappenTot20 = actieveBewerking === 'aftrekken' && parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20) === 20;
+      _updateSchrijflijnenAantalUI(isTussenstappenTot20);
       const uitleg = document.getElementById('tussenstappen-tot20-uitleg');
       const rijVoorbeeld = document.getElementById('rij-schrijflijnen-voorbeeld');
       if (uitleg) uitleg.style.display = (!was && isTussenstappenTot20) ? 'block' : 'none';
