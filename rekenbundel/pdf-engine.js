@@ -325,7 +325,7 @@ const oefBewerking = (bewerking === 'gemengd')
   ? (oef.vraag.includes('−') || oef.vraag.includes('-') ? 'aftrekken' : 'optellen')
   : bewerking;
 const pdfAftrekker = parseInt(delen[2]) || 0;
-const isTwintigMinTEVoorbeeld = isVoorbeeld && oefBewerking === 'aftrekken' &&
+const isTwintigMinTE = heeftLijnen && oefBewerking === 'aftrekken' &&
   parseInt(delen[0]) === 20 && pdfAftrekker >= 11 && pdfAftrekker <= 19;
 const pdfEenheid = pdfAftrekker % 10;
 const doelIdx = (oefBewerking === 'optellen') ? 2 : (splitspositie === 'aftrekker' ? 2 : 0);
@@ -383,11 +383,17 @@ const somTekst = (delen.length >= 3)
       const vakW  = blokNiveau >= 10000 ? 18 : blokNiveau >= 1000 ? 14 : blokNiveau >= 100 ? 12 : 10;
       const vakH  = 9;
       const vakX  = somStartX + somBreedte + 2;
-      if (!isTwintigMinTEVoorbeeld) _antwoordVak(vakX, vakY, vakW, vakH, oef.antwoord);
-      if (isTwintigMinTEVoorbeeld) {
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(0, 112, 178);
-        doc.text(`(20 - 10) - ${pdfEenheid}`, vakX, vakY + 6.3);
-      } else if (isVoorbeeld && !_metAntwoorden) {
+      if (isTwintigMinTE) {
+        doc.setDrawColor(160, 185, 210); doc.setLineWidth(0.4);
+        doc.line(vakX, vakY + vakH, kadEindX - 6, vakY + vakH);
+        if (_metAntwoorden || isVoorbeeld) {
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(0, isVoorbeeld ? 112 : 100, isVoorbeeld ? 178 : 0);
+          doc.text(`(20 - 10) - ${pdfEenheid}`, vakX + 1, vakY + 6.3);
+        }
+      } else {
+        _antwoordVak(vakX, vakY, vakW, vakH, oef.antwoord);
+      }
+      if (!isTwintigMinTE && isVoorbeeld && !_metAntwoorden) {
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
         doc.setTextColor(0, 112, 178);
@@ -401,7 +407,7 @@ const somTekst = (delen.length >= 3)
         const rechtsteVak = aantalTakken === 3
           ? centreX + span3 + vakjW / 2
           : centreX + span2 + vakjW / 2;
-        const lX1    = rechtsteVak + 3;
+        const lX1    = isTwintigMinTE ? vakX + 15 : rechtsteVak + 3;
         const lX2    = ox + kadW - 6;
         const lY1    = vakY + vakH + 10;
         const lijnGap = 12;
@@ -412,10 +418,11 @@ const somTekst = (delen.length >= 3)
 
           doc.setDrawColor(160, 185, 210);
           doc.setLineWidth(0.4);
-          const lijnAntw3 = isTwintigMinTEVoorbeeld
+          const lijnAntw3 = isTwintigMinTE
             ? [`= 10 - ${pdfEenheid}`, `= ${oef.antwoord}`, '']
             : (_spLijn ? [_spLijn.sl1, _spLijn.sl2, _spLijn.sl3] : []);
-          for (let li = 0; li < schrijflijnenAantal; li++) {
+          const aantalOnderlijnen = isTwintigMinTE ? Math.max(0, schrijflijnenAantal - 1) : schrijflijnenAantal;
+          for (let li = 0; li < aantalOnderlijnen; li++) {
             const lY = lY1 + li * lijnGap;
             doc.line(lX1, lY, lX2, lY);
             if ((_metAntwoorden || isVoorbeeld) && lijnAntw3[li] && lijnAntw3[li] !== '') {
