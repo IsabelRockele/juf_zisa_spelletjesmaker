@@ -289,6 +289,20 @@
         <input type="radio" name="brug" value="zonder" checked style="display:none">
       </div>
 
+      <!-- Oefeningstypes EERST (dynamisch gevuld door app.js) -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🔢</div>
+          Oefeningstypes
+        </div>
+        <div class="form-rij">
+          <label>Kies types (meerdere mogelijk)</label>
+          <div class="checkbox-groep" id="cg-types">
+            <!-- gevuld door app.js -->
+          </div>
+        </div>
+      </div>
+
       <!-- Hulpmiddelen (enkel bij met brug) -->
       <div class="config-kaart" id="kaart-hulpmiddelen" style="display:none">
         <div class="kaart-titel">
@@ -423,22 +437,6 @@
               <input type="checkbox" id="cb-trans-voorbeeld" style="display:none">
               <span>Eerste oefening als uitgewerkt voorbeeld</span>
             </label>
-          </div>
-        </div>
-      </div>
-
-
-
-      <!-- Oefeningstypes EERST (dynamisch gevuld door app.js) -->
-      <div class="config-kaart">
-        <div class="kaart-titel">
-          <div class="icon">🔢</div>
-          Oefeningstypes
-        </div>
-        <div class="form-rij">
-          <label>Kies types (meerdere mogelijk)</label>
-          <div class="checkbox-groep" id="cg-types">
-            <!-- gevuld door app.js -->
           </div>
         </div>
       </div>
@@ -2288,7 +2286,7 @@
 
 <script src="modules/rekentaal.js?v=15"></script>
 
-<script src="app.js?v=48"></script>
+<script src="app.js?v=49"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {
