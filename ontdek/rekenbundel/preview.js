@@ -2875,6 +2875,7 @@ const Preview = (() => {
     const antwoordHTML = blok.antwoordzin
       ? `<div class="vs-antwoordzin-rij"><span class="vs-antw-label">Antwoordzin:</span><span class="vs-antw-tekst">${esc(blok.antwoordzin)}</span></div>`
       : `<div class="vs-antwoordzin-rij"><span class="vs-antw-label">Antwoordzin:</span><div class="vs-antw-lijn"></div></div>`;
+    const losseBewerkingHTML = `<div class="vs-bewerking-enkel"><span class="vs-bew-label">Bewerking:</span><div class="vs-bew-lijn"></div></div>`;
 
     // Schema zone
     const heeftSchema = metRooster || metCijfer;
@@ -2890,7 +2891,7 @@ const Preview = (() => {
           ${metRooster && metCijfer ? bewerkingHTML : ''}
           ${cijferHTML}
         </div>
-      </div>` : '';
+      </div>` : losseBewerkingHTML;
 
     const div = document.createElement('div');
     div.className  = 'preview-blok';

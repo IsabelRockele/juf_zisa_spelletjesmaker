@@ -548,6 +548,7 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
     const antwoordHTML = antwoordzin
       ? `<div class="vs-antwoordzin-rij"><span class="vs-antw-label">Antwoordzin:</span><span class="vs-antw-tekst">${antwoordzin}</span></div>`
       : `<div class="vs-antwoordzin-rij"><span class="vs-antw-label">Antwoordzin:</span><div class="vs-antw-lijn"></div></div>`;
+    const losseBewerkingHTML = `<div class="vs-bewerking-enkel"><span class="vs-bew-label">Bewerking:</span><div class="vs-bew-lijn"></div></div>`;
 
     const heeftSchema = metRooster || metCijfer;
     const schemaZone = heeftSchema ? `
@@ -557,7 +558,7 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
           <div class="vs-rooster">${roosterRijen}</div>
         </div>` : ''}
         <div class="vs-schema-rechts">${bewerkingHTML}${cijferHTML}</div>
-      </div>${antwoordHTML}` : antwoordHTML;
+      </div>${antwoordHTML}` : `${losseBewerkingHTML}${antwoordHTML}`;
 
     sidebar.innerHTML = `
       <div class="vs-kaart">

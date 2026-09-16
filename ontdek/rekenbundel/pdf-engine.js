@@ -5688,9 +5688,10 @@ doc.setTextColor(26, 58, 92);
     const antTekst = (blok.antwoordzin || '').trim();
     const antRegels = antTekst ? doc.splitTextToSize('Antwoordzin:  ' + antTekst, CW - KADER_PAD * 2) : [];
     const antH = Math.max(ANT_H, antRegels.length * 6 + 4);
+    const losseBewerkingH = (!metRooster && !metCijfer) ? 14 : 0;
 
     // Totale kaderhoogte
-    const totaalH = KADER_PAD + tekstH + GAP + schemaZoneH + antH + KADER_PAD;
+    const totaalH = KADER_PAD + tekstH + GAP + schemaZoneH + losseBewerkingH + antH + KADER_PAD;
 
     // ── Pagina-check (zoals alle andere blokken) ──────────────
     checkRuimte(VOOR_ZIN + ZINRUIMTE + totaalH + NABLOK);
@@ -5937,6 +5938,19 @@ doc.setTextColor(26, 58, 92);
 
     // ── Antwoordzin (onderaan, volle breedte) ─────────────────
     const antY = kadY + totaalH - KADER_PAD - antH + 2;
+
+    if (!metRooster && !metCijfer) {
+      const bewY = antY - 8;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(LABEL_FS);
+      doc.setTextColor(50, 50, 50);
+      doc.text('Bewerking:', kadX + KADER_PAD, bewY);
+      const bewLabelB = doc.getTextWidth('Bewerking:  ');
+      doc.setDrawColor(80, 80, 80);
+      doc.setLineWidth(0.5);
+      doc.line(kadX + KADER_PAD + bewLabelB, bewY + 1,
+               kadX + kadW - KADER_PAD, bewY + 1);
+    }
 
     // Scheidingslijn boven antwoordzin
     doc.setDrawColor(200, 215, 235);
