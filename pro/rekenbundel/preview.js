@@ -553,6 +553,7 @@ const Preview = (() => {
     if (blok.bewerking === 'breuken') return _maakBreukenElement(blok);
     if (blok.bewerking === 'percentages') return _maakPercentageElement(blok);
     if (blok.bewerking === 'kommagetallen') return _maakKommaGetallenElement(blok);
+    if (blok.bewerking === 'rekenrelaties') return _maakRekenrelatiesElement(blok);
     // ── Schatten: eigen renderer ─────────────────────────────
     if (blok.bewerking === 'schatten') return _schattenBlokElement(blok);
     const heeftAanvullen   = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('aanvullen');
@@ -2727,6 +2728,8 @@ const Preview = (() => {
         </div>
       </div>`;
   }
+
+  function _maakRekenrelatiesElement(blok){const soort=blok.config?.soort||'familie',kaarten=blok.oefeningen.map((o,i)=>{const del=`<button class="btn-del-oef" onclick="App.verwijderOefening('${blok.id}',${i})" title="Verwijder">✕</button>`;if(soort==='familie')return `<div class="oefening-item rr-familie"><div class="rr-getallen">${o.getallen.map(n=>`<span>${n}</span>`).join('')}</div><div class="rr-familie-lijnen">${o.oplossingen.map(s=>`<div class="rr-schrijfregel" data-antwoord="${esc(s)}"></div>`).join('')}</div>${del}</div>`;if(soort==='kader'){const teken=o.bewerking==='aftrekken'?'−':'+';return `<div class="oefening-item rr-kader"><div class="rr-kader-bank">${o.bank.map(n=>`<span>${n}</span>`).join('')}</div><div class="rr-kader-frame">${o.vergelijkingen.map(v=>`<div class="rr-kader-som">${v.waarden.map((n,vi)=>`${vi===1?`<b>${teken}</b>`:''}<span class="${vi===v.leeg?'rr-kader-vak':''}" ${vi===v.leeg?`data-antwoord="${n}"`:''}>${vi===v.leeg?'':n}</span>${vi===1?'<b>=</b>':''}`).join('')}</div>`).join('')}</div>${del}</div>`;}const teken=o.bewerking==='aftrekken'?'−':'+';return `<div class="oefening-item rr-rooster"><table><thead><tr><th class="rr-hoek">${teken}</th>${o.kolommen.map(n=>`<th>${n}</th>`).join('')}</tr></thead><tbody>${o.rijen.map((r,ri)=>`<tr><th>${r}</th>${o.waarden[ri].map(v=>`<td><span data-antwoord="${v}"></span></td>`).join('')}</tr>`).join('')}</tbody></table>${del}</div>`;}).join(''),div=document.createElement('div');div.className='preview-blok';div.dataset.id=blok.id;div.innerHTML=`<div class="preview-blok-header"><span class="blok-type-badge">🔗 ${soort==='familie'?'Getallenfamilie':soort==='kader'?'Rekenkader':'Rekenrooster'}</span><span class="blok-niveau">Tot ${blok.niveau} · ${{zonder:'zonder brug',met:'met brug',beide:'beide'}[blok.brug]||''}</span><div class="spacer"></div><button class="btn-blok-actie verwijder" onclick="App.verwijderBlok('${blok.id}')">✕</button></div><div class="preview-blok-body"><div class="opdrachtzin-wrapper">${esc(blok.opdrachtzin)}</div><div class="rr-grid rr-${soort}">${kaarten}</div></div>`;return div;}
 
   /* ── Vraagstuk blok renderer ─────────────────────────────── */
   function _maakVraagstukElement(blok) {

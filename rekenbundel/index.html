@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — jufzisa.be</title>
-  <link rel="stylesheet" href="style.css?v=123">
+  <link rel="stylesheet" href="style.css?v=124">
   <link rel="stylesheet" href="vraagstukken.css?v=4">
   <link rel="stylesheet" href="rekentaal.css?v=2">
   <style>
@@ -166,6 +166,7 @@
   <div class="sidebar-tab tab-schatten" onclick="App.toonBewerking('schatten',this)">🔮 Schatten</div>
   <div class="sidebar-tab tab-breuken" onclick="App.toonBewerking('breuken',this)">🍰 Breuken</div>
   <div class="sidebar-tab tab-percentages" onclick="App.toonBewerking('percentages',this)">📊 Percentages</div>
+  <div class="sidebar-tab tab-rekenrelaties" onclick="App.toonBewerking('rekenrelaties',this)">🔗 Reken<br>relaties</div>
   <div class="sidebar-tab tab-vraagstukken" onclick="App.toonBewerking('vraagstukken',this)">📖 Vraagstukken</div>
 </div>
 
@@ -1729,6 +1730,33 @@
 
 
     <!-- ── TAB: VRAAGSTUKKEN ─────────────────────────────────── -->
+    <div class="sidebar-content" id="tab-rekenrelaties" style="display:none">
+      <div class="sectie-header"><div class="sectie-icoon">🔗</div><div><h2>Rekenrelaties</h2><p>Oefen de samenhang tussen getallen en bewerkingen.</p></div></div>
+      <div class="config-kaart"><div class="kaart-titel"><div class="icon">🧩</div>Oefenvorm</div><div class="radio-groep">
+        <label class="radio-chip geselecteerd" onclick="App.selecteerRelatieRadio('rr-soort','familie',this)"><input type="radio" name="rr-soort" value="familie" checked>Getallenfamilie</label>
+        <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-soort','rooster',this)"><input type="radio" name="rr-soort" value="rooster">Rekenrooster</label>
+        <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-soort','kader',this)"><input type="radio" name="rr-soort" value="kader">Rekenkader</label>
+      </div></div>
+      <div class="config-kaart"><div class="kaart-titel"><div class="icon">🎯</div>Niveau</div><div class="radio-groep">
+        <label class="radio-chip rr-niveau-10 geselecteerd" onclick="App.selecteerRelatieRadio('rr-niveau','10',this)"><input type="radio" name="rr-niveau" value="10" checked>Tot 10</label>
+        <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-niveau','20',this)"><input type="radio" name="rr-niveau" value="20">Tot 20</label>
+        <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-niveau','100',this)"><input type="radio" name="rr-niveau" value="100">Tot 100</label>
+        <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-niveau','1000',this)"><input type="radio" name="rr-niveau" value="1000">Tot 1000</label>
+      </div></div>
+      <div class="config-kaart rr-rooster-bewerking" style="display:none"><div class="kaart-titel"><div class="icon">➕➖</div>Bewerking</div><div class="radio-groep">
+        <label class="radio-chip geselecteerd" onclick="App.selecteerRelatieRadio('rr-bewerking','optellen',this)"><input type="radio" name="rr-bewerking" value="optellen" checked>Optellen</label>
+        <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-bewerking','aftrekken',this)"><input type="radio" name="rr-bewerking" value="aftrekken">Aftrekken</label>
+        <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-bewerking','gemengd',this)"><input type="radio" name="rr-bewerking" value="gemengd">Gemengd</label>
+      </div></div>
+      <div class="config-kaart rr-brug-kaart"><div class="kaart-titel"><div class="icon">🌉</div>Brug</div><div class="radio-groep">
+        <label class="radio-chip geselecteerd" onclick="App.selecteerRelatieRadio('rr-brug','zonder',this)"><input type="radio" name="rr-brug" value="zonder" checked>Zonder brug</label>
+        <label class="radio-chip rr-brug-met" onclick="App.selecteerRelatieRadio('rr-brug','met',this)"><input type="radio" name="rr-brug" value="met">Met brug</label>
+        <label class="radio-chip rr-brug-beide" onclick="App.selecteerRelatieRadio('rr-brug','beide',this)"><input type="radio" name="rr-brug" value="beide">Beide</label>
+      </div></div>
+      <div class="config-kaart"><div class="kaart-titel"><div class="icon">🔢</div>Aantal</div><div class="form-rij"><label>Aantal oefeningen of roosters</label><input type="number" id="rr-aantal" min="1" max="12" value="6" class="aantal-input"></div></div>
+      <button class="btn-toevoegen" onclick="App.voegRelatieBlokToe()">＋ Voeg rekenrelaties toe</button>
+    </div>
+
     <div class="sidebar-content" id="tab-vraagstukken" style="display:none">
 
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 6px">
@@ -2280,13 +2308,13 @@
 <script src="modules/percentages.js?v=1"></script>
 <script src="modules/kommagetallen.js?v=3"></script>
 <script src="generator.js?v=101"></script>
-<script src="preview.js?v=69"></script>
-<script src="pdf-engine.js?v=123"></script>
+<script src="preview.js?v=70"></script>
+<script src="pdf-engine.js?v=124"></script>
 <script src="vraagstukken.js?v=37"></script>
 
 <script src="modules/rekentaal.js?v=15"></script>
 
-<script src="app.js?v=50"></script>
+<script src="app.js?v=51"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {

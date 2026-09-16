@@ -3763,3 +3763,22 @@ body.pdf-opname .komma-h-schijfjes{min-height:275px;padding:24px 32px;gap:24px}
 body.pdf-opname .komma-h-plaats-rij>span{min-height:84px;padding:8px;gap:4px}
 body.pdf-opname .komma-h-plaats-rij .komma-schijf{width:28px;height:28px;font-size:10px}
 body.pdf-opname .komma-h-schijf-som{font-size:27px}
++
+/* Rekenrelaties */
+.rr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.rr-grid.rr-rooster,.rr-grid.rr-kader{grid-template-columns:repeat(2,minmax(0,1fr))}
+.rr-familie,.rr-rooster,.rr-kader{position:relative;padding:14px;min-height:180px}
+.rr-getallen{display:grid;grid-template-columns:repeat(3,1fr);margin:0 18px 24px}
+.rr-getallen span,.rr-kader-bank span{border:1px solid #8d99a5;text-align:center;padding:7px 3px;background:#fff}
+.rr-familie-lijnen{display:flex;flex-direction:column;gap:13px}
+.rr-schrijfregel{height:20px;border-bottom:1px solid #b8c8d8;color:#0876b9;font-weight:700;padding-left:3px}
+.rr-rooster table{border-collapse:collapse;width:100%;table-layout:fixed;margin-top:5px}
+.rr-rooster th,.rr-rooster td{border:1px solid #9eb6c8;height:38px;text-align:center}
+.rr-rooster th{background:#fde8d8;font-weight:600}.rr-rooster .rr-hoek{background:#fff;font-size:20px}
+.rr-rooster td span{display:block;min-height:22px;border-bottom:1px solid #b8c8d8;margin:0 7px;color:#0876b9;font-weight:700}
+.rr-kader-bank{display:flex;gap:7px;justify-content:center;margin-bottom:18px}
+.rr-kader-bank span{border-radius:7px;min-width:30px}
+.rr-kader-frame{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #9eb6c8}
+.rr-kader-som{display:grid;grid-template-columns:1fr 24px 1fr 24px 1fr;align-items:center;min-height:48px;border:1px solid #c4d0da;text-align:center}
+.rr-kader-som span{padding:5px}.rr-kader-vak{color:#0876b9;font-weight:700;border-bottom:1px solid #9eb6c8;min-height:20px;margin:0 3px}
+@media(max-width:900px){.rr-grid,.rr-grid.rr-rooster,.rr-grid.rr-kader{grid-template-columns:1fr}}
