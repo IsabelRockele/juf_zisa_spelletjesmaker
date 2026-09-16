@@ -771,7 +771,7 @@ header .badge {
   display: flex; align-items: center; white-space: nowrap;
   position: relative;
 }
-.oefening-hulp.twintig-min-te-lijnen .hulp-som-rij {
+.oefening-hulp.tot20-aftrekken-lijnen .hulp-som-rij {
   width: calc(100% - 24px);
 }
 .tussenstappen-eerste-lijn {
@@ -833,7 +833,7 @@ header .badge {
   gap: 4px;
   padding: 0;
 }
-.oefening-hulp.twintig-min-te-lijnen .hulp-schrijflijnen {
+.oefening-hulp.tot20-aftrekken-lijnen .hulp-schrijflijnen {
   left: 128px;
   top: 54px;
 }
