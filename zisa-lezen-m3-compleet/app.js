@@ -19,16 +19,16 @@ let fluencyScore = 0;
 const roleColors = {wie:"#f4d94e",doet:"#ef6b67",waar:"#a985d6",wat:"#9a6b45",hoe:"#67c98f",wanneer:"#f3a04b"};
 const storyGlossaries={
   "m6-raadsel-nachtcamera":{
-    nachtcamera:{text:"Een camera die automatisch foto's of filmpjes maakt wanneer er in het donker een dier voorbijkomt.",image:"images/m6-nachtcamera/01.png"},sporengids:"Een boek waarmee je kunt herkennen van welk dier een spoor is.",splitsing:"Een plek waar een weg of pad in twee richtingen verdergaat.",omheining:"Een hek of afsluiting rond een plek.",dassenburcht:{text:"Het ondergrondse gangenstelsel waarin dassen wonen.",image:"images/m6-nachtcamera/07.png"},veiligheidslijn:"Een lijn die aangeeft tot waar je veilig mag komen.",grijpstok:{text:"Een lange stok met een grijper waarmee je iets vanop afstand kunt pakken.",image:"images/m6-nachtcamera/11.png"},geheugenkaart:"Een klein kaartje waarop een camera foto's en filmpjes bewaart.",bevestiging:"Het onderdeel waarmee iets stevig vastzit."
+    nachtcamera:{text:"Een camera die automatisch foto's of filmpjes maakt wanneer er in het donker een dier voorbijkomt.",image:"images/woorduitleg/nachtcamera.png"},sporengids:"Een boek waarmee je kunt herkennen van welk dier een spoor is.",splitsing:"Een plek waar een weg of pad in twee richtingen verdergaat.",omheining:"Een hek of afsluiting rond een plek.",dassenburcht:{text:"Het ondergrondse gangenstelsel waarin dassen wonen.",image:"images/woorduitleg/dassenburcht.png"},veiligheidslijn:"Een lijn die aangeeft tot waar je veilig mag komen.",grijpstok:{text:"Een lange stok met een grijper waarmee je iets vanop afstand kunt pakken.",image:"images/woorduitleg/grijpstok.png"},geheugenkaart:"Een klein kaartje waarop een camera foto's en filmpjes bewaart.",bevestiging:"Het onderdeel waarmee iets stevig vastzit."
   },
   "m6-boomhut-beek":{
-    buurttuin:"Een tuin die mensen uit de buurt samen gebruiken en verzorgen.",bouwplan:"Een tekening die toont hoe iets gebouwd is.",risico:"Een kans dat er iets gevaarlijks of ongewensts gebeurt.","risico's":"Mogelijke gevaren waarmee je rekening moet houden.",steunpaal:"Een paal die een bouwwerk helpt dragen.",afvoerrooster:{text:"Een metalen rooster waardoor water kan wegstromen.",image:"images/m6-boomhut/04.png"},fundering:"Het stevige onderste deel waarop een bouwwerk rust.",gekeurde:"Gecontroleerd en veilig bevonden.",veiligheidsharnas:{text:"Stevige riemen die iemand beschermen tegen vallen.",image:"images/m6-boomhut/08.png"},serre:"Een glazen huis waarin planten groeien.",draagbare:"Zo gemaakt dat je het kunt meenemen.",vrijwilligers:"Mensen die uit eigen keuze helpen zonder ervoor betaald te worden.",ondergrond:"De grond waarop iets staat.",waterpas:"Helemaal recht en niet scheef.",goedgekeurd:"Na controle veilig en in orde bevonden.",controlelijst:"Een lijst waarop staat wat je één voor één moet nakijken."
+    buurttuin:"Een tuin die mensen uit de buurt samen gebruiken en verzorgen.",bouwplan:"Een tekening die toont hoe iets gebouwd is.",risico:"Een kans dat er iets gevaarlijks of ongewensts gebeurt.","risico's":"Mogelijke gevaren waarmee je rekening moet houden.",steunpaal:"Een paal die een bouwwerk helpt dragen.",afvoerrooster:{text:"Een metalen rooster waardoor water kan wegstromen.",image:"images/woorduitleg/afvoerrooster.png"},fundering:"Het stevige onderste deel waarop een bouwwerk rust.",gekeurde:"Gecontroleerd en veilig bevonden.",veiligheidsharnas:{text:"Stevige riemen die iemand beschermen tegen vallen.",image:"images/woorduitleg/veiligheidsharnas.png"},serre:"Een glazen huis waarin planten groeien.",draagbare:"Zo gemaakt dat je het kunt meenemen.",vrijwilligers:"Mensen die uit eigen keuze helpen zonder ervoor betaald te worden.",ondergrond:"De grond waarop iets staat.",waterpas:"Helemaal recht en niet scheef.",goedgekeurd:"Na controle veilig en in orde bevonden.",controlelijst:"Een lijst waarop staat wat je één voor één moet nakijken."
   },
   "e6-kompas-onder-stad":{
-    archivaris:"Iemand die oude documenten en andere bronnen bewaart en ordent.",instrument:"Een hulpmiddel waarmee je iets kunt meten of onderzoeken.",beïnvloeden:"Ervoor zorgen dat iets verandert of anders werkt.",legenda:{text:"De uitleg van kleuren en tekens op een kaart.",image:"images/e6-kompas/03.png"},windroos:{text:"Een teken op een kaart dat de windrichtingen toont.",image:"images/e6-kompas/04.png"},gietijzeren:"Gemaakt van ijzer dat in een vorm is gegoten.",leidingenplan:"Een kaart waarop ondergrondse buizen en leidingen staan.",inspectiedeur:{text:"Een afgesloten deur voor mensen die iets moeten controleren of onderhouden.",image:"images/e6-kompas/08.png"},gemetselde:"Opgebouwd uit stenen die met specie aan elkaar vastzitten.",inspectieluik:{text:"Een kleine opening waardoor een vakmens iets kan nakijken.",image:"images/e6-kompas/10.png"},verzegeling:"Een sluiting waaraan je kunt zien of iets al geopend is.",stadsingenieur:"Een deskundige die technische werken voor een stad ontwerpt of controleert.",verstopping:"Een blokkering waardoor water niet meer goed kan doorstromen.",reconstrueren:"Met alle gegevens opnieuw stap voor stap tonen wat er gebeurd is."
+    archivaris:"Iemand die oude documenten en andere bronnen bewaart en ordent.",instrument:"Een hulpmiddel waarmee je iets kunt meten of onderzoeken.",beïnvloeden:"Ervoor zorgen dat iets verandert of anders werkt.",legenda:{text:"De uitleg van kleuren en tekens op een kaart.",image:"images/woorduitleg/legenda.png"},windroos:{text:"Een teken op een kaart dat de windrichtingen toont.",image:"images/woorduitleg/windroos.png"},gietijzeren:"Gemaakt van ijzer dat in een vorm is gegoten.",leidingenplan:"Een kaart waarop ondergrondse buizen en leidingen staan.",inspectiedeur:{text:"Een afgesloten deur voor mensen die iets moeten controleren of onderhouden.",image:"images/woorduitleg/inspectiedeur.png"},gemetselde:"Opgebouwd uit stenen die met specie aan elkaar vastzitten.",inspectieluik:{text:"Een kleine opening waardoor een vakmens iets kan nakijken.",image:"images/woorduitleg/inspectieluik.png"},verzegeling:"Een sluiting waaraan je kunt zien of iets al geopend is.",stadsingenieur:"Een deskundige die technische werken voor een stad ontwerpt of controleert.",verstopping:"Een blokkering waardoor water niet meer goed kan doorstromen.",reconstrueren:"Met alle gegevens opnieuw stap voor stap tonen wat er gebeurd is."
   },
   "e6-code-rood-marsbasis":{
-    ruimtevaartcentrum:"Een plaats waar mensen ruimtevaart onderzoeken, oefenen en besturen.",noodprotocol:"Vaste veiligheidsstappen die je bij gevaar in de juiste volgorde uitvoert.",simulatie:{text:"Een nagebootste situatie waarmee je veilig kunt oefenen.",image:"images/e6-marsbasis/02.png"},zuurstofsensoren:{text:"Meettoestellen die controleren hoeveel zuurstof er aanwezig is.",image:"images/e6-marsbasis/04.png"},waarschuwingslicht:"Een lamp die toont dat er mogelijk een probleem is.",tegenstrijdig:"Niet met elkaar overeenkomend.",tijdlijn:{text:"Een overzicht waarop gebeurtenissen in volgorde van tijd staan.",image:"images/e6-marsbasis/06.png"},koeling:"Een systeem dat iets kouder maakt.",condens:{text:"Kleine waterdruppels die ontstaan wanneer vochtige lucht afkoelt.",image:"images/e6-marsbasis/07.png"},optische:"Werkend met licht.",reservesensor:"Een extra sensor die klaarstaat als de gewone sensor niet betrouwbaar is.",dienstsluis:"Een afsluitbare doorgang waarmee een technicus veilig een ruimte binnengaat.",geïsoleerde:"Beschermd tegen warmte of koude van buitenaf.",afdichting:{text:"Een rubberen rand die een opening lucht- of waterdicht afsluit.",image:"images/e6-marsbasis/13.png"},bewijsreeks:"Een rij aanwijzingen die samen laten zien dat een uitleg klopt.",onderhoudsverslag:"Een document waarin staat welke controle of reparatie is uitgevoerd.",controleerbaar:"Zo duidelijk dat iemand anders kan nagaan of het klopt."
+    ruimtevaartcentrum:"Een plaats waar mensen ruimtevaart onderzoeken, oefenen en besturen.",noodprotocol:"Vaste veiligheidsstappen die je bij gevaar in de juiste volgorde uitvoert.",simulatie:{text:"Een nagebootste situatie waarmee je veilig kunt oefenen.",image:"images/woorduitleg/simulatie.png"},zuurstofsensoren:{text:"Meettoestellen die controleren hoeveel zuurstof er aanwezig is.",image:"images/woorduitleg/zuurstofsensoren.png"},waarschuwingslicht:"Een lamp die toont dat er mogelijk een probleem is.",tegenstrijdig:"Niet met elkaar overeenkomend.",tijdlijn:{text:"Een overzicht waarop gebeurtenissen in volgorde van tijd staan.",image:"images/woorduitleg/tijdlijn.png"},koeling:"Een systeem dat iets kouder maakt.",condens:{text:"Kleine waterdruppels die ontstaan wanneer vochtige lucht afkoelt.",image:"images/woorduitleg/condens.png"},optische:"Werkend met licht.",reservesensor:"Een extra sensor die klaarstaat als de gewone sensor niet betrouwbaar is.",dienstsluis:"Een afsluitbare doorgang waarmee een technicus veilig een ruimte binnengaat.",geïsoleerde:"Beschermd tegen warmte of koude van buitenaf.",afdichting:{text:"Een rubberen rand die een opening lucht- of waterdicht afsluit.",image:"images/woorduitleg/afdichting.png"},bewijsreeks:"Een rij aanwijzingen die samen laten zien dat een uitleg klopt.",onderhoudsverslag:"Een document waarin staat welke controle of reparatie is uitgevoerd.",controleerbaar:"Zo duidelijk dat iemand anders kan nagaan of het klopt."
   }
 };
 const bookGames = {
@@ -125,6 +125,44 @@ const vocabularyGames={
 };
 Object.entries(vocabularyGames).forEach(([id,games])=>{if(bookGames[id])bookGames[id].push(...games)});
 
+const meaningContexts={
+  "Wat betekent stoffig?":"In de oude berging zijn de kasten en dozen stoffig.",
+  "Wat betekent verdwaald?":"De wolkenwolf is verdwaald en weet de weg naar zijn familie niet meer.",
+  "Wat betekent wankelen?":"De jonge vos probeert recht te staan, maar blijft wankelen.",
+  "Wat betekent verzorgen?":"De bewoners verzorgen de jonge planten elke dag.",
+  "Wat betekent voorzichtig?":"Meester Raf herstelt het oude uurwerk voorzichtig.",
+  "Wat betekent opgelucht?":"Mira is opgelucht wanneer de wolf zijn familie terugvindt.",
+  "Wat betekent deskundig?":"De dierenhelper bevrijdt de vos deskundig.",
+  "Wat betekent ‘omweg’ in dit verhaal?":"Blik reed eerst een omweg, maar brengt de dozen nu rechtstreeks.",
+  "Wat betekent ‘versperren’?":"Het stormhout verspert de opening van de grot.",
+  "Wat betekent ‘vergeeld’?":"Aya bekijkt een vergeelde foto uit het archief.",
+  "Wat betekent ‘onregelmatig’ bij de ademhaling?":"De draak ademt onregelmatig: niet telkens in hetzelfde ritme.",
+  "Wat betekent ‘bevestigen’?":"De nieuwe beelden bevestigen de uitleg van Lina en Sem.",
+  "Wat betekent ‘waterpas’?":"Na de herstelling staat de boomhut opnieuw waterpas.",
+  "Wat betekent ‘stabiel’?":"Tijdens de tweede proef blijven de meetwaarden stabiel.",
+  "Wat is een dassenburcht?":"De das verdwijnt via een opening in zijn dassenburcht.",
+  "Wat is een fundering?":"De vakman verstevigt de fundering onder de steunpaal.",
+  "Wat is een legenda op een kaart?":"Volgens de legenda stelt de blauwe lijn een waterkanaal voor.",
+  "Wat is condens?":"Door de koude lucht ontstaat condens op de kap van de sensor.",
+  "Wat is een berging?":"De oude spullen worden in de berging bewaard.",
+  "Wat betekent stevig vasthouden?":"Mira moet het touw stevig vasthouden tijdens de windvlaag.",
+  "Wat is een aanwijzing?":"De blauwe verfdruppel is een aanwijzing in hun zoektocht.",
+  "Wat is een aanwijzing op een schatkaart?":"Een getekende rots is een aanwijzing op de schatkaart."
+};
+function enrichQuestions(){
+  const visited=new Set();
+  const visit=value=>{
+    if(!value||typeof value!=="object"||visited.has(value))return;
+    visited.add(value);
+    if(value.q&&meaningContexts[value.q])value.context=meaningContexts[value.q];
+    else if(value.q&&/wat betekent|betekenis/i.test(`${value.q} ${value.title||""}`)&&value.focus&&/[.!?]/.test(value.focus))value.context=value.focus;
+    if(value.q&&/(waarom (past|klopt) de titel|past de titel)/i.test(value.q))value.showBookTitle=true;
+    Object.values(value).forEach(visit);
+  };
+  [allBooks,bookGames,window.ZISA_FLUENCY_BOOKS,window.ZISA_START_BOOKS].forEach(visit);
+}
+enrichQuestions();
+
 // Verdeel juiste antwoorden per oefensoort bewust over links, midden en rechts.
 // De inhoud blijft gelijk; alleen de zichtbare plaats wisselt voorspelbaar af.
 function spreadCorrectAnswerPositions(){
@@ -215,7 +253,7 @@ function bindGlossaryWords(root=document){
     const key=button.dataset.word;const entry=storyGlossaries[currentBook?.id]?.[key];if(!entry)return;
     const explanation=typeof entry==="object"?entry.text:entry;const explanationImage=typeof entry==="object"?entry.image:null;
     const layer=document.createElement("div");layer.className="word-explanation-layer";
-    layer.innerHTML=`<section class="word-explanation${explanationImage?" has-image":""}" role="dialog" aria-modal="true" aria-labelledby="wordExplanationTitle"><button class="word-explanation-close" type="button" aria-label="Sluiten">×</button>${explanationImage?`<div class="word-explanation-image">${imageBlock(explanationImage,`Voorbeeld van ${key}`)}</div>`:""}<div><small>Moeilijk woord</small><h3 id="wordExplanationTitle">${escapeAttr(key)}</h3><p>${escapeAttr(explanation)}</p></div></section>`;
+    layer.innerHTML=`<section class="word-explanation${explanationImage?" has-image":""}" role="dialog" aria-modal="true" aria-labelledby="wordExplanationTitle"><button class="word-explanation-close" type="button" aria-label="Sluiten">×</button>${explanationImage?`<div class="word-explanation-image">${imageBlock(explanationImage,`Afbeelding die ${key} verduidelijkt`)}</div>`:""}<div><small>Moeilijk woord</small><h3 id="wordExplanationTitle">${escapeAttr(key)}</h3><strong class="word-explanation-label">Uitleg</strong><p>${escapeAttr(explanation)}</p></div></section>`;
     const close=()=>layer.remove();layer.onclick=event=>{if(event.target===layer)close()};layer.querySelector(".word-explanation-close").onclick=close;
     document.body.append(layer);layer.querySelector(".word-explanation-close").focus();
   });
@@ -367,7 +405,7 @@ function renderWordStart(){
 }
 
 function inlineTaskMarkup(task){
-  const answers=shuffled(task.a.map((answer,index)=>({answer,index})));
+  const answers=task.a.map((answer,index)=>({answer,index}));
   return `<section class="inline-task">
     <div class="inline-task-head"><img src="images/zisa-zebra.png" alt=""><div><b>Leesvraag</b><span>${task.q}</span></div>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(task.q)}" aria-label="Lees de vraag voor">🔊</button>`:""}</div>
     <div class="inline-answers">${answers.map(({answer,index})=>hasAudioSupport()?`<div class="inline-answer-wrap"><button class="inline-answer" data-answer="${index}">${answer}</button><button class="mini-listen" data-say="${escapeAttr(answer)}" aria-label="Lees ${escapeAttr(answer)} voor">🔊</button></div>`:`<button class="inline-answer" data-answer="${index}">${answer}</button>`).join("")}</div>
@@ -551,7 +589,7 @@ function renderMission(){
   const game=games[missionIndex];
   app.innerHTML=`<section class="mission-stage">
     <header class="mission-progress"><button id="missionBack" aria-label="Terug naar het boek">‹ Boek</button><div><b>Taalreis na het verhaal</b><span>${missionIndex+1} van ${games.length}</span></div><button id="missionFullscreen" class="mission-fullscreen" type="button" aria-label="Open volledig scherm">⛶ <span>Volledig scherm</span></button><div class="mission-bar"><i style="width:${missionIndex/games.length*100}%"></i></div></header>
-    <div class="mission-card"><img class="mission-zebra" src="images/zisa-zebra.png" alt=""><div class="mission-icon">${game.icon||"⭐"}</div><h2>${game.title||"Leesmissie"}</h2><div class="mission-question-row"><p class="mission-question">${game.q}</p>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(game.q)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="missionActivity"></div><p id="missionFeedback" class="mission-feedback" aria-live="polite"></p></div>
+    <div class="mission-card"><img class="mission-zebra" src="images/zisa-zebra.png" alt=""><div class="mission-icon">${game.icon||"⭐"}</div><h2>${game.title||"Leesmissie"}</h2>${game.showBookTitle?`<div class="question-book-title"><small>Titel van het verhaal</small><strong>${escapeAttr(currentBook.title)}</strong></div>`:""}${game.context?`<blockquote class="meaning-context">${escapeAttr(game.context)}</blockquote>`:""}<div class="mission-question-row"><p class="mission-question">${game.q}</p>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(`${game.context?`${game.context} `:""}${game.q}`)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="missionActivity"></div><p id="missionFeedback" class="mission-feedback" aria-live="polite"></p></div>
   </section>`;
   document.querySelector("#missionBack").onclick=()=>{reviewMode=false;renderReader()};
   bindMissionFullscreen();
@@ -581,7 +619,7 @@ function renderGame(game){
     const line=document.createElement("div");line.className="game-sentence";line.textContent=game.sentence;activity.append(line);
   }
   const choices=document.createElement("div");choices.className="game-choices";activity.append(choices);
-  shuffled(answers.map((answer,index)=>({answer,index}))).forEach(({answer,index})=>{
+  answers.map((answer,index)=>({answer,index})).forEach(({answer,index})=>{
     const btn=document.createElement("button");btn.className=`game-choice${game.type==="vocabulary-image"?" picture-choice":""}`;
     const answerText=typeof answer==="object"?answer.text:answer;
     if(game.type==="vocabulary-image")btn.innerHTML=`${imageBlock(answer.image,answer.text)}<span>${escapeAttr(answer.text)}</span>`;
@@ -746,7 +784,16 @@ function renderSpeedGame(game,activity,onComplete=null){
 function setMissionFeedback(text,kind){const el=document.querySelector("#missionFeedback");el.textContent=text;el.className=`mission-feedback ${kind||""}`}
 function finishGame(button,message){
   document.querySelectorAll("#missionActivity .game-choice").forEach(btn=>btn.disabled=true);document.querySelector(".reread-btn")?.remove();button?.classList.add("correct");missionScore++;setMissionFeedback(message,"good");
-  const next=document.createElement("button");next.className="mission-next";next.textContent=missionIndex===(bookGames[currentBook.id]?.length||1)-1?"Open mijn vlotleesboekje ›":"Volgende opdracht ›";next.onclick=()=>{missionIndex++;missionIndex>=(bookGames[currentBook.id]?.length||1)?startFluencyBook():renderMission()};document.querySelector(".mission-card").append(next);
+  const last=missionIndex===(bookGames[currentBook.id]?.length||1)-1;
+  if(last){
+    const card=document.querySelector(".mission-card");card.classList.add("mission-finished");
+    card.querySelector(".mission-icon").textContent="🎉";card.querySelector("h2").textContent="Taalreis klaar!";
+    card.querySelector(".question-book-title")?.remove();card.querySelector(".meaning-context")?.remove();
+    card.querySelector(".mission-question-row").innerHTML='<p class="mission-question">Je hebt alle opdrachten gemaakt. Ga nu verder naar je vlotleesboekje.</p>';
+    document.querySelector("#missionActivity").innerHTML='<div class="mission-finish-panel"><strong>Goed gewerkt!</strong><span>In het vlotleesboekje oefen je nog kort op vlot en nauwkeurig lezen.</span></div>';
+    setMissionFeedback("Alles is klaar. ⭐","good");
+  }
+  const next=document.createElement("button");next.className="mission-next";next.textContent=last?"Open mijn vlotleesboekje ›":"Volgende opdracht ›";next.onclick=()=>{missionIndex++;missionIndex>=(bookGames[currentBook.id]?.length||1)?startFluencyBook():renderMission()};document.querySelector(".mission-card").append(next);
 }
 
 function startFluencyBook(){fluencyIndex=-1;fluencyScore=0;renderFluencyBook()}
@@ -762,7 +809,7 @@ function renderFluencyBook(){
     <header class="fluency-head"><button id="fluencyBack">‹ Taalreis</button><div><b>${currentBook.startBook?"Mijn leesstartboekje":"Mijn vlotleesboekje"}</b><span>${cover?"Voorkaft":`${fluencyIndex+1} van ${pages.length}`}</span></div><div class="fluency-dots">${pages.map((_,i)=>`<i class="${i===fluencyIndex?"on":""}"></i>`).join("")}</div></header>
     <div class="mini-book ${cover?"mini-cover":""}">
       <div class="mini-left">${cover&&currentBook.startBook?`<div class="start-mini-cover tone-${currentBook.coverTone||"blue"}"><img src="${currentBook.coverImage}" alt=""><strong>${currentBook.title}</strong><span>AVI START</span></div>`:cover?`<img src="images/zisa-leest.png" alt="Zisa leest"><span>AVI ${currentBook.level}</span>`:currentBook.startBook?`<img class="fluency-illustration" src="${page.iconImage||currentBook.coverImage}" alt=""><h2>${page.title}</h2><p>${currentBook.title}</p>`:`<div class="fluency-side-art">${imageBlock(sidePage.image,`Prent uit ${currentBook.title}`)}</div><h2>${page.title}</h2><p>${currentBook.title}</p>`}</div>
-      <article class="mini-right">${cover?`<small>${currentBook.startBook?"AVI START":"BONUSBOEKJE"}</small><h1>${currentBook.startBook?currentBook.title:"Lees vlot<br>en mooi"}</h1><p>${currentBook.startBook?currentBook.blurb:`${pages.length} korte oefenbladzijden die aansluiten bij jouw verhaal.`}</p><small>${pages.length} oefenbladzijden</small><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2><div class="fluency-question-row"><p class="fluency-question">${page.q}</p>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(page.q)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
+      <article class="mini-right">${cover?`<small>${currentBook.startBook?"AVI START":"BONUSBOEKJE"}</small><h1>${currentBook.startBook?currentBook.title:"Lees vlot<br>en mooi"}</h1><p>${currentBook.startBook?currentBook.blurb:`${pages.length} korte oefenbladzijden die aansluiten bij jouw verhaal.`}</p><small>${pages.length} oefenbladzijden</small><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2>${page.context?`<blockquote class="meaning-context">${escapeAttr(page.context)}</blockquote>`:""}<div class="fluency-question-row"><p class="fluency-question">${page.q}</p>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(`${page.context?`${page.context} `:""}${page.q}`)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
     </div></section>`;
   document.querySelector("#fluencyBack").textContent=currentBook.startBook?"‹ Bibliotheek":"‹ Taalreis";
   document.querySelector("#fluencyBack").onclick=()=>{document.body.classList.remove("fluency-mode");if(currentBook.startBook)renderLibrary();else{missionIndex=Math.max(0,(bookGames[currentBook.id]?.length||1)-1);renderMission()}};
@@ -802,7 +849,7 @@ function renderFluencyPage(page,total){
     const text=document.createElement("div");text.className="fluency-read main sentence-highlight";text.innerHTML=storyTextMarkup(page.text);activity.append(text);
     const listen=makeListenButton(page.text,"Lees de zin voor");listen.classList.add("fluency-listen");listen.onclick=event=>{event.stopPropagation();speak(page.text,text)};activity.append(listen);
     const choices=document.createElement("div");choices.className="fluency-picture-choices";activity.append(choices);
-    shuffled(page.pictures.map((picture,index)=>({picture,index}))).forEach(({picture,index})=>{
+    page.pictures.map((picture,index)=>({picture,index})).forEach(({picture,index})=>{
       const button=document.createElement("button");button.innerHTML=`<img src="${picture.src}" alt="${escapeAttr(picture.alt)}">`;button.setAttribute("aria-label",picture.alt);button.onclick=()=>{
         if(index!==page.correct){button.classList.add("wrong");document.querySelector("#fluencyFeedback").textContent=page.hint||"Lees de zin nog eens en kijk heel goed.";setTimeout(()=>button.classList.remove("wrong"),550);return}
         button.classList.add("correct");choices.querySelectorAll("button").forEach(item=>item.disabled=true);fluencyScore++;document.querySelector("#fluencyFeedback").textContent=page.good||"Juist! Deze prent past bij de zin.";addFluencyNext(total)
