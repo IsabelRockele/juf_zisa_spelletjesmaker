@@ -639,6 +639,7 @@ const Preview = (() => {
     const splitspositie = blok.splitspositie || 'aftrekker';
     const bewerking     = blok.bewerking || 'optellen';
     const schrijflijnenAantal = oef.splitsDeel1 !== undefined ? 2 : (blok.schrijflijnenAantal || 2);
+    const isVoorbeeld = blok.metVoorbeeld === true && idx === 0 && heeftLijnen;
     const aanvullenVariant = blok.aanvullenVariant || 'zonder-schema';
 
     /* ── Tafels inzicht ──────────────────────────────────── */
@@ -914,10 +915,10 @@ const Preview = (() => {
     }
 
     return `
-      <div class="oefening-item oefening-hulp${isAftrektal ? ' aftrektal-hulp' : ''}${isAftrektalGroot ? ' aftrektal-hulp-groot' : ''}${splGroot ? ' niveau-10000' : ''}">
+      <div class="oefening-item oefening-hulp${isVoorbeeld ? ' tussenstappen-voorbeeld' : ''}${isAftrektal ? ' aftrektal-hulp' : ''}${isAftrektalGroot ? ' aftrektal-hulp-groot' : ''}${splGroot ? ' niveau-10000' : ''}">
         <div class="hulp-som-rij">
           <span class="oef-tekst">${somHTML}</span>
-          <span class="antwoord-vak" style="margin-left:4px;" data-antwoord="${oef.antwoord ?? ''}" ></span>
+          <span class="antwoord-vak${isVoorbeeld ? ' antwoord-ingevuld' : ''}" style="margin-left:4px;" data-antwoord="${oef.antwoord ?? ''}">${isVoorbeeld ? esc(oef.antwoord ?? '') : ''}</span>
         </div>
         ${heeftSplits ? `
         <div class="hulp-splits-rij" data-splits="${splAantal}">
@@ -932,7 +933,7 @@ const Preview = (() => {
             const _spH = _berekenSplits(oef, blok.bewerking || 'optellen', blok.splitspositie || 'aftrekker', blok.config?.strategie, schrijflijnenAantal);
             const antw = [_spH.sl1, _spH.sl2, _spH.sl3];
             return Array(schrijflijnenAantal).fill(0).map((_, si) =>
-              `<div class="schrijflijn" data-antwoord="${antw[si] ?? ''}"></div>`
+              `<div class="schrijflijn${isVoorbeeld ? ' schrijflijn-ingevuld' : ''}" data-antwoord="${antw[si] ?? ''}">${isVoorbeeld ? esc(antw[si] ?? '') : ''}</div>`
             ).join('');
           })()}
         </div>` : ''}

@@ -304,7 +304,7 @@ y += 5;
     } catch(e) { return { d1:'', d2:'', sl1:'', sl2:'' }; }
   }
 
-  function _tekenHulpRij(oefeningen, heeftSplits, heeftLijnen, bewerking, splitspositie, schrijflijnenAantal = 2, blokBrug = 'zonder', blokNiveau = 100) {
+  function _tekenHulpRij(oefeningen, heeftSplits, heeftLijnen, bewerking, splitspositie, schrijflijnenAantal = 2, blokBrug = 'zonder', blokNiveau = 100, metVoorbeeld = false, startIndex = 0) {
     const kolB   = CW / 2;
     const kadW   = kolB - 6;
     const marge  = 3;
@@ -313,6 +313,7 @@ y += 5;
     const rijH   = kadH + 6;
 
     oefeningen.forEach((oef, kol) => {
+      const isVoorbeeld = metVoorbeeld && (startIndex + kol === 0);
       const oy     = y;
       const ox     = ML + kol * kolB + 3;   // kader altijd op vaste positie
       const kadEindX = ox + kadW;
@@ -360,8 +361,8 @@ const somTekst = (delen.length >= 3)
       const centreX = xOff + getalB / 2;
 
       // Buitenkader — altijd op vaste positie, nooit uitbreiden
-      doc.setFillColor(255, 255, 255);
-      doc.setDrawColor(180, 200, 225);
+      doc.setFillColor(255, isVoorbeeld ? 248 : 255, isVoorbeeld ? 220 : 255);
+      doc.setDrawColor(isVoorbeeld ? 240 : 180, isVoorbeeld ? 165 : 200, isVoorbeeld ? 0 : 225);
       doc.setLineWidth(0.6);
       doc.roundedRect(ox, oy, kadW, kadH, 2, 2, 'FD');
 
@@ -379,6 +380,10 @@ const somTekst = (delen.length >= 3)
       const vakH  = 9;
       const vakX  = somStartX + somBreedte + 2;
       _antwoordVak(vakX, vakY, vakW, vakH, oef.antwoord);
+      if (isVoorbeeld && !_metAntwoorden) {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(0, 112, 178);
+        doc.text(String(oef.antwoord ?? ''), vakX + vakW / 2, vakY + 6.3, { align: 'center' });
+      }
 
       // Schrijflijnen — rechts van het meest rechtse splitsvakje
       if (heeftLijnen) {
@@ -393,7 +398,7 @@ const somTekst = (delen.length >= 3)
         const lijnGap = 12;
         if (lX2 > lX1 + 5) {
           // Bereken antwoorden voor schrijflijnen
-          const _spLijn = _metAntwoorden ? _splitsVanVraag(oef, oefBewerking, splitspositie, null, schrijflijnenAantal) : null;
+          const _spLijn = (_metAntwoorden || isVoorbeeld) ? _splitsVanVraag(oef, oefBewerking, splitspositie, null, schrijflijnenAantal) : null;
           const lijnAntw = _spLijn ? [_spLijn.sl1, _spLijn.sl2] : [];
 
           doc.setDrawColor(160, 185, 210);
@@ -402,10 +407,10 @@ const somTekst = (delen.length >= 3)
           for (let li = 0; li < schrijflijnenAantal; li++) {
             const lY = lY1 + li * lijnGap;
             doc.line(lX1, lY, lX2, lY);
-            if (_metAntwoorden && lijnAntw3[li] && lijnAntw3[li] !== '') {
+            if ((_metAntwoorden || isVoorbeeld) && lijnAntw3[li] && lijnAntw3[li] !== '') {
               doc.setFont('helvetica', 'bold');
               doc.setFontSize(12);
-              doc.setTextColor(0, 100, 0);
+              doc.setTextColor(0, isVoorbeeld ? 112 : 100, isVoorbeeld ? 178 : 0);
               doc.text(String(lijnAntw3[li]), lX1 + 2, lY - 2);
               doc.setTextColor(30, 30, 30);
             }
@@ -2035,6 +2040,7 @@ const onthoudH = c;
   const heeftLijnen = blok.hulpmiddelen?.includes('schrijflijnen');
   const schrijflijnenAantal = blok.schrijflijnenAantal || 2;
   const heeftHulp = heeftSplits || heeftLijnen;
+  const metVoorbeeld = blok.metVoorbeeld === true && heeftLijnen;
 
   const rijGrootte = heeftHulp ? 2 : _kolommen;
   const aantalRijen = Math.ceil(blok.oefeningen.length / rijGrootte);
@@ -2061,7 +2067,9 @@ const onthoudH = c;
   blok.splitspositie || 'aftrekker',
   schrijflijnenAantal,
   blok.brug || 'zonder',
-  blok.niveau || 100
+  blok.niveau || 100,
+  metVoorbeeld,
+  rij * rijGrootte
 );
     } else {
       _tekenRij(rijOef, _kolommen, blok.niveau || 100);

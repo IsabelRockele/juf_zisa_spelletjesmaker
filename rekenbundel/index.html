@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — jufzisa.be</title>
-  <link rel="stylesheet" href="style.css?v=118">
+  <link rel="stylesheet" href="style.css?v=119">
   <link rel="stylesheet" href="vraagstukken.css?v=3">
   <link rel="stylesheet" href="rekentaal.css?v=2">
   <style>
@@ -335,6 +335,17 @@
             </label>
             <label class="radio-chip" onclick="App.selecteerRadio('schrijflijnen-aantal','3',this)">
               <input type="radio" name="schrijflijnen-aantal" value="3">3 lijnen
+            </label>
+          </div>
+          <div id="tussenstappen-tot20-uitleg" style="display:none;margin-top:10px;font-size:13px;line-height:1.45;color:#52677d">
+            Kies <strong>20 − TE</strong> om alleen aftrekkingen zoals 20 − 16 te oefenen.
+            Kies <strong>Gemengd</strong> om de hulplijnen bij alle oefeningen te tonen; de kinderen beslissen dan zelf waar tussenstappen nodig zijn.
+          </div>
+          <div id="rij-schrijflijnen-voorbeeld" style="display:none;margin-top:10px">
+            <label class="vink-chip" id="chip-schrijflijnen-voorbeeld" onclick="App.toggleVoorbeeld(this)">
+              <span class="vink-box"></span>
+              <input type="checkbox" id="cb-schrijflijnen-voorbeeld" style="display:none">
+              <span>Eerste oefening als uitgewerkt voorbeeld</span>
             </label>
           </div>
         </div>
@@ -2270,14 +2281,14 @@
 <script src="modules/breuken.js?v=5"></script>
 <script src="modules/percentages.js?v=1"></script>
 <script src="modules/kommagetallen.js?v=3"></script>
-<script src="generator.js?v=100"></script>
-<script src="preview.js?v=64"></script>
-<script src="pdf-engine.js?v=117"></script>
+<script src="generator.js?v=101"></script>
+<script src="preview.js?v=65"></script>
+<script src="pdf-engine.js?v=118"></script>
 <script src="vraagstukken.js?v=36"></script>
 
 <script src="modules/rekentaal.js?v=15"></script>
 
-<script src="app.js?v=45"></script>
+<script src="app.js?v=46"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {

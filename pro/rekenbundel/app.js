@@ -43,6 +43,11 @@ const App = (() => {
       const vb = cb.closest('.vink-chip')?.querySelector('.vink-box');
       if (vb) vb.textContent = '';
     });
+    const lijnenVoorbeeld = document.getElementById('cb-schrijflijnen-voorbeeld');
+    if (lijnenVoorbeeld) lijnenVoorbeeld.checked = false;
+    document.getElementById('chip-schrijflijnen-voorbeeld')?.classList.remove('geselecteerd');
+    const lijnenVoorbeeldVink = document.querySelector('#chip-schrijflijnen-voorbeeld .vink-box');
+    if (lijnenVoorbeeldVink) lijnenVoorbeeldVink.textContent = '';
     // 2. Niveau → reset naar 20 (laagste)
     document.querySelectorAll('[name="niveau"]').forEach(r => {
       const chip = r.closest('.radio-chip');
@@ -376,6 +381,8 @@ const App = (() => {
       zinInp.value = 'Reken uit door te compenseren.';
     } else if (hulpmiddelen.includes('transformeren')) {
       zinInp.value = 'Reken uit door te transformeren.';
+    } else if (hulpmiddelen.includes('schrijflijnen') && actieveBewerking === 'aftrekken') {
+      zinInp.value = 'Los op. Schrijf de tussenstappen waar nodig.';
     } else if (alleenEerst10) {
       zinInp.value = 'Onderstreep eerst wat samen 10 is en reken dan uit.';
     } else if (actieveBewerking === 'aftrekken') {
@@ -412,6 +419,7 @@ const App = (() => {
       'DH-DH': 'DH − DH',
       'H+H':   'H + H',
       'HT+HT': 'HT + HT',
+      'T-TE':  (actieveBewerking === 'aftrekken' && Number(niveau) === 20) ? '20 − TE' : 'T − TE',
     };
 
     beschikbaar.forEach((type) => {
@@ -564,7 +572,7 @@ const App = (() => {
     if (actieveBewerking === 'splitsingen') { kaart.style.display = 'none'; return; }
 
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-    const isBrug = ['naar-tiental','naar-honderdtal','beide','met','naar-duizendtal'].includes(brug);
+    const isBrug = ['naar-tiental','naar-honderdtal','beide','met','gemengd','naar-duizendtal'].includes(brug);
     const isZonderTot1000 = brug === 'zonder' && niveau >= 1000;
     if (niveau < 20) { kaart.style.display = 'none'; return; }
 
@@ -665,9 +673,11 @@ const App = (() => {
     const transformerenVariant = document.querySelector('[name="transformeren-variant"]:checked')?.value || 'schema';
     const schrijflijnenAantal = parseInt(document.querySelector('[name="schrijflijnen-aantal"]:checked')?.value || '2');
     const isTransformeren     = hulpmiddelen.includes('transformeren');
-    const metVoorbeeld        = isTransformeren
-      ? (document.getElementById('cb-trans-voorbeeld')?.checked || false)
-      : (document.getElementById('cb-metvoorbeeld')?.checked || false);
+    const metVoorbeeld        = hulpmiddelen.includes('schrijflijnen')
+      ? (document.getElementById('cb-schrijflijnen-voorbeeld')?.checked || false)
+      : isTransformeren
+        ? (document.getElementById('cb-trans-voorbeeld')?.checked || false)
+        : (document.getElementById('cb-metvoorbeeld')?.checked || false);
     const splitsVariant       = document.querySelector('[name="splits-variant"]:checked')?.value || 'afwisselend';
     const puntBewerking       = document.querySelector('[name="punt-bewerking"]:checked')?.value || 'optellen';
     const splitsConfig  = isSplitsingen ? _getSplitsConfig() : null;
@@ -820,6 +830,18 @@ const App = (() => {
     if (waarde === 'schrijflijnen') {
       const rijAantal = document.getElementById('rij-schrijflijnen-aantal');
       if (rijAantal) rijAantal.style.display = !was ? 'block' : 'none';
+      const isTussenstappenTot20 = actieveBewerking === 'aftrekken' && parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20) === 20;
+      const uitleg = document.getElementById('tussenstappen-tot20-uitleg');
+      const rijVoorbeeld = document.getElementById('rij-schrijflijnen-voorbeeld');
+      if (uitleg) uitleg.style.display = (!was && isTussenstappenTot20) ? 'block' : 'none';
+      if (rijVoorbeeld) rijVoorbeeld.style.display = (!was && isTussenstappenTot20) ? 'block' : 'none';
+      if (was) {
+        const voorbeeld = document.getElementById('cb-schrijflijnen-voorbeeld');
+        if (voorbeeld) voorbeeld.checked = false;
+        document.getElementById('chip-schrijflijnen-voorbeeld')?.classList.remove('geselecteerd');
+        const vink = document.querySelector('#chip-schrijflijnen-voorbeeld .vink-box');
+        if (vink) vink.textContent = '';
+      }
     }
     if (waarde === 'aanvullen') {
       const rijAanvullen = document.getElementById('rij-aanvullen');

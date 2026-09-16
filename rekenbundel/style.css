@@ -1117,6 +1117,16 @@ header .badge {
   align-items: center !important; justify-content: center !important;
   font-weight: 700 !important;
 }
+
+.oefening-hulp.tussenstappen-voorbeeld {
+  background: #fff8dc;
+  border-color: #f0a500;
+}
+
+.tussenstappen-voorbeeld .schrijflijn-ingevuld {
+  color: #0070b2;
+  font-weight: 700;
+}
 .oefening-comp .btn-del-oef { position: absolute !important; top: 6px; right: 6px; }
 /* ══════════════════════════════════════════════════════════
    SPLITSINGEN — preview stijlen

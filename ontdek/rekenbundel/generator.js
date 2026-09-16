@@ -144,6 +144,15 @@ const Generator = (() => {
       oefeningen = alleOef;
     }
     else                    oefeningen = module.genereer({ niveau, oefeningstypes, brug: brugVoorModule, aantalOefeningen });
+    if (metVoorbeeld && bewerking === 'aftrekken' && Number(niveau) === 20 && hulpmiddelen.includes('schrijflijnen')) {
+      const bestaandVoorbeeld = oefeningen.findIndex(oef => oef.type === 'T-TE');
+      if (bestaandVoorbeeld > 0) {
+        [oefeningen[0], oefeningen[bestaandVoorbeeld]] = [oefeningen[bestaandVoorbeeld], oefeningen[0]];
+      } else if (bestaandVoorbeeld < 0) {
+        const voorbeeld = AftrekkenTot20.genereer({ niveau: 20, oefeningstypes: ['T-TE'], brug: 'met', aantalOefeningen: 1 })[0];
+        if (voorbeeld) oefeningen = [voorbeeld, ...oefeningen.slice(0, Math.max(0, aantalOefeningen - 1))];
+      }
+    }
     const wilGroot = oefeningstypes?.some(t => t.includes('Groot'));
     if (oefeningen.length < 2 && !wilGroot) return null;
 
