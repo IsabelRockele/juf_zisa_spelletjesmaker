@@ -1,0 +1,7 @@
+import {pool} from './core.mjs';
+export function exercisePool(range,op,form='result'){return pool(range,op).flatMap(q=>{const plain={...q,blank:'result',reverse:false};const points=['a','b'].flatMap(blank=>[false,true].map(reverse=>({...q,id:q.id+'|'+blank+'|'+Number(reverse),blank,reverse})));return form==='point'?points:form==='mix'?[plain,...points]:[plain];});}
+export function expected(q){return q.blank==='a'?q.a:q.blank==='b'?q.b:q.answer;}
+export function equationParts(q){const a=q.blank==='a'?'?':String(q.a),b=q.blank==='b'?'?':String(q.b),c=!q.blank||q.blank==='result'?'?':String(q.answer);return (q.reverse?`${c} = ${a} ${q.op} ${b}`:`${a} ${q.op} ${b} = ${c}`).split('?');}
+export function recoveryPlan(q){const blank=q.blank||'result';if(blank==='a'&&q.op!=='+' )return {base:q.answer,move:q.b,mode:'add',count:q.a,prompt:`Er blijven ${q.answer} over. Leg de ${q.b} weggehaalde blokjes terug.`,countPrompt:'Tel hoeveel er eerst waren'};
+if(q.op==='+'){const base=blank==='a'?q.b:q.a,move=blank==='a'?q.a:q.b;return {base,move,mode:'add',count:expected(q),prompt:blank==='result'?`Doe er ${move} bij.`:`Vul aan van ${base} tot ${q.answer}.`,countPrompt:blank==='result'?'Tel alles samen':'Tel de blokjes die je erbij deed'};}
+return {base:q.a,move:q.b,mode:'remove',count:expected(q),prompt:blank==='b'?`Haal weg tot er ${q.answer} overblijven.`:`Haal ${q.b} blokjes weg.`,countPrompt:blank==='b'?'Tel de weggehaalde blokjes':'Tel wat er overblijft'};}
