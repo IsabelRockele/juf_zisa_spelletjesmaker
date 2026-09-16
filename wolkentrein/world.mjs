@@ -1,4 +1,5 @@
 import * as T from './three.module.js';
+import {baseAssets,levelAssets,assetNames} from './assets.mjs';
 import {createStarWorld} from './star-world.mjs?v=31';
 import {createGardenWorld} from './garden-world.mjs?v=31';
 import {createPostWorld} from './post-world.mjs?v=31';
@@ -12,8 +13,20 @@ export function createWorld(canvas){
  function height(x,route){if(route==='stars'){for(const [a,b,h] of [[25,33,1.1],[58,66,1.4],[92,100,1.2]])if(x>a&&x<b)return h*Math.sin((x-a)/(b-a)*Math.PI)**2;return 0;}if(route==='garden'){for(const [a,b,h] of [[17,23,1.1],[51,57,1.25],[85,91,1.1],[132,140,1.5]])if(x>a&&x<b)return h*Math.sin((x-a)/(b-a)*Math.PI)**2;return 0;}if(route==='postal'){for(const [a,b,h] of [[12,20,1.3],[40,48,1.5],[68,76,1.3],[96,104,1.5],[124,132,1.3]])if(x>a&&x<b)return h*Math.sin((x-a)/(b-a)*Math.PI)**2;return 0;}if(x>36&&x<66){const s=Math.sin((x-36)/30*Math.PI)**2;if(route==='low'){const u=x<44?(x-36)/8:x>58?(66-x)/8:1;return -.65*(.5-.5*Math.cos(Math.PI*u));}const u=x<46?(x-36)/10:x>56?(66-x)/10:1;return 8.5*(.5-.5*Math.cos(Math.PI*u));}if(x>80&&x<98)return .65*Math.sin((x-80)/18*Math.PI)**2;return 0;}
  function ribbon(from,to,route,texture,rect,depth,tileWidth,drop,thickness){const vertices=[],uvs=[];const iw=texture.image.width,ih=texture.image.height;for(let x=from;x<to;x+=tileWidth){const right=Math.min(x+tileWidth,to),y1=height(x,route)+drop,y2=height(right,route)+drop,l=rect[0]/iw,r=(rect[0]+rect[2]*(right-x)/tileWidth)/iw,top=1-rect[1]/ih,bottom=1-(rect[1]+rect[3])/ih;vertices.push(x,y1,depth,x,y1-thickness,depth,right,y2,depth,right,y2,depth,x,y1-thickness,depth,right,y2-thickness,depth);uvs.push(l,top,l,bottom,r,top,r,top,l,bottom,r,bottom);}const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));g.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));const o=new T.Mesh(g,new T.MeshBasicMaterial({map:texture,transparent:true,alphaTest:.12,toneMapped:false}));scene.add(o);return o;}
  function cropPiece(rect,width,x,y,z){return art(tex.kit,rect,width,x,y,z);}
- const ready=Promise.all(['landscape.png','sprites.png','train-kit.png','story-art.png','party-art.png','rescue-art.png','cloud-rail-art.png','post-art.png','garden-art.png','garden-island.png','garden-growth.png','star-sky.png','star-art.png'].map(name=>new T.TextureLoader().loadAsync(name))).then(images=>{
-  [tex.sky,tex.animals,tex.kit,tex.story,tex.party,tex.rescue,tex.cloud,tex.post,tex.garden,tex.island,tex.growth,tex.nightSky,tex.stars]=images;for(const t of images){t.colorSpace=T.SRGBColorSpace;t.minFilter=T.LinearMipmapLinearFilter;}scene.background=tex.sky;
+ const pending=new Map(),complete=new Set();
+ for(const key of Object.keys(assetNames)){const blank=document.createElement('canvas');blank.width=key==='sky'?1672:1536;blank.height=key==='sky'?941:1024;tex[key]=new T.Texture(blank);tex[key].colorSpace=T.SRGBColorSpace;tex[key].minFilter=T.LinearMipmapLinearFilter;}
+ function loadAsset(key){
+  if(complete.has(key))return Promise.resolve();
+  if(pending.has(key))return pending.get(key);
+  const task=new T.TextureLoader().loadAsync(assetNames[key]+'.webp').then(image=>{
+   tex[key].image=image.image;tex[key].needsUpdate=true;
+   scene.traverse(object=>{for(const material of [object.material].flat().filter(Boolean)){if(material.map?.source===tex[key].source)material.map.needsUpdate=true;}});
+   complete.add(key);
+  }).finally(()=>pending.delete(key));pending.set(key,task);return task;
+ }
+ function ensureLevel(level){return Promise.all([...baseAssets,...(levelAssets[level]||[])].map(loadAsset));}
+ const ready=ensureLevel(1).then(()=>{
+  scene.background=tex.sky;
   // Rails rest on illustrated cloud banks, with an actual gap for the repair bridge.
   function cloudRun(from,to,route){const width=from===36?4:8,step=width*.68,tall=width*.325;for(let x=from;x<to;x+=step){const cx=x+step/2,c=art(tex.cloud,[23,21,1500,384],width,cx,height(cx,route)-tall*.82,.6,scene,tall);c.rotation.z=Math.atan2(height(cx+.5,route)-height(cx-.5,route),1);c.material.clippingPlanes=[new T.Plane(new T.Vector3(1,0,0),-from),new T.Plane(new T.Vector3(-1,0,0),to)];}}
 
@@ -116,5 +129,5 @@ export function createWorld(canvas){
   fogVeil.visible=fog>0;fogVeil.material.opacity=fog;fogVeil.position.set(camX,camY,11);nightShade.position.x=camX;nightShade.position.y=camY;renderer.render(scene,camera);
  }
  function hit(e){if(!loaded)return;const target=starWorld.target||gardenWorld.target|| (postWorld.target.visible?postWorld.target:doorTarget.visible?doorTarget:null);if(!target)return;const rect=canvas.getBoundingClientRect();pointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);ray.setFromCamera(pointer,camera);return ray.intersectObject(target,false).length?target.userData.action:undefined;}
- return {get starWorld(){return starWorld},get gardenWorld(){return gardenWorld},get postWorld(){return postWorld},get tunnelSolid(){return tunnelSolid}, rebase(distance){camX-=distance;},ready,update,hit,scene,renderer,get train(){return train},get wagon(){return wagon},bridge,pathStones,get doorMesh(){return doorTarget}};
+ return {get starWorld(){return starWorld},get gardenWorld(){return gardenWorld},get postWorld(){return postWorld},get tunnelSolid(){return tunnelSolid}, rebase(distance){camX-=distance;},ready,ensureLevel,update,hit,scene,renderer,get train(){return train},get wagon(){return wagon},bridge,pathStones,get doorMesh(){return doorTarget}};
 }
