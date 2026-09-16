@@ -5579,8 +5579,41 @@ doc.setTextColor(26, 58, 92);
      _tekenVraagstukBlok — tekent 1 vraagstuk-blok in de PDF
      Layout: vraagstuk-tekst (volle breedte) → schema zone → antwoordzin
      ══════════════════════════════════════════════════════════════ */
-  function _tekenRekenrelatiesBlok(blok) {
+  function _tekenRekenrelatiesBlokOud(blok) {
     const soort=blok.config?.soort||'familie',kolommen=soort==='familie'?3:2,kolB=CW/kolommen,kadW=kolB-5,kadH=soort==='familie'?58:soort==='rooster'?57:62;checkRuimte(ZINRUIMTE+kadH+8);doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(40,60,80);doc.text(blok.opdrachtzin||'Los op.',ML,y+4);y+=9;blok.oefeningen.forEach((o,i)=>{if(i>0&&i%kolommen===0){y+=kadH+6;if(y+kadH>PH-MB)nieuweBladzijde();}const x=ML+(i%kolommen)*kolB+2;doc.setDrawColor(170,195,220);doc.setFillColor(255,255,255);doc.roundedRect(x,y,kadW,kadH,2,2,'FD');if(soort==='familie'){const bw=(kadW-12)/3;o.getallen.forEach((n,j)=>{doc.rect(x+6+j*bw,y+5,bw,9);doc.setFont('helvetica','normal');doc.setFontSize(11);doc.setTextColor(30,30,40);doc.text(String(n),x+6+j*bw+bw/2,y+11,{align:'center'});});o.oplossingen.forEach((s,j)=>{const ly=y+24+j*8;doc.setDrawColor(175,195,215);doc.line(x+6,ly,x+kadW-6,ly);if(_metAntwoorden){doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(0,112,178);doc.text(s,x+7,ly-1);}});}else if(soort==='rooster'){const cell=Math.min(12,(kadW-8)/4),tx=x+(kadW-cell*4)/2,ty=y+5,teken=o.bewerking==='aftrekken'?'-':'+';for(let r=0;r<4;r++)for(let c=0;c<4;c++){doc.setFillColor(r===0||c===0?(r===0&&c===0?255:253):255,r===0||c===0?232:255,r===0||c===0?216:255);doc.setDrawColor(150,175,195);doc.rect(tx+c*cell,ty+r*cell,cell,cell,'FD');let v=r===0?(c===0?teken:o.kolommen[c-1]):c===0?o.rijen[r-1]:o.waarden[r-1][c-1];if((r===0||c===0)||_metAntwoorden){doc.setFont('helvetica',r&&c?'bold':'normal');doc.setFontSize(10);doc.setTextColor(r&&c?0:35,r&&c?112:35,r&&c?178:35);doc.text(String(v),tx+c*cell+cell/2,ty+r*cell+cell*.65,{align:'center'});}}}else{doc.setFontSize(9);doc.setTextColor(35,35,45);doc.text(o.bank.join('   '),x+kadW/2,y+8,{align:'center'});const teken=o.bewerking==='aftrekken'?'-':'+';o.vergelijkingen.forEach((v,j)=>{const bx=x+6+(j%2)*(kadW/2-4),by=y+17+Math.floor(j/2)*19,bw=kadW/2-8;doc.setDrawColor(160,180,200);doc.rect(bx,by,bw,15);[v.waarden[0],teken,v.waarden[1],'=',v.waarden[2]].forEach((p,k)=>{const px=bx+3+k*(bw-6)/5+(bw-6)/10,isLeeg=(k===0&&v.leeg===0)||(k===2&&v.leeg===1)||(k===4&&v.leeg===2);if(isLeeg){doc.line(px-4,by+11,px+4,by+11);if(_metAntwoorden){doc.setTextColor(0,112,178);doc.setFont('helvetica','bold');doc.text(String(p),px,by+9,{align:'center'});}}else{doc.setTextColor(35,35,45);doc.setFont('helvetica','normal');doc.text(String(p),px,by+9,{align:'center'});}});});}});y+=kadH+NABLOK;}
+
+  function _tekenRekenrelatiesBlok(blok) {
+    const soort=blok.config?.soort||'familie', kolommen=soort==='familie'?3:2, kolB=CW/kolommen, kadW=kolB-5, kadH=soort==='familie'?62:soort==='rooster'?62:76;
+    checkRuimte(ZINRUIMTE+kadH+8); doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(40,60,80);doc.text(blok.opdrachtzin||'Los op.',ML,y+4);y+=9;
+    blok.oefeningen.forEach((o,i)=>{
+      if(i>0&&i%kolommen===0){y+=kadH+6;if(y+kadH>PH-MB)nieuweBladzijde();}
+      const x=ML+(i%kolommen)*kolB+2;doc.setDrawColor(170,195,220);doc.setFillColor(255,255,255);if(soort==='familie'){if(i%3<2)doc.line(x+kadW+2.5,y+3,x+kadW+2.5,y+kadH-3);}else doc.roundedRect(x,y,kadW,kadH,2,2,'FD');
+      if(soort==='familie'){
+        const bw=(kadW-12)/3;
+        o.getallen.forEach((n,j)=>{doc.rect(x+6+j*bw,y+5,bw,11);doc.setFont('helvetica','normal');doc.setFontSize(11);doc.setTextColor(30,30,40);doc.text(String(n),x+6+j*bw+bw/2,y+12,{align:'center'});});
+        o.oplossingen.forEach((s,j)=>{const ly=y+29+j*8;doc.setDrawColor(175,195,215);doc.line(x+6,ly,x+kadW-6,ly);if(_metAntwoorden){doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(0,112,178);doc.text(s,x+7,ly-1);}});
+      }else if(soort==='rooster'){
+        const cell=Math.min(18,(kadW-8)/4),tx=x+(kadW-cell*4)/2,ty=y+7,teken=o.bewerking==='aftrekken'?'-':'+';
+        for(let r=0;r<4;r++)for(let c=0;c<4;c++){doc.setFillColor(r===0||c===0?(r===0&&c===0?255:253):255,r===0||c===0?232:255,r===0||c===0?216:255);doc.setDrawColor(150,175,195);doc.rect(tx+c*cell,ty+r*cell,cell,cell,'FD');const v=r===0?(c===0?'':o.kolommen[c-1]):c===0?o.rijen[r-1]:o.waarden[r-1][c-1];if(v!==''&&((r===0||c===0)||_metAntwoorden)){doc.setFont('helvetica',r&&c?'bold':'normal');doc.setFontSize(10);doc.setTextColor(r&&c?0:35,r&&c?112:35,r&&c?178:35);doc.text(String(v),tx+c*cell+cell/2,ty+r*cell+cell*.65,{align:'center'});}}
+        doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(35,35,45);doc.text(teken,tx+cell*.28,ty+cell*.78,{align:'center'});
+        doc.setDrawColor(235,105,55);doc.setLineWidth(.55);const sx=tx+cell*.32,sy=ty+cell*.7,ex=tx+cell*.82,ey=ty+cell*.2;doc.lines([[0,-cell*.22,cell*.2,-cell*.5,cell*.5,-cell*.5]],sx,sy);doc.line(ex,ey,ex-cell*.12,ey+.5);doc.line(ex,ey,ex-.5,ey+cell*.12);doc.setLineWidth(.2);
+      }else{
+        doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(35,35,45);
+        const bankW=Math.min(10,(kadW-12)/Math.max(1,o.bank.length)),bankX=x+(kadW-bankW*o.bank.length)/2;
+        o.bank.forEach((n,j)=>{doc.roundedRect(bankX+j*bankW,y+5,bankW-1,8,1,1);doc.text(String(n),bankX+j*bankW+(bankW-1)/2,y+10.5,{align:'center'});});
+        const cw=[14,7,14,7,14],rh=[9,7,9,7,9],fw=cw.reduce((a,b)=>a+b,0),fh=rh.reduce((a,b)=>a+b,0),fx=x+(kadW-fw)/2,fy=y+19;
+        const cx=n=>fx+cw.slice(0,n).reduce((a,b)=>a+b,0),cy=n=>fy+rh.slice(0,n).reduce((a,b)=>a+b,0);
+        const teken=o.bewerking==='aftrekken'?'-':'+',leeg=new Set(o.legeSleutels||[]);
+        const vak=(key,col,row)=>{doc.setDrawColor(150,175,195);doc.rect(cx(col),cy(row),cw[col],rh[row]);if(!leeg.has(key)||_metAntwoorden){doc.setFont('helvetica',leeg.has(key)?'bold':'normal');doc.setTextColor(leeg.has(key)?0:35,leeg.has(key)?112:35,leeg.has(key)?178:45);doc.text(String(o.cellen[key]),cx(col)+cw[col]/2,cy(row)+rh[row]*.68,{align:'center'});}};
+        const sym=(s,col,row)=>{doc.setDrawColor(150,175,195);doc.rect(cx(col),cy(row),cw[col],rh[row]);doc.setFont('helvetica','bold');doc.setTextColor(35,35,45);doc.text(s,cx(col)+cw[col]/2,cy(row)+rh[row]*.68,{align:'center'});};
+        vak('tl',0,0);sym(teken,1,0);vak('boven',2,0);sym('=',3,0);vak('tr',4,0);
+        sym(teken,0,1);vak('links',0,2);sym('=',0,3);vak('bl',0,4);
+        sym(teken,4,1);vak('rechts',4,2);sym('=',4,3);vak('br',4,4);
+        sym(teken,1,4);vak('onder',2,4);sym('=',3,4);
+      }
+    });
+    y+=kadH+NABLOK;
+  }
 
   function _tekenVraagstukBlok(blok) {
     const inst = blok.inst || blok.config || {};

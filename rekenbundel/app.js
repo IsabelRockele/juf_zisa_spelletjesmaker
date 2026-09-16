@@ -2419,6 +2419,7 @@ function _getSplitsConfig() {
     document.querySelectorAll(`[name="${naam}"]`).forEach(r => r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
     const radio = el.querySelector('input'); if (radio) radio.checked = true;
+    if (naam === 'rr-soort') { const aantal=document.getElementById('rr-aantal'); if(aantal) aantal.value=waarde==='familie'?'6':'2'; }
     _updateRelatieUI();
   }
   function _updateRelatieUI() {
@@ -2455,8 +2456,8 @@ function _getSplitsConfig() {
     }
     return _rrFamilie(niveau,'beide');
   }
-  function _rrRooster(niveau, brug, keuze) {
-    const bewerking = keuze === 'gemengd' ? (Math.random()<.5?'optellen':'aftrekken') : keuze;
+  function _rrRooster(niveau, brug, keuze, index=0) {
+    const bewerking = keuze === 'gemengd' ? (index%2===0?'optellen':'aftrekken') : keuze;
     for (let p=0;p<900;p++) {
       const kolommen=Array.from({length:3},()=>_rrRnd(1,Math.max(2,Math.floor(niveau*.45))));
       const rijen=Array.from({length:3},()=>bewerking==='optellen'?_rrRnd(1,niveau-Math.max(...kolommen)):_rrRnd(Math.max(...kolommen),niveau));
@@ -2469,9 +2470,20 @@ function _getSplitsConfig() {
     return _rrRooster(niveau,'beide',bewerking);
   }
   function _rrKader(niveau, keuze) {
-    const bewerking=keuze==='gemengd'?(Math.random()<.5?'optellen':'aftrekken'):keuze;
-    const vergelijkingen=Array.from({length:4},()=>{let a,b,c;if(bewerking==='optellen'){a=_rrRnd(1,Math.max(2,Math.floor(niveau*.7)));b=_rrRnd(1,Math.max(1,niveau-a));c=a+b;}else{a=_rrRnd(2,niveau);b=_rrRnd(1,a);c=a-b;}return{waarden:[a,b,c],leeg:_rrRnd(0,2)};});
-    return {bewerking,bank:vergelijkingen.map(v=>v.waarden[v.leeg]),vergelijkingen};
+    const bewerking=keuze==='aftrekken'?'aftrekken':'optellen';
+    let cellen, legeSleutels;
+    if(bewerking==='optellen'){
+      const tl=_rrRnd(1,Math.max(2,Math.floor(niveau*.35))), boven=_rrRnd(1,Math.max(1,Math.floor(niveau*.28))), links=_rrRnd(1,Math.max(1,Math.floor(niveau*.28)));
+      const tr=tl+boven, bl=tl+links, br=_rrRnd(Math.max(tr,bl)+1,niveau);
+      cellen={tl,boven,tr,links,bl,rechts:br-tr,br,onder:br-bl};
+      legeSleutels=['boven','links','bl','rechts','br','onder'];
+    }else{
+      const tl=_rrRnd(Math.max(6,Math.ceil(niveau*.6)),niveau), boven=_rrRnd(1,Math.max(1,Math.floor(tl*.35))), links=_rrRnd(1,Math.max(1,Math.floor(tl*.35)));
+      const tr=tl-boven, bl=tl-links, br=_rrRnd(1,Math.max(1,Math.min(tr,bl)-1));
+      cellen={tl,boven,tr,links,bl,rechts:tr-br,br,onder:bl-br};
+      legeSleutels=['boven','tr','bl','br'];
+    }
+    return {bewerking,cellen,legeSleutels,bank:legeSleutels.map(k=>cellen[k]).sort(()=>Math.random()-.5)};
   }
   function voegRelatieBlokToe() {
     const soort=document.querySelector('[name="rr-soort"]:checked')?.value||'familie';
@@ -2479,8 +2491,8 @@ function _getSplitsConfig() {
     const brug=soort==='kader'?'beide':(document.querySelector('[name="rr-brug"]:checked')?.value||'zonder');
     const roosterBewerking=document.querySelector('[name="rr-bewerking"]:checked')?.value||'optellen';
     const aantal=Math.max(1,Math.min(12,Number(document.getElementById('rr-aantal')?.value||6)));
-    const oefeningen=Array.from({length:aantal},()=>soort==='familie'?_rrFamilie(niveau,brug):soort==='kader'?_rrKader(niveau,roosterBewerking):_rrRooster(niveau,brug,roosterBewerking));
-    bundelData.push({id:`blok-rekenrelaties-${Date.now()}`,bewerking:'rekenrelaties',niveau,brug,opdrachtzin:soort==='familie'?'Schrijf de vier bewerkingen.':'Los op.',hulpmiddelen:[],oefeningen,config:{soort,roosterBewerking}});
+    const oefeningen=Array.from({length:aantal},(_,i)=>soort==='familie'?_rrFamilie(niveau,brug):soort==='kader'?_rrKader(niveau,roosterBewerking):_rrRooster(niveau,brug,roosterBewerking,i));
+    bundelData.push({id:`blok-rekenrelaties-${Date.now()}`,bewerking:'rekenrelaties',niveau,brug,opdrachtzin:soort==='familie'?'Schrijf alle bewerkingen met de 3 getallen.':'Los op.',hulpmiddelen:[],oefeningen,config:{soort,roosterBewerking}});
     Preview.render(bundelData); toonToast('✓ Rekenrelaties toegevoegd');
   }
 

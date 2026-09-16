@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bundel bewerkingen proberen — Spelgenerator van juf Zisa</title>
-  <link rel="stylesheet" href="style.css?v=124">
+  <link rel="stylesheet" href="style.css?v=125">
   <link rel="stylesheet" href="vraagstukken.css?v=4">
   <link rel="stylesheet" href="rekentaal.css?v=2">
   <link rel="stylesheet" href="ontdek-pilot.css?v=9">
@@ -1805,9 +1805,9 @@
         <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-niveau','1000',this)"><input type="radio" name="rr-niveau" value="1000">Tot 1000</label>
       </div></div>
       <div class="config-kaart rr-rooster-bewerking" style="display:none"><div class="kaart-titel"><div class="icon">➕➖</div>Bewerking</div><div class="radio-groep">
-        <label class="radio-chip geselecteerd" onclick="App.selecteerRelatieRadio('rr-bewerking','optellen',this)"><input type="radio" name="rr-bewerking" value="optellen" checked>Optellen</label>
-        <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-bewerking','aftrekken',this)"><input type="radio" name="rr-bewerking" value="aftrekken">Aftrekken</label>
-        <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-bewerking','gemengd',this)"><input type="radio" name="rr-bewerking" value="gemengd">Gemengd</label>
+        <label class="radio-chip geselecteerd" onclick="App.selecteerRelatieRadio('rr-bewerking','optellen',this)"><input type="radio" name="rr-bewerking" value="optellen" checked>2 × optellen</label>
+        <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-bewerking','aftrekken',this)"><input type="radio" name="rr-bewerking" value="aftrekken">2 × aftrekken</label>
+        <label class="radio-chip" onclick="App.selecteerRelatieRadio('rr-bewerking','gemengd',this)"><input type="radio" name="rr-bewerking" value="gemengd">1 × + en 1 × −</label>
       </div></div>
       <div class="config-kaart rr-brug-kaart"><div class="kaart-titel"><div class="icon">🌉</div>Brug</div><div class="radio-groep">
         <label class="radio-chip geselecteerd" onclick="App.selecteerRelatieRadio('rr-brug','zonder',this)"><input type="radio" name="rr-brug" value="zonder" checked>Zonder brug</label>
@@ -2373,13 +2373,13 @@
 <script src="modules/percentages.js?v=1"></script>
 <script src="modules/kommagetallen.js?v=3"></script>
 <script src="generator.js?v=101"></script>
-<script src="preview.js?v=70"></script>
-<script src="pdf-engine.js?v=ontdek10"></script>
+<script src="preview.js?v=71"></script>
+<script src="pdf-engine.js?v=ontdek11"></script>
 <!-- AI-vraagstukken worden bewust niet geladen in de openbare Ontdek-versie. -->
 
 <script src="modules/rekentaal.js?v=15"></script>
 
-<script src="app.js?v=ontdek12"></script>
+<script src="app.js?v=ontdek13"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {

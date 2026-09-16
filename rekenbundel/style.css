@@ -3799,22 +3799,33 @@ body.pdf-opname .komma-h-schijfjes{min-height:275px;padding:24px 32px;gap:24px}
 body.pdf-opname .komma-h-plaats-rij>span{min-height:84px;padding:8px;gap:4px}
 body.pdf-opname .komma-h-plaats-rij .komma-schijf{width:28px;height:28px;font-size:10px}
 body.pdf-opname .komma-h-schijf-som{font-size:27px}
-+
 /* Rekenrelaties */
-.rr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.rr-grid.rr-rooster,.rr-grid.rr-kader{grid-template-columns:repeat(2,minmax(0,1fr))}
-.rr-familie,.rr-rooster,.rr-kader{position:relative;padding:14px;min-height:180px}
-.rr-getallen{display:grid;grid-template-columns:repeat(3,1fr);margin:0 18px 24px}
-.rr-getallen span,.rr-kader-bank span{border:1px solid #8d99a5;text-align:center;padding:7px 3px;background:#fff}
-.rr-familie-lijnen{display:flex;flex-direction:column;gap:13px}
-.rr-schrijfregel{height:20px;border-bottom:1px solid #b8c8d8;color:#0876b9;font-weight:700;padding-left:3px}
-.rr-rooster table{border-collapse:collapse;width:100%;table-layout:fixed;margin-top:5px}
-.rr-rooster th,.rr-rooster td{border:1px solid #9eb6c8;height:38px;text-align:center}
-.rr-rooster th{background:#fde8d8;font-weight:600}.rr-rooster .rr-hoek{background:#fff;font-size:20px}
-.rr-rooster td span{display:block;min-height:22px;border-bottom:1px solid #b8c8d8;margin:0 7px;color:#0876b9;font-weight:700}
-.rr-kader-bank{display:flex;gap:7px;justify-content:center;margin-bottom:18px}
-.rr-kader-bank span{border-radius:7px;min-width:30px}
-.rr-kader-frame{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #9eb6c8}
-.rr-kader-som{display:grid;grid-template-columns:1fr 24px 1fr 24px 1fr;align-items:center;min-height:48px;border:1px solid #c4d0da;text-align:center}
-.rr-kader-som span{padding:5px}.rr-kader-vak{color:#0876b9;font-weight:700;border-bottom:1px solid #9eb6c8;min-height:20px;margin:0 3px}
+.rr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.rr-grid.rr-rooster,.rr-grid.rr-kader{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.oefening-item.rr-familie,.oefening-item.rr-rooster,.oefening-item.rr-kader{display:block;position:relative;padding:14px;min-height:0}
+.oefening-item.rr-familie{min-height:255px;border:0;border-radius:0;background:transparent;padding:10px 18px 18px}
+.oefening-item.rr-familie:not(:nth-child(3n)){border-right:2px solid #6fa8cf}
+.rr-getallen{display:grid;grid-template-columns:repeat(3,minmax(58px,1fr));max-width:270px;margin:0 auto 31px}
+.rr-getallen span,.rr-kader-bank span{border:1px solid #8d99a5;text-align:center;padding:9px 8px;background:#fff;font-size:18px}
+.rr-familie-lijnen{display:flex;flex-direction:column;gap:20px}
+.rr-schrijfregel{height:27px;border-bottom:1px solid #b8c8d8;color:#0876b9;font-weight:700;padding:0 4px}
+.rr-rooster{padding:13px 18px}
+.rr-rooster table{border-collapse:collapse;width:100%;max-width:440px;table-layout:fixed;margin:4px auto}
+.rr-rooster th,.rr-rooster td{border:1px solid #9eb6c8;height:42px;text-align:center}
+.rr-rooster th{background:#fde8d8;font-weight:600}
+.rr-rooster .rr-hoek{position:relative;background:#fff}
+.rr-rooster .rr-hoek::before{content:"";position:absolute;right:8px;top:8px;width:32%;height:60%;border-top:2px solid #ef6c35;border-left:2px solid #ef6c35;border-radius:95% 0 0 0}
+.rr-rooster .rr-hoek::after{content:"";position:absolute;right:5px;top:4px;width:8px;height:8px;border-top:2px solid #ef6c35;border-right:2px solid #ef6c35;transform:rotate(24deg)}
+.rr-rooster .rr-hoek>span{position:absolute;left:29%;bottom:8px;font-size:20px;line-height:1}
+.rr-rooster td span{display:block;min-height:24px;border-bottom:1px solid #b8c8d8;margin:0 7px;color:#0876b9;font-weight:700}
+.rr-kader{padding:13px 18px 18px}
+.rr-kader-bank{display:flex;gap:7px;justify-content:center;margin-bottom:17px}
+.rr-kader-bank span{border-radius:7px;min-width:31px;padding:5px 7px;font-size:15px}
+.rr-kader-frame{display:grid;grid-template-columns:54px 28px 54px 28px 54px;grid-template-rows:38px 27px 38px 27px 38px;justify-content:center;align-items:stretch}
+.rr-kader-frame>*{display:flex;align-items:center;justify-content:center;border:1px solid #9eb6c8;margin:-.5px;font-size:16px;background:#fff}
+.rr-k-tl{grid-area:1/1}.rr-k-op-boven{grid-area:1/2}.rr-k-boven{grid-area:1/3}.rr-k-eq-boven{grid-area:1/4}.rr-k-tr{grid-area:1/5}
+.rr-k-op-links{grid-area:2/1}.rr-k-links{grid-area:3/1}.rr-k-eq-links{grid-area:4/1}.rr-k-bl{grid-area:5/1}
+.rr-k-op-rechts{grid-area:2/5}.rr-k-rechts{grid-area:3/5}.rr-k-eq-rechts{grid-area:4/5}.rr-k-br{grid-area:5/5}
+.rr-k-op-onder{grid-area:5/2}.rr-k-onder{grid-area:5/3}.rr-k-eq-onder{grid-area:5/4}
+.rr-kader-vak{color:#0876b9;font-weight:700}
 @media(max-width:900px){.rr-grid,.rr-grid.rr-rooster,.rr-grid.rr-kader{grid-template-columns:1fr}}
