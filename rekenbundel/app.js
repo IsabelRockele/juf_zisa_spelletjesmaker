@@ -2419,7 +2419,7 @@ function _getSplitsConfig() {
     document.querySelectorAll(`[name="${naam}"]`).forEach(r => r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
     const radio = el.querySelector('input'); if (radio) radio.checked = true;
-    if (naam === 'rr-soort') { const aantal=document.getElementById('rr-aantal'); if(aantal) aantal.value=waarde==='familie'?'6':waarde==='kader'?'3':'2'; }
+    if (naam === 'rr-soort') { const aantal=document.getElementById('rr-aantal'); if(aantal) aantal.value=waarde==='familie'?'6':'2'; }
     _updateRelatieUI();
   }
   function _updateRelatieUI() {
