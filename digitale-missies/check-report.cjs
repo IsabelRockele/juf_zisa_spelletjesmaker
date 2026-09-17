@@ -1,0 +1,48 @@
+const {chromium}=require('C:/Users/isabe/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const source=vm.createContext({});vm.runInContext(fs.readFileSync(__dirname+'/curriculum-source.js','utf8')+'\n'+fs.readFileSync(__dirname+'/report-data.js','utf8'),source);
+for(const age of ['6-7','7-8'])for(const count of [3,4]){
+ const data=JSON.parse(vm.runInContext(`JSON.stringify({expected:curriculumSource.filter(g=>g.ages.includes('${age}')).map(g=>g.code).sort(),actual:[...new Set(Array.from({length:${count}},(_,i)=>proposedReportGoals('${age}',${count},i+1)).flat().flatMap(g=>g.codes))].sort()})`,source));
+ assert.deepEqual(data.actual,data.expected,age+'/'+count+' full source coverage');
+}
+(async()=>{
+ const browser=await chromium.launch({headless:true,channel:'msedge'}),context=await browser.newContext({viewport:{width:1360,height:1000}}),page=await context.newPage();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ await page.goto('http://127.0.0.1:8765/digitale-missies/rapport.html');
+ assert.equal(await page.locator('[data-row]').count(),5);
+ assert.equal(await page.locator('#reportPrint').isDisabled(),true);
+ assert.equal(await page.evaluate(()=>localStorage.getItem('zisa-report-forms-v1')),null);
+ await page.locator('#pupil').fill('Testleerling <&>');await page.locator('#className').fill('1A');
+ await page.locator('[data-row="care"] input[value="green"]').check();
+ assert.equal(await page.locator('.feedback-goal').count(),1);
+ assert.equal(await page.locator('[data-kind="positive"]').isChecked(),false);
+ await page.locator('[data-feedback="care"] [data-kind="positive"]').check();
+ await page.locator('[data-feedback="care"] [data-kind="custom"]').fill('Je gaf de koptelefoon rustig door.');
+ assert.match(await page.locator('#reportPreview').innerText(),/Je gaat zorgvuldig/);
+ await page.locator('#reportPeriod').selectOption('2');assert.equal(await page.locator('[data-row="care"] input:checked').count(),0);
+ await page.locator('#reportPeriod').selectOption('1');assert.equal(await page.locator('[data-row="care"] input[value="green"]').isChecked(),true);
+ await page.locator('#reportCount').selectOption('4');assert.equal(await page.locator('#reportPeriod option').count(),4);assert.equal(await page.locator('[data-row="care"] input:checked').count(),0);
+ await page.locator('#reportAge').selectOption('7-8');await page.locator('#reportPeriod').selectOption('2');assert.equal(await page.locator('[data-row="filetype"]').count(),1);
+ await page.locator('#reportAge').selectOption('6-7');assert.equal(await page.locator('[data-row="filetype"]').count(),0);
+ await page.locator('#reportCount').selectOption('3');await page.locator('#reportPeriod').selectOption('1');
+ await page.locator('#observationRows').screenshot({path:'.tmp-goals/ict-report-table.png'});
+ const popupPromise=context.waitForEvent('page');await page.locator('#reportPrint').click();const printed=await popupPromise;await printed.waitForLoadState();
+ assert.equal(await printed.locator('.report-preview-item').count(),1);assert.match(await printed.locator('body').innerText(),/Testleerling <&>/);assert.match(await printed.locator('body').innerText(),/koptelefoon rustig door/);assert.doesNotMatch(await printed.locator('body').innerText(),/Oefen om de iPad rustig/);
+ await printed.emulateMedia({media:'print'});await printed.screenshot({path:'.tmp-goals/ict-report-print.png',fullPage:true});await printed.close();
+ const blankPromise=context.waitForEvent('page');await page.locator('#blankPrint').click();const blank=await blankPromise;await blank.waitForLoadState();
+ assert.equal(await blank.locator('tbody tr').count(),5);assert.doesNotMatch(await blank.locator('body').innerText(),/Testleerling|koptelefoon rustig door/);assert.equal(await blank.locator('.feedback-choice').count(),5);await blank.emulateMedia({media:'print'});await blank.screenshot({path:'.tmp-goals/ict-report-blank.png',fullPage:true});await blank.close();
+ await page.getByText('Formulier bewaren of later verder invullen',{exact:true}).click();await page.locator('#saveLocal').click();
+ await page.reload();await page.getByText('Formulier bewaren of later verder invullen',{exact:true}).click();await page.locator('#savedReports').selectOption({index:1});await page.locator('#loadLocal').click();assert.equal(await page.locator('#pupil').inputValue(),'Testleerling <&>');assert.equal(await page.locator('[data-row="care"] input[value="green"]').isChecked(),true);
+ await page.locator('#publicUrl').fill('http://127.0.0.1:8765/digitale-missies/');await page.locator('#makeQR').click();assert.equal(await page.locator('#qrResult svg').count(),0);
+ await page.locator('#publicUrl').fill('https://tools.jufzisa.be/digitale-missies/');await page.locator('#makeQR').click();assert.equal(await page.locator('#qrResult svg').count(),1);
+ const target=await page.locator('#qrResult a').getAttribute('href');assert(!target.includes('Testleerling'));assert(target.includes('leeftijd=6-7'));assert(target.includes('rapport=1'));
+ await page.locator('#qrResult svg').screenshot({path:'.tmp-goals/ict-report-qr.png'});
+ fs.writeFileSync('.tmp-goals/ict-report-qr-url.txt',target);
+ const pupil=await context.newPage();pupil.on('pageerror',e=>errors.push(e.message));await pupil.goto(target.replace('https://tools.jufzisa.be','http://127.0.0.1:8765'));
+ assert.equal(await pupil.locator('#teacherBtn').isVisible(),false);assert.match(await pupil.locator('#dashboardTitle').innerText(),/oefenronde 1/);assert.equal(await pupil.locator('[data-id="bestanden"]').count(),0);assert.equal(await pupil.locator('[data-id="robot"]').count(),0);
+ await pupil.locator('[data-round-goal="control"]').click();assert.equal(await pupil.locator('.ipad-assignment').count(),1);await pupil.locator('#closeMission').click();
+ await pupil.locator('[data-round-goal="care"]').click();assert.match(await pupil.locator('#taskArea').innerText(),/koptelefoon/);await pupil.close();
+ await page.locator('#reportPeriod').selectOption('2');assert.equal(await page.locator('#qrResult svg').count(),0);
+ await page.locator('#reportPeriod').selectOption('1');await page.locator('[data-clear="care"]').click();assert.equal(await page.locator('.feedback-goal').count(),0);assert.equal(await page.locator('#reportPrint').isDisabled(),true);
+ assert.deepEqual(errors,[]);console.log('Both ages / 3 and 4 periods: source coverage, rating isolation, optional saving, selected feedback, blank/filled print views, local URL rejection and child QR routing passed.');await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});

@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="practice.css">
   <link rel="stylesheet" href="screen-layout.css">
+  <link rel="stylesheet" href="curriculum.css">
 </head>
 <body>
   <header class="topbar">
@@ -55,8 +56,8 @@
   </dialog>
 
   <dialog id="teacherDialog" class="teacher-dialog">
-    <div class="dialog-bar"><div><span class="eyebrow">LEERKRACHTENOVERZICHT</span><h2>Doelen in deze lokale versie</h2></div><button id="closeTeacher" class="icon-button" aria-label="Overzicht sluiten">×</button></div>
-    <p class="teacher-intro">De voortgang wordt per leeftijd op dit toestel bewaard. Bekijk bij elk doel de doe-opdrachten en noteer je observaties. Een missiester betekent dat de route doorlopen is, niet dat een doel al beheerst is.</p>
+    <div class="dialog-bar"><div><span class="eyebrow">LEERKRACHTENOVERZICHT</span><h2>Samen oefenen en observeren</h2></div><button id="closeTeacher" class="icon-button" aria-label="Overzicht sluiten">×</button></div>
+    <p class="teacher-intro">Laat een groepje de opdrachten uitvoeren en kijk mee. Geen login of digitale registratie nodig. Bij elk doel vind je opdrachten en aandachtspunten. Een missiester betekent dat de route doorlopen is, niet dat een doel al beheerst is.</p>
     <div class="teacher-summary" id="teacherSummary" aria-live="polite"></div>
     <div id="teacherGoals" class="teacher-goals"></div>
     <button id="resetProgress" class="danger-button">Wis de voortgang op dit toestel</button>
@@ -67,6 +68,12 @@
   <script src="practice.js"></script>
   <script src="systemen.js"></script>
   <script src="work-output.js"></script>
+  <script src="curriculum-source.js"></script>
+  <script src="curriculum.js"></script>
+  <script src="real-search.js"></script>
+  <script src="teacher-cards.js"></script>
+  <script src="report-data.js"></script>
+  <script src="report-route.js"></script>
   <script>
     if (new URLSearchParams(location.search).get('van') === 'collegas') {
       const back = document.createElement('a');

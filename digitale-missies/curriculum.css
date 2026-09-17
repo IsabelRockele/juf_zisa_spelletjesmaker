@@ -1,0 +1,23 @@
+.ipad-assignment{max-width:850px;margin:auto;font-size:1.1rem;line-height:1.6}
+.ipad-assignment h3{font-size:1.65rem}.ipad-assignment li{margin:14px 0}
+.ipad-assignment details{padding:12px 0;border-top:1px solid #bdcfd7}
+.ipad-return{background:#e7f4f7;padding:16px;border-radius:12px}
+.mission-body:has(.ipad-assignment){display:block}
+.curriculum-goal{padding:20px 0;border-bottom:2px solid #c8dce4}
+.curriculum-goal h3{line-height:1.4}.curriculum-goal form{display:grid;gap:12px;background:#edf5f8;padding:16px;border-radius:12px;margin-top:12px}
+.curriculum-goal label,.observation-settings label{display:grid;gap:8px}
+.curriculum-goal textarea{min-height:80px;resize:vertical}.curriculum-goal textarea,.curriculum-goal select,.observation-settings input{font:inherit;padding:12px;border:1px solid #7295a5;border-radius:8px;max-width:100%;min-width:0}
+.curriculum-goal [data-history] p{border-left:3px solid #438399;padding:8px 12px}
+.route-work .route-code{flex-wrap:wrap;max-height:none}.route-work [data-step]{display:flex;flex-direction:column;align-items:center;min-width:48px;padding:6px}
+.route-work [data-step][aria-pressed=true]{outline:3px solid #174e6c;background:#fff0a6}.route-work [data-step].running{background:#b8e4cb}
+.route-work .arrow-pad{flex-wrap:wrap}.route-work .route-cell{position:relative;font-size:24px}.route-work .robot-token{position:absolute;inset:2px;transform:none}
+.practice-note:empty{display:none}.media-controls .device-volume{grid-column:1/-1;width:auto}
+.mission-body:has(.real-search){display:block}.mission-body:has(.real-search)>.mission-scene{display:none}.real-search{max-width:950px;margin:auto}.search-word{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#fff2b8;padding:12px;border-radius:12px}.search-word strong{font-size:1.5rem}.child-search-tools{display:grid;grid-template-columns:1fr 1fr;gap:16px}.child-search-tools article{padding:16px;border:1px solid #9dbbca;border-radius:14px;background:white}.child-search-tools .primary-button{display:block;text-align:center;padding:14px;background:#155570;color:white;text-decoration:none;border-radius:10px;margin:12px 0}.real-search li{margin:10px 0;line-height:1.5}.real-search small{font-size:.85rem}.search-reflect{padding:18px;background:#e7f4ee;border-radius:12px}@media(max-width:600px){.child-search-tools{grid-template-columns:1fr}}
+.classroom-tools{margin-top:24px;padding:18px;border:1px solid #bedce7;border-radius:16px;background:#f1f8fb}.classroom-tools label{display:flex;gap:12px;align-items:center}.classroom-tools input{width:24px;height:24px}.classroom-tools p{line-height:1.5}.optional-record{margin-top:12px}
+.report-entry{display:block;margin:18px 22px;padding:16px;text-align:center;background:#155570;color:white;text-decoration:none;border-radius:10px;font-weight:800}.round-intro{line-height:1.6}.round-targets{padding:20px;margin:24px 0;background:white;border:1px solid #bedce7;border-radius:16px}.round-targets button{min-height:48px;text-align:left;padding:12px;border:1px solid #9cbccb;border-radius:10px;background:#eff7fa;color:#173f54;font:inherit;cursor:pointer}
+.pupil-report-round #missionGrid,.pupil-report-round .progress-card,.pupil-report-round .progress-track{display:none}.round-activities{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.round-activities article{padding:18px;border:1px solid #bedce7;border-radius:16px}.round-activities img{width:90px;height:90px;object-fit:contain;float:right;margin:0 0 8px 10px}.round-activities p{font-size:1.1rem;line-height:1.5;min-height:90px}.round-activities svg{width:24px;height:24px;fill:currentColor;vertical-align:middle}.round-activities button{margin-right:8px}.round-activities button[data-round-goal]{background:#155570;color:white}@media(max-width:620px){.round-activities{grid-template-columns:1fr}}
+button,a.primary-button,summary,select{touch-action:manipulation}summary{cursor:pointer;min-height:44px;align-content:center}
+.curriculum-goal button,.ipad-assignment button,.route-work button{min-height:48px}
+input,textarea,select{font-size:max(16px,1em)}canvas{touch-action:none}
+:focus-visible{outline:3px solid #936500;outline-offset:3px}
+@media(max-width:850px){.teacher-dialog{width:96vw;max-height:94dvh}.curriculum-goal{overflow-wrap:anywhere}.route-work{padding:8px}.ipad-assignment{font-size:1rem}}

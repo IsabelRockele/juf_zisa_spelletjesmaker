@@ -109,6 +109,8 @@ function mediaRequirements(task, progress){
 }
 function renderRealMedia(task){
  const area=$('#taskArea'),progress={started:false,adjusted:false,paused:false,answered:false,resumed:false,stopped:false};
+ const deviceVolume=typeof navigator!=='undefined'&&(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1));
+ if(deviceVolume&&task.adjust)task.requiresObservation=true;
  const clip=mediaClips[task.clip],label=task.clip==='flower'?'Kijk wat er verandert':task.question&&task.clip==='glasswing'?'Een bijzondere vlinder':clip.title;
  let busy=false,resumeAt=null;
  const title={play:'Afspelen',pause:'Pauze',stop:'Stop',volumeDown:'Stiller',volumeUp:'Luider'};
@@ -133,7 +135,7 @@ function renderRealMedia(task){
   if(!progress.started){key='start';words='Tik op de driehoek. Dan begint het filmpje.';}
   else if(progress.stopped&&mediaRequirements(task,progress).every(([,done])=>done)){key='done';words='Goed gedaan! Tik op Klaar voor het volgende filmpje.';icon='done';}
   else if(video.paused&&(!progress.paused||progress.stopped)){key='restart';words='Tik op de driehoek om verder te kijken.';}
-  else if(task.adjust&&!progress.adjusted){key=task.adjust;icon=key;words=key==='volumeUp'?'Tik op de luidspreker met het plusje. Dan klinkt het luider.':'Tik op de luidspreker met het minnetje. Dan klinkt het zachter.';}
+  else if(task.adjust&&!progress.adjusted){key=task.adjust;icon=key;words=deviceVolume?'Gebruik de echte volumeknoppen van je iPad. Luister naar het verschil. Tik daarna op Ik heb het geluid aangepast.':key==='volumeUp'?'Tik op de luidspreker met het plusje. Dan klinkt het luider.':'Tik op de luidspreker met het minnetje. Dan klinkt het zachter.';}
   else if(!watchedEnough()){key='watch';words='Kijk goed. Wat verandert er? Ik zeg wanneer je mag pauzeren.';icon='watch';}
   else if((task.question||task.pausePractice)&&!progress.paused){key='pause';icon='pause';words='Tik nu op de twee streepjes. Dan staat het beeld stil.';}
   else if(task.question&&!progress.answered){key='answer';icon='answer';words='Beantwoord nu de vraag. '+task.question+' '+task.answers.map((a,i)=>(i+1)+': '+a).join('. ')+'. Tik op jouw antwoord. Je kunt elk antwoord ook beluisteren.';}
@@ -173,6 +175,17 @@ function renderRealMedia(task){
  });
  ready.onclick=()=>{if(session.answered)return;if(!mediaRequirements(task,progress).every(([,done])=>done)){note(missingHelp());area.querySelector('.practice-note').scrollIntoView({block:'nearest',behavior:'smooth'});return}video.pause();session.answered=true;session.correct++;task.goals.forEach(addHit);save();session.index++;renderTask();body.scrollTop=0;dialog.scrollTop=0;};
  const help=area.querySelector("details");help.querySelector("summary").textContent="Hulp en videobron";help.appendChild(area.querySelector(".media-exercise>small"));
+ if(deviceVolume){
+  const status=area.querySelector('.volume-status');
+  status.hidden=true;
+  area.querySelectorAll('[data-action="volumeUp"],[data-action="volumeDown"]').forEach(b=>b.hidden=true);
+  if(task.adjust){
+   const control=document.createElement('button');control.className='device-volume';control.textContent='Ik heb het geluid aangepast';
+   const hint=document.createElement('p');hint.textContent='Zet met de echte volumeknoppen het geluid '+(task.adjust==='volumeUp'?'een beetje luider.':'zachter.')+' Luister naar het verschil. Je leerkracht kijkt mee; de website kan deze knoppen niet meten.';
+   area.querySelector('.media-controls').append(control);area.querySelector('.media-controls').after(hint);
+   control.onclick=()=>{if(!progress.started||video.paused)return note('Start eerst het filmpje en pas dan het geluid aan.');progress.adjusted=true;control.disabled=true;update();note('Toon je leerkracht hoe je het volume regelt. Deze opdracht vraagt observatie.');};
+  }
+ }
  wireRead();update();cleanupPractice=()=>{alive=false;cancelGuide();video.pause();};
 }
 function fileContent(file){if(file.kind==='Beeld')return `<img class="file-picture" src="${file.src}" alt="Vlinder in een bloemenweide">`;if(file.kind==='Tekst')return `<article class="paper">${file.text}</article>`;if(file.kind==='Video')return `<video class="real-video" controls playsinline src="${file.src}"></video>`;if(file.kind==='Geluid')return `<audio controls src="${file.src}"></audio>`;return '<label>Kies de kleur van je scherm <input type="color" value="#e4f3fb"></label><div class="color-output">Jouw kleur verschijnt hier.</div>'}
