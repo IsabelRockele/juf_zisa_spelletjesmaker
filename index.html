@@ -526,6 +526,7 @@
       <a class="img-link" href="blokkenbouwsels/index.html"><img alt="Blokkenbouwsels" class="drukknop-afbeelding" src="drukknop_afbeeldingen/blokkenbouwsels.webp" loading="lazy"/><span class="img-label">Blokkenbouwsels</span></a>
       <a class="img-link" href="pentomino_studio_volledige_tool.html?teacher=1&amp;back=index.html"><img alt="Pentomino Studio" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/pentomino-studio-v2.svg" loading="lazy"/><span class="img-label">Pentomino Studio</span></a>
       <a class="img-link" href="plattegrond.html"><img alt="Plattegrond" class="drukknop-afbeelding" src="drukknop_afbeeldingen/plattegrond.webp" loading="lazy"/><span class="img-label">Plattegrond</span></a>
+      <a class="img-link" href="zisa-tekenwereld.html"><img alt="Zisa's tekenwereld" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/zisa-tekenwereld.svg" loading="lazy"/><span class="img-label">Zisa's tekenwereld</span></a>
     </div>
     <div class="section-footer">
       <div class="footer-banner" style="background:#27ae60">
@@ -771,7 +772,7 @@ window.addEventListener('load', () => {
   (()=>{
     const vernieuwd=new Set(['sudoku','zoek_de_verschillen','doolhof','slangendoolhof','hexagon','schaduw','pixelart','coderen','punttekening','blokkenbouwsels','bouwplaat','plattegrond','bingo','vieropeenrij','rad','QR','werkblad_kloklezen','kalender','timer','planbord']);
     document.querySelectorAll('img.drukknop-afbeelding').forEach(img=>{const naam=(img.getAttribute('src').split('/').pop()||'').replace(/\.webp$/,'');if(vernieuwd.has(naam))img.src=`drukknop_afbeeldingen_v3/${naam}.png`});
-    const orden={puzzels:['Sudoku','Doolhof','Zoek de verschillen','Slangendoolhof','Hexagonaal raster','Schaduw'],creatief:['Pixelart','Coderen','Punttekening','Blokkenbouwsels','Pentomino Studio','Bouwplaten','Plattegrond']};
+    const orden={puzzels:['Sudoku','Doolhof','Zoek de verschillen','Slangendoolhof','Hexagonaal raster','Schaduw'],creatief:['Pixelart','Coderen','Punttekening','Blokkenbouwsels','Pentomino Studio','Bouwplaten','Plattegrond',"Zisa's tekenwereld"]};
     Object.entries(orden).forEach(([categorie,namen])=>{const grid=document.querySelector(`#panel-${categorie} .button-grid`);if(!grid)return;const links=[...grid.querySelectorAll(':scope > a.img-link')];namen.forEach(naam=>{const link=links.find(item=>item.querySelector('.img-label')?.textContent.trim()===naam);if(link)grid.appendChild(link)})});
   })();
 </script>
