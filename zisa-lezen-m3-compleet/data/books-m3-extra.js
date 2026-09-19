@@ -44,7 +44,7 @@
       {type:"sentence",icon:"🧩",title:"Bouw de zin",q:"Zet de zin in de goede volgorde.",image:picture(loes,6),imageAlt:"Mo zit in de doos",parts:[{text:"Mo",role:"wie"},{text:"zit",role:"doet"},{text:"in de doos",role:"waar"}]},
       {type:"choice",icon:"💡",title:"Woordenschat",q:"Mo spint zacht. Wat doet hij?",image:picture(loes,10),imageAlt:"Mo ligt fijn in de doos",a:["Hij rent heel snel.","Hij maakt een zacht geluid.","Hij blaast de doos weg."],correct:1,hint:"Mo ligt fijn in de doos."},
       {type:"article",icon:"🏷️",title:"De of het?",q:"Welk lidwoord hoort bij doos?",word:"doos",correct:"de"},
-      {type:"sound",icon:"👂",title:"Klankjacht",q:"Welk woord uit de zin heeft de lange klank oo?",sentence:"De doos staat op de mat.",a:["staat","doos","mat"],correct:1,kind:"lange klank oo"},
+      {type:"choice",icon:"📖",title:"Lees en kies",context:"De doos staat op de mat.",q:"Waar staat de doos?",a:["op de mat","op het pad","in de boom"],correct:0,hint:"Lees de zin nog eens. Waar staat de doos?"},
       {type:"sequence",icon:"⏳",title:"Eerst en dan",q:"Zet de zinnen in de goede volgorde.",items:["De doos gaat heen en weer.","Loes ziet een poot.","Mo gaat uit de doos.","Mo speelt met de bol."],hint:"Denk aan het begin en het eind."},
       {type:"sentence",icon:"🧩",title:"Nog een zin",q:"Bouw de zin over Loes.",image:picture(loes,8),imageAlt:"Loes legt de bol in de doos",parts:[{text:"Loes",role:"wie"},{text:"legt",role:"doet"},{text:"de bol",role:"wat"},{text:"in de doos",role:"waar"}]},
       {type:"choice",icon:"💡",title:"Lees goed",q:"Wat ligt bij Mo in de doos?",a:["een bol wol","een pet","een peer"],correct:0,hint:"Kijk naar de prent waar je Mo goed ziet."},
@@ -56,7 +56,7 @@
       {type:"sentence",icon:"🧩",title:"Bouw de zin",q:"Zet de zin in de goede volgorde.",image:picture(rik,6),imageAlt:"Boef stopt het wiel",parts:[{text:"Boef",role:"wie"},{text:"stopt",role:"doet"},{text:"het wiel",role:"wat"}]},
       {type:"choice",icon:"💡",title:"Woordenschat",q:"Het wiel zit los. Wat is los?",image:picture(rik,5),imageAlt:"Een wiel rolt van de kar weg",a:["Het zit niet meer vast.","Het is erg zwaar.","Het is nat van de regen."],correct:0,hint:"Het wiel rolt van de kar weg."},
       {type:"article",icon:"🏷️",title:"De of het?",q:"Welk lidwoord hoort bij wiel?",word:"wiel",correct:"het"},
-      {type:"sound",icon:"👂",title:"Klankjacht",q:"Welk woord uit de zin heeft de korte klank a?",sentence:"Rik trekt de kar.",a:["Rik","kar","trekt"],correct:1,kind:"korte klank a"},
+      {type:"choice",icon:"📖",title:"Lees en kies",context:"Rik trekt de kar.",q:"Wat trekt Rik?",a:["de peer","de kar","het wiel"],correct:1,hint:"Lees de zin nog eens. Wat trekt Rik?"},
       {type:"sequence",icon:"⏳",title:"Eerst en dan",q:"Zet de zinnen in de goede volgorde.",items:["Een peer valt uit de kar.","Het wiel rolt weg.","Boef stopt het wiel.","Pa zet het wiel vast."],hint:"Wat gebeurde eerst op het pad?"},
       {type:"sentence",icon:"🧩",title:"Nog een zin",q:"Bouw de zin over Pa.",image:picture(rik,8),imageAlt:"Pa pakt een pin",parts:[{text:"Pa",role:"wie"},{text:"pakt",role:"doet"},{text:"een pin",role:"wat"}]},
       {type:"choice",icon:"💡",title:"Lees goed",q:"Wat ligt er in Riks kar?",a:["een bol","een pet","een peer"],correct:2,hint:"Lees de eerste bladzij nog eens."},
@@ -74,7 +74,7 @@
     {title:"Zoek het rijmwoord",q:"Welk woord rijmt op doos?",focus:"doos",a:["poot","kat","roos"],correct:2,good:"Juist! doos en roos rijmen."},
     {title:"Zoek het woord",q:"Welk woord maakt de zin goed? Mo zit in de ...",focus:"Mo zit in de ...",a:["doos","kar","boom"],correct:0,good:"Juist! Mo zit in de doos."},
     {title:"Lees heel goed",q:"Wat zit er in de doos?",focus:"in de doos",a:["een hond","een kat","een vis"],correct:1,good:"Juist! Mo is een kat."},
-    {title:"Luister naar het begin",q:"Welk woord begint met dezelfde klank als bol?",focus:"bol",a:["doos","poot","boom"],correct:2,good:"Juist! bol en boom beginnen met b."},
+    {title:"Korte klanken",q:"Klik in elk woord met een korte klank op die klank. Laat het woord met een lange klank staan.",shortVowels:[{word:"kat",index:1},{word:"doos",index:null},{word:"tik",index:1},{word:"bol",index:1}],good:"Goed gedaan! Je liet het woord met de lange klank staan."},
     {title:"Kies het leesteken",q:"Welk leesteken hoort achter deze vraag?",focus:"wat zit er in de doos",punctuation:true,a:["?","!","."],correct:0,good:"Juist! Dit is een vraag."}
   ];
   window.ZISA_FLUENCY_BOOKS["m3-rik-kar"]=[
@@ -82,7 +82,7 @@
     {title:"Zoek het rijmwoord",q:"Welk woord rijmt op peer?",focus:"peer",a:["weer","paar","per"],correct:0,good:"Juist! peer en weer rijmen."},
     {title:"Zoek het woord",q:"Welk woord maakt de zin goed? Pa zet het ... vast.",focus:"Pa zet het ... vast.",a:["hek","wiel","pad"],correct:1,good:"Juist! Pa zet het wiel vast."},
     {title:"Lees heel goed",q:"Wie stopt het wiel?",focus:"het wiel",a:["mam","Pa","Boef"],correct:2,good:"Juist! Boef stopt het wiel."},
-    {title:"Luister naar het begin",q:"Welk woord begint met dezelfde klank als kar?",focus:"kar",a:["kat","peer","wiel"],correct:0,good:"Juist! kar en kat beginnen met k."},
+    {title:"Korte klanken",q:"Klik in elk woord met een korte klank op die klank. Laat het woord met een lange klank staan.",shortVowels:[{word:"kar",index:1},{word:"peer",index:null},{word:"hek",index:1},{word:"pin",index:1}],good:"Goed gedaan! Je liet het woord met de lange klank staan."},
     {title:"Kies het leesteken",q:"Welk leesteken hoort bij de uitroep?",focus:"het wiel rolt weg",punctuation:true,a:["?","!","."],correct:1,good:"Juist! Rik roept dit hard."}
   ];
 })();

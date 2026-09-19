@@ -874,6 +874,26 @@ function renderFluencyPage(page,total){
       setTimeout(()=>{train.innerHTML=`<strong>${page.word}</strong>`;instruction.textContent=`Lees nu zelf: ${page.word}.`;document.querySelector("#fluencyFeedback").textContent="Knap! Je maakte het hele woord.";fluencyScore++;addFluencyNext(total)},900)
     };
     start.onclick=()=>{start.disabled=true;start.textContent="Zoem mee…";showStep()}
+  }else if(page.shortVowels){
+    const words=document.createElement("div");words.className="short-vowel-words";activity.append(words);
+    const targetCount=page.shortVowels.filter(item=>Number.isInteger(item.index)).length;
+    let solved=0;
+    page.shortVowels.forEach(({word,index})=>{
+      const row=document.createElement("div");row.className="short-vowel-word";
+      [...word].forEach((letter,letterIndex)=>{
+        const button=document.createElement("button");button.type="button";button.className="short-vowel-letter";button.textContent=letter;
+        button.setAttribute("aria-label",`Letter ${letter} in ${word}`);
+        button.onclick=()=>{
+          if(row.classList.contains("solved"))return;
+          if(letterIndex!==index){button.classList.add("wrong");document.querySelector("#fluencyFeedback").textContent=index===null?"Dit woord heeft geen korte klank. Laat het staan.":`Luister nog eens naar ${word}.`;setTimeout(()=>button.classList.remove("wrong"),650);return}
+          row.classList.add("solved");button.classList.add("correct");row.querySelectorAll(".short-vowel-letter").forEach(choice=>choice.disabled=true);
+          solved++;document.querySelector("#fluencyFeedback").textContent=solved===targetCount?page.good:`Goed! Nog ${targetCount-solved} ${targetCount-solved===1?"woord":"woorden"} met een korte klank.`;
+          if(solved===targetCount){fluencyScore++;addFluencyNext(total)}
+        };row.append(button)
+      });
+      if(hasAudioSupport())row.append(makeListenButton(word,`Beluister ${word}`));
+      words.append(row)
+    });
   }else if(page.pictures){
     const text=document.createElement("div");text.className="fluency-read main sentence-highlight";text.innerHTML=storyTextMarkup(page.text);activity.append(text);
     const listen=makeListenButton(page.text,"Lees de zin voor");listen.classList.add("fluency-listen");listen.onclick=event=>{event.stopPropagation();speak(page.text,text)};activity.append(listen);
