@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="nl">
 <head>
+<script src="../ipad-play-safety.js?v=1"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#5b43d6">
@@ -88,7 +89,7 @@
           <form class="answer-area" id="answerForm">
             <label for="answerInput">Vul het gele vak in</label>
             <div class="answer-row">
-              <input id="answerInput" type="text" inputmode="numeric" autocomplete="off" maxlength="3" aria-describedby="feedback">
+              <input id="answerInput" type="text" readonly inputmode="none" autocomplete="off" maxlength="3" aria-describedby="feedback">
               <button class="primary" id="checkButton" type="submit">Controleer ✓</button>
             </div>
             <div class="feedback" id="feedback" role="status"></div>

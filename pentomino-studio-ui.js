@@ -93,15 +93,21 @@
     if(!document.getElementById('game').classList.contains('active'))return;
     const data=FIG[$('gFig').value],d=dims(data.rows),boardCard=document.querySelector('#game>.card:nth-child(2)');
     if(innerWidth>680){
-      const help=document.querySelector('.puzzle-help'),mw=Math.max(220,boardCard.clientWidth-22),mh=Math.max(200,boardCard.clientHeight-(help?.offsetHeight||0)-58);
+      const help=document.querySelector('.puzzle-help'),mw=Math.max(180,boardCard.clientWidth-22-gPad*2),mh=Math.max(180,boardCard.clientHeight-(help?.offsetHeight||0)-58-gPad*2);
       const boardCell=Math.floor(Math.min(mw/d.w,mh/d.h));
-      gCell=Math.max(18,Math.min(innerWidth<=1100?34:40,boardCell));gSetupWithCell(data,d)
+      gCell=Math.max(18,Math.min(innerWidth<=1100?34:40,boardCell));
+      const tray=$('gTray');
+      const trayHeight=cell=>{let x=8,y=8,row=0;NAMES.forEach(n=>{const p=gState[n];if(p.placed)return;const w=(Math.max(...p.ori.map(c=>c[0]))+1)*cell,h=(Math.max(...p.ori.map(c=>c[1]))+1)*cell;if(x+w+8>tray.clientWidth){x=8;y+=row+10;row=0}x+=w+10;row=Math.max(row,h)});return y+row+12};
+      while(gCell>18&&trayHeight(gCell)>tray.clientHeight)gCell--;
+      gSetupWithCell(data,d)
     }
   }
   function gSetupWithCell(data,d){
-    gSelected=null;gOutlines=false;gHelp=0;$('gOutline').textContent='1. Toon de plaatsen van de stukken';$('gTray').innerHTML='';
+    // Resizing (rotation, Safari toolbar) must never restart a child's puzzle.
+    gCancelDrag();
     $('gameBoard').style.width=d.w*gCell+gPad*2+'px';$('gameBoard').style.height=d.h*gCell+gPad*2+'px';$('gameBg').setAttribute('width',d.w*gCell+gPad*2);$('gameBg').setAttribute('height',d.h*gCell+gPad*2);
-    gState={};NAMES.forEach(gMakePiece);gDrawBoard();gLayout();gScore();$('gMessage').className='status';$('gMessage').textContent='Tik op een stuk, draai het indien nodig en sleep het in de figuur.';
+    NAMES.forEach(n=>{const p=gState[n];p.el.innerHTML=gPieceSvg(n);if(p.placed){const x=Math.min(...p.cells.map(c=>c[0])),y=Math.min(...p.cells.map(c=>c[1]));p.el.style.left=gPad+x*gCell+'px';p.el.style.top=gPad+y*gCell+'px'}});
+    gDrawBoard();gLayout();gScore();
   }
 
   document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>{
@@ -119,6 +125,10 @@
   const originalCheck=gCheck;
   gCheck=function(){originalCheck();if(NAMES.every(n=>gState[n].placed)){$('gMessage').innerHTML='🎉 <b>Fantastisch!</b> Helemaal klaar. <button type="button" id="nextPuzzle">Kies een nieuwe puzzel</button>';document.getElementById('nextPuzzle').onclick=()=>showOnly('choices')}gScore()};
   addEventListener('keydown',e=>{if(!document.body.classList.contains('game-mode'))return;if(e.key.toLowerCase()==='r')$('gRotate').click();if(e.key.toLowerCase()==='s')$('gFlip').click();if(e.key==='Escape')showOnly('choices')});
+  // Also fit after the explicit restart/figure controls, not only on opening.
+  const originalSetup=gSetup;
+  gSetup=function(){originalSetup();fitGame()};
+  $('gNew').onclick=gSetup;$('gFig').onchange=gSetup;
   let resizeTimer;addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(fitGame,120)});
   const requestedFigure=params.get('figure');
   if(isPlay&&requestedFigure&&FIG[requestedFigure]&&selectableFigures.includes(requestedFigure))openGame(requestedFigure);

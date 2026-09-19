@@ -23,3 +23,4 @@ body.game-mode{overflow:hidden}body.game-mode #toolHeader{padding:7px 12px}body.
 @media(min-width:681px) and (max-width:1100px){.game-workspace.active{grid-template-columns:minmax(0,64fr) minmax(300px,36fr)}.puzzle-help-actions button,.game-workspace .actions button{min-height:54px}.puzzle-help>span{font-size:.84rem}}
 @media(max-height:700px) and (min-width:681px){#toolHeader .small{display:none}#toolHeader{padding:7px 12px}#toolHeader h1{font-size:19px}.studio-nav{height:38px;margin-bottom:6px}.game-workspace.active{height:calc(100dvh - 112px)}.game-workspace #gScore{top:54px}.game-workspace>.card:first-child h2,.game-workspace>.card:first-child .small{display:none}.game-workspace .actions button{min-height:36px;font-size:13px}.game-workspace .status{font-size:12px}}
 @media print{.studio-nav,.studio-start,.choice-screen{display:none!important}}
+.game-workspace .tray{touch-action:pan-y}

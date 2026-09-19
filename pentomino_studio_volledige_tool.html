@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="nl">
 <head>
+<script src="spelen/games/ipad-play-safety.js?v=1"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Pentomino Studio</title>
 <link rel="icon" href="start_afbeeldingen/Zisa_spelgenerator-32.png" sizes="32x32" type="image/png">
-<link rel="stylesheet" href="pentomino-studio.css">
+<link rel="stylesheet" href="pentomino-studio.css?v=20260919">
 <style>
 *{box-sizing:border-box}
 :root{--bg:#f5f6f8;--card:#fff;--line:#d8d8d8;--text:#222;--muted:#666}
@@ -314,8 +315,15 @@ function gMakePiece(n,i){
  gState[n]={ori:norm(BASE[n]),placed:false,cells:[],color:COLORS[i],el:e};e.innerHTML=gPieceSvg(n);
 }
 function gDown(e){
+ if(!e.isPrimary||gDrag||e.button!==0)return;
  let n=e.currentTarget.dataset.n;gChoose(n);let r=e.currentTarget.getBoundingClientRect();gDrag={n,dx:e.clientX-r.left,dy:e.clientY-r.top};
  e.currentTarget.setPointerCapture(e.pointerId);e.currentTarget.onpointermove=gMove;e.currentTarget.onpointerup=gUp;
+ e.currentTarget.onpointercancel=gCancelDrag;e.currentTarget.onlostpointercapture=gCancelDrag;
+}
+function gCancelDrag(){
+ if(!gDrag)return;const p=gState[gDrag.n];gDrag=null;p.el.onpointermove=null;p.el.onpointerup=null;
+ if(p.placed){const x=Math.min(...p.cells.map(c=>c[0])),y=Math.min(...p.cells.map(c=>c[1]));p.el.style.cssText+=`;position:absolute;left:${gPad+x*gCell}px;top:${gPad+y*gCell}px;z-index:5`}
+ else gLayout();
 }
 function gMove(e){if(!gDrag)return;let el=gState[gDrag.n].el;el.style.position='fixed';el.style.zIndex=99;el.style.left=e.clientX-gDrag.dx+'px';el.style.top=e.clientY-gDrag.dy+'px'}
 function gUp(e){
@@ -328,6 +336,7 @@ function gUp(e){
 function gResetOne(n,layout=true){let p=gState[n];p.placed=false;p.cells=[];$('gTray').appendChild(p.el);if(layout)gLayout()}
 function gRefresh(){if(!gSelected)return;gState[gSelected].el.innerHTML=gPieceSvg(gSelected);if(!gState[gSelected].placed)gLayout()}
 function gSetup(){
+ gCancelDrag();$('gameBoard').querySelectorAll('.gamePiece').forEach(el=>el.remove());
  gSelected=null;gOutlines=false;gHelp=0;$('gOutline').textContent='1. Toon de plaatsen van de stukken';$('gTray').innerHTML='';
  let data=FIG[$('gFig').value],d=dims(data.rows),mw=Math.min(innerWidth-45,620),mh=Math.min(innerHeight*.4,450);
  gCell=Math.max(18,Math.floor(Math.min(mw/d.w,mh/d.h)));
@@ -349,6 +358,6 @@ document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>{document.querySe
 
 renderMaker();gSetup();
 </script>
-<script src="pentomino-studio-ui.js?v=20260810-2"></script>
+<script src="pentomino-studio-ui.js?v=20260919-1"></script>
 </body>
 </html>
