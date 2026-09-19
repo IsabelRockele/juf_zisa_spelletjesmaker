@@ -1,5 +1,11 @@
 # Eigen afbeeldingen voor de meetkundebundel
 
+## Extra fotobladen
+
+`voorwerpen-2.png` en `voorwerpen-3.png` zijn via de ingebouwde imagegen-tool gemaakt (1536 × 1024, vier kolommen en drie rijen). De oefeningen kiezen drie afzonderlijke sets; binnen één oefentype komen dezelfde foto's niet opnieuw terug bij toevoegen. Het uitlegkader is eenmalig.
+
+Set 2 bevat bord, geodriehoek, tegel, boek, knikker, houten kegel, schoenendoos, houten piramide, kaars, houten kubus, onderzetter en groen vierkant papier. Set 3 bevat pizza, driehoekige boterham, servet, krijtbord, bal, oranje kegel, geschenkdoos, glazen piramide, blik, ijsblok, munt en paars vierkant papier. De kegel in set 3 is met imagegen gecorrigeerd naar een scherpe top zonder gat of uitstekende voet.
+
 Beide PNG-bladen zijn met de ingebouwde imagegen-tool gemaakt. De oefeningen tonen individuele cellen uit de originele bestanden met SVG-vensters; de PNG's zijn niet achteraf bijgesneden of vervormd. Beide bladen zijn 1536 × 1024 pixels.
 
 - `voorwerpen.png`: twaalf levensechte voorwerpen op wit, vier kolommen en drie rijen.
