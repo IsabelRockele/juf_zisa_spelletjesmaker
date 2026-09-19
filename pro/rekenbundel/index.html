@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — Juf Zisa PRO</title>
-  <link rel="stylesheet" href="style.css?v=128">
+  <link rel="stylesheet" href="style.css?v=129">
   <link rel="stylesheet" href="vraagstukken.css?v=4">
   <link rel="stylesheet" href="rekentaal.css?v=2">
   <style>
@@ -342,6 +342,23 @@
       </div>
 
       <!-- Hulpmiddelen (enkel bij met brug) -->
+      <div class="config-kaart" id="kaart-tot100-hulp" style="display:none">
+        <div class="kaart-titel">Hulpmiddelen bij TE + TE / TE − TE</div>
+        <div class="form-rij">
+          <label for="tot100-hulp">Kies de weergave</label>
+          <select id="tot100-hulp" style="width:100%" onchange="document.getElementById('tot100-voorbeeld-rij').style.display=this.value==='vakje'?'none':'block'">
+            <option value="vakje">Enkel oefening met invulvakje</option>
+            <option value="mab">MAB-materiaal + 3 schrijflijnen</option>
+            <option value="sprongen">Ingevulde sprongen + 3 schrijflijnen</option>
+            <option value="sprongen-leeg">Sprongen om in te vullen + 3 schrijflijnen</option>
+            <option value="lijnen">Enkel oefening met 3 schrijflijnen</option>
+          </select>
+        </div>
+        <label id="tot100-voorbeeld-rij" style="display:none;margin-top:10px">
+          <input type="checkbox" id="tot100-voorbeeld"> Eerste oefening als uitgewerkt voorbeeld
+        </label>
+      </div>
+
       <div class="config-kaart" id="kaart-hulpmiddelen" style="display:none">
         <div class="kaart-titel">
           <div class="icon">🛠️</div>
@@ -2360,14 +2377,15 @@
 <script src="modules/breuken.js?v=5"></script>
 <script src="modules/percentages.js?v=1"></script>
 <script src="modules/kommagetallen.js?v=3"></script>
-<script src="generator.js?v=101"></script>
-<script src="preview.js?v=71"></script>
-<script src="pdf-engine.js?v=128"></script>
+<script src="tot100-hulp.js?v=6"></script>
+<script src="generator.js?v=102"></script>
+<script src="preview.js?v=72"></script>
+<script src="pdf-engine.js?v=129"></script>
 <script src="vraagstukken.js?v=39"></script>
 
 <script src="modules/rekentaal.js?v=15"></script>
 
-<script src="app.js?v=53"></script>
+<script src="app.js?v=54"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {

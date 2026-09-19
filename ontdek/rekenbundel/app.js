@@ -473,6 +473,7 @@ const App = (() => {
           label.classList.toggle('geselecteerd', !wasChecked);
           label.querySelector('.vink-box').textContent = !wasChecked ? '✓' : '';
         }
+        _updateTot100HulpUI();
         _updateGemengdInfo(container, infoEl);
         _updateSplitsKaarten();
         _updateOpdrachtzin();
@@ -584,7 +585,26 @@ const App = (() => {
     }
   }
 
+  function _updateTot100HulpUI() {
+    const kaart = document.getElementById('kaart-tot100-hulp');
+    const niveau = Number(document.querySelector('[name="niveau"]:checked')?.value);
+    const types = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
+    const type = actieveBewerking === 'optellen' ? 'TE+TE' : 'TE-TE';
+    const toon = ['optellen', 'aftrekken'].includes(actieveBewerking) && niveau === 100 &&
+      _getBrugWaarde() === 'zonder' && types.length === 1 && types[0] === type;
+    if (kaart) kaart.style.display = toon ? 'block' : 'none';
+    if (!toon) {
+      const keuze = document.getElementById('tot100-hulp');
+      if (keuze) keuze.value = 'vakje';
+      const rij = document.getElementById('tot100-voorbeeld-rij');
+      if (rij) rij.style.display = 'none';
+      const vb = document.getElementById('tot100-voorbeeld');
+      if (vb) vb.checked = false;
+    }
+  }
+
   function _updateHulpmiddelenUI(brug) {
+    _updateTot100HulpUI();
     const kaart = document.getElementById('kaart-hulpmiddelen');
     if (!kaart) return;
 
@@ -731,6 +751,8 @@ const App = (() => {
       : (isHerken || isSplitsingen) ? 'zonder' : brug;
 
     const blok = Generator.maakBlok({
+      tot100Hulp: document.getElementById('tot100-hulp')?.value || 'vakje',
+      tot100Voorbeeld: document.getElementById('tot100-voorbeeld')?.checked || false,
       bewerking: actieveBewerking,
       niveau:    (isHerken || isSplitsingen) ? (isSplitsingen ? effectiefNiveau : 100) : niveau,
       splitsGetallen: effectiefGetallen,

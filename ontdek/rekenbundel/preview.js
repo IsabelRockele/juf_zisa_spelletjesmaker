@@ -213,7 +213,7 @@ const Preview = (() => {
       blok.bewerking === 'breuken' &&
       blok.config?.soort === 'vermenigvuldigen'
     );
-    if (heeftCompZonderHulp || heeftBreukSchrapping) {
+    if (heeftCompZonderHulp || heeftBreukSchrapping || _laatsteBundelData.some(b => typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(b))) {
       render(_laatsteBundelData);
       // Toggle knop state behouden na re-render
       if (btn) {
@@ -573,7 +573,8 @@ const Preview = (() => {
                       blok.bewerking === 'aftrekken' ? 'Aftrekken' : 'Optellen';
     const isPunt = isSplitsingen && blok.oefeningen[0]?.type === 'puntoefening';
     let gridKlasse;
-    if (isPunt)                                                            gridKlasse = 'splits-grid punt-grid';
+    if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok)) gridKlasse = blok.tot100Hulp.startsWith('sprongen') ? 'tot100-grid tot100-sprongen-grid' : 'tot100-grid';
+    else if (isPunt)                                                            gridKlasse = 'splits-grid punt-grid';
     else if (isGetallenlijn)                                               gridKlasse = 'gl-grid';
     else if (isTafelsInzicht)                                              gridKlasse = 'inzicht-grid';
     else if (isTafels)  { const eersteType = blok.oefeningen[0]?.type; gridKlasse = (eersteType === 'redeneren' || eersteType === 'koppel') ? 'tafels-grid tafels-grid-2kol' : 'tafels-grid'; }
@@ -632,6 +633,9 @@ const Preview = (() => {
   }
 
   function _oefeningHTML(blok, oef, idx) {
+    if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok) && Tot100Hulp.gegevens(oef)) {
+      return `<div class="oefening-item tot100-oefening">${Tot100Hulp.svg(blok, oef, _toonOplossingen || (blok.tot100Voorbeeld && idx === 0))}<button class="btn-del-oef" onclick="App.verwijderOefening('${blok.id}',${idx})" title="Verwijder oefening">×</button></div>`;
+    }
     const blokId        = blok.id;
     const isHerken      = blok.bewerking === 'herken-brug';
     const hulp          = blok.hulpmiddelen || [];

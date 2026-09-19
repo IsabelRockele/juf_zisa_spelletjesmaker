@@ -2028,7 +2028,30 @@ const onthoudH = c;
     }
   }
 
+  async function _tekenTot100HulpBlok(blok) {
+    const [sw, sh] = Tot100Hulp.maten(blok.tot100Hulp);
+    const kolommen = blok.tot100Hulp.startsWith('sprongen') ? 1 : 2;
+    const breedte = (CW - (kolommen - 1) * 8) / kolommen;
+    const hoogte = breedte * sh / sw;
+    checkRuimte(VOOR_ZIN + ZINRUIMTE + hoogte + 6);
+    y += VOOR_ZIN;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(26,58,92);
+    doc.text(blok.opdrachtzin, ML, y); y += ZINRUIMTE;
+    for (let i = 0; i < blok.oefeningen.length; i += kolommen) {
+      checkRuimte(hoogte + 6);
+      for (let k = 0; k < kolommen && i + k < blok.oefeningen.length; k++) {
+        const oef = blok.oefeningen[i+k];
+        const png = await Tot100Hulp.png(blok, oef, _metAntwoorden || (blok.tot100Voorbeeld && i+k === 0));
+        doc.addImage(png, 'PNG', ML+k*(breedte+8), y, breedte, hoogte, undefined, 'FAST');
+      }
+      y += hoogte + 6;
+    }
+    y += NABLOK;
+    lijn(ML, y-4, ML+CW, y-4, [210,220,230], 0.4);
+  }
+
  async function _tekenBlok(blok) {
+  if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok)) { await _tekenTot100HulpBlok(blok); return; }
   if (blok.bewerking === 'breuken')                                  { _tekenBreukenBlok(blok); return; }
   if (blok.bewerking === 'percentages')                              { _tekenPercentageBlok(blok); return; }
   if (blok.bewerking === 'schatten')                                          { _tekenSchattenBlok(blok); return; }

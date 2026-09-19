@@ -3831,3 +3831,9 @@ body.pdf-opname .komma-h-schijf-som{font-size:27px}
 .rr-k-op-onder{grid-area:5/2}.rr-k-onder{grid-area:5/3}.rr-k-eq-onder{grid-area:5/4}
 .rr-kader-vak{color:#0876b9;font-weight:700}
 @media(max-width:900px){.rr-grid,.rr-grid.rr-rooster,.rr-grid.rr-kader{grid-template-columns:1fr}}
+
+/* TE + TE / TE - TE zonder brug: dezelfde opmaak als de PDF. */
+.oefeningen-grid.tot100-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 24px; }
+.oefeningen-grid.tot100-sprongen-grid { grid-template-columns:minmax(0,1fr); }
+.tot100-oefening { display:block; position:relative; padding:0; border:none; background:white; min-width:0; }
+.tot100-oefening svg { display:block; width:100%; height:auto; }
