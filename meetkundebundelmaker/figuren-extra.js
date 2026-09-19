@@ -106,3 +106,41 @@
   const baseRender=renderEx;renderEx=function(ex,index){if(!types[ex.type])return baseRender(ex,index);const full=limitedTypes.has(ex.type)&&state.exercises.filter(item=>item.type===ex.type).length>=variants[ex.type];return `<section class="exercise figure-extra" data-id="${ex.id}" data-figure-type="${ex.type}"><div class="editbar no-print"><button data-act="up">↑</button><button data-act="down">↓</button>${full?`<span class="mini">${ex.type==='solidHelp'?'Uitleg toegevoegd':'Alle 3 afbeeldingssets toegevoegd'}</span>`:'<button data-act="replace" title="Andere opdracht">↻</button><button data-act="addsame">+ oefening</button>'}<button data-act="delete">✕</button></div><h3>${index+1}. ${types[ex.type][1]}</h3>${builders[ex.type](ex)}</section>`;};
   const baseBind=bindEdit;bindEdit=function(){baseBind();document.querySelectorAll('#pages .figure-extra [data-act="replace"]').forEach(button=>{const section=button.closest('.exercise');if(!limitedTypes.has(section.dataset.figureType))return;button.onclick=()=>{const i=state.exercises.findIndex(ex=>String(ex.id)===section.dataset.id);if(i<0)return;const fresh=makeUnique(state.exercises[i].type,{},state.exercises);if(fresh){state.exercises.splice(i,1,fresh);render();}};});};
 })();
+
+/* Fill gaps with the next complete exercise that fits; never shrink drawing scales. */
+(() => {
+  const label=document.createElement('label');label.className='check';
+  label.innerHTML='<input type="checkbox" id="compactPages" checked> Vul lege ruimte met een volgende passende opdracht';
+  document.getElementById('pageNumbers').closest('label').after(label);
+  const compact=label.querySelector('input');compact.onchange=()=>render();
+  // An explicit move takes precedence over automatic packing.
+  document.getElementById('pages').addEventListener('click',event=>{
+    if(event.target.closest('[data-act="up"],[data-act="down"]'))compact.checked=false;
+  },true);
+  const sequentialPaginate=paginate;
+  paginate=function(){
+    const baseline=sequentialPaginate();
+    if(!compact.checked||state.solutionMode||baseline.length<2)return baseline;
+    const pending=state.exercises.slice(),pages=[];
+    let current=[],m=makeMeasurePage(0);
+    try{
+      while(pending.length){
+        let chosen=-1;
+        for(let i=0;i<pending.length;i++){
+          const holder=document.createElement('div');
+          holder.innerHTML=renderEx(pending[i],pages.flat().length+current.length);
+          const node=holder.firstElementChild;m.content.append(node);
+          if(node.getBoundingClientRect().bottom<=m.page.querySelector('.page-footer').getBoundingClientRect().top-6||!current.length){chosen=i;break;}
+          node.remove();
+        }
+        if(chosen>=0){current.push(pending.splice(chosen,1)[0]);continue;}
+        pages.push(current);current=[];m.host.remove();m=makeMeasurePage(pages.length);
+      }
+      if(current.length)pages.push(current);
+    }finally{m.host.remove();}
+    if(pages.length>baseline.length)return baseline;
+    // Keep numbering and the move/delete controls aligned with the visible order.
+    state.exercises.splice(0,state.exercises.length,...pages.flat());
+    return pages;
+  };
+})();
