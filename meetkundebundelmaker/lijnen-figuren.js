@@ -4,11 +4,19 @@
   const style=document.createElement('style');
   style.textContent=`.parallel-picture{position:relative;width:100%;aspect-ratio:3 / 2;margin:4mm 0 0}.parallel-picture img{display:block;width:100%;height:100%;object-fit:contain}.parallel-picture svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.parallel-picture-note{font-size:10pt;color:#256944;margin:3mm 0 0}`;
   document.head.append(style);
+  const count=document.querySelector('#count-parallel-find'),picker=count.closest('.group'),pickerTitle=picker.querySelector('.group-title'),pickerLabel=pickerTitle.textContent;
+  count.type='hidden';count.max='1';picker.querySelector('.type-count').style.display='none';
+  picker.insertAdjacentHTML('beforeend','<div class="mini">Eén opdracht met vier afbeeldingen. Deze opdracht kan één keer in de bundel.</div>');
+  const guard=e=>{if(state.exercises.some(ex=>ex.type==='parallelFind')){e.preventDefault();e.stopImmediatePropagation();}};
+  pickerTitle.addEventListener('click',guard,true);pickerTitle.addEventListener('keydown',guard,true);
+  const baseUnique=makeUnique;makeUnique=function(type,forced={},existing=state.exercises){if(type==='parallelFind'&&existing.some(ex=>ex.type===type))return null;return baseUnique(type,forced,existing);};
+  const baseRefresh=render;render=function(){baseRefresh();const included=state.exercises.some(ex=>ex.type==='parallelFind');pickerTitle.textContent=pickerLabel+(included?' — toegevoegd':'');pickerTitle.setAttribute('aria-disabled',String(included));};
   const baseRender=renderEx;
   renderEx=function(ex,index) {
     const html=baseRender(ex,index);
     if(ex.type!=='parallelFind')return html;
     const holder=document.createElement('div');holder.innerHTML=html;
+    holder.querySelectorAll('[data-act="addsame"],[data-act="replace"]').forEach(button=>button.remove());
     holder.querySelector('.prompt').textContent='Zoek in elke figuur minstens twee evenwijdige lijnen. Overtrek ze met groen. Gebruik je lat.';
     const scenes=holder.querySelector('.parallel-scenes');
     const picture=document.createElement('div');picture.className='parallel-picture';
@@ -36,6 +44,15 @@
     title.onclick=toggle;title.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();}};
     panel.append(group);document.querySelector('#addType').add(new Option(label,type));
   });
+  // Keep new exercises in their subject section instead of below the final existing heading.
+  const sections=[
+    ['Punten, rechten en lijnstukken',['lines-vocabulary','lineNameMatch','lineNameWrite','lineGridDraw']],
+    ['Lijnen herkennen, meten en tekenen',['lines-floorplan','segments-grid','segments-blank','lines-recognize','lines-draw']],
+    ['Evenwijdige en snijdende lijnen',['parallel-draw-name','parallel-judge','parallel-statements','parallel-find','parallel-through-line','parallel-through-point','lineRelationChoose','lineSceneTrace','lineSidesTrace','lineRelationHelp']],
+    ['Loodrechte stand',['perpendicular-draw','perpendicular-judge','perpendicular-statements','perpendicular-find','perpendicular-through-point']]
+  ];
+  panel.querySelectorAll(':scope > h3').forEach(h=>h.remove());
+  sections.forEach(([label,ids])=>{const h=document.createElement('h3');h.textContent=label;panel.append(h);ids.forEach(id=>{const input=document.getElementById('count-'+id);if(input)panel.append(input.closest('.group'));});});
   const baseMake=make;
   make=function(type,forced={}){const ex=baseMake(type,forced);if(types[type])ex.gridVariant=forced.gridVariant??n(0,23);return ex;};
   const baseTitle=titleFor;titleFor=t=>types[t]||baseTitle(t);
