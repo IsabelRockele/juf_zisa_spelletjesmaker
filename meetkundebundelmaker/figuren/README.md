@@ -4,6 +4,18 @@ Beide PNG-bladen zijn met de ingebouwde imagegen-tool gemaakt. De oefeningen ton
 
 - `voorwerpen.png`: twaalf levensechte voorwerpen op wit, vier kolommen en drie rijen.
 - `vormenfiguurtjes.png`: vis, raket, huis en robot uit vlakke figuren, twee kolommen en twee rijen.
+- `vormenfiguurtjes-2.png`: zeilboot, dennenboom, trein en vogel, twee kolommen en twee rijen.
+- `vormenfiguurtjes-3.png`: kasteel, bloem, auto en kat, twee kolommen en twee rijen.
+
+## Extra sets (19 september 2026)
+
+Gemaakt met de ingebouwde imagegen-tool, elk 1536 × 1024 pixels. De derde set kreeg via dezelfde tool een witte achtergrond. De oefeningen gebruiken drie verschillende bladen en stoppen na drie opdrachten per type; herordenen van dezelfde afbeeldingen telt niet als een nieuwe set.
+
+Ontwerpbrief set 2: vier eenvoudige figuren op wit in een 2×2-rooster, met dunne zwarte contouren. Zeilboot: blauwe rechthoekige romp, bruine rechthoekige mast, rode en gele driehoekige zeilen. Boom: drie groene driehoeken en een bruine rechthoekige stam. Trein: blauwe rechthoekige romp, rode vierkante cabine, geel vierkant raam, zwarte rechthoekige schoorsteen en drie zwarte cirkelwielen. Vogel: twee gele cirkels, zwart cirkeloog, oranje driehoekige snavel en twee oranje rechthoekige poten.
+
+Ontwerpbrief set 3: kasteel met drie blauwe rechthoeken, twee rode driehoekige daken en een gele rechthoekige deur; bloem met vier rode cirkelblaadjes, geel cirkelhart, groene rechthoekige steel en twee groene driehoekige bladeren; auto met blauwe rechthoekige romp, rode rechthoekige cabine, twee gele vierkante ramen en twee zwarte cirkelwielen; kattenkop met oranje cirkel, twee oranje driehoekige oren, twee zwarte cirkelogen en rode driehoekige neus.
+
+Correctieprompt set 3: Correct the attached school worksheet asset. Replace the ENTIRE black glowing background with PURE SOLID OPAQUE WHITE. Remove all glow, blur, shadows and gradients. White paper everywhere outside shapes, flat solid colors inside shapes. Keep EXACT same four figures and same parts and counts, same 2x2 positions: castle top left, flower top right, car bottom left, cat face bottom right. Each figure fully within its quadrant, generous margins. No additional marks or objects. Preserve the 3 blue rectangle walls and 2 red triangle roofs and yellow rectangle door of castle; flower 4 red circle petals, yellow circle center, green rectangular stem, 2 green triangle leaves; car blue rectangle body red rectangle cabin 2 yellow square windows 2 black circle wheels; cat orange circle face 2 orange triangle ears 2 black circle eyes red triangle nose. Output 1536x1024 PNG with WHITE background.
 
 ## Prompt voor voorwerpen
 

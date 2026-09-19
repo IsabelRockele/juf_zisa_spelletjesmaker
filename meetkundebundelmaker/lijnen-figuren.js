@@ -4,6 +4,7 @@
   const style=document.createElement('style');
   style.textContent=`.parallel-picture{position:relative;width:100%;aspect-ratio:3 / 2;margin:4mm 0 0}.parallel-picture img{display:block;width:100%;height:100%;object-fit:contain}.parallel-picture svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.parallel-picture-note{font-size:10pt;color:#256944;margin:3mm 0 0}`;
   document.head.append(style);
+  style.textContent+=`.parallel-card .yes-no{display:flex;justify-content:center;gap:7mm;margin-top:3mm;font-size:12pt;line-height:1.4}.parallel-card .yes-no>span{display:inline-flex;align-items:center;gap:2mm}.parallel-answer-box{display:inline-block;box-sizing:border-box;width:5mm;height:5mm;border:.3mm solid #526c7b;background:white;flex:none}`;
   const count=document.querySelector('#count-parallel-find'),picker=count.closest('.group'),pickerTitle=picker.querySelector('.group-title'),pickerLabel=pickerTitle.textContent;
   count.type='hidden';count.max='1';picker.querySelector('.type-count').style.display='none';
   picker.insertAdjacentHTML('beforeend','<div class="mini">Eén opdracht met vier afbeeldingen. Deze opdracht kan één keer in de bundel.</div>');
@@ -14,6 +15,7 @@
   const baseRender=renderEx;
   renderEx=function(ex,index) {
     const html=baseRender(ex,index);
+    if(ex.type==='parallelJudge'||ex.type==='perpendicularJudge')return html.replace(/<span>□ (ja|nee)<\/span>/g,'<span><i class="parallel-answer-box" aria-hidden="true"></i>$1</span>');
     if(ex.type!=='parallelFind')return html;
     const holder=document.createElement('div');holder.innerHTML=html;
     holder.querySelectorAll('[data-act="addsame"],[data-act="replace"]').forEach(button=>button.remove());
