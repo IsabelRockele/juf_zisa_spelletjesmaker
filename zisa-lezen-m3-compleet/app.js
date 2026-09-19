@@ -3,6 +3,10 @@ const app = document.querySelector("#app");
 const allBooks = window.ZISA_BOOKS || [];
 const books = allBooks;
 const levels = ["START","M3","E3","M4","E4","M5","E5","M6","E6"];
+const startMethodParam=new URLSearchParams(location.search).get("methode");
+const lockedStartMethod=["kim","zoem"].includes(startMethodParam)?startMethodParam:null;
+let startMethod=lockedStartMethod||localStorage.getItem("zisa_start_method")||null;
+if(!["original","kim","zoem"].includes(startMethod))startMethod="original";
 let currentLevel = null;
 let currentBook = null;
 let pageIndex = 0;
@@ -273,6 +277,7 @@ function shuffledWrong(list,key=item=>item){
 
 function isDiscoverLocked(book){
   if(window.ZISA_ACCESS_MODE!=="discover")return false;
+  if(book.level==="START")return books.find(candidate=>candidate.level==="START"&&(startMethod==="original"?!candidate.method:candidate.method===startMethod))?.id!==book.id;
   return books.find(candidate=>candidate.level===book.level)?.id!==book.id;
 }
 
@@ -314,7 +319,15 @@ function renderLibrary(){
     grid.innerHTML=`<section class="choose-level"><img src="images/zisa-leest.png" alt="Zisa leest"><div><h2>Kies eerst je AVI-niveau</h2><p>Daarna verschijnen de boeken die bij jouw leesniveau horen.</p></div></section>`;
     return;
   }
-  const list = books.filter(b=>b.level===currentLevel);
+  if(currentLevel==="START"){
+    const tip=document.createElement("p");tip.className="start-parent-tip";tip.textContent="Tip voor ouders: vraag aan de leerkracht met welke versie je kind leert lezen.";grid.before(tip);
+    const tabs=document.createElement("nav");tabs.className="start-tabs";tabs.setAttribute("aria-label","AVI Start-oefeningen");
+    tabs.innerHTML=`<button data-method="kim" aria-pressed="${startMethod==="kim"}">Lezen volgens Kim-versie <small>Kern start t/m 7</small></button><button data-method="zoem" aria-pressed="${startMethod==="zoem"}">Lezen volgens Zoem-versie <small>Anker start t/m 5</small></button><button data-method="original" aria-pressed="${startMethod==="original"}">Mijn eerste leesoefeningen</button>`;
+    grid.before(tabs);
+    tabs.querySelectorAll("[data-method]").forEach(button=>button.onclick=()=>{startMethod=button.dataset.method;localStorage.setItem("zisa_start_method",startMethod);renderLibrary()});
+    const heading=document.createElement("h2");heading.className="start-group-heading";heading.textContent=startMethod==="kim"?"Lezen volgens Kim-versie":startMethod==="zoem"?"Lezen volgens Zoem-versie":"Mijn eerste leesoefeningen";grid.before(heading);
+  }
+  const list = books.filter(b=>b.level===currentLevel&&(currentLevel!=="START"||(startMethod==="original"?!b.method:b.method===startMethod)));
 
   if(!list.length){
     grid.innerHTML = `<section class="hero"><div class="z">📚</div><div><h1>${currentLevel}</h1><p>De twee boeken voor dit AVI-niveau worden hier later toegevoegd.</p></div></section>`;
@@ -335,7 +348,7 @@ function renderLibrary(){
       <div class="cover">
         <span class="badge">${book.level}</span>
         ${locked?`<span class="pro-lock">🔒 Enkel in Pro</span>`:""}
-        ${book.startBook?`<div class="start-card-cover tone-${book.coverTone||"blue"}"><img src="${book.coverImage}" alt=""><strong>${book.title}</strong><small>AVI START</small></div>`:book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="${spriteStyle(book.cover)}"></div>`:`<img class="cover-image" src="${book.cover}" alt="Voorkaft van ${escapeAttr(book.title)}">`}
+        ${book.startBook?`<div class="start-card-cover tone-${book.coverTone||"blue"}">${book.coverEmoji?`<span class="start-cover-icon" aria-hidden="true">${book.coverEmoji}</span>`:`<img src="${book.coverImage}" alt="">`}<strong>${book.title}</strong><small>AVI START</small></div>`:book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="${spriteStyle(book.cover)}"></div>`:`<img class="cover-image" src="${book.cover}" alt="Voorkaft van ${escapeAttr(book.title)}">`}
       </div>
       <div class="cardtext">
         <h3>${book.title}</h3>
@@ -810,7 +823,7 @@ function renderFluencyBook(){
   app.innerHTML=`<section class="fluency-shell">
     <header class="fluency-head"><button id="fluencyBack">‹ Taalreis</button><div><b>${currentBook.startBook?"Mijn leesstartboekje":"Mijn vlotleesboekje"}</b><span>${cover?"Voorkaft":`${fluencyIndex+1} van ${pages.length}`}</span></div><div class="fluency-dots">${pages.map((_,i)=>`<i class="${i===fluencyIndex?"on":""}"></i>`).join("")}</div></header>
     <div class="mini-book ${cover?"mini-cover":""}">
-      <div class="mini-left">${cover&&currentBook.startBook?`<div class="start-mini-cover tone-${currentBook.coverTone||"blue"}"><img src="${currentBook.coverImage}" alt=""><strong>${currentBook.title}</strong><span>AVI START</span></div>`:cover?`<img src="images/zisa-leest.png" alt="Zisa leest"><span>AVI ${currentBook.level}</span>`:currentBook.startBook?`<img class="fluency-illustration" src="${page.iconImage||currentBook.coverImage}" alt=""><h2>${page.title}</h2><p>${currentBook.title}</p>`:`<div class="fluency-side-art">${imageBlock(sidePage.image,`Prent uit ${currentBook.title}`)}</div><h2>${page.title}</h2><p>${currentBook.title}</p>`}</div>
+      <div class="mini-left">${cover&&currentBook.startBook?`<div class="start-mini-cover tone-${currentBook.coverTone||"blue"}"><img src="${currentBook.coverImage}" alt=""><strong>${currentBook.title}</strong><span>AVI START</span></div>`:cover?`<img src="images/zisa-leest.png" alt="Zisa leest"><span>AVI ${currentBook.level}</span>`:currentBook.startBook?`<img class="fluency-illustration" src="${currentBook.method&&(page.pictures||page.imageSrc)?"images/zisa-leest.png":page.iconImage||currentBook.coverImage}" alt=""><h2>${page.title}</h2><p>${currentBook.stage||currentBook.title}</p>`:`<div class="fluency-side-art">${imageBlock(sidePage.image,`Prent uit ${currentBook.title}`)}</div><h2>${page.title}</h2><p>${currentBook.title}</p>`}</div>
       <article class="mini-right">${cover?`<small>${currentBook.startBook?"AVI START":"BONUSBOEKJE"}</small><h1>${currentBook.startBook?currentBook.title:"Lees vlot<br>en mooi"}</h1><p>${currentBook.startBook?currentBook.blurb:`${pages.length} korte oefenbladzijden die aansluiten bij jouw verhaal.`}</p><small>${pages.length} oefenbladzijden</small><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2>${page.context?`<blockquote class="meaning-context">${escapeAttr(page.context)}</blockquote>`:""}<div class="fluency-question-row"><p class="fluency-question">${page.q}</p>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(`${page.context?`${page.context} `:""}${page.q}`)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
     </div></section>`;
   document.querySelector("#fluencyBack").textContent=currentBook.startBook?"‹ Bibliotheek":"‹ Taalreis";
@@ -820,12 +833,26 @@ function renderFluencyBook(){
   bindSpeechButtons(app);
 }
 
+function orderedFluencyChoices(entries,correctIndex){
+  if(currentBook?.level!=="START"||entries.length<2||!Number.isInteger(correctIndex)||correctIndex<0||correctIndex>=entries.length)return entries;
+  const offset=[...currentBook.id].reduce((sum,char)=>sum+char.charCodeAt(0),0)%entries.length;
+  const target=(fluencyIndex+offset)%entries.length;
+  const correct=entries[correctIndex];
+  const ordered=entries.filter((_,index)=>index!==correctIndex);
+  ordered.splice(target,0,correct);
+  return ordered;
+}
+
 function renderFluencyPage(page,total){
   const activity=document.querySelector("#fluencyActivity");
+  if(page.audioPrompt){const listen=makeListenButton(page.audioPrompt,"Beluister het woord");listen.textContent="🔊 Luister naar het woord";listen.classList.add("start-audio-prompt");activity.append(listen)}
+  if(page.imageSrc){const prompt=document.createElement("img");prompt.className="start-picture-prompt start-picture-img";prompt.src=page.imageSrc;prompt.alt=page.imageAlt||"Prent bij de vraag";activity.append(prompt)}
+  if(page.imagePrompt){const prompt=document.createElement("div");prompt.className="start-picture-prompt";prompt.setAttribute("role","img");prompt.setAttribute("aria-label","Prent bij de vraag");prompt.textContent=page.imagePrompt;activity.append(prompt)}
+  if(page.text&&!page.pictures&&page.a){const sentence=document.createElement("div");sentence.className="fluency-read main";sentence.textContent=page.text;activity.append(sentence)}
   if(page.focus){
     const wrap=document.createElement("div");wrap.className="fluency-focus-wrap";
     const focus=document.createElement("div");focus.className="fluency-focus";focus.textContent=page.focus;wrap.append(focus);
-    if(hasAudioSupport())wrap.append(makeListenButton(page.focus,`Beluister ${page.focus}`));
+    if(hasAudioSupport()&&!page.audioPrompt)wrap.append(makeListenButton(page.focus,`Beluister ${page.focus}`));
     activity.append(wrap)
   }
   if(page.chunks){
@@ -851,8 +878,8 @@ function renderFluencyPage(page,total){
     const text=document.createElement("div");text.className="fluency-read main sentence-highlight";text.innerHTML=storyTextMarkup(page.text);activity.append(text);
     const listen=makeListenButton(page.text,"Lees de zin voor");listen.classList.add("fluency-listen");listen.onclick=event=>{event.stopPropagation();speak(page.text,text)};activity.append(listen);
     const choices=document.createElement("div");choices.className="fluency-picture-choices";activity.append(choices);
-    page.pictures.map((picture,index)=>({picture,index})).forEach(({picture,index})=>{
-      const button=document.createElement("button");button.innerHTML=`<img src="${picture.src}" alt="${escapeAttr(picture.alt)}">`;button.setAttribute("aria-label",picture.alt);button.onclick=()=>{
+    orderedFluencyChoices(page.pictures.map((picture,index)=>({picture,index})),page.correct).forEach(({picture,index})=>{
+      const button=document.createElement("button");button.innerHTML=picture.icon?`<span class="start-picture-choice" aria-hidden="true">${picture.icon}</span>`:`<img src="${picture.src}" alt="${escapeAttr(picture.alt)}">`;button.setAttribute("aria-label",picture.alt);button.onclick=()=>{
         if(index!==page.correct){button.classList.add("wrong");document.querySelector("#fluencyFeedback").textContent=page.hint||"Lees de zin nog eens en kijk heel goed.";setTimeout(()=>button.classList.remove("wrong"),550);return}
         button.classList.add("correct");choices.querySelectorAll("button").forEach(item=>item.disabled=true);fluencyScore++;document.querySelector("#fluencyFeedback").textContent=page.good||"Juist! Deze prent past bij de zin.";addFluencyNext(total)
       };choices.append(button)
@@ -884,10 +911,11 @@ function renderFluencyPage(page,total){
     };
   }else if(page.a){
     const choices=document.createElement("div");choices.className="fluency-choices";activity.append(choices);
-    page.a.map((answer,index)=>({answer,index})).forEach(({answer,index})=>{
+    orderedFluencyChoices(page.a.map((answer,index)=>({answer,index})),page.correct).forEach(({answer,index})=>{
       const button=document.createElement("button");button.textContent=answer;button.onclick=()=>{
         if(index!==page.correct){button.classList.add("wrong");document.querySelector("#fluencyFeedback").textContent="Kijk of lees nog eens rustig.";setTimeout(()=>button.classList.remove("wrong"),500);return}
         button.classList.add("correct");choices.querySelectorAll("button").forEach(item=>item.disabled=true);fluencyScore++;
+        if(page.audioPrompt&&page.focus){const focus=document.querySelector(".fluency-focus");if(focus)focus.textContent=page.audioPrompt}
         if(page.punctuation){
           const sentence=document.querySelector(".fluency-focus");if(sentence)sentence.textContent=`${page.focus}${answer}`;
           const listen=document.querySelector(".fluency-focus-wrap .mini-listen");if(listen)listen.onclick=event=>{event.stopPropagation();speak(`${page.focus}${answer}`)}
