@@ -3623,7 +3623,9 @@ const Bundel = (() => {
 
       // Pas op nieuwe pagina als opdrachtzin + eerste blok er niet meer bij passen,
       // OF als dit niet de eerste groep is
-      const passtNogOpHuidigePagina = y + benodigdVoorStart + margin <= pageH;
+      // Reserveer ook de 5 mm onderruimte die de oefenrenderer bewaakt.
+      // Anders past de titel nét wel, maar verhuist het rooster alsnog.
+      const passtNogOpHuidigePagina = y + benodigdVoorStart + margin + 5 <= pageH;
 
       if (!isEerstePagina && !passtNogOpHuidigePagina) {
         doc.addPage();

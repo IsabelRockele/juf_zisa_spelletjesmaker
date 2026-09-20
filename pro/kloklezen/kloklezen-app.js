@@ -3623,7 +3623,8 @@ const Bundel = (() => {
 
       // Pas op nieuwe pagina als opdrachtzin + eerste blok er niet meer bij passen,
       // OF als dit niet de eerste groep is
-      const passtNogOpHuidigePagina = y + benodigdVoorStart + margin <= pageH;
+      // Reserveer dezelfde onderruimte als de oefenrenderer.
+      const passtNogOpHuidigePagina = y + benodigdVoorStart + margin + 5 <= pageH;
 
       if (!isEerstePagina && !passtNogOpHuidigePagina) {
         doc.addPage();
