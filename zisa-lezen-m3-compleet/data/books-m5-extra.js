@@ -82,7 +82,7 @@
   };
   window.ZISA_SPEED_GAMES={...(window.ZISA_SPEED_GAMES||{}),
     'm5-lege-mand':{words:['hazelnoten','verzameld','bosmaaltijd','voorraad','schuur','regendruppels','verdwenen','hengsel','roodbruine','aanwijzing','wielsporen','notenkraker','opgelucht','terechtgekomen','boodschap','vervoeren','gekraak','overgebleven']},
-    'm5-nieuw-papier':{words:['schooltuin','bijzondere','bedankkaart','tekenbladen','achterkant','Plastic','nietjes','snippers','weken','geduld','mixer','pulp','vezels','stappenplan','Teleurgesteld','voorzichtig','spons','rafelig','oppervlak','kleurpotloden','recycleren','materiaal']}
+    'm5-nieuw-papier':{words:['schooltuin','bijzondere','bedankkaart','tekenbladen','achterkant','plastic','nietjes','snippers','weken','geduld','mixer','pulp','vezels','stappenplan','teleurgesteld','voorzichtig','spons','rafelig','oppervlak','kleurpotloden','recycleren','materiaal']}
   };
   window.ZISA_FLUENCY_BOOKS={...(window.ZISA_FLUENCY_BOOKS||{}),
     'm5-lege-mand':[
