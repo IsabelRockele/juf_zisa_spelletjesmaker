@@ -15,7 +15,7 @@ const Tijdsbesef = (() => {
     {prent:'voetbal', vraag:'Een voetbalwedstrijd spelen', antwoord:'lang'},
     {prent:'boswandeling', vraag:'Een wandeling in het bos maken', antwoord:'lang'}
   ];
-  const namen = {cirkel:'Weekcirkel',nachten:'Hoeveel keer slapen?',verhalen:'Verhaaltjes over dagen',duur:'Kort of lang?'};
+  const namen = {cirkel:'Weekcirkel',nachten:'Hoeveel keer slapen?',verhalen:'Verhaaltjes over dagen'};
   const opdrachten = {cirkel:'Hoeveel keer slapen? Teken de pijlen en vul in.',nachten:'Hoeveel keer slapen? Vul in.',verhalen:'Lees en los op.',duur:'Kruis aan of de activiteit kort of lang duurt.'};
   const images = {};
   let laden;
@@ -119,7 +119,7 @@ const Tijdsbesef = (() => {
   document.addEventListener('DOMContentLoaded',()=>{
     const tab=document.createElement('div');tab.className='sidebar-tab';tab.textContent='🌙 Tijdsbesef';tab.onclick=()=>toonTab('tijdsbesef',tab);document.querySelector('#sidebarTabs .tab-dagen').after(tab);
     const panel=document.createElement('div');panel.id='tab-tijdsbesef';panel.className='sidebar-content';
-    panel.innerHTML='<div class="config-kaart"><div class="kaart-titel">Dagen en tijdsduur</div><p>Kies een oefening. De prenten helpen bij het lezen.</p><div class="tijdsbesef-keuzes"></div></div><div class="config-kaart"><label>Aantal oefeningen <select id="tijdAantal"><option>2</option><option selected>4</option><option>6</option><option>8</option></select></label></div><div class="config-kaart"><label>Opdrachtzin<textarea id="tijdOpdracht" rows="3"></textarea></label></div><div id="tijdVoorbeeld"></div><p id="tijdStatus" role="status"></p><button id="tijdToevoegen" class="genereer-knop">+ Voeg toe aan bundel</button>';
+    panel.innerHTML='<div class="config-kaart"><div class="kaart-titel">Dagen en nachten</div><p>Kies een oefening. De prenten helpen bij het lezen.</p><div class="tijdsbesef-keuzes"></div></div><div class="config-kaart"><label>Aantal oefeningen <select id="tijdAantal"><option>2</option><option selected>4</option><option>6</option><option>8</option></select></label></div><div class="config-kaart"><label>Opdrachtzin<textarea id="tijdOpdracht" rows="3"></textarea></label></div><div id="tijdVoorbeeld"></div><p id="tijdStatus" role="status"></p><button id="tijdToevoegen" class="genereer-knop">+ Voeg toe aan bundel</button>';
     document.querySelector('.sidebar').append(panel);
     let variant='cirkel';
     function kies(k){variant=k;panel.querySelectorAll('[data-variant]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.variant===k));document.getElementById('tijdOpdracht').value=opdrachten[k];}

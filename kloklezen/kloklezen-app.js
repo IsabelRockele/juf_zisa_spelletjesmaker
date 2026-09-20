@@ -2913,6 +2913,7 @@ const Bundel = (() => {
   };
 
   function getOpdrachtzin(instellingen) {
+    if (instellingen.type === 'tijdsduur') return Tijdsduur.opdracht;
     if (instellingen.type === 'kloklezen') {
       return instellingen.invulmethode === 'analoog'
         ? STANDAARD_OPDRACHTZIN.kloklezen_analoog
@@ -2928,7 +2929,7 @@ const Bundel = (() => {
   const openBewerkingen = new Set();
 
   function bronTab(type) {
-    return {kloklezen:'klok', kleurparen:'verbinden', verbinden:'verbinden', verbinden24u:'verbinden', tijdverschil:'tijdverschil', maateenheden:'maateenheden', ordenen:'ordenen', rangschikken:'rangschikken', schrijven:'schrijven', begrippen:'begrippen'}[type];
+    return {tijdsduur:'tijdsduur', kloklezen:'klok', kleurparen:'verbinden', verbinden:'verbinden', verbinden24u:'verbinden', tijdverschil:'tijdverschil', maateenheden:'maateenheden', ordenen:'ordenen', rangschikken:'rangschikken', schrijven:'schrijven', begrippen:'begrippen'}[type];
   }
 
   function bewaarKeuzes(type) {
@@ -2954,7 +2955,9 @@ const Bundel = (() => {
   function vernieuwGroep(groepId) {
     const items = oefeningen.filter(o => o.groepId === groepId), eerste = items[0];
     if (!eerste) return;
-    if (eerste.type === 'kloklezen') {
+    if (eerste.type === 'tijdsduur') {
+      eerste.instellingen = Tijdsduur.maak(eerste.instellingen.vragen.length);
+    } else if (eerste.type === 'kloklezen') {
       const inst = eerste.basisInstellingen || eerste.instellingen;
       const tijden = KlokLezen.vernieuwTijden(inst, items.length);
       items.forEach((o, i) => { o.instellingen = {...o.instellingen, tijden:[tijden[i]]}; });
@@ -2966,7 +2969,7 @@ const Bundel = (() => {
       let inst;
       try {
         zet(gekozen);
-        const modules = {kleurparen:HulpKlok, verbinden:KlokVerbinden, verbinden24u:KlokVerbinden, tijdverschil:KlokTijdverschil, maateenheden:Maateenheden, ordenen:KlokOrdenen, rangschikken:KlokRangschikken, schrijven:KlokSchrijven, begrippen:KlokBegrippen};
+        const modules = {tijdsduur:Tijdsduur, kleurparen:HulpKlok, verbinden:KlokVerbinden, verbinden24u:KlokVerbinden, tijdverschil:KlokTijdverschil, maateenheden:Maateenheden, ordenen:KlokOrdenen, rangschikken:KlokRangschikken, schrijven:KlokSchrijven, begrippen:KlokBegrippen};
         inst = eerste.type === 'kleurparen' ? HulpKlok.kleurInstellingen() : modules[eerste.type].leesInstellingen(eerste.type === 'verbinden24u' ? '24u' : undefined);
       } finally { zet(huidig); }
       if (!inst) return;
@@ -2992,6 +2995,7 @@ const Bundel = (() => {
       knop('↓ Omlaag', () => verplaatsGroep(id, 1), index === ids.length - 1);
       knop('Vernieuwen', () => vernieuwGroep(id));
       if (eerste.type === 'kloklezen') knop('+ Klok', () => voegKlokToe(id));
+      if (eerste.type === 'tijdsduur') knop('+ Oefening', () => {const inst=eerste.instellingen;inst.vragen.push(Tijdsduur.maak(1,inst.vragen).vragen[0]);renderAlles();});
       knop('Verwijderen', () => verwijderGroep(id));
       rij.append(kop);
       const details = document.createElement('details'); details.open = openBewerkingen.has(id);
@@ -3248,6 +3252,8 @@ const Bundel = (() => {
           }, 50);
         }
 
+      } else if (groep.type === 'tijdsduur') {
+        Tijdsduur.preview(blok, groep.items[0].instellingen, renderAlles);
       } else if (groep.type === 'kleurparen') {
         const inhoud = document.createElement('div');
         HulpKlok.preview(inhoud, groep.items[0].instellingen);
@@ -3368,6 +3374,7 @@ const Bundel = (() => {
   }
 
   function typeLabel(type, inst, aantal) {
+    if (type === 'tijdsduur') return 'Besef tijdsduur: kort of lang';
     if (type === 'kleurparen') return 'Dezelfde kleur geven';
     if (type === 'kloklezen') {
       const notatie = inst.tijdnotatie === '24uur' ? '24u' : '12u';
@@ -3585,7 +3592,7 @@ const Bundel = (() => {
     });
 
     if (oplossingen) {
-      const ondersteund = groepen.filter(g => g.type === 'kleurparen' || (g.type === 'begrippen' && g.items[0].instellingen.variant === 'halfuurvragen') || (g.type === 'kloklezen' && g.items[0].instellingen.klokType !== 'digitaal'));
+      const ondersteund = groepen.filter(g => g.type === 'tijdsduur' || g.type === 'kleurparen' || (g.type === 'begrippen' && g.items[0].instellingen.variant === 'halfuurvragen') || (g.type === 'kloklezen' && g.items[0].instellingen.klokType !== 'digitaal'));
       groepen.splice(0, groepen.length, ...ondersteund);
       if (!groepen.length) { toonMelding('Voeg eerst analoge klokken, kleurparen of halfuurvragen toe voor deze oplossingen.'); return; }
     }
@@ -3610,6 +3617,7 @@ const Bundel = (() => {
       doc.setFont(undefined, 'normal'); // kader + marge
       let eersteBlokH = 0;
       if (groep.type === 'kloklezen')    eersteBlokH = 100;
+      if (groep.type === 'tijdsduur') eersteBlokH = (pageW - 2 * margin - 5) / 2 * .7;
       if (groep.type === 'kleurparen') eersteBlokH = Math.ceil(groep.items[0].instellingen.kaarten.length / 4) * (pageW - 2 * margin) * .85 / 4;  // één rij klokken
       if (groep.type === 'maateenheden') eersteBlokH = 30;
       if (groep.type === 'verbinden') eersteBlokH = groep.items[0].instellingen.indeling === 'linksrechts' ? groep.items[0].instellingen.aantalParen * (groep.items[0].instellingen.aantalParen <= 5 ? 40 : 36) : KlokVerbinden.RIJ_H;
@@ -3672,6 +3680,8 @@ const Bundel = (() => {
           }
         }
 
+      } else if (groep.type === 'tijdsduur') {
+        y = Tijdsduur.pdf(doc, groep.items[0].instellingen, y, margin, nieuweVervolgpagina, oplossingen);
       } else if (groep.type === 'kleurparen') {
         y = HulpKlok.pdf(doc, {...groep.items[0].instellingen, oplossingen}, hulpCanvas, y, margin, nieuweVervolgpagina);
       } else if (groep.type === 'maateenheden') {
