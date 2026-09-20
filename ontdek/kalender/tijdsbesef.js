@@ -6,7 +6,14 @@ const Tijdsbesef = (() => {
     {prent:'zandkasteel', vraag:'Een groot zandkasteel bouwen', antwoord:'lang'},
     {prent:'schoenveter', vraag:'Een schoenveter strikken', antwoord:'kort'},
     {prent:'deur', vraag:'Een deur met de sleutel openen', antwoord:'kort'},
-    {prent:'slapen', vraag:'Een hele nacht slapen', antwoord:'lang'}
+    {prent:'slapen', vraag:'Een hele nacht slapen', antwoord:'lang'},
+    {prent:'jas', vraag:'Een jas aandoen', antwoord:'kort'},
+    {prent:'licht', vraag:'Het licht aandoen', antwoord:'kort'},
+    {prent:'potlood', vraag:'Een potlood slijpen', antwoord:'kort'},
+    {prent:'neus', vraag:'Je neus snuiten', antwoord:'kort'},
+    {prent:'film', vraag:'Een film kijken', antwoord:'lang'},
+    {prent:'voetbal', vraag:'Een voetbalwedstrijd spelen', antwoord:'lang'},
+    {prent:'boswandeling', vraag:'Een wandeling in het bos maken', antwoord:'lang'}
   ];
   const namen = {cirkel:'Weekcirkel',nachten:'Hoeveel keer slapen?',verhalen:'Verhaaltjes over dagen',duur:'Kort of lang?'};
   const opdrachten = {cirkel:'Hoeveel keer slapen? Teken de pijlen en vul in.',nachten:'Hoeveel keer slapen? Vul in.',verhalen:'Lees en los op.',duur:'Kruis aan of de activiteit kort of lang duurt.'};
