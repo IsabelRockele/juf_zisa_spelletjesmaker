@@ -1050,7 +1050,7 @@ function renderBundelPreview(){
     return;
   }
   container.innerHTML='';
-  const labels={kalender:'📅 Kalender',dagen:'📆 Dagen',maanden:'🗓️ Maanden',tellen:'⏳ Tellen',algemeen:'🧠 Algemeen'};
+  const labels={kalender:'📅 Kalender',dagen:'📆 Dagen',maanden:'🗓️ Maanden',tellen:'⏳ Tellen',algemeen:'🧠 Algemeen',tijdsbesef:'🌙 Tijdsbesef'};
   const gezien=new Set();
   oefs.forEach((oef,gi)=>{
     if(gezien.has(oef.groepId))return;
@@ -1062,7 +1062,7 @@ function renderBundelPreview(){
       <span class="preview-blok-nr">Oefening ${gi+1}</span>
       <span class="preview-blok-type">${labels[oef.type]||oef.type}</span>
       <button class="preview-blok-verwijder" onclick="Bundel.verwijderGroep(${oef.groepId})">🗑 Verwijder</button>
-    </div><div class="preview-opdracht">${oef.opdrachtzin}</div>`;
+    </div><div class="preview-opdracht">${oef.opdrachtzin.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</div>`;
     const inhoud=document.createElement('div');
     inhoud.className='preview-inhoud';
 
@@ -1071,6 +1071,8 @@ function renderBundelPreview(){
       inhoud.dataset.kalenderBlok = oef.groepId;
       inhoud.setAttribute('data-kalender-blok', oef.groepId);
       tekenKalenderBlokInhoud(inhoud, oef.inst);
+    } else if(oef.type==='tijdsbesef'){
+      Tijdsbesef.preview(inhoud,oef.inst);
     } else if(oef.type==='dagen'){
       DagenModule.tekenPreviewHtml(inhoud,oef.inst);
     } else if(oef.type==='maanden'){
@@ -1144,6 +1146,7 @@ function downloadPdf(){
 
       // Schat minimale hoogte: opdrachtzin (16) + eerste oefening per type
       const eersteH = oef.type==='kalender' ? 80
+        : oef.type==='tijdsbesef' ? (oef.inst.variant==='cirkel'?90:oef.inst.variant==='verhalen'?80:68)
         : oef.type==='tellen' ? 40
         : 28; // dagen, maanden: 14pt vraag + speling
       if(y + 16 + eersteH + margin > pageH){
@@ -1179,6 +1182,8 @@ function downloadPdf(){
           }
           y+=14;
         });
+      } else if(oef.type==='tijdsbesef'){
+        y=Tijdsbesef.pdf(doc,oef.inst,y,margin,pageW,pageH);
       } else if(oef.type==='dagen'){
         y=DagenModule.tekenInPdf(doc,oef.inst,y,margin,pageW,pageH);
       } else if(oef.type==='maanden'){
@@ -1448,6 +1453,12 @@ function downloadAntwoordblad() {
         });
       }
 
+    } else if (oef.type === 'tijdsbesef') {
+      const eersteRijH = oef.inst.variant === 'cirkel' ? 86 : oef.inst.variant === 'verhalen' ? 57 : 65;
+      if (y + 12 + eersteRijH > pageH - margin - 8) nieuweBladzijde();
+      sectieKop('Dagen en tijdsbesef');
+      y=Tijdsbesef.pdf(doc,oef.inst,y,margin,pageW,pageH,true);
+      nr+=oef.inst.vragen.length;
     } else if (oef.type === 'dagen') {
       sectieKop('Dagen');
       oef.inst.oefeningen.forEach(o => antwoordRij(nr++, o.vraag, o.antwoord));

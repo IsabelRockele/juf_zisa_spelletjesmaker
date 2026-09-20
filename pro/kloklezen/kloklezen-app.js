@@ -2115,7 +2115,7 @@ const KlokOrdenen = (() => {
       if (toonGrenzen) {
         doc.text(dd.label, x + (vakW - 1) / 2, y + vakH * 0.42, { align: 'center' });
         doc.setFontSize(7.5); doc.setFont(undefined, 'normal');
-        doc.text(`${vanUur}u-${totUur}u`, x + (vakW - 1) / 2, y + vakH * 0.82, { align: 'center' });
+        doc.text(`${vanUur}:00 t/m ${totUur-1}:59`, x + (vakW - 1) / 2, y + vakH * 0.82, { align: 'center' });
         doc.setFontSize(9); doc.setFont(undefined, 'bold');
       } else {
         doc.text(dd.label, x + (vakW - 1) / 2, y + vakH * 0.62, { align: 'center' });
@@ -2145,7 +2145,7 @@ const KlokOrdenen = (() => {
       const vanUur = dd.id === 'nacht' ? 0 : Math.floor(dd.van / 60);
       const totUur = dd.id === 'nacht' ? 6 : Math.floor(dd.tot / 60);
       item.textContent = instellingen.toonGrenzen
-        ? `${dd.label} (${vanUur}u-${totUur}u)`
+        ? `${dd.label} (${vanUur}:00 t/m ${totUur-1}:59)`
         : dd.label;
       legenda.appendChild(item);
     });

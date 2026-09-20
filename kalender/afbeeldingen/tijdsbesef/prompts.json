@@ -1,0 +1,49 @@
+{
+  "method": "Built-in image_gen",
+  "images": [
+    {
+      "file": "maan.png",
+      "prompt": "Use case: illustration-story. Asset type: original PNG illustration for a Dutch primary-school worksheet. Subject: A friendly crescent moon with a few stars, simple single isolated object. Style: warm clean children's book illustration, confident dark outlines, flat cheerful colors, restrained soft shading. White background, centered whole subject with generous white margins, readable at small printed size. No text, letters, numbers, logos or watermark. Square composition."
+    },
+    {
+      "file": "dino.png",
+      "prompt": "Use case: illustration-story. Asset type: original PNG illustration for a Dutch primary-school worksheet. Subject: A friendly green long-neck dinosaur, simple single isolated character. Style: warm clean children's book illustration, confident dark outlines, flat cheerful colors, restrained soft shading. White background, centered whole subject with generous white margins, readable at small printed size. No text, letters, numbers, logos or watermark. Square composition."
+    },
+    {
+      "file": "hond.png",
+      "prompt": "Use case: illustration-story. Asset type: original PNG illustration for a Dutch primary-school worksheet. Subject: A friendly brown puppy sitting, simple single isolated character. Style: warm clean children's book illustration, confident dark outlines, flat cheerful colors, restrained soft shading. White background, centered whole subject with generous white margins, readable at small printed size. No text, letters, numbers, logos or watermark. Square composition."
+    },
+    {
+      "file": "onweer.png",
+      "prompt": "Use case: illustration-story. Asset type: original PNG illustration for a Dutch primary-school worksheet. Subject: A blue cloud with a yellow lightning bolt, simple single isolated weather symbol. Style: warm clean children's book illustration, confident dark outlines, flat cheerful colors, restrained soft shading. White background, centered whole subject with generous white margins, readable at small printed size. No text, letters, numbers, logos or watermark. Square composition."
+    },
+    {
+      "file": "vrienden.png",
+      "prompt": "Use case: illustration-story. Asset type: original PNG illustration for a Dutch primary-school worksheet. Subject: Three diverse smiling schoolchildren standing together as friends. Style: warm clean children's book illustration, confident dark outlines, flat cheerful colors, restrained soft shading. White background, centered whole subject with generous white margins, readable at small printed size. No text, letters, numbers, logos or watermark. Square composition."
+    },
+    {
+      "file": "zaag.png",
+      "prompt": "Use case: illustration-story. Asset type: original PNG illustration for a Dutch primary-school worksheet. Subject: A hand saw with a red handle, single isolated tool, no people. Style: warm clean children's book illustration, confident dark outlines, flat cheerful colors, restrained soft shading. White background, centered whole subject with generous white margins, readable at small printed size. No text, letters, numbers, logos or watermark. Square composition."
+    },
+    {
+      "file": "zon.png",
+      "prompt": "Use case: illustration-story. Asset type: original PNG illustration for a Dutch primary-school worksheet. Subject: A cheerful golden sun with rays, single isolated symbol. Style: warm clean children's book illustration, confident dark outlines, flat cheerful colors, restrained soft shading. White background, centered whole subject with generous white margins, readable at small printed size. No text, letters, numbers, logos or watermark. Square composition."
+    },
+    {
+      "file": "zandkasteel.png",
+      "prompt": "Use case: illustration-story. Asset type: original PNG illustration for a Dutch primary-school worksheet. Subject: A fully dressed child building a large sandcastle at the beach with a small bucket and spade. Style: warm clean children's book illustration, confident dark outlines, flat cheerful colors, restrained soft shading. White background, centered whole subject with generous white margins, readable at small printed size. No text, letters, numbers, logos or watermark. Square composition."
+    },
+    {
+      "file": "schoenveter.png",
+      "prompt": "Use case: illustration-story. Asset type: original PNG illustration for a Dutch primary-school worksheet. Subject: A fully dressed child sitting on a low bench tying a shoelace. Hands and laces clearly visible. Style: warm clean children's book illustration, confident dark outlines, flat cheerful colors, restrained soft shading. White background, centered whole subject with generous white margins, readable at small printed size. No text, letters, numbers, logos or watermark. Square composition."
+    },
+    {
+      "file": "deur.png",
+      "prompt": "Use case: illustration-story. Asset type: original PNG illustration for a Dutch primary-school worksheet. Subject: Close view of a hand turning a key in the lock of a front door. Style: warm clean children's book illustration, confident dark outlines, flat cheerful colors, restrained soft shading. White background, centered whole subject with generous white margins, readable at small printed size. No text, letters, numbers, logos or watermark. Square composition."
+    },
+    {
+      "file": "slapen.png",
+      "prompt": "Use case: illustration-story. Asset type: original PNG illustration for a Dutch primary-school worksheet. Subject: A child sleeping under a cozy duvet in a bed, crescent moon outside the window. Style: warm clean children's book illustration, confident dark outlines, flat cheerful colors, restrained soft shading. White background, centered whole subject with generous white margins, readable at small printed size. No text, letters, numbers, logos or watermark. Square composition."
+    }
+  ]
+}
