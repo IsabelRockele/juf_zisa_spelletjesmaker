@@ -107,7 +107,45 @@
   const baseBind=bindEdit;bindEdit=function(){baseBind();document.querySelectorAll('#pages .figure-extra [data-act="replace"]').forEach(button=>{const section=button.closest('.exercise');if(!limitedTypes.has(section.dataset.figureType))return;button.onclick=()=>{const i=state.exercises.findIndex(ex=>String(ex.id)===section.dataset.id);if(i<0)return;const fresh=makeUnique(state.exercises[i].type,{},state.exercises);if(fresh){state.exercises.splice(i,1,fresh);render();}};});};
 })();
 
-/* Fill gaps with the next complete exercise that fits; never shrink drawing scales. */
+// Pattern rows share one assignment; other exercise records are complete assignments.
+function meetkundeAssignmentGroups(exercises=state.exercises){
+  const groups=[],byKey=new Map();
+  for(const ex of exercises){
+    const key=ex.type.startsWith('pattern')&&ex.type!=='patternHelp'
+      ?`${ex.type}:${ex.patternGroup??ex.id}`:`exercise:${ex.id}`;
+    if(!byKey.has(key)){const group=[];byKey.set(key,group);groups.push(group);}
+    byKey.get(key).push(ex);
+  }
+  return groups;
+}
+
+/* Number and move assignments, including all their rows. */
+(() => {
+  const baseRender=renderEx;
+  renderEx=function(ex,index){
+    const actualIndex=state.exercises.indexOf(ex);
+    const number=meetkundeAssignmentGroups().findIndex(group=>group.includes(ex))+1;
+    return baseRender(ex,actualIndex<0?index:actualIndex).replace(/(<h3\b[^>]*>)\d+\./,`$1${number||index+1}.`);
+  };
+  const baseBind=bindEdit;
+  bindEdit=function(){
+    baseBind();
+    document.querySelectorAll('#pages [data-act="up"],#pages [data-act="down"]').forEach(button=>{
+      button.title=button.dataset.act==='up'?'Hele opdracht omhoog':'Hele opdracht omlaag';
+      button.onclick=()=>{
+        const groups=meetkundeAssignmentGroups(),id=button.closest('.exercise').dataset.id;
+        const from=groups.findIndex(group=>group.some(ex=>String(ex.id)===id));
+        const to=from+(button.dataset.act==='up'?-1:1);
+        if(from<0||to<0||to>=groups.length)return;
+        [groups[from],groups[to]]=[groups[to],groups[from]];
+        state.exercises.splice(0,state.exercises.length,...groups.flat());
+        render();
+      };
+    });
+  };
+})();
+
+/* Fill gaps without separating rows belonging to the same assignment. */
 (() => {
   const label=document.createElement('label');label.className='check';
   label.innerHTML='<input type="checkbox" id="compactPages" checked> Vul lege ruimte met een volgende passende opdracht';
@@ -121,23 +159,32 @@
   paginate=function(){
     const baseline=sequentialPaginate();
     if(!compact.checked||state.solutionMode||baseline.length<2)return baseline;
-    const pending=state.exercises.slice(),pages=[];
+    const original=state.exercises.slice(),pending=meetkundeAssignmentGroups(),pages=[];
     let current=[],m=makeMeasurePage(0);
+    const nextPage=()=>{pages.push(current);current=[];m.host.remove();m=makeMeasurePage(pages.length);};
+    const append=ex=>{
+      const holder=document.createElement('div');
+      holder.innerHTML=renderEx(ex,state.exercises.indexOf(ex));
+      const node=holder.firstElementChild;m.content.append(node);return node;
+    };
+    const fits=node=>node.getBoundingClientRect().bottom<=m.page.querySelector('.page-footer').getBoundingClientRect().top-6;
     try{
       while(pending.length){
         let chosen=-1;
         for(let i=0;i<pending.length;i++){
-          const holder=document.createElement('div');
-          holder.innerHTML=renderEx(pending[i],pages.flat().length+current.length);
-          const node=holder.firstElementChild;m.content.append(node);
-          if(node.getBoundingClientRect().bottom<=m.page.querySelector('.page-footer').getBoundingClientRect().top-6||!current.length){chosen=i;break;}
-          node.remove();
+          state.exercises.splice(0,state.exercises.length,...pages.flat(),...current,...pending[i],...pending.filter((_,j)=>j!==i).flat());
+          const node=append(pending[i][0]),canStart=fits(node)||!current.length;
+          node.remove();if(canStart){chosen=i;break;}
         }
-        if(chosen>=0){current.push(pending.splice(chosen,1)[0]);continue;}
-        pages.push(current);current=[];m.host.remove();m=makeMeasurePage(pages.length);
+        if(chosen<0){nextPage();continue;}
+        for(const ex of pending.splice(chosen,1)[0]){
+          const node=append(ex);
+          if(!fits(node)&&current.length){node.remove();nextPage();append(ex);}
+          current.push(ex);
+        }
       }
       if(current.length)pages.push(current);
-    }finally{m.host.remove();}
+    }finally{m.host.remove();state.exercises.splice(0,state.exercises.length,...original);}
     if(pages.length>baseline.length)return baseline;
     // Keep numbering and the move/delete controls aligned with the visible order.
     state.exercises.splice(0,state.exercises.length,...pages.flat());
