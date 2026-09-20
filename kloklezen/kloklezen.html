@@ -70,6 +70,8 @@
           <div class="checkbox-chip"><input type="checkbox" name="moeilijkheid" value="kwartier"/> Kwartieren</div>
           <div class="checkbox-chip"><input type="checkbox" name="moeilijkheid" value="5minuten"/> Per 5 min</div>
           <div class="checkbox-chip"><input type="checkbox" name="moeilijkheid" value="minuut"/> Per minuut</div>
+          <div class="checkbox-chip"><input type="checkbox" name="moeilijkheid" value="bijna"/> Bijna het uur</div>
+          <div class="checkbox-chip"><input type="checkbox" name="moeilijkheid" value="netover"/> Net over het uur</div>
         </div>
       </div>
       <!-- Tijdnotatie: enkel bij analoge klok -->
@@ -94,10 +96,13 @@
         <div class="radio-groep">
           <div class="radio-chip geselecteerd"><input type="radio" name="invulmethode" value="digitaal" checked/> Digitaal (wekker)</div>
           <div class="radio-chip"><input type="radio" name="invulmethode" value="analoog"/> Analoog (zin)</div>
+          <div class="radio-chip"><input type="radio" name="invulmethode" value="beide"/> Zin én digitale wekker</div>
         </div>
       </div>
       <div class="config-kaart" id="kaart-hulpmiddelen">
         <div class="kaart-titel"><div class="icon">💡</div>Hulpmiddelen</div>
+        <label style="display:block;margin-bottom:10px;font-size:13px;"><input type="checkbox" id="gekleurdeHulpklok"/> Gekleurde hulpklok</label>
+        <p style="font-size:12px;color:var(--muted);">Rode uurwijzer en urenboog, blauwe minutenwijzer en minutenboog. Vervangt de andere hulpmiddelen. Bij bijna/net over verschijnt automatisch een invulzin.</p>
         <div class="form-rij">
           <label for="voorOverHulp">Voor/over hulp</label>
           <select id="voorOverHulp">
@@ -243,8 +248,20 @@
 
       <!-- Sub-tab 1: Klok ↔ Tijd -->
       <div id="verbSectie1">
+        <div class="config-kaart"><div class="kaart-titel">Wat doet de leerling?</div>
+          <div class="voorbeeld-keuzes" id="verbWerkwijzeKeuzes"></div>
+          <select id="verbWerkwijze" hidden><option value="lijnen">Lijnen trekken</option><option value="kleuren">Dezelfde kleur geven</option></select>
+        </div>
+<div class="config-kaart" id="verbIndelingKaart"><div class="kaart-titel">Indeling</div><select id="verbIndeling" hidden><option value="bovenonder">Klokken boven – tijden onder</option><option value="linksrechts">Klokken links – tijden rechts</option></select><div class="voorbeeld-keuzes" id="verbIndelingKeuzes"></div><div id="verbParenKeuze" style="display:none;margin-top:10px;"><label for="verbAantalParen">Aantal paren</label><select id="verbAantalParen"><option value="4">4 paren</option><option value="5" selected>5 paren</option><option value="6">6 paren</option></select></div></div>
+        <div class="config-kaart" id="verbKlokStijl"><div class="kaart-titel">Klokstijl</div><input type="checkbox" id="verbGekleurdeHulpklok" hidden/><div class="voorbeeld-keuzes" id="verbStijlKeuzes"></div></div>
+        <div class="config-kaart" id="kleurOpties" style="display:none;">
+          <label for="kleurAantalParen">Aantal paren</label>
+          <select id="kleurAantalParen"><option value="4">4 paren (8 vakken)</option><option value="6" selected>6 paren (12 vakken)</option></select>
+
+        </div>
         <div class="config-kaart">
           <div class="kaart-titel"><div class="icon">🎯</div>Moeilijkheid</div>
+          <div class="form-rij" style="margin-bottom:10px;"><label for="verbSnelleKeuze">Snelle keuze</label><select id="verbSnelleKeuze"><option value="uur">Hele uren</option><option value="halfuur">Halve uren</option><option value="mix">Mix: uur en halfuur</option><option value="eigen">Eigen keuze</option></select></div>
           <div class="checkbox-groep">
             <div class="checkbox-chip geselecteerd"><input type="checkbox" name="verbMoeilijkheid" value="uur" checked/> Hele uren</div>
             <div class="checkbox-chip geselecteerd"><input type="checkbox" name="verbMoeilijkheid" value="halfuur" checked/> Halve uren</div>
@@ -530,6 +547,22 @@
 
     <!-- TAB BEGRIPPEN -->
     <div class="sidebar-content" id="tab-begrippen">
+      <div class="config-kaart"><div class="kaart-titel">Wat wil je oefenen?</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="begripOefening" value="kleuren" checked/> Kleur wat bij het begrip hoort</div>
+          <div class="radio-chip"><input type="radio" name="begripOefening" value="halfuurvragen"/> Welk uur is voorbij of komt eraan?</div>
+        </div>
+      </div>
+      <div class="config-kaart" id="halfVraagOpties" style="display:none;">
+        <div class="kaart-titel">Vragen over het halfuur</div>
+        <p style="font-size:12px;line-height:1.5;">Als het half 6 is, welk uur is er dan net voorbij?<br/>☐ 4 uur &nbsp; ☐ 5 uur &nbsp; ☐ 6 uur</p>
+        <div class="radio-groep">
+          <div class="radio-chip"><input type="radio" name="halfVraagSoort" value="voorbij"/> Net voorbij</div>
+          <div class="radio-chip"><input type="radio" name="halfVraagSoort" value="komt"/> Komt eraan</div>
+          <div class="radio-chip geselecteerd"><input type="radio" name="halfVraagSoort" value="mix" checked/> Een mix</div>
+        </div>
+        <div class="form-rij" style="margin-top:10px;"><label for="halfVraagAantal">Aantal vragen</label><select id="halfVraagAantal"><option value="4">4</option><option value="6">6</option><option value="8" selected>8</option><option value="12">12</option></select></div>
+      </div>
       <div class="config-kaart">
         <div class="kaart-titel"><div class="icon">🎯</div>Centraal begrip</div>
         <div class="radio-groep">
@@ -569,6 +602,8 @@
   <div class="content">
     <div class="toolbar">
       <span class="toolbar-label">📋 Bundelopbouw</span>
+      <label for="previewWeergave" style="font-size:12px;">Weergave</label>
+      <select id="previewWeergave" class="toolbar-knop"><option value="pdf">A4 / PDF-voorbeeld</option><option value="bewerken">Bewerken</option></select>
       <div class="toolbar-spacer"></div>
       <div id="bundelMelding" class="bundel-melding-toolbar"></div>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap;cursor:pointer;">
@@ -576,6 +611,7 @@
         Titel op elke pagina
       </label>
       <button class="toolbar-knop primair" id="downloadPdfBtn">📄 Download PDF</button>
+      <button class="toolbar-knop" id="downloadOplossingenBtn" title="Oplossingen voor analoge klokleesoefeningen, kleurparen en halfuurvragen in deze bundel">Oplossingen</button>
     </div>
 
     <!-- INFO MODAAL -->
@@ -587,7 +623,7 @@
 
         <h3 style="font-size:15px;color:#4A90D9;margin:0 0 8px;">⚙️ Algemene werking</h3>
         <p style="font-size:13px;line-height:1.7;margin:0 0 12px;">Kies een tabblad links, stel de oefening in en klik <strong>➕ Voeg toe aan bundel</strong>. Je ziet de oefening rechts verschijnen in de preview. Je kunt meerdere oefeningen uit verschillende tabbladen combineren in één bundel. Klik daarna op <strong>📄 Download PDF</strong> om het werkblad te genereren.</p>
-        <p style="font-size:13px;line-height:1.7;margin:0 0 20px;background:#fff8e8;border-left:3px solid #f0b429;padding:8px 12px;border-radius:4px;">💡 De <strong>preview</strong> toont een vereenvoudigd voorbeeld van je oefeningen. Het uitzicht in de PDF kan lichtjes afwijken (andere lettergrootte, betere lay-out), maar de inhoud is altijd correct. Gebruik de preview om te controleren welke oefeningen je hebt toegevoegd.</p>
+        <p style="font-size:13px;line-height:1.7;margin:0 0 20px;background:#fff8e8;border-left:3px solid #f0b429;padding:8px 12px;border-radius:4px;">💡 Het <strong>A4 / PDF-voorbeeld</strong> toont dezelfde pagina’s als de PDF-download, inclusief de juiste verhoudingen en pagina-einden. Kies <strong>Bewerken</strong> om losse klokken of oefeningen te verwijderen of klokken toe te voegen.</p>
 
         <h3 style="font-size:15px;color:#4A90D9;margin:0 0 8px;">📑 Tabbladen</h3>
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
@@ -651,7 +687,11 @@
 <!-- Scripts: jsPDF eerst, dan app (alles in één bestand) -->
 <canvas id="mainCanvas" width="552" height="552" style="display:none;"></canvas>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="hulpklok.js"></script>
+<script src="halfuur-vragen.js"></script>
+<script src="pdf-voorbeeld.js"></script>
 <script src="kloklezen-app.js"></script>
+<script src="visuele-keuzes.js"></script>
 
 </body>
 </html>

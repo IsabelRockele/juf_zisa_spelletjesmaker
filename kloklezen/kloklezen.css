@@ -649,3 +649,63 @@ header .badge {
 .tab-begrippen { background: #fde8f5; color: #5a1a4c; }
 .tab-begrippen:hover { background: #f5c8e8; }
 .tab-begrippen.active { background: #9b2576 !important; color: #fff; border-bottom-color: #7a1a5a !important; font-weight: 800; }
+
+/* A4-voorbeeld en begrensde bewerkweergave */
+.toolbar { flex-wrap: wrap; }
+.pdf-voorbeeld-pagina { width:100%; max-width:794px; margin:0 auto 24px; }
+.pdf-voorbeeld-pagina figcaption { text-align:center; color:var(--muted); font-size:12px; padding:0 0 8px; }
+.pdf-voorbeeld-pagina canvas { display:block; width:100%; height:auto; background:white; box-shadow:0 2px 10px #0002; }
+.pdf-voorbeeld-status { text-align:center; padding:24px; color:var(--muted); }
+#bundelPreview > .preview-blok { max-width:794px; margin:0 auto 16px; }
+#bundelPreview .preview-blok canvas { max-width:100%; height:auto; }
+
+.bundel-bewerkingen { max-width:794px; margin:0 auto 24px; background:#fff; border:1px solid var(--border); border-radius:10px; padding:12px; }
+.bundel-bewerkingen h3 { font-size:14px; margin:0 0 10px; }
+.bundel-bewerkrij { padding:10px 0; border-top:1px solid var(--border); }
+.bundel-bewerkkop { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.bundel-bewerkkop strong { width:100%; font-size:12px; }
+.bundel-bewerkingen .toolbar-knop { font-size:12px; padding:5px 9px; cursor:pointer; }
+.bundel-bewerkingen button:disabled { opacity:.4; cursor:default; }
+.bundel-bewerkingen summary { cursor:pointer; font-size:12px; padding:8px 0; color:var(--blauw); }
+.bundel-bewerkingen textarea { display:block; width:100%; box-sizing:border-box; margin:4px 0 8px; padding:8px; border:1px solid var(--border); border-radius:5px; font:inherit; font-size:13px; }
+.bundel-losse-klokken { display:flex; gap:5px; flex-wrap:wrap; margin-top:10px; }
+
+.voorbeeld-keuzes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.voorbeeld-keuze { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:0; padding:8px 5px; border:2px solid #dce5ef; border-radius:9px; background:#fff; color:#29425d; font:inherit; font-size:12px; cursor:pointer; }
+.voorbeeld-keuze:hover { border-color:#71a4d5; background:#f7fbff; }
+.voorbeeld-keuze.gekozen { border-color:#2878ce; background:#eef6ff; }
+.voorbeeld-keuze canvas { display:block; width:100%; max-width:144px; height:auto; }
+.voorbeeld-vink { display:none; position:absolute; right:5px; top:3px; color:#1769b4; font-size:16px; }
+.voorbeeld-keuze.gekozen .voorbeeld-vink { display:block; }
+.voorbeeld-keuze:focus-visible { outline:3px solid #e9b33e; outline-offset:2px; }
+.voorbeeld-keuze[hidden] { display:none; }
+.voorbeeld-zin { grid-column:1/-1; }
+.voorbeeld-zin canvas { max-width:180px; }
+.voorbeeld-invullen { grid-template-columns:1fr; }
+.voorbeeld-invul { flex-direction:row; justify-content:flex-start; gap:8px; text-align:left; }
+.voorbeeld-invul canvas { width:130px; flex-shrink:0; }
+.voorbeeld-uitleg { font-size:11px; line-height:1.5; color:var(--muted); margin:10px 0 0; }
+
+/* Bewerken hoort bij de gedrukte opdracht, niet in een apart overzicht. */
+.pdf-voorbeeld-papier { position:relative; }
+.pdf-opdracht-acties { position:absolute; left:4.76%; right:4.76%; z-index:2; pointer-events:none; }
+.pdf-opdracht-acties:focus-within, .pdf-opdracht-acties:has(details[open]) { z-index:5; }
+.inline-bewerkingen.bundel-bewerkingen { max-width:none; margin:0; padding:0; border:0; background:transparent; }
+.inline-bewerkingen .bundel-bewerkrij { border:0; padding:0; display:flex; align-items:center; justify-content:flex-end; gap:4px; }
+.inline-bewerkingen .bundel-bewerkkop { flex-wrap:nowrap; gap:3px; }
+.inline-bewerkingen .bundel-bewerkkop strong { display:none; }
+.inline-bewerkingen .toolbar-knop { padding:3px 7px; font-size:12px; min-height:25px; background:#fff; pointer-events:auto; }
+.inline-bewerkingen details { position:relative; pointer-events:auto; }
+.inline-bewerkingen summary { list-style:none; padding:3px 8px; min-height:25px; box-sizing:border-box; border:1px solid #9cbadb; border-radius:5px; background:#fff; font-size:15px; line-height:18px; }
+.inline-bewerkingen summary::-webkit-details-marker { display:none; }
+.pdf-opdracht-acties .inline-bewerkingen { position:absolute; right:0; top:0; transform:translateY(-65%); }
+.pdf-opdracht-acties .bundel-bewerkkop { opacity:0; transition:opacity .12s; }
+.pdf-voorbeeld-papier:hover .bundel-bewerkkop, .pdf-opdracht-acties:focus-within .bundel-bewerkkop { opacity:1; }
+.inline-bewerkingen details[open] { width:min(420px,65vw); padding:10px; background:white; border:1px solid #b5cbe1; border-radius:8px; box-shadow:0 4px 16px #0002; }
+.inline-bewerkingen details[open] summary { width:32px; margin-left:auto; }
+.inline-bewerkingen .bundel-losse-klokken { max-height:160px; overflow:auto; }
+.preview-blok > .inline-bewerkingen { padding:4px 12px; }
+@media (hover:none) { .pdf-opdracht-acties .bundel-bewerkkop { opacity:1; } }
+
+.pdf-opdracht-acties .inline-bewerkingen { transform:translateY(-17px); }
+.pdf-opdracht-acties .inline-bewerkingen details[open] { position:absolute; right:0; top:28px; }
