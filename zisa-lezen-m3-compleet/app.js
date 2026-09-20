@@ -22,6 +22,26 @@ let fluencyScore = 0;
 
 const roleColors = {wie:"#f4d94e",doet:"#ef6b67",waar:"#a985d6",wat:"#9a6b45",hoe:"#67c98f",wanneer:"#f3a04b"};
 const storyGlossaries={
+  ...(window.ZISA_STORY_GLOSSARIES||{}),
+  "m4-nila-geitje":{
+    prehistorie:"Een tijd heel lang geleden, vóór mensen hier gingen schrijven. De steentijd is een deel van de prehistorie.",
+    steentijd:"Een deel van de prehistorie. Mensen maakten toen veel gereedschap van steen, zoals bijlen en messen. Eerst leefden ze van jagen en voedsel zoeken. Later kwamen er ook boeren, zoals in dit verhaal.",
+    leem:{text:"Een soort aarde die je met water kunt mengen. Je kunt er muren mee dicht smeren.",image:"images/woorduitleg/m4-leem.webp"},
+    stro:"De droge stelen van graan, zonder de korrels. Je kunt er een dak mee bedekken.",
+    maalt:"Maakt iets heel fijn. Moeder wrijft het graan fijn tussen twee stenen.",
+    maalden:"Maakten iets heel fijn. De boeren wreven graan fijn tussen stenen.",
+    graan:{text:"Planten met korrels die je kunt eten. Van die korrels kun je meel maken.",image:"images/woorduitleg/m4-graan.webp"},
+    meel:"Fijn poeder van graan. Je kunt er brood of pap mee maken.",
+    spoor:"Een teken dat laat zien waar iemand of een dier is geweest. Hier zijn het putjes van poten.",
+    hoeven:{text:"De harde delen onder aan de poten van een geit. De geit staat en loopt erop.",image:"images/woorduitleg/m4-hoeven.webp"},
+    akker:"Een stuk grond waar een boer planten laat groeien, zoals graan.",
+    halmen:{text:"De lange stelen van graan. Bovenaan groeien de korrels.",image:"images/woorduitleg/m4-halmen.webp"},
+    beek:"Een smal stroompje water dat door het land loopt.",
+    gemekker:"Het geluid dat een geit maakt: mèèè!",
+    voorpoot:"Een van de twee poten vooraan bij een dier met vier poten.",
+    vlecht:"Steekt takken om en om tussen elkaar. Zo blijven ze samen een stevig hek vormen.",
+    klei:"Zachte, natte aarde die je kunt kneden. Je kunt er een kom of pot van maken."
+  },
   "m6-raadsel-nachtcamera":{
     nachtcamera:{text:"Een camera die automatisch foto's of filmpjes maakt wanneer er in het donker een dier voorbijkomt.",image:"images/woorduitleg/nachtcamera.png"},sporengids:"Een boek waarmee je kunt herkennen van welk dier een spoor is.",splitsing:"Een plek waar een weg of pad in twee richtingen verdergaat.",omheining:"Een hek of afsluiting rond een plek.",dassenburcht:{text:"Het ondergrondse gangenstelsel waarin dassen wonen.",image:"images/woorduitleg/dassenburcht.png"},veiligheidslijn:"Een lijn die aangeeft tot waar je veilig mag komen.",grijpstok:{text:"Een lange stok met een grijper waarmee je iets vanop afstand kunt pakken.",image:"images/woorduitleg/grijpstok.png"},geheugenkaart:"Een klein kaartje waarop een camera foto's en filmpjes bewaart.",bevestiging:"Het onderdeel waarmee iets stevig vastzit."
   },

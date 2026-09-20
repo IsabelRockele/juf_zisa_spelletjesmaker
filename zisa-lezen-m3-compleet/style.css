@@ -301,6 +301,11 @@ body.mission-mode main{display:grid;place-items:center}
 .short-vowel-words{display:grid;justify-items:center;gap:12px;margin:12px auto}.short-vowel-word{display:flex;align-items:center;gap:6px}.short-vowel-letter{display:grid;place-items:center;width:54px;height:60px;border:3px solid #8fc7e1;border-radius:14px;background:#fff;color:#173e70;font-size:32px;font-weight:900;cursor:pointer}.short-vowel-letter.correct{border-color:#38a56d;background:#dff8e9}.short-vowel-letter.wrong{border-color:#df5961;background:#ffe8ea}.short-vowel-letter:disabled{opacity:1;cursor:default}.short-vowel-word .mini-listen{margin-left:7px}@media(max-width:720px){.short-vowel-words{gap:7px;margin:6px auto}.short-vowel-letter{width:43px;height:46px;font-size:25px}.short-vowel-word{gap:4px}}
 
 /* Op een liggende tablet blijft naast de prent minder ruimte voor antwoorden. */
+/* Bewaar de volledige losse E4-prenten, ook in het brede tabletbeeldkader. */
+.story-image[style*="images/e4-aardbeien/"],
+.story-image[style*="images/m5-lege-mand/"],
+.story-image[style*="images/m5-nieuw-papier/"],
+.story-image[style*="images/e4-reus-feest/"]{background-size:contain}
 @media (min-width:841px) and (max-width:1100px){
   .inline-answers{grid-template-columns:1fr}
   .inline-answer-wrap{min-height:44px}
