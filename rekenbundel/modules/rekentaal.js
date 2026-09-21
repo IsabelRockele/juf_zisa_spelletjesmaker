@@ -4,6 +4,8 @@
 
 var REKENTAAL_ZINNEN = {
   optellen: [
+    {"id":"opt7","label":"Tel de termen … en … op","template":"Tel de termen {a} en {b} op.","schrijfruimte":true},
+    {"id":"opt8","label":"Ik vermeerder … met … Dan heb ik …","template":"Ik vermeerder {a} met {b}. Dan heb ik {?}.","schrijfruimte":true},
     { id:'opt1', label:'De som van … en …',            template:'De som van {a} en {b} is {?}.' },
     { id:'opt2', label:'… meer dan …',                 template:'{b} meer dan {a} is {?}.' },
     { id:'opt3', label:'Tel … bij … op',               template:'Tel {b} bij {a} op. {?}' },
@@ -12,6 +14,7 @@ var REKENTAAL_ZINNEN = {
     { id:'opt6', label:'… vermeerderd met … is …',     template:'{a} vermeerderd met {b} is {?}.' },
   ],
   aftrekken: [
+    {"id":"aft6","label":"Het aftrektal is … en de aftrekker …","template":"Het aftrektal is {a} en de aftrekker {b}.","schrijfruimte":true},
     { id:'aft1', label:'Het verschil van … en …',      template:'Het verschil van {a} en {b} is {?}.' },
     { id:'aft2', label:'… minder dan …',               template:'{b} minder dan {a} is {?}.' },
     { id:'aft3', label:'Trek … van … af',              template:'Trek {b} van {a} af. {?}' },
@@ -19,10 +22,16 @@ var REKENTAAL_ZINNEN = {
     { id:'aft5', label:'… verminderd met … is …',      template:'{a} verminderd met {b} is {?}.' },
   ],
   vermenigvuldigen: [
+    {"id":"verm3","label":"Vermenigvuldig de factoren … en …","template":"Vermenigvuldig de factoren {P} en {Q}.","schrijfruimte":true},
+    {"id":"verm4","label":"Hoeveel is het product van … en …?","template":"Hoeveel is het product van {P} en {Q}?","schrijfruimte":true},
+    {"id":"verm5","label":"… keer … is …","template":"{P} keer {Q} is {?}.","schrijfruimte":true},
     { id:'verm1', label:'Het product van … en …',      template:'Het product van {P} en {Q} is {?}.' },
     { id:'verm2', label:'Vermenigvuldig … met …',      template:'Vermenigvuldig {P} met {Q}. {?}' },
   ],
   delen: [
+    {"id":"deel3","label":"Hoeveel is het quotiënt van … en …?","template":"Hoeveel is het quotiënt van {a} en {b}?","schrijfruimte":true},
+    {"id":"deel4","label":"De deler is … en het deeltal is …","template":"De deler is {b} en het deeltal is {a}.","schrijfruimte":true},
+    {"id":"deel5","label":"Ik verdeel … in … delen. Dan krijg ik …","template":"Ik verdeel {a} in {b} delen. Dan krijg ik {?}.","schrijfruimte":true},
     { id:'deel1', label:'Het quotiënt van … en …',     template:'Het quotiënt van {a} en {b} is {?}.' },
     { id:'deel2', label:'… gedeeld door … is …',       template:'{a} gedeeld door {b} is {?}.' },
   ],
@@ -179,7 +188,7 @@ var RekentaalGenerator = (() => {
 
       oefeningen.push({
         sleutel:sleutel, cat:cat2, templateId:tmpl2.id,
-        template:tmpl2.template, a:a, b:b, P:P, Q:Q, antwoord:antwoord
+        template:tmpl2.template, schrijfruimte:!!tmpl2.schrijfruimte, a:a, b:b, P:P, Q:Q, antwoord:antwoord
       });
     }
     return oefeningen;
@@ -400,6 +409,36 @@ var RekentaalPdfRenderer = (() => {
 
     (blok.oefeningen || []).forEach(function(oef) {
       checkPagina();
+      if (oef.schrijfruimte) {
+        var zin = oef.template.replace('{a}', oef.a).replace('{b}', oef.b)
+          .replace('{P}', oef.P).replace('{Q}', oef.Q).replace('{?}', '________');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        var regels = doc.splitTextToSize(zin, CW - 4);
+        var hoogte = regels.length * 6 + 14;
+        if (y + hoogte > PH - MB) {
+          doc.addPage(); y = 15;
+          if (layout.tekenVoettekst) layout.tekenVoettekst();
+        }
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(0, 0, 0);
+        regels.forEach(function(regel, index) { doc.text(regel, ML, y + index * 6); });
+        var lijnY = y + (regels.length - 1) * 6 + 9;
+        doc.setDrawColor(140, 140, 140);
+        doc.setLineWidth(0.4);
+        doc.line(ML, lijnY, ML + CW - 4, lijnY);
+        if (layout.metAntwoorden) {
+          var teken = { optellen:'+', aftrekken:'-', vermenigvuldigen:'×', delen:':' }[oef.cat];
+          var eerste = oef.cat === 'vermenigvuldigen' ? oef.P : oef.a;
+          var tweede = oef.cat === 'vermenigvuldigen' ? oef.Q : oef.b;
+          doc.setTextColor(0, 130, 0);
+          doc.text(eerste + ' ' + teken + ' ' + tweede + ' = ' + oef.antwoord, ML + 2, lijnY - 1);
+          doc.setTextColor(0, 0, 0);
+        }
+        y += hoogte;
+        return;
+      }
       var cy = y;
       var cx = ML;
 

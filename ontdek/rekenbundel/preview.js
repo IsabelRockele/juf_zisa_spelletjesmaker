@@ -2965,7 +2965,7 @@ const Preview = (() => {
     (blok.oefeningen || []).forEach((oef, idx) => {
       const zinHtml = _renderZin(oef);
       // Bepaal bewerking voor oplossing
-      const _rtBew = oef.bewerking || blok.bewerking || '';
+      const _rtBew = oef.cat || oef.bewerking || blok.bewerking || '';
       const _rtA = oef.a !== undefined ? oef.a : (oef.P !== undefined ? oef.P : '');
       let _rtB = oef.b !== undefined ? oef.b : (oef.Q !== undefined ? oef.Q : '');
       const _rtAnt = oef.antwoord !== undefined ? oef.antwoord : '';
@@ -2996,7 +2996,7 @@ const Preview = (() => {
         ? _rtA + ' ' + _rtTeken + ' ' + _rtB + ' = ' + _rtAnt
         : (_rtAnt !== '' ? String(_rtAnt) : '');
 
-      oefHtml += '<div class="rt-oef-rij">' +
+      oefHtml += '<div class="rt-oef-rij' + (oef.schrijfruimte ? ' rt-oef-schrijf' : '') + '">' +
         '<span class="rt-oef-zin">' + zinHtml + '</span>' +
         '<span class="rt-pijl">&#x2192;</span>' +
         '<span class="rt-oef-lijn" data-antwoord="' + _rtOplStr + '"></span>' +

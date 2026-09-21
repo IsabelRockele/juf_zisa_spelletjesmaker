@@ -76,3 +76,10 @@
   background: #1A3A5C;
   color: #fff;
 }
+
+/* Volledige rekentaalzinnen met een ruime bewerkingslijn eronder. */
+.rt-oef-rij.rt-oef-schrijf { display:flex; flex-wrap:wrap; position:relative; padding:8px 28px 10px 4px; gap:6px; }
+.rt-oef-schrijf .rt-oef-zin { flex:0 0 100%; min-width:0; white-space:normal; }
+.rt-oef-schrijf .rt-pijl { display:none; }
+.rt-oef-schrijf .rt-oef-lijn { flex:0 0 100%; width:100%; min-height:26px; margin:0; }
+.rt-oef-schrijf .btn-del-oef { position:absolute; right:0; top:8px; }
