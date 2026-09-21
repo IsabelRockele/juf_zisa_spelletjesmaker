@@ -8,11 +8,11 @@
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <!-- Volgorde: eerst oefeningen, dan preview, dan pdf -->
-  <script defer src="getalinzicht.js?v=rekentaal1"></script>
+  <script defer src="getalinzicht.js?v=rekentaal-zinnen2"></script>
   <script defer src="gi-preview.js?v=range-freeze-fix-1"></script>
   <script defer src="gi-pdf.js?v=pagepack3"></script>
 
-  <link rel="stylesheet" href="getalinzicht.css">
+  <link rel="stylesheet" href="getalinzicht.css?v=rekentaal-zinnen2">
   <link rel="stylesheet" href="getalinzicht-ui.css">
 </head>
 <body class="modus-werkbundel">
@@ -373,7 +373,7 @@
 
     <!-- ══ TAB: REKENTAAL ════════════════════════════════════ -->
     <div class="sidebar-content" id="tab-rekentaal" style="display:none">
-      <div class="sectie-titel">Rekentaal: voor en na</div>
+      <div class="sectie-titel">Rekentaal</div>
       <div class="config-kaart">
         <div class="kaart-titel"><span class="icon">🎓</span> Leerjaar &amp; bereik</div>
         <div class="veld-rij">
@@ -395,6 +395,19 @@
         <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="blankAfter" checked> … komt net na 7</label>
       </div>
       <button class="btn-toevoegen" id="btnAddRekentaal">➕ Voeg rekentaal toe</button>
+      <div class="config-kaart" id="rekentaalZinnenKaart" hidden>
+        <div class="kaart-titel"><span class="icon">✏️</span> Zinnen met schrijflijnen — tot 100</div>
+        <div class="harm-beschrijving">Kies de soorten vragen. Onder elke zin komt een lange schrijflijn, ook voor meerdere getallen. Het aantal en de afstand kies je hierboven.</div>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-alle" checked> Alle even of oneven getallen tussen twee getallen</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-te" checked> Een getal met tientallen en eenheden</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tussen" checked> Een even of oneven getal tussen twee grenzen</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-voorna" checked> Welk getal komt juist / twee plaatsen voor of na?</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tiental" checked> Welk tiental komt juist voor of na?</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tientallen" checked> Welke tientallen staan tussen twee getallen?</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tussen-tientallen" checked> Tussen welke tientallen ligt een getal?</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-buren" checked> Welk getal komt voor … en na …?</label>
+        <button class="btn-toevoegen" id="btnAddRekentaalZinnen">➕ Voeg zinnen met schrijflijnen toe</button>
+      </div>
     </div>
 
     <!-- ══ TAB: GETALLENRIJ ═══════════════════════════════════ -->
@@ -903,10 +916,16 @@ const GI_UI = (() => {
 
   document.addEventListener('DOMContentLoaded', () => {
     initChips();
+    const updateRekentaalZinnen = () => {
+      document.getElementById('rekentaalZinnenKaart').hidden = document.getElementById('rekentaalMax').value !== '100';
+    };
+    document.getElementById('rekentaalMax')?.addEventListener('change', updateRekentaalZinnen);
+    updateRekentaalZinnen();
     document.getElementById('rekentaalLeerjaar')?.addEventListener('change', e => {
       const advies = { '1': '20', '2': '100', '3': '1000' };
       const bereik = document.getElementById('rekentaalMax');
       if (bereik) bereik.value = advies[e.target.value] || '20';
+      updateRekentaalZinnen();
     });
     toonTab('getallenlijn', document.querySelector('.tab-getallenlijn'));
   });

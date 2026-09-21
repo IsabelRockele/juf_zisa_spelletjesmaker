@@ -2785,6 +2785,47 @@ placeAfterLastOfKey(block, key);
 
   /* ══ Rekentaal: voor en na ════════════════════════════════ */
   function _rekentaalOpgave(vorm, afstand, max) {
+    if (vorm.startsWith('zin-')) {
+      const rand = (min, bovengrens) => min + Math.floor(Math.random() * (bovengrens - min + 1));
+      let tekst, antwoord;
+      const basis = rand(11, 98);
+      if (vorm === 'zin-alle') {
+        const onder = rand(1, 8) * 10;
+        const even = rand(0, 1) === 0;
+        tekst = `Schrijf alle ${even ? 'even' : 'oneven'} getallen tussen ${onder} en ${onder + 10}.`;
+        antwoord = Array.from({ length: 9 }, (_, i) => onder + i + 1).filter(n => n % 2 === (even ? 0 : 1)).join(', ');
+      } else if (vorm === 'zin-te') {
+        const t = rand(1, 9), e = rand(1, 9);
+        tekst = `Schrijf een getal met ${t} ${t === 1 ? 'tiental' : 'tientallen'} en ${e} ${e === 1 ? 'eenheid' : 'eenheden'}.`;
+        antwoord = t * 10 + e;
+      } else if (vorm === 'zin-tussen') {
+        const onder = rand(10, 94), boven = onder + rand(3, 5);
+        const even = rand(0, 1) === 0;
+        tekst = `Schrijf een ${even ? 'even' : 'oneven'} getal dat meer is dan ${onder}, maar minder dan ${boven}.`;
+        antwoord = Array.from({ length: boven - onder - 1 }, (_, i) => onder + i + 1).filter(n => n % 2 === (even ? 0 : 1)).join(' of ');
+      } else if (vorm === 'zin-voorna') {
+        const voor = rand(0, 1) === 0;
+        tekst = `Welk getal komt ${afstand === 1 ? 'juist' : 'twee plaatsen'} ${voor ? 'voor' : 'na'} ${basis}?`;
+        antwoord = basis + (voor ? -afstand : afstand);
+      } else if (vorm === 'zin-tiental') {
+        const n = rand(1, 9) * 10 + rand(1, 9);
+        const voor = rand(0, 1) === 0;
+        tekst = `Welk tiental komt juist ${voor ? 'voor' : 'na'} ${n}?`;
+        antwoord = Math.floor(n / 10) * 10 + (voor ? 0 : 10);
+      } else if (vorm === 'zin-tientallen') {
+        const onder = rand(1, 6) * 10, boven = onder + rand(2, 4) * 10;
+        tekst = `Welke tientallen staan tussen ${onder} en ${boven}?`;
+        antwoord = Array.from({ length: (boven - onder) / 10 - 1 }, (_, i) => onder + (i + 1) * 10).join(', ');
+      } else if (vorm === 'zin-tussen-tientallen') {
+        const n = rand(1, 9) * 10 + rand(1, 9);
+        tekst = `Tussen welke tientallen ligt ${n}?`;
+        antwoord = `${Math.floor(n / 10) * 10} en ${Math.ceil(n / 10) * 10}`;
+      } else {
+        tekst = `Welk getal komt voor ${basis + 1} en na ${basis - 1}?`;
+        antwoord = basis;
+      }
+      return { vorm, tekst, antwoord, schrijflijn: true };
+    }
     const stapTekst = afstand === 1 ? 'net' : '2 plaatsen';
     let basis, antwoord, tekst;
     if (vorm === 'beforeAfter') {
@@ -2811,6 +2852,15 @@ placeAfterLastOfKey(block, key);
     item.appendChild(createRowDeleteButton(item));
     const input = document.createElement('input');
     input.type = 'text'; input.className = 'rekentaal-box';
+    if (opgave.schrijflijn) {
+      item.classList.add('rekentaal-zin');
+      const vraag = document.createElement('span');
+      vraag.textContent = opgave.tekst;
+      input.className = 'rekentaal-schrijflijn';
+      input.setAttribute('aria-label', opgave.tekst);
+      item.append(vraag, input);
+      return item;
+    }
     if (vorm === 'blankBefore' || vorm === 'blankAfter') item.append(input, document.createTextNode(` ${opgave.tekst}.`));
     else item.append(document.createTextNode(`${opgave.tekst} `), input, document.createTextNode('.'));
     return item;
@@ -2828,14 +2878,15 @@ placeAfterLastOfKey(block, key);
     requestAnimationFrame(() => window.GI_Toets?.updateScoreVakken());
   }
 
-  function addRekentaalExercises() {
+  function addRekentaalExercises(metZinnen = false) {
     const max = parseInt($('#rekentaalMax')?.value, 10) || 20;
     const count = clamp(parseInt($('#rekentaalCount')?.value, 10) || 8, 2, 30);
     const afstandKeuze = document.querySelector('input[name="rekentaalAfstand"]:checked')?.value || '1';
-    const vormen = $$('.rekentaal-vorm:checked').map(el => el.value);
+    const vormen = $$(metZinnen ? '.rekentaal-zinsvorm:checked' : '.rekentaal-vorm:checked').map(el => el.value);
+    if (metZinnen && max !== 100) return;
     if (!vormen.length) { alert('Kies minstens één zinsvorm.'); return; }
     const key = `rekentaal_${max}_${afstandKeuze}_${vormen.join('_')}`;
-    const titel = afstandKeuze === '2' ? 'Vul het getal 2 plaatsen voor of na in.'
+    const titel = metZinnen ? 'Lees de zinnen en schrijf je antwoorden op de lijnen.' : afstandKeuze === '2' ? 'Vul het getal 2 plaatsen voor of na in.'
       : afstandKeuze === 'mix' ? 'Vul het juiste getal voor of na in.' : 'Vul het getal net voor of net na in.';
     ensureTitleOnce(sheet, key, titel);
     _registerAddFn(key, () => _voegRekentaalItemToe(key, vormen, afstandKeuze, max));
@@ -2843,6 +2894,7 @@ placeAfterLastOfKey(block, key);
     block.className = 'rekentaal-exercise-block'; block.dataset.titleKey = key;
     block.appendChild(createDeleteButton(block));
     const grid = document.createElement('div'); grid.className = 'rekentaal-grid';
+    if (metZinnen) grid.classList.add('rekentaal-zinnen-grid');
     for (let i = 0; i < count; i++) {
       const vorm = vormen[i % vormen.length];
       const afstand = afstandKeuze === 'mix' ? (i % 2) + 1 : Number(afstandKeuze);
@@ -2881,7 +2933,8 @@ placeAfterLastOfKey(block, key);
 bindThrottled($('#btnAddToSheet'),      addExerciseToSheet);
 bindThrottled($('#btnAddJumpExercise'), addJumpExercise);
 bindThrottled($('#btnAddMixed'),        addMixedExercises);
-bindThrottled($('#btnAddRekentaal'),     addRekentaalExercises);
+bindThrottled($('#btnAddRekentaal'),     () => addRekentaalExercises());
+bindThrottled($('#btnAddRekentaalZinnen'), () => addRekentaalExercises(true));
 bindThrottled($('#btnAddSequence'),     addSequenceExercise);
 bindThrottled($('#btnAddHonderdveld'),  addHonderdveldExercise);
 bindThrottled($('#btnAddMab'),          addMabExercise);
