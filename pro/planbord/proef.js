@@ -170,7 +170,7 @@
     ['jas-kapstok','jas aan de kapstok'],['werkplek-opruimen','werkplek opruimen'],['rustig-in-rij','rustig in de rij'],
     ['stil-binnenkomen','stil binnenkomen'],['agenda-invullen','agenda invullen'],['boekentas-maken','boekentas maken'],
     ['tafel-taakje-opruimen','tafel en taakje opruimen'],['stoel-onder-tafel','stoel onder tafel'],['stoel-op-tafel','stoel op tafel'],
-    ['bakje-netjes','bakje netjes'],['bakje-in-kast','bakje in de kast'],['losse-drinkbus','drinkbus'],
+    ['bakje-netjes','bakje netjes'],['bakje-in-kast','bakje in de kast'],['bakje-uit-kast','neem je groene bakje uit de kast'],['losse-drinkbus','drinkbus'],
     ['losse-brooddoos','brooddoos'],['losse-koekendoos','koekendoos'],['losse-fruitdoos','fruitdoos'],
     ['losse-agendamap','agendamap'],['losse-huistaken','huistaken'],['losse-pennenzak','pennenzak'],
     ['boom-lente','boom in de lente'],['boom-zomer','boom in de zomer'],['boom-herfst','boom in de herfst'],['boom-winter','boom in de winter'],
