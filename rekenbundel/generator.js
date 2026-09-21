@@ -54,6 +54,11 @@ const Generator = (() => {
     const isAanvullen     = hulpmiddelen.includes('aanvullen');
     const isCompenseren   = hulpmiddelen.includes('compenseren');
     const isTransformeren = hulpmiddelen.includes('transformeren');
+    // Deze tienramen oefenen uitsluitend TE − E over het tiental heen.
+    if (bewerking === 'aftrekken' && Number(niveau) === 20 && hulpmiddelen.some(h => h.startsWith('aftrek-'))) {
+      oefeningstypes = ['TE-E'];
+      brug = 'met';
+    }
 
     // Brugwaarde aanpassen voor modules die enkel met/zonder kennen
     const brugVoorModule = niveau <= 100 ? _brugVoor100(brug) : brug;
@@ -211,6 +216,13 @@ const Generator = (() => {
 
   /* ── Voeg één extra oefening toe aan een bestaand blok ───── */
   function voegOefeningToe(blok) {
+    if (blok.config?.hulpPerBewerking) {
+      const nieuw = maakGemengdBlok({...blok.config,aantalOefeningen:12});
+      const bestaand = new Set(blok.oefeningen.map(o=>o.vraag));
+      const oef = nieuw?.oefeningen.find(o=>!bestaand.has(o.vraag));
+      if(!oef)return false;
+      oef.hulpConfig.metVoorbeeld=false; blok.oefeningen.push(oef); return true;
+    }
     if (blok.bewerking === 'breuken') {
       const nieuw = Breuken.genereer({ ...(blok.config || {}), aantalOefeningen: 12 });
       const bestaand = new Set(blok.oefeningen.map(o => o.sleutel));
@@ -341,6 +353,7 @@ const Generator = (() => {
 
   /* ── Geef beschikbare types terug ────────────────────────── */
   function getTypes(bewerking, niveau, brug = 'zonder', hulpmiddelen = [], splitsModus = 'tot') {
+    if (bewerking === 'aftrekken' && Number(niveau) === 20 && hulpmiddelen.some(h => h.startsWith('aftrek-'))) return ['TE-E'];
     if (bewerking === 'gemengd') {
       const typesOpt = this.getTypes('optellen',  niveau, brug, hulpmiddelen, splitsModus).filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
       const typesAft = this.getTypes('aftrekken', niveau, brug, hulpmiddelen, splitsModus).filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
@@ -400,7 +413,21 @@ const Generator = (() => {
   }
 
   /* ── Maak een gemengd optellen+aftrekken blok ───────────── */
-  function maakGemengdBlok({ niveau, brug, typesOpt, typesAft, aantalOefeningen, opdrachtzin, verhouding = '50-50', hulpmiddelen = [], schrijflijnenAantal = 2, splitspositie = 'aftrekker' }) {
+  function maakGemengdBlok({ niveau, brug, typesOpt, typesAft, aantalOefeningen, opdrachtzin, verhouding = '50-50', hulpmiddelen = [], schrijflijnenAantal = 2, splitspositie = 'aftrekker', hulpPerBewerking = null }) {
+    if(hulpPerBewerking) {
+      const nOpt=verhouding==='meer-opt'?Math.ceil(aantalOefeningen*.67):verhouding==='meer-aft'?aantalOefeningen-Math.ceil(aantalOefeningen*.67):Math.ceil(aantalOefeningen/2);
+      const oefeningen=[];
+      for(const [op,n,types] of [['optellen',nOpt,typesOpt],['aftrekken',aantalOefeningen-nOpt,typesAft]]) {
+        if(!n)continue;
+        const deel=maakBlok({...hulpPerBewerking[op],bewerking:op,niveau,brug,oefeningstypes:types,aantalOefeningen:Math.max(2,n)});
+        if(!deel)return null;
+        const {oefeningen:pool,config,id,...weergave}=deel;
+        oefeningen.push(...pool.slice(0,n).map(o=>({...o,hulpConfig:{...weergave,metVoorbeeld:false}})));
+      }
+      for(let i=oefeningen.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[oefeningen[i],oefeningen[j]]=[oefeningen[j],oefeningen[i]];}
+      for(const op of ['optellen','aftrekken']){const eerste=oefeningen.find(o=>o.hulpConfig.bewerking===op);if(eerste)eerste.hulpConfig.metVoorbeeld=!!hulpPerBewerking[op].metVoorbeeld;}
+      return {id:`blok-gemengd-${Date.now()}-${++_teller}`,bewerking:'gemengd',niveau,brug,opdrachtzin:opdrachtzin||'Kijk goed naar het teken. Reken uit.',hulpmiddelen:['per-bewerking'],oefeningen,config:{niveau,brug,typesOpt,typesAft,aantalOefeningen,opdrachtzin,verhouding,hulpPerBewerking}};
+    }
     const brugVoorModule = niveau <= 100 ? _brugVoor100(brug) : brug;
 
     // Gebruik brug-correcte modules

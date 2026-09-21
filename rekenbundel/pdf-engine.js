@@ -2028,6 +2028,24 @@ const onthoudH = c;
     }
   }
 
+  async function _tekenTot20HulpBlok(blok) {
+    const [sw,sh] = Tot20Hulp.maten(blok);
+    const breedte = (CW - 8) / 2, hoogte = breedte * sh / sw;
+    checkRuimte(VOOR_ZIN + ZINRUIMTE + hoogte + 6);
+    y += VOOR_ZIN;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(26,58,92);
+    doc.text(blok.opdrachtzin, ML, y); y += ZINRUIMTE;
+    for (let i = 0; i < blok.oefeningen.length; i += 2) {
+      checkRuimte(hoogte + 6);
+      for (let k = 0; k < 2 && i+k < blok.oefeningen.length; k++) {
+        const png = await Tot20Hulp.png(blok, blok.oefeningen[i+k], _metAntwoorden || (blok.metVoorbeeld && i+k === 0));
+        doc.addImage(png, 'PNG', ML+k*(breedte+8), y, breedte, hoogte, undefined, 'FAST');
+      }
+      y += hoogte + 6;
+    }
+    y += NABLOK;
+  }
+
   async function _tekenTot100HulpBlok(blok) {
     const [sw, sh] = Tot100Hulp.maten(blok.tot100Hulp);
     const kolommen = blok.tot100Hulp.startsWith('sprongen') ? 1 : 2;
@@ -2051,6 +2069,16 @@ const onthoudH = c;
   }
 
  async function _tekenBlok(blok) {
+  if(blok.config?.hulpPerBewerking) {
+    for(let i=0;i<blok.oefeningen.length;) {
+      const {hulpConfig,...oef}=blok.oefeningen[i];
+      const eerste=i, oefeningen=[oef]; i++;
+      while(i<blok.oefeningen.length && blok.oefeningen[i].hulpConfig.bewerking===hulpConfig.bewerking && !blok.oefeningen[i].hulpConfig.metVoorbeeld){const {hulpConfig:_,...volgende}=blok.oefeningen[i++];oefeningen.push(volgende);}
+      await _tekenBlok({...hulpConfig,opdrachtzin:eerste===0?blok.opdrachtzin:'',oefeningen});
+    }
+    return;
+  }
+  if (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(blok)) { await _tekenTot20HulpBlok(blok); return; }
   if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok)) { await _tekenTot100HulpBlok(blok); return; }
   if (blok.bewerking === 'breuken')                                  { _tekenBreukenBlok(blok); return; }
   if (blok.bewerking === 'percentages')                              { _tekenPercentageBlok(blok); return; }

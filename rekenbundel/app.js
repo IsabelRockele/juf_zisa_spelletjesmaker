@@ -379,7 +379,9 @@ const App = (() => {
     const geselecteerd = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
     const alleenEerst10 = geselecteerd.length === 1 && geselecteerd[0] === 'Maak eerst 10';
     const hulpmiddelen = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
-    if (hulpmiddelen.includes('aanvullen')) {
+    if (hulpmiddelen.some(h => Tot20Hulp.soorten[h])) {
+      zinInp.value = 'Los op. Schrijf de splitsbenen.';
+    } else if (hulpmiddelen.includes('aanvullen')) {
       zinInp.value = 'Los op door aan te vullen.';
     } else if (hulpmiddelen.includes('compenseren')) {
       zinInp.value = 'Reken uit door te compenseren.';
@@ -613,6 +615,7 @@ const App = (() => {
 
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     const isBrug = ['naar-tiental','naar-honderdtal','beide','met','gemengd','naar-duizendtal'].includes(brug);
+    Tot20Hulp.update(actieveBewerking, niveau, brug);
     const isZonderTot1000 = brug === 'zonder' && niveau >= 1000;
     const isTussenstappenTot20 = brug === 'zonder' && niveau === 20 && actieveBewerking === 'aftrekken';
     _updateSchrijflijnenAantalUI(isTussenstappenTot20);
@@ -708,7 +711,8 @@ const App = (() => {
                             if (h === 'splitsbeen' && brug === 'zonder' && niveau >= 10000) return false;
                             return true;
                           });
-    const hulpmiddelenZin = hulpmiddelen.includes('aanvullen')     ? 'Los op door aan te vullen.' :
+    const hulpmiddelenZin = hulpmiddelen.some(h => Tot20Hulp.soorten[h]) ? 'Los op. Schrijf de splitsbenen.' :
+                            hulpmiddelen.includes('aanvullen')     ? 'Los op door aan te vullen.' :
                             hulpmiddelen.includes('compenseren')   ? 'Reken uit door te compenseren.' :
                             hulpmiddelen.includes('transformeren') ? 'Reken uit door te transformeren.' : null;
     const zin    = document.getElementById('inp-opdrachtzin').value.trim() ||
@@ -723,7 +727,9 @@ const App = (() => {
       ? 3
       : parseInt(document.querySelector('[name="schrijflijnen-aantal"]:checked')?.value || '2');
     const isTransformeren     = hulpmiddelen.includes('transformeren');
-    const metVoorbeeld        = hulpmiddelen.includes('schrijflijnen')
+    const metVoorbeeld        = hulpmiddelen.some(h => Tot20Hulp.soorten[h])
+      ? document.getElementById('tot20-voorbeeld').checked
+      : hulpmiddelen.includes('schrijflijnen')
       ? (document.getElementById('cb-schrijflijnen-voorbeeld')?.checked || false)
       : isTransformeren
         ? (document.getElementById('cb-trans-voorbeeld')?.checked || false)
@@ -859,6 +865,15 @@ const App = (() => {
   function toggleHulpmiddel(label, waarde) {
     const cb = label.querySelector('input');
     const was = cb.checked;
+    const hadTot20Hulp = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].some(c => Tot20Hulp.soorten[c.value]);
+    if (!was) {
+      const nieuw = !!Tot20Hulp.soorten[waarde];
+      document.querySelectorAll('[name="hulpmiddelen"]:checked').forEach(andere => {
+        if (andere !== cb && (nieuw || Tot20Hulp.soorten[andere.value])) {
+          _resetChip(andere.closest('.vink-chip'), 'rij-' + andere.value);
+        }
+      });
+    }
     cb.checked = !was;
     label.classList.toggle('geselecteerd', !was);
     label.querySelector('.vink-box').textContent = !was ? '\u2713' : '';
@@ -921,6 +936,11 @@ const App = (() => {
       if (rijPos && !was) rijPos.style.display = 'none';
       const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 100);
       _updateTypesUI(niveau, _getBrugWaarde(), true);
+    }
+    if (hadTot20Hulp || Tot20Hulp.soorten[waarde]) {
+      _updateTypesUI(Number(document.querySelector('[name="niveau"]:checked')?.value || 20), _getBrugWaarde(), true);
+      const positie = document.getElementById('rij-splitspositie');
+      if (positie && Tot20Hulp.soorten[waarde] && !was) positie.style.display = 'none';
     }
     _updateOpdrachtzin();
   }
@@ -2024,6 +2044,8 @@ function _getSplitsConfig() {
     document.querySelectorAll(`[name="${naam}"]`).forEach(r =>
       r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
+    const radio=el.querySelector('input');if(radio)radio.checked=true;
+    GemengdHulp.update(_gemengdNiveau,_gemengdBrug);
   }
 
   function toggleGemengdHulpmiddel(label, waarde) {
@@ -2048,7 +2070,7 @@ function _getSplitsConfig() {
     const brugVoor = niveau <= 100
       ? (brug === 'zonder' || brug === 'gemengd' ? brug : 'met')
       : brug;
-    const types = Generator.getTypes(bewerking, niveau, brugVoor);
+    const types = Generator.getTypes(bewerking, niveau, brugVoor, GemengdHulp.extra()[bewerking].hulpmiddelen);
     container.innerHTML = '';
 
     // "Alles gemengd" chip eerst
@@ -2112,6 +2134,7 @@ function _getSplitsConfig() {
 
   function _updateGemengdTypesUI() {
     const brug = _gemengdBrug;
+    GemengdHulp.update(_gemengdNiveau, brug);
     _vulTypesContainer('cg-gem-opt-types', 'optellen',  _gemengdNiveau, brug);
     _vulTypesContainer('cg-gem-aft-types', 'aftrekken', _gemengdNiveau, brug);
   }
@@ -2119,7 +2142,7 @@ function _getSplitsConfig() {
   function _getGemengdTypes(containerId, alleTypes) {
     // Als "Alles gemengd" aangevinkt: geef alle types terug (zonder Gemengd/Maak eerst 10)
     const cbAlles = document.querySelector(`#${containerId} [value="__alles__"]`);
-    if (cbAlles?.checked) return alleTypes.filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
+    if (cbAlles?.checked) { const types=alleTypes.filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10'); return types.length ? types : ['Gemengd']; }
     return [...document.querySelectorAll(`#${containerId} input:checked`)].map(c => c.value);
   }
 
@@ -2127,8 +2150,9 @@ function _getSplitsConfig() {
     const brugVoor = _gemengdNiveau <= 100
       ? (_gemengdBrug === 'zonder' || _gemengdBrug === 'gemengd' ? _gemengdBrug : 'met')
       : _gemengdBrug;
-    const alleOpt = Generator.getTypes('optellen',  _gemengdNiveau, brugVoor).filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
-    const alleAft = Generator.getTypes('aftrekken', _gemengdNiveau, brugVoor).filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
+    const hulpPerBewerking = GemengdHulp.extra();
+    const alleOpt = Generator.getTypes('optellen',  _gemengdNiveau, brugVoor, hulpPerBewerking.optellen.hulpmiddelen);
+    const alleAft = Generator.getTypes('aftrekken', _gemengdNiveau, brugVoor, hulpPerBewerking.aftrekken.hulpmiddelen);
 
     const typesOpt = _getGemengdTypes('cg-gem-opt-types', alleOpt);
     const typesAft = _getGemengdTypes('cg-gem-aft-types', alleAft);
@@ -2144,6 +2168,7 @@ function _getSplitsConfig() {
                    || 'Kijk goed naar het teken. Reken uit.';
 
     const blok = Generator.maakGemengdBlok({
+      hulpPerBewerking,
       niveau:           _gemengdNiveau,
       brug:             _gemengdBrug,
       typesOpt,
@@ -2445,6 +2470,7 @@ function _getSplitsConfig() {
     _updateRelatieUI();
   }
   function _updateRelatieUI() {
+    _initRelatieVoorbeelden();
     const soort = document.querySelector('[name="rr-soort"]:checked')?.value || 'familie';
     document.querySelectorAll('.rr-rooster-bewerking').forEach(el => el.style.display = soort !== 'familie' ? '' : 'none');
     document.querySelectorAll('.rr-brug-kaart').forEach(el => el.style.display = soort === 'kader' ? 'none' : '');
@@ -2464,6 +2490,48 @@ function _getSplitsConfig() {
       const zonder = document.querySelector('[name="rr-brug"][value="zonder"]');
       if (zonder) { zonder.checked = true; zonder.closest('.radio-chip')?.classList.add('geselecteerd'); }
     }
+    document.querySelectorAll('.rr-voorbeeld[open]').forEach(_toonRelatieVoorbeeld);
+  }
+  function _initRelatieVoorbeelden() {
+    document.querySelectorAll('[name="rr-soort"]').forEach(input => {
+      const label = input.closest('.radio-chip');
+      if (label.parentElement.classList.contains('hulp-keuzerij')) return;
+      label.parentElement.classList.add('rr-soort-keuzes');
+      const rij = document.createElement('div'); rij.className = 'hulp-keuzerij';
+      label.before(rij); rij.append(label);
+      const details = document.createElement('details');
+      details.className = 'hulp-voorbeeld rr-voorbeeld'; details.dataset.soort = input.value;
+      details.innerHTML = '<summary>Voorbeeld</summary><div class="hulp-voorbeeld-inhoud"></div>';
+      details.addEventListener('toggle', () => {
+        if (!details.open) return;
+        document.querySelectorAll('.rr-voorbeeld[open]').forEach(el => { if(el !== details) el.open = false; });
+        _toonRelatieVoorbeeld(details);
+      });
+      rij.append(details);
+    });
+  }
+  function _toonRelatieVoorbeeld(details) {
+    const soort = details.dataset.soort;
+    const gekozenNiveau = Number(document.querySelector('[name="rr-niveau"]:checked')?.value || 10);
+    const niveau = soort === 'familie' ? gekozenNiveau : Math.max(20, gekozenNiveau);
+    const brug = soort === 'kader' ? 'beide' : document.querySelector('[name="rr-brug"]:checked')?.value || 'zonder';
+    const bewerking = document.querySelector('[name="rr-bewerking"]:checked')?.value || 'optellen';
+    const sleutel = [soort,niveau,brug,bewerking].join('|');
+    if(details.dataset.voorbeeld === sleutel) return;
+    const oef = soort === 'familie' ? _rrFamilie(niveau,brug) : soort === 'kader' ? _rrKader(niveau,bewerking) : _rrRooster(niveau,brug,bewerking);
+    const blok = {id:'voorbeeld-rr-'+soort,bewerking:'rekenrelaties',niveau,brug,opdrachtzin:'',hulpmiddelen:[],oefeningen:[oef],config:{soort}};
+    const kaart = Preview.maakBlokElement(blok).querySelector('.oefening-item');
+    kaart.querySelectorAll('button').forEach(el => el.remove());
+    const uitleg = {familie:'Maak twee optellingen en twee aftrekkingen met dezelfde drie getallen.',rooster:'Combineer het getal links met het getal bovenaan. Vul de lege vakjes in.',kader:'Vul de lege plaatsen in met de getallen boven het kader.'};
+    const host = details.querySelector('.hulp-voorbeeld-inhoud');
+    const tekst = document.createElement('p'); tekst.textContent = `${uitleg[soort]} Voorbeeld tot ${niveau}.`;
+    const voorbeeld = document.createElement('div'); voorbeeld.className = 'hulp-echt-voorbeeld'; voorbeeld.append(kaart);
+    host.replaceChildren(tekst,voorbeeld); details.dataset.voorbeeld = sleutel;
+    requestAnimationFrame(() => {
+      const breedte = soort === 'familie' ? 280 : 360;
+      voorbeeld.style.width = breedte+'px';
+      voorbeeld.style.zoom = Math.min(1,(host.clientWidth-16)/breedte);
+    });
   }
   const _rrRnd = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
   function _rrBrugPlus(a,b) { while (a || b) { if ((a%10)+(b%10)>=10) return true; a=Math.floor(a/10); b=Math.floor(b/10); } return false; }
@@ -2566,7 +2634,7 @@ function _getSplitsConfig() {
     selecteerSchattenType, selecteerSchattenNiveau, selecteerSchattenBewerking, selecteerSchattenAfronden,
     voegSchattenBlokToe,
     selecteerBreukRadio, voegBreukenBlokToe, selecteerPercentageRadio, voegPercentageBlokToe, selecteerKommaRadio, voegKommaBlokToe,
-    selecteerGemengdNiveau, selecteerGemengdBrugHoofd, selecteerGemengdBrugSub, selecteerGemengdVerhouding, selecteerGemengdRadio, toggleGemengdHulpmiddel, voegGemengdBlokToe,
+    selecteerGemengdNiveau, selecteerGemengdBrugHoofd, selecteerGemengdBrugSub, selecteerGemengdVerhouding, selecteerGemengdRadio, toggleGemengdHulpmiddel, voegGemengdBlokToe, verversGemengdHulp: _updateGemengdTypesUI,
     selecteerRelatieRadio, voegRelatieBlokToe,
     toonToast, getLaatsteBlok,
   };

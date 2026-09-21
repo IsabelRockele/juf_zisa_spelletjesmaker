@@ -379,7 +379,9 @@ const App = (() => {
     const geselecteerd = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
     const alleenEerst10 = geselecteerd.length === 1 && geselecteerd[0] === 'Maak eerst 10';
     const hulpmiddelen = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
-    if (hulpmiddelen.includes('aanvullen')) {
+    if (hulpmiddelen.some(h => Tot20Hulp.soorten[h])) {
+      zinInp.value = 'Los op. Schrijf de splitsbenen.';
+    } else if (hulpmiddelen.includes('aanvullen')) {
       zinInp.value = 'Los op door aan te vullen.';
     } else if (hulpmiddelen.includes('compenseren')) {
       zinInp.value = 'Reken uit door te compenseren.';
@@ -613,6 +615,7 @@ const App = (() => {
 
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     const isBrug = ['naar-tiental','naar-honderdtal','beide','met','gemengd','naar-duizendtal'].includes(brug);
+    Tot20Hulp.update(actieveBewerking, niveau, brug);
     const isZonderTot1000 = brug === 'zonder' && niveau >= 1000;
     const isTussenstappenTot20 = brug === 'zonder' && niveau === 20 && actieveBewerking === 'aftrekken';
     _updateSchrijflijnenAantalUI(isTussenstappenTot20);
@@ -708,7 +711,8 @@ const App = (() => {
                             if (h === 'splitsbeen' && brug === 'zonder' && niveau >= 10000) return false;
                             return true;
                           });
-    const hulpmiddelenZin = hulpmiddelen.includes('aanvullen')     ? 'Los op door aan te vullen.' :
+    const hulpmiddelenZin = hulpmiddelen.some(h => Tot20Hulp.soorten[h]) ? 'Los op. Schrijf de splitsbenen.' :
+                            hulpmiddelen.includes('aanvullen')     ? 'Los op door aan te vullen.' :
                             hulpmiddelen.includes('compenseren')   ? 'Reken uit door te compenseren.' :
                             hulpmiddelen.includes('transformeren') ? 'Reken uit door te transformeren.' : null;
     const zin    = document.getElementById('inp-opdrachtzin').value.trim() ||
@@ -723,7 +727,9 @@ const App = (() => {
       ? 3
       : parseInt(document.querySelector('[name="schrijflijnen-aantal"]:checked')?.value || '2');
     const isTransformeren     = hulpmiddelen.includes('transformeren');
-    const metVoorbeeld        = hulpmiddelen.includes('schrijflijnen')
+    const metVoorbeeld        = hulpmiddelen.some(h => Tot20Hulp.soorten[h])
+      ? document.getElementById('tot20-voorbeeld').checked
+      : hulpmiddelen.includes('schrijflijnen')
       ? (document.getElementById('cb-schrijflijnen-voorbeeld')?.checked || false)
       : isTransformeren
         ? (document.getElementById('cb-trans-voorbeeld')?.checked || false)
@@ -859,6 +865,15 @@ const App = (() => {
   function toggleHulpmiddel(label, waarde) {
     const cb = label.querySelector('input');
     const was = cb.checked;
+    const hadTot20Hulp = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].some(c => Tot20Hulp.soorten[c.value]);
+    if (!was) {
+      const nieuw = !!Tot20Hulp.soorten[waarde];
+      document.querySelectorAll('[name="hulpmiddelen"]:checked').forEach(andere => {
+        if (andere !== cb && (nieuw || Tot20Hulp.soorten[andere.value])) {
+          _resetChip(andere.closest('.vink-chip'), 'rij-' + andere.value);
+        }
+      });
+    }
     cb.checked = !was;
     label.classList.toggle('geselecteerd', !was);
     label.querySelector('.vink-box').textContent = !was ? '\u2713' : '';
@@ -920,6 +935,11 @@ const App = (() => {
       if (rijPos && !was) rijPos.style.display = 'none';
       const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 100);
       _updateTypesUI(niveau, _getBrugWaarde(), true);
+    }
+    if (hadTot20Hulp || Tot20Hulp.soorten[waarde]) {
+      _updateTypesUI(Number(document.querySelector('[name="niveau"]:checked')?.value || 20), _getBrugWaarde(), true);
+      const positie = document.getElementById('rij-splitspositie');
+      if (positie && Tot20Hulp.soorten[waarde] && !was) positie.style.display = 'none';
     }
     _updateOpdrachtzin();
   }
@@ -2077,6 +2097,8 @@ function _getSplitsConfig() {
     document.querySelectorAll(`[name="${naam}"]`).forEach(r =>
       r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
+    const radio=el.querySelector('input');if(radio)radio.checked=true;
+    GemengdHulp.update(_gemengdNiveau,_gemengdBrug);
   }
 
   function toggleGemengdHulpmiddel(label, waarde) {
@@ -2101,7 +2123,7 @@ function _getSplitsConfig() {
     const brugVoor = niveau <= 100
       ? (brug === 'zonder' || brug === 'gemengd' ? brug : 'met')
       : brug;
-    const types = Generator.getTypes(bewerking, niveau, brugVoor);
+    const types = Generator.getTypes(bewerking, niveau, brugVoor, GemengdHulp.extra()[bewerking].hulpmiddelen);
     container.innerHTML = '';
 
     // "Alles gemengd" chip eerst
@@ -2165,6 +2187,7 @@ function _getSplitsConfig() {
 
   function _updateGemengdTypesUI() {
     const brug = _gemengdBrug;
+    GemengdHulp.update(_gemengdNiveau, brug);
     _vulTypesContainer('cg-gem-opt-types', 'optellen',  _gemengdNiveau, brug);
     _vulTypesContainer('cg-gem-aft-types', 'aftrekken', _gemengdNiveau, brug);
   }
@@ -2172,7 +2195,7 @@ function _getSplitsConfig() {
   function _getGemengdTypes(containerId, alleTypes) {
     // Als "Alles gemengd" aangevinkt: geef alle types terug (zonder Gemengd/Maak eerst 10)
     const cbAlles = document.querySelector(`#${containerId} [value="__alles__"]`);
-    if (cbAlles?.checked) return alleTypes.filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
+    if (cbAlles?.checked) { const types=alleTypes.filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10'); return types.length ? types : ['Gemengd']; }
     return [...document.querySelectorAll(`#${containerId} input:checked`)].map(c => c.value);
   }
 
@@ -2180,8 +2203,9 @@ function _getSplitsConfig() {
     const brugVoor = _gemengdNiveau <= 100
       ? (_gemengdBrug === 'zonder' || _gemengdBrug === 'gemengd' ? _gemengdBrug : 'met')
       : _gemengdBrug;
-    const alleOpt = Generator.getTypes('optellen',  _gemengdNiveau, brugVoor).filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
-    const alleAft = Generator.getTypes('aftrekken', _gemengdNiveau, brugVoor).filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
+    const hulpPerBewerking = GemengdHulp.extra();
+    const alleOpt = Generator.getTypes('optellen',  _gemengdNiveau, brugVoor, hulpPerBewerking.optellen.hulpmiddelen);
+    const alleAft = Generator.getTypes('aftrekken', _gemengdNiveau, brugVoor, hulpPerBewerking.aftrekken.hulpmiddelen);
 
     const typesOpt = _getGemengdTypes('cg-gem-opt-types', alleOpt);
     const typesAft = _getGemengdTypes('cg-gem-aft-types', alleAft);
@@ -2197,6 +2221,7 @@ function _getSplitsConfig() {
                    || 'Kijk goed naar het teken. Reken uit.';
 
     const blok = Generator.maakGemengdBlok({
+      hulpPerBewerking,
       niveau:           _gemengdNiveau,
       brug:             _gemengdBrug,
       typesOpt,
@@ -2492,17 +2517,127 @@ function _getSplitsConfig() {
   }
   function selecteerRelatieRadio(naam, waarde, el) {
     document.querySelectorAll(`[name="${naam}"]`).forEach(r => r.closest('.radio-chip')?.classList.remove('geselecteerd'));
-    el.classList.add('geselecteerd'); const radio=el.querySelector('input'); if(radio) radio.checked=true; if(naam==='rr-soort'){const aantal=document.getElementById('rr-aantal');if(aantal)aantal.value=waarde==='familie'?'6':'2';} _updateRelatieUI();
+    el.classList.add('geselecteerd');
+    const radio = el.querySelector('input'); if (radio) radio.checked = true;
+    if (naam === 'rr-soort') { const aantal=document.getElementById('rr-aantal'); if(aantal) aantal.value=waarde==='familie'?'6':'2'; }
+    _updateRelatieUI();
   }
-  function _updateRelatieUI(){const soort=document.querySelector('[name="rr-soort"]:checked')?.value||'familie';document.querySelectorAll('.rr-rooster-bewerking').forEach(el=>el.style.display=soort!=='familie'?'':'none');document.querySelectorAll('.rr-brug-kaart').forEach(el=>el.style.display=soort==='kader'?'none':'');const n10=document.querySelector('.rr-niveau-10');if(n10)n10.style.display=soort==='familie'?'':'none';if(soort!=='familie'&&document.querySelector('[name="rr-niveau"]:checked')?.value==='10'){const r20=document.querySelector('[name="rr-niveau"][value="20"]');if(r20){r20.checked=true;r20.closest('.radio-chip')?.classList.add('geselecteerd');}n10?.classList.remove('geselecteerd');}const gemengdChip=document.querySelector('[name="rr-bewerking"][value="gemengd"]')?.closest('.radio-chip');if(gemengdChip)gemengdChip.style.display=soort==='kader'?'none':'';if(soort==='kader'&&document.querySelector('[name="rr-bewerking"]:checked')?.value==='gemengd'){const optel=document.querySelector('[name="rr-bewerking"][value="optellen"]');if(optel){optel.checked=true;optel.closest('.radio-chip')?.classList.add('geselecteerd');gemengdChip?.classList.remove('geselecteerd');}}const niveau=Number(document.querySelector('[name="rr-niveau"]:checked')?.value||20);document.querySelectorAll('.rr-brug-met,.rr-brug-beide').forEach(el=>el.style.display=niveau===10?'none':'');if(niveau===10&&document.querySelector('[name="rr-brug"]:checked')?.value!=='zonder'){const z=document.querySelector('[name="rr-brug"][value="zonder"]');if(z){z.checked=true;z.closest('.radio-chip')?.classList.add('geselecteerd');}}}
-  const _rrRnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-  function _rrBrugPlus(a,b){while(a||b){if((a%10)+(b%10)>=10)return true;a=Math.floor(a/10);b=Math.floor(b/10);}return false;}
-  function _rrBrugMin(a,b){while(a||b){if((a%10)<(b%10))return true;a=Math.floor(a/10);b=Math.floor(b/10);}return false;}
-  function _rrPastBrug(h,brug){return brug==='beide'||(brug==='met'?h:!h);}
-  function _rrFamilie(niveau,brug){for(let p=0;p<800;p++){const a=_rrRnd(1,niveau-1),b=_rrRnd(1,niveau-a),som=a+b;if(!_rrPastBrug(_rrBrugPlus(a,b),brug))continue;return{getallen:[a,b,som].sort(()=>Math.random()-.5),oplossingen:[`${a} + ${b} = ${som}`,`${b} + ${a} = ${som}`,`${som} − ${a} = ${b}`,`${som} − ${b} = ${a}`]};}return _rrFamilie(niveau,'beide');}
-  function _rrRooster(niveau,brug,keuze,index=0){const bewerking=keuze==='gemengd'?(index%2===0?'optellen':'aftrekken'):keuze;for(let p=0;p<900;p++){const kolommen=Array.from({length:3},()=>_rrRnd(1,Math.max(2,Math.floor(niveau*.45))));const rijen=Array.from({length:3},()=>bewerking==='optellen'?_rrRnd(1,niveau-Math.max(...kolommen)):_rrRnd(Math.max(...kolommen),niveau));const waarden=rijen.map(r=>kolommen.map(k=>bewerking==='optellen'?r+k:r-k));const bs=rijen.flatMap(r=>kolommen.map(k=>bewerking==='optellen'?_rrBrugPlus(r,k):_rrBrugMin(r,k)));if(brug==='met'&&!bs.every(Boolean))continue;if(brug==='zonder'&&!bs.every(v=>!v))continue;return{bewerking,kolommen,rijen,waarden};}return _rrRooster(niveau,'beide',bewerking,index);}
-  function _rrKader(niveau,keuze,index=0){const bewerking=keuze==='aftrekken'?'aftrekken':'optellen';let cellen,legeSleutels;if(bewerking==='optellen'){const tl=_rrRnd(1,Math.max(2,Math.floor(niveau*.35))),boven=_rrRnd(1,Math.max(1,Math.floor(niveau*.28))),links=_rrRnd(1,Math.max(1,Math.floor(niveau*.28))),tr=tl+boven,bl=tl+links,br=_rrRnd(Math.max(tr,bl)+1,niveau);cellen={tl,boven,tr,links,bl,rechts:br-tr,br,onder:br-bl};legeSleutels=index%2===0?['boven','links','bl','rechts','br','onder']:['tl','boven','tr','rechts','br','onder'];}else{const tl=_rrRnd(Math.max(6,Math.ceil(niveau*.6)),niveau),boven=_rrRnd(1,Math.max(1,Math.floor(tl*.35))),links=_rrRnd(1,Math.max(1,Math.floor(tl*.35))),tr=tl-boven,bl=tl-links,br=_rrRnd(1,Math.max(1,Math.min(tr,bl)-1));cellen={tl,boven,tr,links,bl,rechts:tr-br,br,onder:bl-br};legeSleutels=['boven','tr','bl','br'];}return{bewerking,cellen,legeSleutels,bank:legeSleutels.map(k=>cellen[k]).sort(()=>Math.random()-.5)};}
-  function voegRelatieBlokToe(){const soort=document.querySelector('[name="rr-soort"]:checked')?.value||'familie',niveau=Number(document.querySelector('[name="rr-niveau"]:checked')?.value||20),brug=soort==='kader'?'beide':(document.querySelector('[name="rr-brug"]:checked')?.value||'zonder'),roosterBewerking=document.querySelector('[name="rr-bewerking"]:checked')?.value||'optellen',aantal=Math.max(1,Math.min(12,Number(document.getElementById('rr-aantal')?.value||6))),oefeningen=Array.from({length:aantal},(_,i)=>soort==='familie'?_rrFamilie(niveau,brug):soort==='kader'?_rrKader(niveau,roosterBewerking,i):_rrRooster(niveau,brug,roosterBewerking,i));bundelData.push({id:`blok-rekenrelaties-${Date.now()}`,bewerking:'rekenrelaties',niveau,brug,opdrachtzin:soort==='familie'?'Schrijf alle bewerkingen met de 3 getallen.':'Los op.',hulpmiddelen:[],oefeningen,config:{soort,roosterBewerking}});Preview.render(bundelData);toonToast('✓ Rekenrelaties toegevoegd');}
+  function _updateRelatieUI() {
+    _initRelatieVoorbeelden();
+    const soort = document.querySelector('[name="rr-soort"]:checked')?.value || 'familie';
+    document.querySelectorAll('.rr-rooster-bewerking').forEach(el => el.style.display = soort !== 'familie' ? '' : 'none');
+    document.querySelectorAll('.rr-brug-kaart').forEach(el => el.style.display = soort === 'kader' ? 'none' : '');
+    const n10 = document.querySelector('.rr-niveau-10');
+    if (n10) n10.style.display = soort === 'familie' ? '' : 'none';
+    if (soort !== 'familie' && document.querySelector('[name="rr-niveau"]:checked')?.value === '10') {
+      const r20 = document.querySelector('[name="rr-niveau"][value="20"]');
+      if (r20) { r20.checked = true; r20.closest('.radio-chip')?.classList.add('geselecteerd'); }
+      n10?.classList.remove('geselecteerd');
+    }
+    const niveau = Number(document.querySelector('[name="rr-niveau"]:checked')?.value || 20);
+    const gemengdChip=document.querySelector('[name="rr-bewerking"][value="gemengd"]')?.closest('.radio-chip');
+    if(gemengdChip) gemengdChip.style.display=soort==='kader'?'none':'';
+    if(soort==='kader'&&document.querySelector('[name="rr-bewerking"]:checked')?.value==='gemengd'){const optel=document.querySelector('[name="rr-bewerking"][value="optellen"]');if(optel){optel.checked=true;optel.closest('.radio-chip')?.classList.add('geselecteerd');gemengdChip?.classList.remove('geselecteerd');}}
+    document.querySelectorAll('.rr-brug-met,.rr-brug-beide').forEach(el => el.style.display = niveau === 10 ? 'none' : '');
+    if (niveau === 10 && document.querySelector('[name="rr-brug"]:checked')?.value !== 'zonder') {
+      const zonder = document.querySelector('[name="rr-brug"][value="zonder"]');
+      if (zonder) { zonder.checked = true; zonder.closest('.radio-chip')?.classList.add('geselecteerd'); }
+    }
+    document.querySelectorAll('.rr-voorbeeld[open]').forEach(_toonRelatieVoorbeeld);
+  }
+  function _initRelatieVoorbeelden() {
+    document.querySelectorAll('[name="rr-soort"]').forEach(input => {
+      const label = input.closest('.radio-chip');
+      if (label.parentElement.classList.contains('hulp-keuzerij')) return;
+      label.parentElement.classList.add('rr-soort-keuzes');
+      const rij = document.createElement('div'); rij.className = 'hulp-keuzerij';
+      label.before(rij); rij.append(label);
+      const details = document.createElement('details');
+      details.className = 'hulp-voorbeeld rr-voorbeeld'; details.dataset.soort = input.value;
+      details.innerHTML = '<summary>Voorbeeld</summary><div class="hulp-voorbeeld-inhoud"></div>';
+      details.addEventListener('toggle', () => {
+        if (!details.open) return;
+        document.querySelectorAll('.rr-voorbeeld[open]').forEach(el => { if(el !== details) el.open = false; });
+        _toonRelatieVoorbeeld(details);
+      });
+      rij.append(details);
+    });
+  }
+  function _toonRelatieVoorbeeld(details) {
+    const soort = details.dataset.soort;
+    const gekozenNiveau = Number(document.querySelector('[name="rr-niveau"]:checked')?.value || 10);
+    const niveau = soort === 'familie' ? gekozenNiveau : Math.max(20, gekozenNiveau);
+    const brug = soort === 'kader' ? 'beide' : document.querySelector('[name="rr-brug"]:checked')?.value || 'zonder';
+    const bewerking = document.querySelector('[name="rr-bewerking"]:checked')?.value || 'optellen';
+    const sleutel = [soort,niveau,brug,bewerking].join('|');
+    if(details.dataset.voorbeeld === sleutel) return;
+    const oef = soort === 'familie' ? _rrFamilie(niveau,brug) : soort === 'kader' ? _rrKader(niveau,bewerking) : _rrRooster(niveau,brug,bewerking);
+    const blok = {id:'voorbeeld-rr-'+soort,bewerking:'rekenrelaties',niveau,brug,opdrachtzin:'',hulpmiddelen:[],oefeningen:[oef],config:{soort}};
+    const kaart = Preview.maakBlokElement(blok).querySelector('.oefening-item');
+    kaart.querySelectorAll('button').forEach(el => el.remove());
+    const uitleg = {familie:'Maak twee optellingen en twee aftrekkingen met dezelfde drie getallen.',rooster:'Combineer het getal links met het getal bovenaan. Vul de lege vakjes in.',kader:'Vul de lege plaatsen in met de getallen boven het kader.'};
+    const host = details.querySelector('.hulp-voorbeeld-inhoud');
+    const tekst = document.createElement('p'); tekst.textContent = `${uitleg[soort]} Voorbeeld tot ${niveau}.`;
+    const voorbeeld = document.createElement('div'); voorbeeld.className = 'hulp-echt-voorbeeld'; voorbeeld.append(kaart);
+    host.replaceChildren(tekst,voorbeeld); details.dataset.voorbeeld = sleutel;
+    requestAnimationFrame(() => {
+      const breedte = soort === 'familie' ? 280 : 360;
+      voorbeeld.style.width = breedte+'px';
+      voorbeeld.style.zoom = Math.min(1,(host.clientWidth-16)/breedte);
+    });
+  }
+  const _rrRnd = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
+  function _rrBrugPlus(a,b) { while (a || b) { if ((a%10)+(b%10)>=10) return true; a=Math.floor(a/10); b=Math.floor(b/10); } return false; }
+  function _rrBrugMin(a,b) { while (a || b) { if ((a%10)<(b%10)) return true; a=Math.floor(a/10); b=Math.floor(b/10); } return false; }
+  function _rrPastBrug(heeft, brug) { return brug === 'beide' || (brug === 'met' ? heeft : !heeft); }
+  function _rrFamilie(niveau, brug) {
+    for (let p=0;p<800;p++) {
+      const a=_rrRnd(1,niveau-1), b=_rrRnd(1,niveau-a), som=a+b;
+      if (!_rrPastBrug(_rrBrugPlus(a,b),brug)) continue;
+      const getallen=[a,b,som].sort(()=>Math.random()-.5);
+      return {getallen, oplossingen:[`${a} + ${b} = ${som}`,`${b} + ${a} = ${som}`,`${som} − ${a} = ${b}`,`${som} − ${b} = ${a}`]};
+    }
+    return _rrFamilie(niveau,'beide');
+  }
+  function _rrRooster(niveau, brug, keuze, index=0) {
+    const bewerking = keuze === 'gemengd' ? (index%2===0?'optellen':'aftrekken') : keuze;
+    for (let p=0;p<900;p++) {
+      const kolommen=Array.from({length:3},()=>_rrRnd(1,Math.max(2,Math.floor(niveau*.45))));
+      const rijen=Array.from({length:3},()=>bewerking==='optellen'?_rrRnd(1,niveau-Math.max(...kolommen)):_rrRnd(Math.max(...kolommen),niveau));
+      const waarden=rijen.map(r=>kolommen.map(k=>bewerking==='optellen'?r+k:r-k));
+      const bruggen=rijen.flatMap(r=>kolommen.map(k=>bewerking==='optellen'?_rrBrugPlus(r,k):_rrBrugMin(r,k)));
+      if (brug==='met' && !bruggen.every(Boolean)) continue;
+      if (brug==='zonder' && !bruggen.every(v=>!v)) continue;
+      return {bewerking,kolommen,rijen,waarden};
+    }
+    return _rrRooster(niveau,'beide',bewerking);
+  }
+  function _rrKader(niveau, keuze, index=0) {
+    const bewerking=keuze==='aftrekken'?'aftrekken':'optellen';
+    let cellen, legeSleutels;
+    if(bewerking==='optellen'){
+      const tl=_rrRnd(1,Math.max(2,Math.floor(niveau*.35))), boven=_rrRnd(1,Math.max(1,Math.floor(niveau*.28))), links=_rrRnd(1,Math.max(1,Math.floor(niveau*.28)));
+      const tr=tl+boven, bl=tl+links, br=_rrRnd(Math.max(tr,bl)+1,niveau);
+      cellen={tl,boven,tr,links,bl,rechts:br-tr,br,onder:br-bl};
+      legeSleutels=index%2===0?['boven','links','bl','rechts','br','onder']:['tl','boven','tr','rechts','br','onder'];
+    }else{
+      const tl=_rrRnd(Math.max(6,Math.ceil(niveau*.6)),niveau), boven=_rrRnd(1,Math.max(1,Math.floor(tl*.35))), links=_rrRnd(1,Math.max(1,Math.floor(tl*.35)));
+      const tr=tl-boven, bl=tl-links, br=_rrRnd(1,Math.max(1,Math.min(tr,bl)-1));
+      cellen={tl,boven,tr,links,bl,rechts:tr-br,br,onder:bl-br};
+      legeSleutels=['boven','tr','bl','br'];
+    }
+    return {bewerking,cellen,legeSleutels,bank:legeSleutels.map(k=>cellen[k]).sort(()=>Math.random()-.5)};
+  }
+  function voegRelatieBlokToe() {
+    const soort=document.querySelector('[name="rr-soort"]:checked')?.value||'familie';
+    const niveau=Number(document.querySelector('[name="rr-niveau"]:checked')?.value||20);
+    const brug=soort==='kader'?'beide':(document.querySelector('[name="rr-brug"]:checked')?.value||'zonder');
+    const roosterBewerking=document.querySelector('[name="rr-bewerking"]:checked')?.value||'optellen';
+    const aantal=Math.max(1,Math.min(12,Number(document.getElementById('rr-aantal')?.value||6)));
+    const oefeningen=Array.from({length:aantal},(_,i)=>soort==='familie'?_rrFamilie(niveau,brug):soort==='kader'?_rrKader(niveau,roosterBewerking,i):_rrRooster(niveau,brug,roosterBewerking,i));
+    bundelData.push({id:`blok-rekenrelaties-${Date.now()}`,bewerking:'rekenrelaties',niveau,brug,opdrachtzin:soort==='familie'?'Schrijf alle bewerkingen met de 3 getallen.':'Los op.',hulpmiddelen:[],oefeningen,config:{soort,roosterBewerking}});
+    Preview.render(bundelData); toonToast('✓ Rekenrelaties toegevoegd');
+  }
 
   function voegKommaBlokToe(){
     const bewerking=document.querySelector('[name="komma-bewerking"]:checked')?.value||'optellen';
@@ -2522,6 +2657,8 @@ function _getSplitsConfig() {
     bundelData.push({id:`blok-komma-${Date.now()}`,bewerking:'kommagetallen',niveau:niveau==='honderdste'?'honderdsten':'tienden',opdrachtzin,hulpmiddelen:[],oefeningen,config:{soort:'kommagetallen',bewerking,decimalen,niveau,brug,variant,restsoort,aantalOefeningen,toonVoorbeeld,toonTransformSchemaH,toonAftrekTransformSchemaH}});
     Preview.render(bundelData);toonToast(`Kommablok toegevoegd! (${oefeningen.length} oefeningen)`,'#2e9d62');
   }
+
+  function getLaatsteBlok() { const b=bundelData[bundelData.length-1]; return b ? JSON.parse(JSON.stringify(b)) : null; }
 
   return {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, selecteerStrategie, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
@@ -2544,8 +2681,9 @@ function _getSplitsConfig() {
     selecteerSchattenType, selecteerSchattenNiveau, selecteerSchattenBewerking, selecteerSchattenAfronden,
     voegSchattenBlokToe,
     selecteerBreukRadio, voegBreukenBlokToe, selecteerPercentageRadio, voegPercentageBlokToe, selecteerKommaRadio, voegKommaBlokToe,
-    selecteerGemengdNiveau, selecteerGemengdBrugHoofd, selecteerGemengdBrugSub, selecteerGemengdVerhouding, selecteerGemengdRadio, toggleGemengdHulpmiddel, voegGemengdBlokToe, selecteerRelatieRadio, voegRelatieBlokToe,
-    toonToast,
+    selecteerGemengdNiveau, selecteerGemengdBrugHoofd, selecteerGemengdBrugSub, selecteerGemengdVerhouding, selecteerGemengdRadio, toggleGemengdHulpmiddel, voegGemengdBlokToe, verversGemengdHulp: _updateGemengdTypesUI,
+    selecteerRelatieRadio, voegRelatieBlokToe,
+    toonToast, getLaatsteBlok,
   };
 })();
 

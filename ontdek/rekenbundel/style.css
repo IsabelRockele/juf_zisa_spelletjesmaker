@@ -3809,3 +3809,23 @@ body.pdf-opname .komma-h-schijf-som{font-size:27px}
 .oefeningen-grid.tot100-sprongen-grid { grid-template-columns:minmax(0,1fr); }
 .tot100-oefening { display:block; position:relative; padding:0; border:none; background:white; min-width:0; }
 .tot100-oefening svg { display:block; width:100%; height:auto; }
+/* Compacte keuzes met een echt, uitklapbaar werkbladvoorbeeld. */
+#cg-hulpmiddelen, .tot20-keuzes { display:flex; flex-direction:column; gap:8px; width:100%; min-width:0; }
+.hulp-keuzerij { position:relative; width:100%; min-width:0; max-width:100%; border:1px solid #d5e0ea; border-radius:8px; background:white; }
+.hulp-keuzerij:has(> label[style*="display: none"]) { display:none; }
+.hulp-keuzerij > .vink-chip { display:flex; align-items:center; width:calc(100% - 80px); min-height:46px; padding:9px 10px; margin:0; border:0; border-radius:7px; gap:8px; white-space:normal; }
+.hulp-keuzerij > .vink-chip .vink-box { flex-shrink:0; }
+.hulp-keuzerij > .vink-chip > span:last-child { font-size:13px; line-height:1.35; }
+.hulp-voorbeeld > summary { position:absolute; right:8px; top:13px; cursor:pointer; color:#2366a1; font-size:12px; font-weight:600; }
+.hulp-voorbeeld[open] > summary { color:#183c5b; }
+.hulp-voorbeeld { min-width:0; max-width:100%; }
+.hulp-voorbeeld-inhoud { width:100%; min-width:0; border-top:1px solid #d5e0ea; padding:12px 8px; overflow:hidden; }
+.hulp-voorbeeld-inhoud > p { font-size:12px; color:#52677d; line-height:1.5; margin-bottom:10px; }
+.hulp-echt-voorbeeld { background:white; pointer-events:none; }
+.hulp-echt-voorbeeld > .oefening-item { margin:0; width:100%; }
+.hulp-echt-voorbeeld .tot20-oefening { padding:0; border:0; }
+.hulp-eerste-voorbeeld { display:flex !important; gap:8px; align-items:center; margin-top:12px; font-size:12px !important; }
+.rr-soort-keuzes { display:flex; flex-direction:column; gap:8px; width:100%; min-width:0; }
+.rr-soort-keuzes .radio-chip { display:flex; align-items:center; width:calc(100% - 80px); min-height:46px; padding:9px 10px; margin:0; border:0; border-radius:7px; font-size:13px; }
+.oefeningen-grid.tot20-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.tot20-oefening svg { width:100%; height:auto; }

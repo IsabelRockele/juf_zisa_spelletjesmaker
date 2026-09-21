@@ -213,7 +213,7 @@ const Preview = (() => {
       blok.bewerking === 'breuken' &&
       blok.config?.soort === 'vermenigvuldigen'
     );
-    if (heeftCompZonderHulp || heeftBreukSchrapping || _laatsteBundelData.some(b => typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(b))) {
+    if (heeftCompZonderHulp || heeftBreukSchrapping || _laatsteBundelData.some(b => b.config?.hulpPerBewerking || (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(b)) || (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(b)))) {
       render(_laatsteBundelData);
       // Toggle knop state behouden na re-render
       if (btn) {
@@ -573,7 +573,8 @@ const Preview = (() => {
                       blok.bewerking === 'aftrekken' ? 'Aftrekken' : 'Optellen';
     const isPunt = isSplitsingen && blok.oefeningen[0]?.type === 'puntoefening';
     let gridKlasse;
-    if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok)) gridKlasse = blok.tot100Hulp.startsWith('sprongen') ? 'tot100-grid tot100-sprongen-grid' : 'tot100-grid';
+    if (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(blok)) gridKlasse = 'tot20-grid';
+    else if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok)) gridKlasse = blok.tot100Hulp.startsWith('sprongen') ? 'tot100-grid tot100-sprongen-grid' : 'tot100-grid';
     else if (isPunt)                                                            gridKlasse = 'splits-grid punt-grid';
     else if (isGetallenlijn)                                               gridKlasse = 'gl-grid';
     else if (isTafelsInzicht)                                              gridKlasse = 'inzicht-grid';
@@ -633,6 +634,15 @@ const Preview = (() => {
   }
 
   function _oefeningHTML(blok, oef, idx) {
+    if(oef.hulpConfig) {
+      const {hulpConfig,...som}=oef;
+      // Behoud de echte index voor verwijderen, maar laat de renderer het voorbeeld als eerste oefening zien.
+      const html=_oefeningHTML({...blok,...hulpConfig,id:blok.id},som,0);
+      return html.replaceAll(`App.verwijderOefening('${blok.id}',0)`,`App.verwijderOefening('${blok.id}',${idx})`);
+    }
+    if (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(blok)) {
+      return `<div class="oefening-item tot20-oefening">${Tot20Hulp.svg(blok, oef, _toonOplossingen || (blok.metVoorbeeld && idx === 0))}<button class="btn-del-oef" onclick="App.verwijderOefening('${blok.id}',${idx})" title="Verwijder oefening">×</button></div>`;
+    }
     if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok) && Tot100Hulp.gegevens(oef)) {
       return `<div class="oefening-item tot100-oefening">${Tot100Hulp.svg(blok, oef, _toonOplossingen || (blok.tot100Voorbeeld && idx === 0))}<button class="btn-del-oef" onclick="App.verwijderOefening('${blok.id}',${idx})" title="Verwijder oefening">×</button></div>`;
     }
@@ -1569,8 +1579,8 @@ const Preview = (() => {
       </div>`;
   }
 
-  function _positioneerSplitsbenen() {
-    document.querySelectorAll('.splitsbeen-anker').forEach(anker => {
+  function _positioneerSplitsbenen(root = document) {
+    root.querySelectorAll('.splitsbeen-anker').forEach(anker => {
       const oefening  = anker.closest('.oefening-hulp');
       const doelEl    = oefening?.querySelector('.splits-doel');
       if (!doelEl) return;
@@ -1583,7 +1593,9 @@ const Preview = (() => {
       const boom   = anker.querySelector('.splitsbeen-boom');
       const isDrie = boom?.classList.contains('splitsbeen-3');
       const isGroot = boom?.classList.contains('splitsbeen-boom-groot');
-      const boomB  = isDrie ? 80 : isGroot ? 72 : 48;
+      const boomB  = root === document
+        ? (isDrie ? 80 : isGroot ? 72 : 48)
+        : (boom?.getBoundingClientRect().width || (isDrie ? 80 : isGroot ? 72 : 48));
 
       // Zet anker absoluut t.o.v. hulp-splits-rij (die is position:relative)
       // splits-rij heeft dezelfde left als oefening (minus padding)
@@ -1595,13 +1607,20 @@ const Preview = (() => {
 
       anker.style.position = 'relative';
       anker.style.marginLeft = Math.round(links) + 'px';
+      // Corrigeer na de echte compacte lay-out. In een smal Dagelijkse-Kost-vak
+      // kunnen padding en borders enkele pixels verschillen van de bundelpagina.
+      const boomRect = root === document ? null : boom?.getBoundingClientRect();
+      if (boomRect) {
+        const delta = (doelRect.left + doelRect.width / 2) - (boomRect.left + boomRect.width / 2);
+        if (Math.abs(delta) >= .5) anker.style.marginLeft = Math.round(links + delta) + 'px';
+      }
     });
   }
 
-  function _positioneerCompenseren() {
-    document.querySelectorAll('.comp-pijl-blokje').forEach(blokje => {
+  function _positioneerCompenseren(root = document) {
+    root.querySelectorAll('.comp-pijl-blokje').forEach(blokje => {
       const kringId = blokje.dataset.kringId;
-      const kringEl = document.getElementById(kringId);
+      const kringEl = root.getElementById ? root.getElementById(kringId) : root.querySelector(`#${kringId}`);
       const somWrapper = blokje.closest('.oefening-comp')?.querySelector('.comp-som-wrapper');
       if (!kringEl || !somWrapper) return;
       // Midden van de kring t.o.v. de som-wrapper
@@ -3510,5 +3529,24 @@ const Preview = (() => {
     div.innerHTML=`<div class="preview-blok-header komma-header"><span class="blok-type-badge">🔢 Kommagetallen</span><span class="blok-niveau">${niveauLabel} · ${bewerkingLabel} · ${strategieLabel}</span><div class="spacer"></div><button class="btn-blok-actie verwijder" onclick="App.verwijderBlok('${blok.id}')">✕</button></div><div class="preview-blok-body"><div class="opdrachtzin-wrapper" id="zin-wrapper-${blok.id}">${zinWeergave}</div><div class="oefeningen-grid komma-getallen-grid komma-${blok.config.variant}">${blok.oefeningen.map((o,i)=>_kommaGetalOefHTML(blok,o,i)).join('')}</div></div><div class="preview-blok-footer"><span class="footer-info">${blok.oefeningen.length} oefeningen</span><button class="btn-add-oef" onclick="App.voegOefeningToe('${blok.id}')">+ Oefening</button></div>`;return div;
   }
 
-  return { render, toonZinEditor, toggleOplossingen };
+  // Herbruikbaar voor andere Juf Zisa-tools, zoals Dagelijkse Kost.
+  // De aanroeper kan één volledig oefenblok in een eigen afgeschermde
+  // stijlomgeving plaatsen zonder de gewone bundel-preview op te bouwen.
+  function positioneerBlok(root) {
+    _positioneerSplitsbenen(root);
+    _positioneerCompenseren(root);
+  }
+  function maakHulpmiddelVoorbeeld(blok) {
+    const div = document.createElement('div');
+    div.className = 'hulp-echt-voorbeeld';
+    const vorig = _toonOplossingen;
+    try {
+      _toonOplossingen = false;
+      div.innerHTML = _oefeningHTML(blok, blok.oefeningen[0], 0);
+    } finally { _toonOplossingen = vorig; }
+    div.querySelectorAll('button').forEach(knop => knop.remove());
+    return div;
+  }
+  return { render, toonZinEditor, toggleOplossingen, maakBlokElement: _maakBlokElement, positioneerBlok, maakHulpmiddelVoorbeeld };
 })();
+window.DKRekenPreview = Preview;
