@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Hulpschema – Kindmodus</title>
 
-  <!-- STAGING base; voor live vervangen door /juf_zisa_spelletjesmaker/pro/ -->
-  <base href="/juf_zisa_spelletjesmaker/pro/">
+  <base href="./">
 
   <!-- Zelfde layout als keuze-hulpschema.html -->
   <link rel="stylesheet" href="../keuze-hulpschema.css">
@@ -16,6 +15,8 @@
     /* Kleine aanvullingen: titels centreren zoals op jouw keuze-scherm */
     .panel { max-width: 900px; margin: 0 auto; }
     .panel h1 { text-align: center; }
+    #stap1 .button-container { flex-wrap: wrap; gap: 20px; }
+    #stap1 .choice-btn { flex: 1 1 190px; font-size: 2rem; }
     /* Verberg eventuele “menu”/terug-achtige elementen: deze kindpagina heeft die niet nodig */
     .menu-btn.top, .terug-knoop { display:none !important; }
 
@@ -47,6 +48,7 @@
     <div id="stap1" class="stap">
       <h1>Kies bereik</h1>
       <div class="button-container">
+        <a id="bereik-20" class="choice-btn" href="./handelend-tot20.html?kid=1&amp;range=20">Tot 20<br>met brug</a>
         <button id="bereik-100" class="choice-btn">Tot 100</button>
         <button id="bereik-1000" class="choice-btn">Tot 1000</button>
       </div>

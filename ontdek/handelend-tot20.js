@@ -76,4 +76,11 @@
   document.addEventListener('pointerup',e=>{if(!sleep)return;const old=sleep;sleep=null;if(!old.ghost)return;old.ghost.remove();const zone=el(min?'losse':'ramen').getBoundingClientRect();const goed=e.clientX>=zone.left&&e.clientX<=zone.right&&e.clientY>=zone.top&&e.clientY<=zone.bottom;old.target.addEventListener('click',e=>e.stopImmediatePropagation(),{capture:true,once:true});if(goed)verplaats();});
   document.addEventListener('pointercancel',()=>{sleep?.ghost?.remove();sleep=null;});
   render();
+  if(new URLSearchParams(location.search).get('kid')==='1'){
+    kiesGebruik(true);
+    el('keuze-terug').hidden=true;
+    const terug=document.querySelector('header a');
+    terug.href='hulpschema-kid.html?kid=1';
+    terug.textContent='← Kies bereik';
+  }
 })();
