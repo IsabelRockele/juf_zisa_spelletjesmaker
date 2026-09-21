@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="nl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Handelend rekenen tot 20</title><link rel="stylesheet" href="handelend-tot20.css"><script src="device-id.js"></script><script type="module" src="guard.js"></script><script src="handelend-tot20.js" defer></script><script src="handelend-vrij-legbord.js" defer></script></head>
+<body data-scherm="keuze">
+<header><a href="keuze-hulpschema.html">← MAB en schema</a><h1 id="schermtitel">Tot 20 met brug</h1><button id="keuze-terug" hidden>← Kies opnieuw</button><button id="volledig">Volledig scherm</button></header>
+<main>
+<nav id="keuzescherm" class="gebruik-knoppen" aria-label="Hoe wil je oefenen?">
+<button id="samen" class="keuzekaart"><img src="../spelen/games/afbeeldingen/hulpjuf_zisa.png" alt=""><span>Samen met juf</span></button>
+<button id="alleen" class="keuzekaart"><img src="../drukknop_afbeeldingen_v3/huistaken.png" alt=""><span>Alleen</span></button></nav>
+<section id="bord-instellingen" hidden class="instellingen" aria-label="Oefening kiezen">
+<div class="bewerkingen" role="group" aria-label="Bewerking"><button class="bewerk plus" data-select="bewerking" data-waarde="plus" aria-pressed="true" aria-label="Optellen">+</button><button class="bewerk min" data-select="bewerking" data-waarde="min" aria-pressed="false" aria-label="Aftrekken">−</button></div><label hidden>Bewerking <select id="bewerking"><option value="plus">Optellen</option><option value="min">Aftrekken</option></select></label>
+<form id="eigen"><label>Eerste getal <input id="eerste" type="number" min="1" max="18" value="9" required></label><span id="teken">+</span><label>Tweede getal <input id="tweede" type="number" min="1" max="9" value="5" required></label><button>Toon oefening</button></form>
+<button id="nieuw">Andere oefening</button><button id="opnieuw">Opnieuw leggen</button>
+</section>
+<p id="fout" role="alert"></p>
+<section id="bord-les" hidden class="les" aria-label="Samen met juf">
+<p id="instructie" aria-live="polite"></p>
+<div id="ramen" class="ramen"></div>
+<div class="voorraad"><h2 id="voorraad-titel">Nog erbij</h2><div id="losse" class="losse"></div></div>
+<div id="penbalk"><div class="penkleuren" role="group" aria-label="Kies je schrijfpen"><button type="button" class="penkleur" data-kleur="#16803c" style="--penkleur:#16803c" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-1 5 5-1L21 7l-4-4Z"/><path d="m14 6 4 4M4 16l4 4"/></svg>Groene pen</button><button type="button" class="penkleur" data-kleur="#d12828" style="--penkleur:#d12828" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-1 5 5-1L21 7l-4-4Z"/><path d="m14 6 4 4M4 16l4 4"/></svg>Rode pen</button><button type="button" class="penkleur" data-kleur="#006bb6" style="--penkleur:#006bb6" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-1 5 5-1L21 7l-4-4Z"/><path d="m14 6 4 4M4 16l4 4"/></svg>Blauwe pen</button></div><button id="gum" aria-pressed="false">Gum</button><button id="wis">Wis mijn notities</button></div>
+<div id="schrijfzone">
+<div class="som"><span id="a"></span><span id="op"></span><span class="term"><span id="b"></span><span class="splits"><svg viewBox="0 0 120 42" aria-hidden="true"><path d="M60 2 L20 38 M60 2 L100 38"/></svg><span id="deel1">…</span><span id="deel2">…</span></span></span><span>=</span><span id="antwoord">…</span></div>
+<div id="stappen" class="stappen" aria-live="polite"></div>
+<svg id="inkt" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-label="Schrijfvlak voor eigen notities"></svg>
+</div>
+<div id="zelfhulp" hidden><p>Leg zelf de stippen en schrijf in je boek. Hulp nodig bij het opschrijven?</p><button id="hulp">Geef een hint</button><button id="verberg-hulp">Verberg hulp</button><p id="hint" aria-live="polite"></p></div>
+<div class="acties"><button id="stap">Toon de volgende stap</button><button id="terug">Stap terug</button></div>
+<p class="tip">Tik op een stip of sleep hem. Je kunt ook de knoppen gebruiken.</p>
+</section>
+<section id="alleen-les" class="les" aria-label="Legbord voor je werkboek" hidden>
+<div class="kind-kop"><div><h2 class="alleen-titel">Kijk in je boek. Leg maar!</h2><p>Schrijven doe je in je boek.</p></div><div class="bewerkingen" role="group" aria-label="Wat staat er in je boek?"><button class="bewerk plus" data-select="vrij-bewerking" data-waarde="plus" aria-pressed="true" aria-label="Optellen">+</button><button class="bewerk min" data-select="vrij-bewerking" data-waarde="min" aria-pressed="false" aria-label="Aftrekken">−</button></div></div>
+<div id="vrij-ramen" class="ramen"></div>
+<div id="vrij-som" aria-live="polite" aria-atomic="true"><p>Leg stippen. Dan verschijnt jouw som.</p></div>
+<div class="vrij-materiaal" aria-label="Kies je stippen"><button class="vrij-bron" data-kleur="blauw"><span class="stip" aria-hidden="true"></span>Blauw erbij</button><button class="vrij-bron" data-kleur="rood"><span class="stip rood" aria-hidden="true"></span>Rood erbij</button><div id="vrij-weg" role="region" aria-label="Stippen wegnemen"><div>↘ Hier wegleggen</div><div id="vrij-weg-bollen"></div><div id="vrij-weg-aantal" aria-live="polite"></div><div id="vrij-weg-som" aria-live="polite" aria-label="Bewerking bij het wegleggen"></div></div></div>
+<p class="tip"><strong>Maak eerst 10.</strong> Tik op een kleur: stip erbij. Tik op een stip: stip weg.</p>
+<div class="acties"><button id="vrij-terug">↶ Terug</button><button id="vrij-leeg">↺ Leeg bord</button><button id="vrij-help-open">? Help mij</button></div>
+<p id="vrij-melding" aria-live="polite"></p>
+<dialog id="vrij-hulp" class="vrij-hulp" aria-labelledby="hulptitel"><div class="hulp-kop"><h2 id="hulptitel">Stap voor stap</h2><button id="vrij-help-sluit" aria-label="Hulp sluiten">✕</button></div><label hidden>In mijn werkboek staat <select id="vrij-bewerking"><option value="plus">Een optelling</option><option value="min">Een aftrekking</option></select></label><p id="vrij-hint" aria-live="polite"></p><button id="vrij-hulp-volgende">Volgende tip</button><button id="vrij-hulp-opnieuw">Tips opnieuw</button></dialog>
+</section>
+</main></body></html>
