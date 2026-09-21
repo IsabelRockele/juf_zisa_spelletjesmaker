@@ -135,7 +135,8 @@ function _toggleTimer(vak) {
     status.isLopend = false;
     vak.querySelector('.timer-start').textContent = '▶';
   } else {
-    // Start
+    // Start: activeer audio tijdens de klik, zodat het alarm later mag klinken.
+    _bereidAlarmVoor();
     status.startTik = Date.now();
     status.isLopend = true;
     vak.querySelector('.timer-start').textContent = '⏸';
@@ -317,42 +318,50 @@ function _timerAfgelopen(vak) {
   vak.classList.add('tijd-om');
   vak.querySelector('.timer-tijd').textContent = 'Tijd om!';
   _speelAlarm();
-  // Knipperen stopt na 6 seconden
-  setTimeout(() => vak.classList.remove('tijd-om'), 6000);
+  // Laat de visuele melding even lang opvallen als het geluid.
+  setTimeout(() => vak.classList.remove('tijd-om'), 8000);
 }
 
-// === ALARMGELUID (Web Audio, 3 sec, zacht en vriendelijk) ===
+// === ALARMGELUID (heldere bel, vier keer ding-dong, ongeveer 8 seconden) ===
 let _audioCtx = null;
 
-function _speelAlarm() {
+async function _bereidAlarmVoor() {
   try {
-    if (!_audioCtx) {
+    if (!_audioCtx || _audioCtx.state === 'closed') {
       _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    const ctx = _audioCtx;
-    // Resume context if suspended (Chrome auto-suspend policy)
-    if (ctx.state === 'suspended') ctx.resume();
+    if (_audioCtx.state === 'suspended') await _audioCtx.resume();
+    return _audioCtx;
+  } catch (err) {
+    console.warn('Kon alarmgeluid niet voorbereiden:', err);
+    return null;
+  }
+}
 
-    // Drie tonen (do-mi-sol), elk 0.4s, herhaald
-    const tonen = [523.25, 659.25, 783.99]; // C5, E5, G5
-    const beginTijd = ctx.currentTime;
-
-    // Speel reeks 2x = ongeveer 2.4s, plus laatste lange noot = 3s totaal
-    [0, 1.2].forEach((offsetSec) => {
-      tonen.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        gain.gain.value = 0;
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        const t = beginTijd + offsetSec + i * 0.18;
-        gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(0.15, t + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-        osc.start(t);
-        osc.stop(t + 0.4);
+async function _speelAlarm() {
+  const ctx = await _bereidAlarmVoor();
+  if (!ctx) return;
+  try {
+    const beginTijd = ctx.currentTime + 0.03;
+    // Een grondtoon met een zachte boventoon geeft een herkenbare belklank.
+    [0, 2, 4, 6].forEach((offsetSec) => {
+      [880, 659.25].forEach((freq, i) => {
+        const t = beginTijd + offsetSec + i * 0.65;
+        [[1, 0.24], [2, 0.06]].forEach(([verhouding, volume]) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq * verhouding;
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0, t);
+          gain.gain.linearRampToValueAtTime(volume, t + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 1.15);
+          gain.gain.linearRampToValueAtTime(0, t + 1.2);
+          osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+          osc.start(t);
+          osc.stop(t + 1.2);
+        });
       });
     });
   } catch (err) {
