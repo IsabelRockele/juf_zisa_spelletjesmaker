@@ -2881,7 +2881,8 @@ placeAfterLastOfKey(block, key);
   function addRekentaalExercises(metZinnen = false) {
     const max = parseInt($('#rekentaalMax')?.value, 10) || 20;
     const count = clamp(parseInt($('#rekentaalCount')?.value, 10) || 8, 2, 30);
-    const afstandKeuze = document.querySelector('input[name="rekentaalAfstand"]:checked')?.value || '1';
+    const afstandKeuze = metZinnen ? ($('#rekentaalZinnenStap')?.value || '1')
+      : document.querySelector('input[name="rekentaalAfstand"]:checked')?.value || '1';
     const vormen = $$(metZinnen ? '.rekentaal-zinsvorm:checked' : '.rekentaal-vorm:checked').map(el => el.value);
     if (metZinnen && max !== 100) return;
     if (!vormen.length) { alert('Kies minstens één zinsvorm.'); return; }

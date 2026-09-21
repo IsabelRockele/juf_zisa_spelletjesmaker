@@ -8,7 +8,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <!-- Volgorde: eerst oefeningen, dan preview, dan pdf -->
-  <script defer src="getalinzicht.js?v=rekentaal-zinnen2"></script>
+  <script defer src="getalinzicht.js?v=rekentaal-keuze3"></script>
   <script defer src="gi-preview.js?v=range-freeze-fix-1"></script>
   <script defer src="gi-pdf.js?v=pagepack3"></script>
 
@@ -384,21 +384,35 @@
         </div>
         <div class="harm-beschrijving" style="margin-top:8px">Richtlijn: 1ste leerjaar tot 10/20, 2de tot 20/100 en 3de tot 100/1000. Je kunt elk bereik vrij kiezen.</div>
       </div>
-      <div class="config-kaart"><div class="kaart-titel"><span class="icon">↔️</span> Afstand</div><div class="chips-rij">
-        <label class="radio-chip geselecteerd"><input type="radio" name="rekentaalAfstand" value="1" checked> Net voor / net na</label>
-        <label class="radio-chip"><input type="radio" name="rekentaalAfstand" value="2"> 2 plaatsen voor / na</label>
-        <label class="radio-chip"><input type="radio" name="rekentaalAfstand" value="mix"> Beide door elkaar</label>
-      </div></div>
-      <div class="config-kaart"><div class="kaart-titel"><span class="icon">💬</span> Zinsvormen</div>
-        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="beforeAfter" checked> 6 komt net voor …</label>
-        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="blankBefore" checked> … komt net voor 7</label>
-        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="afterBlank" checked> 8 komt net na …</label>
-        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="blankAfter" checked> … komt net na 7</label>
+      <div class="config-kaart">
+        <div class="kaart-titel">Wat wil je oefenen?</div>
+        <select id="rekentaalSoort" style="width:100%">
+          <option value="voorna">Voor en na oefenen — korte invulzinnen</option>
+          <option value="zinnen">Rekenzinnen met schrijflijnen — tot 100</option>
+        </select>
+        <div class="harm-beschrijving" style="margin-top:8px">Bij rekenzinnen met schrijflijnen wordt het getalbereik op 100 gezet.</div>
       </div>
-      <button class="btn-toevoegen" id="btnAddRekentaal">➕ Voeg rekentaal toe</button>
+      <div id="rekentaalVoorNaKaart">
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">↔️</span> Hoeveel plaatsen voor of na?</div>
+        <div class="chips-rij">
+          <label class="radio-chip geselecteerd"><input type="radio" name="rekentaalAfstand" value="1" checked> 1 plaats — na 6 komt 7</label>
+          <label class="radio-chip"><input type="radio" name="rekentaalAfstand" value="2"> 2 plaatsen — twee plaatsen na 6 komt 8</label>
+          <label class="radio-chip"><input type="radio" name="rekentaalAfstand" value="mix"> 1 en 2 plaatsen door elkaar</label>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">💬</span> Welke invulzinnen wil je?</div>
+        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="beforeAfter" checked> <span data-rekentaal-voorbeeld="beforeAfter">6 komt net voor …</span></label>
+        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="blankBefore" checked> <span data-rekentaal-voorbeeld="blankBefore">… komt net voor 7</span></label>
+        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="afterBlank" checked> <span data-rekentaal-voorbeeld="afterBlank">8 komt net na …</span></label>
+        <label class="check-label"><input class="rekentaal-vorm" type="checkbox" value="blankAfter" checked> <span data-rekentaal-voorbeeld="blankAfter">… komt net na 7</span></label>
+      </div>
+      <button class="btn-toevoegen" id="btnAddRekentaal">➕ Voeg deze invulzinnen toe</button>
+      </div>
       <div class="config-kaart" id="rekentaalZinnenKaart" hidden>
         <div class="kaart-titel"><span class="icon">✏️</span> Zinnen met schrijflijnen — tot 100</div>
-        <div class="harm-beschrijving">Kies de soorten vragen. Onder elke zin komt een lange schrijflijn, ook voor meerdere getallen. Het aantal en de afstand kies je hierboven.</div>
+        <div class="harm-beschrijving">Kies de soorten vragen. Onder elke zin komt een lange schrijflijn, ook voor meerdere getallen. Vink hieronder de vragen aan die je wilt oefenen.</div>
         <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-alle" checked> Alle even of oneven getallen tussen twee getallen</label>
         <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-te" checked> Een getal met tientallen en eenheden</label>
         <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tussen" checked> Een even of oneven getal tussen twee grenzen</label>
@@ -407,6 +421,16 @@
         <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tientallen" checked> Welke tientallen staan tussen twee getallen?</label>
         <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tussen-tientallen" checked> Tussen welke tientallen ligt een getal?</label>
         <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-buren" checked> Welk getal komt voor … en na …?</label>
+        <div id="rekentaalZinnenAfstand" style="margin:12px 0">
+          <label><strong>Bij de vraag “Welk getal komt voor of na?”</strong>
+            <select id="rekentaalZinnenStap" style="width:100%;margin-top:6px">
+              <option value="1">1 plaats — juist na 42 is 43</option>
+              <option value="2">2 plaatsen — twee plaatsen na 42 is 44</option>
+              <option value="mix">1 en 2 plaatsen door elkaar</option>
+            </select>
+          </label>
+          <div class="harm-beschrijving">Deze keuze geldt alleen voor die vraag. De andere aangevinkte vragen veranderen niet.</div>
+        </div>
         <button class="btn-toevoegen" id="btnAddRekentaalZinnen">➕ Voeg zinnen met schrijflijnen toe</button>
       </div>
     </div>
@@ -918,14 +942,38 @@ const GI_UI = (() => {
   document.addEventListener('DOMContentLoaded', () => {
     initChips();
     const updateRekentaalZinnen = () => {
-      document.getElementById('rekentaalZinnenKaart').hidden = document.getElementById('rekentaalMax').value !== '100';
+      const metZinnen = document.getElementById('rekentaalSoort').value === 'zinnen';
+      document.getElementById('rekentaalVoorNaKaart').hidden = metZinnen;
+      document.getElementById('rekentaalZinnenKaart').hidden = !metZinnen;
+      document.getElementById('rekentaalZinnenAfstand').hidden = !document.querySelector('.rekentaal-zinsvorm[value="zin-voorna"]').checked;
+      const stap = document.querySelector('[name="rekentaalAfstand"]:checked').value;
+      const twee = stap === '2';
+      const woord = twee ? 'twee plaatsen' : 'net';
+      const voorbeelden = {
+        beforeAfter: '6 komt ' + woord + ' voor … (antwoord: ' + (twee ? 8 : 7) + ')',
+        blankBefore: '… komt ' + woord + ' voor 7 (antwoord: ' + (twee ? 5 : 6) + ')',
+        afterBlank: '8 komt ' + woord + ' na … (antwoord: ' + (twee ? 6 : 7) + ')',
+        blankAfter: '… komt ' + woord + ' na 7 (antwoord: ' + (twee ? 9 : 8) + ')'
+      };
+      document.querySelectorAll('[data-rekentaal-voorbeeld]').forEach(el => {
+        el.textContent = voorbeelden[el.dataset.rekentaalVoorbeeld] + (stap === 'mix' ? ' — ook met twee plaatsen' : '');
+      });
     };
+    document.getElementById('rekentaalSoort').addEventListener('change', () => {
+      if (document.getElementById('rekentaalSoort').value === 'zinnen') document.getElementById('rekentaalMax').value = '100';
+      updateRekentaalZinnen();
+    });
+    document.getElementById('rekentaalMax').addEventListener('change', () => {
+      if (document.getElementById('rekentaalMax').value !== '100') document.getElementById('rekentaalSoort').value = 'voorna';
+    });
+    document.querySelectorAll('[name="rekentaalAfstand"], .rekentaal-zinsvorm').forEach(el => el.addEventListener('change', updateRekentaalZinnen));
     document.getElementById('rekentaalMax')?.addEventListener('change', updateRekentaalZinnen);
     updateRekentaalZinnen();
     document.getElementById('rekentaalLeerjaar')?.addEventListener('change', e => {
       const advies = { '1': '20', '2': '100', '3': '1000' };
       const bereik = document.getElementById('rekentaalMax');
       if (bereik) bereik.value = advies[e.target.value] || '20';
+      if (bereik.value !== '100') document.getElementById('rekentaalSoort').value = 'voorna';
       updateRekentaalZinnen();
     });
     toonTab('getallenlijn', document.querySelector('.tab-getallenlijn'));
