@@ -390,7 +390,7 @@
           <option value="voorna">Voor en na oefenen — korte invulzinnen</option>
           <option value="zinnen">Rekenzinnen met schrijflijnen — tot 100</option>
         </select>
-        <div class="harm-beschrijving" style="margin-top:8px">Bij rekenzinnen met schrijflijnen wordt het getalbereik op 100 gezet.</div>
+        <div class="harm-beschrijving" style="margin-top:8px">Bij tot 100 verschijnen de rekenzinnen met schrijflijnen automatisch. Je kunt hier ook kiezen voor korte invulzinnen.</div>
       </div>
       <div id="rekentaalVoorNaKaart">
       <div class="config-kaart">
@@ -413,14 +413,14 @@
       <div class="config-kaart" id="rekentaalZinnenKaart" hidden>
         <div class="kaart-titel"><span class="icon">✏️</span> Zinnen met schrijflijnen — tot 100</div>
         <div class="harm-beschrijving">Kies de soorten vragen. Onder elke zin komt een lange schrijflijn, ook voor meerdere getallen. Vink hieronder de vragen aan die je wilt oefenen.</div>
-        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-alle" checked> Alle even of oneven getallen tussen twee getallen</label>
-        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-te" checked> Een getal met tientallen en eenheden</label>
-        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tussen" checked> Een even of oneven getal tussen twee grenzen</label>
-        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-voorna" checked> Welk getal komt juist / twee plaatsen voor of na?</label>
-        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tiental" checked> Welk tiental komt juist voor of na?</label>
-        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tientallen" checked> Welke tientallen staan tussen twee getallen?</label>
-        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tussen-tientallen" checked> Tussen welke tientallen ligt een getal?</label>
-        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-buren" checked> Welk getal komt voor … en na …?</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-alle" checked> Schrijf alle oneven getallen tussen 10 en 20. (Ook even getallen.)</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-te" checked> Schrijf een getal met 5 tientallen en 4 eenheden.</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tussen" checked> Schrijf een even getal minder dan 40, maar meer dan 34. (Ook oneven getallen.)</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-voorna" checked> Welk getal komt twee plaatsen na 63? / Welk getal komt juist voor 55?</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tiental" checked> Welk tiental komt juist na 42?</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tientallen" checked> Welke tientallen staan tussen 60 en 90?</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-tussen-tientallen" checked> Tussen welke tientallen ligt 56?</label>
+        <label class="check-label"><input class="rekentaal-zinsvorm" type="checkbox" value="zin-buren" checked> Welk getal komt voor 55 en na 53?</label>
         <div id="rekentaalZinnenAfstand" style="margin:12px 0">
           <label><strong>Bij de vraag “Welk getal komt voor of na?”</strong>
             <select id="rekentaalZinnenStap" style="width:100%;margin-top:6px">
@@ -964,7 +964,7 @@ const GI_UI = (() => {
       updateRekentaalZinnen();
     });
     document.getElementById('rekentaalMax').addEventListener('change', () => {
-      if (document.getElementById('rekentaalMax').value !== '100') document.getElementById('rekentaalSoort').value = 'voorna';
+      document.getElementById('rekentaalSoort').value = document.getElementById('rekentaalMax').value === '100' ? 'zinnen' : 'voorna';
     });
     document.querySelectorAll('[name="rekentaalAfstand"], .rekentaal-zinsvorm').forEach(el => el.addEventListener('change', updateRekentaalZinnen));
     document.getElementById('rekentaalMax')?.addEventListener('change', updateRekentaalZinnen);
@@ -973,7 +973,7 @@ const GI_UI = (() => {
       const advies = { '1': '20', '2': '100', '3': '1000' };
       const bereik = document.getElementById('rekentaalMax');
       if (bereik) bereik.value = advies[e.target.value] || '20';
-      if (bereik.value !== '100') document.getElementById('rekentaalSoort').value = 'voorna';
+      document.getElementById('rekentaalSoort').value = bereik.value === '100' ? 'zinnen' : 'voorna';
       updateRekentaalZinnen();
     });
     toonTab('getallenlijn', document.querySelector('.tab-getallenlijn'));
