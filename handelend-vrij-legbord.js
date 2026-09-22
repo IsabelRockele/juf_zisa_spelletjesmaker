@@ -51,7 +51,7 @@
   function toonTip(){el('vrij-hint').textContent=tips[el('vrij-bewerking').value][tip];el('vrij-hulp-volgende').disabled=tip===3;}
   el('vrij-hulp-volgende').addEventListener('click',()=>{tip=Math.min(3,tip+1);toonTip();});
   el('vrij-hulp-opnieuw').addEventListener('click',()=>{tip=0;toonTip();});
-  el('vrij-bewerking').addEventListener('change',()=>{tip=0;wegBollen=[];geschiedenis=[];if(isMin())vakken=vakken.map(k=>k?'blauw':null);render();toonTip();});
+  el('vrij-bewerking').addEventListener('change',()=>{tip=0;wegBollen=[];geschiedenis=[];vakken=Array(20).fill(null);sleep?.ghost?.remove();sleep=null;render();toonTip();});
   el('alleen-les').addEventListener('pointerdown',e=>{
     const target=e.target.closest('.vrij-bron,.vrij-stip');if(!target)return;
     sleep={target,id:e.pointerId,x:e.clientX,y:e.clientY,ghost:null,bron:target.classList.contains('vrij-bron'),plek:Number(target.dataset.plek),kleur:target.dataset.kleur};target.setPointerCapture(e.pointerId);
