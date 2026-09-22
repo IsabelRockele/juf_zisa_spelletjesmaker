@@ -2,7 +2,7 @@
 const TimerWorld = (() => {
     let sceneSerial = 0;
     const root = typeof document === 'undefined' ? '' : new URL('timer_assets/worlds/', document.currentScript.src).href;
-    const asset = name => `${root}${name}.png`;
+    const asset = name => `${root}optimized/${name}.webp?v=1`;
     const clamp = value => Math.max(0, Math.min(1, value));
     const reveal = (p, start, end = start + .08) => clamp((p-start)/(end-start));
     const ease = p => p*p*(3-2*p);
@@ -134,11 +134,11 @@ const TimerWorld = (() => {
             }
             for(let i=0;i<plan.count-1;i++) {
                 const name=['planet-ringed','planet-coral','planet-blue','planet-gold'][i%4];
-                world+=`<image href="${new URL('../'+name+'.png',root).href}" x="${850+i*1050}" y="${i%2?380:65}" width="${220+i%3*60}" height="${220+i%3*60}"/>`;
+                world+=`<image href="${asset(name)}" x="${850+i*1050}" y="${i%2?380:65}" width="${220+i%3*60}" height="${220+i%3*60}"/>`;
                 if(i%2===0) world+=`<g transform="translate(${1500+i*1050} 190) rotate(-18)"><rect x="-75" y="-20" width="48" height="40" rx="3" fill="#4c79ac" stroke="#b1d4eb" stroke-width="3"/><rect x="27" y="-20" width="48" height="40" rx="3" fill="#4c79ac" stroke="#b1d4eb" stroke-width="3"/><path d="M-65-20v40m14-40v40m88-40v40m14-40v40M-75 0H75" stroke="#a4c6e5"/><rect x="-20" y="-24" width="40" height="48" rx="10" fill="#dfdfcf"/><path d="M0-24V-50m-14 0q14 15 28 0" fill="none" stroke="#c8d4de" stroke-width="4"/></g>`;
             }
             front=`<g class="depth-layer" data-factor="1.45">${Array.from({length:plan.count},(_,i)=>`<g transform="translate(${1500+i*1400} ${i%2?715:115}) scale(.45) rotate(${i*37})">${sprite(4,'','journey-props-v3')}</g>`).join('')}</g>`;
-            world+=`<image href="${new URL('../moon.png',root).href}" x="${end+760}" y="300" width="490" height="490"/><ellipse cx="${end+1005}" cy="339" rx="95" ry="17" fill="#c2cbd8" stroke="#8796ad" stroke-width="5"/>`;
+            world+=`<image href="${asset('moon')}" x="${end+760}" y="300" width="490" height="490"/><ellipse cx="${end+1005}" cy="339" rx="95" ry="17" fill="#c2cbd8" stroke="#8796ad" stroke-width="5"/>`;
         } else {
             const name=theme==='aquarium'?'ocean-panorama-v3':'valley-panorama-v3';
             // Tile a single continuous panorama in world coordinates, with a fixed soft join.
@@ -175,7 +175,7 @@ const TimerWorld = (() => {
             : `<image class="world-background" href="${asset(backgrounds[theme])}" width="1200" height="675" preserveAspectRatio="xMidYMid slice"/>`;
         if(theme==='balloon') content+=['forest','mountains','coast'].map(name=>`<image class="travel-landscape" href="${asset(name)}" width="1200" height="675" preserveAspectRatio="xMidYMid slice"/>`).join('');
         if(theme==='space') {
-            content=`<defs><radialGradient id="deep-space"><stop stop-color="#323769"/><stop offset="1" stop-color="#0b1536"/></radialGradient></defs><path d="M0 0h1200v675H0Z" fill="url(#deep-space)"/><g class="passing-stars">${Array.from({length:100},(_,i)=>`<circle cx="${i*173%2400}" cy="${i*89%675}" r="${1+i%3*.5}" fill="#d9e8ff" opacity="${.3+(i%4)*.2}"/>`).join('')}</g>${['planet-ringed','planet-coral','planet-blue','planet-gold'].map(name=>`<image class="passing-planet" href="${new URL('../'+name+'.png',root).href}" width="270" height="270"/>`).join('')}<image class="space-destination" href="${asset('space')}" width="1200" height="675"/>`;
+            content=`<defs><radialGradient id="deep-space"><stop stop-color="#323769"/><stop offset="1" stop-color="#0b1536"/></radialGradient></defs><path d="M0 0h1200v675H0Z" fill="url(#deep-space)"/><g class="passing-stars">${Array.from({length:100},(_,i)=>`<circle cx="${i*173%2400}" cy="${i*89%675}" r="${1+i%3*.5}" fill="#d9e8ff" opacity="${.3+(i%4)*.2}"/>`).join('')}</g>${['planet-ringed','planet-coral','planet-blue','planet-gold'].map(name=>`<image class="passing-planet" href="${asset(name)}" width="270" height="270"/>`).join('')}<image class="space-destination" href="${asset('space')}" width="1200" height="675"/>`;
         }
         if(theme==='garden') {
             content+=Array.from({length:6},(_,i)=>`<g class="flower-plot" transform="translate(${340+i*104} 600)"><ellipse rx="39" ry="10" fill="#705037" stroke="#b49262" stroke-width="3"/><g class="plant-seedling">${sprite(3,'','life-sprites')}</g><g class="plant-bud">${sprite(4,'','life-sprites')}</g><g class="plant-flower" style="filter:hue-rotate(${i%3*25}deg)">${sprite(5,'','life-sprites')}</g></g>`).join('');
@@ -187,7 +187,7 @@ const TimerWorld = (() => {
         if(theme==='garden') content+=`<g class="game-hero garden-hero"><ellipse cx="-10" cy="0" rx="35" ry="7" fill="#3b4126" opacity=".22"/>${sprite(4,'class="hero-sprite rabbit-cycle"','rabbit-cycle-v3')}</g>`;
         else if(heroIndex[theme]!==undefined) content+=`<g class="game-hero"><g class="world-drift ${theme==='aquarium'?'swimming-body':''}">${theme==='space'?'<g class="rocket-flame"><path d="M-13 0Q-15 26 0 47 15 26 13 0" fill="#f5aa5c"/><path d="M-6 0Q-8 20 0 28 8 20 6 0" fill="#fff2bd"/></g>':''}${theme==='star'?'<g class="star-celebration">':''}${sprite(heroIndex[theme],'class="hero-sprite"')}${theme==='star'?'</g>':''}</g></g>`;
         if(theme==='rainbow') {
-            content+=`<defs>${[['#ffb3ba','#ee777f'],['#ffd09b','#f1a259'],['#fff5a5','#ecd265'],['#c9e6a7','#84bd8d'],['#b2e6f3','#74b8dc'],['#b9c7ed','#939cce'],['#e6c3ee','#bf97d0']].map(([light,color],i)=>`<linearGradient id="pretty-band-${i}" x2="0" y2="1"><stop stop-color="${light}"/><stop offset=".55" stop-color="${color}"/><stop offset="1" stop-color="${light}"/></linearGradient>`).join('')}</defs><g>${Array.from({length:7},(_,i)=>`<path class="game-rainbow" data-band="${i}" d="M${270+i*19} 505 A${350-i*19} ${330-i*20} 0 0 1 ${970-i*19} 505" pathLength="1" fill="none" stroke="url(#pretty-band-${i})" stroke-width="21" stroke-linecap="butt"/>`).join('')}</g><svg x="130" y="400" width="330" height="211" viewBox="93 245 838 535" overflow="visible"><image href="${new URL('../../afbeeldingen%20klok/wolk.png',root).href}" width="1024" height="1024"/></svg>${chest(940,600,1.1)}`;
+            content+=`<defs>${[['#ffb3ba','#ee777f'],['#ffd09b','#f1a259'],['#fff5a5','#ecd265'],['#c9e6a7','#84bd8d'],['#b2e6f3','#74b8dc'],['#b9c7ed','#939cce'],['#e6c3ee','#bf97d0']].map(([light,color],i)=>`<linearGradient id="pretty-band-${i}" x2="0" y2="1"><stop stop-color="${light}"/><stop offset=".55" stop-color="${color}"/><stop offset="1" stop-color="${light}"/></linearGradient>`).join('')}</defs><g>${Array.from({length:7},(_,i)=>`<path class="game-rainbow" data-band="${i}" d="M${270+i*19} 505 A${350-i*19} ${330-i*20} 0 0 1 ${970-i*19} 505" pathLength="1" fill="none" stroke="url(#pretty-band-${i})" stroke-width="21" stroke-linecap="butt"/>`).join('')}</g><svg x="130" y="400" width="330" height="211" viewBox="93 245 838 535" overflow="visible"><image href="${asset('rainbow-cloud')}" width="1024" height="1024"/></svg>${chest(940,600,1.1)}`;
         }
         if(theme==='aquarium') content+=`${chest(1010,447,.85)}${Array.from({length:3},(_,i)=>`<g class="sea-friend"><g class="swimming-body">${sprite(i,'','life-sprites')}</g></g>`).join('')}`;
         if(theme==='balloon') content+=`<g class="passing-balloon">${sprite(0)}</g>`;
@@ -226,7 +226,7 @@ const TimerWorld = (() => {
         }
         return wrapScene(`<circle cx="340" cy="320" r="300" fill="white"/><circle cx="340" cy="320" r="210" fill="#edf4f0"/><path class="quiet-sector" fill="#65bf9d"/>${ticks}<path class="quiet-hand" stroke="#28654f" stroke-width="5" stroke-linecap="round"/><circle cx="340" cy="320" r="10" fill="#28654f"/><text x="340" y="655" text-anchor="middle" fill="#668275" font-size="22">minuten</text><svg x="777.5" y="20" width="270" height="540" viewBox="${Math.max(0,index)*512} 0 512 1024" overflow="hidden"><defs><clipPath id="quiet-zebra" clipPathUnits="userSpaceOnUse"><rect x="${index===2?1000:Math.max(0,index)*512}" width="${index===1?480:index===2?536:512}" height="1024"/></clipPath></defs><image clip-path="url(#quiet-zebra)" href="${asset('quiet-zebras')}" width="1536" height="1024"/></svg><text x="915" y="615" text-anchor="middle" fill="#294e43" font-size="39" font-weight="900">${quietModes[mode]}</text>`);
     }
-    function create(host,compact=false) {
+    function create(host,compact=false,preview=false) {
         const doc=host.ownerDocument||document;
         const layer=doc.createElement('div');
         layer.className=compact?'mini-world':'story-world';
@@ -238,6 +238,7 @@ const TimerWorld = (() => {
                 if(theme!==nextTheme||builtDuration!==duration||builtMode!==mode) {
                     theme=nextTheme;builtDuration=duration;builtMode=mode;layer.dataset.theme=theme;
                     layer.innerHTML=buildQuiet(duration,mode);
+                    if(preview) layer.innerHTML=layer.innerHTML.replaceAll("/optimized/","/previews/");
                     refs={sector:layer.querySelector('.quiet-sector'),hand:layer.querySelector('.quiet-hand')};
                 }
                 const f=quietFrame(progress,duration);
@@ -248,6 +249,7 @@ const TimerWorld = (() => {
             if(!backgrounds[nextTheme]) return '';
             if(theme!==nextTheme || (journeyThemes.includes(nextTheme)&&builtDuration!==duration)) {
                 theme=nextTheme; builtDuration=duration; layer.dataset.theme=theme; layer.innerHTML=build(theme,duration);
+                if(preview) layer.innerHTML=layer.innerHTML.replaceAll("/optimized/","/previews/");
                 const one=selector=>layer.querySelector(selector);
                 refs={hero:one('.game-hero'),sprite:one('.hero-sprite'),bloom:one('.garden-bloom'),treasure:one('.game-treasure'),closedChest:one('.closed-chest'),flame:one('.rocket-flame'),drops:one('.watering-drops'),constellation:one('.constellation'),finale:one('.world-finale'),bands:[...layer.querySelectorAll('.game-rainbow')],discoveries:[...layer.querySelectorAll('.world-discovery')]};
                 refs.lid=one('.chest-lid'); refs.coins=one('.chest-coins');refs.chestAtlas=one('.chest-atlas');refs.gardenVisitors=[...layer.querySelectorAll('.garden-visitor')];

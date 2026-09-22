@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const preview = document.createElement('span');
         preview.className = `theme-preview preview-${button.dataset.theme}`;
         preview.setAttribute('aria-hidden', 'true');
-        const previewWorld = window.TimerWorld.create(preview, true);
+        const previewWorld = window.TimerWorld.create(preview, true, true);
         previewWorld.render(button.dataset.theme, button.dataset.theme === 'quiet' ? 0 : .76, false, 1200);
         button.prepend(preview);
     });
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.title = 'Klastimer';
             const stylesheet = doc.createElement('link');
             stylesheet.rel = 'stylesheet';
-            stylesheet.href = new URL('timer-floating.css?v=20260922-11', new URL('.', document.querySelector('script[src*="timer.js"]').src)).href;
+            stylesheet.href = new URL('timer-floating.css?v=20260922-12', new URL('.', document.querySelector('script[src*="timer.js"]').src)).href;
             doc.head.appendChild(stylesheet);
             doc.body.innerHTML = '<main><div id="miniTheme" class="mini-theme"></div><div id="miniTime"></div><progress id="miniProgress" max="1" aria-label="Resterende werktijd"></progress><p id="miniState" role="status"></p><div class="mini-controls"><button id="miniToggle"></button><button id="miniAdd">+ 1 min</button><button id="miniReset" aria-label="Opnieuw instellen">↻</button></div></main>';
             floatingWorld = window.TimerWorld.create(doc.querySelector('main'), true);
