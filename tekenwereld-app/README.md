@@ -10,6 +10,22 @@ Neem de broncode én de vernieuwde map `tekenwereld/` mee in de GitHub Pages-com
 `public/art` bevat de oorspronkelijke 65 figuren en vier achtergronden; de vier
 vrije tekenbladen worden tijdens het printen opgebouwd.
 
+## Automatisch uitknippen
+
+Nieuwe afdrukken hebben vier `ZISA2:<template>:<hoek>`-codes buiten het tekenvak.
+`lib/sheet-scan.ts` deelt de maatvoering met de afdruk, herkent de vier hoeken,
+herstelt perspectief en oriëntatie en houdt kader, codes en bladtekst buiten de
+uitsnede. Alleen vier geldige codes van hetzelfde blad geven een automatische
+uitsnede. Ontbrekende codes leiden tot een verzoek om een nieuwe foto; oude
+`ZISA:`-bladen blijven met de optionele handmatige uitsnede bruikbaar.
+De bestaande papierverwijdering maakt daarna meteen het bewegende voorbeeld.
+
+Voer `node scan.test.cjs` uit vanuit deze map. De test controleert gedraaide en
+perspectivische foto's, kleurbehoud, oriëntatie, het uitsluiten van kader/tekst/QR,
+en ontbrekende of gemengde codes. Testbeelden worden in de genegeerde `.preview/`
+map gezet. Test daarnaast het fotoverloop in de browser. Een echte camera- en
+printertest blijft nuttig voor belichting, onscherpte en printerinstellingen.
+
 ## Toegang en opslag
 
 - De leerkracht gebruikt dezelfde standaard Firebase-app en aanmelding als
