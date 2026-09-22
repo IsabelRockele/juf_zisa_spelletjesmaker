@@ -193,6 +193,7 @@ document.querySelectorAll('a.img-link').forEach((link) => {
     link.href = BESCHIKBAAR.get(label);
     link.removeAttribute('onclick');
     link.classList.add('ontdek-beschikbaar');
+    if(label==='Rekenavonturen') link.onclick=function(){window.open(this.href,'_blank','popup=yes,width=1440,height=900,resizable=yes,scrollbars=yes,noopener,noreferrer');return false;};
   } else {
     link.href = '#';
     link.removeAttribute('onclick');
