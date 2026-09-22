@@ -205,13 +205,46 @@ const TimerWorld = (() => {
         content+='<g class="world-finale">'+Array.from({length:12},(_,i)=>`<g transform="translate(${450+(i%6)*65} ${150+Math.floor(i/6)*330}) scale(${.45+(i%3)*.2})">${sparkle}</g>`).join('')+'</g>';
         return wrapScene(content);
     }
+    const quietModes = {work:'Stil werken',read:'Stil lezen',whisper:'Fluistertoon'};
+    function quietFrame(progress,duration=1200) {
+        const capacity=Math.max(60,Math.ceil(duration/3600)*60);
+        const remaining=(1-clamp(progress))*duration/60;
+        const angle=remaining/capacity*Math.PI*2;
+        const x=340+210*Math.sin(angle),y=320-210*Math.cos(angle);
+        const path=remaining<=0?'':angle>=Math.PI*2-.000001
+            ?'M340 110 A210 210 0 1 1 340 530 A210 210 0 1 1 340 110 Z'
+            :`M340 320 L340 110 A210 210 0 ${angle>Math.PI?1:0} 1 ${x} ${y} Z`;
+        return {capacity,remaining,angle,path,x,y};
+    }
+    function buildQuiet(duration,mode) {
+        const f=quietFrame(0,duration),index=['work','read','whisper'].indexOf(mode);
+        let ticks='';
+        for(let i=0;i<60;i++) {
+            const a=i*Math.PI/30,major=i%5===0,r=major?222:230;
+            ticks+=`<path d="M${340+r*Math.sin(a)} ${320-r*Math.cos(a)} L${340+238*Math.sin(a)} ${320-238*Math.cos(a)}" stroke="#72958b" stroke-width="${major?3:1.5}"/>`;
+            if(major) ticks+=`<text x="${340+267*Math.sin(a)}" y="${320-267*Math.cos(a)+10}" text-anchor="middle" fill="#294e43" font-size="29" font-weight="800">${i*f.capacity/60}</text>`;
+        }
+        return wrapScene(`<circle cx="340" cy="320" r="300" fill="white"/><circle cx="340" cy="320" r="210" fill="#edf4f0"/><path class="quiet-sector" fill="#65bf9d"/>${ticks}<path class="quiet-hand" stroke="#28654f" stroke-width="5" stroke-linecap="round"/><circle cx="340" cy="320" r="10" fill="#28654f"/><text x="340" y="655" text-anchor="middle" fill="#668275" font-size="22">minuten</text><svg x="777.5" y="20" width="270" height="540" viewBox="${Math.max(0,index)*512} 0 512 1024" overflow="hidden"><defs><clipPath id="quiet-zebra" clipPathUnits="userSpaceOnUse"><rect x="${index===2?1000:Math.max(0,index)*512}" width="${index===1?480:index===2?536:512}" height="1024"/></clipPath></defs><image clip-path="url(#quiet-zebra)" href="${asset('quiet-zebras')}" width="1536" height="1024"/></svg><text x="915" y="615" text-anchor="middle" fill="#294e43" font-size="39" font-weight="900">${quietModes[mode]}</text>`);
+    }
     function create(host,compact=false) {
         const doc=host.ownerDocument||document;
         const layer=doc.createElement('div');
         layer.className=compact?'mini-world':'story-world';
         layer.setAttribute('aria-hidden','true'); host.prepend(layer);
-        let theme='',builtDuration=0,refs={};
-        return { render(nextTheme,progress,running,duration=600) {
+        let theme='',builtDuration=0,refs={},builtMode='';
+        return { render(nextTheme,progress,running,duration=600,mode='work') {
+            if(nextTheme==='quiet') {
+                mode=quietModes[mode]?mode:'work';
+                if(theme!==nextTheme||builtDuration!==duration||builtMode!==mode) {
+                    theme=nextTheme;builtDuration=duration;builtMode=mode;layer.dataset.theme=theme;
+                    layer.innerHTML=buildQuiet(duration,mode);
+                    refs={sector:layer.querySelector('.quiet-sector'),hand:layer.querySelector('.quiet-hand')};
+                }
+                const f=quietFrame(progress,duration);
+                refs.sector.setAttribute('d',f.path);
+                refs.hand.setAttribute('d',`M340 320 L${f.x} ${f.y}`);
+                return quietModes[mode];
+            }
             if(!backgrounds[nextTheme]) return '';
             if(theme!==nextTheme || (journeyThemes.includes(nextTheme)&&builtDuration!==duration)) {
                 theme=nextTheme; builtDuration=duration; layer.dataset.theme=theme; layer.innerHTML=build(theme,duration);
@@ -344,7 +377,7 @@ const TimerWorld = (() => {
             return f.chapter;
         }};
     }
-    return {create,frame,journeyPlan,journeyFrame,gardenFrame,rainbowAmount,fishFrame};
+    return {create,frame,journeyPlan,journeyFrame,gardenFrame,rainbowAmount,fishFrame,quietFrame};
 })();
 if(typeof window!=='undefined') window.TimerWorld=TimerWorld;
 if(typeof module!=='undefined') module.exports=TimerWorld;

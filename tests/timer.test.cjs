@@ -1,4 +1,14 @@
 const { test } = require('node:test');
+const {quietFrame}=require('../timer-worlds.js');
+test('quiet clock uses minute markings, shrinks to zero and supports long durations',()=>{
+ const start=quietFrame(0,1200),half=quietFrame(.5,1200),end=quietFrame(1,1200);
+ assert.equal(start.capacity,60);assert.equal(start.remaining,20);
+ assert.ok(Math.abs(start.angle-Math.PI*2/3)<1e-10);
+ assert.equal(half.remaining,10);assert.equal(end.path,'');
+ assert.equal(quietFrame(0,3600).angle,Math.PI*2);
+ assert.equal(quietFrame(0,5400).capacity,120);
+ assert.equal(quietFrame(0,10800).capacity,180);
+});
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');

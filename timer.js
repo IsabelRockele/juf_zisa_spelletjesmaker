@@ -41,9 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const treasureOpen = document.getElementById('treasureChestOpen');
     const bigGoldCoin = document.getElementById('bigGoldCoin');
     const timeUpSound = new Audio('sounds/chime.mp3');
-    const themeNames = { rainbow: 'Regenboog', star: 'Groeiende ster', aquarium: 'Aquarium', balloon: 'Luchtballon', garden: 'Bloementuin', space: 'Ruimtereis' };
+    const themeNames = { rainbow: 'Regenboog', star: 'Groeiende ster', aquarium: 'Aquarium', balloon: 'Luchtballon', garden: 'Bloementuin', space: 'Ruimtereis', quiet: 'Zebra' };
 
     let selectedTheme = '';
+    let quietMode = 'work';
+    const quietChoices = document.getElementById('quietChoices');
+    const quietButtons = [...document.querySelectorAll('[data-quiet-mode]')];
+    quietButtons.forEach(button => button.addEventListener('click', () => {
+        quietMode = button.dataset.quietMode;
+        quietButtons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+    }));
     let selectedMinutes = 10;
     let initialTotalSeconds = 0;
     let totalSeconds = 0;
@@ -77,13 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
     progressBar.max = 1;
     progressBar.setAttribute('aria-label', 'Resterende werktijd');
     countdown.after(progressBar);
-    const themeIcons = { rainbow: '🌈', star: '⭐', aquarium: '🐠', balloon: '🎈', garden: '🌸', space: '🚀' };
+    const themeIcons = { rainbow: '🌈', star: '⭐', aquarium: '🐠', balloon: '🎈', garden: '🌸', space: '🚀', quiet: '🦓' };
     themeButtons.forEach(button => {
         const preview = document.createElement('span');
         preview.className = `theme-preview preview-${button.dataset.theme}`;
         preview.setAttribute('aria-hidden', 'true');
         const previewWorld = window.TimerWorld.create(preview, true);
-        previewWorld.render(button.dataset.theme, .76, false);
+        previewWorld.render(button.dataset.theme, button.dataset.theme === 'quiet' ? 0 : .76, false, 1200);
         button.prepend(preview);
     });
 
@@ -96,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.getElementById('miniToggle').textContent = running ? 'Pauze' : finished ? 'Nog een keer' : 'Start / hervat';
         doc.getElementById('miniProgress').value = initialTotalSeconds ? totalSeconds / initialTotalSeconds : 0;
         doc.body.dataset.state = finished ? 'finished' : running ? 'running' : 'paused';
-        if (floatingWorld) floatingWorld.render(selectedTheme, visualProgress(), running, initialTotalSeconds);
+        if (floatingWorld) floatingWorld.render(selectedTheme, visualProgress(), running, initialTotalSeconds, quietMode);
     }
 
     floatingButton.addEventListener('click', async () => {
@@ -107,14 +114,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         floatingButton.disabled = true;
         try {
-            floatingWindow = await window.documentPictureInPicture.requestWindow({ width: 360, height: 330 });
+            floatingWindow = await window.documentPictureInPicture.requestWindow({ width: 420, height: 430 });
             if (!timerScreen.classList.contains('active')) { floatingWindow.close(); floatingWindow = null; return; }
             const doc = floatingWindow.document;
             doc.documentElement.lang = 'nl';
             doc.title = 'Klastimer';
             const stylesheet = doc.createElement('link');
             stylesheet.rel = 'stylesheet';
-            stylesheet.href = new URL('timer-floating.css?v=20260922-7', new URL('.', document.querySelector('script[src*="timer.js"]').src)).href;
+            stylesheet.href = new URL('timer-floating.css?v=20260922-11', new URL('.', document.querySelector('script[src*="timer.js"]').src)).href;
             doc.head.appendChild(stylesheet);
             doc.body.innerHTML = '<main><div id="miniTheme" class="mini-theme"></div><div id="miniTime"></div><progress id="miniProgress" max="1" aria-label="Resterende werktijd"></progress><p id="miniState" role="status"></p><div class="mini-controls"><button id="miniToggle"></button><button id="miniAdd">+ 1 min</button><button id="miniReset" aria-label="Opnieuw instellen">↻</button></div></main>';
             floatingWorld = window.TimerWorld.create(doc.querySelector('main'), true);
@@ -134,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Run updates in the visible window too, while the board book covers the main tab.
             floatingInterval = floatingWindow.setInterval(() => { if (running) tick(); renderFloating(); }, 250);
             if(floatingWindow.requestAnimationFrame) {
-                const animateMini=()=>{if(!floatingWindow||floatingWindow.closed)return;if(running&&floatingWorld)floatingWorld.render(selectedTheme,visualProgress(),true,initialTotalSeconds);floatingAnimationId=floatingWindow.requestAnimationFrame(animateMini);};
+                const animateMini=()=>{if(!floatingWindow||floatingWindow.closed)return;if(running&&floatingWorld)floatingWorld.render(selectedTheme,visualProgress(),true,initialTotalSeconds,quietMode);floatingAnimationId=floatingWindow.requestAnimationFrame(animateMini);};
                 floatingAnimationId=floatingWindow.requestAnimationFrame(animateMini);
             }
             floatingButton.textContent = '▣ Toon zwevende timer';
@@ -159,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function selectTheme(theme) {
         selectedTheme = theme;
+        if (quietChoices) quietChoices.hidden = theme !== 'quiet';
         themeButtons.forEach(button => {
             const selected = button.dataset.theme === theme;
             button.classList.toggle('selected', selected);
@@ -183,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showTheme(theme) {
         document.body.className = `theme-${theme}`;
         [rainbowContainer, starContainer, aquariumContainer, balloonContainer, gardenContainer, spaceContainer].forEach(item => item.classList.remove('active'));
-        ({ rainbow: rainbowContainer, star: starContainer, aquarium: aquariumContainer, balloon: balloonContainer, garden: gardenContainer, space: spaceContainer })[theme].classList.add('active');
+        ({ rainbow: rainbowContainer, star: starContainer, aquarium: aquariumContainer, balloon: balloonContainer, garden: gardenContainer, space: spaceContainer })[theme]?.classList.add('active');
         if (theme === 'aquarium') initializeAquarium();
         if (theme === 'garden') initializeGarden();
     }
@@ -322,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateVisual() {
         const progress = visualProgress();
-        storyCaption.textContent = storyWorld.render(selectedTheme, progress, running, initialTotalSeconds);
+        storyCaption.textContent = storyWorld.render(selectedTheme, progress, running, initialTotalSeconds, quietMode);
         if (selectedTheme === 'rainbow') updateRainbow();
         if (selectedTheme === 'star') updateStars();
         if (selectedTheme === 'aquarium') updateAquarium();
@@ -351,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function animateWorld() {
         if(!running)return;
-        storyCaption.textContent=storyWorld.render(selectedTheme,visualProgress(),true,initialTotalSeconds);
+        storyCaption.textContent=storyWorld.render(selectedTheme,visualProgress(),true,initialTotalSeconds,quietMode);
         animationId=window.requestAnimationFrame(animateWorld);
     }
 
@@ -476,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedMinutes = minutes;
         initialTotalSeconds = minutes * 60;
         totalSeconds = initialTotalSeconds;
-        themeDisplay.textContent = `${themeNames[selectedTheme]}timer`;
+        themeDisplay.textContent = selectedTheme === 'quiet' ? ({work:'Stil werken',read:'Stil lezen',whisper:'Fluistertoon'})[quietMode] : `${themeNames[selectedTheme]}timer`;
         showScreen(timerScreen);
         showTheme(selectedTheme);
         resetCurrentTimer();

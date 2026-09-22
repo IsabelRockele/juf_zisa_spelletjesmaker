@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Klastimer</title>
-    <link rel="stylesheet" href="timer.css?v=20260922-8">
+    <link rel="stylesheet" href="timer.css?v=20260922-10">
 </head>
 <body>
     <header class="app-header">
@@ -17,12 +17,21 @@
         <section class="choice-card">
             <div class="section-title"><span>1</span><div><h2>Kies een thema</h2><p>Tijdens het werken groeit jullie wereld. Elke tijdkeuze vertelt het hele verhaal.</p></div></div>
             <div class="theme-buttons">
+                <button data-theme="quiet"><b>🦓 Zebratimer</b><small>Stil werken, stil lezen of fluisteren met een duidelijke klok.</small></button>
                 <button data-theme="rainbow"><b>🌈 Regenboog</b><small>Vorm de regenboog en zie de schatkist opengaan.</small></button>
                 <button data-theme="star"><b>⭐ Groeiende ster</b><small>Ontdek sterrenbeelden en laat jouw ster stralen.</small></button>
                 <button data-theme="aquarium"><b>🐠 Aquarium</b><small>Zwem met de zeeschildpad naar een verborgen schat.</small></button>
                 <button data-theme="balloon"><b>🎈 Luchtballon</b><small>Vlieg met Beer over heuvels, huisjes en een rivier.</small></button>
                 <button data-theme="garden"><b>🌸 Bloementuin</b><small>Help Konijn zijn tuin vol bloemen te laten groeien.</small></button>
                 <button data-theme="space"><b>🚀 Ruimtereis</b><small>Reis langs planeten en kometen naar de maan.</small></button>
+            </div>
+        </section>
+        <section class="choice-card quiet-choices" id="quietChoices" hidden>
+            <h2>Wat gaan jullie doen?</h2>
+            <div class="quiet-options" aria-label="Kies de afbeelding bij de timer">
+                <button data-quiet-mode="work" aria-pressed="true"><span class="zebra-choice zebra-work"></span>Stil werken</button>
+                <button data-quiet-mode="read" aria-pressed="false"><span class="zebra-choice zebra-read"></span>Stil lezen</button>
+                <button data-quiet-mode="whisper" aria-pressed="false"><span class="zebra-choice zebra-whisper"></span>Fluistertoon</button>
             </div>
         </section>
         <section class="choice-card time-choice" id="timeChoicePanel" hidden>
@@ -64,7 +73,7 @@
     </main>
     <script src="device-id.js"></script>
     <script type="module" src="guard.js"></script>
-    <script src="../timer-worlds.js?v=20260922-8"></script>
-    <script src="../timer.js?v=20260922-8"></script>
+    <script src="../timer-worlds.js?v=20260922-10"></script>
+    <script src="../timer.js?v=20260922-11"></script>
 </body>
 </html>

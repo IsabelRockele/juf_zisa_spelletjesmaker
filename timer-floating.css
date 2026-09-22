@@ -38,3 +38,18 @@ body[data-state='paused'] #miniTime { color: #906a27; }
 .garden-hero .hero-sprite,.journey-sprite,.fish-cycle{transition:none!important}
 .sea-bubbles{fill:#b7eff5;fill-opacity:.12;stroke:#cefbff;stroke-opacity:.6;stroke-width:1.5}
 .journey-flame{filter:drop-shadow(0 0 8px #ffc75c)}
+
+/* Fit the entire floating timer to its viewport, reserving space for controls. */
+html,body{width:100%;height:100%;min-height:0;overflow:hidden}
+body{display:block;padding:10px}
+main{height:100%;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto auto 7px auto auto;gap:6px;text-align:center}
+.mini-world{display:block;min-height:0;height:auto;margin:0;border-radius:12px}
+.mini-theme{font-size:15px;line-height:1.2}
+#miniTime{font-size:clamp(32px,13vh,58px);line-height:1;letter-spacing:-1px}
+progress{display:block;height:7px;margin:0}
+#miniState{font-size:12px;line-height:1.2;margin:0}
+.mini-controls{flex-wrap:nowrap;gap:6px;min-width:0}
+.mini-controls button{padding:8px 10px;font-size:13px;min-width:0;white-space:nowrap}
+.mini-world[data-theme='quiet']{background:#f6f8ef}
+@media(max-height:300px){body{padding:6px}main{gap:4px}.mini-theme,#miniState{font-size:11px}#miniTime{font-size:32px}.mini-controls button{padding:5px 8px;font-size:12px}}
+@media(max-height:210px){main{grid-template-columns:minmax(0,1fr) minmax(160px,1fr);grid-template-rows:auto auto 7px auto auto}.mini-world{grid-column:1;grid-row:1 / 6}.mini-theme,#miniTime,progress,#miniState,.mini-controls{grid-column:2}}

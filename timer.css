@@ -87,3 +87,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #bd84
 .garden-hero .hero-sprite,.journey-sprite,.fish-cycle{transition:none!important}
 .sea-bubbles{fill:#b7eff5;fill-opacity:.12;stroke:#cefbff;stroke-opacity:.6;stroke-width:1.5}
 .journey-flame{filter:drop-shadow(0 0 8px #ffc75c)}
+.quiet-choices[hidden]{display:none}.quiet-choices h2{margin-top:0}.quiet-options{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.quiet-options button{background:#fafcf9;font-size:18px}.quiet-options button[aria-pressed='true']{border:2px solid #40866b;background:#eaf5ed}.zebra-choice{display:block;height:160px;width:90px;margin:0 auto 12px;background:url('timer_assets/worlds/quiet-zebras.png') no-repeat;background-size:270px 180px}.zebra-read{background-position:-90px 0}.zebra-whisper{background-position:-180px 0}
+.theme-quiet .story-world{inset:145px 4% 180px;background:#f6f8ef}.theme-quiet #timerScreen{background:#f6f8ef}.theme-quiet .story-caption{display:none}.theme-quiet .time-panel{box-shadow:none;border-color:#dce7dc;background:white}.story-world[data-theme='quiet'],.mini-world[data-theme='quiet']{background:#f6f8ef}
+@media(max-width:600px){.quiet-options{gap:6px}.quiet-options button{font-size:14px;padding:8px 3px}.theme-quiet .story-world{inset:150px 0 165px}}
+
+.zebra-read{clip-path:inset(0 6% 0 0)}
