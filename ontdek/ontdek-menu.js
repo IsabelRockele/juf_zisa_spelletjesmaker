@@ -16,6 +16,7 @@ const BESCHIKBAAR = new Map([
   ['Rekenrooster', './rekenrooster.html'],
   ['Rekenspellen', './reken-doolhof-generator.html'],
   ['Loopspel', './loopspel.html'],
+  ['Rekenavonturen', './drakeneiland/index.html'],
   ['Verliefde harten', './harten.html'],
   ['MAB en schema', './keuze-hulpschema.html'],
   ['Bundel spelling', './spelling/index.html'],
