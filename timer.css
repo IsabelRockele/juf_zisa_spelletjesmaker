@@ -17,3 +17,73 @@ body.theme-space #timerScreen{background:radial-gradient(circle at 50% 42%,#3426
 @media(max-width:900px){.theme-buttons{grid-template-columns:1fr}.time-buttons{grid-template-columns:repeat(4,1fr)}.timer-topbar{align-items:flex-start}.side-controls{max-width:62%}.side-controls button{font-size:11px;padding:7px 9px}.brand span{display:none}}
 @media(max-width:620px){.app-header{padding:10px 14px}.brand{display:none}#themeSelectionScreen{padding:22px 10px}.custom-time{align-items:stretch;flex-direction:column}.custom-time label{justify-content:center}.timer-topbar{left:7px;right:7px;top:7px;padding:8px;display:block}.side-controls{max-width:none;justify-content:flex-start;margin-top:7px}.visual-container{inset:145px 0 95px}.time-panel{bottom:8px;min-width:260px}.countdown{font-size:50px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+/* Calm classroom cards and a clear remaining-time indicator. */
+:root{--mint:#337c62;--shadow:0 12px 36px rgba(36,76,105,.07)}
+body{background:#f5f7f3}
+.app-header{background:#fff;border-bottom-color:#e4eae3}
+.choice-intro .eyebrow{color:#48836a}.choice-intro h1{letter-spacing:-1.4px}.choice-intro p{font-size:16px}
+.choice-card{border-color:#e1e8df;border-radius:24px;padding:24px}
+.theme-buttons{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.theme-buttons button{position:relative;overflow:hidden;padding:10px 10px 18px;background:#fff;border:2px solid #e7ece7;border-radius:18px;transition:box-shadow .2s,transform .2s}
+.theme-buttons button:hover{box-shadow:0 8px 20px #274e3912;transform:translateY(-3px)}
+.theme-buttons button.selected{border:2px solid #40866b;background:#f6fbf7;box-shadow:0 0 0 3px #40866b18}
+.theme-buttons button.selected:after{content:'✓';position:absolute;right:18px;top:18px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#337c62;color:white}
+.theme-buttons b,.theme-buttons small{margin-left:8px;margin-right:8px}.theme-buttons b{margin-top:12px}
+.theme-preview{display:grid;place-items:center;height:112px;border-radius:11px;font-size:68px;line-height:1;background:#eaf4f6}
+.preview-rainbow{background:linear-gradient(135deg,#e6f3fa,#fcf3da)}.preview-star{background:radial-gradient(ellipse at center,#695999,#282348)}.preview-aquarium{background:linear-gradient(#c6eef2,#81cad5)}.preview-balloon{background:linear-gradient(#d6eef8,#f4f8e5)}.preview-garden{background:linear-gradient(#edf5db,#d6e8be)}.preview-space{background:radial-gradient(ellipse at top right,#555184,#1d2442)}
+.primary-button:hover{background:#27634e}.section-title>span{background:#e9f2e7;color:#357359}
+.remaining-progress{display:block;appearance:none;width:100%;height:8px;border:0;border-radius:9px;overflow:hidden;margin:12px 0 7px;background:#e2ece5;accent-color:#40866b}
+.remaining-progress::-webkit-progress-bar{background:#e2ece5}.remaining-progress::-webkit-progress-value{background:#40866b;border-radius:9px;transition:width .25s}
+.timer-message:empty{display:none}.time-panel{padding:14px 26px}.floating-button{background:#e6f2e9;border-color:#87b899}
+.floating-help{position:absolute;z-index:80;left:18px;bottom:18px;max-width:260px;margin:0;padding:12px 15px;background:#fff;color:#294b40;border:1px solid #b5d1c0;border-radius:14px;font-size:13px;box-shadow:var(--shadow)}.floating-help:empty{display:none}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #bd842a;outline-offset:3px}
+@media(max-width:900px){.theme-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}.floating-help{bottom:170px;max-width:230px}}
+@media(max-width:480px){.choice-card{padding:14px}.theme-buttons{gap:8px}.theme-buttons b{font-size:15px}.theme-buttons small{font-size:12px}.theme-preview{height:88px;font-size:52px}.brand{display:none}}
+/* Illustrated storybook worlds replace the old mixed image scenes. */
+.main-visual-area>.visual-container,.main-visual-area>#finalStar,.main-visual-area>#bigGoldCoin{visibility:hidden}
+.story-world{position:absolute;inset:0;overflow:hidden;background:#d8e9e2}
+.story-world>svg{width:100%;height:100%;display:block}
+.story-world [data-reveal],.mini-world [data-reveal]{transition:opacity 1s linear,transform 1s linear}
+.world-drift{animation:world-bob 7s ease-in-out infinite;animation-play-state:paused;transform-box:fill-box;transform-origin:center}
+.is-moving .world-drift{animation-play-state:running}
+@keyframes world-bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-7px) rotate(1deg)}}
+.story-caption{position:absolute;left:28px;bottom:42px;max-width:26%;z-index:45;background:#fff9e9e8;color:#465751;border:1px solid #fff5dc;border-radius:15px;padding:12px 18px;font-size:16px;font-weight:800;box-shadow:0 3px 12px #3440350a}
+.theme-preview{height:150px;position:relative;overflow:hidden;background:#e3eee8}
+.mini-world{width:100%;height:100%;overflow:hidden;border-radius:inherit}.mini-world svg{width:100%;height:100%;display:block}
+.theme-buttons b{font-size:17px}.theme-buttons small{line-height:1.5}
+.floating-help:not(:empty)~.story-caption{display:none}
+@media(min-width:901px){.timer-topbar{left:24px;right:24px;top:20px;border-radius:20px;padding:14px 18px}.time-panel{bottom:22px;background:#fffcf4f5;border-color:#fff9ea}}
+@media(max-width:700px){.story-caption{left:12px;bottom:177px;max-width:calc(100% - 24px);font-size:13px;padding:8px 12px}.theme-preview{height:118px}.story-world>svg{width:160%;max-width:none;margin-left:-30%}.floating-help{bottom:225px}}
+@media(prefers-reduced-motion:reduce){.world-drift{animation:none!important}.story-world [data-reveal],.mini-world [data-reveal]{transition:none}}
+/* Preserve the complete game stage at every screen size. */
+.story-world{background:#d4effa;display:grid;place-items:center}.story-world>svg{width:100%;height:100%;margin:0;max-width:100%}
+.story-world[data-theme='space'],.story-world[data-theme='star']{background:#101a41}.story-world[data-theme='aquarium']{background:#268ba4}
+.game-hero,.hero-sprite,.game-treasure,.closed-chest,.garden-bloom,.world-discovery,.game-rainbow,.world-finale,.constellation{transition:opacity .35s linear,transform .5s ease,stroke-dashoffset .5s linear}
+.is-complete *{transition:none!important}.is-complete .world-drift{animation:none;transform:none}
+.mini-world{background:#d4effa}.mini-world[data-theme='space'],.mini-world[data-theme='star']{background:#101a41}
+@media(max-width:700px){.story-world>svg{width:100%;height:100%;margin-left:0}.story-caption{bottom:165px}}
+@media(prefers-reduced-motion:reduce){.game-hero,.hero-sprite,.game-treasure,.closed-chest,.garden-bloom,.world-discovery,.game-rainbow,.world-finale,.constellation{transition:none}}
+.swimming-body{transform-box:fill-box;transform-origin:center;animation:swim-stroke 3.6s ease-in-out infinite;animation-play-state:paused}
+.is-moving .swimming-body{animation-play-state:running}
+@keyframes swim-stroke{0%,100%{transform:translateY(0) rotate(-2deg) scaleY(1)}50%{transform:translateY(-8px) rotate(2deg) scaleY(.97)}}
+.chest-lid{transition:transform .25s linear}.chest-coins,.travel-landscape,.space-destination,.sea-friend,.plant-seedling,.plant-bud,.plant-flower{transition:opacity .25s linear}
+.passing-stars{animation:star-stream 40s linear infinite;animation-play-state:paused}.is-moving .passing-stars{animation-play-state:running}
+@keyframes star-stream{from{transform:translateX(0)}to{transform:translateX(-1200px)}}
+.is-complete .swimming-body,.is-complete .passing-stars{animation:none}
+@media(prefers-reduced-motion:reduce){.swimming-body,.passing-stars{animation:none}.chest-lid{transition:none}}
+.star-celebration{transform-box:fill-box;transform-origin:center}
+.is-complete .star-celebration{animation:star-finish-turn 3.2s ease-in-out 1;filter:drop-shadow(0 0 15px #ffe688)}
+@keyframes star-finish-turn{0%{transform:rotateY(0deg) scale(1);filter:drop-shadow(0 0 0 #ffe688)}35%{filter:drop-shadow(0 0 32px #fff3b6)}55%{transform:rotateY(180deg) scale(1.09)}100%{transform:rotateY(360deg) scale(1);filter:drop-shadow(0 0 15px #ffe688)}}
+@media(prefers-reduced-motion:reduce){.is-complete .star-celebration{animation:none;filter:drop-shadow(0 0 15px #ffe688)}}
+
+.journey-camera,.journey-hero,.world-resident{transition:transform .25s linear}
+
+.garden-wing{transform-box:fill-box;transform-origin:center;animation:garden-flutter .85s ease-in-out infinite;animation-play-state:paused}.is-moving .garden-wing{animation-play-state:running}@keyframes garden-flutter{50%{transform:scaleX(.55) rotate(5deg)}}.garden-water{animation:garden-ripple 3s ease-in-out infinite;animation-play-state:paused}.is-moving .garden-water{animation-play-state:running}@keyframes garden-ripple{50%{opacity:.25;transform:translateY(2px)}}.garden-visitor{transition:transform .25s linear}.is-complete .garden-wing,.is-complete .garden-water{animation:none}@media(prefers-reduced-motion:reduce){.garden-wing,.garden-water{animation:none}}
+
+.is-moving .watering-drops{animation:water-fall .8s linear infinite}@keyframes water-fall{to{stroke-dashoffset:-34}}@media(prefers-reduced-motion:reduce){.is-moving .watering-drops{animation:none}}
+
+/* Character motion is driven per animation frame; ground anchors never bob. */
+.journey-camera,.journey-hero,.world-resident,.garden-hero,.garden-visitor{transition:none!important}
+.garden-hero .hero-sprite,.journey-sprite,.fish-cycle{transition:none!important}
+.sea-bubbles{fill:#b7eff5;fill-opacity:.12;stroke:#cefbff;stroke-opacity:.6;stroke-width:1.5}
+.journey-flame{filter:drop-shadow(0 0 8px #ffc75c)}

@@ -49,12 +49,108 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalSeconds = 0;
     let endTimestamp = 0;
     let intervalId = null;
+    let animationId = null;
+    let floatingAnimationId = null;
     let running = false;
     let finished = false;
     let soundEnabled = true;
     let pathLengths = [];
     let fishElements = [];
     let growingStars = [];
+    let floatingWindow = null;
+    let floatingInterval = null;
+    let floatingWorld = null;
+    const storyWorld = window.TimerWorld.create(document.querySelector('.main-visual-area'));
+    const storyCaption = document.createElement('div');
+    storyCaption.className = 'story-caption';
+    timerContainer.appendChild(storyCaption);
+    const floatingButton = document.createElement('button');
+    floatingButton.className = 'control-button floating-button';
+    floatingButton.textContent = '▣ Zwevende timer';
+    fullscreenButton.before(floatingButton);
+    const floatingHelp = document.createElement('p');
+    floatingHelp.className = 'floating-help';
+    floatingHelp.setAttribute('role', 'status');
+    timerContainer.appendChild(floatingHelp);
+    const progressBar = document.createElement('progress');
+    progressBar.className = 'remaining-progress';
+    progressBar.max = 1;
+    progressBar.setAttribute('aria-label', 'Resterende werktijd');
+    countdown.after(progressBar);
+    const themeIcons = { rainbow: '🌈', star: '⭐', aquarium: '🐠', balloon: '🎈', garden: '🌸', space: '🚀' };
+    themeButtons.forEach(button => {
+        const preview = document.createElement('span');
+        preview.className = `theme-preview preview-${button.dataset.theme}`;
+        preview.setAttribute('aria-hidden', 'true');
+        const previewWorld = window.TimerWorld.create(preview, true);
+        previewWorld.render(button.dataset.theme, .76, false);
+        button.prepend(preview);
+    });
+
+    function renderFloating() {
+        if (!floatingWindow || floatingWindow.closed) return;
+        const doc = floatingWindow.document;
+        doc.getElementById('miniTime').textContent = formatTime(totalSeconds);
+        doc.getElementById('miniTheme').textContent = `${themeIcons[selectedTheme]} ${themeNames[selectedTheme]}`;
+        doc.getElementById('miniState').textContent = finished ? 'Tijd is om!' : running ? 'Aan het werk' : timerContainer.classList.contains('paused') ? 'Gepauzeerd' : 'Klaar om te starten';
+        doc.getElementById('miniToggle').textContent = running ? 'Pauze' : finished ? 'Nog een keer' : 'Start / hervat';
+        doc.getElementById('miniProgress').value = initialTotalSeconds ? totalSeconds / initialTotalSeconds : 0;
+        doc.body.dataset.state = finished ? 'finished' : running ? 'running' : 'paused';
+        if (floatingWorld) floatingWorld.render(selectedTheme, visualProgress(), running, initialTotalSeconds);
+    }
+
+    floatingButton.addEventListener('click', async () => {
+        if (floatingWindow && !floatingWindow.closed) { floatingWindow.focus(); return; }
+        if (!window.documentPictureInPicture || !window.isSecureContext) {
+            floatingHelp.textContent = 'Zweven is hier niet beschikbaar. Open de website in een recente Chrome of Edge op je computer.';
+            return;
+        }
+        floatingButton.disabled = true;
+        try {
+            floatingWindow = await window.documentPictureInPicture.requestWindow({ width: 360, height: 330 });
+            if (!timerScreen.classList.contains('active')) { floatingWindow.close(); floatingWindow = null; return; }
+            const doc = floatingWindow.document;
+            doc.documentElement.lang = 'nl';
+            doc.title = 'Klastimer';
+            const stylesheet = doc.createElement('link');
+            stylesheet.rel = 'stylesheet';
+            stylesheet.href = new URL('timer-floating.css?v=20260922-7', new URL('.', document.querySelector('script[src*="timer.js"]').src)).href;
+            doc.head.appendChild(stylesheet);
+            doc.body.innerHTML = '<main><div id="miniTheme" class="mini-theme"></div><div id="miniTime"></div><progress id="miniProgress" max="1" aria-label="Resterende werktijd"></progress><p id="miniState" role="status"></p><div class="mini-controls"><button id="miniToggle"></button><button id="miniAdd">+ 1 min</button><button id="miniReset" aria-label="Opnieuw instellen">↻</button></div></main>';
+            floatingWorld = window.TimerWorld.create(doc.querySelector('main'), true);
+            doc.getElementById('miniToggle').onclick = () => { running ? pauseCountdown() : startCountdown(); renderFloating(); };
+            doc.getElementById('miniAdd').onclick = () => { addMinute(); renderFloating(); };
+            doc.getElementById('miniReset').onclick = () => { resetCurrentTimer(); renderFloating(); };
+            floatingWindow.addEventListener('pagehide', () => {
+                floatingWindow.clearInterval(floatingInterval);
+                if(floatingAnimationId!==null&&floatingWindow.cancelAnimationFrame) floatingWindow.cancelAnimationFrame(floatingAnimationId);
+                floatingAnimationId=null;
+                floatingInterval = null;
+                floatingWindow = null;
+                floatingWorld = null;
+                floatingHelp.textContent = '';
+                floatingButton.textContent = '▣ Zwevende timer';
+            }, { once: true });
+            // Run updates in the visible window too, while the board book covers the main tab.
+            floatingInterval = floatingWindow.setInterval(() => { if (running) tick(); renderFloating(); }, 250);
+            if(floatingWindow.requestAnimationFrame) {
+                const animateMini=()=>{if(!floatingWindow||floatingWindow.closed)return;if(running&&floatingWorld)floatingWorld.render(selectedTheme,visualProgress(),true,initialTotalSeconds);floatingAnimationId=floatingWindow.requestAnimationFrame(animateMini);};
+                floatingAnimationId=floatingWindow.requestAnimationFrame(animateMini);
+            }
+            floatingButton.textContent = '▣ Toon zwevende timer';
+            floatingHelp.textContent = 'Sleep het venstertje naar rechtsonder. Je kunt nu je bordboek openen. Houd dit timertabblad open.';
+            renderFloating();
+        } catch (_) {
+            floatingHelp.textContent = 'Het venstertje kon niet openen. Probeer opnieuw in Chrome of Edge op je computer.';
+        } finally {
+            floatingButton.disabled = false;
+        }
+    });
+
+    function visualProgress() {
+        const remaining=running?Math.max(0,(endTimestamp-Date.now())/1000):totalSeconds;
+        return initialTotalSeconds?Math.max(0,Math.min(1,1-remaining/initialTotalSeconds)):0;
+    }
 
     function formatTime(seconds) {
         const minutes = Math.floor(seconds / 60);
@@ -69,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             button.setAttribute('aria-pressed', String(selected));
         });
         timePanel.hidden = false;
-        timeHeader.textContent = `Hoelang wil je de ${themeNames[theme].toLowerCase()} gebruiken?`;
+        timeHeader.textContent = `Hoeveel werktijd kies je voor ${themeNames[theme].toLowerCase()}?`;
         timePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
@@ -220,11 +316,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateAquarium() {
-        const visible = totalSeconds <= 0 ? 0 : (totalSeconds % 60 || 60);
+        const visible = initialTotalSeconds ? Math.ceil(60 * totalSeconds / initialTotalSeconds) : 0;
         fishElements.forEach((fish, index) => fish.style.opacity = index < visible ? '1' : '0');
     }
 
     function updateVisual() {
+        const progress = visualProgress();
+        storyCaption.textContent = storyWorld.render(selectedTheme, progress, running, initialTotalSeconds);
         if (selectedTheme === 'rainbow') updateRainbow();
         if (selectedTheme === 'star') updateStars();
         if (selectedTheme === 'aquarium') updateAquarium();
@@ -246,10 +344,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderTime() {
         countdown.textContent = formatTime(totalSeconds);
+        progressBar.value = initialTotalSeconds ? totalSeconds / initialTotalSeconds : 0;
+        renderFloating();
         updateVisual();
     }
 
+    function animateWorld() {
+        if(!running)return;
+        storyCaption.textContent=storyWorld.render(selectedTheme,visualProgress(),true,initialTotalSeconds);
+        animationId=window.requestAnimationFrame(animateWorld);
+    }
+
     function stopInterval() {
+        if(animationId!==null&&window.cancelAnimationFrame)window.cancelAnimationFrame(animationId);
+        animationId=null;
         if (intervalId !== null) clearInterval(intervalId);
         intervalId = null;
     }
@@ -280,14 +388,16 @@ document.addEventListener('DOMContentLoaded', () => {
             spaceRocket.classList.add('arrived');
             arrivalGlow.classList.add('visible');
         }
+        renderFloating();
     }
 
     function tick() {
+        if (!running) return;
         const remaining = Math.max(0, Math.ceil((endTimestamp - Date.now()) / 1000));
         if (remaining !== totalSeconds) {
             totalSeconds = remaining;
             renderTime();
-        }
+        } else updateVisual();
         if (remaining <= 0) finishTimer();
     }
 
@@ -303,12 +413,16 @@ document.addEventListener('DOMContentLoaded', () => {
         endTimestamp = Date.now() + totalSeconds * 1000;
         stopInterval();
         intervalId = setInterval(tick, 250);
+        if(window.requestAnimationFrame)animationId=window.requestAnimationFrame(animateWorld);
         tick();
+        updateVisual();
+        renderFloating();
     }
 
     function pauseCountdown() {
         if (!running) return;
         totalSeconds = Math.max(0, Math.ceil((endTimestamp - Date.now()) / 1000));
+        if (totalSeconds === 0) { finishTimer(); return; }
         stopInterval();
         running = false;
         renderTime();
@@ -317,6 +431,8 @@ document.addEventListener('DOMContentLoaded', () => {
         startButton.textContent = 'Hervat';
         startButton.hidden = false;
         pauseButton.hidden = true;
+        updateVisual();
+        renderFloating();
     }
 
     function resetCurrentTimer() {
@@ -337,6 +453,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addMinute() {
+        if (running) tick();
+        if (finished) {
+            finished = false;
+            totalSeconds = 0;
+            initialTotalSeconds = 0;
+            timerContainer.classList.remove('finished', 'paused');
+            timerMessage.textContent = '';
+            startButton.textContent = 'Start';
+            resetEndVisuals();
+        }
         initialTotalSeconds += 60;
         totalSeconds += 60;
         if (running) endTimestamp += 60000;
@@ -346,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openSelectedTimer() {
         if (!selectedTheme) return;
-        const minutes = Math.max(1, Math.min(180, Number(customMinutes.value) || selectedMinutes || 1));
+        const minutes = Math.max(1, Math.min(180, Math.round(Number(customMinutes.value) || selectedMinutes || 1)));
         selectedMinutes = minutes;
         initialTotalSeconds = minutes * 60;
         totalSeconds = initialTotalSeconds;
@@ -360,6 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (running && !window.confirm('De timer loopt nog. Wil je hem stoppen en een andere timer kiezen?')) return;
         stopInterval();
         running = false;
+        if (floatingWindow && !floatingWindow.closed) floatingWindow.close();
         document.body.className = '';
         showScreen(selectionScreen);
     }

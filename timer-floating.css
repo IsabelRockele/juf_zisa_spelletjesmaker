@@ -1,0 +1,40 @@
+* { box-sizing: border-box; }
+:root { color-scheme: light; font-family: 'Segoe UI', sans-serif; color: #243e50; background: #f5f8f4; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+main { width: 100%; text-align: center; }
+.mini-theme { font-weight: 700; font-size: 17px; }
+#miniTime { font-size: clamp(48px, 23vw, 96px); font-weight: 750; font-variant-numeric: tabular-nums; line-height: 1.2; letter-spacing: -3px; color: #246853; }
+progress { appearance: none; border: 0; width: 100%; height: 10px; overflow: hidden; border-radius: 99px; background: #dfe9e2; accent-color: #40866b; }
+progress::-webkit-progress-bar { background: #dfe9e2; border-radius: 99px; }
+progress::-webkit-progress-value { background: #40866b; border-radius: 99px; transition: width .2s; }
+#miniState { margin: 12px 0; font-weight: 600; font-size: 14px; }
+.mini-controls { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+button { font: inherit; font-size: 14px; font-weight: 650; border: 1px solid #c7d8ce; background: white; border-radius: 12px; padding: 10px 12px; cursor: pointer; color: #243e50; }
+#miniToggle { background: #246853; color: white; border-color: #246853; }
+button:focus-visible { outline: 3px solid #b77b23; outline-offset: 2px; }
+body[data-state='finished'] { background: #e2f2d9; }
+body[data-state='paused'] #miniTime { color: #906a27; }
+@media(max-height:230px) { body { padding: 8px 14px; } #miniTime { font-size: 55px; } #miniState { margin: 5px; } button { padding: 6px 10px; } }
+.mini-world{height:100px;border-radius:13px;overflow:hidden;margin-bottom:8px}.mini-world>svg{width:100%;height:100%;display:block}.world-drift{animation:mini-bob 7s ease-in-out infinite;animation-play-state:paused}.is-moving .world-drift{animation-play-state:running}@keyframes mini-bob{50%{transform:translateY(-6px)}}
+#miniTime{font-size:clamp(42px,20vw,80px)}
+@media(max-height:290px){.mini-world{height:60px;margin-bottom:4px}#miniTime{font-size:48px}#miniState{margin:5px}button{padding:6px 10px}}
+@media(max-height:220px){.mini-world{display:none}}
+@media(prefers-reduced-motion:reduce){.world-drift{animation:none}}
+.mini-world{background:#d4effa}.mini-world[data-theme='space'],.mini-world[data-theme='star']{background:#101a41}.is-complete *{transition:none!important}.is-complete .world-drift{animation:none;transform:none}
+.swimming-body{transform-box:fill-box;transform-origin:center;animation:swim-stroke 3.6s ease-in-out infinite;animation-play-state:paused}.is-moving .swimming-body{animation-play-state:running}@keyframes swim-stroke{50%{transform:translateY(-8px) rotate(2deg) scaleY(.97)}}.is-complete .swimming-body{animation:none}.chest-lid{transition:transform .25s linear}@media(prefers-reduced-motion:reduce){.swimming-body{animation:none}}
+.star-celebration{transform-box:fill-box;transform-origin:center}
+.is-complete .star-celebration{animation:star-finish-turn 3.2s ease-in-out 1;filter:drop-shadow(0 0 15px #ffe688)}
+@keyframes star-finish-turn{0%{transform:rotateY(0deg) scale(1);filter:drop-shadow(0 0 0 #ffe688)}35%{filter:drop-shadow(0 0 32px #fff3b6)}55%{transform:rotateY(180deg) scale(1.09)}100%{transform:rotateY(360deg) scale(1);filter:drop-shadow(0 0 15px #ffe688)}}
+@media(prefers-reduced-motion:reduce){.is-complete .star-celebration{animation:none;filter:drop-shadow(0 0 15px #ffe688)}}
+
+.journey-camera,.journey-hero,.world-resident{transition:transform .25s linear}
+
+.garden-wing{transform-box:fill-box;transform-origin:center;animation:garden-flutter .85s ease-in-out infinite;animation-play-state:paused}.is-moving .garden-wing{animation-play-state:running}@keyframes garden-flutter{50%{transform:scaleX(.55) rotate(5deg)}}.garden-water{animation:garden-ripple 3s ease-in-out infinite;animation-play-state:paused}.is-moving .garden-water{animation-play-state:running}@keyframes garden-ripple{50%{opacity:.25;transform:translateY(2px)}}.garden-visitor{transition:transform .25s linear}.is-complete .garden-wing,.is-complete .garden-water{animation:none}@media(prefers-reduced-motion:reduce){.garden-wing,.garden-water{animation:none}}
+
+.is-moving .watering-drops{animation:water-fall .8s linear infinite}@keyframes water-fall{to{stroke-dashoffset:-34}}@media(prefers-reduced-motion:reduce){.is-moving .watering-drops{animation:none}}
+
+/* Character motion is driven per animation frame; ground anchors never bob. */
+.journey-camera,.journey-hero,.world-resident,.garden-hero,.garden-visitor{transition:none!important}
+.garden-hero .hero-sprite,.journey-sprite,.fish-cycle{transition:none!important}
+.sea-bubbles{fill:#b7eff5;fill-opacity:.12;stroke:#cefbff;stroke-opacity:.6;stroke-width:1.5}
+.journey-flame{filter:drop-shadow(0 0 8px #ffc75c)}

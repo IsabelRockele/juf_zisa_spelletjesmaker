@@ -4,25 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Klastimer</title>
-    <link rel="stylesheet" href="timer.css?v=20260808-3">
+    <link rel="stylesheet" href="timer.css?v=20260922-8">
 </head>
 <body>
     <header class="app-header">
         <a href="app.html" class="keuzemenu-knop">← Keuzemenu</a>
-        <div class="brand"><strong>Klastimer</strong><span>Kies een rustige, visuele aftelklok</span></div>
+        <div class="brand"><strong>Klastimer</strong><span>Een kleine wereld voor jullie werktijd</span></div>
     </header>
 
     <main id="themeSelectionScreen" class="screen active">
-        <div class="choice-intro"><span class="eyebrow">STAP VOOR STAP</span><h1>Maak je timer klaar</h1><p>Kies eerst een thema en daarna hoelang de activiteit duurt.</p></div>
+        <div class="choice-intro"><span class="eyebrow">STAP VOOR STAP</span><h1>Welke wereld ontdekken jullie?</h1><p>Kies eerst een thema en daarna hoelang de activiteit duurt.</p></div>
         <section class="choice-card">
-            <div class="section-title"><span>1</span><div><h2>Kies een thema</h2><p>De afbeelding laat zien hoeveel tijd er voorbij is.</p></div></div>
+            <div class="section-title"><span>1</span><div><h2>Kies een thema</h2><p>Tijdens het werken groeit jullie wereld. Elke tijdkeuze vertelt het hele verhaal.</p></div></div>
             <div class="theme-buttons">
-                <button data-theme="rainbow"><b>🌈 Regenboog</b><small>De kleuren verschijnen langzaam.</small></button>
-                <button data-theme="star"><b>⭐ Groeiende ster</b><small>De ster wordt steeds groter en helderder.</small></button>
-                <button data-theme="aquarium"><b>🐠 Aquarium</b><small>De vissen verdwijnen één voor één.</small></button>
-                <button data-theme="balloon"><b>🎈 Luchtballon</b><small>De ballon stijgt langzaam naar de wolken.</small></button>
-                <button data-theme="garden"><b>🌸 Bloementuin</b><small>De bloemen groeien en bloeien open.</small></button>
-                <button data-theme="space"><b>🚀 Ruimtereis</b><small>Vlieg langs sterren en planeten naar de maan.</small></button>
+                <button data-theme="rainbow"><b>🌈 Regenboog</b><small>Vorm de regenboog en zie de schatkist opengaan.</small></button>
+                <button data-theme="star"><b>⭐ Groeiende ster</b><small>Ontdek sterrenbeelden en laat jouw ster stralen.</small></button>
+                <button data-theme="aquarium"><b>🐠 Aquarium</b><small>Zwem met de zeeschildpad naar een verborgen schat.</small></button>
+                <button data-theme="balloon"><b>🎈 Luchtballon</b><small>Vlieg met Beer over heuvels, huisjes en een rivier.</small></button>
+                <button data-theme="garden"><b>🌸 Bloementuin</b><small>Help Konijn zijn tuin vol bloemen te laten groeien.</small></button>
+                <button data-theme="space"><b>🚀 Ruimtereis</b><small>Reis langs planeten en kometen naar de maan.</small></button>
             </div>
         </section>
         <section class="choice-card time-choice" id="timeChoicePanel" hidden>
@@ -35,7 +35,7 @@
         </section>
     </main>
 
-    <main id="timerScreen" class="screen" aria-live="polite">
+    <main id="timerScreen" class="screen">
         <div class="timer-container" id="timerContainer">
             <div class="timer-topbar">
                 <div><span class="eyebrow">KLASTIMER</span><h1 id="currentThemeDisplay" class="current-theme-display"></h1></div>
@@ -59,11 +59,12 @@
                 <div id="spaceContainer" class="visual-container"><div id="spaceStarsFar" class="space-stars stars-far"></div><div id="spaceStarsNear" class="space-stars stars-near"></div><div class="space-planet planet-one"></div><div class="space-planet planet-two"></div><div class="space-planet planet-three"></div><div class="space-planet planet-four"></div><div id="spaceMoon" class="space-moon"></div><div id="spaceRocket" class="space-rocket"></div><div id="arrivalGlow" class="arrival-glow"></div></div>
                 <img src="afbeeldingen klok/ster.png" alt="" id="finalStar"><img src="klok_afbeeldingen/gouden_muntstuk.png" alt="" id="bigGoldCoin" class="big-gold-coin">
             </div>
-            <div class="time-panel"><div id="timerMessage" class="timer-message"></div><div id="countdown" class="countdown">00:00</div><div id="timerState" class="timer-state">Klaar om te starten</div></div>
+            <div class="time-panel"><div id="timerMessage" class="timer-message"></div><div id="countdown" class="countdown">00:00</div><div id="timerState" class="timer-state" role="status">Klaar om te starten</div></div>
         </div>
     </main>
     <script src="device-id.js"></script>
     <script type="module" src="guard.js"></script>
-    <script src="../timer.js?v=20260808-3"></script>
+    <script src="../timer-worlds.js?v=20260922-8"></script>
+    <script src="../timer.js?v=20260922-8"></script>
 </body>
 </html>
