@@ -2601,16 +2601,21 @@ function _getSplitsConfig() {
   }
   function _rrRooster(niveau, brug, keuze, index=0) {
     const bewerking = keuze === 'gemengd' ? (index%2===0?'optellen':'aftrekken') : keuze;
-    for (let p=0;p<900;p++) {
-      const kolommen=Array.from({length:3},()=>_rrRnd(1,Math.max(2,Math.floor(niveau*.45))));
-      const rijen=Array.from({length:3},()=>bewerking==='optellen'?_rrRnd(1,niveau-Math.max(...kolommen)):_rrRnd(Math.max(...kolommen),niveau));
+    const kiesDrie = getallen => Array.from({length:3},()=>getallen.splice(_rrRnd(0,getallen.length-1),1)[0]);
+    for (let p=0;p<=900;p++) {
+      // De vaste laatste keuze biedt voor alle roosterinstellingen genoeg geldige rijen.
+      const kolommen=p===900?[3,4,5]:kiesDrie(Array.from({length:Math.max(3,Math.floor(niveau*.45))},(_,i)=>i+1));
+      const grootste=Math.max(...kolommen), kandidaten=[];
+      const min=bewerking==='optellen'?1:grootste, max=bewerking==='optellen'?niveau-grootste:niveau;
+      for(let r=min;r<=max;r++){
+        if(kolommen.every(k=>_rrPastBrug(bewerking==='optellen'?_rrBrugPlus(r,k):_rrBrugMin(r,k),brug))) kandidaten.push(r);
+      }
+      if(kandidaten.length<3) continue;
+      const rijen=kiesDrie(kandidaten);
       const waarden=rijen.map(r=>kolommen.map(k=>bewerking==='optellen'?r+k:r-k));
-      const bruggen=rijen.flatMap(r=>kolommen.map(k=>bewerking==='optellen'?_rrBrugPlus(r,k):_rrBrugMin(r,k)));
-      if (brug==='met' && !bruggen.every(Boolean)) continue;
-      if (brug==='zonder' && !bruggen.every(v=>!v)) continue;
       return {bewerking,kolommen,rijen,waarden};
     }
-    return _rrRooster(niveau,'beide',bewerking);
+    throw new Error('Geen rekenrooster mogelijk met deze instellingen.');
   }
   function _rrKader(niveau, keuze, index=0) {
     const bewerking=keuze==='aftrekken'?'aftrekken':'optellen';

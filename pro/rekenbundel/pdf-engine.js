@@ -5643,7 +5643,12 @@ doc.setTextColor(26, 58, 92);
         const cell=Math.min(18,(kadW-8)/4),tx=x+(kadW-cell*4)/2,ty=y+7,teken=o.bewerking==='aftrekken'?'-':'+';
         for(let r=0;r<4;r++)for(let c=0;c<4;c++){doc.setFillColor(r===0||c===0?(r===0&&c===0?255:253):255,r===0||c===0?232:255,r===0||c===0?216:255);doc.setDrawColor(150,175,195);doc.rect(tx+c*cell,ty+r*cell,cell,cell,'FD');const v=r===0?(c===0?'':o.kolommen[c-1]):c===0?o.rijen[r-1]:o.waarden[r-1][c-1];if(r&&c&&!_metAntwoorden){doc.setDrawColor(0,0,0);doc.setLineWidth(.15);doc.line(tx+c*cell+2,ty+(r+1)*cell-3,tx+(c+1)*cell-2,ty+(r+1)*cell-3);}if(v!==''&&((r===0||c===0)||_metAntwoorden)){doc.setFont('helvetica',r&&c?'bold':'normal');doc.setFontSize(14);doc.setTextColor(r&&c?0:35,r&&c?112:35,r&&c?178:35);doc.text(String(v),tx+c*cell+cell/2,ty+r*cell+cell*.68,{align:'center'});}}
         doc.setFont('helvetica','normal');doc.setFontSize(14);doc.setTextColor(35,35,45);doc.text(teken,tx+cell*.22,ty+cell*.76,{align:'center'});
-        doc.setDrawColor(235,105,55);doc.setLineWidth(.7);const sx=tx+cell*.4,sy=ty+cell*.73,ex=sx+cell*.46,ey=sy-cell*.52;doc.lines([[0,-cell*.24,cell*.16,-cell*.52,cell*.46,-cell*.52]],sx,sy);doc.line(ex,ey,ex-2.6,ey+.5);doc.line(ex,ey,ex-.5,ey+2.6);doc.setLineWidth(.2);
+        // De boog eindigt horizontaal; de pijlpunt wijst in dezelfde richting.
+        doc.setDrawColor(235,105,55);doc.setFillColor(235,105,55);doc.setLineWidth(.7);
+        const sx=tx+cell*.4,sy=ty+cell*.73,ex=tx+cell*.86,ey=ty+cell*.24;
+        const punt=cell*.14,basisX=ex-punt;
+        doc.lines([[0,-cell*.24,cell*.13,-cell*.49,basisX-sx,ey-sy]],sx,sy);
+        doc.triangle(ex,ey,basisX,ey-punt*.65,basisX,ey+punt*.65,'F');doc.setLineWidth(.2);
       }else{
         doc.setFont('helvetica','normal');doc.setFontSize(14);doc.setTextColor(35,35,45);
         const bankW=Math.min(10,(kadW-12)/Math.max(1,o.bank.length)),bankX=x+(kadW-bankW*o.bank.length)/2;
