@@ -1,6 +1,6 @@
 (() => {
   const el=id=>document.getElementById(id);
-  let vakken=Array(20).fill(null),wegBollen=[],geschiedenis=[],tip=0,sleep=null,klikBlokkeren=false;
+  let vakken=Array(20).fill(null),wegBollen=[],geschiedenis=[],tip=0,sleep=null;
   const isMin=()=>el('vrij-bewerking').value==='min';
   const toestand=()=>({vakken:vakken.slice(),wegBollen:wegBollen.slice()});
   const tips={
@@ -17,13 +17,14 @@
   }
   function render(){
     el('vrij-weg').hidden=!isMin();
+    el('vrij-sleeptip').textContent=isMin()?'Sleep bollen naar het raam. Sleep ze weg naar het weglegvak.':'Sleep bollen naar het raam. Een bol te veel? Sleep hem terug naar de voorraad.';
     document.querySelector('.vrij-bron[data-kleur="rood"]').hidden=isMin();
     el('vrij-melding').textContent='';el('vrij-ramen').replaceChildren();
     for(let r=0;r<2;r++){
       const raam=document.createElement('div');raam.className='tienraam';raam.setAttribute('aria-label','Tienraam '+(r+1));
       for(let j=0;j<10;j++){
         const i=r*10+j,cel=document.createElement('div');cel.className='cel';cel.dataset.plek=i;
-        if(vakken[i]){const s=document.createElement('button');s.className='stip vrij-stip'+(vakken[i]==='rood'?' rood':'');s.dataset.plek=i;s.setAttribute('aria-label',`Neem ${vakken[i]==='rood'?'rode':'blauwe'} stip weg`);s.addEventListener('click',()=>{if(!klikBlokkeren)neemWeg(i);});cel.append(s);}
+        if(vakken[i]){const s=document.createElement('button');s.className='stip vrij-stip'+(vakken[i]==='rood'?' rood':'');s.dataset.plek=i;s.setAttribute('aria-label',`Sleep ${vakken[i]==='rood'?'rode':'blauwe'} stip weg`);cel.append(s);}
         raam.append(cel);
       }el('vrij-ramen').append(raam);
     }
@@ -44,7 +45,7 @@
       termen.forEach((tekst,i)=>{const span=document.createElement('span');span.textContent=tekst;if(optelling&&(i===0||i===2))span.className=i===0?'som-blauw':'som-rood';regel.append(span);});som.append(regel);
     }
   }
-  document.querySelectorAll('.vrij-bron').forEach(btn=>btn.addEventListener('click',()=>{if(!klikBlokkeren)leg(btn.dataset.kleur);}));
+
   el('vrij-leeg').addEventListener('click',()=>{wijzig(()=>{vakken.fill(null);wegBollen=[];});tip=0;toonTip();});
   el('vrij-terug').addEventListener('click',()=>{if(geschiedenis.length){const vorig=geschiedenis.pop();vakken=vorig.vakken;wegBollen=vorig.wegBollen;render();}});
   function toonTip(){el('vrij-hint').textContent=tips[el('vrij-bewerking').value][tip];el('vrij-hulp-volgende').disabled=tip===3;}
@@ -61,10 +62,10 @@
     if(sleep.ghost){sleep.ghost.style.left=e.clientX-19+'px';sleep.ghost.style.top=e.clientY-19+'px';}
   });
   el('alleen-les').addEventListener('pointerup',e=>{
-    if(!sleep)return;const s=sleep;sleep=null;if(!s.ghost)return;s.ghost.remove();klikBlokkeren=true;setTimeout(()=>{klikBlokkeren=false;},0);
+    if(!sleep)return;const s=sleep;sleep=null;if(!s.ghost)return;s.ghost.remove();
     const hit=document.elementFromPoint(e.clientX,e.clientY),cel=hit?.closest('#vrij-ramen .cel');
     if(cel){const naar=Number(cel.dataset.plek);if(!vakken[naar]){if(s.bron)leg(s.kleur,naar);else wijzig(()=>{vakken[naar]=vakken[s.plek];vakken[s.plek]=null;});}}
-    else if(!s.bron&&hit?.closest('#vrij-weg'))neemWeg(s.plek);
+    else if(!s.bron&&(isMin()?hit?.closest('#vrij-weg'):hit?.closest('.vrij-bron')))neemWeg(s.plek);
   });
   el('alleen-les').addEventListener('pointercancel',()=>{sleep?.ghost?.remove();sleep=null;});
   el('vrij-help-open').addEventListener('click',()=>el('vrij-hulp').showModal());
