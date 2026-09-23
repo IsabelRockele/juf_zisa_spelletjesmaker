@@ -1,0 +1,338 @@
+{
+  "source": "Aangeleverd leerplanbestand, tabblad ICT, kolommen 6-7 en 7-8 (23 september 2026).",
+  "goals": {
+    "IT.002": {
+      "text": "Herkennen de globale werking van digitale systemen.",
+      "ages": [
+        "6-7"
+      ],
+      "row": 13
+    },
+    "IT.003": {
+      "text": "Herkennen de bouwstenen van digitale systemen.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 21
+    },
+    "IT.004": {
+      "text": "Bepalen om al dan niet digitale systemen te gebruiken.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 32
+    },
+    "IT.014": {
+      "text": "Tonen hun kennis over digitale systemen en digitale informatieverwerking in verschillende contexten.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 119
+    },
+    "IT.015": {
+      "text": "Herkennen hoe een eenvoudig lineair algoritme opgebouwd is volgens de principes van computationeel denken.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 126
+    },
+    "IT.019": {
+      "text": "Ontwerpen een eenvoudig lineair algoritme volgens de principes van computationeel denken.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 180
+    },
+    "IT.027": {
+      "text": "Illustreren eenvoudige handelingen bij digitale systemen.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 259
+    },
+    "IT.028": {
+      "text": "Herkennen een bestand.",
+      "ages": [
+        "7-8"
+      ],
+      "row": 270
+    },
+    "IT.029": {
+      "text": "Bepalen het bestandstype.",
+      "ages": [
+        "7-8"
+      ],
+      "row": 280
+    },
+    "IT.030": {
+      "text": "Illustreren eenvoudige handelingen bij digitale systemen.",
+      "ages": [
+        "7-8"
+      ],
+      "row": 289
+    },
+    "IT.035": {
+      "text": "Gebruiken eenvoudige handelingen bij digitale systemen.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 322
+    },
+    "IT.037": {
+      "text": "Illustreren het basisgebruik van een toetsenbord.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 331
+    },
+    "IT.042": {
+      "text": "Gebruiken invoer- en uitvoerapparaten, met inbegrip van het toetsenbord, functioneel.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 378
+    },
+    "IT.044": {
+      "text": "Hanteren invoer- en uitvoerapparaten zorgzaam.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 404
+    },
+    "IT.045": {
+      "text": "Begrijpen de functie van een digitale zoektool.",
+      "ages": [
+        "6-7"
+      ],
+      "row": 412
+    },
+    "IT.046": {
+      "text": "Gebruiken een digitale zoektool om informatie te verzamelen.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 415
+    },
+    "IT.055": {
+      "text": "Herkennen digitale bronnen.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 487
+    },
+    "IT.058": {
+      "text": "Evalueren digitale bronnen.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 499
+    },
+    "IT.061": {
+      "text": "Illustreren het gezond gebruik van digitale media.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 521
+    },
+    "IT.064": {
+      "text": "Gebruiken digitale media op een gezonde manier.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 555
+    },
+    "IT.092": {
+      "text": "Beschrijven de mogelijkheden van digitale tools.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 718
+    },
+    "IT.093": {
+      "text": "Gebruiken het juiste type digitale tools voor specifieke digitale taken.",
+      "ages": [
+        "6-7",
+        "7-8"
+      ],
+      "row": 719
+    }
+  },
+  "missions": [
+    {
+      "id": "tekenen",
+      "title": "Tekenen",
+      "href": "/atelier.html",
+      "codes": [
+        "IT.035",
+        "IT.037",
+        "IT.042",
+        "IT.092",
+        "IT.093"
+      ],
+      "practice": "Met de vinger tekenen, gommen en kleuren. Een tekst typen en opmaken. Een passende tekentool kiezen.",
+      "observe": "Laat een eigen werkje maken; observeer of het kind gereedschappen en toetsenbord functioneel gebruikt."
+    },
+    {
+      "id": "kijken",
+      "title": "Filmpjes bedienen",
+      "href": "/kijken",
+      "codes": [
+        "IT.027",
+        "IT.035",
+        "IT.042"
+      ],
+      "practice": "Een filmpje starten, pauzeren, verder afspelen en stoppen. Fysieke volumeknoppen gebruiken.",
+      "observe": "Observeer de echte bediening. De website kan niet meten of het kind de volumeknoppen gebruikt."
+    },
+    {
+      "id": "robotroutes",
+      "title": "Robotroutes",
+      "href": "/robotroutes",
+      "codes": [
+        "IT.015",
+        "IT.019"
+      ],
+      "practice": "Een route in losse pijlen plannen, laten uitvoeren en zo nodig aanpassen.",
+      "observe": "Laat het kind de stappen toelichten. Bied begeleiding bij het ontwerpen. Deze routes oefenen niet automatisch elk principe van computationeel denken."
+    },
+    {
+      "id": "veilig",
+      "title": "Veilig met media",
+      "href": "/veilig",
+      "codes": [
+        "IT.061",
+        "IT.064"
+      ],
+      "practice": "Bespreken wat je doet bij vreemde berichten, privégegevens, foto’s, enge beelden en schermtijd.",
+      "observe": "Keuzevragen bereiden veilig gedrag voor. Bespreek ervaringen en observeer toepassing; een juist antwoord bewijst nog geen veilig mediagebruik."
+    },
+    {
+      "id": "zoeken",
+      "title": "Slim zoeken",
+      "href": "/zoeken",
+      "codes": [
+        "IT.004",
+        "IT.045",
+        "IT.055",
+        "IT.058",
+        "IT.093"
+      ],
+      "practice": "Kiezen welk boek, persoon of digitale bron bruikbaar is voor een vraag. Meerdere passende bronnen kiezen.",
+      "observe": "Laat uitleggen waarom een bron bij de vraag past. Bronbetrouwbaarheid zelfstandig onderzoeken wordt hier slechts voorbereid."
+    },
+    {
+      "id": "opzoeken",
+      "title": "Zelf opzoeken",
+      "href": "/opzoeken",
+      "codes": [
+        "IT.045",
+        "IT.046",
+        "IT.055",
+        "IT.058",
+        "IT.042"
+      ],
+      "practice": "Met aangereikte woorden in de woordenbibliotheek zoeken en uitleg toepassen op een werkblad. Gericht een aangereikte website openen.",
+      "observe": "Observeer het werkelijk opzoeken en gebruiken van de gevonden informatie. Een website openen alleen volstaat niet. Vergelijk samen bronnen voor IT.058."
+    },
+    {
+      "id": "toestel",
+      "title": "Mijn toestel",
+      "href": "/ontdekken?missie=toestel",
+      "codes": [
+        "IT.002",
+        "IT.003",
+        "IT.014",
+        "IT.027",
+        "IT.035",
+        "IT.042"
+      ],
+      "practice": "Batterij en geluid herkennen, invoer-verwerking-uitvoer bespreken, een app openen en verlaten.",
+      "observe": "Laat het kind de functies ook op het echte toestel tonen en de verwerking in eigen woorden uitleggen."
+    },
+    {
+      "id": "zorg",
+      "title": "Zorg voor je tablet",
+      "href": "/ontdekken?missie=zorg",
+      "codes": [
+        "IT.044"
+      ],
+      "practice": "Veilig dragen, een veilige werkplek maken, hulp vragen bij kabels en correct opbergen.",
+      "observe": "Observeer het dragen, neerleggen en opbergen met het echte toestel."
+    },
+    {
+      "id": "typen",
+      "title": "Toetsentovenaar",
+      "href": "/ontdekken?missie=typen",
+      "codes": [
+        "IT.037",
+        "IT.042"
+      ],
+      "practice": "Letters, cijfers en leestekens typen; spaties en verbeteringen gebruiken.",
+      "observe": "Controleer de eigen naam, zinnen en leestekens en observeer het toetsenbordgebruik."
+    },
+    {
+      "id": "bestanden",
+      "title": "Mijn bestanden",
+      "href": "/ontdekken?missie=bestanden",
+      "codes": [
+        "IT.028",
+        "IT.029",
+        "IT.030"
+      ],
+      "practice": "Een naamkaartje maken, een herkenbare naam geven, in 1A of 2A en de juiste submap bewaren, sluiten, openen, vervangen en een oefenkladje verwijderen. Bestandstypes verkennen.",
+      "observe": "De oefenmappen zijn in de browser nagebootst en lokaal bewaard. Laat het kind dezelfde handelingen later in een echte bestandsomgeving tonen."
+    },
+    {
+      "id": "kiezen",
+      "title": "Wat gebruik ik?",
+      "href": "/ontdekken?missie=kiezen",
+      "codes": [
+        "IT.004",
+        "IT.055",
+        "IT.058",
+        "IT.092",
+        "IT.093"
+      ],
+      "practice": "Een geschikt hulpmiddel kiezen voor tekenen, luisteren, kijken of informatie zoeken.",
+      "observe": "Bespreek waarom het hulpmiddel bruikbaar is en laat het daarna echt gebruiken. Kiezen alleen dekt IT.093 niet volledig."
+    },
+    {
+      "id": "robot",
+      "title": "Robotdenkers",
+      "href": "/ontdekken?missie=robot",
+      "codes": [
+        "IT.015",
+        "IT.019"
+      ],
+      "practice": "Een eindvak voorspellen, fouten verbeteren, een route in deelstappen plannen en patronen herkennen.",
+      "observe": "Laat een plan toelichten, testen en aanpassen. Ondersteun het ontwerpen waar nodig."
+    },
+    {
+      "id": "gezond",
+      "title": "Fijn met een scherm",
+      "href": "/ontdekken?missie=gezond",
+      "codes": [
+        "IT.061",
+        "IT.064"
+      ],
+      "practice": "Gevoelens bij schermgebruik bespreken, pauzes en een gezonde houding oefenen.",
+      "observe": "Observeer gezonde gewoontes in de klas; bespreek met het kind welke afspraak helpt."
+    }
+  ]
+}

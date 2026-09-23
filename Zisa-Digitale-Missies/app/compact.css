@@ -1,0 +1,277 @@
+/* Shared working layouts: keep touch targets generous, remove stacked framing. */
+@media screen {
+body .missions-header,body .robot-header,body .safe-header,body .discover-header{padding:10px 20px;min-height:64px;gap:12px}
+body .missions-main,body .robot-main,body .safe-main,body .discover-main{padding:12px 20px 24px;max-width:1180px}
+body .missions-main h1{font-size:28px;margin-bottom:16px}
+body .mission-choices{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+body .mission-picture{height:150px;transform:scale(.66);margin:6px -25px -16px}
+body .mission-caption{padding:12px 14px;gap:6px}
+body .mission-caption h2{font-size:22px}
+body .mission-go{width:36px;height:36px}
+body .mission-choice{border-radius:20px}
+body .teacher-settings{margin-bottom:8px}
+body .is-working{display:flex;flex-direction:column}
+body .is-working>.teacher-settings{order:10;margin:8px 0 0}
+body .back-missions{align-self:flex-start;margin:0;min-height:44px;padding:6px 12px}
+body .lesson-nav{margin:0 0 8px;gap:20px}
+body .lesson-nav span{font-size:19px}
+body .lesson-question{padding:12px 16px;gap:12px;flex-wrap:nowrap}
+body .lesson-question>div{flex-basis:auto;min-width:0}
+body .lesson-question h1{font-size:24px;margin:0 0 4px}
+body .lesson-question p{font-size:18px;line-height:1.4}
+body .lesson-question>.listen-wrap{flex-shrink:0}
+body .activity,body .practical,body .typing,body .file-lab,body .robot-lab,body .battery-lab{padding:14px 16px}
+body .choice-hint{margin:0 0 8px;font-size:16px}
+body .answer-grid{gap:12px;margin-bottom:12px}
+body .answer-card{padding-bottom:6px;border-radius:14px}
+body .answer-card>button{min-height:125px;padding:12px;gap:10px;font-size:19px}
+body .answer-card>button>svg{width:42px;height:42px}
+body .discover .primary{min-height:48px;padding:10px 18px}
+body .exercise-feedback{margin-top:10px;padding:10px 14px}
+body .exercise-feedback p{font-size:18px}
+body .observe{padding:6px 16px}
+body .observe summary{min-height:44px;display:flex;align-items:center}
+body .lesson-bottom{margin-top:10px}
+body .discovery-heading{margin-bottom:12px}
+body .discovery-heading h1{font-size:28px}
+body .discovery-heading img{width:70px;height:78px}
+body .discovery-tiles{gap:14px}
+body .discovery-tile>button{min-height:164px;padding:45px 10px 12px;gap:3px}
+body .discovery-tile>button>svg{height:48px;width:48px}
+body .discovery-tile h2{font-size:21px;margin:4px 0}
+body .file-steps{margin-bottom:10px;gap:8px}
+body .file-steps span{width:30px;height:30px;font-size:16px}
+body .lab-instruction{margin-bottom:10px}
+body .lab-instruction h2{font-size:20px;line-height:1.4}
+body .kind-files .lesson-question p{display:none}
+body .card-name{padding:8px 12px 4px}
+body .card-name>span{display:inline;margin-right:12px}
+body .card-name input{width:min(65%,420px);font-size:24px;padding:6px}
+body .card-editor .file-canvas{width:min(100%,560px);height:auto;margin:auto}
+body .file-toolbar{padding:6px 12px}
+body .file-lab>.primary{margin-top:10px}
+body .delivery-fold{margin-top:10px}
+body .delivery-fold>summary{cursor:pointer;min-height:48px;padding:10px 14px;border:1px solid #bdcce1;border-radius:12px;background:#edf4ff;font-weight:bold}
+body .card-delivery{margin-top:8px;padding:12px}
+body .battery-hint{margin-bottom:10px}
+body .battery-devices{gap:12px;margin-bottom:12px}
+body .battery-option{padding:8px}
+body .ipad-example-content{padding:8px}
+body .ipad-example-content img{height:66px;width:60px}
+body .battery-option strong{margin:6px 0}
+body .battery-transfer{margin-top:12px;padding:12px}
+body .battery-lab>.primary{margin-top:10px}
+body .safe-nav{margin-bottom:10px}
+body .safe-story{padding:14px 16px;gap:14px;flex-wrap:nowrap}
+body .safe-scene{width:65px;height:65px;border-radius:16px}
+body .safe-scene svg{width:44px;height:44px}
+body .safe-story h1{font-size:24px;margin-bottom:4px}
+body .safe-story p{font-size:19px;line-height:1.4}
+body .safe-story>div:nth-child(2){flex-basis:auto;min-width:0}
+body .safe-story>.listen-wrap{flex-shrink:0}
+body .safe-choice-heading{margin:12px 0 10px}
+body .safe-choice-heading h2{font-size:21px}
+body .safe-choices{gap:12px}
+body .safe-answer,body .search-multi-answer label{min-height:130px;padding:14px 12px;gap:10px;font-size:19px}
+body .search-multi-answer{min-height:130px}
+body .safe-answer>svg:first-child,body .search-multi-answer label>svg{width:42px;height:42px}
+body .safe-answer-audio{padding:0 8px 8px}
+body .safe-feedback{padding:12px 16px;margin-top:12px;gap:12px}
+body .safe-feedback h2{margin-bottom:4px}
+body .safe-feedback p{font-size:17px;line-height:1.4}
+body .safe-next{min-height:48px;padding:10px 18px;margin-top:10px}
+body .safe-progress,body .robot-levels{margin-top:12px;gap:6px}
+body .safe-teacher{margin-top:10px}
+body .search-check-row{margin-top:10px}
+body .search-open-library{margin-top:12px;padding:10px;font-size:18px}
+body .robot-instruction{margin:6px 0 12px;min-height:54px;padding:6px 12px}
+body .robot-workspace{gap:18px}
+body .robot-field-panel{padding:12px}
+body .robot-field-panel>p{margin-bottom:10px}
+body .robot-board{max-width:350px}
+body .robot-legend{margin-top:10px}
+body .robot-sequence{min-height:76px;max-height:130px;padding:8px}
+body .robot-plan-empty{min-height:56px}
+body .robot-arrows{margin:8px auto;gap:8px}
+body .robot-arrows button{height:50px}
+body .robot-edit-hint{margin:6px 0}
+body .robot-feedback{min-height:48px;margin:8px 0}
+body .robot-run,body .robot-next{min-height:48px;padding:10px}
+body .robot-help{margin-top:6px}
+body .robot-lab{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:10px 20px;align-items:start}
+body .robot-lab>p{grid-column:1/-1;margin:0;font-size:17px}
+body .robot-lab .mini-grid{width:min(100%,310px);margin:0 auto;grid-template-rows:repeat(3,minmax(0,1fr));aspect-ratio:1}
+body .robot-lab .mini-grid>button{min-width:0}
+body .robot-lab-controls{min-width:0}
+body .robot-lab-controls>p{font-size:17px;margin:8px 0}
+body .robot-plan{padding:8px;min-height:64px;max-height:150px;overflow:auto}
+body .direction-buttons,body .robot-actions{gap:6px;margin:10px 0}
+body .direction-buttons button{min-width:48px;padding:8px}
+body .watch-header{height:auto;min-height:64px;padding:10px 20px}
+body .watch-main{padding:12px 20px 24px}
+body .watch-title{margin-bottom:8px}
+body .watch-title h1{font-size:26px}
+body .watch-eyebrow{display:none}
+body .watch-choices{margin-bottom:12px}
+body .watch-choices>summary{cursor:pointer;min-height:48px;padding:10px 14px;border:1px solid #bed4df;background:white;border-radius:12px;font-size:18px;font-weight:bold}
+body .watch-choice-grid{margin-top:10px}
+body .watch-layout{grid-template-columns:minmax(0,1fr) 290px;gap:16px}
+body .video-stage{max-width:650px;margin:auto}
+body .video-control{min-height:76px;padding:8px 4px;gap:4px}
+body .mission-card{padding:14px}
+body .mission-card>.listen-wrap{float:right;margin:4px 0 4px 8px}
+body .step-dots{margin:8px 0 12px}
+body .mission-icon{width:44px;height:44px;margin-bottom:8px}
+body .mission-icon svg{width:28px;height:28px}
+body .mission-card h2{font-size:22px;margin-bottom:8px}
+body .mission-card>p{font-size:17px;line-height:1.4;margin:8px 0}
+body .mission-card>.primary,body .mission-card>.secondary{margin-top:8px}
+body .pause-hint{margin:10px 0;padding:10px}
+body .lookup-switch{display:flex;gap:10px;margin-bottom:12px}
+body .lookup-switch button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:10px 16px;font-size:18px;font-weight:bold;background:white;border:2px solid #bed7df;border-radius:12px}
+body .lookup-switch button[aria-pressed=true]{background:#dff1f5;border-color:#277488;color:#245c6b}
+body .lookup-dictionary{padding:16px}
+body .lookup-title h1{font-size:26px}
+body .lookup-form{margin-top:12px}
+body .lookup-result{margin-top:14px}
+body .lookup-result article{grid-template-columns:minmax(0,180px) 1fr;gap:16px;padding-top:14px}
+body .lookup-empty{min-height:85px}
+body .lookup-app .search-shelf{margin-top:0;padding-top:0;border:0}
+body .search-links{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+body .search-links>div{padding:10px}
+body .search-links a{min-height:95px;gap:7px;padding:6px}
+body .lookup-print{margin-top:12px;padding:10px 16px}
+@media(min-width:701px){
+body .robot-board{max-width:min(350px,calc(100dvh - 275px))}
+body .card-editor .file-canvas{width:min(100%,560px,max(280px,calc((100dvh - 460px)*2)))}
+}
+@media(max-width:700px){
+body .missions-main,body .robot-main,body .safe-main,body .discover-main,body .watch-main{padding:10px 12px 20px}
+body .mission-choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+body .missions-main{max-width:none}
+body .mission-picture{transform:scale(.48);margin:0 -60px -25px}
+body .mission-caption h2{font-size:19px}
+body .mission-go{display:none}
+body .safe-brand small,body .robot-brand small,body .watch-brand small{display:none}
+body .safe-answer,body .search-multi-answer label{min-height:76px;flex-direction:row;padding:10px 12px;text-align:left;justify-content:flex-start}
+body .search-multi-answer{min-height:76px}
+body .safe-answer-audio{padding:8px}
+body .safe-choices,body .answer-grid{gap:8px}
+body .answer-card{padding:0 8px 0 0}
+body .answer-card>button{min-height:76px;font-size:18px}
+body .safe-story h1{font-size:21px}
+body .safe-story p{font-size:18px}
+body .safe-scene{display:none}
+body .robot-workspace{grid-template-columns:1fr;gap:12px}
+body .robot-board{max-width:245px}
+body .robot-field-panel{padding:8px}
+body .robot-legend{display:none}
+body .robot-plan-title{margin:0 0 6px}
+body .robot-plan-title h2{font-size:20px}
+body .robot-arrows{display:flex;max-width:none;gap:8px}
+body .robot-arrows button{flex:1;height:48px}
+body .robot-arrows .direction-up{order:0}body .robot-arrows .direction-right{order:1}body .robot-arrows .direction-down{order:2}body .robot-arrows .direction-left{order:3}
+body .robot-lab{grid-template-columns:1fr}
+body .robot-lab .mini-grid{max-width:230px}
+body .battery-devices{grid-template-columns:1fr}
+body .battery-option .ipad-screen{width:145px}
+body .ipad-example-content img{height:35px}
+body .watch-layout{grid-template-columns:1fr}
+body .mission-card{order:1}
+body .screen-column{order:0}
+body .watch-header{padding:8px 12px;min-height:60px;flex-wrap:wrap;gap:8px}
+body .watch-header nav{width:auto;gap:8px}
+body .watch-brand strong{font-size:19px}
+body .video-control{min-height:72px}
+body .lookup-switch button{flex:1;padding:8px;font-size:16px}
+body .lookup-switch svg{flex-shrink:0;width:22px}
+body .lookup-result article{grid-template-columns:110px minmax(0,1fr);gap:12px}
+body .word-explanation .word-meaning{font-size:18px;margin:8px 0}
+body .word-example{font-size:16px}
+}
+@media(min-width:600px) and (max-width:700px){
+body .robot-workspace{grid-template-columns:minmax(0,1fr) minmax(0,1fr);max-width:none}
+body .robot-arrows{display:grid}
+body .robot-arrows button{width:auto}
+body .robot-stop{position:static;width:100%}
+body .robot-lab{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+body .battery-devices{grid-template-columns:repeat(3,minmax(0,1fr))}
+body .battery-option,body .battery-option>button{display:block;text-align:center}
+body .battery-option .ipad-screen{width:100%}
+}
+}
+/* Lesson navigation occupies one row; teacher controls open separately. */
+@media screen {
+body .discover-header{min-height:56px;padding:6px 20px}
+body .discover .teacher-open{min-height:44px;padding:6px 10px;font-size:16px}
+body .lesson-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:8px}
+body .lesson-toolbar .lesson-nav{margin:0;gap:14px}
+body .lesson-toolbar .lesson-nav>button{height:44px;min-height:44px;width:44px}
+body .lesson-toolbar .lesson-nav span{font-size:18px}
+body .lesson-toolbar .lesson-nav p{font-size:14px}
+body .is-working .lesson-bottom>span{display:none}
+body .is-working .lesson-bottom{justify-content:flex-end;margin-top:8px}
+body .task-batterij .lesson-question{padding:8px 16px}
+body .task-batterij .lesson-question p{display:none}
+body .task-batterij .lesson-question h1{font-size:22px;margin:0}
+body .task-batterij .battery-lab{padding:10px 16px}
+body .task-batterij .lab-instruction{margin-bottom:4px}
+body .task-batterij .lab-instruction h2{font-size:19px}
+body .task-batterij .battery-hint{margin:0 0 8px;font-size:16px}
+body .task-batterij .battery-devices{margin-bottom:8px;gap:12px}
+body .task-batterij .battery-option{padding:7px 9px 4px}
+body .task-batterij .ipad-screen{max-width:300px;margin:auto;padding-bottom:16px;border-width:5px;border-radius:16px}
+body .task-batterij .ipad-status{padding:8px}
+body .task-batterij .ipad-example-content{padding:4px;gap:2px;font-size:16px}
+body .task-batterij .ipad-example-content img{height:clamp(32px,7dvh,54px);width:48px}
+body .battery-option-footer{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:4px}
+body .battery-option-footer strong{margin:0;font-size:18px}
+body .battery-response{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:72px}
+body .battery-response>.primary{flex-shrink:0;margin:0}
+body .battery-response>.exercise-feedback{flex:1;margin:0;padding:8px 12px}
+body .battery-response>.exercise-feedback p{font-size:17px;line-height:1.4}
+body .battery-prompt{font-size:16px;margin:0;color:#58667c}
+body .task-batterij .battery-lab>small{font-size:14px;margin-top:6px}
+body .battery-final{min-height:220px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center}
+body .battery-final h2{font-size:24px;margin:0}
+body .battery-final p{font-size:20px;max-width:650px;margin:0}
+.discovery-teacher-dialog{max-width:min(850px,calc(100vw - 24px))!important;max-height:calc(100dvh - 32px);overflow:auto;font:17px/1.5 Arial,sans-serif;background:#f5f7fc;color:#29334b}
+.discovery-teacher-dialog .teacher-body{padding:12px}
+.discovery-teacher-dialog .observe{padding:0 0 12px;margin-bottom:12px}
+.discovery-teacher-dialog button{min-height:44px;padding:8px 12px;background:white;border:1px solid #bec8d9;border-radius:10px;margin:4px}
+@media(max-width:700px){
+body .discover-header strong{font-size:16px}
+body .teacher-open span{display:none}
+body .lesson-toolbar{gap:8px}
+body .lesson-toolbar .back-missions{font-size:16px;padding:6px 8px}
+body .lesson-toolbar .lesson-nav{gap:6px}
+body .lesson-toolbar .lesson-nav span{font-size:16px}
+body .task-batterij .battery-devices{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+body .task-batterij .battery-option{display:block;padding:5px}
+body .task-batterij .battery-option>button{display:block}
+body .task-batterij .ipad-screen{width:100%;border-width:3px}
+body .task-batterij .ipad-status{padding:6px 4px}
+body .task-batterij .ipad-status>span:first-child{display:none}
+body .task-batterij .ipad-status>span:last-child{margin-left:auto}
+body .battery-option-footer{gap:5px;flex-wrap:wrap}
+body .battery-response{align-items:stretch;flex-direction:column;gap:8px}
+body .battery-response>.primary{align-self:flex-end}
+}
+}
+@media print {
+body .discovery-teacher-dialog[data-slot=dialog-content]{display:block!important;position:static!important;transform:none!important;max-height:none!important;max-width:none!important;width:100%!important;border:0!important;box-shadow:none!important;overflow:visible!important;padding:0!important}
+.discovery-teacher-dialog>h2,.discovery-teacher-dialog>p,.discovery-teacher-dialog>button,.discovery-teacher-dialog .observe,.discovery-teacher-dialog .teacher-body>label,.discovery-teacher-dialog .teacher-body>p,.discovery-teacher-dialog .teacher-body>button{display:none!important}
+.discovery-teacher-dialog .teacher-body,.discovery-teacher-dialog .observations{display:block!important;max-height:none!important;overflow:visible!important;border:0!important;padding:0!important}
+.discovery-teacher-dialog .teacher-body::before{content:'Zisa’s digitale missies — observaties';display:block;font-size:18px;margin-bottom:16px}
+}
+@media screen {
+body .missions-main h1{margin-bottom:8px}
+.mission-filter{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;font-size:16px}
+.mission-filter select{min-height:44px;padding:8px 14px;border:1px solid #b9cbbd;border-radius:10px;background:white;font:inherit}
+.mission-pages{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:16px}
+.mission-pages button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 16px;border:1px solid #bdd0c3;border-radius:12px;background:white;font-size:18px;font-weight:bold}
+.mission-pages>span{font-size:18px;font-weight:bold;white-space:nowrap}
+.mission-age{display:block;margin-top:4px;font-size:14px}
+body .added-mission-picture{color:var(--card-ink)}
+@media(max-width:560px){.mission-pages{gap:12px}.mission-pages button{font-size:16px;padding:8px}.mission-filter{margin-bottom:10px}}
+}

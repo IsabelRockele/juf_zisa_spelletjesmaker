@@ -1,0 +1,10 @@
+'use client';
+import {useEffect,useRef,useState} from 'react';
+import {Volume2,Square} from 'lucide-react';
+export default function Listen({text,label='Luister',beforeSpeak}:{text:string;label?:string;beforeSpeak?:()=>void}){
+ const [available,setAvailable]=useState(false),[speaking,setSpeaking]=useState(false),[error,setError]=useState('');const own=useRef<SpeechSynthesisUtterance|null>(null);
+ useEffect(()=>{setAvailable('speechSynthesis' in window);const reset=()=>{own.current=null;setSpeaking(false);setError('');};window.addEventListener('zisa-speech',reset);return()=>{window.removeEventListener('zisa-speech',reset);if(own.current){window.speechSynthesis.cancel();own.current=null;}};},[]);
+ useEffect(()=>{if(own.current){window.speechSynthesis.cancel();own.current=null;setSpeaking(false);}},[text]);
+ function play(){if(!available)return;const stop=speaking;window.dispatchEvent(new Event('zisa-speech'));window.speechSynthesis.cancel();setError('');if(stop)return;beforeSpeak?.();const u=new SpeechSynthesisUtterance(text);u.lang='nl-BE';u.rate=.86;const voices=window.speechSynthesis.getVoices();const voice=voices.find(v=>v.lang.toLowerCase()==='nl-be')??voices.find(v=>v.lang.toLowerCase().startsWith('nl'));if(voice)u.voice=voice;own.current=u;setSpeaking(true);u.onend=()=>{if(own.current===u){own.current=null;setSpeaking(false);}};u.onerror=e=>{if(own.current===u){own.current=null;setSpeaking(false);if(e.error!=='canceled'&&e.error!=='interrupted')setError('Het voorlezen lukt niet. Vraag hulp aan de juf of meester.');}};window.speechSynthesis.speak(u);}
+ return <span className="listen-wrap"><button type="button" className="listen-button" onClick={play} disabled={!available} aria-label={speaking?'Stop met voorlezen':label} aria-pressed={speaking} title={available?label:'Voorlezen is niet beschikbaar in deze browser'}>{speaking?<Square size={21} fill="currentColor"/>:<Volume2 size={24}/>}</button>{error&&<span className="listen-error" role="status">{error}</span>}</span>;
+}

@@ -1,0 +1,13 @@
+'use client';
+import {useState} from 'react';
+import {BookOpen,House,Printer,Monitor,FolderOpen} from 'lucide-react';
+import data from '@/data-curriculum/goals.json';
+import './goals.css';
+export default function Goals(){
+ const [age,setAge]=useState('all'),[mission,setMission]=useState('all');
+ const goals:Record<string,{text:string;ages:string[];row:number}>=data.goals;
+ const shown=data.missions.filter(m=>(mission==='all'||m.id===mission)&&m.codes.some(c=>age==='all'||goals[c].ages.includes(age)));
+ return <div className="goals-app"><header><a href="/"><House/> Missies</a><strong>Voor de leerkracht</strong><a href="/leerkracht"><FolderOpen/> Werkjes ontvangen</a></header><main><h1><BookOpen/> Leerplandoelen per missie</h1><p>Bekijk welke doelen een missie oefent en wat je in de klas kunt observeren.</p><nav className="goals-actions"><a href="/atelier.html"><Monitor/> Voordoen op het bord</a><button onClick={()=>window.print()}><Printer/> Druk dit overzicht af</button></nav><div className="goals-filters"><label>Leeftijd<select value={age} onChange={e=>setAge(e.target.value)}><option value="all">6–7 en 7–8 jaar</option><option value="6-7">6–7 jaar</option><option value="7-8">7–8 jaar</option></select></label><label>Missie<select value={mission} onChange={e=>setMission(e.target.value)}><option value="all">Alle missies</option>{data.missions.map(m=><option key={m.id} value={m.id}>{m.title}</option>)}</select></label></div><div className="goals-note"><p><strong>Leeftijd volgens jouw leerplanbestand.</strong> IT.002 en IT.045 zijn daar alleen bij 6–7 jaar aangevinkt. IT.028, IT.029 en IT.030 alleen bij 7–8 jaar. De andere opgenomen doelen staan bij beide leeftijden. Eerder aangeleerde doelen kun je blijven herhalen.</p><p>Deze koppeling beschrijft oefenkansen. Een juist antwoord is geen bewijs van volledige beheersing. Praktische handelingen observeer je ook op het echte toestel.</p></div>
+ {shown.length?shown.map(m=><section key={m.id} className="goal-mission"><div className="goal-heading"><h2>{m.title}</h2><a href={m.href}>Open missie</a></div><p><strong>In deze missie:</strong> {m.practice}</p><ul>{m.codes.filter(c=>age==='all'||goals[c].ages.includes(age)).map(c=><li key={c}><strong>{c}</strong><div>{goals[c].text}<small>{goals[c].ages.map(a=>a.replace('-','–')+' jaar').join(' · ')}</small></div></li>)}</ul><p className="goal-observe"><strong>Observeren en aanvullen:</strong> {m.observe}</p></section>):<p>Deze missie heeft in het aangeleverde bestand geen doelen voor de gekozen leeftijd.</p>}
+ <footer>{data.source} De doelzinnen zijn overgenomen uit het bestand. De koppeling aan de activiteiten is didactisch uitgewerkt voor deze tool.</footer></main></div>;
+}

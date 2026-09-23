@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><title>Inleverplek — Zisa</title><link rel="stylesheet" href="inleverplek.css"></head>
+<body><main><header><a href="./">Terug naar de missies</a><span>Voor de leerkracht</span></header><h1>Werk van mijn klas</h1>
+<p id="connection" role="status">De inleverplek wordt gecontroleerd…</p>
+<section><h2>Inleverronde openen</h2><p>Kinderen openen jouw klaslink, maken hun werk en leveren het met hun voornaam in. Ze hebben geen e-mailaccount nodig.</p>
+<form id="createRound"><label>Klasnaam<input id="className" maxlength="60" placeholder="Bijvoorbeeld: 1A" required></label><button disabled id="create">Open een inleverronde</button></form>
+<div id="newLink" hidden><p>Deze klaslink werkt 24 uur en laat alleen inleveren toe. Deel ze alleen met je klas. Een nieuwe ronde sluit de vorige.</p><label>Klaslink<input id="classLink" readonly></label><button id="copyLink">Kopieer klaslink</button><p id="linkStatus" role="status"></p></div></section>
+<section><div class="section-heading"><h2>Ingeleverd werk</h2><button id="refresh" disabled>Vernieuwen</button></div><p>Alleen jouw leerkrachtaccount kan deze inzendingen bekijken. Bewaar nodig werk op de afgesproken schoolplek en verwijder daarna de ronde.</p><div id="rounds"></div><div id="works"></div></section>
+<dialog id="preview"><button id="closePreview">Sluiten</button><h2 id="workTitle"></h2><img id="workImage" alt="Ingeleverd werk"><div class="actions"><a id="download">Download PNG</a><button id="print">Afdrukken</button></div></dialog>
+</main><script src="inlever-config.js"></script><script type="module" src="inleverplek.js"></script></body></html>
