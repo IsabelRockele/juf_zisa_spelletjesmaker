@@ -208,3 +208,16 @@ elements.get('world').value='space';elements.get('operation').value='mul';elemen
 assert.equal(run('state.config.world'),'dragon');assert.equal(run('state.config.duration'),90);assert.equal(run('state.config.range'),10);assert.equal(run('state.teams.length'),2);assert.equal(run('state.config.operation'),'add');
 elements.get('world').value='tug';run('start();state.phase="playing";state.elapsed=90;tick(20000)');assert.equal(run('state.phase'),'ending');assert.equal(run('state.tugWinner'),null);assert.equal(run('state.tugOvertime'),undefined);run('finishTug()');assert.equal(elements.get('overlayTitle').textContent,'Gelijkspel!');
 console.log('Ontdek gecontroleerd: spel geblokkeerd vóór Pro-controle, instellingen begrensd bij start en harde eindtijd bij gelijkstand.');
+// Expressions follow each team's own progress, reset, and shared progress in co-op.
+run('AdventureAccess={edition:"pro",ready:true}');
+elements.get('world').value='dragon';elements.get('mode').value='race';elements.get('target').value='15';elements.get('teamCount').value='3';run('refreshWorld();start()');
+for(const [score,expected] of [[0,'strijd'],[4,'strijd'],[5,'verbaasd'],[9,'verbaasd'],[10,'beduusd'],[15,'beduusd']]){
+ run(`state.teams[0].score=${score};updateProgress(state.teams[0])`);
+ assert.equal(run('state.teams[0].actor.querySelector(".personal-dragon > img").src'),`vargos-${expected}.png`);
+ assert.equal(run('state.teams[1].actor.querySelector(".personal-dragon > img").src'),'vargos-strijd.png');
+}
+run('start()');assert.equal(run('state.teams[0].actor.querySelector(".personal-dragon > img").src'),'vargos-strijd.png');
+elements.get('mode').value='coop';run('start();state.teams[0].score=15;updateBoss()');
+assert.equal(elements.get('battle').querySelector('.dragon-portrait > img').src,'vargos-verbaasd.png');
+run('state.teams[1].score=15;updateBoss()');assert.equal(elements.get('battle').querySelector('.dragon-portrait > img').src,'vargos-beduusd.png');
+console.log('Drakenuitdrukkingen getest: grenzen op 1/3 en 2/3, onafhankelijke teams, herstart en samen spelen.');

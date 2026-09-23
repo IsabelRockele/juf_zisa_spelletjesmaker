@@ -179,7 +179,7 @@ function start() {
     const actor = ['dragon','tug'].includes(config.world) ? document.createElement('div') : AdventureWorlds.create(team,config);
     if(config.world==='tug') actor.innerHTML='<span class="knight-name"></span>';
     if(config.world==='dragon') { actor.className = 'knight'; actor.style.setProperty('--team', colors[i]);
-    actor.innerHTML = '<div class="knight-name"></div><div class="duel"><div class="knight-figure"><img src="ridder.png" alt="De ridder van dit team"><div class="cast-word"></div></div><div class="personal-dragon"><img src="vargos.png" alt="De eigen draak van dit team"><div class="personal-shield"></div><span class="dragon-health"></span></div></div><div class="place-label" hidden></div><div class="crystal-count"></div><div class="crystal-treasury" aria-label="Gewonnen kristallen"></div>';
+    actor.innerHTML = '<div class="knight-name"></div><div class="duel"><div class="knight-figure"><img src="ridder.png" alt="De ridder van dit team"><div class="cast-word"></div></div><div class="personal-dragon"><img src="vargos-strijd.png" alt="De eigen draak van dit team"><div class="personal-shield"></div><span class="dragon-health"></span></div></div><div class="place-label" hidden></div><div class="crystal-count"></div><div class="crystal-treasury" aria-label="Gewonnen kristallen"></div>';
     actor.querySelector('.knight-figure img').src = knightImages[i];
     }
     actor.querySelector('.knight-name').textContent = team.name; $('knights').append(actor); team.actor = actor;
@@ -312,9 +312,17 @@ function beginEnding(won) {
   if(state.config.world!=='dragon' && won) $('arenaResult').textContent=state.config.coop?'Missie geslaagd! Samen gedaan!':'Alle missies voltooid! Goed gedaan!';
   if (won) for (let i = 0; i < 18; i++) { const gem = document.createElement('span'); gem.className = state.config.world==='dragon'?'celebration-crystal':'world-confetti'; gem.style.setProperty('--from', `${5 + i * 5}%`); gem.style.setProperty('--delay', `${(i % 5) * .12}s`); gem.style.setProperty('--n',i%12);gem.style.setProperty('--team',colors[i%4]); $('spellEffects').append(gem); }
 }
+function updateDragonExpression(image, progress) {
+  const stage = progress >= 2 / 3 ? 'beduusd' : progress >= 1 / 3 ? 'verbaasd' : 'strijd';
+  if (image.dataset.expression === stage) return;
+  image.dataset.expression = stage;
+  image.src = `vargos-${stage}.png`;
+  image.alt = stage === 'beduusd' ? 'Vargos kijkt beduusd: bijna verslagen!' : stage === 'verbaasd' ? 'Vargos kijkt verbaasd: zijn schild breekt!' : 'Vargos bewaakt zelfverzekerd de lichtkristallen';
+}
 function updateProgress(team) {
   if(state.config.world==='tug') {team.panel.querySelector('.points').textContent=`${team.score} / ${state.config.target} goed`;return;}
   if(state.config.world!=='dragon') {AdventureWorlds.update(team,state);return;}
+  updateDragonExpression(team.actor.querySelector('.personal-dragon > img'), team.score / state.config.target);
   const remaining = Math.max(0, state.config.target - team.score);
   team.lane.querySelector('.fill').style.width = `${state.config.coop ? Math.min(100, team.score / state.config.target * 100) : remaining / state.config.target * 100}%`;
   team.lane.querySelector('.lane-score').textContent = state.config.coop ? `${team.score} raak` : `${remaining} over`;
@@ -339,6 +347,7 @@ function updateBoss() {
   $('bossShield').style.width = `${remaining}%`;
   $('bossShieldBar').setAttribute('aria-valuenow', remaining);
   $('shieldValue').textContent = `${remaining}%`;
+  if (config.coop) updateDragonExpression($('battle').querySelector('.dragon-portrait > img'), damage);
   $('battle').dataset.stage = damage >= 1 ? 'won' : damage >= .66 ? 'weak' : damage >= .33 ? 'cracked' : 'strong';
   [...$('shieldPieces').children].forEach((piece, n) => piece.classList.toggle('broken', n < Math.floor(Math.min(1, damage) * 8)));
   $('bossStage').textContent = damage >= 1 ? 'Het schild is gebroken!' : damage >= .66 ? 'Nog even! Het schild valt bijna uiteen.' : damage >= .33 ? 'Vargos wankelt. Het schild barst!' : 'Vargos: “Mijn kristallen krijgen jullie nooit!”';
