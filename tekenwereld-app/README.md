@@ -64,3 +64,10 @@ De acht tests en een online proef met tijdelijk collega-account, QR-upload,
 privé-opslag, ophalen en verwijderen zijn geslaagd. De browserweergave,
 bibliotheek, testanimatie en QR-dialoog zijn gecontroleerd. Een fysieke
 iPadcamera met een echt ingekleurd blad blijft een praktijktest.
+
+Papierverwijdering gebruikt de papierkleur langs de lege randen om belichting en
+kleurzweem te compenseren. Alleen met de buitenrand verbonden papier wordt
+transparant; witte vlakken binnen gesloten figuren blijven staan. Een grotendeels
+ondoorzichtige buitenrand wordt afgewezen, zodat geen heel blad als figuur wordt
+verstuurd. `node paper.test.cjs` controleert grijze, warme, koele en geschaduwde
+achtergronden, kleurbehoud, gesloten witte vlakken en onbruikbare foto's.

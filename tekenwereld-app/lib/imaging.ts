@@ -1,20 +1,10 @@
+import {removePaperPixels} from './paper';
 import type {Creature,Motion} from './worlds';
 import {wingWarp} from './wings';
 export function loadImage(src:string):Promise<HTMLImageElement>{return new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(new Error('De afbeelding kan niet geopend worden. Gebruik JPG of PNG.'));i.src=src;});}
-// Close small breaks in outlines before finding the surrounding paper.
-// The original pixels and colours are never replaced by the temporary mask.
-function closeOutline(mask:Uint8Array,w:number,h:number,r:number){
- const pass=(a:Uint8Array,horizontal:boolean,dilate:boolean)=>{const b=new Uint8Array(a.length);for(let y=0;y<h;y++)for(let x=0;x<w;x++){let v=dilate?0:1;for(let k=-r;k<=r;k++){const xx=horizontal?x+k:x,yy=horizontal?y:y+k;if(xx<0||xx>=w||yy<0||yy>=h)continue;const bit=a[yy*w+xx];if(dilate?bit:!bit){v=dilate?1:0;break;}}b[y*w+x]=v;}return b;};
- return pass(pass(pass(pass(mask,true,true),false,true),true,false),false,false);
-}
 export function removePaper(input:HTMLCanvasElement,threshold=220){
- const w=input.width,h=input.height,ctx=input.getContext('2d',{willReadFrequently:true})!,d=ctx.getImageData(0,0,w,h),p=d.data;
- const ink=new Uint8Array(w*h);for(let n=0;n<ink.length;n++){const k=n*4,min=Math.min(p[k],p[k+1],p[k+2]),max=Math.max(p[k],p[k+1],p[k+2]);ink[n]=p[k+3]>0&&!(min>=threshold&&max-min<45)?1:0;}
- const barrier=closeOutline(ink,w,h,Math.max(2,Math.min(8,Math.round(Math.min(w,h)*.016))));
- const seen=new Uint8Array(w*h),q=new Int32Array(w*h);let a=0,b=0;
- const add=(n:number)=>{if(n<0||n>=w*h||seen[n])return;seen[n]=1;if(!barrier[n]&&!ink[n]){q[b++]=n;p[n*4+3]=0;}};
- for(let x=0;x<w;x++){add(x);add((h-1)*w+x);}for(let y=0;y<h;y++){add(y*w);add(y*w+w-1);}
- while(a<b){const n=q[a++],x=n%w;if(x>0)add(n-1);if(x<w-1)add(n+1);add(n-w);add(n+w);}ctx.putImageData(d,0,0);return input;
+ const ctx=input.getContext('2d',{willReadFrequently:true})!,d=ctx.getImageData(0,0,input.width,input.height);
+ removePaperPixels(d.data,input.width,input.height,threshold);ctx.putImageData(d,0,0);return input;
 }
 export function trimCanvas(c:HTMLCanvasElement){const w=c.width,h=c.height,d=c.getContext('2d')!.getImageData(0,0,w,h).data;let x0=w,y0=h,x1=0,y1=0;for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(d[(y*w+x)*4+3]>30){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);}if(x0>x1)throw Error('Er blijft geen tekening over. Verlaag het verwijderen van papier.');const out=document.createElement('canvas');out.width=x1-x0+9;out.height=y1-y0+9;out.getContext('2d')!.drawImage(c,x0,y0,x1-x0+1,y1-y0+1,4,4,x1-x0+1,y1-y0+1);return out;}
 export function warp(x:number,y:number,t:number,motion:Motion,p=.55,template=''):[number,number]{if(motion==='bubbles')return[x,y];if(motion==='swim'){const a=Math.max(0,(x-p)/(1-p));return[x,y+Math.sin(t*6+x*3)*a*a*.14];}if(motion==='fly')return wingWarp(x,y,t,template);if(motion==='crawl')return [x+Math.sin(t*5+x*11)*.014,y+Math.sin(t*5+x*12)*.023*(.3+y)];if(motion==='tentacles'){const a=Math.max(0,(y-p)/(1-p));return[x+Math.sin(t*4+x*16)*a*a*.09,y+Math.cos(t*4+x*12)*a*.025];}if(motion==='walk'){const a=Math.max(0,(y-p)/(1-p));return[x+Math.sin(t*7+(x>.5?Math.PI:0))*a*.07,y-Math.max(0,Math.cos(t*7+(x>.5?Math.PI:0)))*a*.035];}const edge=Math.max(0,Math.abs(x-.5)-.18);return[x+Math.sin(t*3+y*4)*edge*.13,y+Math.sin(t*3+x*5)*edge*.2];}
