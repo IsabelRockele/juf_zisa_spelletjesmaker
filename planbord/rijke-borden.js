@@ -97,7 +97,7 @@
       .ochtend-routines { padding:16px; display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(4,1fr); grid-auto-flow:column; gap:10px 14px; align-content:start; }
       .routine-rij { position:relative; display:grid; grid-template-columns:72px 112px 1fr; align-items:center; gap:9px; min-height:125px; padding:7px 34px 7px 0; border:2px solid #e1dcf5; border-radius:17px; background:#faf9ff; text-align:left; overflow:visible; }
       .routine-rij img { width:108px; height:108px; object-fit:contain; }
-      .stapnummer { align-self:stretch; display:grid; place-items:center; padding:7px; border-radius:14px 0 0 14px; color:#fff; background:#806dcc; font-size:15px; line-height:1.05; font-weight:900; text-align:center; text-transform:lowercase; }
+      .stapnummer { align-self:stretch; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px; padding:7px; border-radius:14px 0 0 14px; color:#fff; background:#806dcc; font-size:15px; line-height:1.05; font-weight:900; text-align:center; text-transform:lowercase; }
       .routine-rij:nth-child(1) .stapnummer { background:#7662c4; }
       .routine-rij:nth-child(2) .stapnummer { background:#3e9b8c; }
       .routine-rij:nth-child(3) .stapnummer { background:#dc9630; }
@@ -106,8 +106,8 @@
       .routine-rij:nth-child(6) .stapnummer { background:#789f3f; }
       .routine-rij:nth-child(7) .stapnummer { background:#b46cab; }
       .routine-rij:nth-child(8) .stapnummer { background:#cf6f45; }
-      .routine-rij strong { display:block; color:#453a72; font-size:17px; }
-      .routine-rij span:not(.stapnummer) { display:block; color:#6d6880; font-size:12px; line-height:1.2; }
+      .routine-tekst strong { display:block; color:#453a72; font-size:17px; }
+      .routine-tekst > span { display:block; color:#6d6880; font-size:12px; line-height:1.2; }
       .ochtend-routines.zonder-woorden .routine-tekst { display:none; }
       .woordenknop { position:absolute; z-index:4; left:42px; bottom:34px; border:0; border-radius:10px; padding:9px 12px; color:#fff; background:#6653bd; font-weight:900; cursor:pointer; }
       .stappenkiezer { position:absolute; z-index:90; left:270px; bottom:24px; }
@@ -283,6 +283,23 @@
       .programma-keuzegrid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
       .programma-keuze { min-height:125px; border:2px solid transparent; border-radius:15px; padding:8px; color:#403955; background:#f6f4fc; font-weight:900; cursor:pointer; }
       .programma-keuze:hover { border-color:#6653bd; }.programma-keuze img { display:block; width:78px; height:78px; margin:auto; object-fit:contain; }
+      .stap-label { font-size:17px; }
+      .stap-getal { font-size:48px; line-height:1; }
+      .routine-rij > .routine-volgorde { position:absolute; right:5px; bottom:7px; display:flex; flex-direction:column; gap:5px; }
+      .routine-rij > .routine-volgorde button { width:34px; height:34px; font-size:23px; }
+      .routine-volgorde button:disabled { opacity:.3; cursor:default; }
+      .rijk-ochtend .ochtend-routines { grid-template-rows:repeat(var(--routine-rijen,4),minmax(0,1fr)); }
+      body.in-presentatie .rijk-ochtend { padding:10px 14px; display:flex; flex-direction:column; }
+      body.in-presentatie .rijk-ochtend > .rijk-subtitel { margin:0 0 8px; }
+      body.in-presentatie .rijk-ochtend .ochtend-grid { flex:1; min-height:0; height:auto; grid-template-columns:140px minmax(0,1fr); gap:12px; padding-right:0; }
+      body.in-presentatie .rijk-ochtend.ochtend-met-zijvakken .ochtend-grid { padding-right:290px; }
+      body.in-presentatie .rijk-ochtend .ochtend-routines { padding:8px; gap:8px; }
+      body.in-presentatie .rijk-ochtend .routine-rij { min-height:0!important; min-width:0; padding-right:8px; }
+      body.in-presentatie .rijk-ochtend .datumtegel { padding:8px; }
+      body.in-presentatie .rijk-ochtend .datumtegel strong { font-size:22px; }
+      body.in-presentatie .rijk-ochtend .routine-tekst { min-width:0; overflow-wrap:anywhere; }
+      body.in-presentatie .rijk-ochtend .routine-tekst strong { font-size:21px; }
+      body.in-presentatie .rijk-ochtend .routine-tekst span { font-size:15px; }
       .programma-livebediening { grid-column:1/-1; display:flex; align-items:center; justify-content:center; gap:5px; margin-top:5px; }
       .programma-livebediening button,.programma-livebediening select { border:1px solid #d2cbea; border-radius:8px; padding:5px 7px; color:#514394; background:#fff; font-weight:900; cursor:pointer; }
       .routine-kolommen { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
@@ -331,20 +348,39 @@
     const datum = node(doc, 'section', 'rijk-kaart datumtegel');
     datum.append(node(doc, 'strong', '', DAGEN[nu.getDay()]), node(doc, 'div', 'dagnummer', String(nu.getDate())), node(doc, 'span', '', MAANDEN[nu.getMonth()]));
     const routines = node(doc, 'section', 'rijk-kaart ochtend-routines');
+    routines.style.setProperty('--routine-rijen', Math.max(1, Math.ceil(data.items.length / 2)));
     const routineKeuzes=[['brooddoos-broodbak','Brooddoos'],['drinkbus-vaste-plek','Drinkbus'],['snack-fruit-bak','Koek en fruit'],['agendamap-tafel','Agendamap'],['brieven-afgeven','Brieven'],['huistaak-afgeven','Huistaak'],['boekentas-opbergen','Boekentas'],['stille-dagstarter','Stille dagstarter'],['lezen','Lezen'],['naar-de-kring','Naar de kring'],['bakje-uit-kast','Groene bakje']];
-    const openRoutineKiezer=(item,nieuw=false)=>{let gekozen=item.icoon||'';const laag=node(doc,'div','programma-keuzelaag'),venster=node(doc,'section','programma-kiezer'),kop=node(doc,'div','programma-kiezer-kop'),sluit=node(doc,'button','','×'),gridKeuzes=node(doc,'div','programma-keuzegrid'),formulier=node(doc,'div');const titelVeld=node(doc,'input'),tekstVeld=node(doc,'input'),beeldMaat=node(doc,'input'),stapMaat=node(doc,'input'),beeldLabel=node(doc,'label'),stapLabel=node(doc,'label'),bewaar=node(doc,'button','rijk-toevoegen','Routine bewaren');kop.append(node(doc,'h2','',nieuw?'Nieuwe routine maken':'Routine aanpassen'),sluit);sluit.type='button';sluit.onclick=()=>laag.remove();titelVeld.placeholder='Titel, bijvoorbeeld Lezen';titelVeld.value=nieuw?'':item.titel||'';tekstVeld.placeholder='Extra tekst, bijvoorbeeld Lees stil in je boekje';tekstVeld.value=nieuw?'':item.tekst||'';[titelVeld,tekstVeld].forEach(veld=>veld.style.cssText='width:100%;margin-top:10px;padding:11px 13px;border:2px solid #d9d2ef;border-radius:11px;font:inherit;box-sizing:border-box;');const maakMaat=(input,label,tekst,min,max,waarde)=>{input.type='range';input.min=String(min);input.max=String(max);input.value=String(waarde);input.style.width='100%';const toon=()=>label.firstChild.textContent=`${tekst}: ${input.value}px `;label.append(doc.createTextNode(''),input);label.style.cssText='display:block;margin-top:12px;color:#514298;font-weight:900;';input.oninput=toon;toon();};maakMaat(beeldMaat,beeldLabel,'Afbeeldingsgrootte',60,160,item.icoonGrootte||108);maakMaat(stapMaat,stapLabel,'Grootte stapnummer',11,32,item.stapGrootte||15);const werkSelectieBij=()=>gridKeuzes.querySelectorAll('button').forEach(knop=>knop.style.outline=knop.dataset.icoon===gekozen?'4px solid #6754bd':'');routineKeuzes.forEach(([icon,label])=>{const knop=node(doc,'button','programma-keuze');knop.type='button';knop.dataset.icoon=icon;knop.append(icoon(doc,icon),node(doc,'span','',label));knop.onclick=()=>{gekozen=icon;if(!titelVeld.value.trim())titelVeld.value=label;if(icon==='bakje-uit-kast'&&!tekstVeld.value.trim())tekstVeld.value='Neem je groene bakje uit de kast';werkSelectieBij();};gridKeuzes.appendChild(knop);});werkSelectieBij();bewaar.type='button';bewaar.style.marginTop='12px';bewaar.onclick=()=>{if(!gekozen){doc.defaultView.alert('Kies eerst een afbeelding.');return;}item.icoon=gekozen;item.titel=titelVeld.value.trim()||'Nieuwe routine';item.tekst=tekstVeld.value.trim();item.icoonGrootte=Number(beeldMaat.value);item.stapGrootte=Number(stapMaat.value);if(nieuw)data.items.push(item);wijzig();laag.remove();opnieuw();};formulier.append(titelVeld,tekstVeld,beeldLabel,stapLabel,bewaar);venster.append(kop,gridKeuzes,formulier);laag.appendChild(venster);doc.body.appendChild(laag);titelVeld.focus();};
+    const openRoutineKiezer=(item,nieuw=false)=>{let gekozen=item.icoon||'';const laag=node(doc,'div','programma-keuzelaag'),venster=node(doc,'section','programma-kiezer'),kop=node(doc,'div','programma-kiezer-kop'),sluit=node(doc,'button','','×'),gridKeuzes=node(doc,'div','programma-keuzegrid'),formulier=node(doc,'div');const titelVeld=node(doc,'input'),tekstVeld=node(doc,'input'),beeldMaat=node(doc,'input'),stapMaat=node(doc,'input'),beeldLabel=node(doc,'label'),stapLabel=node(doc,'label'),bewaar=node(doc,'button','rijk-toevoegen','Routine bewaren');kop.append(node(doc,'h2','',nieuw?'Nieuwe routine maken':'Routine aanpassen'),sluit);sluit.type='button';sluit.onclick=()=>laag.remove();titelVeld.placeholder='Titel, bijvoorbeeld Lezen';titelVeld.value=nieuw?'':item.titel||'';tekstVeld.placeholder='Extra tekst, bijvoorbeeld Lees stil in je boekje';tekstVeld.value=nieuw?'':item.tekst||'';[titelVeld,tekstVeld].forEach(veld=>veld.style.cssText='width:100%;margin-top:10px;padding:11px 13px;border:2px solid #d9d2ef;border-radius:11px;font:inherit;box-sizing:border-box;');const maakMaat=(input,label,tekst,min,max,waarde)=>{input.type='range';input.min=String(min);input.max=String(max);input.value=String(waarde);input.style.width='100%';const toon=()=>label.firstChild.textContent=`${tekst}: ${input.value}px `;label.append(doc.createTextNode(''),input);label.style.cssText='display:block;margin-top:12px;color:#514298;font-weight:900;';input.oninput=toon;toon();};maakMaat(beeldMaat,beeldLabel,'Afbeeldingsgrootte',60,160,item.icoonGrootte||108);maakMaat(stapMaat,stapLabel,'Grootte stapnummer',36,80,Math.max(48,item.stapGrootte||48));const werkSelectieBij=()=>gridKeuzes.querySelectorAll('button').forEach(knop=>knop.style.outline=knop.dataset.icoon===gekozen?'4px solid #6754bd':'');routineKeuzes.forEach(([icon,label])=>{const knop=node(doc,'button','programma-keuze');knop.type='button';knop.dataset.icoon=icon;knop.append(icoon(doc,icon),node(doc,'span','',label));knop.onclick=()=>{gekozen=icon;if(!titelVeld.value.trim())titelVeld.value=label;if(icon==='bakje-uit-kast'&&!tekstVeld.value.trim())tekstVeld.value='Neem je groene bakje uit de kast';werkSelectieBij();};gridKeuzes.appendChild(knop);});werkSelectieBij();bewaar.type='button';bewaar.style.marginTop='12px';bewaar.onclick=()=>{if(!gekozen){doc.defaultView.alert('Kies eerst een afbeelding.');return;}item.icoon=gekozen;item.titel=titelVeld.value.trim()||'Nieuwe routine';item.tekst=tekstVeld.value.trim();item.icoonGrootte=Number(beeldMaat.value);item.stapGrootte=Number(stapMaat.value);if(nieuw)data.items.push(item);wijzig();laag.remove();opnieuw();};formulier.append(titelVeld,tekstVeld,beeldLabel,stapLabel,bewaar);venster.append(kop,gridKeuzes,formulier);laag.appendChild(venster);doc.body.appendChild(laag);titelVeld.focus();};
     data.items.forEach((item, index) => {
       const rij = node(doc, 'div', 'routine-rij');
       const tekst = node(doc, 'div', 'routine-tekst');
       tekst.append(bewerkbaar(node(doc, 'strong', '', item.titel), item, 'titel', bewerken, wijzig), bewerkbaar(node(doc, 'span', '', item.tekst), item, 'tekst', bewerken, wijzig));
-      const icoonGrootte=item.icoonGrootte||108,stap=node(doc,'span','stapnummer',`stap ${index+1}`),beeld=node(doc,bewerken?'button':'span','routine-icoonknop'),routineIcoon=icoon(doc,item.icoon);stap.style.fontSize=`${item.stapGrootte||15}px`;rij.style.gridTemplateColumns=`72px ${Math.max(112,icoonGrootte+8)}px 1fr`;rij.style.minHeight=`${Math.max(125,icoonGrootte+17)}px`;beeld.style.width=`${icoonGrootte+8}px`;beeld.style.height=`${icoonGrootte+8}px`;routineIcoon.style.setProperty('width',`${icoonGrootte}px`,'important');routineIcoon.style.setProperty('height',`${icoonGrootte}px`,'important');if(bewerken){beeld.type='button';beeld.title='Afbeelding, tekst en groottes aanpassen';beeld.onclick=()=>openRoutineKiezer(item);}beeld.appendChild(routineIcoon);
-      if(bewerken){stap.title='Klik om het stapnummer groter of kleiner te maken';stap.style.cursor='pointer';stap.onclick=e=>{e.stopPropagation();toonTekstgereedschap(stap,item,'stapGrootte',wijzig);};}
+      const icoonGrootte=item.icoonGrootte||108,stap=node(doc,'span','stapnummer'),beeld=node(doc,bewerken?'button':'span','routine-icoonknop'),routineIcoon=icoon(doc,item.icoon);const getal=node(doc,'strong','stap-getal',String(index+1));getal.style.fontSize=`${Math.max(36,item.stapGrootte||48)}px`;stap.append(node(doc,'span','stap-label','stap'),getal);rij.style.gridTemplateColumns=`72px ${Math.max(112,icoonGrootte+8)}px 1fr`;rij.style.minHeight=`${Math.max(125,icoonGrootte+17)}px`;beeld.style.width=`${icoonGrootte+8}px`;beeld.style.height=`${icoonGrootte+8}px`;routineIcoon.style.setProperty('width',`${icoonGrootte}px`,'important');routineIcoon.style.setProperty('height',`${icoonGrootte}px`,'important');if(bewerken){beeld.type='button';beeld.title='Afbeelding, tekst en groottes aanpassen';beeld.onclick=()=>openRoutineKiezer(item);}beeld.appendChild(routineIcoon);
+      if(bewerken){stap.title='Klik om het stapnummer groter of kleiner te maken';stap.style.cursor='pointer';stap.onclick=e=>{e.stopPropagation();toonTekstgereedschap(getal,item,'stapGrootte',wijzig);};}
       rij.append(stap,beeld,tekst);
+      if (bewerken) {
+        const volgorde=node(doc,'div','routine-volgorde');
+        [[-1,'↑','hoger'],[1,'↓','lager']].forEach(([richting,pijl,label])=>{
+          const knop=node(doc,'button','',pijl);
+          knop.type='button';
+          knop.title=`Stap ${index+1} ${label} zetten`;
+          knop.setAttribute('aria-label',knop.title);
+          knop.disabled=index+richting<0||index+richting>=data.items.length;
+          knop.onclick=()=>{
+            const doel=index+richting;
+            if(doel<0||doel>=data.items.length)return;
+            [data.items[index],data.items[doel]]=[data.items[doel],data.items[index]];
+            wijzig();opnieuw();
+          };
+          volgorde.appendChild(knop);
+        });
+        rij.appendChild(volgorde);
+      }
       const wis = verwijderKnop(doc, () => { data.items.splice(index, 1); wijzig(); opnieuw(); }, bewerken);
       if (wis) rij.appendChild(wis);
       routines.appendChild(rij);
     });
-    if (bewerken) { const plus=node(doc,'button','rijk-toevoegen','+ Routine toevoegen'); plus.onclick=()=>openRoutineKiezer({},true); routines.appendChild(plus); }
+    if (bewerken) { const plus=node(doc,'button','rijk-toevoegen','+ Routine toevoegen'); plus.onclick=()=>openRoutineKiezer({},true); plus.style.gridColumn='1 / -1';plus.style.gridRow='-1';routines.appendChild(plus); }
     grid.append(datum, routines); root.appendChild(grid);
     if(bewerken){const woorden=node(doc,'button','woordenknop',data.toonTekst?'Woorden verbergen':'Woorden tonen');woorden.type='button';woorden.onclick=()=>{data.toonTekst=!data.toonTekst;wijzig();opnieuw();};root.appendChild(woorden);}
     if(bewerken){const kiezer=node(doc,'details','stappenkiezer');const sam=node(doc,'summary','', '+ Kies een stap');const bak=node(doc,'div');const keuzes=[['brooddoos-broodbak','Brooddoos','Leg je brooddoos in de broodbak'],['drinkbus-vaste-plek','Drinkbus','Zet je drinkbus op de vaste plek'],['snack-fruit-bak','Koek en fruit','Leg je koek en fruit in hun bak'],['agendamap-tafel','Agendamap','Leg je agendamap op tafel'],['brieven-afgeven','Brieven','Geef je brieven af'],['huistaak-afgeven','Huistaak','Geef je huistaak af'],['boekentas-opbergen','Boekentas','Berg je boekentas op'],['stille-dagstarter','Stille dagstarter','Begin stil aan de dagstarter'],['lezen','Lezen in boekje','Lees stil in je boekje'],['naar-de-kring','Naar de kring','Ga rustig in de kring zitten'],['bakje-uit-kast','Groene bakje','Neem je groene bakje uit de kast']];keuzes.forEach(([icon,titelTekst,uitleg])=>{const knop=node(doc,'button');knop.type='button';knop.append(icoon(doc,icon),node(doc,'span','',titelTekst));knop.onclick=()=>{data.items.push({icoon:icon,titel:titelTekst,tekst:uitleg});wijzig();opnieuw();};bak.appendChild(knop);});kiezer.append(sam,bak);root.appendChild(kiezer);}
@@ -619,6 +655,7 @@
     const root=node(doc,'div',`rijk-bord rijk-${bord.rijk.type}`);canvas.appendChild(root);
     const opnieuw=()=>window.renderRijkBord(win,bord,bewerken,wijzig);
     const d=bord.rijk;
+    if(d.type==='ochtend')root.classList.toggle('ochtend-met-zijvakken',Boolean(bord.data?.elementen?.length||d.vrijeElementen?.length));
     if(d.type==='ochtend')renderOchtend(doc,root,d,bewerken,wijzig,opnieuw);
     else if(d.type==='start')renderStart(doc,root,d,bewerken,wijzig,opnieuw);
     else if(d.type==='dagen')renderDagen(doc,root,d,wijzig,opnieuw);
@@ -628,5 +665,6 @@
     else if(d.type==='routines')renderRoutines(doc,root,d,bewerken,wijzig,opnieuw);
     if(bewerken){const maakLeeg=node(doc,'button','rijk-maak-leeg','Maak dit bord leeg');maakLeeg.type='button';maakLeeg.title='Verwijder alle voorbeeldinhoud van dit bord';maakLeeg.onclick=()=>{if(!win.confirm('Alle voorbeeldinhoud en losse onderdelen van dit bord verwijderen?'))return;if(d.type==='ochtend'||d.type==='start'||d.type==='programma')d.items=[];else if(d.type==='routines')d.blokken=[];else if(d.type==='dagen')d.plaatsing={};else if(d.type==='weer'){d.elementen=[];d.toonThermometer=false;}else if(d.type==='kalender'){const prefix=`${d.jaar}-${String(d.maand+1).padStart(2,'0')}-`;Object.keys(d.events||{}).filter(k=>k.startsWith(prefix)).forEach(k=>delete d.events[k]);Object.keys(d.halveDagen||{}).filter(k=>k.startsWith(prefix)).forEach(k=>delete d.halveDagen[k]);}d.vrijeElementen=[];wijzig();opnieuw();};root.appendChild(maakLeeg);}
     renderVrijeLaag(doc,root,bord,bewerken,wijzig,opnieuw);
+    if(typeof win.schaalBord==='function')win.schaalBord();
   };
 })();

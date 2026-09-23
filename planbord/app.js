@@ -167,7 +167,10 @@ function schaalBord() {
   if (beschBreedte === 0 || beschHoogte === 0) return;
 
   const origBreedte = 1600;
-  const origHoogte = 900;
+  // Het welkomstbord vult in klasmodus ook schermen buiten de vaste 16:9-verhouding.
+  const welkom = document.body.classList.contains('in-presentatie') && bord.querySelector('.rijk-ochtend');
+  const origHoogte = welkom ? beschHoogte * origBreedte / beschBreedte : 900;
+  bord.style.height = `${origHoogte}px`;
 
   // Evenredig schalen met behoud van aspect-ratio
   const schaal = Math.min(beschBreedte / origBreedte, beschHoogte / origHoogte);
