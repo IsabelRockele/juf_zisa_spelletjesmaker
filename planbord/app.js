@@ -162,20 +162,26 @@ function schaalBord() {
   const zone = bord.parentElement;
   if (!zone) return;
 
-  const beschBreedte = zone.clientWidth;
-  const beschHoogte = zone.clientHeight;
+  const zoneStijl = getComputedStyle(zone);
+  const beschBreedte = zone.clientWidth - parseFloat(zoneStijl.paddingLeft) - parseFloat(zoneStijl.paddingRight);
+  const beschHoogte = zone.clientHeight - parseFloat(zoneStijl.paddingTop) - parseFloat(zoneStijl.paddingBottom);
   if (beschBreedte === 0 || beschHoogte === 0) return;
 
   const origBreedte = 1600;
   // Het welkomstbord vult in klasmodus ook schermen buiten de vaste 16:9-verhouding.
-  const welkom = document.body.classList.contains('in-presentatie') && bord.querySelector('.rijk-ochtend');
-  const origHoogte = welkom ? beschHoogte * origBreedte / beschBreedte : 900;
+  const welkom = bord.querySelector('.rijk-ochtend');
+  const inPresentatie = document.body.classList.contains('in-presentatie');
+  // In de editor dezelfde bordverhouding als de klasmodus van het hoofdvenster.
+  const scherm = window.parent;
+  const verhouding = inPresentatie ? beschHoogte / beschBreedte : scherm.innerHeight / scherm.innerWidth;
+  const origHoogte = welkom ? verhouding * origBreedte : 900;
   bord.style.height = `${origHoogte}px`;
 
   // Evenredig schalen met behoud van aspect-ratio
   const schaal = Math.min(beschBreedte / origBreedte, beschHoogte / origHoogte);
   bord.style.transform = `scale(${schaal})`;
   bord.style.transformOrigin = 'center center';
+  if(typeof window.begrensPlanbordTimers==='function')window.begrensPlanbordTimers();
 }
 
 // Schaal opnieuw bij venster-resize

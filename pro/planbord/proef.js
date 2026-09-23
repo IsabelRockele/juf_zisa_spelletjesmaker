@@ -262,6 +262,8 @@
       body.proef-editor .canvas-zone { padding: 12px; }
       body.proef-editor:not(.in-presentatie) .canvas-zone { overflow:auto !important; align-items:flex-start !important; justify-content:flex-start !important; scrollbar-gutter:stable both-edges; }
       body.proef-editor:not(.in-presentatie) #bord { transform-origin:top left !important; }
+      body.proef-editor:not(.in-presentatie) #bord { outline:4px dashed #7862bf; outline-offset:3px; }
+      body.proef-editor:not(.in-presentatie) #bord::after { content:'Bordgrens — plaats alles binnen dit kader'; position:absolute; bottom:6px; left:12px; z-index:100; padding:4px 9px; border-radius:7px; background:#eee8ff; color:#514394; font-size:14px; font-weight:800; pointer-events:none; }
       body.proef-editor #bord { box-shadow: 0 8px 30px rgba(38,30,76,.15); }
       body.proef-editor #bord, body.proef-editor #bord-canvas { overflow: visible !important; }
       body.proef-editor .bord-header { position:relative; z-index:1; }
@@ -280,15 +282,15 @@
       body.proef-editor .vak[data-vaktype="werkstijl"] .werkstijl-knop { font-size:clamp(11px,4cqw,22px); }
       body.proef-editor .vak[data-vaktype="vrij"] .vak-inhoud { font-size:clamp(16px,6cqw,42px); }
       body.proef-editor .vak[data-vaktype="checklist"] .item-tekst { font-size:clamp(14px,4.5cqw,30px); }
-      body.proef-editor .vak[data-vaktype="timer"] { min-width:310px; min-height:330px; overflow:visible; container-type:size; padding:12px 15px 18px; }
-      body.proef-editor .vak[data-vaktype="timer"] .timer-inhoud { overflow:visible; gap:6px; }
+      body.proef-editor .vak[data-vaktype="timer"] { min-width:310px; min-height:330px; overflow:visible; container-type:size; padding:12px 15px 66px; }
+      body.proef-editor .vak[data-vaktype="timer"] .timer-inhoud { position:static; overflow:visible; gap:6px; }
       body.proef-editor .vak[data-vaktype="timer"] .timer-visueel { flex:1 1 auto; width:100%; height:calc(100% - 58px); max-height:none; min-height:180px; overflow:hidden; }
       body.proef-editor .vak[data-vaktype="timer"] .timer-svg { width:100%; height:100%; max-height:none; }
       body.proef-editor .vak[data-vaktype="timer"] .timer-cijfers { font-size:clamp(28px,14cqw,74px); }
-      body.proef-editor .vak[data-vaktype="timer"] .timer-knoppen { position:absolute; z-index:8; left:auto; right:4px; bottom:-48px; transform:none; gap:8px; padding:6px 9px; border:1px solid #d8d2ef; border-radius:11px; background:#fff; box-shadow:0 5px 14px rgba(42,32,88,.2); }
+      body.proef-editor .vak[data-vaktype="timer"] .timer-knoppen { position:absolute; z-index:8; left:auto; right:4px; bottom:6px; transform:none; gap:8px; padding:6px 9px; border:1px solid #d8d2ef; border-radius:11px; background:#fff; box-shadow:0 5px 14px rgba(42,32,88,.2); }
       body.proef-editor .vak[data-vaktype="timer"] .timer-knop { width:36px; height:34px; opacity:1; }
       body.proef-editor.in-presentatie .vak[data-vaktype="timer"] .timer-knoppen { display:flex!important; }
-      body.proef-editor .timer-sleepbalk { position:absolute; z-index:9; left:4px; bottom:-48px; height:47px; display:flex; align-items:center; padding:0 14px; border:1px solid #d8d2ef; border-radius:11px; color:#fff; background:#6754bd; box-shadow:0 5px 14px rgba(42,32,88,.2); font-size:13px; font-weight:900; cursor:grab; touch-action:none; white-space:nowrap; }
+      body.proef-editor .timer-sleepbalk { position:absolute; z-index:9; left:4px; bottom:6px; height:47px; display:flex; align-items:center; padding:0 14px; border:1px solid #d8d2ef; border-radius:11px; color:#fff; background:#6754bd; box-shadow:0 5px 14px rgba(42,32,88,.2); font-size:13px; font-weight:900; cursor:grab; touch-action:none; white-space:nowrap; }
       body.proef-editor .timer-sleepbalk:active { cursor:grabbing; }
       body.proef-editor .vak-actie.proef-verwijder-kruis { color:#fff !important; background:#d83f58 !important; font-size:20px !important; font-weight:1000 !important; line-height:1 !important; }
       body.proef-editor .vak-actie.proef-verwijder-kruis:hover { background:#b92540 !important; transform:scale(1.08); }
@@ -350,7 +352,7 @@
       if(event.target.closest('[contenteditable="true"],button,input,select,.greep,.rotatie-greep,.vak-acties,.timer-klok,.timer-sleepbalk'))return;
       event.preventDefault();event.stopImmediatePropagation();win.selecteerVak?.(element);element.setPointerCapture?.(event.pointerId);
       const canvas=doc.getElementById('bord-canvas'),schaal=doc.getElementById('bord').getBoundingClientRect().width/doc.getElementById('bord').offsetWidth,sx=event.clientX,sy=event.clientY,bx=parseFloat(element.style.left)||0,by=parseFloat(element.style.top)||0;
-      const bewegen=e=>{const minY=-canvas.offsetTop,minX=-20,x=Math.max(minX,Math.min(canvas.offsetWidth-element.offsetWidth,bx+(e.clientX-sx)/schaal)),y=Math.max(minY,Math.min(canvas.offsetHeight-element.offsetHeight,by+(e.clientY-sy)/schaal));element.style.left=`${x}px`;element.style.top=`${y}px`;};
+      const bewegen=e=>{const minY=-canvas.offsetTop,minX=-20,x=Math.max(minX,Math.min(canvas.offsetWidth-element.offsetWidth,bx+(e.clientX-sx)/schaal)),y=Math.max(minY,Math.min(canvas.offsetHeight-element.offsetHeight,by+(e.clientY-sy)/schaal));element.style.left=`${x}px`;element.style.top=`${y}px`;win.begrensPlanbordTimers?.();};
       const stop=()=>{element.removeEventListener('pointermove',bewegen);element.removeEventListener('pointerup',stop);element.removeEventListener('pointercancel',stop);laatsteSnapshot='';bewaarHuidigBord();};element.addEventListener('pointermove',bewegen);element.addEventListener('pointerup',stop);element.addEventListener('pointercancel',stop);
     },true);
   }
@@ -361,11 +363,24 @@
     if(timerKnop)timerKnop.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();doc.querySelector('.tekstgereedschap')?.remove();const vak=win.voegVakToe('timer');setTimeout(()=>vak.querySelector('.timer-instellen')?.click(),30);},true);
     const voorbeeldStijl=doc.createElement('style');voorbeeldStijl.textContent='#timer-modal .modal-inhoud{width:min(760px,94vw);max-width:760px}.timer-stijl-grid{grid-template-columns:repeat(5,1fr)!important}.timer-stijl-knop{min-height:145px!important;padding:8px!important}.timer-echt-voorbeeld{display:grid;place-items:center;width:94px;height:94px;padding:4px;border-radius:12px;background:#f8f7fc}.timer-echt-voorbeeld .timer-svg{width:84px;height:84px}.timer-echt-voorbeeld .balk-buiten{width:82px}.timer-echt-cijfers{color:#534ab7;font-size:23px;font-weight:900;font-variant-numeric:tabular-nums}';doc.head.appendChild(voorbeeldStijl);
     const voegSchaalToe=svg=>{if(!svg||svg.querySelector('.timer-minutenschaal'))return;const ns='http://www.w3.org/2000/svg',groep=doc.createElementNS(ns,'g');groep.setAttribute('class','timer-minutenschaal');for(let m=0;m<60;m+=5){const hoek=m/60*Math.PI*2-Math.PI/2,x1=50+39*Math.cos(hoek),y1=50+39*Math.sin(hoek),x2=50+43*Math.cos(hoek),y2=50+43*Math.sin(hoek),lijn=doc.createElementNS(ns,'line');lijn.setAttribute('x1',x1);lijn.setAttribute('y1',y1);lijn.setAttribute('x2',x2);lijn.setAttribute('y2',y2);lijn.setAttribute('stroke','#423b54');lijn.setAttribute('stroke-width','1');groep.appendChild(lijn);const tekst=doc.createElementNS(ns,'text'),r=34;tekst.setAttribute('x',50+r*Math.cos(hoek));tekst.setAttribute('y',50+r*Math.sin(hoek)+1.8);tekst.setAttribute('text-anchor','middle');tekst.setAttribute('font-size','5');tekst.setAttribute('font-weight','700');tekst.setAttribute('fill','#423b54');tekst.textContent=String(m);groep.appendChild(tekst);}svg.appendChild(groep);};
-    const zorgTimerSleepbalk=vak=>{if(vak.querySelector('.timer-sleepbalk'))return;const balk=doc.createElement('div');balk.className='timer-sleepbalk';balk.textContent='⠿ verplaatsen';balk.addEventListener('pointerdown',event=>{event.preventDefault();event.stopPropagation();const canvas=doc.getElementById('bord-canvas'),schaal=canvas.getBoundingClientRect().width/canvas.offsetWidth,sx=event.clientX,sy=event.clientY,bx=parseFloat(vak.style.left)||0,by=parseFloat(vak.style.top)||0;const bewegen=e=>{const x=Math.max(-20,Math.min(canvas.offsetWidth-vak.offsetWidth,bx+(e.clientX-sx)/schaal)),y=Math.max(-canvas.offsetTop,Math.min(canvas.offsetHeight-vak.offsetHeight,by+(e.clientY-sy)/schaal));vak.style.left=`${x}px`;vak.style.top=`${y}px`;};const stop=()=>{doc.removeEventListener('pointermove',bewegen);doc.removeEventListener('pointerup',stop);laatsteSnapshot='';bewaarHuidigBord();};doc.addEventListener('pointermove',bewegen);doc.addEventListener('pointerup',stop);});vak.appendChild(balk);};
+    win.begrensPlanbordTimers=()=>{
+      const canvas=doc.getElementById('bord-canvas');if(!canvas)return;
+      // Laat onderaan ruimte voor de navigatie en houd alle timerbediening binnen het vak.
+      const marge=70;
+      doc.querySelectorAll('.vak[data-vaktype="timer"]').forEach(vak=>{
+        const maxHoogte=Math.max(330,canvas.clientHeight-marge);
+        if(vak.offsetHeight>maxHoogte)vak.style.height=`${maxHoogte}px`;
+        const x=Math.max(0,Math.min(parseFloat(vak.style.left)||0,canvas.clientWidth-vak.offsetWidth));
+        const y=Math.max(0,Math.min(parseFloat(vak.style.top)||0,canvas.clientHeight-vak.offsetHeight-marge));
+        if(parseFloat(vak.style.left)!==x)vak.style.left=`${x}px`;
+        if(parseFloat(vak.style.top)!==y)vak.style.top=`${y}px`;
+      });
+    };
+    const zorgTimerSleepbalk=vak=>{if(vak.querySelector('.timer-sleepbalk'))return;const balk=doc.createElement('div');balk.className='timer-sleepbalk';balk.textContent='⠿ verplaatsen';balk.addEventListener('pointerdown',event=>{event.preventDefault();event.stopPropagation();const canvas=doc.getElementById('bord-canvas'),schaal=canvas.getBoundingClientRect().width/canvas.offsetWidth,sx=event.clientX,sy=event.clientY,bx=parseFloat(vak.style.left)||0,by=parseFloat(vak.style.top)||0;const bewegen=e=>{const x=Math.max(-20,Math.min(canvas.offsetWidth-vak.offsetWidth,bx+(e.clientX-sx)/schaal)),y=Math.max(-canvas.offsetTop,Math.min(canvas.offsetHeight-vak.offsetHeight,by+(e.clientY-sy)/schaal));vak.style.left=`${x}px`;vak.style.top=`${y}px`;win.begrensPlanbordTimers();};const stop=()=>{doc.removeEventListener('pointermove',bewegen);doc.removeEventListener('pointerup',stop);laatsteSnapshot='';bewaarHuidigBord();};doc.addEventListener('pointermove',bewegen);doc.addEventListener('pointerup',stop);});vak.appendChild(balk);};
     const maakVoorbeelden=()=>{const minuten=Math.max(1,Number(doc.getElementById('timer-minuten')?.value)||5),seconden=Math.max(0,Number(doc.getElementById('timer-seconden')?.value)||0);doc.querySelectorAll('.timer-stijl-knop').forEach(knop=>{const stijl=knop.dataset.stijl;let houder=knop.querySelector('.timer-echt-voorbeeld');if(!houder){knop.querySelector('.stijl-icoon')?.remove();houder=doc.createElement('span');houder.className='timer-echt-voorbeeld';knop.prepend(houder);}if(stijl==='cijfers'){houder.innerHTML=`<span class="timer-echt-cijfers">${String(minuten).padStart(2,'0')}:${String(seconden).padStart(2,'0')}</span>`;}else{houder.innerHTML=win._maakTimerVisueelHTML(stijl);const fractie=stijl==='klok'?Math.min(1,(minuten*60+seconden)/3600):.68;if(stijl==='klok'){const klok=houder.querySelector('.timer-klok');win._updateKlok(klok,fractie);voegSchaalToe(klok);}if(stijl==='taart')win._updateTaart(houder.querySelector('.timer-taart'),fractie);if(stijl==='zandloper')win._updateZandloper(houder.querySelector('.timer-zandloper'),fractie);if(stijl==='balk')win._updateBalk(houder.querySelector('.balk-buiten'),fractie);}});};
     doc.getElementById('timer-minuten')?.addEventListener('input',maakVoorbeelden);doc.getElementById('timer-seconden')?.addEventListener('input',maakVoorbeelden);maakVoorbeelden();
     const uitleg=doc.createElement('p');uitleg.textContent='Tip: bij de visuele klok kun je daarna met je vinger over de wijzerplaat draaien om de tijd aan te passen.';uitleg.style.cssText='margin:8px 0;color:#625b78;font-size:12px;line-height:1.35;';doc.querySelector('#timer-modal .modal-inhoud')?.appendChild(uitleg);
-    setInterval(()=>{doc.querySelectorAll('.vak[data-vaktype="timer"]').forEach(vak=>zorgTimerSleepbalk(vak));doc.querySelectorAll('.vak[data-vaktype="timer"] .timer-klok').forEach(voegSchaalToe);},250);
+    setInterval(()=>{win.begrensPlanbordTimers();doc.querySelectorAll('.vak[data-vaktype="timer"]').forEach(vak=>zorgTimerSleepbalk(vak));doc.querySelectorAll('.vak[data-vaktype="timer"] .timer-klok').forEach(voegSchaalToe);},250);
     doc.addEventListener('pointerdown',event=>{
       const klok=event.target.closest?.('.timer-klok');if(!klok)return;const vak=klok.closest('.vak[data-vaktype="timer"]');if(!vak)return;
       event.preventDefault();event.stopPropagation();const rect=klok.getBoundingClientRect();let minuten=Number(vak.dataset.minuten)||5;
