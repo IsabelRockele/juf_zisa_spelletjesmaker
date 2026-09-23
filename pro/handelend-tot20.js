@@ -1,12 +1,12 @@
 (() => {
   const el=id=>document.getElementById(id);
-  let a=9,b=5,min=false,gedaan=0;
+  let a=9,b=5,min=false,gedaan=0,wegPosities=[];
   let hulp=0, gereedschap='',pad=null, penkleur='#006bb6';
   const zelf=()=>false;
   const deel=()=>min?a-10:10-a;
   const aantal=()=>a+(min?-gedaan:gedaan);
-  function verplaats(){if(gedaan<b){gedaan++;render();}}
-  function stip(kleur,label,actie){const knop=document.createElement('button');knop.type='button';knop.className='stip '+kleur;knop.setAttribute('aria-label',label);if(actie)knop.addEventListener('click',verplaats);else knop.disabled=true;return knop;}
+  function verplaats(plek){if(gedaan>=b)return;if(min){if(!Number.isInteger(plek)){plek=a-1;while(wegPosities.includes(plek))plek--;}if(plek<0||plek>=a||wegPosities.includes(plek))return;wegPosities.push(plek);}gedaan++;render();}
+  function stip(kleur,label,actie,plek){const knop=document.createElement('button');knop.type='button';knop.className='stip '+kleur;knop.setAttribute('aria-label',label);if(Number.isInteger(plek))knop.dataset.plek=plek;if(actie)knop.addEventListener('click',()=>verplaats(plek));else knop.disabled=true;return knop;}
   function render(){
     el('a').textContent=a;el('b').textContent=b;el('op').textContent=min?'−':'+';el('teken').textContent=min?'−':'+';
     el('antwoord').textContent=zelf()&&hulp>=3?a+(min?-b:b):'___';
@@ -16,11 +16,11 @@
       const raam=document.createElement('div');raam.className='tienraam';raam.setAttribute('aria-label','Tienraam '+(r+1));
       for(let j=0;j<10;j++){
         const i=r*10+j,cel=document.createElement('div');cel.className='cel';
-        if(i<aantal())cel.append(stip(min?'zwart':i<a?'':'rood',min&&i===aantal()-1?'Neem deze stip weg':'Gelegde stip',min&&gedaan<b&&i===aantal()-1));
+        if(min?i<a&&!wegPosities.includes(i):i<aantal())cel.append(stip(min?'zwart':i<a?'':'rood',min?'Neem deze stip weg':'Gelegde stip',min&&gedaan<b,i));
         raam.append(cel);
       }el('ramen').append(raam);
     }
-    el('voorraad-titel').textContent=min?'Weggenomen':'Nog erbij';el('losse').replaceChildren();
+    el('voorraad-titel').textContent=min?'Al weggenomen: '+gedaan:'Nog erbij';el('losse').replaceChildren();
     for(let i=0;i<(min?gedaan:b-gedaan);i++){
       if(min){const weg=document.createElement('span');weg.className='weg';weg.setAttribute('aria-label','Weggenomen stip');el('losse').append(weg);}
       else el('losse').append(stip('rood','Leg een stip erbij',true));
@@ -32,13 +32,13 @@
     el('hulp').textContent=hulp===0?'Geef een hint':hulp===1?'Help bij de eerste schrijf-stap':hulp===2?'Help bij de tweede schrijf-stap':'Alle schrijfhulp getoond';el('hulp').disabled=hulp>=3;
     el('stap').disabled=gedaan===b;el('terug').disabled=gedaan===0;
   }
-  function start(x,y){a=x;b=y;gedaan=0;hulp=0;el('hint').textContent='';el('inkt').replaceChildren();el('eerste').value=a;el('tweede').value=b;el('fout').textContent='';render();}
+  function start(x,y){a=x;b=y;gedaan=0;wegPosities=[];hulp=0;el('hint').textContent='';el('inkt').replaceChildren();el('eerste').value=a;el('tweede').value=b;el('fout').textContent='';render();}
   el('eigen').addEventListener('submit',e=>{e.preventDefault();const x=Number(el('eerste').value),y=Number(el('tweede').value);const geldig=Number.isInteger(x)&&Number.isInteger(y)&&y>=1&&y<=9&&(min?x>=11&&x<=18&&x-y>0&&x-y<10:x>=1&&x<=9&&x+y>10);if(!geldig){el('fout').textContent=min?'Kies een aftrekking zoals 13 − 5: vertrek tussen 11 en 18 en ga over 10 heen.':'Kies twee getallen van 1 tot 9 die samen meer dan 10 zijn, zoals 8 + 5.';return;}start(x,y);});
   el('bewerking').addEventListener('change',()=>{min=el('bewerking').value==='min';start(min?13:9,min?5:5);});
   el('nieuw').addEventListener('click',()=>{const pairs=[];for(let x=min?11:2;x<=(min?18:9);x++)for(let y=1;y<=9;y++)if((min?x-y>0&&x-y<10:x+y>10)&&(x!==a||y!==b))pairs.push([x,y]);start(...pairs[Math.floor(Math.random()*pairs.length)]);});
   el('opnieuw').addEventListener('click',()=>start(a,b));
-  el('stap').addEventListener('click',()=>{gedaan=gedaan<deel()?deel():b;render();});
-  el('terug').addEventListener('click',()=>{gedaan=Math.max(0,gedaan-1);hulp=Math.min(hulp,gedaan<deel()?1:2);el('hint').textContent='';render();});
+  el('stap').addEventListener('click',()=>{const doel=gedaan<deel()?deel():b;while(gedaan<doel)verplaats();});
+  el('terug').addEventListener('click',()=>{if(min)wegPosities.pop();gedaan=Math.max(0,gedaan-1);hulp=Math.min(hulp,gedaan<deel()?1:2);el('hint').textContent='';render();});
   function kiesGebruik(alleen){
     kiesPen('');
     el('keuzescherm').hidden=true;el('keuze-terug').hidden=false;document.body.dataset.scherm=alleen?'alleen':'samen';el('schermtitel').textContent=alleen?'Alleen':'Samen met juf';
@@ -73,7 +73,7 @@
   let sleep=null;
   document.addEventListener('pointerdown',e=>{const target=e.target.closest('#bord-les .stip:not(:disabled)');if(!target)return;sleep={x:e.clientX,y:e.clientY,id:e.pointerId,target,ghost:null};target.setPointerCapture(e.pointerId);});
   document.addEventListener('pointermove',e=>{if(!sleep||e.pointerId!==sleep.id)return;if(!sleep.ghost&&Math.hypot(e.clientX-sleep.x,e.clientY-sleep.y)>8){sleep.ghost=sleep.target.cloneNode();sleep.ghost.classList.add('sleepstip');document.body.append(sleep.ghost);}if(sleep.ghost){sleep.ghost.style.left=(e.clientX-19)+'px';sleep.ghost.style.top=(e.clientY-19)+'px';}});
-  document.addEventListener('pointerup',e=>{if(!sleep)return;const old=sleep;sleep=null;if(!old.ghost)return;old.ghost.remove();const zone=el(min?'losse':'ramen').getBoundingClientRect();const goed=e.clientX>=zone.left&&e.clientX<=zone.right&&e.clientY>=zone.top&&e.clientY<=zone.bottom;old.target.addEventListener('click',e=>e.stopImmediatePropagation(),{capture:true,once:true});if(goed)verplaats();});
+  document.addEventListener('pointerup',e=>{if(!sleep)return;const old=sleep;sleep=null;if(!old.ghost)return;old.ghost.remove();const zone=el(min?'losse':'ramen').getBoundingClientRect();const goed=e.clientX>=zone.left&&e.clientX<=zone.right&&e.clientY>=zone.top&&e.clientY<=zone.bottom;old.target.addEventListener('click',e=>e.stopImmediatePropagation(),{capture:true,once:true});if(goed)verplaats(old.target.dataset.plek===undefined?undefined:Number(old.target.dataset.plek));});
   document.addEventListener('pointercancel',()=>{sleep?.ghost?.remove();sleep=null;});
   render();
   if(new URLSearchParams(location.search).get('kid')==='1'){

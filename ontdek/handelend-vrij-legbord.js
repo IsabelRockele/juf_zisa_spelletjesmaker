@@ -31,7 +31,7 @@
     el('vrij-terug').disabled=!geschiedenis.length;
     el('vrij-weg-bollen').replaceChildren();
     wegBollen.forEach(kleur=>{const bol=document.createElement('span');bol.className='stip'+(kleur==='rood'?' rood':'');bol.setAttribute('aria-hidden','true');el('vrij-weg-bollen').append(bol);});
-    el('vrij-weg-aantal').textContent=wegBollen.length?`${wegBollen.length} weggelegd`:'';
+    el('vrij-weg-aantal').textContent=`Al weggenomen: ${wegBollen.length}`;
     const weggenomen=wegBollen.length;
     const blauw=vakken.filter(k=>k==='blauw').length,rood=vakken.filter(k=>k==='rood').length;
     el('vrij-weg-som').textContent=wegBollen.length?`${blauw+rood+wegBollen.length} − ${wegBollen.length} = …`:'';
