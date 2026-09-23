@@ -20,7 +20,7 @@
   root.onProReady=ready;
   root.onAdventureColleagueReady=ready;
   const script=document.createElement('script');script.type='module';
-  script.src=new URL(edition==='pro'?'../pro/guard.js':'colleague-access.js',base).href;
+  script.src=new URL(edition==='pro'?'../pro/guard.js':'colleague-access.js?v=15',base).href;
   script.onerror=()=>{if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',failed,{once:true});else failed();};
   document.head.appendChild(script);
 })(globalThis);
