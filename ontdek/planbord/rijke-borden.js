@@ -342,7 +342,6 @@
     // Ingevulde routinetekst hoort ook op het grote bord zichtbaar te blijven.
     // Oudere proefborden konden deze tekst onbedoeld enkel in de werkmodus tonen.
     data.toonTekst = true;
-    titel(doc, root, 'Welkom in onze klas!', 'Goedemorgen — fijn dat je er bent');
     const nu = new Date();
     const grid = node(doc, 'div', 'ochtend-grid');
     const datum = node(doc, 'section', 'rijk-kaart datumtegel');
