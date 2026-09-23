@@ -290,7 +290,7 @@ window.SpellingModules.ov01 = {
 
       const aantalLijnen = this._lijnenPerNiveau[niveau] || 1;
 
-      const stappenHTML = this._renderStappen(niveau);
+      const stappenHTML = this._renderStappen(niveau, woorden);
       const plaatjesHTML = this._renderPlaatjesRooster(woorden, niveau, aantalLijnen, lijnhoogte, lijntype, metAntwoorden);
       let verdiepingHTML = "";
       if (niveau === "verdieping") {
@@ -343,7 +343,7 @@ window.SpellingModules.ov01 = {
   },
 
   /* ----- 3 stappen per niveau, met aanvinkrechthoekjes ----- */
-  _renderStappen: function(niveau) {
+  _renderStappen: function(niveau, woorden = []) {
     let stappen, opdrachtLabel;
     if (niveau === "basis") {
       opdrachtLabel = "Opdracht:";
@@ -375,6 +375,12 @@ window.SpellingModules.ov01 = {
       ];
     }
     
+    if (woorden.some(w => w.lidwoord)) {
+      const schrijfOpdracht = woorden.every(w => w.lidwoord)
+        ? "Schrijf het woord met de of het op."
+        : "Schrijf het woord op, met de of het waar dat hoort.";
+      stappen = stappen.map(stap => stap === "Schrijf het woord op." ? schrijfOpdracht : stap);
+    }
     return `
       <div class="ov01-stappen">
         <div class="ov01-stappen-label" data-bewerk-id="opdracht1-label">${opdrachtLabel}</div>

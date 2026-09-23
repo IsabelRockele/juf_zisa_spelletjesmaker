@@ -44,7 +44,9 @@ window.SpellingWoordenbibliotheek = {
     // hoorwoord
     "korte-klanken",
     "lange-klanken",
+    "mk-km",
     "tweeklanken",
+    "zinnen-klankzuiver",
     "ei-ij",       // tweeklanken-onderdeel maar onthoudwoord
     "au-ou",
     "aai-ooi-oei-eeuw-ieuw-uw",  // graad 2 — uitgebreide tweeklanken
@@ -153,7 +155,9 @@ window.SpellingWoordenbibliotheek = {
 
   groepLabels: {
     "korte-klanken": "Korte klanken (MK/KM/MKM)",
-    "tweeklanken": "Tweeklanken",
+    "mk-km": "MK / KM-woorden",
+    "tweeklanken": "Tweetekenklanken",
+    "zinnen-klankzuiver": "Zinnen met klankzuivere woorden",
     "ng-nk": "ng / nk woorden",
     "verdubbel-verenkel": "Verdubbelaars / Verenkelaars",
     "lange-klanken": "Lange klanken (aa, ee, oo, uu)",

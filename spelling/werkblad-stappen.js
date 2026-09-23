@@ -20,6 +20,7 @@
   function slaatWoordenStapOver() {
     const zinDoelen = new Set([
       "leestekens-eind-g1", "leestekens-binnen-g1",
+      "zinnen-prent-g1", "zinnen-volgorde-g1",
       "hoofdletters-g2", "leestekens-eind-g2", "leestekens-binnen-g2",
       "werkwoordstijden-mix-g2"
     ]);
@@ -38,7 +39,13 @@
   }
 
   function werkbladAantal() {
-    return document.querySelectorAll("#preview .werkblad").length;
+    // Opmaak toont soms al een los voorbeeld vóór het toevoegen. Alleen
+    // opgeslagen bundelbladen tellen mee voor de overgang naar Resultaat.
+    return (window.SpellingBundel?.items || []).reduce((aantal, item) => {
+      const inhoud = document.createElement("div");
+      inhoud.innerHTML = item.html || "";
+      return aantal + inhoud.querySelectorAll(".werkblad").length;
+    }, 0);
   }
 
   function updateGekozenDoelenKader() {

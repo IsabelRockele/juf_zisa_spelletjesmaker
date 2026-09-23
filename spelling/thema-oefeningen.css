@@ -1,0 +1,64 @@
+/* Aanvullende graad-1-oefeningen gebruiken de bestaande werkbladkop,
+   opdrachtblokken en globale schrijflijnen. */
+.to-scene-keuze{border:1px solid #cbded9;border-radius:8px;min-width:0;padding:8px}
+.to-scene-keuze legend{font-weight:700}
+.to-scene-keuze p{font-size:13px;line-height:1.5}
+.to-scene-kaarten{display:grid;grid-template-columns:1fr;gap:8px}
+.to-scene-kaarten label{display:grid;grid-template-columns:20px 1fr;gap:6px;cursor:pointer;background:white;border:2px solid #ddd;border-radius:8px;padding:6px}
+.to-scene-kaarten label:has(input:checked){border-color:#258476;background:#e6f5f1}
+.to-scene-kaarten input{width:16px;height:16px;margin-top:3px}
+.to-scene-kaarten img{width:100%;height:110px;object-fit:contain}
+.to-scene-kaarten span{grid-column:2;font-weight:600}
+.werkblad.to-blad{font-family:Arial,sans-serif;font-size:17px;line-height:1.4;padding:1.5cm 1.8cm}
+.to-inhoud p{margin:12px 0}
+.to-lijn{position:relative;min-width:0;text-align:left}
+.to-lijn>span{position:absolute;left:6px;font-size:17px;line-height:22px;color:#176239;background:white;padding:0 2px;white-space:nowrap}
+.to-lijn canvas{max-width:100%}
+.to-lijn-fallback{height:50px;border-bottom:1px solid #999}
+.to-bank{margin:12px 0 18px;padding:12px 16px;border:1px solid #94bdab;border-radius:6px;background:#eff8f0;font-weight:bold;line-height:1.8}
+.to-tweekolommen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px}
+.to-tweekolommen>div{padding:8px 12px;border:1px solid #bfd8e5;border-radius:8px;break-inside:avoid}
+.to-kolommen{display:grid;border:1px solid #98bbc1}
+.to-kolommen section{padding:8px 10px 12px;border-right:1px solid #98bbc1;min-width:0}
+.to-kolommen section:last-child{border-right:0}
+.to-kolommen strong{display:block;font-size:15px;text-align:center;margin-bottom:10px}
+.to-vraag{margin:0 0 14px;break-inside:avoid;page-break-inside:avoid}
+.to-vraag>div:first-child{margin-bottom:3px}
+.to-blad[data-oefenvorm="tafereel"] .to-inhoud>.to-vraag{margin-bottom:26px}
+.to-blad[data-oefenvorm="tafereel"] .to-inhoud>.to-vraag:last-of-type{margin-bottom:0}
+.to-blad[data-oefenvorm="klankzin"] .to-vraag,
+.to-blad[data-oefenvorm="woordzin"] .to-vraag{margin-bottom:26px}
+.to-blad[data-oefenvorm="klankzin"] .to-vraag:last-child,
+.to-blad[data-oefenvorm="woordzin"] .to-vraag:last-child{margin-bottom:0}
+.to-prenten{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 12px}
+.to-prenten>div{padding:8px;text-align:center;border:1px solid #ccc;border-radius:4px;break-inside:avoid}
+.to-tafereel{display:block;width:auto;max-width:100%;height:72mm;margin:0 auto 18px}
+.to-tekenzin{display:flex;justify-content:space-between;align-items:center;min-height:45px;margin:0 0 14px;padding:8px 12px;border:1px solid #bfd8e5;border-radius:8px;break-inside:avoid}
+.to-tekenvak{display:inline-flex;width:32px;height:30px;border:1px solid #859ea5;align-items:center;justify-content:center;color:#176239;font-size:20px;flex:none;margin-left:10px}
+.to-bedek{border-collapse:collapse;width:100%;table-layout:fixed}
+.to-bedek th,.to-bedek td{border:1px solid #a8bcc2;text-align:left;padding:4px 8px}
+.to-bedek thead{background:#eff5f5}
+.to-bedek th:first-child{width:19%}
+.to-bedek tr{break-inside:avoid}
+.to-inhoud small{display:block;font-size:12px;color:#476574;margin-top:8px}
+.zb-zin-klankgroep{max-width:100%;min-width:0;white-space:normal}
+.to-prentvraag{display:grid;grid-template-columns:32mm minmax(0,1fr);align-items:center;gap:7mm;margin-bottom:7mm;break-inside:avoid}
+.to-prentvraag>img{display:block;width:auto;height:auto;max-width:32mm;max-height:36mm;margin:auto}
+.to-prentvraag .to-vraag{margin:0}
+.to-zinrij{margin-bottom:8mm;break-inside:avoid}
+.to-zinprenten{display:flex;justify-content:space-around;align-items:center;gap:6mm;margin-bottom:3mm}
+.to-zinprenten img{width:auto;height:auto;max-width:44mm;max-height:36mm}
+.to-klanklijnen>div{display:flex;align-items:center;justify-content:flex-start;gap:18px;border:0;padding:4px 10px}
+.to-klanklijnen>div>span{min-width:65px}
+.to-klanklijnen .to-lijn{width:76px;flex:0 0 76px}
+.to-afwijkend{display:grid;grid-template-columns:minmax(0,1fr) 145px;gap:24px;align-items:center;margin-bottom:12px;break-inside:avoid}
+.to-afwijkend>div:first-child{display:flex;justify-content:space-between;gap:8px}
+.to-code{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px;margin:8px 0 22px;text-align:center}
+.to-code td{border:1px solid #c8d2da;padding:6px 0}
+.to-codewoorden>div{border:0;padding:4px 0;font-size:15px}
+.to-verbind{display:flex;justify-content:space-between;max-width:330px;margin:20px auto;font-size:22px}
+.to-verbind p{height:40px;display:flex;gap:24px;align-items:center;justify-content:space-between}
+.to-verbind-woorden{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;margin-top:12px}
+.to-verbind-extra{margin-top:18px;break-inside:avoid}
+
+.to-mix-blok{break-inside:avoid;margin-bottom:14px}.to-mix-blok .ov01-stappen{margin-bottom:10px}.to-mix-blok .to-bank{margin:6px 0 8px;padding:6px 10px}.to-mix-blok .to-tweekolommen{gap:4px 20px}.to-mix-blok .to-tweekolommen>div{padding:2px 6px}.to-mix-blok .to-afwijkend{margin-bottom:4px}.to-mix-blok>p{margin:4px 0;font-size:14px}

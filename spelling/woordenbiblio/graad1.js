@@ -94,7 +94,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
   },
   "mk-km": {
     naam: "MK / KM-woorden",
-    groep: "korte-klanken",
+    groep: "mk-km",
     hoofdgroep: "hoorwoord",
     woorden: [
       { tekst: "om", lidwoord: null, afbeelding: false },
@@ -1246,6 +1246,22 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
      LEESTEKENS — optionele leerstof tweede leerjaar
      Twee aparte categorieën zodat scholen zelf kunnen kiezen.
      ========================================================== */
+  "zinnen-prent-g1": {
+    naam: "Eenvoudige zinnen bij prenten",
+    groep: "zinnen-klankzuiver",
+    hoofdgroep: "hoorwoord",
+    woorden: [
+      { tekst: "op", afbeelding: false },
+      { tekst: "in", afbeelding: false },
+      { tekst: "voor", afbeelding: false }
+    ]
+  },
+  "zinnen-volgorde-g1": {
+    naam: "Eenvoudige zinnen in de juiste volgorde",
+    groep: "zinnen-klankzuiver",
+    hoofdgroep: "hoorwoord",
+    woorden: [{ tekst: "zin", afbeelding: false }]
+  },
   "leestekens-eind-g1": {
     naam: "Eindtekens: punt, vraagteken en uitroepteken",
     groep: "leestekens",

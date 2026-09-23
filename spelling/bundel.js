@@ -126,7 +126,7 @@ window.SpellingBundel = {
         // OV13 en OV14 bouwen zelf volledige zinnen/teksten. De gekozen
         // categorie-items bepalen alleen welke regels of tekens geoefend
         // worden en zijn dus geen woorden die geteld moeten worden.
-        const gebruiktEigenOefeninhoud = oef.id === "ov13" || oef.id === "ov14";
+        const gebruiktEigenOefeninhoud = oef.id === "ov13" || oef.id === "ov14" || module.gebruiktEigenOefeninhoud === true;
         if (!gebruiktEigenOefeninhoud && gevraagd > uniekBeschikbaar && window.SpellingDedup) {
           const naam = (module.naam || oef.id)
             + " " + (niveau.charAt(0).toUpperCase() + niveau.slice(1));
@@ -150,12 +150,13 @@ window.SpellingBundel = {
           aantalToegevoegd++;
         } catch (e) {
           console.error("Kon item niet renderen voor", oef.id, niveau, e);
+          if (oef.id.startsWith("g1-")) alert(e.message);
         }
       }
     }
 
     if (aantalToegevoegd === 0) {
-      alert("Geen werkbladen toegevoegd. Vink minstens één niveau aan per oefenvorm.");
+      alert("Geen werkbladen toegevoegd. Controleer je woorden, oefenvormen en niveaus.");
       return;
     }
 
@@ -193,6 +194,11 @@ window.SpellingBundel = {
       ondertitel: ""
     };
     
+      if (oef.id === "g1-tafereel") subOpties.prent = oef.prent || "tuin";
+      if (["g1-tafereel", "g1-zelfzin", "g1-volgorde"].includes(oef.id)) {
+        subOpties.klankgroep = oef.klankgroep || "kort-lang-twee";
+      }
+
     // OV02-specifiek: plaatje-toggle uit zijbalk-state
     if (oef.id === "ov02") {
       subOpties.metPlaatje = oef.metPlaatje === true;
@@ -591,12 +597,12 @@ window.SpellingBundel = {
       ? item.gekozenCategorieIdsSnapshot
       : null;
     
-    const html = module.genereerBlad(item.opties, metAntwoorden);
-    
-    // Restore
-    window._weekdictee_gekozenWoorden = origineel;
-    window._spellingCategorieIdsSnapshot = origineleCategorieIds;
-    return html;
+    try {
+      return module.genereerBlad(item.opties, metAntwoorden);
+    } finally {
+      window._weekdictee_gekozenWoorden = origineel;
+      window._spellingCategorieIdsSnapshot = origineleCategorieIds;
+    }
   },
 
   /* === Update download/wis knoppen op basis van bundel-status === */

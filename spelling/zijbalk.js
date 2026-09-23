@@ -22,6 +22,7 @@ window.SpellingZijbalk = (function() {
 
   /* Definitie van oefenvormen: id, label, ondersteunde niveaus, default settings */
   const OEFENVORMEN = [
+    ...(window.SpellingThemaOefeningen?.definities || []),
     {
       id: "ov01", label: "📷 Schrijf bij het plaatje",
       korteUitleg: "Bekijken, herkennen en schrijven",
@@ -412,7 +413,7 @@ window.SpellingZijbalk = (function() {
     return {
       id: oef.id,
       aangevinkt: false,
-      niveaus: new Set(oef.niveaus.length > 0 ? ["basis"] : []),
+        niveaus: new Set(oef.niveaus.length > 0 ? [oef.niveaus[0]] : []),
       aantal: oef.defaultAantal,
       lijntype: "type3",
       lijnhoogte: "middel",
@@ -780,6 +781,11 @@ window.SpellingZijbalk = (function() {
     // generieke terugval in een andere graad verschijnen.
     if (oef.graad && oef.graad !== actieveGraad) return false;
 
+    if (oef.thema) {
+      return window.SpellingThemaOefeningen.pastBijDoelen(
+        oef.thema, actieveGraad, [...getAangevinkteCats()], window._weekdictee_gekozenWoorden);
+    }
+
     const soorten = _detecteerCategorieSoorten();
     const ietsAangevinkt = soorten.heeftGenerieke || soorten.specifiekeGroepen.size > 0;
 
@@ -1036,7 +1042,9 @@ window.SpellingZijbalk = (function() {
       // → automatisch op max per niveau, geen handmatige keuze nodig.
       // Verwijderen + 1-erbij gebeurt op het werkblad zelf.
       const heeftVastePlafonds = !!window.SpellingModules?.[oef.id]?._maxPerNiveau;
-      if (!inHerhalingsModusCheck && oef.id !== "weekdictee" && !heeftVastePlafonds) {
+      if (oef.thema) {
+        html += window.SpellingThemaOefeningen.instellingen(oef.thema, state);
+      } else if (!inHerhalingsModusCheck && oef.id !== "weekdictee" && !heeftVastePlafonds) {
         html += `
           <div class="zb-oef-rij">
             <label>Aantal woorden:</label>
@@ -1289,6 +1297,24 @@ window.SpellingZijbalk = (function() {
           }
         }
       }
+      else if (e.target.matches(".zb-zin-klankgroep")) {
+        const state = _getOrCreateState(e.target.dataset.oef);
+        const api = window.SpellingThemaOefeningen;
+        if (state && Object.hasOwn(api.zinKlanken, e.target.value)) {
+          state.klankgroep = e.target.value;
+          const prenten = api.prentKeuzes(state.klankgroep);
+          if (!prenten[state.prent]) state.prent = Object.keys(prenten)[0];
+          bewaarState();
+          renderOefenvormen();
+        }
+      }
+      else if (e.target.matches(".zb-prent-keuze")) {
+        const state = _getOrCreateState(e.target.dataset.oef);
+        if (state && window.SpellingThemaOefeningen?.prentKeuzes(state.klankgroep)[e.target.value]) {
+          state.prent = e.target.value;
+          bewaarState();
+        }
+      }
       else if (e.target.matches(".zb-oef-aantal")) {
         const oefId = e.target.dataset.oef;
         const state = _getOrCreateState(oefId);
@@ -1435,6 +1461,7 @@ window.SpellingZijbalk = (function() {
       // aparte weekdictee-paneel zijn eigen categorieën en woordenlijst.
       if (document.body.classList.contains("modus-actief-werkblad")) {
         updateWoordenkiezerKnop();
+        renderOefenvormen();
       }
     });
   }
