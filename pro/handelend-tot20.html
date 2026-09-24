@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="nl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Handelend rekenen tot 20</title><link rel="stylesheet" href="handelend-tot20.css"><script type="module">if(new URLSearchParams(location.search).get("kid")!=="1"){await import("./device-id.js");await import("./guard.js");}</script><script src="handelend-tot20.js" defer></script><script src="handelend-vrij-legbord.js" defer></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Handelend rekenen tot 20</title><link rel="stylesheet" href="handelend-tot20.css"><script type="module">if(new URLSearchParams(location.search).get("kid")!=="1"){await import("./device-id.js");await import("./guard.js");}</script><script src="handelend-tot20.js?v=vijfstructuur-20260924" defer></script><script src="handelend-vrij-legbord.js" defer></script></head>
 <body data-scherm="keuze">
 <header><a href="keuze-hulpschema.html">← MAB en schema</a><h1 id="schermtitel">Tot 20 met brug</h1><button id="keuze-terug" hidden>← Kies opnieuw</button><button id="volledig">Volledig scherm</button></header>
 <main>
@@ -9,6 +9,7 @@
 <button id="alleen" class="keuzekaart"><img src="../drukknop_afbeeldingen_v3/huistaken.png" alt=""><span>Alleen</span></button></nav>
 <section id="bord-instellingen" hidden class="instellingen" aria-label="Oefening kiezen">
 <div class="bewerkingen" role="group" aria-label="Bewerking"><button class="bewerk plus" data-select="bewerking" data-waarde="plus" aria-pressed="true" aria-label="Optellen">+</button><button class="bewerk min" data-select="bewerking" data-waarde="min" aria-pressed="false" aria-label="Aftrekken">−</button></div><label hidden>Bewerking <select id="bewerking"><option value="plus">Optellen</option><option value="min">Aftrekken</option></select></label>
+<label>Structuur van de tienramen <select id="tienraam-structuur"><option value="twee">Twee-structuur (per kolom)</option><option value="vijf">Vijf-structuur (eerst de bovenste rij)</option></select></label>
 <form id="eigen"><label>Eerste getal <input id="eerste" type="number" min="1" max="18" value="9" required></label><span id="teken">+</span><label>Tweede getal <input id="tweede" type="number" min="1" max="9" value="5" required></label><button>Toon oefening</button></form>
 <button id="nieuw">Andere oefening</button><button id="opnieuw">Opnieuw leggen</button>
 </section>

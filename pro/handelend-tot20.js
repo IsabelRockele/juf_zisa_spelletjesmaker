@@ -13,7 +13,7 @@
     el('deel1').textContent=zelf()&&hulp>=2?deel():'___';el('deel2').textContent=zelf()&&hulp>=3?b-deel():'___';
     el('ramen').replaceChildren();
     for(let r=0;r<2;r++){
-      const raam=document.createElement('div');raam.className='tienraam';raam.setAttribute('aria-label','Tienraam '+(r+1));
+      const raam=document.createElement('div');raam.className='tienraam';raam.style.gridAutoFlow=el('tienraam-structuur').value==='vijf'?'row':'column';raam.setAttribute('aria-label','Tienraam '+(r+1));
       for(let j=0;j<10;j++){
         const i=r*10+j,cel=document.createElement('div');cel.className='cel';
         if(min?i<a&&!wegPosities.includes(i):i<aantal())cel.append(stip(min?'zwart':i<a?'':'rood',min?'Neem deze stip weg':'Gelegde stip',min&&gedaan<b,i));
@@ -36,6 +36,7 @@
   el('eigen').addEventListener('submit',e=>{e.preventDefault();const x=Number(el('eerste').value),y=Number(el('tweede').value);const geldig=Number.isInteger(x)&&Number.isInteger(y)&&y>=1&&y<=9&&(min?x>=11&&x<=18&&x-y>0&&x-y<10:x>=1&&x<=9&&x+y>10);if(!geldig){el('fout').textContent=min?'Kies een aftrekking zoals 13 − 5: vertrek tussen 11 en 18 en ga over 10 heen.':'Kies twee getallen van 1 tot 9 die samen meer dan 10 zijn, zoals 8 + 5.';return;}start(x,y);});
   el('bewerking').addEventListener('change',()=>{min=el('bewerking').value==='min';start(min?13:9,min?5:5);});
   el('nieuw').addEventListener('click',()=>{const pairs=[];for(let x=min?11:2;x<=(min?18:9);x++)for(let y=1;y<=9;y++)if((min?x-y>0&&x-y<10:x+y>10)&&(x!==a||y!==b))pairs.push([x,y]);start(...pairs[Math.floor(Math.random()*pairs.length)]);});
+  el('tienraam-structuur').addEventListener('change',render);
   el('opnieuw').addEventListener('click',()=>start(a,b));
   el('stap').addEventListener('click',()=>{const doel=gedaan<deel()?deel():b;while(gedaan<doel)verplaats();});
   el('terug').addEventListener('click',()=>{if(min)wegPosities.pop();gedaan=Math.max(0,gedaan-1);hulp=Math.min(hulp,gedaan<deel()?1:2);el('hint').textContent='';render();});
