@@ -57,8 +57,8 @@ export default function Help(){
             <p>Je hoeft <b>geen kader te trekken en niet op een knipknop te drukken</b>. Het bewegende voorbeeld verschijnt vanzelf.</p>
             <p>Zijn niet alle hoekcodes leesbaar? Maak een nieuwe foto, recht van boven en met het hele blad in beeld. Gebruik een nieuwe afdruk uit de bibliotheek. Voor oude bladen is <b>‘Met hulp zelf bijsnijden (optioneel)’</b> beschikbaar.</p>
           </li>
-          <li><h2>Geef je wezen een naam en bekijk het voorbeeld</h2>
-            <p>Vul <b>‘Naam van het wezen’</b> in, bijvoorbeeld Blub. Kijk of je figuurtje goed zichtbaar is en beweegt. Bij bibliotheekkleurplaten kiest de tool het soort beweging al voor je. Bij een vrije tekening kun je die zelf kiezen.</p>
+          <li><h2>Bekijk het voorbeeld en geef eventueel een naam</h2>
+            <p>Een naam invullen is <b>niet verplicht</b>. Laat het naamveld leeg om alleen het figuurtje te tonen, zonder naamvakje. Wil je wel een naam tonen? Vul die dan in, bijvoorbeeld Blub. Kijk of je figuurtje goed zichtbaar is en beweegt. Bij bibliotheekkleurplaten kiest de tool het soort beweging al voor je. Bij een vrije tekening kun je die zelf kiezen.</p>
             <p>Het voorbeeld staat klaar zodra het nieuwe blad herkend is. Is het resultaat niet goed? Maak eerst een nieuwe foto met beter licht. Via <b>‘Uitsnede of papierverwijdering aanpassen’</b> kan de leerkracht eventueel helpen. De grootte en kijkrichting kun je bij het voorbeeld aanpassen.</p>
           </li>
           <li><h2>Stuur het figuurtje naar de klaswereld</h2>

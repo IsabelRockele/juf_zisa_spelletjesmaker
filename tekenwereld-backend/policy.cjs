@@ -11,7 +11,7 @@ function requireSession(owner,code,now){
   return owner.session;
 }
 function validateDrawing(x){
-  if(!x||!worlds.has(x.world)||!['swim','fly','crawl','walk','float','tentacles','bubbles'].includes(x.motion)||!['air','ground'].includes(x.zone)||typeof x.name!=='string'||!x.name.trim()||x.name.length>60||!Number.isFinite(x.size)||x.size<.5||x.size>2||!Number.isFinite(x.pivot)||x.pivot<.2||x.pivot>.8||typeof x.flip!=='boolean')fail(400,'Controleer de gegevens van je tekening.');
+  if(!x||!worlds.has(x.world)||!['swim','fly','crawl','walk','float','tentacles','bubbles'].includes(x.motion)||!['air','ground'].includes(x.zone)||typeof x.name!=='string'||x.name.length>60||!Number.isFinite(x.size)||x.size<.5||x.size>2||!Number.isFinite(x.pivot)||x.pivot<.2||x.pivot>.8||typeof x.flip!=='boolean')fail(400,'Controleer de gegevens van je tekening.');
   if(typeof x.image!=='string'||x.image.length>2500000||!/^data:image\/png;base64,[A-Za-z0-9+/]+={0,2}$/.test(x.image))fail(400,'Kies een geldige, kleinere tekening.');
   const bytes=Buffer.from(x.image.slice(22),'base64');
   if(bytes.length<33||!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))||bytes.toString('ascii',12,16)!=='IHDR')fail(400,'De tekening is geen geldige PNG-afbeelding.');

@@ -62,7 +62,7 @@ test('closing QR while an upload is saving rejects it and cleans the image',asyn
 });
 test('invalid images, oversized images and invalid properties cannot be stored',async()=>{
   const {request,files}=setup();
-  for(const change of [{image:'data:image/svg+xml;base64,PHN2Zz4='},{image:png.slice(0,30)},{image:'x'.repeat(2500001)},{name:''},{world:'fake'},{size:99},{pivot:0},{flip:'yes'},{motion:'fake'}])assert.equal((await request('creatures','POST','alice',{...drawing,...change})).statusCode,400);
+  for(const change of [{image:'data:image/svg+xml;base64,PHN2Zz4='},{image:png.slice(0,30)},{image:'x'.repeat(2500001)},{name:42},{name:null},{name:'x'.repeat(61)},{world:'fake'},{size:99},{pivot:0},{flip:'yes'},{motion:'fake'}])assert.equal((await request('creatures','POST','alice',{...drawing,...change})).statusCode,400);
   assert.equal(files.size,0);
 });
 test('poll returns 304 until a drawing changes and delete removes private image',async()=>{
@@ -79,4 +79,14 @@ test('capacity limits and simultaneous uploads preserve counts',async()=>{
   assert(results.every(r=>r.statusCode===201));assert.equal(docs.get('tekenwereldOwners/'+ownerId('alice')).count,12);
   docs.get('tekenwereldOwners/'+ownerId('alice')).count=100;
   assert.equal((await request('creatures','POST','alice',drawing)).statusCode,409);assert.equal(files.size,12);
+});
+
+
+test('empty and whitespace names are optional for teachers and children',async()=>{
+ const {request}=setup();const code=(await request('session','POST','alice',{world:'aqua'})).body.code;
+ for(const name of ['', '   ', ' Blub '])for(const child of [false,true]){
+  const saved=await request('creatures','POST',child?null:'alice',{...drawing,name},child?code:undefined);
+  assert.equal(saved.statusCode,201);assert.equal(saved.body.name,name.trim());
+ }
+ const list=(await request('creatures')).body;assert.equal(list.filter(c=>c.name==='').length,4);
 });
