@@ -1073,7 +1073,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     const celBreedte = (state.contentBreedte - (CELLEN_PER_RIJ - 1) * CEL_SPACING) / CELLEN_PER_RIJ;
     
     // Bereken cel-hoogte op basis van inhoud:
-    //   - emoji ruimte: ~14mm
+    //   - afbeelding: 26mm + 3mm tussenruimte
     //   - keuze-vakjes (alleen basis): ~9mm
     //   - schrijflijnen: 3 × L per lijn (L = 4mm klein, 5.5mm middel, 7.5mm groot)
     //   - padding: 5mm boven en onder
@@ -1082,7 +1082,8 @@ window.SpellingHerhalingsbundelPDF = (function() {
     else if (lijnhoogte === "groot") L = 7.5;
     
     const PADDING_CEL = 4;
-    const EMOJI_RUIMTE = 23;  // 20mm afbeelding + 3mm spacing
+    const AFBEELDING_HOOGTE = 26;
+    const EMOJI_RUIMTE = AFBEELDING_HOOGTE + 3;
     const KEUZE_RUIMTE = niveau === "basis" ? 11 : 0;
     const SCHRIJFLIJN_HOOGTE = 3 * L;
     const aantalLijnenInCel = cellen[0]?.aantalLijnen || 1;
@@ -1113,6 +1114,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
       rij.forEach((cel, idx) => {
         const celX = state.contentX + idx * (celBreedte + CEL_SPACING);
         _tekenOV01Cel(pdf, celX, rijY, celBreedte, celHoogte, cel, {
+          afbeeldingHoogte: AFBEELDING_HOOGTE,
           niveau,
           lijntype,
           lijnhoogte,
@@ -1147,9 +1149,9 @@ window.SpellingHerhalingsbundelPDF = (function() {
     
     let cy = y + 4;  // cursor binnen cel
     
-    // Afbeelding: vaste hoogte (20mm), breedte volgt aspect ratio.
+    // Afbeelding: vaste hoogte, gelijk aan de gereserveerde ruimte in de cel.
     // Brede afbeeldingen krijgen max bijna de hele celbreedte (met kleine marge).
-    const afbHoogte = 20;
+    const afbHoogte = opties.afbeeldingHoogte;
     const afbMaxBreedte = breedte - 4;  // 2mm padding aan elke kant
     const afbX = x + 2;  // start na de 2mm padding (centrering gebeurt in tekenAfbeelding)
     

@@ -2104,7 +2104,7 @@ body.bewerk-aan [data-bewerk-id]:focus {
   border: 1px dashed #eee;
 }
 .ov01-cel-plaatje {
-  font-size: 3.5rem;
+  font-size: 4.5rem;
   line-height: 1.1;
   margin-bottom: 4px;
   text-align: center;
@@ -7045,7 +7045,7 @@ body.hb-bewerk-aan .hb-item-toevoeg-balk {
 
 /* OV01 cel-plaatje */
 .ov01-cel-plaatje .woord-afbeelding {
-  height: 60px;        /* vaste hoogte: visueel consistent over alle afbeeldingen */
+  height: 80px;        /* grotere plaatjes om het te schrijven woord goed te herkennen */
   max-width: 100%;     /* mag tot volle cel-breedte uitstrekken indien nodig */
   width: auto;
   display: block;
@@ -7053,7 +7053,7 @@ body.hb-bewerk-aan .hb-item-toevoeg-balk {
   object-fit: contain;
 }
 .ov01-cel-plaatje .woord-emoji {
-  font-size: 3.5rem;
+  font-size: 4.5rem;
   line-height: 1.1;
   display: block;
   text-align: center;
