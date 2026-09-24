@@ -17,6 +17,7 @@ const GemengdHulp = (() => {
     const key=kaart?.querySelector('select').value || '';
     const config={hulpmiddelen:key ? key.split('+') : []};
     if (varianten[key]) config[key+'Variant']=kaart.querySelector('.gem-hulp-variant').value;
+    config.tienraamStructuur=kaart?.querySelector('.gem-tienraam-structuur select')?.value || 'twee';
     config.metVoorbeeld=!!kaart?.querySelector('.gem-hulp-voorbeeld').checked;
     config.splitspositie=document.querySelector('[name="gem-splitspositie"]:checked')?.value || 'aftrekker';
     config.schrijflijnenAantal=Number(document.querySelector('[name="gem-schrijflijnen-aantal"]:checked')?.value || 2);
@@ -42,7 +43,7 @@ const GemengdHulp = (() => {
       paneel.innerHTML='<p style="font-size:12px;margin-bottom:12px">Kies voor plus- en minsommen afzonderlijk een hulpmiddel.</p>';
       for(const op of ['optellen','aftrekken']){
         const kaart=document.createElement('div');kaart.id='gem-hulp-'+op;kaart.className='form-rij';
-        kaart.innerHTML=`<label for="gem-hulp-keuze-${op}">${op==='optellen'?'Bij optellen':'Bij aftrekken'}</label><select id="gem-hulp-keuze-${op}"></select><select class="gem-hulp-variant" aria-label="Variant bij ${op}" style="display:none;margin-top:8px"></select><label class="hulp-eerste-voorbeeld"><input type="checkbox" class="gem-hulp-voorbeeld"> Eerste ${op==='optellen'?'plussom':'minsom'} uitwerken</label><details class="gem-hulp-detail"><summary>Voorbeeld</summary><div class="hulp-voorbeeld-inhoud"></div></details>`;
+        kaart.innerHTML=`<label for="gem-hulp-keuze-${op}">${op==='optellen'?'Bij optellen':'Bij aftrekken'}</label><select id="gem-hulp-keuze-${op}"></select><select class="gem-hulp-variant" aria-label="Variant bij ${op}" style="display:none;margin-top:8px"></select><label class="gem-tienraam-structuur" style="display:none;margin-top:8px">Structuur van de tienramen<select><option value="twee">Twee-structuur (per kolom)</option><option value="vijf">Vijf-structuur (eerst de bovenste rij)</option></select></label><label class="hulp-eerste-voorbeeld"><input type="checkbox" class="gem-hulp-voorbeeld"> Eerste ${op==='optellen'?'plussom':'minsom'} uitwerken</label><details class="gem-hulp-detail"><summary>Voorbeeld</summary><div class="hulp-voorbeeld-inhoud"></div></details>`;
         kaart.addEventListener('change',()=>{vulVarianten(kaart);toonVoorbeeld(kaart,op);App.verversGemengdHulp();});
         kaart.querySelector('details').addEventListener('toggle',()=>toonVoorbeeld(kaart,op));paneel.append(kaart);
       }
@@ -70,6 +71,7 @@ const GemengdHulp = (() => {
     const key=kaart.querySelector('select').value,select=kaart.querySelector('.gem-hulp-variant');
     if(select.dataset.key!==key){select.replaceChildren(...(varianten[key]||[]).map(([v,t])=>new Option(t,v)));select.dataset.key=key;}
     select.style.display=varianten[key]?'block':'none';
+    kaart.querySelector('.gem-tienraam-structuur').style.display=key.includes('tienra')?'block':'none';
     const voorbeeld=kaart.querySelector('.gem-hulp-voorbeeld');
     const kanVoorbeeld=!!Tot20Hulp.soorten[key] || key.includes('schrijflijnen') || ['compenseren','transformeren'].includes(key);
     voorbeeld.closest('label').style.setProperty('display',kanVoorbeeld?'flex':'none','important');

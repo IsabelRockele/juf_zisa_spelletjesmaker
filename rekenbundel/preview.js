@@ -537,6 +537,7 @@ const Preview = (() => {
   }
 
   function _maakBlokElement(blok) {
+    blok = Generator.normaliseerGemengdBlok(blok);
     const isHerken        = blok.bewerking === 'herken-brug';
     const isSplitsingen   = blok.bewerking === 'splitsingen';
     const isTafels        = blok.bewerking === 'tafels';
@@ -569,6 +570,7 @@ const Preview = (() => {
                       isHerken    ? '🔦 Herken brug' :
                       isRekentaal ? '🗣️ Rekentaal' :
                       blok.hulpmiddelen?.includes('transformeren') ? '↔️ Transformeren' :
+                      blok.bewerking === 'gemengd' ? 'Gemengd' :
                       blok.bewerking === 'aftrekken' ? 'Aftrekken' : 'Optellen';
     const isPunt = isSplitsingen && blok.oefeningen[0]?.type === 'puntoefening';
     let gridKlasse;

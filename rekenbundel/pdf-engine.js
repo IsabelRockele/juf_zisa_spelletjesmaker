@@ -2069,6 +2069,7 @@ const onthoudH = c;
   }
 
  async function _tekenBlok(blok) {
+  blok = Generator.normaliseerGemengdBlok(blok);
   if(blok.config?.hulpPerBewerking) {
     for(let i=0;i<blok.oefeningen.length;) {
       const {hulpConfig,...oef}=blok.oefeningen[i];

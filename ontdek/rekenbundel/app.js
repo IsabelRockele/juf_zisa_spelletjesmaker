@@ -757,6 +757,7 @@ const App = (() => {
       : (isHerken || isSplitsingen) ? 'zonder' : brug;
 
     const blok = Generator.maakBlok({
+      tienraamStructuur: document.getElementById('tot20-structuur')?.value || 'twee',
       tot100Hulp: document.getElementById('tot100-hulp')?.value || 'vakje',
       tot100Voorbeeld: document.getElementById('tot100-voorbeeld')?.checked || false,
       bewerking: actieveBewerking,

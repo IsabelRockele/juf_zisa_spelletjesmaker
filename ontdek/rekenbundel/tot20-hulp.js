@@ -18,10 +18,12 @@ const Tot20Hulp = (() => {
     const antwoord = min ? a-b : a+b;
     const deel1 = min ? a-10 : 10-a;
     const kleur = '#006eaf';
+    const vijf = blok.tienraamStructuur === 'vijf';
+    const cel = i => vijf ? [i % 5, Math.floor(i / 5)] : [Math.floor(i / 2), i % 2];
     let inhoud = '';
     function raam(x, aantal, start) {
       for (let kol = 0; kol < 5; kol++) for (let rij = 0; rij < 2; rij++) {
-        const i = kol * 2 + rij;
+        const i = vijf ? rij * 5 + kol : kol * 2 + rij;
         const cx = x + kol * 24, cy = (min ? 22 : 12) + rij * 24;
         inhoud += `<rect x="${cx}" y="${cy}" width="24" height="24" fill="white" stroke="#777" stroke-width=".7"/>`;
         if (i < aantal) inhoud += `<circle cx="${cx+12}" cy="${cy+12}" r="7.5" fill="${min || type === 'tienraam-start' ? '#222' : start+i < a ? '#00557e' : '#c72d24'}"/>`;
@@ -37,7 +39,8 @@ const Tot20Hulp = (() => {
           const edges = new Map();
           const punt = p => p.join(',');
           for (let i=van; i<tot; i++) {
-            const cx=x+Math.floor(i/2)*24, cy=22+(i%2)*24;
+            const [kol, rij] = cel(i);
+            const cx=x+kol*24, cy=22+rij*24;
             const p=[[cx,cy],[cx+24,cy],[cx+24,cy+24],[cx,cy+24]];
             p.forEach((v,j) => { const w=p[(j+1)%4], rev=punt(w)+'|'+punt(v), key=punt(v)+'|'+punt(w); if(edges.has(rev)) edges.delete(rev); else edges.set(key,[v,w]); });
           }
@@ -98,6 +101,7 @@ const Tot20Hulp = (() => {
     const {bewerking, niveau, brug} = context;
     const config = {
       bewerking, niveau, brug, hulpmiddelen: [key], aantalOefeningen: 2,
+      tienraamStructuur: document.getElementById('tot20-structuur')?.value || 'twee',
       splitspositie: waarde('splitspositie', 'aftrekker'),
       aanvullenVariant: waarde('aanvullen-variant', 'zonder-schema'),
       compenserenVariant: waarde('compenseren-variant', 'met-tekens'),
@@ -150,7 +154,7 @@ const Tot20Hulp = (() => {
     let rij = document.getElementById('tot20-hulp-keuze');
     if (!rij) {
       rij = document.createElement('div'); rij.id = 'tot20-hulp-keuze'; rij.className = 'form-rij';
-      rij.innerHTML = `<label>Zelf splitsbenen schrijven</label><div class="tot20-keuzes">${Object.entries(soorten).map(([key,[titel]]) => `<label class="vink-chip" onclick="App.toggleHulpmiddel(this,'${key}')"><span class="vink-box"></span><input type="checkbox" name="hulpmiddelen" value="${key}" style="display:none"><span>${titel}</span></label>`).join('')}</div><label class="hulp-eerste-voorbeeld"><input type="checkbox" id="tot20-voorbeeld" checked> Eerste oefening uitwerken</label>`;
+      rij.innerHTML = `<label>Zelf splitsbenen schrijven</label><div class="tot20-keuzes">${Object.entries(soorten).map(([key,[titel]]) => `<label class="vink-chip" onclick="App.toggleHulpmiddel(this,'${key}')"><span class="vink-box"></span><input type="checkbox" name="hulpmiddelen" value="${key}" style="display:none"><span>${titel}</span></label>`).join('')}</div><label for="tot20-structuur" style="margin-top:12px">Structuur van de tienramen</label><select id="tot20-structuur"><option value="twee">Twee-structuur (per kolom)</option><option value="vijf">Vijf-structuur (eerst de bovenste rij)</option></select><label class="hulp-eerste-voorbeeld"><input type="checkbox" id="tot20-voorbeeld" checked> Eerste oefening uitwerken</label>`;
       document.getElementById('cg-hulpmiddelen').parentElement.after(rij);
       const kaart = document.getElementById('kaart-hulpmiddelen');
       kaart.addEventListener('change', () => requestAnimationFrame(() => kaart.querySelectorAll('.hulp-voorbeeld[open]').forEach(voorbeeld)));

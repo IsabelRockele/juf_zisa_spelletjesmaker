@@ -47,7 +47,7 @@ const Generator = (() => {
   }
 
   /* ── Maak een nieuw blok ─────────────────────────────────── */
-  function maakBlok({ tot100Hulp = 'vakje', tot100Voorbeeld = false, bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', transformerenVariant = 'schema', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', puntBewerking = 'optellen', splitsGetallen = null, splitsModus = 'tot', tafels = null, tafelPositie = 'vooraan', tafelMax = 10, strategie = 'aftrekker' }) {
+  function maakBlok({ tienraamStructuur = 'twee', tot100Hulp = 'vakje', tot100Voorbeeld = false, bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', transformerenVariant = 'schema', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', puntBewerking = 'optellen', splitsGetallen = null, splitsModus = 'tot', tafels = null, tafelPositie = 'vooraan', tafelMax = 10, strategie = 'aftrekker' }) {
     const isHerken        = bewerking === 'herken-brug';
     const isSplitsingen   = bewerking === 'splitsingen';
     const isTafels        = bewerking === 'tafels';
@@ -192,7 +192,7 @@ const Generator = (() => {
     return {
       id:          `blok-${Date.now()}-${_teller}`,
       bewerking,
-      tot100Hulp, tot100Voorbeeld,
+      tienraamStructuur, tot100Hulp, tot100Voorbeeld,
       subtype:     `${bewerking}-tot${niveau}`,
       niveau,
       brug,
@@ -209,7 +209,7 @@ const Generator = (() => {
       tafelPositie,
       tafelMax,
       strategie,
-      config: { tot100Hulp, tot100Voorbeeld, bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie: effectiefSplitspositie, aanvullenVariant, compenserenVariant, transformerenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, puntBewerking, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax, strategie },
+      config: { tienraamStructuur, tot100Hulp, tot100Voorbeeld, bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie: effectiefSplitspositie, aanvullenVariant, compenserenVariant, transformerenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, puntBewerking, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax, strategie },
       oefeningen,
     };
   }
@@ -503,6 +503,20 @@ const Generator = (() => {
     };
   }
 
-  return { maakBlok, maakGemengdBlok, voegOefeningToe, getTypes };
+  // Gewone gemengde sommen delen één raster, ook als de keuzes per bewerking zijn opgeslagen.
+  function normaliseerGemengdBlok(blok) {
+    if (blok.bewerking !== 'gemengd' || !blok.config?.hulpPerBewerking) return blok;
+    const instellingen = [...Object.values(blok.config.hulpPerBewerking),
+      ...blok.oefeningen.map(o => o.hulpConfig).filter(Boolean)];
+    if (instellingen.some(c => c.hulpmiddelen?.length || (c.tot100Hulp && c.tot100Hulp !== 'vakje'))) return blok;
+    return {
+      ...blok,
+      hulpmiddelen: [],
+      config: { ...blok.config, hulpPerBewerking: null },
+      oefeningen: blok.oefeningen.map(({ hulpConfig, ...oef }) => oef),
+    };
+  }
+
+  return { maakBlok, maakGemengdBlok, voegOefeningToe, getTypes, normaliseerGemengdBlok };
 })();
 window.DKRekenGenerator = Generator;
