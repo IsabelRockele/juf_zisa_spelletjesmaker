@@ -84,6 +84,7 @@ export default function Help(){
         </section>
         <section><h2>Als iets niet lukt</h2><ul>
           <li><b>‘Geen geschikte app’ bij het scannen:</b> scan de klas-QR uit ‘iPads verbinden’, niet de code op het kleurblad.</li>
+          <li><b>Verkeerde wereld geopend:</b> tik op de gsm op ‘Andere klas-QR’ en scan met de camera de klas-QR van de juiste wereld. Een nieuwe klas-QR scannen werkt ook rechtstreeks. Op de computer kies je eerst de gewenste leefwereld, daarna ‘iPads verbinden’ en ‘Maak nieuwe QR’. De vorige klas-QR vervalt dan.</li>
           <li><b>De klasverbinding is gesloten of verlopen:</b> maak op de computer een nieuwe klas-QR en scan die opnieuw. Een oude afdruk werkt dan niet meer.</li>
           <li><b>De tekening verschijnt niet:</b> wacht op de verzendbevestiging en controleer op de computer ‘Klasomgeving’, de gekozen leefwereld en de internetverbinding.</li>
           <li><b>Het blad wordt niet herkend:</b> neem alle vier de hoekcodes scherp in beeld en gebruik een nieuwe afdruk uit de bibliotheek. Bij oude bladen kan de leerkracht eventueel helpen via ‘Met hulp zelf bijsnijden (optioneel)’.</li>

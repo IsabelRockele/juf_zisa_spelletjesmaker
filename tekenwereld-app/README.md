@@ -71,3 +71,10 @@ transparant; witte vlakken binnen gesloten figuren blijven staan. Een grotendeel
 ondoorzichtige buitenrand wordt afgewezen, zodat geen heel blad als figuur wordt
 verstuurd. `node paper.test.cjs` controleert grijze, warme, koele en geschaduwde
 achtergronden, kleurbehoud, gesloten witte vlakken en onbruikbare foto's.
+
+De leerlingpagina volgt gewijzigde QR-fragmenten zonder herladen. Een nieuwe of
+verlopen QR wist de vorige verbinding en de oude foto; late antwoorden van een
+vorige verbindingspoging worden genegeerd. De leerkrachtdialoog toont alleen een
+QR die bij de gekozen wereld hoort. Browsercontrole: aquarium → bloementuin,
+verlopen QR, snel wisselen met vertraagd antwoord, Andere klas-QR, en nieuwe
+leerkracht-QR na een wereldwissel.
