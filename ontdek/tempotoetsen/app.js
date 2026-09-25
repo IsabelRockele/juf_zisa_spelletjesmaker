@@ -132,12 +132,13 @@ function genereerOptelAftrek5(config, patroon) {
       : config.bewerking);
 
   if (bewerking === 'plus') {
-    const a = randInt(0, 5);
-    const b = randInt(0, 5 - a);
+    const metNul = Math.random() < 0.05;
+    const a = randInt(1, 4);
+    const b = metNul ? 0 : randInt(1, 5 - a);
     return { vraag: `${a} + ${b}`, antwoord: a + b };
   } else {
-    const a = randInt(0, 5);
-    const b = randInt(0, a);
+    const a = randInt(1, 5);
+    const b = Math.random() < 0.05 ? 0 : randInt(1, a);
     return { vraag: `${a} - ${b}`, antwoord: a - b };
   }
 }
@@ -149,12 +150,13 @@ function genereerOptelAftrek10(config, patroon) {
       : config.bewerking);
 
   if (bewerking === 'plus') {
-    const a = randInt(0, 10);
-    const b = randInt(0, 10 - a);
+    const metNul = Math.random() < 0.05;
+    const a = randInt(1, 9);
+    const b = metNul ? 0 : randInt(1, 10 - a);
     return { vraag: `${a} + ${b}`, antwoord: a + b };
   } else {
-    const a = randInt(0, 10);
-    const b = randInt(0, a);
+    const a = randInt(1, 10);
+    const b = Math.random() < 0.05 ? 0 : randInt(1, a);
     return { vraag: `${a} - ${b}`, antwoord: a - b };
   }
 }
@@ -316,6 +318,10 @@ function genereerToets(type, config, aantal = 10) {
   const oefeningen = [];
   const gezien = new Set();
   let veiligheid = 0;
+  let aantalNuloefeningen = 0;
+  const maxNuloefeningen = Math.floor(aantal / 10);
+  const isNuloefening = oef => typeof oef.vraag === 'string'
+    && /^(?:0 \+ \d+|\d+ [+-] 0)$/.test(oef.vraag);
 
   // Voor gemengd-modi: maak vooraf een balans-patroon (50/50)
   // Patroon bepaalt per oefening welke subtype die moet zijn
@@ -372,7 +378,9 @@ function genereerToets(type, config, aantal = 10) {
       ? oef.vraag
       : JSON.stringify(oef.vraag);
 
-    if (!gezien.has(sleutel)) {
+    const metNul = isNuloefening(oef);
+    if (!gezien.has(sleutel) && (!metNul || aantalNuloefeningen < maxNuloefeningen)) {
+      if (metNul) aantalNuloefeningen++;
       gezien.add(sleutel);
       oefeningen.push(oef);
     }
@@ -381,7 +389,9 @@ function genereerToets(type, config, aantal = 10) {
 
   // Veiligheidsnet: als we nog geen 10 hebben (te strenge filters), vul aan met duplicaten
   while (oefeningen.length < aantal && oefeningen.length > 0) {
-    oefeningen.push(oefeningen[oefeningen.length % Math.max(1, oefeningen.length)]);
+    const aanvulling = oefeningen.find(oef => !isNuloefening(oef));
+    if (!aanvulling) break;
+    oefeningen.push(aanvulling);
   }
 
   return oefeningen;

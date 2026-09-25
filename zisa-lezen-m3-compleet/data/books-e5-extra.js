@@ -1,0 +1,145 @@
+// E5: verdere oefening binnen de GO!-doelen voor 8–9 jaar.
+(() => {
+  const image = (folder,n) => `images/${folder}/${String(n).padStart(2,'0')}.webp`;
+  const theater = n => [2,9,11,13,14].includes(n) ? `images/e5-voorstelling/${String(n).padStart(2,'0')}-v2.webp` : image('e5-voorstelling',n);
+  const concert = n => image('e5-concert-mol',n);
+  const choice = (q,a,correct,hint,reviewPage) => ({type:'choice',q,a,correct,hint,...(Number.isInteger(reviewPage)?{reviewPage}:{})});
+  const page = (text,image,task) => ({text,image,...(task?{task}:{})});
+  const game = (title,q,a,correct,hint,context,reviewPage) => ({...choice(q,a,correct,hint,reviewPage),icon:'🔎',title,...(context?{context}:{})});
+  window.ZISA_BOOKS.push({
+    id:'e5-voorstelling',level:'E5',title:'De voorstelling gaat door',
+    blurb:'Net voor het buurtfeest valt de stroom uit. Kunnen Noor en Finn hun poppenspel nog redden?',cover:theater(1),
+    pages:[
+      page('Voor het buurtfeest oefenen Noor en Finn een schaduwspel in het kleine theater. Noor speelt met een groene draak van karton, terwijl Finn een rode vogel bestuurt. Beide figuren zitten op een houten stokje. Ze hebben weken aan hun voorstelling gewerkt.',theater(1)),
+      page('Tante Roos zet achter het witte doek een lamp aan. Als de kinderen hun figuren ertussen houden, verschijnen aan de voorkant grote schaduwen. Hun handen blijven onder de rand. Roos gaat aan de andere kant kijken of het publiek straks alles kan zien.',theater(2),choice('Waar moeten de figuren staan om schaduwen op het doek te maken?',['Tussen de lamp en het doek.','Achter het publiek.','Onder de tafel, zonder licht.'],0,'Zoek tussen welke twee dingen de kinderen hun figuren houden.')),
+      page('Finn legt het toneeltekstje op de tafel en leest met een piepstem. Noor antwoordt met een zware drakenstem.\n\nVOGEL: In mijn nest is plaats voor één vogel.\nDRAAK: En voor één piepkleine draak?\nVOGEL: Dan moet jouw staart buiten blijven!\n\nBij die laatste zin schiet Noor telkens in de lach.',theater(3)),
+      page('Plotseling dooft de lamp en verdwijnt de draak van het doek. Ook de lampen boven de stoelen gaan uit. Door de hoge ramen valt nog daglicht naar binnen. Tante Roos kijkt in de gang en ontdekt dat daar evenmin licht brandt.',theater(4),choice('Waarom denkt Roos dat het probleem groter is dan één kapotte lamp?',['Omdat Noor de draak te laag houdt.','Omdat ook andere lampen niet branden.','Omdat de vogel een rode kleur heeft.'],1,'Vergelijk het licht in de zaal met het licht in de gang.')),
+      page('Bij haar bureau belt Roos de beheerder van het gebouw. De stroom is uitgevallen en komt vandaag niet meteen terug. Ze zet de lamp veilig uit. Wanneer Roos op haar horloge kijkt, zucht Finn: over een halfuur zouden de eerste bezoekers komen.',theater(5)),
+      page('Finn laat zijn rode vogel op de tafel zakken. ‘Dan kunnen we alles wel inpakken,’ mompelt hij. Noor zegt niets, maar draait haar groene draak langzaam om. De schaduw is verdwenen; de grappige figuur zelf is er nog. Ze kijkt naar de zonnige binnenplaats achter het raam.',theater(6),choice('Wat brengt Noor waarschijnlijk op een nieuw idee?',['Ze merkt dat de figuren zonder lamp nog bruikbaar zijn.','Ze ontdekt dat de stroom alweer werkt.','Ze ziet dat alle bezoekers naar huis gaan.'],0,'Denk aan het verschil tussen de schaduw en de kartonnen figuur.')),
+      page('‘We kunnen met de figuren zelf spelen!’ zegt Noor. ‘Buiten is genoeg licht.’ Roos opent de deur naar de binnenplaats. Daar staat een brede houten tafel onder een afdak. Als de kinderen erachter knielen, kunnen ze hun figuren boven het tafelblad laten bewegen.',theater(7)),
+      page('Eerst zetten ze de draak en de vogel samen in een lage kist. Roos draagt die naar buiten, terwijl Noor een blauw kleed meeneemt. Finn neemt zijn toneeltekst mee. Het witte scherm en de uitgeschakelde lamp blijven in de zaal; die hebben ze buiten niet nodig.',theater(8),choice('Wat laten ze in de zaal achter omdat het nieuwe plan dat niet nodig heeft?',['De twee kartonnen figuren.','De toneeltekst van Finn.','Het witte scherm en de lamp.'],2,'Bedenk wat bij een schaduwspel hoort, maar niet bij dit poppenspel.')),
+      page('Op de binnenplaats leggen ze het blauwe kleed over de voorkant van de tafel. Noor en Finn knielen erachter en nemen hun figuren uit de kist. Roos kijkt vanaf de eerste rij stoelen. ‘Ik zie twee prachtige poppen, maar ook een paar krullen,’ zegt ze lachend.',theater(9)),
+      page('Noor zakt iets lager, zodat haar hoofd achter het kleed verdwijnt. Finn knielt ook lager, maar houdt zijn vogel hoger: de snavel raakte telkens de tafelrand. Daarna oefenen ze opnieuw. Deze keer ziet Roos alleen de draak en de vogel, precies zoals de kinderen het bedoelen.',theater(10),choice('Waarom moeten Noor en Finn allebei iets anders veranderen?',['Ze gebruiken verschillende kleuren verf.','Noors hoofd is zichtbaar, maar Finns vogel zit te laag.','Roos wil liever drie figuren zien.'],1,'Vergelijk wat er bij Noor en bij Finn nog niet goed gaat.')),
+      page('De figuren staan rechtop in de kist op de tafel. Bij de ingang hangt Roos een bericht. Finn leest het na.\n\nBeste bezoekers, ons poppenspel gaat door op de binnenplaats. Volg de pijlen vanaf de ingang. De voorstelling begint om drie uur. Tot zo!\n\nNoor wijst naar de klok: ze hebben nog net tijd.',theater(11)),
+      page('Wanneer de eerste bezoekers zitten, klinkt Finns vogelstem boven de tafel. Noor laat de draak nieuwsgierig dichterbij komen. Er zijn geen schaduwen meer, maar het publiek begrijpt meteen wie er praat. Bij de grap over de staart moet zelfs tante Roos hard lachen.',theater(12),choice('Waaraan merk je dat de nieuwe voorstelling werkt?',['De lamp achter het witte scherm gaat weer aan.','Het publiek begrijpt het spel en lacht om de grap.','Finn verstopt de vogel in de kist.'],1,'Zoek een reactie van de bezoekers.')),
+      page('Midden in het spel vergeet Finn één zin. Hij kijkt snel naar Noor, die haar draak verbaasd laat rondkijken. ‘Zoek je soms je woorden?’ bromt ze. Finn glimlacht en vindt zijn vogelstem terug. Het publiek denkt dat dit grappige stukje bij het verhaal hoort.',theater(13)),
+      page('Na het laatste applaus komen de kinderen achter de tafel vandaan. Ze zetten de draak en de vogel terug in de kist. ‘Dit was een fantastische voorstelling,’ vindt Roos. Finn kijkt naar het lege theaterraam. ‘En daar hadden we dus geen stroom voor nodig.’',theater(14),choice('Welke zin van Roos is een mening?',['De figuren zitten op stokjes.','De kinderen zetten de figuren in de kist.','Dit was een fantastische voorstelling.'],2,'Een mening vertelt wat iemand ervan vindt.')),
+      page('Roos geeft hun een klein doosje chocolade om samen te delen. Noor buigt de draak nog één keer boven de kist. ‘Heeft iemand soms een reusachtig nest over?’ vraagt ze met haar zware stem. Finn schudt lachend zijn hoofd. ‘Alleen als jouw staart buiten blijft!’',theater(15))
+    ],
+    endTask:choice('Welke hoofdgedachte past bij het hele verhaal?',['Een kapotte lamp maakt ieder feest onmogelijk.','Door hun plan aan te passen, redden kinderen hun poppenspel.','Een rode vogel zoekt een groter nest in het bos.'],1,'Denk aan het probleem en hoe de kinderen het oplossen.')
+  },{
+    id:'e5-concert-mol',level:'E5',title:'Het concert van Mol',
+    blurb:'Tijdens de repetitie weet Mol precies wat hij moet doen. Maar op het podium kijkt iedereen naar hem.',cover:concert(1),
+    pages:[
+      page('Onder de wilg oefenen Eekhoorn en Das voor het zomerconcert. Eekhoorn speelt viool en Das speelt cello. Mol hoort meteen wanneer ze niet tegelijk beginnen. Daarom vragen zijn vrienden of hij hun dirigent wil zijn. Met zijn stokje kan hij aangeven wanneer de muziek start.',concert(1)),
+      page('Tijdens de repetitie gaat het uitstekend. Mol kijkt naar beide muzikanten, ademt rustig in en tilt zijn stokje op. Zodra hij het laat zakken, beginnen ze samen. In een groen boekje schrijft hij drie woorden die hem helpen: kijken, ademen, beginnen.',concert(2),choice('Waarom schrijft Mol die drie woorden in zijn boekje?',['Om de namen van de instrumenten te onthouden.','Om zichzelf aan de volgorde van zijn start te herinneren.','Om te weten welke weg naar het plein loopt.'],1,'De woorden beschrijven wat Mol vlak voor de muziek doet.')),
+      page('Das leest de uitnodiging voor die Eekhoorn heeft gemaakt.\n\nKom zaterdag naar ons zomerconcert op het dorpsplein. Luister naar viool en cello onder leiding van Mol. We beginnen om vier uur. Iedereen is welkom!\n\nMol glimlacht bij zijn naam. Toch voelt hij een kriebel in zijn buik wanneer hij aan al die bezoekers denkt.',concert(3)),
+      page('Op zaterdag bergen de muzikanten hun instrumenten op in stevige koffers. Eekhoorn draagt haar kleine vioolkoffer; Das draagt zijn grotere cellokoffer. Mol stopt zijn groene boekje en het stokje in een schoudertas. Samen lopen ze langs de berkenlaan naar het dorpsplein.',concert(4),choice('Waarom zie je onderweg geen losse viool of cello?',['De instrumenten zitten veilig in hun koffers.','De muzikanten hebben hun instrumenten verkocht.','De instrumenten staan nog onder de wilg.'],0,'Zoek wat de vrienden voor hun vertrek doen.')),
+      page('Het houten podium staat midden op het plein. Achteraan hangt een donkerblauw gordijn, ervoor staan rijen lege stoelen. Das zet zijn cello naast de kruk en Eekhoorn haalt haar viool tevoorschijn. De lege koffers leggen ze achter het gordijn. Mol legt zijn boekje op de muziekstandaard.',concert(5)),
+      page('Langzaam vullen de stoelen zich met bezoekers. Mol houdt zijn stokje zo stevig vast dat zijn vingers stijf worden. Hij kijkt naar zijn vrienden, maar ziet overal ogen die hem aankijken. Wanneer hij zijn arm wil optillen, blijft die dicht tegen zijn lichaam hangen.',concert(6),choice('Wat kun je uit Mols gedrag afleiden?',['Hij heeft zijn stokje thuis laten liggen.','Hij vindt het spannend om voor het publiek te staan.','Hij wil meteen een ander instrument kopen.'],1,'Let op zijn stijve vingers en op de arm die hij niet optilt.')),
+      page('Eekhoorn houdt haar strijkstok stil en wacht op het teken. Ook Das begint nog niet, hoewel hij zijn eerste noot al klaar heeft. Mol hoort iemand op de eerste rij kuchen. Het lijkt wel alsof de stilte steeds groter wordt. Was hij maar weer onder de wilg.',concert(7)),
+      page('‘We nemen heel even pauze,’ zegt Das tegen het publiek. Hij legt zijn cello veilig in de koffer achter het gordijn; Eekhoorn bergt haar viool daar ook op. Dan stappen ze met Mol naar de rustige zijkant van het podium. Mol neemt zijn boekje mee.',concert(8),choice('Waarom beginnen Eekhoorn en Das niet gewoon zonder Mol te spelen?',['Ze willen Mol helpen en samen verdergaan.','Ze weten niet meer welk instrument van hen is.','Ze mogen nooit muziek maken op een plein.'],0,'Denk aan hoe de vrienden op Mols stilte reageren.')),
+      page('‘Ik dacht dat een dirigent nooit bang mocht zijn,’ fluistert Mol. Eekhoorn schudt haar hoofd. Zij had voor haar eerste concert ook trillende poten. Das gaat op zijn hurken zitten. ‘Je hoeft niet naar alle stoelen tegelijk te kijken. Je kunt eerst alleen naar ons kijken.’',concert(9)),
+      page('Mol opent zijn groene boekje bij de drie woorden. Terwijl zijn vrienden voor hem staan, oefent hij de vertrouwde stappen zonder muziek. Eerst kijkt hij hen aan. Dan ademt hij rustig in en beweegt hij het stokje. Bij de derde poging zijn zijn schouders al minder stijf.',concert(10),choice('Wat helpt Mol nu om het begin te oefenen?',['Hij probeert alle bezoekers tegelijk aan te kijken.','Hij oefent de vertrouwde stappen met alleen zijn vrienden.','Hij gooit zijn boekje weg en loopt naar huis.'],1,'Vergelijk deze rustige oefening met de situatie voor de volle stoelen.')),
+      page('Samen keren ze terug naar hun plaatsen. Eekhoorn en Das halen hun instrumenten uit de koffers; Mol legt zijn boekje open op de standaard. Hij zegt tegen het publiek dat het zijn eerste concert als dirigent is. Op de eerste rij knikt een oude egel hem vriendelijk toe.',concert(11)),
+      page('Mol kijkt naar Eekhoorn en Das, die allebei klaar zijn. Hij ademt in en brengt het stokje omhoog. Als hij het laat zakken, klinkt de eerste noot van de viool tegelijk met die van de cello. De melodie vult het plein. Deze keer blijft de muziek niet in hun hoofden zitten.',concert(12),choice('Wat laat het duidelijkst zien dat de nieuwe start lukt?',['De instrumenten liggen in gesloten koffers.','Het gordijn heeft een donkerblauwe kleur.','Viool en cello beginnen tegelijk te klinken.'],2,'Zoek het gevolg van Mols teken.')),
+      page('Tijdens het rustige deel maakt Mol kleinere bewegingen. Zijn vrienden volgen het ritme en spelen zachter. Hij durft even naar de eerste rij te kijken. De oude egel luistert met gesloten ogen en beweegt één poot mee. Mol richt zich weer op zijn muzikanten.',concert(13)),
+      page('Na de laatste noot laat Mol zijn stokje zakken. Een ogenblik blijft het stil; dan begint het applaus. Eekhoorn en Das buigen naast hem. Mol voelt dezelfde kriebel als voor het concert, maar nu moet hij ervan lachen. ‘Zullen we nog een keer?’ fluistert hij.',concert(14),choice('Wat is er bij Mol veranderd sinds het begin?',['Hij durft opnieuw te dirigeren, ook al voelt hij nog spanning.','Hij wil nooit meer samen met zijn vrienden spelen.','Hij denkt dat hij geen hulp meer nodig kan hebben.'],0,'Vergelijk zijn wens onder de wilg te zijn met zijn laatste vraag.')),
+      page('Als de bezoekers vertrokken zijn, bergen de vrienden alles weer op. Onderweg stopt Mol even bij een bank om zijn groene boekje open te slaan. Onder de drie woorden schrijft hij een vierde: samen. Dan bergt hij het op en haalt zijn vrienden in, terwijl de melodie nog in zijn hoofd klinkt.',concert(15))
+    ],
+    endTask:choice('Welke hoofdgedachte past bij dit verhaal?',['Met steun van zijn vrienden durft Mol het concert te leiden.','Mol leert in één dag viool en cello spelen.','Drie dieren zoeken een verdwenen muziekboek.'],0,'Vat Mols probleem en de oplossing samen.')
+  });
+
+  window.ZISA_LEVEL_GAMES={...(window.ZISA_LEVEL_GAMES||{}),
+    'e5-voorstelling':[
+      game('De hoofdgedachte','Welke zin vat het hele verhaal het best samen?',['Roos deelt chocolade uit op een binnenplaats.','Kinderen redden hun voorstelling door hun plan aan te passen.','Een draak bouwt buiten een nest voor een vogel.'],1,'Neem het probleem én de oplossing mee.',null,13),
+      {type:'sequence',icon:'⏳',title:'Van plan naar uitvoering',q:'Zet de gebeurtenissen in de juiste volgorde.',items:['De stroom in het gebouw valt uit.','Noor bedenkt dat ze met de figuren zelf kunnen spelen.','Ze oefenen het poppenspel op de binnenplaats.','De bezoekers lachen om de voorstelling.'],hint:'Wat moeten de kinderen oplossen voordat het publiek komt?'},
+      {type:'sentence',icon:'🧩',title:'Bouw een duidelijke zin',q:'Zet de woordgroepen in de juiste volgorde.',image:theater(8),parts:[{text:'Roos',role:'wie'},{text:'draagt',role:'doet'},{text:'de kist met figuren',role:'wat'},{text:'naar de binnenplaats',role:'waar'}]},
+      game('Hoofdzaak en bijzaak','Welke informatie kun je weglaten uit een korte samenvatting?',['De stroom valt uit.','De voorstelling verhuist naar buiten.','Finn gebruikt een piepstem voor de vogel.'],2,'Een bijzaak geeft kleur aan het verhaal, maar is minder nodig voor de kern.',null,2),
+      game('Lees tussen de regels','Waarom laat Finn zijn vogel op de tafel zakken?',['Hij is teleurgesteld en denkt dat het spel niet kan doorgaan.','Hij wil de vogel een nieuw stokje geven.','Hij gaat meteen chocolade halen.'],0,'Kijk ook naar wat Finn op dat moment zegt.',null,5),
+      game('Een verwijswoord','Waarnaar verwijst die in deze zin?',['de bezoekers','het witte scherm en de lamp','Noor en Finn'],1,'Lees de twee zinnen samen.','Het witte scherm en de uitgeschakelde lamp blijven in de zaal; die hebben ze buiten niet nodig.',7),
+      game('Oorzaak en gevolg','Waardoor ziet het publiek Noors hoofd niet meer?',['De lamp achter het scherm schijnt feller.','Finn laat zijn vogel zakken.','Noor knielt lager achter het kleed.'],2,'Zoek welke verandering het probleem oplost.',null,9),
+      game('Het doel van een bericht','Waarom hangt Roos het bericht bij de ingang?',['Om bezoekers naar de juiste plek en het juiste tijdstip te verwijzen.','Om uit te leggen hoe je kartonnen figuren knipt.','Om te vertellen wie de beste acteur is.'],0,'Wat moeten bezoekers dankzij het bericht weten?',null,10),
+      game('Woordenschat in de tekst','Wat betekent de beheerder van het gebouw?',['iemand die het publiek speelt','iemand die voor het gebouw zorgt','iemand die de vogel bestuurt'],1,'Roos belt deze persoon wanneer er een probleem met het gebouw is.',null,4),
+      game('De verleden tijd','Welke zin staat in de verleden tijd?',['Noor draait de draak om.','Noor zal de draak omdraaien.','Noor draaide de draak om.'],2,'Zoek de zin die vertelt wat eerder gebeurde.'),
+      game('Onderwerp en persoonsvorm','Wat is het onderwerp van deze zin?',['Noor en Finn','nemen','hun figuren'],0,'Wie nemen hun figuren uit de kist?','Op de binnenplaats nemen Noor en Finn hun figuren uit de kist.'),
+      game('De persoonsvorm','Wat is de persoonsvorm in deze zin?',['achter het kleed','knielen','de kinderen'],1,'Maak een vraag: Knielen de kinderen achter het kleed?','Achter het kleed knielen de kinderen.'),
+      game('Wat laat het verhaal zien?','Welke gedachte past het best bij de afloop?',['Een voorstelling is alleen goed met veel lampen.','Je moet ieder probleem alleen oplossen.','Een nieuw plan kan helpen als het eerste plan niet meer werkt.'],2,'Denk aan wat de kinderen veranderen en wat toch lukt.',null,13),
+      game('Een teksttype herkennen','Welk teksttype herken je aan de namen vóór de gesproken zinnen?',['een toneeltekst','een recept','een nieuwsbericht'],0,'De namen laten zien wie welke woorden zegt.',null,2)
+    ],
+    'e5-concert-mol':[
+      game('De hoofdgedachte','Welke zin vat het hele verhaal het best samen?',['Mol koopt een nieuw groen boekje op het dorpsplein.','De bezoekers wachten omdat de instrumenten zoek zijn.','Met hulp van zijn vrienden durft Mol het concert te leiden.'],2,'Denk aan wat Mol eerst tegenhoudt en wat hem later helpt.',null,13),
+      {type:'sequence',icon:'⏳',title:'Mols eerste concert',q:'Zet de gebeurtenissen in de juiste volgorde.',items:['Mol oefent het begin onder de wilg.','Voor het publiek durft Mol niet te beginnen.','Zijn vrienden oefenen rustig met hem aan de zijkant.','Mol geeft het teken en de muziek begint.'],hint:'Vergelijk de repetitie met het echte concert.'},
+      {type:'sentence',icon:'🧩',title:'Bouw een duidelijke zin',q:'Zet de woordgroepen in de juiste volgorde.',image:concert(11),parts:[{text:'Mol',role:'wie'},{text:'legt',role:'doet'},{text:'zijn groene boekje',role:'wat'},{text:'op de muziekstandaard',role:'waar'}]},
+      game('Hoofdzaak en bijzaak','Welke informatie is een bijzaak in een korte samenvatting?',['Het gordijn achter het podium is donkerblauw.','Mol durft voor het publiek niet te beginnen.','Zijn vrienden helpen hem om opnieuw te starten.'],0,'Welke informatie kun je weglaten zonder het probleem en de oplossing te verliezen?',null,4),
+      game('Lees tussen de regels','Waarom verlangt Mol terug naar de wilg?',['Daar heeft hij zijn instrument vergeten.','Tijdens de repetitie zonder publiek voelde hij zich zekerder.','Op het plein groeien geen bloemen.'],1,'Vergelijk zijn gedrag bij de repetitie en op het podium.',null,6),
+      game('Een verwijswoord','Naar wie verwijst die in deze zin?',['de bezoekers op het plein','de stoelen voor het podium','Eekhoorn en Das'],2,'Zoek de personen die klaar zijn om muziek te maken.','Mol kijkt naar Eekhoorn en Das, die allebei klaar zijn.',11),
+      game('Feit en mening','Welke zin is een mening?',['Dit is het mooiste concert van de zomer.','Eekhoorn speelt viool.','Mol schrijft in een groen boekje.'],0,'Wat iemand het mooiste vindt, kan per persoon verschillen.'),
+      game('Het doel van een uitnodiging','Wat willen de dieren met hun uitnodiging bereiken?',['Uitleggen hoe een cello gemaakt wordt.','Mensen vragen om naar hun concert te komen.','Vertellen welke muzikant het bangst is.'],1,'Welke reactie hopen de makers bij de lezer op te roepen?',null,2),
+      game('Woordenschat in de tekst','Wat doet een dirigent in dit verhaal?',['Hij draagt alle koffers naar huis.','Hij verkoopt kaartjes aan de ingang.','Hij geeft de muzikanten tekens voor het samen spelen.'],2,'Kijk naar het stokje en naar het begin van de muziek.',null,1),
+      game('De verleden tijd','Welke zin staat in de verleden tijd?',['Das speelde cello.','Das speelt cello.','Das gaat cello spelen.'],0,'Zoek de vorm die vertelt wat eerder gebeurde.'),
+      game('Het onderwerp','Wat is het onderwerp van deze zin?',['op het teken','Eekhoorn en Das','wachten'],1,'Vraag: wie wachten op het teken?','Op het teken wachten Eekhoorn en Das.'),
+      game('De persoonsvorm','Wat is de persoonsvorm van deze zin?',['zijn groene boekje','na het concert','sluit'],2,'Maak een vraag: Sluit Mol zijn groene boekje?','Na het concert sluit Mol zijn groene boekje.'),
+      game('De boodschap van het slot','Waarom schrijft Mol het woord samen in zijn boekje?',['Hij beseft dat de steun van zijn vrienden belangrijk was.','Hij weet de namen van de instrumenten niet meer.','Hij wil voortaan in zijn eentje optreden.'],0,'Verbind dit laatste woord met de hulp tijdens de pauze.',null,14),
+      game('Fictie herkennen','Waaraan merk je dat dit verhaal fictie is?',['Er is een concert met bezoekers.','De dieren praten, schrijven en spelen instrumenten als mensen.','De muzikanten bewaren hun instrumenten in koffers.'],1,'Zoek iets dat bij verzonnen dierenpersonages hoort.')
+    ]
+  };
+  window.ZISA_SPEED_GAMES={...(window.ZISA_SPEED_GAMES||{}),
+    'e5-voorstelling':{words:['schaduwspel','theater','bestuurt','figuren','publiek','toneeltekst','plotseling','evenmin','bureau','beheerder','horloge','binnenplaats','uitgeschakelde','nieuwsgierig','applaus','fantastische','chocolade','reusachtig']},
+    'e5-concert-mol':{words:['zomerconcert','viool','cello','dirigent','repetitie','muzikanten','uitstekend','uitnodiging','bezoekers','schoudertas','podium','muziekstandaard','strijkstok','hoewel','ogenblik','melodie','ritme','applaus']}
+  };
+  window.ZISA_FLUENCY_BOOKS={...(window.ZISA_FLUENCY_BOOKS||{}),
+    'e5-voorstelling':[
+      {title:'Lees in woordgroepen',q:'Welke verdeling houdt de woorden die bij elkaar horen samen?',focus:'Als de stroom uitvalt, verplaatsen de kinderen hun voorstelling.',a:['Als de / stroom uitvalt verplaatsen / de kinderen hun voorstelling.','Als de stroom uitvalt / verplaatsen de kinderen / hun voorstelling.','Als de stroom / uitvalt verplaatsen de / kinderen hun voorstelling.'],correct:1,good:'Juist! Lees de woordgroepen samen en pauzeer kort bij de komma.'},
+      {title:'Een leenwoord lezen',q:'Hoe klinkt het laatste stukje van bureau?',focus:'bureau',a:['als oo','als au','als oe'],correct:0,good:'Juist! In bureau klinkt eau als oo. Lees het hele woord hardop.'},
+      {title:'Een leenwoord lezen',q:'Welk woord begint met dezelfde klank als sjaal?',focus:'chocolade',a:['kaart','chocolade','stoel'],correct:1,good:'Juist! De ch van chocolade klinkt hier als sj. Lees chocolade rustig hardop.'},
+      {title:'Lettergrepen',q:'Hoe verdeel je voorstelling in lettergrepen?',focus:'voorstelling',a:['vo-orstel-ling','voor-stel-ling','voorst-el-ling'],correct:1,good:'Juist! voor-stel-ling. Lees de delen en daarna het hele woord.'},
+      {title:'Nauwkeurig lezen',q:'Welk woord staat hier precies?',focus:'uitgeschakelde',a:['uitgeschakelde','ingeschakelde','uitgeschakelde lamp'],correct:0,good:'Juist! Kijk naar het begin én het einde van het woord.'},
+      {title:'Lezen met intonatie',q:'Welke stem past bij Finn op dit moment?',focus:'‘Dan kunnen we alles wel inpakken,’ mompelt hij.',a:['een vrolijke juichstem','een boze schreeuwstem','een zachte, teleurgestelde stem'],correct:2,good:'Juist! Lees de zin zacht en teleurgesteld; dat past bij mompelen.'}
+    ],
+    'e5-concert-mol':[
+      {title:'Lees in woordgroepen',q:'Welke verdeling past het best bij de betekenis?',focus:'Wanneer Mol zijn stokje laat zakken, beginnen zijn vrienden samen.',a:['Wanneer Mol zijn stokje laat zakken / beginnen zijn vrienden samen.','Wanneer Mol zijn / stokje laat zakken beginnen / zijn vrienden samen.','Wanneer / Mol zijn stokje laat / zakken beginnen zijn vrienden samen.'],correct:0,good:'Juist! Houd het eerste zinsdeel samen en pauzeer kort bij de komma.'},
+      {title:'Een leenwoord lezen',q:'Hoe spreek je het begin van cello uit?',focus:'cello',a:['als k','als s','als tsj'],correct:2,good:'Juist! Cello begint met de klank tsj. Lees het hele woord hardop.'},
+      {title:'Een leenwoord lezen',q:'Hoe klinkt de eerste c in concert?',focus:'concert',a:['als k','als s','als sj'],correct:0,good:'Juist! De eerste c klinkt als k. De tweede c klinkt als s: lees het hele woord concert.'},
+      {title:'Een samenstelling',q:'Uit welke twee woorddelen bestaat strijkstok?',focus:'strijkstok',a:['strijk en stok','strij en kstok','strijkst en ok'],correct:0,good:'Juist! Lees strijk en stok, en daarna strijkstok als één woord.'},
+      {title:'Lettergrepen',q:'Hoe verdeel je muzikanten in lettergrepen?',focus:'muzikanten',a:['muz-i-kant-en','mu-zi-kan-ten','muzi-kant-en'],correct:1,good:'Juist! mu-zi-kan-ten. Lees de vier delen en verbind ze daarna.'},
+      {title:'Lezen met intonatie',q:'Hoe lees je Mols vraag aan het einde?',focus:'‘Zullen we nog een keer?’ fluistert hij.',a:['hard en kwaad','zacht en enthousiast','vlak en zonder vraagtoon'],correct:1,good:'Juist! Fluister de vraag met enthousiasme; Mol wil opnieuw beginnen.'}
+    ]
+  };
+  window.ZISA_STORY_GLOSSARIES={...(window.ZISA_STORY_GLOSSARIES||{}),
+    'e5-voorstelling':{
+      schaduwspel:{text:'Een spel waarbij het publiek schaduwen van figuren op een doek ziet. Een lamp achter het doek maakt de schaduwen.',image:'images/woorduitleg/e5-schaduwspel.webp'},
+      theater:'Een gebouw of zaal waar je naar toneel, dans of muziek kunt kijken.',
+      bestuurt:'Laat iets bewegen en bepaalt wat het doet. Finn beweegt de vogel met het stokje.',
+      figuren:'Hier: de kartonnen draak en vogel waarmee de kinderen spelen.',
+      publiek:'De mensen die naar een voorstelling komen kijken of luisteren.',
+      toneeltekst:'De tekst van een toneelstuk. Er staat wie welke woorden zegt.',
+      evenmin:'Ook niet. In de gang brandt ook geen licht.',
+      bureau:'Een tafel waaraan je schrijft of ander werk doet.',
+      beheerder:'Iemand die voor een gebouw zorgt en helpt als er iets geregeld of hersteld moet worden.',
+      horloge:'Een klein klokje dat je bijvoorbeeld om je pols draagt.',
+      mompelt:'Spreekt zacht en niet heel duidelijk.',
+      binnenplaats:'Een open plek buiten, tussen de delen van een gebouw.',
+      afdak:'Een dak dat een open plek eronder beschut.',
+      applaus:'Het klappen van mensen die willen laten merken dat ze iets goed vonden.',
+      fantastische:'Heel erg mooie of goede. Roos vindt de voorstelling bijzonder geslaagd.'
+    },
+    'e5-concert-mol':{
+      zomerconcert:'Een muziekuitvoering in de zomer, met publiek dat komt luisteren.',
+      viool:{text:'Een snaarinstrument dat je onder je kin houdt. Meestal strijk je met een strijkstok over de snaren.',image:'images/woorduitleg/e5-viool.webp'},
+      cello:{text:'Een groot snaarinstrument. Je zit op een stoel en houdt het tussen je knieën. Een pin onderaan steunt op de grond.',image:'images/woorduitleg/e5-cello.webp'},
+      dirigent:'Iemand die muzikanten met gebaren helpt om samen te spelen, bijvoorbeeld om tegelijk te beginnen.',
+      repetitie:'Een oefenmoment voor een voorstelling of concert.',
+      muzikanten:'Mensen die muziek maken. In dit verzonnen verhaal zijn het dieren die instrumenten spelen.',
+      uitnodiging:'Een bericht waarin je iemand vraagt om ergens bij te zijn.',
+      podium:'Een verhoogde plek waarop je optreedt, zodat het publiek je goed kan zien.',
+      muziekstandaard:{text:'Een steun waarop je bladmuziek of een boekje zet, zodat je het tijdens het spelen kunt lezen.',image:'images/woorduitleg/e5-muziekstandaard.webp'},
+      strijkstok:'Een stok met gespannen haren waarmee je over de snaren van een viool of cello strijkt.',
+      kuchen:'Kort en zacht hoesten.',
+      vertrouwde:'Wat je al kent en waar je aan gewend bent.',
+      melodie:'Een reeks tonen die samen een wijsje vormen.',
+      ritme:'De afwisseling van lange en korte klanken en stiltes in muziek.',
+      applaus:'Het klappen waarmee het publiek laat merken dat het de muziek of voorstelling mooi vond.'
+    }
+  };
+})();

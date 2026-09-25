@@ -318,8 +318,21 @@ document.addEventListener("DOMContentLoaded", () => {
         else { selectedTables = (options.selectedTables || []).map(Number).filter(n => n > 0); }
         const operation = operationType.includes('beide') ? (operationType.includes('opt_aft') ? (Math.random() > 0.5 ? 'optellen' : 'aftrekken') : (Math.random() > 0.5 ? 'vermenigvuldigen' : 'delen')) : operationType;
         switch (operation) {
-            case 'optellen': if (desiredOutcome > maxRange * 2) return null; for (let i = 0; i < 50; i++) { const num1 = Math.floor(Math.random() * (desiredOutcome + 1)); const num2 = desiredOutcome - num1; if (num1 <= maxRange && num2 <= maxRange && num2 >= 0) return `${num1} + ${num2}`; } return null;
-            case 'aftrekken': if (desiredOutcome > maxRange) return null; for (let i = 0; i < 100; i++) { const num2 = Math.floor(Math.random() * (maxRange - desiredOutcome + 1)); const num1 = desiredOutcome + num2; if (num1 <= maxRange) return `${num1} - ${num2}`; } return null;
+            case 'optellen': {
+                if (desiredOutcome < 0 || desiredOutcome > maxRange * 2) return null;
+                // Kies twee positieve termen zodra de uitkomst dat toelaat.
+                const minTerm = desiredOutcome >= 2 ? Math.max(1, desiredOutcome - maxRange) : 0;
+                const maxTerm = desiredOutcome >= 2 ? Math.min(maxRange, desiredOutcome - 1) : desiredOutcome;
+                const num1 = minTerm + Math.floor(Math.random() * (maxTerm - minTerm + 1));
+                return `${num1} + ${desiredOutcome - num1}`;
+            }
+            case 'aftrekken': {
+                if (desiredOutcome < 0 || desiredOutcome > maxRange) return null;
+                // Alleen bij de maximale uitkomst is aftrekken van nul onvermijdelijk.
+                const ruimte = maxRange - desiredOutcome;
+                const num2 = ruimte > 0 ? 1 + Math.floor(Math.random() * ruimte) : 0;
+                return `${desiredOutcome + num2} - ${num2}`;
+            }
             case 'vermenigvuldigen': if (selectedTables.length === 0) return null; const possibleFactors = selectedTables.filter(factor => desiredOutcome % factor === 0 && (desiredOutcome / factor) <= 10); if (possibleFactors.length > 0) { const factor1 = possibleFactors[Math.floor(Math.random() * possibleFactors.length)]; const factor2 = desiredOutcome / factor1; return Math.random() > 0.5 ? `${factor1} x ${factor2}` : `${factor2} x ${factor1}`; } return null;
             case 'delen': if (selectedTables.length === 0 || desiredOutcome > 10) return null; const possibleDivisors = selectedTables.filter(divisor => (desiredOutcome * divisor) <= 100); if (possibleDivisors.length > 0) { const divisor = possibleDivisors[Math.floor(Math.random() * possibleDivisors.length)]; const dividend = desiredOutcome * divisor; return `${dividend} : ${divisor}`; } return null;
             default: return null;

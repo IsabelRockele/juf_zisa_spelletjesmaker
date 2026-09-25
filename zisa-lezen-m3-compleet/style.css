@@ -305,6 +305,8 @@ body.mission-mode main{display:grid;place-items:center}
 .story-image[style*="images/e4-aardbeien/"],
 .story-image[style*="images/m5-lege-mand/"],
 .story-image[style*="images/m5-nieuw-papier/"],
+.story-image[style*="images/e5-voorstelling/"],
+.story-image[style*="images/e5-concert-mol/"],
 .story-image[style*="images/e4-reus-feest/"]{background-size:contain}
 @media (min-width:841px) and (max-width:1100px){
   .inline-answers{grid-template-columns:1fr}
