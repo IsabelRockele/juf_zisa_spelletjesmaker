@@ -417,12 +417,6 @@ function renderBookCover(){
   document.querySelector("#coverStart").onclick=renderReader;
   document.querySelector("#coverWords")?.addEventListener("click",renderWordStart);
   document.querySelector("#coverPractice")?.addEventListener("click",startFluencyBook);
-  // TEMPORARY REVIEW SHORTCUT: remove after the story exercises have been reviewed.
-  const reviewShortcut=document.createElement("button");
-  reviewShortcut.id="coverReviewTasks";reviewShortcut.type="button";reviewShortcut.className="cover-secondary";
-  reviewShortcut.textContent="Bekijk de opdrachten ›";
-  reviewShortcut.addEventListener("click",renderEndTask);
-  document.querySelector(".cover-actions").append(reviewShortcut);
   document.querySelectorAll(".book-thumb:not(.pro-locked)").forEach(btn=>btn.onclick=()=>openBook(books.find(book=>book.id===btn.dataset.book)));
 }
 
