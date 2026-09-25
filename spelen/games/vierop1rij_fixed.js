@@ -13,13 +13,30 @@ const kolomKnoppen = document.querySelectorAll(".kolom-knop");
 const antwoordInput = document.getElementById("antwoordInput");
 const controleerBtn = document.getElementById("controleerBtn");
 
-// iPad-proof: geen keyboard en nooit focus vasthouden
+// Readonly voorkomt het schermtoetsenbord op tablets; fysieke toetsen verwerken we zelf.
 antwoordInput.readOnly = true;
 antwoordInput.setAttribute('inputmode', 'none');
 antwoordInput.setAttribute('autocomplete', 'off');
 antwoordInput.setAttribute('autocorrect', 'off');
 antwoordInput.setAttribute('autocapitalize', 'off');
-antwoordInput.addEventListener('focus', () => antwoordInput.blur());
+function verwerkAntwoordToets(toets) {
+  if (antwoordInput.disabled || controleerBtn.disabled || spelScherm.style.display === 'none') return;
+  if (toets === 'Backspace' || toets === 'Delete' || toets === '←') {
+    antwoordInput.value = toets === 'Delete' ? '' : antwoordInput.value.slice(0, -1);
+  } else if (toets === 'Enter' || toets === 'OK') {
+    controleerBtn.click();
+  } else if (/^\d$/.test(toets) && antwoordInput.value.length < antwoordInput.maxLength) {
+    antwoordInput.value += toets;
+  }
+}
+
+antwoordInput.addEventListener('keydown', event => {
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
+  if (/^\d$/.test(event.key) || ['Backspace', 'Delete', 'Enter'].includes(event.key)) {
+    event.preventDefault();
+    verwerkAntwoordToets(event.key);
+  }
+});
 
 // --- DEEL 1: KEUZESCHERM LOGICA ---
 function checkKeuzes() {
@@ -192,20 +209,16 @@ function genereerToetsenbord(container) {
       knop.style.cssText = "margin:3px; width:50px; height:40px; font-size:1.2em;";
       // iOS: sneller & stabiel
       knop.style.touchAction = 'manipulation';
-      // iPad-proof: één pointer-event (geen click/touch-dubbel)
-      knop.addEventListener('pointerup', (e) => {
-        e.preventDefault();
-        if (item === '←') antwoordInput.value = antwoordInput.value.slice(0, -1);
-        else if (item === 'OK') controleerBtn.click();
-        else if (antwoordInput.value.length < 3) antwoordInput.value += item;
-      }, { passive: false });
-      container.appendChild(knop);
+      // Click werkt met aanraken, muis én toetsenbord zonder dubbele invoer.
+      knop.addEventListener('click', () => verwerkAntwoordToets(item));
+      rijDiv.appendChild(knop);
     });
     container.appendChild(rijDiv);
   });
 }
 
 controleerBtn.addEventListener("click", () => {
+  if (antwoordInput.disabled || controleerBtn.disabled) return;
   if (antwoordInput.value.trim() === "") return;
   const input = parseInt(antwoordInput.value.trim());
   const isJuist = input === juisteAntwoord;
@@ -252,10 +265,11 @@ function toonFicheBijSpeler(speler) {
 }
 
 kolomKnoppen.forEach((knop, index) => {
-  // iPad-proof: pointerup i.p.v. click
+  // Eén click-handler voor aanraken, muis en toetsenbord.
   knop.style.touchAction = 'manipulation';
-  knop.addEventListener("pointerup", (e) => {
+  knop.addEventListener("click", (e) => {
     e.preventDefault();
+    if (knop.disabled) return;
 
     const ficheNode = document.querySelector(`#speler${actieveSpeler}Zone .fiche-cirkel div`);
     if (!ficheNode) return;
@@ -412,7 +426,7 @@ function verwijderWinAnimatie() {
 
 document.getElementById("btn-opnieuw").addEventListener("click", resetSpel);
 
-document.getElementById("btn-terug-spel").addEventListener("pointerup", (e) => {
+document.getElementById("btn-terug-spel").addEventListener("click", (e) => {
   e.preventDefault();
   verwijderWinAnimatie();
 

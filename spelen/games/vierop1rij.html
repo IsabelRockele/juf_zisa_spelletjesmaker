@@ -21,6 +21,7 @@
   <script type="module" src="./zisa-play-guard.js"></script>
 </head>
 <body>
+<div class="container" id="keuzeScherm">
 <div class="pijl-links-boven">
  <!-- NIEUWE, robuuste versie -->
 <a class="btn-actie btn-terug"
@@ -31,7 +32,6 @@
 </a>
 </div>
 
-<div class="container" id="keuzeScherm">
   <header><h1>4 op een rij met tafels!</h1></header>
   <div class="kies-scherm">
     <img class="zisa-afbeelding" src="tafels_afbeeldingen/zisa_4opeenrij.png" alt="Juf Zisa 4 op een rij"/>
@@ -86,7 +86,7 @@
         <div id="oefeningContainer" style="font-size:2em; margin-bottom:20px; text-align:center; height: 50px;">Oefening komt hier</div>
         <div style="text-align:center; margin-bottom:20px;">
           <!-- input blijft iPad-proof -->
-          <input id="antwoordInput" maxlength="3"
+          <input id="antwoordInput" maxlength="3" aria-label="Jouw antwoord"
                  type="text" readonly inputmode="none"
                  autocomplete="off" autocorrect="off" autocapitalize="off" enterkeyhint="done"
                  style="font-size:1.4em; padding:6px 10px; width:80px; text-align:center; border-radius:10px; border:2px solid #ccc;"/>

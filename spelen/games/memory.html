@@ -138,6 +138,7 @@
     .kaart .kant {
       width: 100%;
       height: 100%;
+      box-sizing: border-box;
       border-radius: 15px;
       position: absolute;
       backface-visibility: hidden;
@@ -153,9 +154,15 @@
       transform: rotateY(180deg);
     }
     .kaart .achterkant {
+      background-color: #eaf7ff;
       background-image: url('tafels_afbeeldingen/memory_zisa.png');
-      background-size: cover;
+      background-size: contain;
       background-position: center;
+      background-repeat: no-repeat;
+      background-origin: content-box;
+      padding: 10px;
+      border: 2px solid #238bc4;
+      box-shadow: 0 3px 8px rgba(23, 50, 77, 0.18);
       transform: rotateY(0deg);
     }
     .kaart.omgedraaid .voorkant {
@@ -176,9 +183,14 @@
       position: absolute;
       width: 70px;
       height: 90px;
+      box-sizing: border-box;
+      padding: 5px;
+      background-color: #eaf7ff;
       background-image: url('tafels_afbeeldingen/memory_zisa.png');
-      background-size: cover;
+      background-size: contain;
       background-position: center;
+      background-repeat: no-repeat;
+      background-origin: content-box;
       border: 2px solid white;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
