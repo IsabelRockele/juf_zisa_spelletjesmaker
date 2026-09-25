@@ -7,13 +7,19 @@
   const aantal=()=>a+(min?-gedaan:gedaan);
   function verplaats(plek){if(gedaan>=b)return;if(min){if(!Number.isInteger(plek)){plek=a-1;while(wegPosities.includes(plek))plek--;}if(plek<0||plek>=a||wegPosities.includes(plek))return;wegPosities.push(plek);}gedaan++;render();}
   function stip(kleur,label,actie,plek){const knop=document.createElement('button');knop.type='button';knop.className='stip '+kleur;knop.setAttribute('aria-label',label);if(Number.isInteger(plek))knop.dataset.plek=plek;if(actie)knop.addEventListener('click',()=>verplaats(plek));else knop.disabled=true;return knop;}
+  let eersteRaamVol=false, preciesTien=false;
   function render(){
+    const vol=Array.from({length:10},(_,i)=>min?i<a&&!wegPosities.includes(i):i<aantal()).every(Boolean);
+    const tien=vol&&aantal()===10;
+    const lichtOp=vol&&(!eersteRaamVol||(tien&&!preciesTien));
+    eersteRaamVol=vol;preciesTien=tien;
     el('a').textContent=a;el('b').textContent=b;el('op').textContent=min?'−':'+';el('teken').textContent=min?'−':'+';
     el('antwoord').textContent=zelf()&&hulp>=3?a+(min?-b:b):'___';
     el('deel1').textContent=zelf()&&hulp>=2?deel():'___';el('deel2').textContent=zelf()&&hulp>=3?b-deel():'___';
     el('ramen').replaceChildren();
     for(let r=0;r<2;r++){
       const raam=document.createElement('div');raam.className='tienraam';raam.style.gridAutoFlow=el('tienraam-structuur').value==='vijf'?'row':'column';raam.setAttribute('aria-label','Tienraam '+(r+1));
+      if(r===0&&vol){raam.classList.add('tienraam-vol');if(lichtOp)raam.classList.add('tienraam-oplichten');raam.setAttribute('aria-label','Tienraam 1: vol, 10 bolletjes');}
       for(let j=0;j<10;j++){
         const i=r*10+j,cel=document.createElement('div');cel.className='cel';
         if(min?i<a&&!wegPosities.includes(i):i<aantal())cel.append(stip(min?'zwart':i<a?'':'rood',min?'Neem deze stip weg':'Gelegde stip',min&&gedaan<b,i));
@@ -70,12 +76,16 @@
   el('inkt').addEventListener('pointermove',e=>{if(gereedschap==='gum'&&e.buttons){gumBij(e);return;}if(!pad)return;e.preventDefault();pad.setAttribute('d',pad.getAttribute('d')+' L '+positie(e).join(' '));});
   for(const type of ['pointerup','pointercancel'])el('inkt').addEventListener(type,()=>{pad=null;});
   el('volledig').addEventListener('click',async()=>{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();});
+  // Voorkom browserselectie en het lang-indrukmenu alleen op het legmateriaal.
+  for(const type of ['contextmenu','selectstart','dragstart'])document.addEventListener(type,e=>{
+    if(e.target.closest('.ramen,.losse,.vrij-materiaal,.sleepstip'))e.preventDefault();
+  });
   // Pointerbediening werkt ook met een vinger op het bord; een tik blijft een gewone klik.
   let sleep=null;
-  document.addEventListener('pointerdown',e=>{const target=e.target.closest('#bord-les .stip:not(:disabled)');if(!target)return;sleep={x:e.clientX,y:e.clientY,id:e.pointerId,target,ghost:null};target.setPointerCapture(e.pointerId);});
-  document.addEventListener('pointermove',e=>{if(!sleep||e.pointerId!==sleep.id)return;if(!sleep.ghost&&Math.hypot(e.clientX-sleep.x,e.clientY-sleep.y)>8){sleep.ghost=sleep.target.cloneNode();sleep.ghost.classList.add('sleepstip');document.body.append(sleep.ghost);}if(sleep.ghost){sleep.ghost.style.left=(e.clientX-19)+'px';sleep.ghost.style.top=(e.clientY-19)+'px';}});
-  document.addEventListener('pointerup',e=>{if(!sleep)return;const old=sleep;sleep=null;if(!old.ghost)return;old.ghost.remove();const zone=el(min?'losse':'ramen').getBoundingClientRect();const goed=e.clientX>=zone.left&&e.clientX<=zone.right&&e.clientY>=zone.top&&e.clientY<=zone.bottom;old.target.addEventListener('click',e=>e.stopImmediatePropagation(),{capture:true,once:true});if(goed)verplaats(old.target.dataset.plek===undefined?undefined:Number(old.target.dataset.plek));});
-  document.addEventListener('pointercancel',()=>{sleep?.ghost?.remove();sleep=null;});
+  document.addEventListener('pointerdown',e=>{const target=e.target.closest('#bord-les .stip:not(:disabled)');if(!target||sleep||e.isPrimary===false||e.button!==0)return;e.preventDefault();sleep={x:e.clientX,y:e.clientY,id:e.pointerId,target,ghost:null};target.setPointerCapture(e.pointerId);});
+  document.addEventListener('pointermove',e=>{if(!sleep||e.pointerId!==sleep.id)return;e.preventDefault();if(!sleep.ghost&&Math.hypot(e.clientX-sleep.x,e.clientY-sleep.y)>8){sleep.ghost=sleep.target.cloneNode();sleep.ghost.classList.add('sleepstip');document.body.append(sleep.ghost);}if(sleep.ghost){sleep.ghost.style.left=(e.clientX-19)+'px';sleep.ghost.style.top=(e.clientY-19)+'px';}});
+  document.addEventListener('pointerup',e=>{if(!sleep||e.pointerId!==sleep.id)return;const old=sleep;sleep=null;if(!old.ghost)return;old.ghost.remove();const zone=el(min?'losse':'ramen').getBoundingClientRect();const goed=e.clientX>=zone.left&&e.clientX<=zone.right&&e.clientY>=zone.top&&e.clientY<=zone.bottom;old.target.addEventListener('click',e=>e.stopImmediatePropagation(),{capture:true,once:true});if(goed)verplaats(old.target.dataset.plek===undefined?undefined:Number(old.target.dataset.plek));});
+  for(const type of ['pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(sleep?.id!==e.pointerId)return;sleep.ghost?.remove();sleep=null;});
   render();
   if(new URLSearchParams(location.search).get('kid')==='1'){
     kiesGebruik(true);

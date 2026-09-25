@@ -15,13 +15,19 @@
     if(vakken[plek])return;
     wijzig(()=>{vakken[plek]=kleur;if(wegBollen.length>0){const index=wegBollen.lastIndexOf(kleur);wegBollen.splice(index<0?wegBollen.length-1:index,1);}});
   }
+  let eersteRaamVol=false, preciesTien=false;
   function render(){
+    const vol=vakken.slice(0,10).every(Boolean);
+    const tien=vol&&vakken.filter(Boolean).length===10;
+    const lichtOp=vol&&(!eersteRaamVol||(tien&&!preciesTien));
+    eersteRaamVol=vol;preciesTien=tien;
     el('vrij-weg').hidden=!isMin();
     el('vrij-sleeptip').textContent=isMin()?'Sleep bollen naar het raam. Sleep ze weg naar het weglegvak.':'Sleep bollen naar het raam. Een bol te veel? Sleep hem terug naar de voorraad.';
     document.querySelector('.vrij-bron[data-kleur="rood"]').hidden=isMin();
     el('vrij-melding').textContent='';el('vrij-ramen').replaceChildren();
     for(let r=0;r<2;r++){
       const raam=document.createElement('div');raam.className='tienraam';raam.setAttribute('aria-label','Tienraam '+(r+1));
+      if(r===0&&vol){raam.classList.add('tienraam-vol');if(lichtOp)raam.classList.add('tienraam-oplichten');raam.setAttribute('aria-label','Tienraam 1: vol, 10 bolletjes');}
       for(let j=0;j<10;j++){
         const i=r*10+j,cel=document.createElement('div');cel.className='cel';cel.dataset.plek=i;
         if(vakken[i]){const s=document.createElement('button');s.className='stip vrij-stip'+(vakken[i]==='rood'?' rood':'');s.dataset.plek=i;s.setAttribute('aria-label',`Sleep ${vakken[i]==='rood'?'rode':'blauwe'} stip weg`);cel.append(s);}
@@ -53,21 +59,21 @@
   el('vrij-hulp-opnieuw').addEventListener('click',()=>{tip=0;toonTip();});
   el('vrij-bewerking').addEventListener('change',()=>{tip=0;wegBollen=[];geschiedenis=[];vakken=Array(20).fill(null);sleep?.ghost?.remove();sleep=null;render();toonTip();});
   el('alleen-les').addEventListener('pointerdown',e=>{
-    const target=e.target.closest('.vrij-bron,.vrij-stip');if(!target)return;
+    const target=e.target.closest('.vrij-bron,.vrij-stip');if(!target||sleep||e.isPrimary===false||e.button!==0)return;e.preventDefault();
     sleep={target,id:e.pointerId,x:e.clientX,y:e.clientY,ghost:null,bron:target.classList.contains('vrij-bron'),plek:Number(target.dataset.plek),kleur:target.dataset.kleur};target.setPointerCapture(e.pointerId);
   });
   el('alleen-les').addEventListener('pointermove',e=>{
-    if(!sleep||sleep.id!==e.pointerId)return;
+    if(!sleep||sleep.id!==e.pointerId)return;e.preventDefault();
     if(!sleep.ghost&&Math.hypot(e.clientX-sleep.x,e.clientY-sleep.y)>8){const kleur=sleep.bron?sleep.kleur:vakken[sleep.plek];sleep.ghost=document.createElement('span');sleep.ghost.className='stip sleepstip'+(kleur==='rood'?' rood':'');document.body.append(sleep.ghost);}
     if(sleep.ghost){sleep.ghost.style.left=e.clientX-19+'px';sleep.ghost.style.top=e.clientY-19+'px';}
   });
   el('alleen-les').addEventListener('pointerup',e=>{
-    if(!sleep)return;const s=sleep;sleep=null;if(!s.ghost)return;s.ghost.remove();
+    if(!sleep||sleep.id!==e.pointerId)return;const s=sleep;sleep=null;if(!s.ghost)return;s.ghost.remove();
     const hit=document.elementFromPoint(e.clientX,e.clientY),cel=hit?.closest('#vrij-ramen .cel');
     if(cel){const naar=Number(cel.dataset.plek);if(!vakken[naar]){if(s.bron)leg(s.kleur,naar);else wijzig(()=>{vakken[naar]=vakken[s.plek];vakken[s.plek]=null;});}}
     else if(!s.bron&&(isMin()?hit?.closest('#vrij-weg'):hit?.closest('.vrij-bron')))neemWeg(s.plek);
   });
-  el('alleen-les').addEventListener('pointercancel',()=>{sleep?.ghost?.remove();sleep=null;});
+  for(const type of ['pointercancel','lostpointercapture'])el('alleen-les').addEventListener(type,e=>{if(sleep?.id!==e.pointerId)return;sleep.ghost?.remove();sleep=null;});
   el('vrij-help-open').addEventListener('click',()=>el('vrij-hulp').showModal());
   el('vrij-help-sluit').addEventListener('click',()=>el('vrij-hulp').close());
   render();toonTip();

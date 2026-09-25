@@ -8,3 +8,17 @@
 #vrij-som{min-height:87px;margin:12px 0 0}#vrij-som p{font-size:15px;color:#746858;margin:0 0 4px}.vrij-somregel{display:flex;justify-content:center;gap:18px;font-size:32px;font-weight:bold}.som-blauw{color:#075979}.som-rood{color:#cc352c}#alleen-les .vrij-materiaal{margin-top:12px}
 #vrij-weg{flex-direction:column;justify-content:center;gap:5px;min-width:190px;max-width:250px}#vrij-weg-bollen{display:grid;grid-template-columns:repeat(5,22px);gap:5px}#vrij-weg-bollen .stip{width:22px;height:22px;min-height:0}#vrij-weg-aantal{font-size:14px}#vrij-weg-aantal:empty,#vrij-weg-bollen:empty{display:none}
 #vrij-weg-som{font-size:24px;font-weight:bold;white-space:nowrap}#vrij-weg-som:empty{display:none}
+
+/* Het legmateriaal is een aanraakvlak; ook naast een stip mag geen veeg beginnen. */
+.ramen,.losse,.vrij-materiaal{touch-action:none}
+.ramen,.ramen *,.losse,.losse *,.vrij-materiaal,.vrij-materiaal *,.sleepstip{
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+  -webkit-user-drag:none;
+}
+
+/* De volle tien blijft herkenbaar zonder de bolletjes of sleepbediening te bedekken. */
+.tienraam.tienraam-vol{border-color:#16803c;outline:3px solid #16803c;outline-offset:1px;box-shadow:0 0 0 5px #16803c20}
+.tienraam-oplichten{animation:tienraam-groen .8s ease-out}
+@keyframes tienraam-groen{0%{box-shadow:0 0 0 5px #16803c55}45%{box-shadow:0 0 0 11px #16803c44,0 0 22px #16803c66}100%{box-shadow:0 0 0 5px #16803c20}}
+@media(prefers-reduced-motion:reduce){.tienraam-oplichten{animation:none}}
