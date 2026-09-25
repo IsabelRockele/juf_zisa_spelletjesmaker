@@ -24,7 +24,7 @@ AVI-bron: [Zwijsen, kenmerken van AVI-niveaus](https://www.zwijsen.nl/lezen/zelf
 | NL.076: expliciete informatie | 449 | wat de eerste foto toont; aanmelden vóór vier uur |
 | NL.077–078: hoofdzaak, bijzaak en hoofdgedachte | 450–451 | samenvattingen met vier zichtbare zinnen; één bijkomstige zin zoeken |
 | NL.080–082: verbanden, conclusies en impliciete boodschappen | 457, 465, 469 | reden van het weghalen; afspraak voorkomt mislopen; eerste indruk bijstellen |
-| NL.085–086: verbinden en titel beoordelen | 485, 490 | gesprek in trein koppelen aan koektrommel; rol van sterren in de titel |
+| NL.085–086: verbinden en titel beoordelen | 485, 490 | gesprek in trein koppelen aan koekentrommel; rol van sterren in de titel |
 | NL.089–091: fictie, feiten en meningen | 495, 498, 503 | dieren gedragen zich als mensen; Brams oordeel over het vogelrestaurant |
 | NL.094–095: tekst en bron passend bij leesdoel | 510–511 | Bram interviewen voor zijn reden; aankondiging gebruiken om bestemming te vinden |
 | NL.119–120: teksttypes en hun doel | 621, 624 | zichtbaar nieuwsfragment herkennen als informerend; praktische aankondiging gericht lezen |
@@ -72,8 +72,8 @@ Uil: bruin, blauwgroen vest, bronzen bril. Otter: kastanjebruin, mosterdgele jas
 | 1 | Vertrekperron: eigen koffer open met sterrenkaart, schriftje, zaklamp en houten sterren. |
 | 2 | Treincoupé: beide koffers gesloten onder bank, nog geen linten. |
 | 3 | Aankomstperron in regen: elk neemt verkeerde gesloten koffer mee. |
-| 4–5 | Wachtzaal: Uil opent Otters koffer met blauwe koektrommel en kaartje. |
-| 6–9 | Loket: gesloten koektrommelkoffer blijft bij Uil; Otter is elders. Telefoongesprek met buurthuis. |
+| 4–5 | Wachtzaal: Uil opent Otters koffer met blauwe koekentrommel en kaartje. |
+| 6–9 | Loket: gesloten koekentrommelkoffer blijft bij Uil; Otter is elders. Telefoongesprek met buurthuis. |
 | 10 | Bank bij loket: Uil bekijkt kaartje; klok kwart over drie. |
 | 11 | Twee open koffers bij elkaar: inhoud controleren, Kraanvogel geeft linten. |
 | 12 | Uils koffer dicht met blauw lint; Otters koffer open met geel lint, zij biedt koekje aan. |
