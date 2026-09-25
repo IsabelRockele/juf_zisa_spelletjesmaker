@@ -65,7 +65,7 @@
       game('Onderwerp en persoonsvorm','Wat is het onderwerp van deze zin?',['Noor en Finn','nemen','hun figuren'],0,'Wie nemen hun figuren uit de kist?','Op de binnenplaats nemen Noor en Finn hun figuren uit de kist.'),
       game('De persoonsvorm','Wat is de persoonsvorm in deze zin?',['achter het kleed','knielen','de kinderen'],1,'Maak een vraag: Knielen de kinderen achter het kleed?','Achter het kleed knielen de kinderen.'),
       game('Wat laat het verhaal zien?','Welke gedachte past het best bij de afloop?',['Een voorstelling is alleen goed met veel lampen.','Je moet ieder probleem alleen oplossen.','Een nieuw plan kan helpen als het eerste plan niet meer werkt.'],2,'Denk aan wat de kinderen veranderen en wat toch lukt.',null,13),
-      game('Een teksttype herkennen','Welk teksttype herken je aan de namen vóór de gesproken zinnen?',['een toneeltekst','een recept','een nieuwsbericht'],0,'De namen laten zien wie welke woorden zegt.',null,2)
+      game('Een tekst binnen het verhaal','Lees dit korte stukje dat Noor en Finn voorlezen. Wat voor tekst is alleen dit stukje?',['een toneeltekst','een recept','een nieuwsbericht'],0,'Kijk naar de namen vóór de zinnen. Ze geven aan wie welke woorden zegt. De vraag gaat alleen over dit stukje, niet over het hele verhaal.','VOGEL: In mijn nest is plaats voor één vogel.\nDRAAK: En voor één piepkleine draak?\nVOGEL: Dan moet jouw staart buiten blijven!',2)
     ],
     'e5-concert-mol':[
       game('De hoofdgedachte','Welke zin vat het hele verhaal het best samen?',['Mol koopt een nieuw groen boekje op het dorpsplein.','De bezoekers wachten omdat de instrumenten zoek zijn.','Met hulp van zijn vrienden durft Mol het concert te leiden.'],2,'Denk aan wat Mol eerst tegenhoudt en wat hem later helpt.',null,13),
