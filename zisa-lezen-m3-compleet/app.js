@@ -479,7 +479,7 @@ function renderReader(){
             <div class="art">
               ${imageBlock(page.image, `Illustratie bij ${currentBook.title}, pagina ${pageIndex+1}`)}
             </div>
-            <article class="story ${currentBook.level==="M3"?"m3-story":""}">
+            <article class="story ${currentBook.level==="M3"?"m3-story":""} ${currentBook.level==="M6"?"m6-story":""}">
               ${reviewMode?`<div class="review-note">📖 Lees deze ${reviewEndPage>pageIndex?"bladzijden":"bladzijde"} opnieuw. De leesvragen zijn nu weg.</div>`:""}
               ${hasAudioSupport("story")?`<button class="story-listen" data-say="${escapeAttr(page.text)}" aria-label="Lees de bladzijde voor">🔊 Lees voor</button>`:""}
               <div class="storytext">${storyTextMarkup(page.text)}</div>
