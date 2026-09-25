@@ -94,7 +94,7 @@
       {title:'Een leenwoord lezen',q:'Hoe klinkt het laatste stukje van bureau?',focus:'bureau',a:['als oo','als au','als oe'],correct:0,good:'Juist! In bureau klinkt eau als oo. Lees het hele woord hardop.'},
       {title:'Vergelijk de beginklank',q:'Welk woord begint met dezelfde klank als sjaal?',focus:'sjaal',a:['kaart','chocolade','stoel'],correct:1,good:'Juist! De ch van chocolade klinkt hier als sj. Lees chocolade rustig hardop.'},
       {title:'Lettergrepen',q:'Hoe verdeel je voorstelling in lettergrepen?',focus:'voorstelling',a:['vo-orstel-ling','voor-stel-ling','voorst-el-ling'],correct:1,good:'Juist! voor-stel-ling. Lees de delen en daarna het hele woord.'},
-      {title:'Nauwkeurig lezen',q:'Welk woord staat hier precies?',focus:'uitgeschakelde',a:['uitgeschakelde','ingeschakelde','uitgeschakelde lamp'],correct:0,good:'Juist! Kijk naar het begin én het einde van het woord.'},
+      {title:'Nauwkeurig lezen',q:'Lees de zinnen. Welk woord past op de lege plek?',focus:'Roos zet de lamp uit. De … lamp blijft in de zaal.',a:['ingeschakelde','uitgeschakelde'],correct:1,good:'Juist! De lamp staat uit, dus uitgeschakelde past. Lees beide woorden hardop en let op het verschil tussen in en uit.'},
       {title:'Lezen met intonatie',q:'Welke stem past bij Finn op dit moment?',focus:'‘Dan kunnen we alles wel inpakken,’ mompelt hij.',a:['een vrolijke juichstem','een boze schreeuwstem','een zachte, teleurgestelde stem'],correct:2,good:'Juist! Lees de zin zacht en teleurgesteld; dat past bij mompelen.'}
     ],
     'e5-concert-mol':[
