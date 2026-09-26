@@ -459,7 +459,7 @@ function renderReader(){
   const bookNumber = booksAtLevel.findIndex(book=>book.id===currentBook.id)+1;
 
   app.innerHTML = `
-    <div class="reader">
+    <div class="reader ${currentBook.level==="E6"?"e6-reader":""}">
       <aside class="rail">
         <span class="lvl">${currentBook.level}</span>
         <small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
@@ -479,7 +479,7 @@ function renderReader(){
             <div class="art">
               ${imageBlock(page.image, `Illustratie bij ${currentBook.title}, pagina ${pageIndex+1}`)}
             </div>
-            <article class="story ${currentBook.level==="M3"?"m3-story":""} ${currentBook.level==="M6"?"m6-story":""}">
+            <article class="story ${currentBook.level==="M3"?"m3-story":""} ${["M6","E6"].includes(currentBook.level)?"m6-story":""}">
               ${reviewMode?`<div class="review-note">📖 Lees deze ${reviewEndPage>pageIndex?"bladzijden":"bladzijde"} opnieuw. De leesvragen zijn nu weg.</div>`:""}
               ${hasAudioSupport("story")?`<button class="story-listen" data-say="${escapeAttr(page.text)}" aria-label="Lees de bladzijde voor">🔊 Lees voor</button>`:""}
               <div class="storytext">${storyTextMarkup(page.text)}</div>

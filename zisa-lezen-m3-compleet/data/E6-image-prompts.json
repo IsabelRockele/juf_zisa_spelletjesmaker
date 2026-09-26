@@ -1,0 +1,301 @@
+{
+  "stories": [
+    {
+      "book": 0,
+      "n": 1,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Characters: Noor, 10-year-old girl with tan skin, straight black bob hair, burnt-orange sweatshirt, navy trousers, white sneakers. Elias, 10-year-old boy pale skin, wavy dark blond hair, blue denim shirt over cream T-shirt, olive trousers, brown sneakers. Setting bright school craft classroom cream walls tall windows green cabinets, wooden worktable. Props two identical rectangular natural wood blocks as supports, white A4 paper sheets, small identical metal washers in yellow bowl, short wooden ruler, red notebook. NO real-size bridge. Scene: Noor and Elias stand at worktable, eagerly discussing a plain white flat sheet bridging a short gap between two wooden blocks. No load on paper yet; yellow bowl with washers rests away from it. Wide eye-level view, both full characters visible.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-8b2b7a35-3d05-4826-babf-68029680db22.png",
+      "asset": "images/e6-papieren-brug/01.webp"
+    },
+    {
+      "book": 1,
+      "n": 1,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Characters: anthropomorphic rabbit editor Konijn, cream fur long upright ears, teal cardigan and brown trousers. Badger author Das, black-white face stripes gray fur, plum waistcoat over cream shirt, tan trousers, round copper glasses. Setting cozy woodland village library warm wooden shelves green reading armchairs arched window, oak desk. Props ONE dark-blue ring binder with cream paper pages, ONE mustard-yellow cardboard folder, red pencil, small brass desk lamp. Their illustrated tale features a mouse and a blue door but no live mouse in this scene. Scene: Rabbit seated at desk reviewing open dark-blue ring binder; Badger stands beside her pointing excitedly at it. The mustard folder is CLOSED at far end of desk, brass lamp and red pencil nearby. Afternoon sun through window, invitation to a book adventure.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ab9e4ac0-6f96-423e-a18f-d786e406b1e6.png",
+      "asset": "images/e6-verdwenen-bladzijde/01.webp"
+    },
+    {
+      "book": 0,
+      "n": 2,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. After failed first test at same classroom worktable: flat white sheet sags between two wood blocks, exactly TWO metal washers have fallen onto TABLE under it. Noor reads small instruction card; Elias holds small stack of unused white paper suggesting more sheets. NO folded paper bridge yet.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-8b2b7a35-3d05-4826-babf-68029680db22.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ffa00085-f0cf-45b9-a586-d038b361c212.png",
+      "asset": "images/e6-papieren-brug/02.webp"
+    },
+    {
+      "book": 0,
+      "n": 3,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Classroom table: both children draw ideas in OPEN red notebook, curved arch and zigzag line sketches without text. Blocks and failed flat sheet pushed aside. No built arch. Thoughtful planning.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-8b2b7a35-3d05-4826-babf-68029680db22.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-1f5c8ddd-d3c0-4f5e-bcfe-9ac090df8143.png",
+      "asset": "images/e6-papieren-brug/03.webp"
+    },
+    {
+      "book": 0,
+      "n": 4,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Classroom: Noor measures the gap between the SAME two wood blocks using ruler. Elias holds a freshly accordion-folded white paper sheet ready to place across gap, folds running ACROSS bridge width and ridges running lengthwise from support to support. Small instruction card on table. No washers on bridge yet.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-8b2b7a35-3d05-4826-babf-68029680db22.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-51665550-0aa6-4991-8333-4028fc27a18f.png",
+      "asset": "images/e6-papieren-brug/04.webp"
+    },
+    {
+      "book": 0,
+      "n": 7,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. NEW LOCATION school library, bookshelves and reading table. Noor and Elias study an open nonfiction book with simple paper-fold diagram while Elias draws side-view in red notebook. NO bridge, no blocks, no yellow bowl in this library scene.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-8b2b7a35-3d05-4826-babf-68029680db22.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-1c32fea1-9ccd-40e9-9d07-37941295f1b0.png",
+      "asset": "images/e6-papieren-brug/07.webp"
+    },
+    {
+      "book": 0,
+      "n": 9,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Classroom AFTER repeated trials. Both children inspect red notebook filled with short rows of marks but no readable letters/numbers. Used flat and accordion sheets lie beside blocks, yellow bowl holds washers. No bridge actively loaded.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-8b2b7a35-3d05-4826-babf-68029680db22.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-27395981-965d-468d-9aea-4e833c67cdb9.png",
+      "asset": "images/e6-papieren-brug/09.webp"
+    },
+    {
+      "book": 0,
+      "n": 10,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Classroom desk: children compare TWO small white draft cards side by side, abstract lines only. Red notebook open nearby, folded paper beside two blocks. Elias amused and Noor thoughtful. No display posters yet.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-8b2b7a35-3d05-4826-babf-68029680db22.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ce6a0121-4c3b-4ecf-a628-be916235f068.png",
+      "asset": "images/e6-papieren-brug/10.webp"
+    },
+    {
+      "book": 0,
+      "n": 11,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Classroom: third child visitor, pale boy red sweater holding a full schoolbag, asks a question across table. Noor and Elias laugh and revise a SMALL draft card with pencil. Bridge remains only small paper model, schoolbag NOT on bridge. Do not add other characters.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-8b2b7a35-3d05-4826-babf-68029680db22.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-6a430fb3-cc56-455c-93c9-9e7b7b327973.png",
+      "asset": "images/e6-papieren-brug/11.webp"
+    },
+    {
+      "book": 0,
+      "n": 15,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. After fair, ONLY Noor and Elias in classroom. Packing used flat and accordion papers and wood blocks into one open cardboard box. Red notebook beside box, yellow bowl on table. No active bridge, no visitors.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-8b2b7a35-3d05-4826-babf-68029680db22.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-b41b38bb-972a-4af3-9107-fffdbb5282e6.png",
+      "asset": "images/e6-papieren-brug/15.webp"
+    },
+    {
+      "book": 0,
+      "n": 16,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. School classroom DOORWAY: Noor carries open cardboard box with paper models and wood blocks, Elias carries closed red notebook and ONE loose white sheet. Both walk out smiling. Empty worktable behind with yellow bowl, NO visitor. Full bodies walking with grounded feet.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-8b2b7a35-3d05-4826-babf-68029680db22.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-b856b4b5-ad96-4bbc-b2b8-7fbec1e282d4.png",
+      "asset": "images/e6-papieren-brug/16.webp"
+    },
+    {
+      "book": 1,
+      "n": 2,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Same library desk. Rabbit points worriedly at gap in open dark-blue ring binder; badger bends closer shocked. Mustard folder stays CLOSED at far end. No additional characters, no floating pages, no paper visibly sticking out of folder.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ab9e4ac0-6f96-423e-a18f-d786e406b1e6.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-c38fee67-af12-460b-bc22-40baeecc1c71.png",
+      "asset": "images/e6-verdwenen-bladzijde/02.webp"
+    },
+    {
+      "book": 1,
+      "n": 3,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Library desk: both characters methodically arrange loose cream manuscript sheets in a row on desk beside opened blue ring binder, searching. Mustard folder CLOSED untouched. Red pencil and brass lamp. No readable text, paper marked with small abstract lines.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ab9e4ac0-6f96-423e-a18f-d786e406b1e6.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-968b4dce-6b1c-44c4-96e4-4af5ba7bee5f.png",
+      "asset": "images/e6-verdwenen-bladzijde/03.webp"
+    },
+    {
+      "book": 1,
+      "n": 4,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Rabbit and badger examine ONE old draft sheet with small drawing of a mouse beside a HIGH window; keep it flat or held. Open blue binder and other sorted sheets on desk, mustard folder CLOSED. No real mouse. Badger gestures remembering.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ab9e4ac0-6f96-423e-a18f-d786e406b1e6.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-86861a05-7831-48e8-8cff-3dfba31f74ca.png",
+      "asset": "images/e6-verdwenen-bladzijde/04.webp"
+    },
+    {
+      "book": 1,
+      "n": 5,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Rabbit and badger compare two sheets beside open blue binder, one contains small BLUE CLOSED DOOR sketch and one a festive table sketch. Mustard folder CLOSED. Thoughtful detective mood, no lost sheet found.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ab9e4ac0-6f96-423e-a18f-d786e406b1e6.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-e14e693f-7279-4b45-a4d0-b62c6221b039.png",
+      "asset": "images/e6-verdwenen-bladzijde/05.webp"
+    },
+    {
+      "book": 1,
+      "n": 6,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Rabbit writes on ONE fresh draft sheet while badger points approvingly. Original blue binder open, mustard folder CLOSED. Pencil on paper, two tiny alternative thumbnail sketches on draft (empty room and celebration), no readable words.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ab9e4ac0-6f96-423e-a18f-d786e406b1e6.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-215de676-2dec-4560-a912-177ec39ceedc.png",
+      "asset": "images/e6-verdwenen-bladzijde/06.webp"
+    },
+    {
+      "book": 1,
+      "n": 7,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Badger sits slumped in green armchair away from desk, Rabbit stands holding draft sheet reassuringly. Desk in background open blue binder and CLOSED mustard folder. ONLY these two animals.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ab9e4ac0-6f96-423e-a18f-d786e406b1e6.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-f8bfd6ce-5eba-493b-a3ad-7d110d8c85fa.png",
+      "asset": "images/e6-verdwenen-bladzijde/07.webp"
+    },
+    {
+      "book": 1,
+      "n": 8,
+      "prompt": "Use case: illustration-story. One polished expressive warm 3D children's book illustration, landscape 1536x1024 3:2. Natural anatomy, grounded feet, believable tables. Single full scene, no panels, no collage, no readable text, no watermark. Generous margins around main characters, high quality storybook materials. Use attached cover ONLY as character/style and prop identity reference, not as required pose or backdrop. Recreate only characters explicitly in this scene; never add absent characters. Back at desk, badger suddenly points at CLOSED mustard-yellow folder with dawning recognition; rabbit follows gaze. Blue binder open. Do NOT open folder yet, no page found yet.",
+      "ref": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ab9e4ac0-6f96-423e-a18f-d786e406b1e6.png",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-a2dd5235-590b-4874-b61f-e4cfb8d6254d.png",
+      "asset": "images/e6-verdwenen-bladzijde/08.webp"
+    },
+    {
+      "book": 1,
+      "n": 10,
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ac0e7ebb-b16b-4be4-b46a-12da92029965.png",
+      "prompt": "Recovered illustration from preceding generation: same library rabbit and badger, scene 10. See story text for narrative. Exact initial prompt not retained.",
+      "asset": "images/e6-verdwenen-bladzijde/10.webp"
+    },
+    {
+      "book": 1,
+      "n": 14,
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-39dd76da-3e86-43f7-b84d-e1517260297c.png",
+      "prompt": "Recovered illustration from preceding generation: same library rabbit and badger, scene 14. See story text for narrative. Exact initial prompt not retained.",
+      "asset": "images/e6-verdwenen-bladzijde/14.webp"
+    },
+    {
+      "book": 1,
+      "n": 11,
+      "refs": [
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/e6-verdwenen-bladzijde/01.webp"
+      ],
+      "prompt": "Use case illustration-story. Create a new 1536x1024 warm 3D storybook scene with the same rabbit and badger and library as the reference. Rabbit wears teal cardigan brown skirt, badger plum waistcoat cream shirt tan pants copper round glasses. One full scene, no panels, no text. Badger puts the loose illustrated page back into the OPEN blue ringbinder on desk and closes the metal rings. Rabbit crosses out notes on a separate draft sheet with red pencil. Yellow document folder CLOSED beside them.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-474c80d3-d107-4d0f-a4a9-28f9bf23f3e8.png",
+      "asset": "images/e6-verdwenen-bladzijde/11.webp"
+    },
+    {
+      "book": 1,
+      "n": 12,
+      "refs": [
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/e6-verdwenen-bladzijde/01.webp"
+      ],
+      "prompt": "Use case illustration-story. Create a new 1536x1024 warm 3D storybook scene with the same rabbit and badger and library as the reference. Rabbit wears teal cardigan brown skirt, badger plum waistcoat cream shirt tan pants copper round glasses. One full scene, no panels, no text. Rabbit and badger at oak desk read a small event invitation card together. Blue ringbinder CLOSED and mustard yellow document folder CLOSED on desk. Warm late afternoon light.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-12e96830-a549-4550-b48e-9b1016491ff8.png",
+      "asset": "images/e6-verdwenen-bladzijde/12.webp"
+    },
+    {
+      "book": 1,
+      "n": 13,
+      "refs": [
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/e6-verdwenen-bladzijde/01.webp"
+      ],
+      "prompt": "Use case illustration-story. Create a new 1536x1024 warm 3D storybook scene with the same rabbit and badger and library as the reference. Rabbit wears teal cardigan brown skirt, badger plum waistcoat cream shirt tan pants copper round glasses. One full scene, no panels, no text. Rehearsal before a reading event: badger at a wooden lectern with open blue ringbinder, rabbit beside lectern raises one paw to suggest a pause. Rows of EMPTY green armchairs. No audience yet. Yellow folder closed on nearby oak desk.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-9b071366-564a-41b4-bdbf-96bb12fcc174.png",
+      "asset": "images/e6-verdwenen-bladzijde/13.webp"
+    },
+    {
+      "book": 0,
+      "n": 12,
+      "prompt": "Use case illustration-story. New 1536x1024 3D children's illustration. Image1 is the EXACT bridge construction to show; retain its geometry AND camera angle unchanged: support nearest viewer at lower LEFT, distant support at upper RIGHT, long ridges joining both. Image2 supplies only two character identities and classroom style. Recompose the scene around image1, NO image2 bridge geometry. Camera looks diagonally down at the tabletop. Orange-sweater girl Noor and blue-denim-shirt boy Elias behind table. Yellow bowl metal washers, red notebook, wooden ruler. No washers on bridge. A red toy car rests BESIDE an upright display card on TABLE, never on bridge. No text, single scene.",
+      "refs": [
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/woorduitleg/e6-ribben.webp",
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/e6-papieren-brug/01.webp"
+      ],
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-3f62d8a9-cad0-41f7-9e95-8d4048b635c1.png",
+      "asset": "images/e6-papieren-brug/12-v2.webp"
+    },
+    {
+      "book": 0,
+      "n": 13,
+      "prompt": "Use case illustration-story. New 1536x1024 3D children's illustration. Image1 is the EXACT bridge construction to show; retain its geometry AND camera angle unchanged: support nearest viewer at lower LEFT, distant support at upper RIGHT, long ridges joining both. Image2 supplies only two character identities and classroom style. Recompose the scene around image1, NO image2 bridge geometry. Camera looks diagonally down at the tabletop. Orange-sweater girl Noor and blue-denim-shirt boy Elias behind table. Yellow bowl metal washers, red notebook, wooden ruler. Small stack of washers on bridge. One adult female visitor sage green blouse watches. Red toy car on TABLE beside display card. No text, single scene.",
+      "refs": [
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/woorduitleg/e6-ribben.webp",
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/e6-papieren-brug/01.webp"
+      ],
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-5c4a3191-41f4-4cde-bf3f-0c3443db8a8f.png",
+      "asset": "images/e6-papieren-brug/13-v2.webp"
+    },
+    {
+      "book": 0,
+      "n": 14,
+      "prompt": "Use case illustration-story. New 1536x1024 3D children's illustration. Image1 is the EXACT bridge construction to show; retain its geometry AND camera angle unchanged: support nearest viewer at lower LEFT, distant support at upper RIGHT, long ridges joining both. Image2 supplies only two character identities and classroom style. Recompose the scene around image1, NO image2 bridge geometry. Camera looks diagonally down at the tabletop. Orange-sweater girl Noor and blue-denim-shirt boy Elias behind table. Yellow bowl metal washers, red notebook, wooden ruler. No washers on bridge. Additional visitor boy with dark straight hair and red shirt asks the two main children a question. Elias blue denim shirt notes it in red notebook. Red toy car beside display card on TABLE. No text, single scene.",
+      "refs": [
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/woorduitleg/e6-ribben.webp",
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/e6-papieren-brug/01.webp"
+      ],
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-79b091ca-7cf1-4727-b2d5-f98f12d85fc8.png",
+      "asset": "images/e6-papieren-brug/14-v2.webp"
+    },
+    {
+      "book": 0,
+      "n": 5,
+      "prompt": "Use case illustration-story. New 1536x1024 3D children's illustration. Image1 is the EXACT bridge construction to show; retain its geometry AND camera angle unchanged: support nearest viewer at lower LEFT, distant support at upper RIGHT, long ridges joining both. Image2 supplies only two character identities and classroom style. Recompose the scene around image1, NO image2 bridge geometry. Camera looks diagonally down at the tabletop. Orange-sweater girl Noor and blue-denim-shirt boy Elias behind table. Yellow bowl metal washers, red notebook, wooden ruler. Exactly two small metal washers in the central valley of the corrugated bridge. Both children pleased. No text, single scene.",
+      "refs": [
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/woorduitleg/e6-ribben.webp",
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/e6-papieren-brug/01.webp"
+      ],
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-081ad67e-dc5e-47e8-9e41-9aff89afcf46.png",
+      "asset": "images/e6-papieren-brug/05-v2.webp"
+    },
+    {
+      "book": 0,
+      "n": 6,
+      "prompt": "Use case illustration-story. New 1536x1024 3D children's illustration. Image1 is the EXACT bridge construction to show; retain its geometry AND camera angle unchanged: support nearest viewer at lower LEFT, distant support at upper RIGHT, long ridges joining both. Image2 supplies only two character identities and classroom style. Recompose the scene around image1, NO image2 bridge geometry. Camera looks diagonally down at the tabletop. Orange-sweater girl Noor and blue-denim-shirt boy Elias behind table. Yellow bowl metal washers, red notebook, wooden ruler. Middle of this same corrugated sheet has bent downward under a small pile of nine washers. Elias erases an entry in the ONE shared red notebook; Noor watches. No text, single scene.",
+      "refs": [
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/woorduitleg/e6-ribben.webp",
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/e6-papieren-brug/01.webp"
+      ],
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-35a900ad-947b-4591-8947-ee3d1d9995a7.png",
+      "asset": "images/e6-papieren-brug/06-v2.webp"
+    },
+    {
+      "book": 0,
+      "n": 8,
+      "prompt": "Use case illustration-story. New 1536x1024 3D children's illustration. Image1 is the EXACT bridge construction to show; retain its geometry AND camera angle unchanged: support nearest viewer at lower LEFT, distant support at upper RIGHT, long ridges joining both. Image2 supplies only two character identities and classroom style. Recompose the scene around image1, NO image2 bridge geometry. Camera looks diagonally down at the tabletop. Orange-sweater girl Noor and blue-denim-shirt boy Elias behind table. Yellow bowl metal washers, red notebook, wooden ruler. No washers on bridge. Girl points to pencil outlines under the two supports to check unchanged gap. No text, single scene.",
+      "refs": [
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/woorduitleg/e6-ribben.webp",
+        "C:/GitHub/juf_zisa_spelletjesmaker/zisa-lezen-m3-compleet/images/e6-papieren-brug/01.webp"
+      ],
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-488d6b7d-230b-47ab-b590-ee057f2e80f1.png",
+      "asset": "images/e6-papieren-brug/08-v2.webp"
+    },
+    {
+      "book": 1,
+      "n": 15,
+      "file": "exec-8a04c84d-f0b5-47f0-83f3-159c736361ef.png",
+      "prompt": "Use case precise-object-edit. Keep this scene, poses and all props. Change outside window to evening twilight blue/pink sky like after sunset; warm lamps inside. Rabbit skirt must be plain brown with subtle texture, not orange plaid. Back row deer wears green knit sweater, owl a blue scarf, fox a brown jacket with green scarf. Keep squirrel yellow sweater. No new characters or objects.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-a9ef0a0d-2955-4381-b82e-f8fcfd6318c2.png",
+      "asset": "images/e6-verdwenen-bladzijde/15.webp"
+    },
+    {
+      "book": 1,
+      "n": 16,
+      "prompt": "Use case illustration-story. New final scene of a children's book, warm detailed 3D storybook still life. Close view of a child's colored-pencil drawing lying on a wooden library desk: cute little hedgehog with one foot tangled in a red party ribbon. Under drawing the handwritten Dutch words exactly: 'Wat gebeurt er daarna?' Beside drawing one CLOSED dark blue ring binder and a CLOSED mustard yellow cardboard folder with black button closure. Out of focus EMPTY green reading armchairs, dark evening window, warm lamplight. No characters, all visitors have gone. Single 1536x1024 landscape scene, no collage.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-7d207cb7-6120-47f5-b0ae-8d4ca9d99b88.png",
+      "asset": "images/e6-verdwenen-bladzijde/16.webp"
+    },
+    {
+      "book": 1,
+      "n": 9,
+      "prompt": "Use case precise-object-edit. Keep this library folder illustration unchanged except remove ALL English words and letters from every paper, mug, book spine and binder label. Replace text on manuscript sheets with light tiny illegible gray handwritten strokes only. Keep page number 13 and inkblot visible, retain mouse and blue door illustration. NO new readable words. Keep warm colors, geometry and composition.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-9ba2c3c8-e5e3-44da-8dbb-9e068c5db8c1.png",
+      "asset": "images/e6-verdwenen-bladzijde/09.webp"
+    }
+  ],
+  "words": [
+    {
+      "word": "harmonicavouw",
+      "prompt": "Scientific-educational vocabulary illustration for children. Warm detailed 3D render on calm cream background, square 1024x1024. One white sheet of paper folded into a regular accordion zigzag, viewed obliquely so alternating valley and mountain folds clearly visible, sitting on wooden tabletop. No musical instrument. No words, no arrows, no panels, single object, generous margin.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-18a74d59-bb39-4c44-ac4a-08f4034aa304.png"
+    },
+    {
+      "word": "ribben",
+      "prompt": "Scientific-educational vocabulary illustration for children. Square 1024x1024 warm detailed 3D render on pale cream background. A white accordion-fold paper sheet spanning between two small identical wooden blocks, several straight parallel elevated ridges run along the span from one support to the other. Close view at low oblique angle makes the longitudinal ridges very clear. Gently warm highlighted top edges to emphasize raised ribs. No weights, no text, no arrows, no extra objects.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-dd70ed67-145d-4ad6-a8b2-882d70b52dbc.png"
+    },
+    {
+      "word": "ringmap",
+      "prompt": "Vocabulary illustration for children, square1024x1024 warm polished 3D object rendering. One dark blue open ring binder on cream background with metal ring mechanism clearly visible; three open rings through round punched holes of several loose cream paper sheets. Paper on both sides, sensible mechanics, no text, no patterns, no animals. Clearly a binder not a sewn book.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-c2523470-b2c9-4236-addf-e06afbf849d5.png"
+    },
+    {
+      "word": "lessenaar",
+      "prompt": "Vocabulary illustration for children, square1024x1024 warm polished3D object rendering on calm cream background. One freestanding wooden reading lectern, full object in view, slanted top surface with raised lower lip supporting a small open book, central wooden column and broad stable base resting on floor. No chair, no person, no words, generous margin, natural proportions.",
+      "path": "C:\\Users\\isabe\\.codex\\generated_images\\01a0bf90-0f21-7833-be6f-52348fdcf88f\\exec-ad2e3a57-97cb-4a6e-8a0c-281952acaf16.png"
+    }
+  ],
+  "mode": "Built-in image_gen; generated PNG originals retained outside project; selected WebP copies in project."
+}
