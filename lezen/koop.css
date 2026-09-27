@@ -31,3 +31,5 @@ main{max-width:none;width:94%;padding:16px 0 22px;display:grid;grid-template-col
  header{gap:12px}.brand{font-size:25px}header>a:last-child{font-size:13px;text-align:right}
 }
 @media(max-width:460px){.intro{grid-template-columns:1fr 75px}.intro img{width:75px}.intro h1{font-size:27px}.price{font-size:38px}.price span{font-size:14px}}
+
+.purchase-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}.purchase-choices section{padding:12px;border:1px solid #dceaf0;border-radius:14px;background:#f5fbfe}.purchase-choices h3{font-size:18px;margin:0}.purchase-choices .buy{font-size:14px;padding:12px 8px;margin:8px 0 0}.offer .purchase-choices p{font-size:14px;margin:6px 0}.offer .small{font-size:13px!important}@media(max-width:600px){.purchase-choices{grid-template-columns:1fr}}

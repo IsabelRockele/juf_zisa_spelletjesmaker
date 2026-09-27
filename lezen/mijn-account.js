@@ -14,7 +14,21 @@ if(ordering){
  // The order form belongs before account management during checkout.
  document.querySelector('main').insertBefore(el('purchase'),el('dashboard'));
 }
+el('purchase').parentNode.insertBefore(el('includedNotice'),el('purchase'));
+el('orderType').value=new URLSearchParams(location.search).get('keuze')==='school'?'school':'persoonlijk';
 let auth,lastStatus,busy=false;
+function applyOrderType(){
+ const school=el('orderType').value==='school';
+ el('quantity').min=school?'2':'1';el('quantity').max=school?'100':'1';
+ el('quantity').value=school?Math.max(2,Number(el('quantity').value)||2):1;
+ el('quantity').readOnly=!school;
+ const included=!!(lastStatus?.pro||lastStatus?.schoolMember)&&!school;
+ show('includedNotice',included);el('checkoutButton').disabled=included;
+ el('includedText').textContent='Dit account heeft al toegang tot Zisa Lezen. Je hoeft geen tweede abonnement te kopen. Wil je als nieuwe klant bestellen? Meld je dan aan met een ander account.';
+ updatePrice();
+}
+el('orderType').onchange=applyOrderType;
+
 const inviteMatch=location.hash.match(/^#invite=([A-Za-z0-9_-]{43})$/);
 if(inviteMatch){sessionStorage.setItem('zisa-reading-invitation',inviteMatch[1]);history.replaceState(null,'',location.pathname+location.search);}
 const invitationToken=()=>sessionStorage.getItem('zisa-reading-invitation');
@@ -46,7 +60,7 @@ async function refresh(){
   show('openBooks',data.allowed);show('newLink',data.allowed);show('share',false);
   el('subscriptionText').textContent=data.school?`${data.quantity} leerkrachtplaatsen. ${data.renewalCanceled?'Verlenging gestopt.':'Automatische verlenging: '+money(Number(data.amountEUR))+' per maand.'} ${data.paidUntil?'Betaalde toegang tot '+date(data.paidUntil)+'.':'Er is geen actieve betaalde periode.'}`:data.schoolMember?'Je school betaalt je leerkrachtplaats.':data.pro?'Lezen is inbegrepen bij je actieve Pro-abonnement.':data.renewalCanceled?`Verlenging gestopt. Betaalde toegang tot ${date(data.paidUntil)}.`:data.cancelRequested?'Je opzegging wordt verwerkt.':data.paidUntil?`Betaalde toegang tot ${date(data.paidUntil)}. Automatische verlenging: €3,99 per maand.`:'Nog geen actieve betaalde leesperiode.';
   const hasOwnPaid=data.paidUntil>Date.now();if(ordering){show('dashboard',hasOwnPaid||data.pro||data.schoolMember);el('pageTitle').textContent=hasOwnPaid?'Je abonnement is actief':'Zisa Lezen bestellen';}show('purchase',!hasOwnPaid&&(!data.cancelRequested||data.renewalCanceled)&&!invitationToken());show('cancel',!data.renewalCanceled&&(data.paidUntil>0||data.paymentStatus==='paid'));
-  el('quantity').min=data.pro||data.schoolMember?'2':'1';if(Number(el('quantity').value)<Number(el('quantity').min))el('quantity').value=el('quantity').min;updatePrice();
+  applyOrderType();
   el('invoices').replaceChildren();
   for(const invoice of data.invoices||[]){const button=document.createElement('button');button.textContent=invoice.ready?`Download ${invoice.number}`:'Factuur wordt aangemaakt';button.disabled=!invoice.ready;button.onclick=()=>task(async()=>{const response=await api('invoice',{id:invoice.id});const url=URL.createObjectURL(await response.blob());const link=document.createElement('a');link.href=url;link.download=`factuur-zisa-lezen-${invoice.number}.pdf`;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);});el('invoices').append(button);}
   if(!data.invoices?.length)el('invoices').textContent='Na je eerste bevestigde betaling verschijnt hier je factuur.';
@@ -56,7 +70,8 @@ el('peppolRequested').onchange=()=>{const checked=el('peppolRequested').checked;
 if(!readingConfig.enabled){message('Deze koppeling wordt voorbereid. Er worden nog geen accounts of betalingen gestart. Je kunt het voorbeeld bekijken op de vorige pagina.');}
 else{
   auth=await createReadingAuth(readingConfig);
-  auth.observe(user=>{show('login',!user);show('invitation',!!invitationToken());show('acceptInvitation',false);show('dashboard',false);show('purchase',false);show('verification',!!user&&!user.emailVerified);if(user?.emailVerified)refresh().catch(error=>message(friendly(error)));else if(!busy)message(user?'Bevestig eerst je e-mailadres.':'Meld je aan of maak een account.');});
+  auth.observe(user=>{lastStatus=null;show('includedNotice',false);el('buyerIdentity').textContent=user?.email?'Je bestelt als '+user.email:'';show('login',!user);show('invitation',!!invitationToken());show('acceptInvitation',false);show('dashboard',false);show('purchase',false);show('verification',!!user&&!user.emailVerified);if(user?.emailVerified)refresh().catch(error=>message(friendly(error)));else if(!busy)message(user?'Bevestig eerst je e-mailadres.':'Meld je aan of maak een account.');});
+  el('switchBuyer').onclick=()=>task(async()=>{await auth.signOut();show('includedNotice',false);message('Meld je aan met het account waarmee je wilt bestellen.');});
   el('googleLogin').onclick=()=>task(()=>auth.signInGoogle(el('email').value));
   el('loginForm').onsubmit=e=>{e.preventDefault();task(()=>auth.signIn(el('email').value,el('password').value));};
   el('register').onclick=()=>task(async()=>{if(!el('loginForm').reportValidity())return;message('Je account wordt aangemaakt. Daarna sturen we je een bevestigingsmail. Even geduld…');await auth.register(el('email').value,el('password').value);message('Open je e-mail om je account te bevestigen. Kijk ook in je spammap of ongewenste e-mail.');});
