@@ -1,4 +1,4 @@
-// E6: verdere toepassing van de GO!-doelen voor 9–10 jaar, einde vierde leerjaar.
+// E6: GO!-doelen 9–10 jaar, einde vierde leerjaar.
 (()=>{
 window.ZISA_BOOKS.push(...[
   {
@@ -155,157 +155,147 @@ window.ZISA_BOOKS.push(...[
     }
   },
   {
-    "id": "e6-verdwenen-bladzijde",
+    "id": "e6-licht-uitkijktoren",
     "level": "E6",
-    "title": "De verdwenen bladzijde",
-    "blurb": "Vlak voor een voorleesavond ontbreekt een bladzijde uit Das’ verhaal. Kunnen Konijn en Das de juiste tekst terugvinden?",
-    "cover": "images/e6-verdwenen-bladzijde/01.webp",
+    "title": "Het licht in de uitkijktoren",
+    "blurb": "Een licht knippert uit een gesloten toren. Wanneer Lena en Ilias antwoord seinen, begint een spannende avond. Wie zit daar boven, en waarom gaat het licht plotseling uit?",
+    "cover": "images/e6-licht-uitkijktoren/01.webp",
     "pages": [
       {
-        "text": "Konijn schuift haar stoel dichter bij de leestafel van de bibliotheek. Vanavond zal Das daar voor het eerst zijn nieuwe verhaal voorlezen. Zijn geïllustreerde manuscript zit in een donkerblauwe ringmap, naast een gele werkmap en een rood potlood. Konijn helpt de tekst na te kijken. Terwijl Das de stoelen telt, leest zij over een muis die voor een raadselachtige blauwe deur staat.",
-        "image": "images/e6-verdwenen-bladzijde/01.webp"
+        "text": "Bij de afwasplaats laat Lena bijna een mok vallen. Boven het donkere weiland knippert een licht. Het komt uit de oude uitkijktoren, die ze vanmiddag nog hebben gezien. Toen hing er een bordje aan de deur: gesloten voor bezoekers. ‘Kijk daar eens,’ zegt ze. Haar neef Ilias zet de afwasbak neer. Achter hen verdwijnen de laatste zonnestralen tussen de tenten. In het bovenste raam flitst het opnieuw.",
+        "image": "images/e6-licht-uitkijktoren/01.webp"
       },
       {
-        "text": "De muis steekt een sleutel in het slot, maar op de volgende bladzijde zit hij plots aan een feesttafel. Konijn bladert terug. Na bladzijde twaalf volgt veertien. ‘Er ontbreekt iets,’ zegt ze. Das lacht eerst, omdat hij denkt dat ze een grap over zijn spannende verhaal maakt. Dan ziet hij het lege stukje tussen de ringen. Zijn glimlach verdwijnt onmiddellijk.",
-        "image": "images/e6-verdwenen-bladzijde/02.webp",
+        "text": "‘Een weerspiegeling?’ vraagt Ilias. Lena kijkt naar de lucht. De zon is inmiddels achter een dikke wolkenrand verdwenen, maar het licht verschijnt nog een keer. Daarna blijft het donker. Ze wachten. Er beweegt niets bij de blauwe deur onder het raam. ‘Misschien is er toch iemand binnen,’ zegt Lena. Vanaf de camping is de toren moeilijk te onderscheiden van de bomen erachter.",
+        "image": "images/e6-licht-uitkijktoren/02.webp",
         "task": {
-          "q": "Waardoor merken ze dat er een bladzijde ontbreekt?",
+          "q": "Welk detail maakt een weerspiegeling van de zon minder waarschijnlijk?",
           "a": [
-            "Das heeft te weinig stoelen klaargezet.",
-            "De gele werkmap ligt naast de ringmap.",
-            "De paginanummers én de verhaallijn maken een sprong."
-          ],
-          "correct": 2,
-          "hint": "Verbind de nummering met wat er met de muis gebeurt."
-        }
-      },
-      {
-        "text": "Das voelt in zijn zakken en kijkt onder de leestafel. Konijn houdt hem tegen voordat hij de hele map uit elkaar haalt. Misschien zit de ontbrekende bladzijde alleen op de verkeerde plaats. Ze leggen alle losse vellen op volgorde en controleren de nummers. Dertien blijft onvindbaar. ‘We weten nu wat er ontbreekt,’ zegt Konijn, ‘maar nog niet waar het gebleven is.’",
-        "image": "images/e6-verdwenen-bladzijde/03.webp"
-      },
-      {
-        "text": "Op de achterzijde van een ander vel staat een oud slot. Daarin klimt de muis door een raam, hoewel hij de sleutel nog in zijn poot houdt. Das herkent zijn eerste versie. ‘Die heb ik later veranderd,’ zegt hij. ‘Het raam zat te hoog.’ Konijn legt het vel apart. Een tekst die toevallig aansluit op dezelfde plek, is daarom nog niet de juiste voortzetting.",
-        "image": "images/e6-verdwenen-bladzijde/04.webp",
-        "task": {
-          "q": "Waarom gebruiken ze de oude versie niet zomaar?",
-          "a": [
-            "Das had die gebeurtenis veranderd en de tekst past niet meer goed.",
-            "Op de achterzijde van een vel mag geen verhaal staan.",
-            "De muis komt in de oude versie helemaal niet voor."
-          ],
-          "correct": 0,
-          "hint": "Denk aan het hoge raam en de latere verandering."
-        }
-      },
-      {
-        "text": "Ze lezen het fragment vóór de ontbrekende bladzijde opnieuw. Het hoofdpersonage, de muis, hoort achter de deur stoelen schuiven en zacht gefluister. Vervolgens draait hij de sleutel om. In het fragment erna bedankt hij zijn vrienden voor de verrassing. Konijn stelt voor om voorlopig alleen op te schrijven wat die aanwijzingen waarschijnlijk maken. ‘Een feest achter de deur,’ denkt Das. ‘Maar hoe heb ik dat precies verteld?’",
-        "image": "images/e6-verdwenen-bladzijde/05.webp"
-      },
-      {
-        "text": "Konijn bedenkt twee mogelijke overgangen. In de eerste vindt de muis een lege kamer en gaat hij alleen naar huis. In de tweede springen zijn vrienden achter de stoelen vandaan en zingen ze voor hem. Das kiest onmiddellijk de tweede. Het gefluister en het bedankje passen daarbij. Toch schrijven ze boven hun kladblad duidelijk: voorstel. Ze hebben een passende oplossing bedacht, geen verloren tekst teruggevonden.",
-        "image": "images/e6-verdwenen-bladzijde/06.webp",
-        "task": {
-          "q": "Waarom noemen ze hun overgang een voorstel?",
-          "a": [
-            "Omdat Das het hele verhaal wil vervangen.",
-            "Omdat het een passende nieuwe tekst is, maar nog niet de teruggevonden tekst.",
-            "Omdat Konijn niet kan lezen wat er op het blad staat."
+            "De deur van de toren is blauw.",
+            "Het licht verschijnt ook nadat de zon achter de wolken verdwijnt.",
+            "Er staan bomen achter de toren."
           ],
           "correct": 1,
-          "hint": "Een vermoeden dat past bij aanwijzingen is nog geen gevonden bron."
+          "hint": "Vergelijk het moment waarop de zon verdwijnt met het verschijnen van het licht."
         }
       },
       {
-        "text": "Das zakt in een groene leunstoel. ‘Mijn verhaal heeft een gat en vanavond zit de zaal vol.’ Konijn wijst naar hun kladblad. Er is tenminste een bruikbare overgang, mocht het origineel wegblijven. Maar eerst willen ze hun zoektocht afmaken. Ze spreken af niet overal tegelijk te zoeken. Das vertelt stap voor stap waar hij die ochtend met de ringmap is geweest.",
-        "image": "images/e6-verdwenen-bladzijde/07.webp"
+        "text": "Ilias haalt hun zaklamp uit de tent. Tante Mara, die de kampeerstoelen opvouwt, vraagt wat er aan de hand is. Samen lopen ze terug naar de afwasplaats. Ilias richt de lamp op de toren en knippert twee keer. Even gebeurt er niets. Dan flitst het bovenste raam twee keer op. Lena voelt haar hart sneller slaan. Dat kan toch geen toeval zijn?",
+        "image": "images/e6-licht-uitkijktoren/03.webp"
       },
       {
-        "text": "Hij begon thuis aan zijn bureau en las daarna in de serre alles hardop. Bij de beschrijving van de blauwe deur had hij een zin doorgestreept. De verbeterde bladzijde legde hij apart, zodat de inkt kon drogen. ‘Apart waarin?’ vraagt Konijn. Das kijkt naar de gele werkmap op tafel. Daarin bewaart hij schetsen en teksten die nog niet in de ringmap zitten.",
-        "image": "images/e6-verdwenen-bladzijde/08.webp",
+        "text": "Mara pakt haar telefoon. ‘We gaan samen tot aan het hek van het weiland.’ Het grindpad loopt langs het riet naar de toren. Terwijl ze lopen, doet Ilias zijn zaklamp weer aan en uit. Vanuit het raam volgt opnieuw een antwoord. Dan horen ze iets anders: drie harde slagen, kort achter elkaar. Lena blijft staan. Het geluid komt van boven, uit de toren.",
+        "image": "images/e6-licht-uitkijktoren/04.webp",
         "task": {
-          "q": "Welke herinnering geeft de bruikbaarste aanwijzing voor hun zoektocht?",
+          "q": "Welke nieuwe aanwijzing krijgen ze als ze dichter bij de toren komen?",
           "a": [
-            "Das had die ochtend in de serre gelezen.",
-            "Das las een zin hardop voor.",
-            "Das legde de verbeterde bladzijde apart om de inkt te laten drogen."
-          ],
-          "correct": 2,
-          "hint": "Welke handeling kan verklaren waarom een vel niet in de ringmap zit?"
-        }
-      },
-      {
-        "text": "Voorzichtig openen ze de gele map. Tussen een tekening van de muis en een lijst met titels ligt een vel met het nummer dertien. Op de bovenrand zit dezelfde kleine inktvlek die Das zich herinnert. Konijn wil al juichen, maar Das vraagt haar eerst te lezen. Een nummer kan helpen om iets te vinden; de inhoud moet nog bewijzen dat het werkelijk op die plaats past.",
-        "image": "images/e6-verdwenen-bladzijde/09.webp"
-      },
-      {
-        "text": "Op de teruggevonden bladzijde duwt de muis de deur open. Zijn vrienden komen zingend achter de stoelen vandaan, terwijl Egel bijna over een lint struikelt. De muis ontdekt dat al het gefluister bij de voorbereiding van zijn verjaardagsfeest hoorde. Konijn leest daarna de eerste zin van bladzijde veertien. Het bedankje sluit nu aan. Hun vermoeden klopte, maar Das had er een grappig detail aan toegevoegd.",
-        "image": "images/e6-verdwenen-bladzijde/10.webp",
-        "task": {
-          "q": "Wat bevestigt dat ze de juiste bladzijde teruggevonden hebben?",
-          "a": [
-            "De inhoud sluit aan op zowel het fragment ervoor als dat erna.",
-            "Op het vel staat een grappiger detail dan op elk ander vel.",
-            "De gele werkmap heeft dezelfde kleur als de inktvlek."
+            "Ze horen drie harde slagen.",
+            "Ze vinden een kapotte telefoon.",
+            "Ze zien een brandweerwagen."
           ],
           "correct": 0,
-          "hint": "Het nummer helpt bij het zoeken; controleer ook de samenhang."
+          "hint": "Let op wat ze nu voor het eerst waarnemen."
         }
       },
       {
-        "text": "Das stopt het vel op de juiste plaats in de ringmap en klikt de ringen dicht. Ze vergelijken het teruggevonden fragment met hun eigen voorstel. Beide bevatten een verrassing, maar alleen Das’ tekst noemt Egels onhandige sprong. ‘Dat detail hoeven we niet te verzinnen,’ zegt Konijn. Op het kladblad zet ze een streep. Het kan weg; de oorspronkelijke bladzijde is terug.",
-        "image": "images/e6-verdwenen-bladzijde/11.webp"
+        "text": "Door het hek zien ze nu een arm uit het raam steken. ‘Help!’ De wind trekt het woord uit elkaar, maar Lena heeft het duidelijk gehoord. Mara roept terug: ‘We horen u! Wat is er gebeurd?’ Ze moeten wachten tot de wind even afneemt. ‘De trap is kapot!’ klinkt het dan. ‘Ik kan niet naar beneden!’ Lena klemt haar handen om de koude spijlen.",
+        "image": "images/e6-licht-uitkijktoren/05.webp"
       },
       {
-        "text": "Ze lezen ook de aankondiging voor de avond na: Luister mee naar een spannend verhaal. Na het voorlezen kun je vragen stellen aan de schrijver. Das wil eraan toevoegen dat dit het spannendste verhaal van het hele bos is. Konijn trekt één wenkbrauw op. ‘Dat mag jij vinden. Onze bezoekers mogen er straks anders over denken.’ Das laat de aankondiging zoals ze was.",
-        "image": "images/e6-verdwenen-bladzijde/12.webp",
+        "text": "Mara belt de brandweer. Ze beschrijft de situatie en noemt de uitkijktoren achter de camping. Ilias wijst op het brede grindpad dat vanaf de camping naar het hek loopt. Daar kan een wagen door. Mara geeft ook die toegangsweg door. Terwijl ze luistert, kijkt Lena omhoog. De man zwaait niet meer. Alleen zijn zaklamp beweegt langzaam heen en weer achter het raam.",
+        "image": "images/e6-licht-uitkijktoren/06.webp",
         "task": {
-          "q": "Waarom hoeft de aankondiging niet te zeggen dat dit het spannendste verhaal is?",
+          "q": "Waarom vertelt Mara ook over het brede grindpad?",
           "a": [
-            "Niemand mag een verhaal spannend vinden.",
-            "Dat is een oordeel waarover bezoekers verschillend kunnen denken.",
-            "De aankondiging mag alleen uit één woord bestaan."
-          ],
-          "correct": 1,
-          "hint": "Maak onderscheid tussen de activiteit aankondigen en een mening geven."
-        }
-      },
-      {
-        "text": "Een uur voor de opening zetten ze de groene stoelen in een halve kring. De ringmap ligt geopend op de lessenaar; de gele werkmap blijft gesloten op de leestafel. Das oefent het fragment met de blauwe deur. Hij leest eerst haastig en zonder pauze. Konijn steekt haar poot op. Als hij even wacht vóór de deur opengaat, krijgt het publiek tijd om mee te raden.",
-        "image": "images/e6-verdwenen-bladzijde/13.webp"
-      },
-      {
-        "text": "Wanneer de dieren binnenkomen, voelt Das zijn poten een beetje trillen. Konijn zit vooraan, met het rode potlood achter haar oor. Bij de blauwe deur laat Das zijn stem zakken. Daarna zwijgt hij heel even. In de zaal wordt het stil. Dan springen de vrienden in het verhaal tevoorschijn. Een jonge eekhoorn lacht zo hard om Egel dat Das zelf bijna begint te lachen.",
-        "image": "images/e6-verdwenen-bladzijde/14.webp",
-        "task": {
-          "q": "Waardoor wordt het publiek bij de blauwe deur extra nieuwsgierig?",
-          "a": [
-            "Konijn houdt een potlood vast.",
-            "De dieren zitten op groene stoelen.",
-            "Das vertraagt zijn stem en wacht even voordat hij verder leest."
+            "Daar kunnen de kinderen hun tent opzetten.",
+            "Zo weet Robin hoe hij moet afdalen.",
+            "Zo weten de hulpverleners hoe ze de toren kunnen bereiken."
           ],
           "correct": 2,
-          "hint": "Let op de manier waarop hij de onthulling uitstelt."
+          "hint": "Welke informatie is nuttig voor de mensen die onderweg zijn?"
         }
       },
       {
-        "text": "Na afloop vraagt iemand of Konijn het verloren stukje heeft geschreven. Das legt uit dat zij samen een mogelijke overgang bedachten, maar uiteindelijk zijn oorspronkelijke bladzijde terugvonden. ‘Dus jullie hadden het al ongeveer geraden?’ vraagt de eekhoorn. Konijn knikt. Ze hadden goed naar de aanwijzingen gekeken. Das sluit de ringmap en zegt dat hij voortaan ook de losse vellen controleert voordat hij vertrekt.",
-        "image": "images/e6-verdwenen-bladzijde/15.webp"
+        "text": "‘De hulp is onderweg!’ roept Mara zodra ze heeft opgehangen. De man steekt zijn duim op. ‘Ik heet Robin!’ roept hij terug. Er hangt iets aan een riem voor zijn borst: een verrekijker. Lena wil vragen waarom hij in de gesloten toren is, maar een windvlaag overstemt haar. Boven het dak schuift een donkere wolk. Het riet buigt bijna tot op het pad.",
+        "image": "images/e6-licht-uitkijktoren/07.webp"
       },
       {
-        "text": "Als de bezoekers weg zijn, vindt Konijn nog één vel onder een stoel. Das schrikt en grijpt naar zijn ringmap. Maar het is een tekening van de eekhoorn: Egel hangt met één poot in een feestlint. Onderaan staat een vraag over wat er daarna gebeurde. Das bekijkt de tekening en begint te glimlachen. ‘Blijkbaar wil iemand een volgend hoofdstuk.’",
-        "image": "images/e6-verdwenen-bladzijde/16.webp"
+        "text": "Plotseling dooft het licht in het raam. Lena wacht op de volgende flits. Die komt niet. ‘Robin?’ roept ze. Geen antwoord. Ilias richt zijn zaklamp omhoog, maar de smalle bundel laat alleen de stenen onder het raam oplichten. Wat als de man gevallen is? Mara roept nogmaals. In de stilte daarna horen ze een doffe klap. Dan nog één.",
+        "image": "images/e6-licht-uitkijktoren/08.webp",
+        "task": {
+          "q": "Wat weet je aan het einde van deze bladzijde zeker?",
+          "a": [
+            "Robin is naar beneden gevallen.",
+            "De lamp is uit en er klinkt een doffe klap.",
+            "Robin is zonder hulp uit de toren gekomen."
+          ],
+          "correct": 1,
+          "hint": "Maak onderscheid tussen wat Lena vreest en wat ze werkelijk waarneemt."
+        }
+      },
+      {
+        "text": "‘Mijn lamp is leeg!’ klinkt het vanuit de toren. Lena ademt uit. Robin is er nog. ‘Wij blijven hier!’ roept Ilias. Hij houdt de zaklamp omhoog zonder ermee te knipperen. Robin kan nu zien waar ze staan. Mara vraagt hem bij het raam te blijven. Ze kijkt telkens naar de bocht in het grindpad, waar ieder moment de brandweerwagen kan verschijnen.",
+        "image": "images/e6-licht-uitkijktoren/09.webp"
+      },
+      {
+        "text": "In de verte bromt een motor. Ilias draait zich om, maar ziet alleen de donkere heg bij de camping. Het geluid wordt harder en verdwijnt dan weer. ‘Is dat de brandweer wel?’ fluistert hij. Mara luistert. Dan kleurt de heg even blauw. Tussen de takken flitst een zwaailicht. De wagen rijdt over het pad naar hen toe. Lena zwaait met beide armen.",
+        "image": "images/e6-licht-uitkijktoren/10.webp",
+        "task": {
+          "q": "Waardoor weten ze uiteindelijk dat de brandweer eraan komt?",
+          "a": [
+            "Ze zien een blauw zwaailicht en daarna de wagen.",
+            "De regen houdt plotseling op.",
+            "Robin wijst naar zijn verrekijker."
+          ],
+          "correct": 0,
+          "hint": "Een motorgeluid alleen was nog niet genoeg om zeker te zijn."
+        }
+      },
+      {
+        "text": "Mara doet het hek open en wijst naar het bovenste raam. De kinderen stappen met haar opzij. Een brandweervrouw coördineert de redding. Ze vraagt Robin om wat naar achteren te gaan. Haar collega bekijkt de toren en haalt een lange ladder van de wagen. Lena wil dichterbij komen, maar blijft naast Ilias staan. Ze wil alles kunnen zien, zonder iemand in de weg te lopen.",
+        "image": "images/e6-licht-uitkijktoren/11.webp"
+      },
+      {
+        "text": "De ladder staat stevig tegen de toren. De brandweervrouw klimt omhoog en verdwijnt door het raam. Beneden is het plotseling stil. Lena telt in gedachten tot tien. Tot twintig. Waarom duurt het zo lang? Dan verschijnt de gele helm weer. ‘We komen naar beneden,’ roept de brandweervrouw. Robin schuift voorzichtig naar de opening. Er zit nu een veiligheidsgordel om zijn middel.",
+        "image": "images/e6-licht-uitkijktoren/12.webp",
+        "task": {
+          "q": "Hoe laat de schrijver voelen dat het wachten voor Lena lang duurt?",
+          "a": [
+            "Door uit te leggen hoe een ladder gemaakt wordt.",
+            "Door te vertellen hoe laat de zon ondergaat.",
+            "Door Lena in gedachten tot tien en daarna tot twintig te laten tellen."
+          ],
+          "correct": 2,
+          "hint": "Let op hoe de schrijver het wachten beschrijft."
+        }
+      },
+      {
+        "text": "Stap voor stap komt Robin omlaag, begeleid door de brandweervrouw. Pas wanneer zijn schoenen het grind raken, laat Ilias zijn schouders zakken. Robin gaat op een bankje naast het hek zitten. Zijn verrekijker hangt nog om zijn nek. ‘Ik zag jullie lamp,’ zegt hij. ‘Toen wist ik dat iemand mijn seinen had opgemerkt.’ Lena merkt dat ze nog steeds haar vuisten gebald houdt.",
+        "image": "images/e6-licht-uitkijktoren/13.webp"
+      },
+      {
+        "text": "Robin telt met toestemming vogelnesten in de toren. Bezoekers mogen er niet in, om de broedende vogels niet te storen. Op de terugweg brak een traptrede. Twee andere treden schoten mee los, waardoor een groot gat ontstond. Robin kon terug op de bovenste vloer kruipen, maar zijn telefoon viel naar beneden. Die lag tussen de gebroken planken, buiten zijn bereik.",
+        "image": "images/e6-licht-uitkijktoren/14.webp",
+        "task": {
+          "q": "Waarom kan Robin zelf niet bellen nadat de trap kapotgaat?",
+          "a": [
+            "Hij weet niet waar de toren staat.",
+            "Zijn telefoon ligt beneden, buiten zijn bereik.",
+            "Hij wil liever op de camping wachten."
+          ],
+          "correct": 1,
+          "hint": "Verbind de val van de telefoon met Robins plaats in de toren."
+        }
+      },
+      {
+        "text": "‘Eerst riep ik,’ vertelt Robin. ‘Maar met die wind hoorde niemand me. Daarna probeerde ik mijn zaklamp. Ik sloeg ook met mijn schoen tegen de metalen leuning.’ Ilias kijkt naar Lena. Dat waren de drie harde slagen. Alle vreemde geluiden passen nu bij elkaar. De eerste regendruppels tikken op de brandweerwagen. Mara bedankt de helpers en neemt de kinderen mee naar de camping.",
+        "image": "images/e6-licht-uitkijktoren/15.webp"
+      },
+      {
+        "text": "Even later zitten ze onder het tentdoek. De regen roffelt boven hun hoofd. Ilias zet de zaklamp tussen de mokken op het kampeertafeltje. ‘Ik dacht echt dat het maar een weerspiegeling was,’ zegt hij. Lena kijkt naar het kleine licht. ‘Gelukkig keek je nog een keer.’ Buiten verdwijnt de toren achter een gordijn van regen. Deze keer weten ze zeker dat er niemand meer op hulp wacht.",
+        "image": "images/e6-licht-uitkijktoren/16.webp"
       }
-    ],
-    "endTask": {
-      "q": "Wat is de hoofdgedachte?",
-      "a": [
-        "Een verdwenen bladzijde hoeft nooit teruggevonden te worden.",
-        "Door aanwijzingen en teksten te vergelijken, vinden twee vrienden de juiste bladzijde terug.",
-        "Iedere schrijver moet zijn verhaal steeds opnieuw verzinnen."
-      ],
-      "correct": 1,
-      "hint": "Verbind het probleem met de aanpak en de oplossing."
-    }
+    ]
   }
 ]);
 window.ZISA_LEVEL_GAMES={...(window.ZISA_LEVEL_GAMES||{}),...{
@@ -501,32 +491,32 @@ window.ZISA_LEVEL_GAMES={...(window.ZISA_LEVEL_GAMES||{}),...{
       "hint": "Vergelijk zijn snelle eerste conclusie met zijn antwoord aan de jongen."
     }
   ],
-  "e6-verdwenen-bladzijde": [
+  "e6-licht-uitkijktoren": [
     {
       "type": "choice",
       "icon": "🔎",
       "title": "De hoofdgedachte",
-      "q": "Welke zin vat dit verhaal het best samen?",
+      "q": "Welke zin vat het verhaal het best samen?",
       "a": [
-        "Das zoekt een nieuwe zaal voor zijn verhaal.",
-        "Met aanwijzingen en tekstvergelijking vinden twee vrienden een ontbrekende bladzijde.",
-        "Konijn besluit om Das’ hele boek zelf te schrijven."
+        "Lena en Ilias bekijken tijdens het kamperen vogelnesten in een oude toren.",
+        "Lena en Ilias ontdekken een noodsignaal en zorgen met Mara dat een vastzittende man hulp krijgt.",
+        "Lena en Ilias zoeken in het donker naar hun verloren zaklamp."
       ],
       "correct": 1,
-      "hint": "Kies de zin die het centrale probleem en de oplossing bevat."
+      "hint": "Kies de zin die zowel het probleem als de oplossing bevat."
     },
     {
       "type": "sequence",
       "icon": "⏳",
-      "title": "De zoektocht ordenen",
-      "q": "Zet de gebeurtenissen in de juiste volgorde.",
+      "title": "De gebeurtenissen ordenen",
+      "q": "Zet de gebeurtenissen in de volgorde waarin de kinderen ze meemaken.",
       "items": [
-        "Konijn merkt dat de tekst een sprong maakt.",
-        "Ze bedenken een overgang die bij de aanwijzingen past.",
-        "Das herinnert zich dat hij een bladzijde apart legde.",
-        "Ze vinden het origineel en controleren of de tekst aansluit."
+        "Ze zien lichtflitsen vanuit de toren.",
+        "Ze horen dat iemand niet naar beneden kan.",
+        "Mara belt de brandweer.",
+        "Robin vertelt hoe zijn telefoon naar beneden viel."
       ],
-      "hint": "Hun eigen voorstel bestaat al voordat ze het origineel terugvinden."
+      "hint": "Let op het verschil tussen wanneer iets gebeurde en wanneer de kinderen het horen."
     },
     {
       "type": "choice",
@@ -534,162 +524,162 @@ window.ZISA_LEVEL_GAMES={...(window.ZISA_LEVEL_GAMES||{}),...{
       "title": "Een samenvatting inkorten",
       "q": "Welke zin is minder belangrijk en kan uit deze samenvatting weg?",
       "a": [
-        "In Das’ manuscript ontbreekt een bladzijde.",
-        "Konijn en Das gebruiken aanwijzingen om te zoeken.",
-        "Konijn heeft een rood potlood.",
-        "Ze vinden het origineel in de werkmap en de voorleesavond kan doorgaan."
+        "Lena en Ilias ontdekken dat iemand vanuit een gesloten toren om hulp seint.",
+        "Aan het einde staat de zaklamp tussen de mokken.",
+        "Met Mara waarschuwen ze de brandweer, die Robin uit de toren helpt.",
+        "Daarna horen ze hoe hij door een kapotte trap vast kwam te zitten."
       ],
-      "correct": 2,
-      "hint": "Kies het detail dat niet nodig is om de zoektocht te begrijpen.",
-      "context": "In Das’ manuscript ontbreekt een bladzijde. Konijn en Das gebruiken aanwijzingen om te zoeken. Konijn heeft een rood potlood. Ze vinden het origineel in de werkmap en de voorleesavond kan doorgaan."
+      "correct": 1,
+      "hint": "Welk detail heb je niet nodig om het probleem en de afloop te begrijpen?",
+      "context": "Lena en Ilias ontdekken dat iemand vanuit een gesloten toren om hulp seint. Aan het einde staat de zaklamp tussen de mokken. Met Mara waarschuwen ze de brandweer, die Robin uit de toren helpt. Daarna horen ze hoe hij door een kapotte trap vast kwam te zitten."
     },
     {
       "type": "choice",
       "icon": "🔎",
       "title": "Aanwijzingen verbinden",
-      "q": "Welke gebeurtenis past het best tussen deze twee fragmenten?",
+      "q": "Waarom denken de kinderen dat iemand bewust op hen reageert?",
       "a": [
-        "De vrienden verrassen de muis met een feest.",
-        "De muis sluit de deur en gaat alleen slapen.",
-        "De muis vertrekt zonder iemand te ontmoeten."
+        "Het licht uit de toren knippert twee keer nadat Ilias twee keer heeft geknipperd.",
+        "De toren heeft een blauwe deur en een grijs dak.",
+        "De man heeft een verrekijker bij zich."
       ],
       "correct": 0,
-      "hint": "Gebruik zowel wat ervoor als wat erna gebeurt.",
-      "context": "Vóór het ontbrekende stuk: de muis hoort gefluister en stoelen schuiven.\nErna: de muis bedankt zijn vrienden voor de verrassing."
+      "hint": "Verbind wat Ilias doet met wat direct daarna in de toren gebeurt."
     },
     {
       "type": "choice",
       "icon": "🔎",
-      "title": "Een bron controleren",
-      "q": "Waarom controleren ze de inhoud na het vinden van nummer dertien?",
+      "title": "Een vermoeden controleren",
+      "q": "Welke gebeurtenis laat zien dat Lena's angst nog geen zekerheid was?",
       "a": [
-        "Alle bladzijden met dat nummer zijn altijd precies gelijk.",
-        "Het nummer alleen toont nog niet of dit de juiste versie is.",
-        "Een inktvlek maakt iedere tekst onleesbaar."
-      ],
-      "correct": 1,
-      "hint": "Denk aan het oude slot dat ze eerder vonden."
-    },
-    {
-      "type": "choice",
-      "icon": "🔎",
-      "title": "Een passende conclusie",
-      "q": "Wat weten ze wanneer hun voorstel goed bij de aanwijzingen past?",
-      "a": [
-        "Dat Konijn het originele verhaal heeft geschreven.",
-        "Dat de originele tekst precies dezelfde woorden moet hebben.",
-        "Dat hun voorstel mogelijk is, maar nog geen teruggevonden origineel."
+        "Er staan donkere wolken boven de toren.",
+        "De brandweerwagen komt over het grindpad.",
+        "Robin roept na de doffe klappen dat zijn lamp leeg is."
       ],
       "correct": 2,
-      "hint": "Maak onderscheid tussen passend bedenken en werkelijk terugvinden."
+      "hint": "Welke latere informatie verandert wat je over de stilte denkt?",
+      "context": "Wanneer het licht uitgaat en Robin niet antwoordt, denkt Lena: wat als hij gevallen is?"
     },
     {
       "type": "choice",
       "icon": "🔎",
-      "title": "Figuurlijke taal",
-      "q": "Wat bedoelt Das hier met een gat?",
+      "title": "Wie weet wat?",
+      "q": "Wat weten de kinderen op dat moment nog niet?",
       "a": [
-        "Er ontbreekt een deel in de verhaallijn.",
-        "Er is een rond gat in elke bladzijde geknipt.",
-        "De muis is in een kuil gevallen."
-      ],
-      "correct": 0,
-      "hint": "Verbind de uitspraak met het probleem in de ringmap.",
-      "context": "Mijn verhaal heeft een gat en vanavond zit de zaal vol."
-    },
-    {
-      "type": "choice",
-      "icon": "🔎",
-      "title": "Een verwijswoord begrijpen",
-      "q": "Waarnaar verwijst die in dit fragment?",
-      "a": [
-        "De blauwe deur.",
-        "De eerste versie van het slot.",
-        "De gele werkmap."
+        "Dat er iemand in de toren vastzit.",
+        "Dat Robin met toestemming vogelnesten telt.",
+        "Dat de brandweer onderweg is."
       ],
       "correct": 1,
-      "hint": "Lees terug naar wat Das net herkende.",
-      "context": "Das herkent zijn eerste versie. “Die heb ik later veranderd,” zegt hij."
+      "hint": "Die uitleg krijgen ze pas nadat Robin beneden is.",
+      "context": "Robin steekt zijn duim op wanneer Mara roept dat de hulp onderweg is."
     },
     {
       "type": "choice",
       "icon": "🔎",
-      "title": "Een mening herkennen",
+      "title": "Een verwijzing begrijpen",
+      "q": "Waarnaar verwijst Die in de laatste zin?",
+      "a": [
+        "Naar de bovenste vloer.",
+        "Naar de toren.",
+        "Naar Robins telefoon."
+      ],
+      "correct": 2,
+      "hint": "Zoek het voorwerp dat in de vorige zin naar beneden valt.",
+      "context": "Robin kon terug op de bovenste vloer kruipen, maar zijn telefoon viel naar beneden. Die lag tussen de gebroken planken, buiten zijn bereik."
+    },
+    {
+      "type": "choice",
+      "icon": "🔎",
+      "title": "Feit en mening",
       "q": "Welke zin is een mening?",
       "a": [
-        "Na het voorlezen kunnen bezoekers vragen stellen.",
-        "De oorspronkelijke bladzijde ligt in de werkmap.",
-        "Dit is het spannendste verhaal van het hele bos."
-      ],
-      "correct": 2,
-      "hint": "Welke uitspraak is een oordeel waarover lezers kunnen verschillen?"
-    },
-    {
-      "type": "choice",
-      "icon": "🔎",
-      "title": "Het doel van de aankondiging",
-      "q": "Wat wil dit fragment vooral bereiken?",
-      "a": [
-        "Mensen uitnodigen voor een activiteit en vertellen wat ze kunnen verwachten.",
-        "Bewijzen waar de verdwenen bladzijde ligt.",
-        "Stap voor stap uitleggen hoe je een ringmap maakt."
-      ],
-      "correct": 0,
-      "hint": "Beoordeel alleen de aankondiging die hier staat.",
-      "context": "Luister mee naar een spannend verhaal. Na het voorlezen kun je vragen stellen aan de schrijver."
-    },
-    {
-      "type": "choice",
-      "icon": "🔎",
-      "title": "Een oorzaak en gevolg",
-      "q": "Waarom raden Konijn en Das ongeveer wat er op de verdwenen bladzijde staat?",
-      "a": [
-        "Konijn heeft alle woorden van tevoren uit haar hoofd geleerd.",
-        "Ze verbinden het gefluister vóór de deur met het bedankje erna.",
-        "Elke verdwenen bladzijde gaat over hetzelfde feest."
+        "Een ladder stond tegen de toren.",
+        "Dit is de spannendste kampeeravond die je kunt beleven.",
+        "Robin had een verrekijker om zijn nek."
       ],
       "correct": 1,
-      "hint": "Hun vermoeden steunt op informatie uit twee tekststukken."
+      "hint": "Over welke uitspraak kunnen lezers verschillend denken?"
     },
     {
       "type": "choice",
       "icon": "🔎",
-      "title": "Vertellen met spanning",
-      "q": "Wat is het effect van Das’ korte stilte bij de deur?",
+      "title": "Een handeling begrijpen",
+      "q": "Waarom blijft Lena naast Ilias staan wanneer de ladder wordt klaargezet?",
       "a": [
-        "De bezoekers weten dan dat het verhaal afgelopen is.",
-        "De muis hoort de schrijver zwijgen.",
-        "De bezoekers wachten nieuwsgierig op wat er achter de deur gebeurt."
+        "Ze wil goed kijken zonder de hulpverleners te hinderen.",
+        "Ze wil teruggaan om de afwas af te maken.",
+        "Ze denkt dat Robin zelf wel uit de toren kan springen."
+      ],
+      "correct": 0,
+      "hint": "De tekst noemt zowel wat ze graag wil als waarmee ze rekening houdt."
+    },
+    {
+      "type": "choice",
+      "icon": "🔎",
+      "title": "De soort verhaal",
+      "q": "Welke omschrijving past het best bij het hele verhaal?",
+      "a": [
+        "Een instructie om een uitkijktoren te bouwen.",
+        "Een verslag met alleen feiten over broedende vogels.",
+        "Een spannend avontuur waarin lichtflitsen naar een redding leiden."
       ],
       "correct": 2,
-      "hint": "Denk aan wat de luisteraars op dat moment nog niet weten."
+      "hint": "Denk aan het belangrijkste wat de lezer in het hele verhaal meemaakt."
+    },
+    {
+      "type": "choice",
+      "icon": "🔎",
+      "title": "Een passende bron kiezen",
+      "q": "Waar kun je het best zoeken hoe een brandweerwagen vanaf de camping bij de toren kan komen?",
+      "a": [
+        "Op een plattegrond met de toegangswegen.",
+        "In een lijst met vogelsoorten.",
+        "In de gebruiksaanwijzing van een zaklamp."
+      ],
+      "correct": 0,
+      "hint": "Kies een bron die laat zien waar wegen lopen."
+    },
+    {
+      "type": "choice",
+      "icon": "🔎",
+      "title": "Onderwerp en persoonsvorm",
+      "q": "Welke combinatie geeft het onderwerp en de persoonsvorm?",
+      "a": [
+        "onderwerp: de zaklamp — persoonsvorm: omhoog",
+        "onderwerp: Ilias — persoonsvorm: houdt",
+        "onderwerp: het raam — persoonsvorm: zonder"
+      ],
+      "correct": 1,
+      "hint": "Wie doet iets? Welk werkwoord verandert als je Ilias vervangt door de kinderen?",
+      "context": "Ilias houdt de zaklamp omhoog zonder ermee te knipperen."
     },
     {
       "type": "choice",
       "icon": "🔎",
       "title": "Een voltooid deelwoord",
-      "q": "Welk woord is in deze zin het voltooid deelwoord?",
+      "q": "Welk woord is het voltooid deelwoord in deze zin?",
       "a": [
-        "teruggevonden",
-        "hebben",
-        "ze"
+        "Toen",
+        "iemand",
+        "opgemerkt"
       ],
-      "correct": 0,
-      "hint": "Welk woord vertelt samen met hebben wat al gebeurd is?",
-      "context": "Ze hebben de oorspronkelijke bladzijde teruggevonden."
+      "correct": 2,
+      "hint": "Zoek het woord dat samen met had vertelt wat eerder gebeurde.",
+      "context": "Toen wist Robin dat iemand zijn seinen had opgemerkt."
     },
     {
       "type": "choice",
       "icon": "🔎",
       "title": "Het slot begrijpen",
-      "q": "Wat maakt het einde van het verhaal grappig?",
+      "q": "Waarom is het donkere raam aan het einde niet meer verontrustend?",
       "a": [
-        "De ringmap is opnieuw leeg en de avond mislukt alsnog.",
-        "Das schrikt van een los vel, maar het blijkt juist een vraag om een vervolg.",
-        "De bezoekers zijn nooit komen luisteren."
+        "Robin is veilig beneden; er wacht niemand meer op hulp.",
+        "De kinderen zijn vergeten dat er een toren staat.",
+        "Een donkere toren kan nooit gevaar opleveren."
       ],
-      "correct": 1,
-      "hint": "Vergelijk de eerste ontbrekende bladzijde met het laatste gevonden vel."
+      "correct": 0,
+      "hint": "Vergelijk wat ze eerst niet wisten met wat ze na de redding wel weten."
     }
   ]
 }};
@@ -716,26 +706,26 @@ window.ZISA_SPEED_GAMES={...(window.ZISA_SPEED_GAMES||{}),...{
       "onderzoeksvraag"
     ]
   },
-  "e6-verdwenen-bladzijde": {
+  "e6-licht-uitkijktoren": {
     "words": [
-      "bibliotheek",
-      "geïllustreerde",
-      "manuscript",
-      "ringmap",
-      "raadselachtige",
-      "onmiddellijk",
-      "onvindbaar",
-      "voortzetting",
-      "hoofdpersonage",
-      "overgangen",
-      "aanwijzingen",
-      "oorspronkelijke",
-      "aankondiging",
-      "wenkbrauw",
-      "lessenaar",
-      "voorbereiding",
-      "verjaardagsfeest",
-      "teruggevonden"
+      "uitkijktoren",
+      "weerspiegeling",
+      "onderscheiden",
+      "kampeerstoelen",
+      "toeval",
+      "toegangsweg",
+      "verrekijker",
+      "overstemt",
+      "windvlaag",
+      "plotseling",
+      "brandweerwagen",
+      "zwaailicht",
+      "coördineert",
+      "veiligheidsgordel",
+      "begeleid",
+      "opgemerkt",
+      "toestemming",
+      "traptrede"
     ]
   }
 }};
@@ -811,74 +801,74 @@ window.ZISA_FLUENCY_BOOKS={...(window.ZISA_FLUENCY_BOOKS||{}),...{
       "focus": "Misschien, maar dan moeten we het opnieuw vergelijken."
     }
   ],
-  "e6-verdwenen-bladzijde": [
+  "e6-licht-uitkijktoren": [
     {
       "title": "Lees in woordgroepen",
-      "q": "Welke verdeling helpt je deze langere zin vloeiend te lezen?",
+      "q": "Welke verdeling houdt de woorden die bij elkaar horen samen? Lees de zin daarna hardop.",
       "a": [
-        "Voordat Das verder leest / houdt hij even stil / om de spanning op te bouwen.",
-        "Voordat Das / verder leest houdt hij even / stil om de spanning op te bouwen.",
-        "Voordat Das verder / leest houdt hij / even stil om de spanning op te bouwen."
+        "Terwijl Mara / de brandweer belt houdt Ilias / de zaklamp omhoog.",
+        "Terwijl Mara de brandweer belt / houdt Ilias / de zaklamp omhoog.",
+        "Terwijl Mara de / brandweer belt houdt / Ilias de zaklamp omhoog."
       ],
-      "correct": 0,
-      "good": "Juist! Lees de delen die bij elkaar horen samen. Pauzeer kort na leest."
+      "correct": 1,
+      "good": "Juist! Lees de bijzin samen en pauzeer kort na belt."
     },
     {
       "title": "Lees een trema",
-      "q": "Lees geïllustreerde hardop. Hoeveel lettergrepen hoor je?",
+      "q": "Lees coördineert hardop. Hoeveel lettergrepen hoor je?",
       "a": [
+        "drie",
         "vier",
-        "vijf",
-        "zes"
+        "vijf"
       ],
       "correct": 1,
-      "good": "Juist! ge-il-lus-treer-de: vijf lettergrepen. Het trema helpt je ge en il apart te lezen."
+      "good": "Juist! co-or-di-neert: vier lettergrepen. Door het trema lees je de twee o's apart."
     },
     {
-      "title": "Een leenwoord lezen",
-      "q": "Hoe spreek je de c in manuscript uit?",
+      "title": "Lees een samenstelling",
+      "q": "Welke twee delen vormen veiligheidsgordel? Lees het woord daarna vloeiend.",
       "a": [
-        "als s",
-        "als sj",
-        "als k"
-      ],
-      "correct": 2,
-      "good": "Juist! De c klinkt als k. Lees het hele woord rustig en nauwkeurig."
-    },
-    {
-      "title": "Lees de woordbouw",
-      "q": "Welke delen helpen je voorleesavond te lezen?",
-      "a": [
-        "voorlees + avond",
-        "voor + leesa + vond",
-        "voorlee + savond"
+        "veiligheid + gordel",
+        "veilige + heidsgordel",
+        "veiligheidsgo + rdel"
       ],
       "correct": 0,
-      "good": "Juist! Je herkent voorlees en avond. Verbind ze daarna vloeiend."
+      "good": "Juist! Veiligheid en gordel vormen samen veiligheidsgordel, met een s ertussen."
     },
     {
       "title": "Nauwkeurig lezen",
-      "q": "Welk woord past bij deze zin?",
+      "q": "Welk woord past op de lege plek? Lees daarna de hele zin.",
+      "focus": "De telefoon ligt ver onder Robin. Hij kan er niet bij: de telefoon is voor hem …",
       "a": [
-        "oorspronkelijke",
-        "voorlopige",
-        "onvindbare"
-      ],
-      "correct": 1,
-      "good": "Juist! Hun voorstel is een voorlopige oplossing totdat ze het origineel terugvinden. Lees de hele zin.",
-      "focus": "Zolang het origineel ontbreekt, bewaren ze hun eigen voorstel als … oplossing."
-    },
-    {
-      "title": "Lees met spanning",
-      "q": "Hoe lees je dit stukje om de luisteraar nieuwsgierig te maken?",
-      "a": [
-        "Zo snel mogelijk zonder te pauzeren.",
-        "Elke letter met dezelfde harde stem.",
-        "Rustig, met een korte stilte vóór de laatste zin."
+        "bereikbaar",
+        "breekbaar",
+        "onbereikbaar"
       ],
       "correct": 2,
-      "good": "Juist! Laat even stilte vallen na sleutel om. Lees daarna de onthulling.",
-      "focus": "De muis draaide de sleutel om. Achter de deur begonnen zijn vrienden te zingen."
+      "good": "Juist! Onbereikbaar betekent dat je er niet bij kunt. Lees het begin on- mee."
+    },
+    {
+      "title": "Een lang woord lezen",
+      "q": "Welke verdeling in lettergrepen helpt bij het lezen van weerspiegeling?",
+      "a": [
+        "weers-pie-gel-ing",
+        "weer-spie-ge-ling",
+        "wee-rspie-ge-ling"
+      ],
+      "correct": 1,
+      "good": "Juist! Lees weer-spie-ge-ling en verbind de vier lettergrepen daarna tot één woord."
+    },
+    {
+      "title": "Lees met passende intonatie",
+      "q": "Hoe lees je Lena's woorden op dit spannende moment?",
+      "focus": "Het licht is uit. ‘Robin?’ roept Lena. ‘Kun je ons nog horen?’",
+      "a": [
+        "Bezorgd, met een korte pauze tussen de twee vragen.",
+        "Vrolijk, alsof ze een mop vertelt.",
+        "Vlak en zonder pauzes, alsof er geen leestekens staan."
+      ],
+      "correct": 0,
+      "good": "Juist! Laat de bezorgdheid horen en geef beide vragen hun eigen intonatie."
     }
   ]
 }};
@@ -907,29 +897,29 @@ window.ZISA_STORY_GLOSSARIES={...(window.ZISA_STORY_GLOSSARIES||{}),...{
     "demonstratie": "Laten zien hoe iets werkt door het voor te doen.",
     "onderzoeksvraag": "Een vraag waarop je met een onderzoek een antwoord probeert te vinden."
   },
-  "e6-verdwenen-bladzijde": {
-    "geïllustreerde": "Met tekeningen of andere afbeeldingen erbij.",
-    "manuscript": "De tekst van een schrijver voordat die als boek wordt uitgegeven. Een manuscript kan geschreven of getypt zijn.",
-    "ringmap": {
-      "text": "Een map met metalen ringen die door gaatjes in losse vellen gaan. Je kunt de ringen openen om vellen toe te voegen.",
-      "image": "images/woorduitleg/e6-ringmap.webp"
+  "e6-licht-uitkijktoren": {
+    "uitkijktoren": {
+      "text": "Een hoge toren vanwaar je ver over de omgeving kunt kijken.",
+      "image": "images/e6-licht-uitkijktoren/01.webp"
     },
-    "raadselachtige": "Moeilijk te begrijpen of geheimzinnig.",
-    "onmiddellijk": "Meteen, zonder te wachten.",
-    "versie": "Een bepaalde vorm van een tekst. Na wijzigingen ontstaat een andere versie.",
-    "voortzetting": "Het stuk dat volgt op wat er al gebeurd of verteld is.",
-    "fragment": "Een klein deel van een grotere tekst of een verhaal.",
-    "hoofdpersonage": "De figuur die de belangrijkste rol in een verhaal heeft.",
-    "overgangen": "Stukken tekst die twee delen van een verhaal met elkaar verbinden.",
-    "voorstel": "Een idee dat je aan anderen voorlegt om te bekijken of te gebruiken.",
-    "origineel": "Hier: de oorspronkelijke tekst die Das zelf had geschreven.",
-    "serre": "Een ruimte met veel glas, bijvoorbeeld aan een huis, waarin veel daglicht binnenkomt.",
-    "aankondiging": "Een bericht dat vertelt dat er binnenkort iets gaat gebeuren.",
-    "lessenaar": {
-      "text": "Een standaard met een schuin blad waarop je tekst kunt leggen terwijl je staand voorleest of spreekt.",
-      "image": "images/woorduitleg/e6-lessenaar.webp"
+    "weerspiegeling": "Licht of een beeld dat je terugziet in bijvoorbeeld glas of water.",
+    "onderscheiden": "Het verschil kunnen zien. Hier: de toren apart van de bomen kunnen zien.",
+    "toeval": "Iets dat gebeurt zonder dat iemand het zo heeft gepland.",
+    "grindpad": "Een pad dat bedekt is met kleine steentjes.",
+    "spijlen": "De smalle stangen van een hek.",
+    "situatie": "Wat er op een bepaald moment aan de hand is.",
+    "toegangsweg": "Een weg waarlangs je bij een plek kunt komen.",
+    "overstemt": "Een harder geluid maakt dat je een ander geluid niet goed meer kunt horen.",
+    "bundel": "Hier: een smalle strook licht die uit de zaklamp komt.",
+    "zwaailicht": "Een waarschuwingslamp op een voertuig die ronddraait of flitst.",
+    "coördineert": "Regelt dat mensen en werkzaamheden goed op elkaar aansluiten.",
+    "veiligheidsgordel": "Een stevige gordel die je vastmaakt om bij een gevaarlijke beweging of val beter beschermd te zijn.",
+    "seinen": "Met licht, geluid of gebaren een boodschap doorgeven.",
+    "traptrede": {
+      "text": "Het horizontale deel van een trap waarop je je voet zet. In het verhaal breken drie van die treden af.",
+      "image": "images/e6-licht-uitkijktoren/14.webp"
     },
-    "publiek": "De mensen of, in dit verhaal, dieren die komen kijken of luisteren."
+    "leuning": "Een stang of rand waaraan je je kunt vasthouden, bijvoorbeeld langs een trap."
   }
 }};
 })();

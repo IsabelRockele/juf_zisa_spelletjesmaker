@@ -1,5 +1,7 @@
 # Twee nieuwe E6-verhalen
 
+**Update 27 september 2026:** het onderstaande verslag beschrijft de oorspronkelijke versie van 26 september. Het boek *De verdwenen bladzijde* is vervangen door *Het licht in de uitkijktoren*. De actuele verhaallijn en opdrachten voor dat boek staan in [E6-uitkijktoren-verantwoording.md](E6-uitkijktoren-verantwoording.md). Het brugboek is ongewijzigd.
+
 - **De brug die bleef staan**: een realistisch schoolverhaal met een informatief fragment en een instructie. Noor en Elias vergelijken papieren modellen en leren het verschil tussen een resultaat, een vermoeden en een te ruime conclusie.
 - **De verdwenen bladzijde**: een dierenverhaal met een verhaal binnen het verhaal. Konijn en Das reconstrueren een ontbrekende overgang aan de hand van aanwijzingen, maar onderscheiden hun voorstel van het originele manuscript.
 

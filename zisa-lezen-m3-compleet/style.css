@@ -310,7 +310,7 @@ body.mission-mode main{display:grid;place-items:center}
 .story-image[style*="images/m6-schoolkrant/"],
 .story-image[style*="images/m6-sterrenkoffer/"],
 .story-image[style*="images/e6-papieren-brug/"],
-.story-image[style*="images/e6-verdwenen-bladzijde/"],
+.story-image[style*="images/e6-licht-uitkijktoren/"],
 .story-image[style*="images/e4-reus-feest/"]{background-size:contain}
 @media (min-width:841px) and (max-width:1100px){
   .inline-answers{grid-template-columns:1fr}
