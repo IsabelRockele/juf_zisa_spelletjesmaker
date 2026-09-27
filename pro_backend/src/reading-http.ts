@@ -22,7 +22,7 @@ export function createReadingFunctions(hasPro:(uid:string)=>Promise<boolean>,sel
     if(!redirectUrl || !webhookUrl || !profileId)throw new Error('Reading endpoints and Mollie profile are not configured');
     return createReadingService(getFirestore(),{mode:'test',apiKey:testKey.value().trim(),redirectUrl,webhookUrl,profileId},{hasPro,invoice:readingInvoiceStore(getFirestore(),getStorage().bucket(),seller)});
   };
-  const readingApi=onRequest({region:'europe-west1',maxInstances:3,secrets:[testKey]},async(req,res)=>{
+  const readingApi=onRequest({region:'europe-west1',maxInstances:3,secrets:[testKey],invoker:'public'},async(req,res)=>{
     res.set('Cache-Control','no-store');res.set('X-Content-Type-Options','nosniff');
     const origin=req.get('Origin');
     if(origin && !origins.has(origin)){res.status(403).json({error:'Onbekende website.'});return;}
@@ -77,7 +77,7 @@ export function createReadingFunctions(hasPro:(uid:string)=>Promise<boolean>,sel
       res.status(safe?400:503).json({error:safe?message:'De aanvraag kon niet worden voltooid. Probeer later opnieuw.'});
     }
   });
-  const readingMollieWebhook=onRequest({region:'europe-west1',maxInstances:3,secrets:[testKey]},async(req,res)=>{
+  const readingMollieWebhook=onRequest({region:'europe-west1',maxInstances:3,secrets:[testKey],invoker:'public'},async(req,res)=>{
     if(req.method!=='POST'){res.status(405).end();return;}
     if(!enabled()){res.status(503).end();return;}
     const id=req.body?.id;
