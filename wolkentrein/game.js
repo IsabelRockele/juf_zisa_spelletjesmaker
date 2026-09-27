@@ -51,7 +51,7 @@ otherGames.onclick=()=>{
  if(leave){try{speechSynthesis.cancel()}catch{}location.assign(overviewUrl())}else paused=wasPaused;
 };
 document.querySelector('header').append(otherGames);
-const resultBack=otherGames.cloneNode(true);resultBack.removeAttribute('id');resultBack.className='subtle';resultBack.onclick=otherGames.onclick;document.querySelector('#modal .result').append(resultBack);
+const resultBack=otherGames.cloneNode(true);resultBack.removeAttribute('id');resultBack.className='subtle';resultBack.dataset.islandMenu='1';resultBack.textContent='← Terug';resultBack.onclick=otherGames.onclick;document.querySelector('#modal .result').append(resultBack);
 if(isDiscover())document.querySelectorAll('[data-level]').forEach(button=>{
  if(Number(button.dataset.level)>1){button.classList.add('proLevel');const badge=document.createElement('span');badge.textContent='PRO';button.append(badge);button.setAttribute('aria-label','Level '+button.dataset.level+' · PRO');}
 });
@@ -70,3 +70,6 @@ async function start(continuing=false){
   showModal('Het laden is onderbroken','<p>Controleer je verbinding en probeer het nog eens. Je kunt ook terug naar het begin.</p>','OPNIEUW LADEN',()=>start(continuing),'☁');
  }
 }
+
+if(document.documentElement.classList.contains('zisa-island-navigation'))$('#home').hidden=true;
+let islandMenuWasPaused=false;window.addEventListener("zisa:navigation-open",()=>{islandMenuWasPaused=paused;paused=true;});window.addEventListener("zisa:navigation-close",()=>{paused=islandMenuWasPaused;});

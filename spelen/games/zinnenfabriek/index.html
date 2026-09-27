@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<script src="../ipad-play-safety.js?v=1"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Zisa’s Zinnenfabriek — lokaal voorbeeld</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="enhancements.css?v=18">
+<script src="../eiland-navigatie.js?v=4" defer></script></head>
+<body>
+  <header class="topbar">
+    <button class="back" id="backButton" type="button">← Kies een spel</button>
+    <div class="brand"><span>🔤</span><div><b>Zisa’s Zinnenfabriek</b><small>Taal oefenen in het tweede leerjaar</small></div></div>
+    <button class="sound" id="soundButton" type="button" aria-pressed="true">🔊</button>
+  </header>
+
+  <main>
+    <section class="menu" id="menuPanel">
+      <div class="menu-copy"><span class="eyebrow">KIES EEN TAALMISSIE</span><h1>Welke woorden wil je onderzoeken?</h1><p>Kies eerst hoe lang je wilt oefenen en daarna een spelkamer.</p>
+        <div class="round-choice" aria-label="Aantal opdrachten"><b>Hoeveel opdrachten?</b><div><button type="button" data-count="10" class="active">10</button><button type="button" data-count="20">20</button><button type="button" data-count="30">30</button></div></div>
+      </div>
+      <img class="menu-zisa" src="../tafels_afbeeldingen/oefen_zisa.png" alt="Zisa wijst naar het taalbord">
+      <div class="mission-grid">
+        <button class="mission article" data-mode="article" type="button"><span class="mission-icon">de · het</span><b>De lidwoordmachine</b><small>Ontdek of een woord een de-woord of een het-woord is.</small></button>
+        <button class="mission sort" data-mode="sort" type="button"><span class="mission-icon">📦</span><b>De woordsoortensorteerder</b><small>Herken zelfstandige naamwoorden, werkwoorden en bijvoeglijke naamwoorden.</small></button>
+        <button class="mission sentence" data-mode="sentence" type="button"><span class="mission-icon">🧩</span><b>De zinnenbouwer</b><small>Zet woorden in de gevraagde volgorde.</small></button>
+        <button class="mission adjective" data-mode="adjective" type="button"><span class="mission-icon">✨</span><b>De woordenkast</b><small>Kies een passend bijvoeglijk naamwoord.</small></button>
+        <button class="mission color" data-mode="color" type="button"><span class="mission-icon">🎨</span><b>Kleur de zin</b><small>Geef ieder zinsdeel de kleur van Zien is Snappen.</small></button>
+      </div>
+    </section>
+
+    <section class="game" id="gamePanel" hidden>
+      <div class="progress-row"><span id="modeLabel">Taalmissie</span><div class="progress"><i id="progressBar"></i></div><b id="roundLabel">1 / 10</b></div>
+      <div class="workshop">
+        <img class="zisa" src="../tafels_afbeeldingen/oefen_zisa.png" alt="Zisa helpt bij de oefening">
+        <article class="board">
+          <span class="task-kind" id="taskKind"></span>
+          <h1 id="prompt">Kies het juiste antwoord.</h1>
+          <p class="support" id="support"></p>
+          <div class="activity" id="activity"></div>
+          <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+          <button class="check" id="checkButton" type="button" hidden>Controleer mijn zin</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="finish" id="finishPanel" hidden>
+      <img src="../tafels_afbeeldingen/zisa_wint.png" alt="Zisa viert mee">
+      <span class="eyebrow">TAALMISSIE VOLBRACHT</span>
+      <h1>Knap gewerkt!</h1>
+      <p id="finishText">Je onderzocht tien taalopdrachten.</p>
+      <div><button class="primary" id="againButton" type="button">Nog een ronde</button><button class="secondary" id="otherButton" type="button">Ander taalspel</button></div>
+    </section>
+  </main>
+  <script src="app.js?v=26"></script>
+</body>
+</html>

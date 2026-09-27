@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Spellingeiland · Zisa Spelen</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="kindvriendelijk.css?v=4">
+  <link rel="stylesheet" href="speels.css?v=1">
+  <link rel="stylesheet" href="adventure.css?v=1">
+  <link rel="stylesheet" href="workshop.css?v=2">
+  <script src="data.js" defer></script>
+  <script src="engine.js?v=2" defer></script>
+  <script src="adventure.js?v=5" defer></script>
+  <script src="story.js?v=3" defer></script>
+  <script src="workshop.js?v=3" defer></script>
+  <script src="workshop-race.js?v=3" defer></script>
+  <script src="circuit.js?v=8" defer></script>
+  <link rel="stylesheet" href="garage-build.css?v=1">
+  <script src="garage-build.js?v=2" defer></script>
+  <script src="app.js?v=8" defer></script>
+<script src="../eiland-navigatie.js?v=4" defer></script></head>
+<body class="child-game">
+  <header class="topbar"><a class="brand" href="../eilanden-leerjaar2.html"><img src="../tafels_afbeeldingen/juf_zisa.png" width="35" height="49" style="width:35px;height:49px;object-fit:contain" alt="Zisa"> <span class="brand-name">ZISA <small>SPELEN</small></span></a><a class="back" href="../eilanden-leerjaar2.html#spelling">← Naar het eiland</a></header>
+  <main id="app"></main>
+  <footer>Met kleine stappen word je een woordwonder. <span>© Isabel Rockelé, 2026</span></footer>
+  <div id="announcer" class="sr-only" role="status" aria-live="polite"></div>
+  <dialog id="help-dialog" aria-labelledby="dialog-title"><div id="dialog-content"></div></dialog>
+  <script>
+    // Use the existing access guard online. Local previews need no network or login.
+    (()=>{const h=location.hostname;if(location.protocol==='file:'||h==='localhost'||h==='[::1]'||/^(127\.|192\.168\.|10\.)/.test(h)||/^172\.(1[6-9]|2\d|3[01])\./.test(h))return;const s=document.createElement('script');s.type='module';s.src='../zisa-play-guard.js';document.head.append(s);})();
+  </script>
+</body>
+</html>
