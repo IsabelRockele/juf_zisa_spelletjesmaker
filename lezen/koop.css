@@ -1,0 +1,33 @@
+/* Keep the complete offer and purchase action together on desktop. */
+header{padding:14px 3vw}
+main{max-width:none;width:94%;padding:16px 0 22px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px 3vw;align-items:start}
+#testNotice{grid-column:1/-1;margin:0;padding:9px 14px;font-size:13px}
+.intro{grid-column:1;grid-row:2;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:0}
+.intro h1{font-size:clamp(30px,3vw,46px);margin:8px 0 14px;line-height:1.1}
+.intro .lead{font-size:17px;line-height:1.5;margin:0;max-width:650px}
+.intro .eyebrow{margin:8px 0}
+.intro img{width:clamp(135px,18vh,210px);height:auto;align-self:center}
+.offer{grid-column:2;grid-row:2/4;max-width:none;padding:22px;width:100%}
+.offer h2{font-size:25px;margin:0 0 10px}
+.price{font-size:44px;margin:8px 0}
+.offer ul{font-size:16px;line-height:1.6;margin:12px 0}
+.offer p:not(.price){font-size:15px;line-height:1.5;margin:12px 0}
+.offer .buy{margin:16px 0 12px;min-height:48px}
+.questions{grid-column:1;grid-row:3;margin:0}
+.questions h2{font-size:20px;margin:0 0 8px}
+.questions ol{font-size:15px;line-height:1.5;margin:0;padding-left:22px}
+.questions p{font-size:14px;line-height:1.4;margin:10px 0 0}
+@media(min-width:901px) and (max-height:760px){
+ main{gap:12px 3vw;padding-top:12px}
+ .intro{display:grid;grid-template-columns:1fr 140px;gap:12px;align-items:center}
+ .intro h1{font-size:32px}.intro .lead{font-size:15px}.intro img{width:140px}
+ .offer{padding:18px}.offer h2{font-size:22px}.price{font-size:38px}
+}
+@media(max-width:900px){
+ main{width:94%;grid-template-columns:1fr;gap:16px}
+ .intro{grid-column:1;grid-row:auto;display:grid;grid-template-columns:1fr 110px;align-items:center;gap:12px}
+ .intro img{width:110px;grid-row:auto}.intro h1{font-size:30px}.intro .lead{font-size:16px}
+ .offer,.questions{grid-column:1;grid-row:auto}.offer{padding:20px}
+ header{gap:12px}.brand{font-size:25px}header>a:last-child{font-size:13px;text-align:right}
+}
+@media(max-width:460px){.intro{grid-template-columns:1fr 75px}.intro img{width:75px}.intro h1{font-size:27px}.price{font-size:38px}.price span{font-size:14px}}
