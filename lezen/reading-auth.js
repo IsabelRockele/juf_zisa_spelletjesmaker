@@ -9,6 +9,7 @@ export async function createReadingAuth(config) {
   const existing = appSdk.getApps().find(app => app.name === name);
   if (existing && existing.options.projectId !== config.firebase.projectId) throw new Error('Verkeerde leesomgeving');
   const auth = sdk.getAuth(existing || appSdk.initializeApp(config.firebase, name));
+  auth.languageCode = 'nl';
   await sdk.setPersistence(auth, sdk.browserLocalPersistence);
   return {
     observe: callback => sdk.onAuthStateChanged(auth, callback),
