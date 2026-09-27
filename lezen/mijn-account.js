@@ -47,10 +47,10 @@ el('peppolRequested').onchange=()=>{const checked=el('peppolRequested').checked;
 if(!readingConfig.enabled){message('Deze koppeling wordt voorbereid. Er worden nog geen accounts of betalingen gestart. Je kunt het voorbeeld bekijken op de vorige pagina.');}
 else{
   auth=await createReadingAuth(readingConfig);
-  auth.observe(user=>{show('login',!user);show('invitation',!!invitationToken());show('acceptInvitation',false);show('dashboard',false);show('verification',!!user&&!user.emailVerified);if(user?.emailVerified)refresh().catch(error=>message(friendly(error)));else message(user?'Bevestig eerst je e-mailadres.':'Meld je aan of maak een account.');});
+  auth.observe(user=>{show('login',!user);show('invitation',!!invitationToken());show('acceptInvitation',false);show('dashboard',false);show('verification',!!user&&!user.emailVerified);if(user?.emailVerified)refresh().catch(error=>message(friendly(error)));else if(!busy)message(user?'Bevestig eerst je e-mailadres.':'Meld je aan of maak een account.');});
   el('googleLogin').onclick=()=>task(()=>auth.signInGoogle(el('email').value));
   el('loginForm').onsubmit=e=>{e.preventDefault();task(()=>auth.signIn(el('email').value,el('password').value));};
-  el('register').onclick=()=>task(async()=>{if(!el('loginForm').reportValidity())return;await auth.register(el('email').value,el('password').value);message('Open je e-mail om je account te bevestigen. Kijk ook in je spammap of ongewenste e-mail.');});
+  el('register').onclick=()=>task(async()=>{if(!el('loginForm').reportValidity())return;message('Je account wordt aangemaakt. Daarna sturen we je een bevestigingsmail. Even geduld…');await auth.register(el('email').value,el('password').value);message('Open je e-mail om je account te bevestigen. Kijk ook in je spammap of ongewenste e-mail.');});
   el('reset').onclick=()=>task(async()=>{if(!el('email').reportValidity()||!el('email').value)return;await auth.resetPassword(el('email').value);message('Als dit adres een account heeft, ontvang je een herstellink.');});
   el('verified').onclick=()=>task(refresh);el('resend').onclick=()=>task(async()=>{await auth.resendVerification();message('De bevestigingsmail is aangevraagd. Kijk ook in je spammap of ongewenste e-mail.');});el('logout').onclick=()=>task(()=>auth.signOut());el('refresh').onclick=()=>task(refresh);
   el('acceptInvitation').onclick=()=>task(async()=>{await api('school-accept',{token:invitationToken()});sessionStorage.removeItem('zisa-reading-invitation');location.assign('bibliotheek.html?account=1'+(testQuery?'&test=1':''));});
