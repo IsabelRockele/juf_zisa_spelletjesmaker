@@ -24,7 +24,7 @@ function applyOrderType(){
  el('quantity').readOnly=!school;
  const included=!!(lastStatus?.pro||lastStatus?.schoolMember)&&!school;
  show('includedNotice',included);el('checkoutButton').disabled=included;
- el('includedText').textContent='Dit account heeft al toegang tot Zisa Lezen. Je hoeft geen tweede abonnement te kopen. Wil je als nieuwe klant bestellen? Meld je dan aan met een ander account.';
+ el('includedText').textContent=lastStatus?.pro?"Je hebt al een actief Pro-account bij Juf Zisa’s spelgenerator. Zisa Lezen is daarin inbegrepen. Je hoeft hiervoor geen apart abonnement te kopen.":'Je hebt al toegang tot Zisa Lezen via je school. Je hoeft hiervoor geen apart abonnement te kopen.';
  updatePrice();
 }
 el('orderType').onchange=applyOrderType;
