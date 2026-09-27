@@ -2,6 +2,8 @@ import { readingConfig } from './config.js';
 import { createReadingAuth } from './reading-auth.js';
 const el=id=>document.getElementById(id),show=(id,visible)=>{el(id).hidden=!visible;};
 const message=text=>{el('message').textContent=text;};
+const testQuery=new URLSearchParams(location.search).get('test')==='1';
+if(testQuery)el('openBooks').href='bibliotheek.html?account=1&test=1';
 const date=n=>new Date(n).toLocaleDateString('nl-BE');
 let auth,lastStatus,busy=false;
 const inviteMatch=location.hash.match(/^#invite=([A-Za-z0-9_-]{43})$/);
@@ -50,9 +52,9 @@ else{
   el('register').onclick=()=>task(async()=>{if(!el('loginForm').reportValidity())return;await auth.register(el('email').value,el('password').value);message('Open je e-mail om je account te bevestigen.');});
   el('reset').onclick=()=>task(async()=>{if(!el('email').reportValidity()||!el('email').value)return;await auth.resetPassword(el('email').value);message('Als dit adres een account heeft, ontvang je een herstellink.');});
   el('verified').onclick=()=>task(refresh);el('resend').onclick=()=>task(async()=>{await auth.resendVerification();message('De bevestigingsmail is aangevraagd.');});el('logout').onclick=()=>task(()=>auth.signOut());el('refresh').onclick=()=>task(refresh);
-  el('acceptInvitation').onclick=()=>task(async()=>{await api('school-accept',{token:invitationToken()});sessionStorage.removeItem('zisa-reading-invitation');location.assign('bibliotheek.html?account=1');});
+  el('acceptInvitation').onclick=()=>task(async()=>{await api('school-accept',{token:invitationToken()});sessionStorage.removeItem('zisa-reading-invitation');location.assign('bibliotheek.html?account=1'+(testQuery?'&test=1':''));});
   el('purchaseForm').onsubmit=e=>{e.preventDefault();task(async()=>{const body={quantity:Number(el('quantity').value),consent:el('consent').checked,consentVersion:'reading-monthly-v1',peppolRequested:el('peppolRequested').checked};for(const key of ['name','address','organization','vatNumber','billingEmail','peppolId','gln','purchaseReference'])body[key]=el(key).value;const result=await(await api('checkout',body)).json();const url=new URL(result.checkoutUrl);if(url.protocol!=='https:'||!['www.mollie.com','checkout.mollie.com'].includes(url.hostname))throw new Error('Ongeldige betaallink.');location.assign(url.href);});};
   el('cancel').onclick=()=>{el('cancelText').textContent=`Wil je de automatische verlenging stoppen? Je behoudt je betaalde toegang${lastStatus.paidUntil?' tot '+date(lastStatus.paidUntil):''}.`;show('confirmCancel',true);};el('cancelNo').onclick=()=>show('confirmCancel',false);el('cancelYes').onclick=()=>task(async()=>{await api('cancel');show('confirmCancel',false);await refresh();});
-  el('newLink').onclick=()=>task(async()=>{const result=await(await api('link')).json();const url=new URL('bibliotheek.html',location.href);url.hash=result.token;el('studentLink').value=url.href;el('qr').replaceChildren();if(window.QRCode)new window.QRCode(el('qr'),{text:url.href,width:220,height:220,colorDark:'#173f73',colorLight:'#ffffff'});show('share',true);message('Je nieuwe leerlinglink staat klaar. De vorige link is vervangen.');});
+  el('newLink').onclick=()=>task(async()=>{const result=await(await api('link')).json();const url=new URL('bibliotheek.html',location.href);if(testQuery)url.searchParams.set('test','1');url.hash=result.token;el('studentLink').value=url.href;el('qr').replaceChildren();if(window.QRCode)new window.QRCode(el('qr'),{text:url.href,width:220,height:220,colorDark:'#173f73',colorLight:'#ffffff'});show('share',true);message('Je nieuwe leerlinglink staat klaar. De vorige link is vervangen.');});
   el('copyLink').onclick=()=>task(async()=>{await navigator.clipboard.writeText(el('studentLink').value);message('Leeslink gekopieerd.');});
 }
