@@ -1,0 +1,1 @@
+Zisa winkelachtergrond: eigen imagegen PNG met juf_zisa.png als karakterreferentie. Bron exec-49f4b9f1-8c6b-4a93-ade2-1f59fdb67097.png. Spel gebruikt bestaande geld-PNGs en productprijzen in zisa-winkel.js.
