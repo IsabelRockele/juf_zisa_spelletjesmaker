@@ -21,6 +21,7 @@ import { getStorage } from "firebase-admin/storage";
 import type { Request, Response } from "express";
 import PDFDocument from "pdfkit";
 import { createHash, randomBytes } from "crypto";
+import { createReadingFunctions } from './reading-http';
 
 // ------------------------------ Init -----------------------------------------
 const REGION = "europe-west1";
@@ -56,6 +57,14 @@ const SELLER_ADDR2      = "2500 Lier";
 const SELLER_VAT_NUMBER = process.env.SELLER_VAT_NUMBER || ""; // bv. "BE 0123.456.789"
 const SELLER_ENTERPRISE = "Ondernemingsnummer (KBO): 1026.769.348   BTW-nummer: BE1026.769.348";
 const SELLER_VAT_EXEMPT = "Onderneming onderworpen aan de vrijstellingsregel voor kleine ondernemingen.";
+
+// Reading test functions share Auth and accounting, never the Pro license collections.
+// Disabled unless READING_TEST_ENABLED=true; deployment is restricted to these names.
+export const { readingApi, readingMollieWebhook, readingReconcile, readingMail } = createReadingFunctions(
+  async uid => Boolean(await activePlayLicense(uid)),
+  { name:SELLER_NAME, address:`${SELLER_ADDR1}, ${SELLER_ADDR2}`, email:SELLER_EMAIL,
+    enterprise:SELLER_ENTERPRISE, vatText:SELLER_VAT_EXEMPT },
+);
 
 const PRICE_EUR_KOOP     = "40.00";
 const PRICE_EUR_WAITLIST = "35.00";
