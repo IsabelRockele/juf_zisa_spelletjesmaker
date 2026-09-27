@@ -12,6 +12,11 @@ export async function createReadingAuth(config) {
   await sdk.setPersistence(auth, sdk.browserLocalPersistence);
   return {
     observe: callback => sdk.onAuthStateChanged(auth, callback),
+    signInGoogle: (email='') => {
+      const provider=new sdk.GoogleAuthProvider();
+      provider.setCustomParameters({prompt:'select_account',...(email.trim()?{login_hint:email.trim()}: {})});
+      return sdk.signInWithPopup(auth,provider);
+    },
     signIn: (email, password) => sdk.signInWithEmailAndPassword(auth, email.trim(), password),
     register: async (email, password) => {
       const result = await sdk.createUserWithEmailAndPassword(auth, email.trim(), password);

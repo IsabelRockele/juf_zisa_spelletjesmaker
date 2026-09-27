@@ -1,5 +1,5 @@
 import { readingConfig } from './config.js';
-import { createReadingAuth } from './reading-auth.js';
+import { createReadingAuth } from './reading-auth.js?v=google-1';
 const el=id=>document.getElementById(id),show=(id,visible)=>{el(id).hidden=!visible;};
 const message=text=>{el('message').textContent=text;};
 const testQuery=new URLSearchParams(location.search).get('test')==='1';
@@ -30,7 +30,7 @@ async function api(action,data={}){
   if(!response.ok){const result=await response.json().catch(()=>({}));throw new Error(result.error||'Probeer later opnieuw.');}return response;
 }
 async function task(fn){if(busy)return;busy=true;const buttons=[...document.querySelectorAll('button')].map(b=>[b,b.disabled]);buttons.forEach(([b])=>b.disabled=true);try{await fn();}catch(error){message(friendly(error));}finally{busy=false;buttons.forEach(([b,disabled])=>b.disabled=disabled);}}
-function friendly(error){const code=error?.code||'';if(code.startsWith('auth/'))return code==='auth/email-already-in-use'?'Dit e-mailadres heeft al een account. Meld je aan of herstel je wachtwoord.':code==='auth/weak-password'?'Kies een sterker wachtwoord.':'Aanmelden is niet gelukt. Controleer je gegevens of herstel je wachtwoord.';return error?.message||'Probeer later opnieuw.';}
+function friendly(error){const code=error?.code||'';if(code==='auth/popup-closed-by-user')return 'Google-aanmelding werd gesloten. Klik opnieuw op Aanmelden met Google om verder te gaan.';if(code==='auth/popup-blocked')return 'Sta het Google-aanmeldvenster toe in je browser en probeer opnieuw.';if(code==='auth/unauthorized-domain')return 'Google-aanmelding is op dit webadres nog niet toegestaan. Geef deze melding door zodat het testadres gecontroleerd kan worden.';if(code.startsWith('auth/'))return code==='auth/email-already-in-use'?'Dit e-mailadres heeft al een account. Meld je aan of herstel je wachtwoord.':code==='auth/weak-password'?'Kies een sterker wachtwoord.':'Aanmelden is niet gelukt. Controleer je gegevens of herstel je wachtwoord.';return error?.message||'Probeer later opnieuw.';}
 async function refresh(){
   const data=await (await api('account')).json();lastStatus=data;show('verification',false);show('dashboard',true);show('invitation',!!invitationToken());show('acceptInvitation',!!invitationToken());renderSchool(data);
   el('accessText').textContent=data.allowed?'Je hebt toegang tot Zisa Lezen.':'Er is nog geen actieve leestoegang.';
@@ -48,6 +48,7 @@ if(!readingConfig.enabled){message('Deze koppeling wordt voorbereid. Er worden n
 else{
   auth=await createReadingAuth(readingConfig);
   auth.observe(user=>{show('login',!user);show('invitation',!!invitationToken());show('acceptInvitation',false);show('dashboard',false);show('verification',!!user&&!user.emailVerified);if(user?.emailVerified)refresh().catch(error=>message(friendly(error)));else message(user?'Bevestig eerst je e-mailadres.':'Meld je aan of maak een account.');});
+  el('googleLogin').onclick=()=>task(()=>auth.signInGoogle(el('email').value));
   el('loginForm').onsubmit=e=>{e.preventDefault();task(()=>auth.signIn(el('email').value,el('password').value));};
   el('register').onclick=()=>task(async()=>{if(!el('loginForm').reportValidity())return;await auth.register(el('email').value,el('password').value);message('Open je e-mail om je account te bevestigen.');});
   el('reset').onclick=()=>task(async()=>{if(!el('email').reportValidity()||!el('email').value)return;await auth.resetPassword(el('email').value);message('Als dit adres een account heeft, ontvang je een herstellink.');});
