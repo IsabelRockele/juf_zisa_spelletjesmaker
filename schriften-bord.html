@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Blok 1 · Les 19 · Wiskanjers 2de leerjaar</title>
+  <link rel="stylesheet" href="schriften-bord.css?v=20260928-20">
+  <script type="module" src="auth-check.js"></script>
+  <script src="schriften-bord.js?v=20260928-16" defer></script>
+  <script src="schriften-weergave.js?v=20260928-8" defer></script>
+  <script src="schriften-strook.js?v=20260928-19" defer></script>
+  <script src="schriften-schrijven.js?v=20260928-20" defer></script>
+</head>
+<body class="handling-wide">
+  <header><a href="wiskanjers-2.html#blok-1">← Blok 1 · Lesoverzicht</a><h1>Les 19 · Even opfrissen – Eigenschappen van bewerkingen:<br>de omgekeerde bewerking bij optellen en aftrekken</h1><div class="view-controls"><button id="toggle-writing" aria-expanded="false" aria-controls="writing-panel">Schrijfvlak tonen</button><button id="fullscreen">Volledig scherm</button></div></header>
+  <main>
+    <div class="lesson-toolbar">
+    <details id="settings"><summary>Eigen startaantal kiezen</summary>
+      <form id="lesson-form"><label>Startaantal <input id="start" type="number" min="0" max="1000" value="13" required></label><button type="submit">Zet startaantal klaar</button><button type="button" id="build-start">Leg startaantal één voor één</button></form>
+      <p id="error" role="alert"></p>
+    </details>
+    <nav class="lesson-modes" aria-label="Voorstelling"><button id="mode-books" aria-pressed="true">Schriften</button><button id="mode-family" aria-pressed="false">Drie getallen</button></nav>
+    </div>
+    <div class="board-layout"><section class="handling" aria-label="Handelen met schriften">
+    <div id="book-lesson">
+    <div class="lesson-status">
+    <h2 id="instruction" aria-live="polite"></h2>
+    </div>
+    <section class="scene" aria-label="Schriften op tafel">
+      <div class="bag-zone"><button id="bag" class="bag" aria-label="Klik de boekentas open"><span class="handle"></span><span class="flap"></span><span class="bag-mouth" aria-hidden="true"></span><span class="bag-stock" aria-hidden="true"><span class="bag-notebook"></span><span class="bag-notebook"></span><span class="bag-notebook"></span></span><span class="bag-lip" aria-hidden="true"></span><span class="pocket" aria-hidden="true"></span></button><span class="scene-label">Boekentas</span><span class="bag-hint">Klik om de boekentas te openen</span></div>
+      <div class="table-zone"><div id="stack" class="stack" role="img" aria-label="Stapel schriften"></div><div class="table-edge"></div><span id="count" class="count" hidden></span></div>
+      <div class="removed-zone"><div id="removed" class="removed" role="img" aria-label="Weggenomen schriften"></div><span class="scene-label">Weggenomen</span></div>
+    </section>
+    <div class="board-controls">
+    <div class="actions"><button id="undo">↶ Stap terug</button><button id="step" class="primary">+ 1 blauw schrift</button><button id="take-one">− Neem één schrift weg</button></div>
+    <details class="extra-controls"><summary>Meer opties</summary>
+    <div class="group-tools" role="group" aria-label="Schriften samen verplaatsen"><label>Groep van <input id="change" type="number" min="1" max="1000" value="5" required></label><button id="drag-group" aria-pressed="false">Slepen: één schrift</button><button id="group-add">Leg 5 rode erbij</button><button id="group-remove">Neem 5 weg</button><button id="group-return">Leg 5 terug</button></div>
+    <div class="color-tools" role="group" aria-label="Rode schriften samen verplaatsen"><button id="sort-colors" aria-pressed="false">Groepeer per kleur</button><button id="remove-color">Neem alle rode weg</button><button id="return-color">Leg alle rode terug</button></div>
+    <button id="play" hidden>Ⅱ Pauze</button>
+    <div class="reveal"><button id="toggle-count" aria-pressed="false">Toon aantal</button><button id="toggle-equation" aria-pressed="false">Toon bewerking</button><button id="toggle-answer" aria-pressed="false" hidden>Toon antwoord</button><button id="new-calculation">Nieuwe bewerking vanaf hier</button><button id="restart">Leeg bord</button></div>
+    <p class="tip">Sleep van boekentas naar tafel, van tafel naar ‘Weggenomen’, of terug. Jij kiest de volgorde. Maximaal tien schriften per stapel.</p>
+    </details>
+    </div>
+    <section id="math" class="math" hidden aria-label="Bewerking"><div id="equation"></div><div id="arrows" class="arrows"></div></section>
+    </div>
+    <section id="family-lesson" hidden aria-label="Opfrissen met drie getallen">
+      <h2>Vier bewerkingen met drie getallen</h2>
+      <p class="strip-question">Gebruik telkens de drie getallen.<br>Schrijf twee optellingen en twee aftrekkingen.</p>
+      <div class="family-examples" role="group" aria-label="Voorbeeld kiezen"><button data-family="9,15,6" aria-pressed="true">9 · 15 · 6</button><button data-family="11,7,4" aria-pressed="false">11 · 7 · 4</button><button data-family="13,5,8" aria-pressed="false">13 · 5 · 8</button></div>
+      <details><summary>Eigen drie getallen</summary><form id="family-form"><label>Getal 1 <input id="family-1" type="number" min="1" max="999" value="9" required></label><label>Getal 2 <input id="family-2" type="number" min="1" max="999" value="15" required></label><label>Getal 3 <input id="family-3" type="number" min="1" max="999" value="6" required></label><button>Toon getallen</button></form><p id="family-error" role="alert"></p></details>
+      <p class="tip">Elk voorbeeld heeft een eigen schrijfvlak. Je notities blijven bewaard zolang deze pagina openstaat.</p>
+      <button id="family-check" aria-expanded="false">Toon de vier bewerkingen</button><div id="family-solutions" hidden></div>
+    </section>
+    </section>
+    <section id="writing-panel" class="writing" aria-labelledby="writing-title" hidden>
+      <h2 id="writing-title">Noteer zoals in je werkboek</h2>
+      <div class="writing-toolbar">
+      <div class="pens" role="group" aria-label="Schrijfmateriaal"><button data-pen="#233b45" style="--ink-color:#233b45" title="Zwarte pen" aria-label="Zwarte pen" aria-pressed="true">Zwart</button><button data-pen="#1769b1" style="--ink-color:#1769b1" title="Blauwe pen" aria-label="Blauwe pen" aria-pressed="false">Blauw</button><button data-pen="#c73636" style="--ink-color:#c73636" title="Rode pen" aria-label="Rode pen" aria-pressed="false">Rood</button><button id="eraser" aria-pressed="false">Gum</button><button id="ink-undo" aria-label="Laatste penstreek terug" title="Laatste penstreek terug">↶</button><button id="ink-clear" title="Wis schrijfvlak">Wissen</button></div>
+      <details class="writing-options"><summary aria-label="Schrijfopties" title="Schrijfopties">⋯</summary><label class="schema-choice"><input type="checkbox" id="schema" checked> Schrijflijnen en boogpijlen</label></details></div>
+      <svg id="paper" viewBox="0 0 640 665" aria-label="Schrijfvlak: schrijf met je vinger, bordpen of muis">
+        <defs><marker id="arrow-tip" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0 0 L7 3 L0 6" fill="none" stroke="#63746b" stroke-width="1.5"/></marker></defs>
+        <g id="guides" fill="#63746b" font-family="Nunito, Arial" font-size="23">
+          <text x="30" y="38">Erbij</text><text x="182" y="110" font-size="42">+</text><text x="388" y="110" font-size="42">=</text>
+          <path d="M30 126H160 M242 126H370 M442 126H610" stroke="#cbd8d2" stroke-width="2"/>
+          <text x="30" y="192">Eraf</text><text x="182" y="264" font-size="42">−</text><text x="388" y="264" font-size="42">=</text>
+          <path d="M30 280H160 M242 280H370 M442 280H610" stroke="#cbd8d2" stroke-width="2"/>
+          <path d="M160 452C165 322 470 322 480 452 M480 505C470 625 165 625 160 505" fill="none" stroke="#63746b" stroke-width="3" marker-end="url(#arrow-tip)"/>
+          <rect x="258" y="328" width="130" height="54" rx="7" fill="white"/><rect x="258" y="550" width="130" height="54" rx="7" fill="white"/>
+          <text x="263" y="369" font-size="36">+</text><text x="263" y="592" font-size="36">−</text>
+          <path d="M308 378H380 M308 600H380 M100 504H220 M420 504H540" stroke="#cbd8d2" stroke-width="2"/>
+        </g>
+        <g id="strip-guides" style="display:none" font-family="Nunito, Arial" fill="#63746b">
+          <g fill="none" stroke="#63746b" stroke-width="2"><rect x="35" y="20" width="570" height="120"/><path d="M35 80H605 M415 80V140"/></g>
+          <g id="strip-writing-guides">
+            <g font-size="38"><text x="182" y="224">+</text><text x="388" y="224">=</text><text x="182" y="320">−</text><text x="388" y="320">=</text></g>
+            <path d="M30 238H160 M242 238H370 M442 238H610 M30 334H160 M242 334H370 M442 334H610" fill="none" stroke="#cbd8d2" stroke-width="2"/>
+            <g transform="translate(0 45)">
+            <path d="M180 450C180 350 460 350 460 450 M460 500C460 600 180 600 180 500" fill="none" stroke="#63746b" stroke-width="3" marker-end="url(#arrow-tip)"/>
+            <rect x="265" y="354" width="110" height="46" fill="white"/><rect x="265" y="550" width="110" height="46" fill="white"/>
+            <g font-size="32"><text x="265" y="388">+</text><text x="265" y="584">−</text></g>
+            <path d="M307 399H375 M307 595H375 M125 497H235 M405 497H515" fill="none" stroke="#cbd8d2" stroke-width="2"/>
+            </g>
+          </g>
+        </g><g id="family-guides" style="display:none" font-family="Nunito, Arial" fill="#233b45">
+          <g stroke="#63746b" stroke-width="2" fill="white"><rect x="50" y="30" width="540" height="80"/><path d="M230 30V110 M410 30V110"/></g>
+          <g text-anchor="middle" font-size="45" font-weight="700"><text id="family-number-1" x="140" y="86">9</text><text id="family-number-2" x="320" y="86">15</text><text id="family-number-3" x="500" y="86">6</text></g>
+          <g id="family-lines" stroke="#cbd8d2" stroke-width="2"><path d="M40 225H600 M40 345H600 M40 465H600 M40 585H600"/></g>
+        </g><g id="ink" fill="none" stroke-linecap="round" stroke-linejoin="round"></g>
+      </svg>
+      <p class="tip">Schrijf met je vinger, bordpen of muis. Je notities blijven staan als je verder handelt.</p>
+    </section></div>
+    <p id="message" role="status"></p>
+  </main>
+</body>
+</html>
