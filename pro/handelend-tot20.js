@@ -82,6 +82,8 @@
   });
   // Pointerbediening werkt ook met een vinger op het bord; een tik blijft een gewone klik.
   let sleep=null;
+  // Voorkom dat een snelle sleepbeweging de volgende tik als browsergebaar opvangt.
+  document.addEventListener('touchmove',e=>{if(sleep&&e.cancelable)e.preventDefault();},{passive:false});
   document.addEventListener('pointerdown',e=>{const target=e.target.closest('#bord-les .stip:not(:disabled)');if(!target||sleep||e.isPrimary===false||e.button!==0)return;e.preventDefault();sleep={x:e.clientX,y:e.clientY,id:e.pointerId,target,ghost:null};target.setPointerCapture(e.pointerId);});
   document.addEventListener('pointermove',e=>{if(!sleep||e.pointerId!==sleep.id)return;e.preventDefault();if(!sleep.ghost&&Math.hypot(e.clientX-sleep.x,e.clientY-sleep.y)>8){sleep.ghost=sleep.target.cloneNode();sleep.ghost.classList.add('sleepstip');document.body.append(sleep.ghost);}if(sleep.ghost){sleep.ghost.style.left=(e.clientX-19)+'px';sleep.ghost.style.top=(e.clientY-19)+'px';}});
   document.addEventListener('pointerup',e=>{if(!sleep||e.pointerId!==sleep.id)return;const old=sleep;sleep=null;if(!old.ghost)return;old.ghost.remove();const zone=el(min?'losse':'ramen').getBoundingClientRect();const goed=e.clientX>=zone.left&&e.clientX<=zone.right&&e.clientY>=zone.top&&e.clientY<=zone.bottom;old.target.addEventListener('click',e=>e.stopImmediatePropagation(),{capture:true,once:true});if(goed)verplaats(old.target.dataset.plek===undefined?undefined:Number(old.target.dataset.plek));});
