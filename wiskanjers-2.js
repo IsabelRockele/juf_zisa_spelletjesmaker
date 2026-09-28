@@ -5,7 +5,8 @@
   const lessons = [
     { block: 1, number: 19, title: 'Even opfrissen – Eigenschappen van bewerkingen: de omgekeerde bewerking bij optellen en aftrekken', description: 'Handel met schriften en noteer de bewerkingen op het bord.', parts: ['Schriften verplaatsen', 'Strookvoorstelling', 'Drie getallen'], url: 'schriften-bord.html' },
     { block: 1, number: 20, title: 'Het uur aflezen en schrijven', description: 'Verzet de wijzer, schrijf het hele uur en koppel de digitale klok aan de wijzerklok.', parts: ['Wijzerklok', 'Zelf noteren', 'Welke klok?'], url: 'wiskanjers-b1-les20.html' },
-    { block: 1, number: 21, title: 'Tijdsduur in dagen', description: 'Ervaar tijd met groepstimers en tel samen de nachten tussen twee dagen.', parts: ['Tijd ervaren', 'Dagen springen', 'Samen oefenen'], url: 'wiskanjers-b1-les21.html' }
+    { block: 1, number: 21, title: 'Tijdsduur in dagen', description: 'Ervaar tijd met groepstimers en tel samen de nachten tussen twee dagen.', parts: ['Tijd ervaren', 'Dagen springen', 'Samen oefenen'], url: 'wiskanjers-b1-les21.html' },
+    { block: 2, number: 1, title: 'Even en oneven getallen tot 20', description: 'Flits getalbeelden, verdeel voorwerpen en ontdek even en oneven getallen.', parts: ['Getalbeelden flitsen', 'Samen verdelen', 'Even of oneven?'], url: 'wiskanjers-b2-les1.html' }
   ];
   const $ = id => document.getElementById(id);
   for (let block = 1; block <= 8; block++) {
