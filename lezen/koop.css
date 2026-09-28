@@ -33,3 +33,7 @@ main{max-width:none;width:94%;padding:16px 0 22px;display:grid;grid-template-col
 @media(max-width:460px){.intro{grid-template-columns:1fr 75px}.intro img{width:75px}.intro h1{font-size:27px}.price{font-size:38px}.price span{font-size:14px}}
 
 .purchase-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}.purchase-choices section{padding:12px;border:1px solid #dceaf0;border-radius:14px;background:#f5fbfe}.purchase-choices h3{font-size:18px;margin:0}.purchase-choices .buy{font-size:14px;padding:12px 8px;margin:8px 0 0}.offer .purchase-choices p{font-size:14px;margin:6px 0}.offer .small{font-size:13px!important}@media(max-width:600px){.purchase-choices{grid-template-columns:1fr}}
+
+.seller-info{grid-column:1/-1;padding-top:12px;border-top:1px solid #dceaf0;font-size:12px;line-height:1.5;color:#456477}.seller-info nav{font-size:13px;margin-top:6px}.seller-info a{color:#17638b}.seller-info a:focus-visible{outline:3px solid #ed1764}
+[hidden]{display:none!important}
+.seller-info{grid-row:4}@media(max-width:900px){.seller-info{grid-row:auto}}
