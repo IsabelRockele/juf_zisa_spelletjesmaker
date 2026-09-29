@@ -42,7 +42,9 @@
   let color='#243b45',erase=false,pointer=null,path=null,versions=[];
   function fresh(){step=0;reveal=false;ink.replaceChildren();versions=[];draw();}
   function selectList(){custom=null;list=mode==='sums'?sums.filter(e=>filter==='mixed'||category(e)===filter):mode==='missing'?[...missing]:[...stories];index=0;fresh();}
-  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));selectList();});$('kind').onchange=()=>{filter=$('kind').value;selectList();};
+  function setOverview(open){$('overview').hidden=!open;$('exercise-view').hidden=open;$('overview-toggle').setAttribute('aria-pressed',String(open));document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(!open&&b.dataset.mode===mode)));}
+  $('overview-toggle').onclick=()=>setOverview($('overview').hidden);
+  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{setOverview(false);mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));selectList();});$('kind').onchange=()=>{filter=$('kind').value;selectList();};
   function next(d){custom=null;index=(index+d+list.length)%list.length;fresh();}$('previous').onclick=()=>next(-1);$('next').onclick=()=>next(1);$('shuffle').onclick=()=>{custom=null;for(let i=list.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[list[i],list[j]]=[list[j],list[i]];}index=0;fresh();};$('reset').onclick=fresh;
   $('toggle-steps').onclick=()=>{showSteps=!showSteps;draw();};$('answer').onclick=()=>{reveal=!reveal;draw();};
   $('custom-form').onsubmit=e=>{e.preventDefault();const exercise=sum(Number($('custom-a').value),$('custom-op').value,Number($('custom-b').value));if(!Number.isInteger(exercise.a)||!Number.isInteger(exercise.b)||exercise.a<0||exercise.b<0||exercise.a>20||exercise.b>20||result(exercise)<0||result(exercise)>20){$('custom-error').textContent='Kies een bewerking met getallen en een uitkomst van 0 tot 20.';return;}$('custom-error').textContent='';custom=exercise;$('custom').open=false;fresh();};
