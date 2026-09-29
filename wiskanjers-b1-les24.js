@@ -20,7 +20,7 @@
       'Splits.',
       e.op==='+'?'10 + ___ =':'10 − ___ ='
     ]};
-    if(e.op==='−'&&e.b>10)return {steps:['Splits het tweede getal in een tiental en eenheden.','Trek eerst het tiental af. Schrijf de tussenstap.','Trek daarna de eenheden af.','Vul je antwoord in en controleer.']};
+    if(e.op==='−'&&e.b>10&&e.b<20)return {steps:['Splits aftrekker in T en E.','Trek eerst 10 af.','Trek dan E af.']};
     return {steps:['Kijk naar het bewerkingsteken: komt er iets bij of gaat er iets af?','Reken met de tientallen en de eenheden.','Schrijf een tussenstap als dat helpt.','Vul je antwoord in en controleer.']};
   }
   function draw(){paper.setAttribute('viewBox',mode==='sums'?'0 0 1200 480':'0 0 1000 480');guides.replaceChildren();const e=current();let instructions=[];
