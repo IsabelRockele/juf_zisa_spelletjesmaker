@@ -7,3 +7,10 @@ body.island-world{background:#078dce;background-image:radial-gradient(ellipse at
 /* Zisa welcomes children on the open crossroads, clear of all game signs. */
 .inside-island[data-island="spelling"] .zisa-guide{left:42.5%;bottom:26%;height:27%;width:15%;z-index:2}
 .inside-island[data-island="rekenen"] .zisa-guide{left:43%;bottom:16%;height:25%;width:15%;z-index:2}
+
+/* Keep the new bridge entrance clear of the island title. */
+.inside-island[data-island="rekenen"] .scene-caption{top:2%;bottom:auto;left:40%;width:20%}
+.inside-island[data-island="rekenen"] .scene-caption p{display:none}
+.inside-island[data-island="rekenen"] .scene-caption h1{font-size:clamp(16px,2vw,26px)}
+.inside-island[data-island="rekenen"] .game-spot:last-child .island-sign{min-width:170px;padding:8px 16px}
+.inside-island[data-island="rekenen"] .game-spot:last-child .island-sign strong{font-size:clamp(12px,1.4vw,20px)}

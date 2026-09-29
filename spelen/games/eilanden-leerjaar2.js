@@ -9,7 +9,8 @@ window.ZisaEilanden = [
     {title:'Tafelspellen',description:'Oefen de maal- en deeltafels.',url:'tafel_overzicht.html'},
     {title:'Zisa’s Splitsmachine',description:'Oefen splitsingen tot 10, 20 of 100.',url:'splitsmachine/index.html?leerjaar=2'},
     {title:'Zisa’s winkel',description:'Koop, betaal en geef geld terug.',url:'zebrawinkel.html'},
-    {title:'Bo en de Wolkentrein',description:'Reis mee met plus- en minsommen tot 20.',url:'../../wolkentrein/?leerjaar=2'}
+    {title:'Bo en de Wolkentrein',description:'Reis mee met plus- en minsommen tot 20.',url:'../../wolkentrein/?leerjaar=2'},
+    {title:'Zisa’s rekenbrug · tot 20',description:'Herken de brug en oefen plus en min tot 20.',url:'rekenbrug-proef/index.html?leerjaar=2',zone:[39,82,24,12]}
   ]},
   {id:'puzzelen',title:'Puzzeleiland',map:{left:24,top:56,width:53,height:40},description:'Denk, probeer en vind de oplossing.',games:[
     {title:'Pentomino Studio',description:'Leg de twaalf puzzelstukken op hun plaats.',url:'../../pentomino_studio_volledige_tool.html?play=1&back=spelen/games/eilanden-leerjaar2.html%23puzzelen'}
