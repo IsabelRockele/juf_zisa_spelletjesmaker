@@ -26,8 +26,8 @@
   function draw(){paper.setAttribute('viewBox',mode==='sums'?'0 0 1200 480':'0 0 1000 480');guides.replaceChildren();const e=current();let instructions=[];
     if(mode==='stories'){
       $('story-question').hidden=false;$('story-question').textContent=e.text;instructions=['Lees het verhaal. Wat weet je al en wat moet je zoeken?','Welke getallen heb je nodig? Kies de passende bewerking(en).','Reken uit. Noteer tussenstappen als dat helpt.','Vul de antwoordzin in en lees ze na.'];
-      text(35,38,'Bewerkingen',25,'#60746b','start');line(35,135,965,135);line(35,245,965,245);text(35,300,'Antwoordzin',25,'#60746b','start');text(35,385,e.prefix,29,'#243b45','start');line(225,400,355,400);text(380,385,e.suffix,29,'#243b45','start');
-      if(reveal){text(500,105,e.equation+' = '+e.answer,38,'#258446');text(290,385,e.answer,42,'#258446');}
+      text(35,38,'Bewerkingen',25,'#60746b','start');line(35,135,965,135);line(35,245,965,245);text(35,385,'Antwoordzin:',25,'#60746b','start');text(220,385,e.prefix,29,'#243b45','start');line(390,400,510,400);text(535,385,e.suffix,29,'#243b45','start');
+      if(reveal){text(500,105,e.equation+' = '+e.answer,38,'#258446');text(450,385,e.answer,42,'#258446');}
     }else{
       $('story-question').hidden=true;const r=result(e);
       if(mode==='missing'){
