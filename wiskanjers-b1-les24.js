@@ -13,36 +13,38 @@
   const guides=$('guides'),ink=$('ink'),paper=$('paper');
   const text=(x,y,value,size=48,color='#243b45',anchor='middle')=>guides.append(node('text',{x,y,'font-size':size,fill:color,'text-anchor':anchor,'font-family':'Nunito,Arial', 'font-weight':700},value));
   const line=(x1,y1,x2,y2,color='#bcced0',width=2)=>guides.append(node('line',{x1,y1,x2,y2,stroke:color,'stroke-width':width}));
-  function plan(e){const r=result(e),bridge=category(e).endsWith('-bridge');let first=null;if(bridge)first=e.op==='+'?10-e.a:e.a-10;else if(e.op==='−'&&e.b>10)first=10;
-    if(first!==null){const second=e.b-first,mid=e.op==='+'?e.a+first:e.a-first;return {first,second,mid,bridge,steps:[`Teken splitsbenen onder ${e.b}.`,`Splits ${e.b} in ${first} en ${second}.`,`${e.a} ${e.op} ${first} = ${mid}.${bridge?' Zet een groene kring rond deze getallen.':''}`,`${mid} ${e.op} ${second} = ${r}.`]};}
-    return {steps:[`Bekijk ${e.a} ${e.op} ${e.b}. Je hoeft niet over 10 te rekenen.`,`${e.a} ${e.op} ${e.b} = ${r}.`]};
+  function plan(e){
+    if(category(e).endsWith('-bridge'))return {steps:[
+      e.op==='+'?'Hoeveel moet erbij om eerst 10 te maken?':'Hoeveel moet eraf om eerst bij 10 te komen?',
+      'Teken splitsbenen onder het tweede getal. Vul beide delen zelf in.',
+      e.op==='+'?'Zet een groene kring rond het eerste getal en het deel dat samen 10 maakt. Schrijf er 10 naast.':'Zet een groene kring rond het eerste getal en het deel dat je eraf neemt om 10 te krijgen. Schrijf er 10 naast.',
+      e.op==='+'?'Tel het overblijvende deel bij 10. Noteer je tussenstappen en antwoord.':'Trek het overblijvende deel van 10 af. Noteer je tussenstappen en antwoord.'
+    ]};
+    if(e.op==='−'&&e.b>10)return {steps:['Splits het tweede getal in een tiental en eenheden.','Trek eerst het tiental af. Schrijf de tussenstap.','Trek daarna de eenheden af.','Vul je antwoord in en controleer.']};
+    return {steps:['Kijk naar het bewerkingsteken: komt er iets bij of gaat er iets af?','Reken met de tientallen en de eenheden.','Schrijf een tussenstap als dat helpt.','Vul je antwoord in en controleer.']};
   }
   function draw(){guides.replaceChildren();const e=current();let instructions=[];
     if(mode==='stories'){
-      $('story-question').hidden=false;$('story-question').textContent=e.text;instructions=e.steps;
+      $('story-question').hidden=false;$('story-question').textContent=e.text;instructions=['Lees het verhaal. Wat weet je al en wat moet je zoeken?','Welke getallen heb je nodig? Kies de passende bewerking(en).','Reken uit. Noteer tussenstappen als dat helpt.','Vul de antwoordzin in en lees ze na.'];
       text(35,38,'Bewerkingen',25,'#60746b','start');line(35,135,965,135);line(35,245,965,245);text(35,300,'Antwoordzin',25,'#60746b','start');text(35,385,e.prefix,29,'#243b45','start');line(225,400,355,400);text(380,385,e.suffix,29,'#243b45','start');
-      if(step&&!reveal){text(500,105,e.work.slice(0,Math.min(step,2)).join('     '),34);if(step>2)text(500,215,e.work.slice(2,step).join('     '),30);}
       if(reveal){text(500,105,e.equation+' = '+e.answer,38,'#258446');text(290,385,e.answer,42,'#258446');}
     }else{
       $('story-question').hidden=true;const r=result(e);
       if(mode==='missing'){
         const values={a:e.a,b:e.b,r};const tokens=e.reverse?['r','=','a',e.op,'b']:['a',e.op,'b','=','r'];tokens.forEach((key,i)=>{const x=180+i*160;if(key===e.hole&&!reveal)line(x-55,128,x+55,128);else text(x,115,values[key]??key,65,key===e.hole?'#258446':'#243b45');});
-        const inverse=e.hole==='r'?`${e.a} ${e.op} ${e.b} = ${r}`:e.hole==='a'?(e.op==='+'?`${r} − ${e.b} = ${e.a}`:`${r} + ${e.b} = ${e.a}`):(e.op==='+'?`${r} − ${e.a} = ${e.b}`:`${e.a} − ${r} = ${e.b}`);
-        instructions=['Welke plaats is leeg? Zoek het ontbrekende getal met de omgekeerde bewerking.',inverse];if(step>=2)text(500,300,inverse,45,'#258446');line(130,325,870,325);line(130,430,870,430);
+        instructions=['Welke plaats is leeg? Wat vertellen de andere getallen je?','Welke bewerking helpt je het ontbrekende getal te vinden? Denk aan de omgekeerde bewerking.','Noteer je berekening op de schrijflijnen.','Vul je getal in en controleer of beide kanten van het gelijkteken evenveel zijn.'];line(130,325,870,325);line(130,430,870,430);
       }else{
         const p=plan(e);instructions=p.steps;line(130,350,870,350);line(130,445,870,445);text(240,100,e.a,68);text(365,100,e.op,62);text(500,100,e.b,68);text(655,100,'=',62);if(reveal)text(805,100,r,68,'#258446');else line(740,115,870,115);
-        if(p.first!==undefined){if(step>=1){line(495,127,420,195,'#558598',3);line(505,127,580,195,'#558598',3);}if(step>=2){text(420,240,p.first,52);text(580,240,p.second,52);}if(step>=3){if(p.bridge){guides.append(node('ellipse',{cx:325,cy:148,rx:155,ry:66,transform:'rotate(36 325 148)',fill:'none',stroke:'#258446','stroke-width':5}));text(170,255,'10',43,'#258446');}text(500,335,`${e.a} ${e.op} ${p.first} = ${p.mid}`,44,p.bridge?'#258446':'#243b45');}if(step>=4)text(500,425,`${p.mid} ${e.op} ${p.second} = ${r}`,44);}
-        else if(step>=2)text(500,300,instructions[1],48,'#258446');
       }
     }
-    $('progress').textContent=custom?'Eigen bewerking':`Oefening ${index+1} van ${list.length}`;$('step-instruction').textContent=step?instructions[step-1]:'Probeer eerst zelf. Je kunt op het schrijfvlak tekenen.';$('step-back').disabled=step===0;$('step-next').disabled=step>=instructions.length;$('step-next').textContent=step>=instructions.length?'Alle stappen getoond':`Toon stap ${step+1}`;$('answer').textContent=reveal?'Verberg antwoord':'Toon antwoord';$('kind').hidden=mode!=='sums';$('custom').hidden=mode!=='sums';$('shuffle').hidden=mode==='stories';$('toggle-steps').setAttribute('aria-pressed',String(showSteps));$('toggle-steps').textContent=showSteps?'Stappenplan verbergen':'Stappenplan tonen';document.querySelector('.lesson-work').classList.toggle('show-steps',showSteps);
+    $('progress').textContent=custom?'Eigen bewerking':`Oefening ${index+1} van ${list.length}`;$('step-instruction').replaceChildren();instructions.forEach(instruction=>{const li=document.createElement('li');li.textContent=instruction;$('step-instruction').append(li);});$('answer').textContent=reveal?'Verberg antwoord':'Toon antwoord';$('kind').hidden=mode!=='sums';$('custom').hidden=mode!=='sums';$('shuffle').hidden=mode==='stories';$('toggle-steps').setAttribute('aria-pressed',String(showSteps));$('toggle-steps').textContent=showSteps?'Stappenplan verbergen':'Stappenplan tonen';document.querySelector('.lesson-work').classList.toggle('show-steps',showSteps);
   }
   let color='#243b45',erase=false,pointer=null,path=null,versions=[];
   function fresh(){step=0;reveal=false;ink.replaceChildren();versions=[];draw();}
   function selectList(){custom=null;list=mode==='sums'?sums.filter(e=>filter==='mixed'||category(e)===filter):mode==='missing'?[...missing]:[...stories];index=0;fresh();}
   document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));selectList();});$('kind').onchange=()=>{filter=$('kind').value;selectList();};
   function next(d){custom=null;index=(index+d+list.length)%list.length;fresh();}$('previous').onclick=()=>next(-1);$('next').onclick=()=>next(1);$('shuffle').onclick=()=>{custom=null;for(let i=list.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[list[i],list[j]]=[list[j],list[i]];}index=0;fresh();};$('reset').onclick=fresh;
-  $('toggle-steps').onclick=()=>{showSteps=!showSteps;draw();};$('hide-steps').onclick=()=>{step=0;draw();};$('step-next').onclick=()=>{step++;draw();};$('step-back').onclick=()=>{step=Math.max(0,step-1);draw();};$('answer').onclick=()=>{reveal=!reveal;draw();};
+  $('toggle-steps').onclick=()=>{showSteps=!showSteps;draw();};$('answer').onclick=()=>{reveal=!reveal;draw();};
   $('custom-form').onsubmit=e=>{e.preventDefault();const exercise=sum(Number($('custom-a').value),$('custom-op').value,Number($('custom-b').value));if(!Number.isInteger(exercise.a)||!Number.isInteger(exercise.b)||exercise.a<0||exercise.b<0||exercise.a>20||exercise.b>20||result(exercise)<0||result(exercise)>20){$('custom-error').textContent='Kies een bewerking met getallen en een uitkomst van 0 tot 20.';return;}$('custom-error').textContent='';custom=exercise;$('custom').open=false;fresh();};
   function selectPen(){document.querySelectorAll('[data-color]').forEach(b=>b.setAttribute('aria-pressed',String(!erase&&color===b.dataset.color)));$('eraser').setAttribute('aria-pressed',String(erase));}document.querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{color=b.dataset.color;erase=false;selectPen();});$('eraser').onclick=()=>{erase=!erase;selectPen();};
   function point(e){const p=paper.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(paper.getScreenCTM().inverse());}function rub(p){for(const n of [...ink.children])for(let d=0;d<=n.getTotalLength();d+=5){const q=n.getPointAtLength(d);if(Math.hypot(p.x-q.x,p.y-q.y)<15){n.remove();break;}}}
