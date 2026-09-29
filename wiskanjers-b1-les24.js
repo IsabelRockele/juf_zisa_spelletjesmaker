@@ -15,10 +15,10 @@
   const line=(x1,y1,x2,y2,color='#bcced0',width=2)=>guides.append(node('line',{x1,y1,x2,y2,stroke:color,'stroke-width':width}));
   function plan(e){
     if(category(e).endsWith('-bridge'))return {steps:[
-      e.op==='+'?'Hoeveel moet erbij om eerst 10 te maken?':'Hoeveel moet eraf om eerst bij 10 te komen?',
-      'Teken splitsbenen onder het tweede getal. Vul beide delen zelf in.',
-      e.op==='+'?'Zet een groene kring rond het eerste getal en het deel dat samen 10 maakt. Schrijf er 10 naast.':'Zet een groene kring rond het eerste getal en het deel dat je eraf neemt om 10 te krijgen. Schrijf er 10 naast.',
-      e.op==='+'?'Tel het overblijvende deel bij 10. Noteer je tussenstappen en antwoord.':'Trek het overblijvende deel van 10 af. Noteer je tussenstappen en antwoord.'
+      'Teken splitsbenen.',
+      'Maak eerst 10. Groene kring + 10.',
+      'Splits.',
+      e.op==='+'?'10 + ___ =':'10 − ___ ='
     ]};
     if(e.op==='−'&&e.b>10)return {steps:['Splits het tweede getal in een tiental en eenheden.','Trek eerst het tiental af. Schrijf de tussenstap.','Trek daarna de eenheden af.','Vul je antwoord in en controleer.']};
     return {steps:['Kijk naar het bewerkingsteken: komt er iets bij of gaat er iets af?','Reken met de tientallen en de eenheden.','Schrijf een tussenstap als dat helpt.','Vul je antwoord in en controleer.']};
@@ -34,7 +34,7 @@
         const values={a:e.a,b:e.b,r};const tokens=e.reverse?['r','=','a',e.op,'b']:['a',e.op,'b','=','r'];tokens.forEach((key,i)=>{const x=180+i*160;if(key===e.hole&&!reveal)line(x-55,128,x+55,128);else text(x,115,values[key]??key,65,key===e.hole?'#258446':'#243b45');});
         instructions=['Welke plaats is leeg? Wat vertellen de andere getallen je?','Welke bewerking helpt je het ontbrekende getal te vinden? Denk aan de omgekeerde bewerking.','Noteer je berekening op de schrijflijnen.','Vul je getal in en controleer of beide kanten van het gelijkteken evenveel zijn.'];line(130,325,870,325);line(130,430,870,430);
       }else{
-        const p=plan(e);instructions=p.steps;line(650,205,1170,205);line(650,340,1170,340);text(240,100,e.a,68);text(365,100,e.op,62);text(500,100,e.b,68);text(655,100,'=',62);if(reveal)text(805,100,r,68,'#258446');else line(740,115,870,115);
+        const p=plan(e);instructions=p.steps;line(650,240,1170,240);line(650,375,1170,375);text(240,100,e.a,68);text(365,100,e.op,62);text(500,100,e.b,68);text(655,100,'=',62);if(reveal)text(860,100,r,68,'#258446');else line(740,115,980,115);
       }
     }
     $('progress').textContent=custom?'Eigen bewerking':`Oefening ${index+1} van ${list.length}`;$('step-instruction').replaceChildren();instructions.forEach(instruction=>{const li=document.createElement('li');li.textContent=instruction;$('step-instruction').append(li);});$('answer').textContent=reveal?'Verberg antwoord':'Toon antwoord';$('kind').hidden=mode!=='sums';$('custom').hidden=mode!=='sums';$('shuffle').hidden=mode==='stories';$('toggle-steps').setAttribute('aria-pressed',String(showSteps));$('toggle-steps').textContent=showSteps?'Stappenplan verbergen':'Stappenplan tonen';document.querySelector('.lesson-work').classList.toggle('show-steps',showSteps);
