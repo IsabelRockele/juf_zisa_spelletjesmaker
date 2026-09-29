@@ -26,7 +26,7 @@
   $('previous-hour').addEventListener('click',()=>setHour(hour-1));$('next-hour').addEventListener('click',()=>setHour(hour+1));
   $('next-example').addEventListener('click',()=>{example=(example+1)%examples.length;setHour(examples[example]);});
   $('show-answer').addEventListener('click',()=>{answer=!answer;renderMain();});
-  $('arc-toggle').addEventListener('click',()=>{arc=!arc;$('arc-toggle').textContent=arc?'Verberg urenboog':'Toon urenboog';$('arc-toggle').setAttribute('aria-pressed',String(arc));renderMain();renderChoices();});
+  $('arc-toggle').addEventListener('click',()=>{arc=!arc;$('arc-toggle').textContent=arc?'Verberg urenboog':'Toon urenboog';$('arc-toggle').setAttribute('aria-pressed',String(arc));renderMain();renderChoices();renderNear();});
   let clockPointer=null;
   function dragHour(event){const svg=$('main-clock'),p=svg.createSVGPoint();p.x=event.clientX;p.y=event.clientY;const q=p.matrixTransform(svg.getScreenCTM().inverse());if(Math.hypot(q.x-200,q.y-200)<35)return;const a=(Math.atan2(q.x-200,200-q.y)*180/Math.PI+360)%360;setHour(Math.round(a/30)%12||12);}
   $('main-clock').addEventListener('pointerdown',event=>{if(event.button!==0||clockPointer!==null||!event.target.closest('.hour-hit'))return;event.preventDefault();clockPointer=event.pointerId;$('main-clock').setPointerCapture(clockPointer);});
@@ -63,7 +63,7 @@
   $('reset-match').addEventListener('click',()=>{selected=null;checked=false;renderChoices();});
   function nextTarget(delta){targetIndex=(targetIndex+delta+targets.length)%targets.length;selected=null;checked=false;renderChoices();}
   $('previous-match').addEventListener('click',()=>nextTarget(-1));$('next-match').addEventListener('click',()=>nextTarget(1));
-  function mode(match){$('read-panel').hidden=match;$('match-panel').hidden=!match;$('mode-read').setAttribute('aria-pressed',String(!match));$('mode-match').setAttribute('aria-pressed',String(match));}
+  function mode(match){$('near-panel').hidden=true;$('mode-near').setAttribute('aria-pressed','false');$('read-panel').hidden=match;$('match-panel').hidden=!match;$('mode-read').setAttribute('aria-pressed',String(!match));$('mode-match').setAttribute('aria-pressed',String(match));}
   $('mode-read').addEventListener('click',()=>mode(false));$('mode-match').addEventListener('click',()=>mode(true));
   const paper=$('paper'),ink=$('ink');let pen='#243b45',erase=false,stroke=null,inkPointer=null,history=[];
   function clearInk(){ink.replaceChildren();history=[];$('ink-undo').disabled=true;}
@@ -78,5 +78,24 @@
   $('ink-undo').addEventListener('click',()=>{if(history.length)ink.innerHTML=history.pop();$('ink-undo').disabled=!history.length;});$('ink-clear').addEventListener('click',()=>{if(ink.children.length){remember();ink.replaceChildren();}});
   $('fullscreen').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{$('message').textContent='Gebruik eventueel F11 voor volledig scherm.';}});
   document.addEventListener('fullscreenchange',()=>{$('fullscreen').textContent=document.fullscreenElement?'Verlaat volledig scherm':'Volledig scherm';});
-  clearInk();renderMain();renderChoices();
+  const nearHours=[5,9,1,7,12,3,10,2,6,11,4,8];
+  let nearMode='mixed',nearIndex=0,nearReveal=false;
+  function nearExercises(){return nearHours.flatMap((h,i)=>[{h,type:'before',minute:[55,57,56][i%3]},{h,type:'after',minute:[3,5,4][i%3]}]).filter(e=>nearMode==='mixed'||e.type===nearMode);}
+  function renderNear(){const list=nearExercises(),e=list[nearIndex],svg=$('near-clock');const value=e.type==='before'?((e.h+11)%12)+e.minute/60:e.h%12+e.minute/60;
+    drawClock(svg,value);
+    Array.from(svg.children).filter(n=>n.tagName==='path'&&(n.getAttribute('stroke')==='#079dca'||n.getAttribute('fill')==='#079dca')).forEach(n=>n.setAttribute('transform',`rotate(${e.minute*6} 200 200)`));
+    if(arc){const end=point(e.minute*6,200);svg.append(node('path',{d:`M200 0 A200 200 0 ${e.minute>30?1:0} 1 ${end.x} ${end.y}`,fill:'none',stroke:'#079dca','stroke-width':8}));}
+    $('near-count').textContent=`Oefening ${nearIndex+1} van ${list.length}`;$('near-prompt').textContent=e.type==='before'?'Het is bijna':'Het is net over';$('near-answer').textContent=nearReveal?'Verberg antwoord':'Toon antwoord';$('near-result').textContent=nearReveal?`Het is ${e.type==='before'?'bijna':'net over'} ${e.h} uur.`:'';
+  }
+  function resetNear(){nearReveal=false;$('near-input').value='';$('near-ink').replaceChildren();renderNear();}
+  $('mode-near').onclick=()=>{$('read-panel').hidden=true;$('match-panel').hidden=true;$('near-panel').hidden=false;$('mode-read').setAttribute('aria-pressed','false');$('mode-match').setAttribute('aria-pressed','false');$('mode-near').setAttribute('aria-pressed','true');};
+  $('near-type').onchange=()=>{nearMode=$('near-type').value;nearIndex=0;resetNear();};
+  $('near-prev').onclick=()=>{nearIndex=(nearIndex-1+nearExercises().length)%nearExercises().length;resetNear();};$('near-next').onclick=()=>{nearIndex=(nearIndex+1)%nearExercises().length;resetNear();};$('near-answer').onclick=()=>{nearReveal=!nearReveal;renderNear();};
+  const nearPaper=$('near-paper'),nearInk=$('near-ink');let nearPointer=null,nearStroke=null;
+  function nearPoint(e){const p=nearPaper.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(nearPaper.getScreenCTM().inverse());}
+  nearPaper.addEventListener('pointerdown',e=>{if(e.button!==0||nearPointer!==null)return;e.preventDefault();nearPointer=e.pointerId;nearPaper.setPointerCapture(e.pointerId);const p=nearPoint(e);nearStroke=node('path',{d:`M${p.x} ${p.y}l.1 .1`});nearInk.append(nearStroke);});
+  nearPaper.addEventListener('pointermove',e=>{if(e.pointerId!==nearPointer)return;const p=nearPoint(e);nearStroke.setAttribute('d',nearStroke.getAttribute('d')+`L${p.x} ${p.y}`);});
+  ['pointerup','pointercancel','lostpointercapture'].forEach(type=>nearPaper.addEventListener(type,()=>{nearPointer=null;nearStroke=null;}));
+  $('near-undo').onclick=()=>nearInk.lastElementChild?.remove();$('near-clear').onclick=()=>{nearInk.replaceChildren();$('near-input').value='';};
+  clearInk();renderMain();renderChoices();renderNear();
 })();

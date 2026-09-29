@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="nl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Blok 1 · Les 20 · Het uur aflezen en schrijven</title><link rel="stylesheet" href="wiskanjers-b1-les20.css?v=3"><script type="module" src="auth-check.js"></script><script src="wiskanjers-b1-les20.js?v=3" defer></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Blok 1 · Les 20 · Het uur aflezen en schrijven</title><link rel="stylesheet" href="wiskanjers-b1-les20.css?v=4"><script type="module" src="auth-check.js"></script><script src="wiskanjers-b1-les20.js?v=4" defer></script></head>
 <body>
 <header><a href="wiskanjers-2.html#blok-1">← Blok 1 · Lesoverzicht</a><h1>Les 20 · Het uur aflezen en schrijven</h1><button id="fullscreen">Volledig scherm</button></header>
 <main>
-  <div class="toolbar"><nav aria-label="Lesonderdeel"><button id="mode-read" aria-pressed="true">Aflezen en schrijven</button><button id="mode-match" aria-pressed="false">Welke klok?</button></nav><button id="arc-toggle" aria-pressed="true">Verberg urenboog</button></div>
+  <div class="toolbar"><nav aria-label="Lesonderdeel"><button id="mode-read" aria-pressed="true">Aflezen en schrijven</button><button id="mode-match" aria-pressed="false">Welke klok?</button><button id="mode-near" aria-pressed="false">Bijna / net over</button></nav><button id="arc-toggle" aria-pressed="true">Verberg urenboog</button></div>
   <section id="read-panel" aria-label="Het uur aflezen en schrijven">
     <div class="clock-stage"><button id="previous-hour" aria-label="Eén uur vroeger">− 1 uur</button><svg id="main-clock" viewBox="0 0 400 400" role="img" aria-label="Wijzerklok"></svg><button id="next-hour" aria-label="Eén uur later">+ 1 uur</button></div>
     <div class="hour-controls"><label>Uur <select id="hour" aria-label="Kies het uur"></select></label><button id="next-example">Volgend voorbeeld</button><button id="show-answer" aria-pressed="false">Toon antwoord</button><span class="hint">Sleep de korte rode wijzer.</span></div>
@@ -24,6 +24,13 @@
     <div class="match-heading"><button id="previous-match" aria-label="Vorige oefening">←</button><h2 id="digital-question"><span id="target-hours"></span><span class="colon">:</span><span class="minutes">00</span></h2><svg id="analog-question" viewBox="0 0 400 400" role="img" aria-label="Lees het uur op de wijzerklok" hidden></svg><button id="next-match" aria-label="Volgende oefening">→</button></div>
     <div id="clock-choices" class="clock-choices"></div>
     <div class="match-actions"><button id="check-match">Controleer</button><button id="reset-match">Opnieuw kiezen</button></div><p id="match-feedback" role="status"></p>
+  </section>
+  <section id="near-panel" hidden aria-label="Bijna en net over het uur">
+    <div class="hour-controls near-controls"><button id="near-prev" aria-label="Vorige oefening bijna of net over">←</button><span id="near-count"></span><button id="near-next" aria-label="Volgende oefening bijna of net over">→</button><select id="near-type" aria-label="Soort klokoefening"><option value="mixed">Gemengd</option><option value="before">Bijna</option><option value="after">Net over</option></select></div>
+    <svg id="near-clock" viewBox="-14 -14 428 428" role="img" aria-label="Klok om bijna of net over het uur af te lezen"></svg>
+    <div class="near-sentence"><span id="near-prompt"></span><input id="near-input" type="number" min="1" max="12" aria-label="Vul het uur in"><span>uur.</span></div>
+    <div class="near-note"><svg id="near-paper" viewBox="0 0 800 100" aria-label="Schrijf hier je antwoord met je bordpen"><path d="M30 85H770" stroke="#bcced0" stroke-width="2"/><g id="near-ink" fill="none" stroke="#243b45" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></g></svg></div>
+    <div class="hour-controls"><button id="near-undo">↶ Pennenstreek</button><button id="near-clear">Wissen</button><button id="near-answer">Toon antwoord</button></div><p id="near-result" role="status"></p>
   </section>
   <p id="message" role="status"></p>
 </main>
