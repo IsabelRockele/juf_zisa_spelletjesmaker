@@ -9,9 +9,16 @@
   const missing=[{a:14,op:'−',b:5,hole:'b'},{a:13,op:'−',b:4,hole:'a'},{a:6,op:'+',b:9,hole:'b'},{a:7,op:'+',b:8,hole:'a'},{a:18,op:'−',b:12,hole:'r',reverse:true},{a:8,op:'+',b:6,hole:'a',reverse:true},{a:20,op:'−',b:11,hole:'b'},{a:16,op:'−',b:7,hole:'a',reverse:true},{a:4,op:'+',b:9,hole:'r',reverse:true},{a:17,op:'−',b:8,hole:'b',reverse:true},{a:9,op:'+',b:3,hole:'a'},{a:15,op:'−',b:6,hole:'b'}];
   const stories=[{text:'In de tuin staan 3 rode en 4 gele bloemen. Noor plant er 5 witte en 2 paarse bloemen bij. Hoeveel bloemen staan er nu in de tuin?',equation:'3 + 4 + 5 + 2',answer:14,prefix:'Er staan',suffix:'bloemen in de tuin.',steps:['Tel eerst de rode en gele bloemen: 3 + 4 = 7.','Tel de nieuwe bloemen: 5 + 2 = 7.','Tel samen: 7 + 7. Splits de tweede 7 in 3 en 4.','7 + 3 = 10. Dan 10 + 4 = 14.'],work:['3 + 4 = 7','5 + 2 = 7','7 + 7 = 7 + 3 + 4','10 + 4 = 14']},{text:'Er zitten 18 kinderen in de turnzaal. Er gaan 11 kinderen naar de speelplaats. Hoeveel kinderen blijven in de turnzaal?',equation:'18 − 11',answer:7,prefix:'Er blijven',suffix:'kinderen in de turnzaal.',steps:['Wat weten we? Er zijn 18 kinderen. Er gaan er 11 weg.','Splits 11 in 10 en 1.','Neem eerst 10 weg: 18 − 10 = 8.','Neem nog 1 weg: 8 − 1 = 7.'],work:['18 − 11','11 = 10 + 1','18 − 10 = 8','8 − 1 = 7']}];
   function shuffled(items){const out=[...items];for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;}
+  function plainSubtractions(random=false){
+    const items=sums.filter(e=>category(e)==='minus-plain');
+    const ordered=random?shuffled(items):items;
+    const te=ordered.find(e=>e.a<20&&e.b>10);
+    const twenty=ordered.find(e=>e.a===20&&e.b>10);
+    return [te,twenty,...ordered.filter(e=>e!==te&&e!==twenty)];
+  }
   function mixedSums(random=false){
     const kinds=['plus-bridge','minus-bridge','plus-plain','minus-plain'];
-    const groups=kinds.map(kind=>{const items=sums.filter(e=>category(e)===kind);return random?shuffled(items):items;});
+    const groups=kinds.map(kind=>{if(kind==='minus-plain')return plainSubtractions(random);const items=sums.filter(e=>category(e)===kind);return random?shuffled(items):items;});
     const out=[];for(let i=0;i<Math.max(...groups.map(group=>group.length));i++)groups.forEach(group=>{if(group[i])out.push(group[i]);});return out;
   }
   let mode='sums',filter='mixed',list=mixedSums(),index=0,step=0,reveal=false,showSteps=false,custom=null;
@@ -47,11 +54,11 @@
   }
   let color='#243b45',erase=false,pointer=null,path=null,versions=[];
   function fresh(){step=0;reveal=false;ink.replaceChildren();versions=[];draw();}
-  function selectList(){custom=null;list=mode==='sums'?(filter==='mixed'?mixedSums():sums.filter(e=>category(e)===filter)):mode==='missing'?[...missing]:[...stories];index=0;fresh();}
+  function selectList(){custom=null;list=mode==='sums'?(filter==='mixed'?mixedSums():filter==='minus-plain'?plainSubtractions():sums.filter(e=>category(e)===filter)):mode==='missing'?[...missing]:[...stories];index=0;fresh();}
   function setOverview(open){$('overview').hidden=!open;$('exercise-view').hidden=open;$('overview-toggle').setAttribute('aria-pressed',String(open));document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(!open&&b.dataset.mode===mode)));}
   $('overview-toggle').onclick=()=>setOverview($('overview').hidden);
   document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{setOverview(false);mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));selectList();});$('kind').onchange=()=>{filter=$('kind').value;selectList();};
-  function next(d){custom=null;index=(index+d+list.length)%list.length;fresh();}$('previous').onclick=()=>next(-1);$('next').onclick=()=>next(1);$('shuffle').onclick=()=>{custom=null;list=mode==='sums'&&filter==='mixed'?mixedSums(true):shuffled(list);index=0;fresh();};$('reset').onclick=fresh;
+  function next(d){custom=null;index=(index+d+list.length)%list.length;fresh();}$('previous').onclick=()=>next(-1);$('next').onclick=()=>next(1);$('shuffle').onclick=()=>{custom=null;list=mode==='sums'&&filter==='mixed'?mixedSums(true):mode==='sums'&&filter==='minus-plain'?plainSubtractions(true):shuffled(list);index=0;fresh();};$('reset').onclick=fresh;
   $('toggle-steps').onclick=()=>{showSteps=!showSteps;draw();};$('answer').onclick=()=>{reveal=!reveal;draw();};
   $('custom-form').onsubmit=e=>{e.preventDefault();const exercise=sum(Number($('custom-a').value),$('custom-op').value,Number($('custom-b').value));if(!Number.isInteger(exercise.a)||!Number.isInteger(exercise.b)||exercise.a<0||exercise.b<0||exercise.a>20||exercise.b>20||result(exercise)<0||result(exercise)>20){$('custom-error').textContent='Kies een bewerking met getallen en een uitkomst van 0 tot 20.';return;}$('custom-error').textContent='';custom=exercise;$('custom').open=false;fresh();};
   function selectPen(){document.querySelectorAll('[data-color]').forEach(b=>b.setAttribute('aria-pressed',String(!erase&&color===b.dataset.color)));$('eraser').setAttribute('aria-pressed',String(erase));}document.querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{color=b.dataset.color;erase=false;selectPen();});$('eraser').onclick=()=>{erase=!erase;selectPen();};
