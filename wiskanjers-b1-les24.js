@@ -30,7 +30,7 @@
         const inverse=e.hole==='r'?`${e.a} ${e.op} ${e.b} = ${r}`:e.hole==='a'?(e.op==='+'?`${r} − ${e.b} = ${e.a}`:`${r} + ${e.b} = ${e.a}`):(e.op==='+'?`${r} − ${e.a} = ${e.b}`:`${e.a} − ${r} = ${e.b}`);
         instructions=['Welke plaats is leeg? Zoek het ontbrekende getal met de omgekeerde bewerking.',inverse];if(step>=2)text(500,300,inverse,45,'#258446');line(130,325,870,325);line(130,430,870,430);
       }else{
-        const p=plan(e);instructions=p.steps;text(240,100,e.a,68);text(365,100,e.op,62);text(500,100,e.b,68);text(655,100,'=',62);if(reveal)text(805,100,r,68,'#258446');else line(740,115,870,115);
+        const p=plan(e);instructions=p.steps;line(130,350,870,350);line(130,445,870,445);text(240,100,e.a,68);text(365,100,e.op,62);text(500,100,e.b,68);text(655,100,'=',62);if(reveal)text(805,100,r,68,'#258446');else line(740,115,870,115);
         if(p.first!==undefined){if(step>=1){line(495,127,420,195,'#558598',3);line(505,127,580,195,'#558598',3);}if(step>=2){text(420,240,p.first,52);text(580,240,p.second,52);}if(step>=3){if(p.bridge){guides.append(node('ellipse',{cx:325,cy:148,rx:155,ry:66,transform:'rotate(36 325 148)',fill:'none',stroke:'#258446','stroke-width':5}));text(170,255,'10',43,'#258446');}text(500,335,`${e.a} ${e.op} ${p.first} = ${p.mid}`,44,p.bridge?'#258446':'#243b45');}if(step>=4)text(500,425,`${p.mid} ${e.op} ${p.second} = ${r}`,44);}
         else if(step>=2)text(500,300,instructions[1],48,'#258446');
       }
