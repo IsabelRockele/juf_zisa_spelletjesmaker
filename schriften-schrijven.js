@@ -69,6 +69,7 @@
   paper.addEventListener('pointerup', finish); paper.addEventListener('pointercancel', finish); paper.addEventListener('lostpointercapture', finish);
   $('ink-undo').disabled = true;
   $('ink-undo').addEventListener('click', () => { if (versions.length) ink.innerHTML = versions.pop(); $('ink-undo').disabled = !versions.length; });
+  $('restart').addEventListener('click', () => $('ink-clear').click());
   $('ink-clear').addEventListener('click', () => { if (ink.children.length) { remember(); ink.replaceChildren(); } });
   $('schema').addEventListener('change', guides);
   guides();

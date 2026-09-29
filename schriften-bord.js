@@ -40,9 +40,10 @@
     // Grouping only changes how a color can be picked up, never its position.
     const groups = [list];
     for (const group of groups) {
-    for (let start = 0; start < group.length; start += 10) {
+    const perColumn = element.id === 'removed' ? Math.max(1, group.length) : 10;
+    for (let start = 0; start < group.length; start += perColumn) {
       const column = document.createElement('div'); column.className = 'book-column';
-      for (const color of group.slice(start, start + 10)) { const book = document.createElement('div'); book.className = 'book ' + color; book.dataset.color = color; column.appendChild(book); }
+      for (const color of group.slice(start, start + perColumn)) { const book = document.createElement('div'); book.className = 'book ' + color; book.dataset.color = color; column.appendChild(book); }
       fragment.appendChild(column);
     }
     }
