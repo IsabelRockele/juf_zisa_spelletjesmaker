@@ -23,7 +23,7 @@
     if(e.op==='−'&&e.b>10)return {steps:['Splits het tweede getal in een tiental en eenheden.','Trek eerst het tiental af. Schrijf de tussenstap.','Trek daarna de eenheden af.','Vul je antwoord in en controleer.']};
     return {steps:['Kijk naar het bewerkingsteken: komt er iets bij of gaat er iets af?','Reken met de tientallen en de eenheden.','Schrijf een tussenstap als dat helpt.','Vul je antwoord in en controleer.']};
   }
-  function draw(){guides.replaceChildren();const e=current();let instructions=[];
+  function draw(){paper.setAttribute('viewBox',mode==='sums'?'0 0 1200 480':'0 0 1000 480');guides.replaceChildren();const e=current();let instructions=[];
     if(mode==='stories'){
       $('story-question').hidden=false;$('story-question').textContent=e.text;instructions=['Lees het verhaal. Wat weet je al en wat moet je zoeken?','Welke getallen heb je nodig? Kies de passende bewerking(en).','Reken uit. Noteer tussenstappen als dat helpt.','Vul de antwoordzin in en lees ze na.'];
       text(35,38,'Bewerkingen',25,'#60746b','start');line(35,135,965,135);line(35,245,965,245);text(35,300,'Antwoordzin',25,'#60746b','start');text(35,385,e.prefix,29,'#243b45','start');line(225,400,355,400);text(380,385,e.suffix,29,'#243b45','start');
@@ -34,7 +34,7 @@
         const values={a:e.a,b:e.b,r};const tokens=e.reverse?['r','=','a',e.op,'b']:['a',e.op,'b','=','r'];tokens.forEach((key,i)=>{const x=180+i*160;if(key===e.hole&&!reveal)line(x-55,128,x+55,128);else text(x,115,values[key]??key,65,key===e.hole?'#258446':'#243b45');});
         instructions=['Welke plaats is leeg? Wat vertellen de andere getallen je?','Welke bewerking helpt je het ontbrekende getal te vinden? Denk aan de omgekeerde bewerking.','Noteer je berekening op de schrijflijnen.','Vul je getal in en controleer of beide kanten van het gelijkteken evenveel zijn.'];line(130,325,870,325);line(130,430,870,430);
       }else{
-        const p=plan(e);instructions=p.steps;line(130,350,870,350);line(130,445,870,445);text(240,100,e.a,68);text(365,100,e.op,62);text(500,100,e.b,68);text(655,100,'=',62);if(reveal)text(805,100,r,68,'#258446');else line(740,115,870,115);
+        const p=plan(e);instructions=p.steps;line(650,205,1170,205);line(650,340,1170,340);text(240,100,e.a,68);text(365,100,e.op,62);text(500,100,e.b,68);text(655,100,'=',62);if(reveal)text(805,100,r,68,'#258446');else line(740,115,870,115);
       }
     }
     $('progress').textContent=custom?'Eigen bewerking':`Oefening ${index+1} van ${list.length}`;$('step-instruction').replaceChildren();instructions.forEach(instruction=>{const li=document.createElement('li');li.textContent=instruction;$('step-instruction').append(li);});$('answer').textContent=reveal?'Verberg antwoord':'Toon antwoord';$('kind').hidden=mode!=='sums';$('custom').hidden=mode!=='sums';$('shuffle').hidden=mode==='stories';$('toggle-steps').setAttribute('aria-pressed',String(showSteps));$('toggle-steps').textContent=showSteps?'Stappenplan verbergen':'Stappenplan tonen';document.querySelector('.lesson-work').classList.toggle('show-steps',showSteps);
