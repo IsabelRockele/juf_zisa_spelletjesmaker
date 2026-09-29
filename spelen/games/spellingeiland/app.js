@@ -77,7 +77,7 @@
 
   function loadTask(){
     clearAdvance();heard=false;repairCells=null;fixedCells=[];editAt=null;
-    item=queue[index];exercise=item.retrySpec||E.makeExercise(item,settings.mode,index,D.pairs.filter(p=>p.words.every(w=>!queue.some((q,i)=>i!==index&&E.normalize(q.word.word)===E.normalize(w))&&!queue.slice(0,index).some(q=>q.usedWords?.includes(w)))),Math.random,recentWords);item.usedWords=exercise.type==='sentences'?exercise.pair.words:[item.word.word];rememberWords(item.usedWords);attempts=0;assisted=false;input='';slots=Array(exercise.type==='sentences'?2:exercise.tokens?.length||0).fill(null);selected=null;feedback='';feedbackType='';stage='question';renderTask();
+    item=queue[index];exercise=item.retrySpec||E.makeExercise(item,settings.mode,index,D.pairs.filter(p=>p.cats.includes(item.cat.id)&&p.words.every(w=>!queue.some((q,i)=>i!==index&&E.normalize(q.word.word)===E.normalize(w))&&!queue.slice(0,index).some(q=>q.usedWords?.includes(w)))),Math.random,recentWords);item.usedWords=exercise.type==='sentences'?exercise.pair.words:[item.word.word];rememberWords(exercise.type==='sentences'?[...item.usedWords,'zin:'+exercise.pair.words.slice().sort().join('|')]:item.usedWords);attempts=0;assisted=false;input='';slots=Array(exercise.type==='sentences'?2:exercise.tokens?.length||0).fill(null);selected=null;feedback='';feedbackType='';stage='question';renderTask();
     const kind=exercise.type==='gap'?'gap':exercise.type==='choice'&&item.cat.transform==='article'?'article':exercise.type;
     if(!seen.has(kind)){seen.add(kind);announce(taskInstructions());}
   }
@@ -123,6 +123,7 @@
   function wireEditor(){app.querySelectorAll('[data-edit]').forEach(button=>button.onclick=()=>{if(stage!=='question')return;editAt=button.dataset.edit==='end'?null:Number(button.dataset.edit);refreshEditor();});}
   function refreshEditor(){const box=$('#answer');if(!box)return;box.outerHTML=answerMarkup();wireEditor();}
   function renderTask(){
+    cancelDrag();
     view('play');document.body.dataset.exercise=stage==='model'?'model':exercise.type;document.body.classList.toggle('answer-success',stage==='correct');
     const c=item.cat,w=item.word,isSentence=exercise.type==='sentences';
     const showPicture=settings.mode==='workshop'&&!isSentence&&!exercise.repeatSentence&&w.image;
@@ -181,10 +182,9 @@
     }else{stage='model';feedback='Kijk goed naar het woord. Tik dan op Nu jij!';feedbackType='help';renderTask();speak('Zisa helpt je. '+(exercise.type==='sentences'?exercise.pair.words.join(' en '):exercise.type==='gap'?item.word.word:exercise.answer)+'. Kijk goed. Tik dan op Nu jij.');}
   }
   function retry(){
-    const wasSentence=exercise.type==='sentences';
-    exercise={type:'type',answer:wasSentence?exercise.pair.words.join(' '):exercise.type==='gap'?item.word.word:exercise.answer,repeatSentence:wasSentence||exercise.repeatSentence};
-    stage='question';attempts=0;input='';slots=[];selected=null;repairCells=null;editAt=null;heard=false;feedback='Nu mag jij! Luister en typ het woord.';feedbackType='help';renderTask();
+    stage='question';attempts=0;input='';slots=exercise.tokens?Array(exercise.type==='sentences'?exercise.pair.sentences.length:exercise.tokens.length).fill(null):[];selected=null;repairCells=null;fixedCells=[];editAt=null;heard=false;feedback='Probeer opnieuw. Je kunt altijd een letter terugleggen.';feedbackType='help';renderTask();
   }
+
   function next(){
     if(stage!=='correct')return;clearAdvance();cancelSpeech();document.body.classList.remove('answer-success');
     if(assisted&&settings.mode!=='workshop'){const retryItem=exercise.type==='sentences'||exercise.repeatSentence?{...item,retrySpec:{type:'type',answer:exercise.type==='sentences'?exercise.pair.words.join(' '):exercise.answer,repeatSentence:true}}:item;E.scheduleRepeat(queue,index,retryItem);}
@@ -203,22 +203,27 @@
     else if(event.key===' '&&!document.activeElement?.matches('button')){event.preventDefault();typeKey('space');}
     else if(event.key==='Enter'&&!document.activeElement?.matches('button')){event.preventDefault();check();}
   });
-  // Pointer events support real dragging with a finger on Safari, plus the tap alternative.
+  function cancelDrag(){if(!drag)return;const old=drag;drag=null;old.ghost?.remove();try{if(old.button.hasPointerCapture(old.id))old.button.releasePointerCapture(old.id);}catch{}}
   app.addEventListener('pointerdown',event=>{
-    const button=event.target.closest('[data-token]');if(!button||button.disabled||stage!=='question')return;
-    drag={token:Number(button.dataset.token),x:event.clientX,y:event.clientY,button,id:event.pointerId,ghost:null};button.setPointerCapture(event.pointerId);
+    if(drag||event.isPrimary===false||event.button>0||stage!=='question')return;
+    const button=event.target.closest('[data-token],[data-slot]');if(!button||button.disabled)return;
+    const from=button.hasAttribute('data-slot')?Number(button.dataset.slot):null,token=from===null?Number(button.dataset.token):slots[from];if(token===null)return;
+    drag={token,from,x:event.clientX,y:event.clientY,button,id:event.pointerId,ghost:null};try{button.setPointerCapture(event.pointerId);}catch{}
   });
   app.addEventListener('pointermove',event=>{
     if(!drag||event.pointerId!==drag.id)return;
-    if(!drag.ghost&&Math.hypot(event.clientX-drag.x,event.clientY-drag.y)>7){drag.ghost=drag.button.cloneNode(true);drag.ghost.classList.add('drag-ghost');drag.ghost.removeAttribute('data-token');document.body.append(drag.ghost);}
+    if(!drag.ghost&&Math.hypot(event.clientX-drag.x,event.clientY-drag.y)>7){drag.ghost=drag.button.cloneNode(true);drag.ghost.classList.add('drag-ghost');drag.ghost.removeAttribute('data-token');drag.ghost.style.pointerEvents='none';document.body.append(drag.ghost);}
     if(drag.ghost){drag.ghost.style.left=event.clientX+'px';drag.ghost.style.top=event.clientY+'px';event.preventDefault();}
   });
   app.addEventListener('pointerup',event=>{
-    if(!drag||event.pointerId!==drag.id)return;const current=drag;drag=null;
-    if(current.ghost){current.ghost.remove();suppressClick=Date.now()+350;const slot=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-slot]');if(slot)placeToken(current.token,Number(slot.dataset.slot));}
+    if(!drag||event.pointerId!==drag.id)return;const current=drag,moved=!!current.ghost;cancelDrag();
+    if(!moved)return;suppressClick=Date.now()+350;if(stage!=='question')return;
+    const slot=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-slot]');
+    if(slot){const target=Number(slot.dataset.slot);if(current.from!==null){const displaced=slots[target];slots[current.from]=displaced;slots[target]=current.token;selected=null;renderTask();}else placeToken(current.token,target);}
+    else if(current.from!==null){slots[current.from]=null;selected=null;renderTask();}
   });
-  app.addEventListener('pointercancel',()=>{drag?.ghost?.remove();drag=null;});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelSpeech();clearAdvance();}else if(stage==='correct')autoAdvance();});
+  app.addEventListener('pointercancel',cancelDrag);app.addEventListener('lostpointercapture',cancelDrag);window.addEventListener('blur',cancelDrag);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelDrag();cancelSpeech();clearAdvance();}else if(stage==='correct')autoAdvance();});
   window.addEventListener('zisa:navigation-open',clearAdvance);
   window.addEventListener('zisa:navigation-close',()=>{if(stage==='correct')autoAdvance();});
   window.addEventListener('pagehide',()=>{cancelSpeech();clearAdvance();});

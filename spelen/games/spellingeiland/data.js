@@ -2500,61 +2500,271 @@ window.SpellingData = {
     }
   ],
   "pairs": [
-    {
-      "cats": [
-        "kort",
-        "lang"
-      ],
-      "words": [
-        "man",
-        "maan"
-      ],
-      "sentences": [
-        "De … draagt een jas.",
-        "De … schijnt aan de hemel."
-      ]
-    },
-    {
-      "cats": [
-        "kort",
-        "lang"
-      ],
-      "words": [
-        "ram",
-        "raam"
-      ],
-      "sentences": [
-        "De … is een mannelijk schaap.",
-        "Ik kijk door het … naar buiten."
-      ]
-    },
-    {
-      "cats": [
-        "kort",
-        "lang"
-      ],
-      "words": [
-        "bom",
-        "boom"
-      ],
-      "sentences": [
-        "De … ontploft met een knal.",
-        "Aan de … groeien bladeren."
-      ]
-    },
-    {
-      "cats": [
-        "kort",
-        "lang"
-      ],
-      "words": [
-        "rok",
-        "rook"
-      ],
-      "sentences": [
-        "Ik draag een … met stippen.",
-        "Uit de schoorsteen komt … ."
-      ]
-    }
-  ]
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "man",
+      "maan"
+    ],
+    "sentences": [
+      "De … draagt een jas.",
+      "De … schijnt aan de hemel."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "ram",
+      "raam"
+    ],
+    "sentences": [
+      "De … is een mannelijk schaap.",
+      "Ik kijk door het … naar buiten."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "bom",
+      "boom"
+    ],
+    "sentences": [
+      "De … ontploft met een knal.",
+      "Aan de … groeien bladeren."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "rok",
+      "rook"
+    ],
+    "sentences": [
+      "Ik draag een … met stippen.",
+      "Uit de schoorsteen komt … ."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "tak",
+      "taak"
+    ],
+    "sentences": [
+      "De vogel zit op een … .",
+      "Ik maak mijn … voor school."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "zak",
+      "zaak"
+    ],
+    "sentences": [
+      "Ik stop de knikkers in een … .",
+      "In die … verkoopt de bakker brood."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "pen",
+      "peen"
+    ],
+    "sentences": [
+      "Ik schrijf met een … .",
+      "Het konijn knabbelt aan een … ."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "bek",
+      "beek"
+    ],
+    "sentences": [
+      "De vogel houdt een worm in zijn … .",
+      "In de … stroomt helder water."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "bos",
+      "boos"
+    ],
+    "sentences": [
+      "We wandelen tussen de bomen in het … .",
+      "Hij is … omdat zijn fiets stuk is."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "pot",
+      "poot"
+    ],
+    "sentences": [
+      "De soep zit in een grote … .",
+      "De hond geeft mij een … ."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "bot",
+      "boot"
+    ],
+    "sentences": [
+      "De hond knaagt op een … .",
+      "De … vaart op het water."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "kop",
+      "koop"
+    ],
+    "sentences": [
+      "Er zit thee in mijn … .",
+      "Ik … een brood bij de bakker."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "bal",
+      "baal"
+    ],
+    "sentences": [
+      "Ik schop de … in het doel.",
+      "In de stal ligt een … stro."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "mat",
+      "maat"
+    ],
+    "sentences": [
+      "Veeg je voeten op de … .",
+      "Welke … schoenen draag jij?"
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "kas",
+      "kaas"
+    ],
+    "sentences": [
+      "De tomaten groeien in een glazen … .",
+      "Ik leg een plak … op mijn brood."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "gas",
+      "gaas"
+    ],
+    "sentences": [
+      "Het fornuis werkt op … .",
+      "Rond het kippenhok zit … ."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "vel",
+      "veel"
+    ],
+    "sentences": [
+      "Ik teken op een … papier.",
+      "In de doos zitten heel … blokken."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "wet",
+      "weet"
+    ],
+    "sentences": [
+      "Je moet je aan de … houden.",
+      "Ik … het antwoord op de vraag."
+    ]
+  },
+  {
+    "cats": [
+      "kort",
+      "lang"
+    ],
+    "words": [
+      "zon",
+      "zoon"
+    ],
+    "sentences": [
+      "De … maakt de dag warm en licht.",
+      "Hun … is een jongen van zeven jaar."
+    ]
+  }
+]
 };

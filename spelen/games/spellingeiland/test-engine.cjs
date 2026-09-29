@@ -39,8 +39,13 @@ assert.equal(E.makeQueue([tiny],1,()=>.37,['kat','vis','zon'])[0].word.word,'kat
 assert.equal(new Set(small.map(i=>i.word.word)).size,3);
 const balanced=E.makeQueue([large,tiny],20,()=>.37,history);
 assert.equal(balanced.filter(i=>i.cat.id==='tiny').length,3);assert.equal(new Set(balanced.map(i=>i.word.word)).size,20);
-const pairs=[{words:['man','maan']},{words:['bom','boom']}];
-assert.deepEqual(E.makeExercise({cat:{id:'kort'},word:{word:'man'}},'workshop',0,pairs,()=>.37,['man','maan']).pair.words,['bom','boom']);
+const pairs=D.pairs;
+const sentenceHistory=[];
+for(let n=0;n<pairs.length;n++){
+ const ex=E.makeExercise({cat:{id:'kort'},word:{word:'man'}},'workshop',0,pairs,()=>.37,sentenceHistory);
+ const key='zin:'+ex.pair.words.slice().sort().join('|');assert(!sentenceHistory.includes(key));sentenceHistory.push(key);
+ for(let i=0;i<2;i++){const original=pairs.find(p=>p.words.includes(ex.pair.words[i]));assert.equal(ex.pair.sentences[i],original.sentences[original.words.indexOf(ex.pair.words[i])]);}
+}
 console.log('Geslaagd: nieuwe woorden eerst, oudste woorden bij kleine voorraad, evenwichtige mix en gevarieerde zinnen.');
 
 for(const word of ['maan','mama','kat']){const ex=E.makeExercise({cat:{id:'test'},word:{word}},'workshop',1,[],()=>.99999);assert.notEqual(ex.tokens.join(''),word);}

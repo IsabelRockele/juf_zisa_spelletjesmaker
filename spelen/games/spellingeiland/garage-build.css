@@ -16,3 +16,7 @@
 #race-podium .player-place strong{font-size:22px;color:#075c49}
 @keyframes player-glow{50%{box-shadow:0 0 27px 11px #ffd75cd9}}
 @media(prefers-reduced-motion:reduce){#race-podium .finish-places .player-place{animation:none}}
+
+#race-track-choice{position:absolute;inset:18% 8% auto;background:#fff8e9;border:3px solid #d5b56a;border-radius:24px;padding:20px;z-index:12;text-align:center}#race-track-choice[hidden]{display:none}#race-track-choice>div{display:flex;gap:14px}#race-track-choice button{flex:1;min-width:0;background:#fff0cb;border:2px solid #c8a354;border-radius:16px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:8px}#race-track-choice img{width:100%;height:120px;object-fit:cover;border-radius:10px}#race-track-choice strong{font-size:23px}#race-track-choice img.track-obstacle{height:65px;object-fit:contain}@media(max-width:600px){#race-track-choice{inset:17% 3% auto;padding:12px}#race-track-choice>div{gap:6px}#race-track-choice img{height:85px}#race-track-choice strong{font-size:17px}#race-track-choice h2{font-size:24px}}
+
+#race-switch-track{position:absolute;right:18px;top:150px;z-index:10;background:#fff6dc;color:#244b4f;min-height:44px;border:2px solid #cfaf69;border-radius:12px;padding:8px 14px}.real-workshop:not(.chase-race) #race-switch-track{display:none}

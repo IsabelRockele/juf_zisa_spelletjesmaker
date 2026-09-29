@@ -80,8 +80,9 @@
     if (cat.transform) return {type:'shuffle',answer,tokens:jumble([...answer],random)};
     if ((cat.id === 'kort' || cat.id === 'lang') && index % 3 === 0 && pairs.length) {
       const history=new Map(recent.map((word,i)=>[normalize(word),i+1]));
-      const score=p=>Math.max(...p.words.map(w=>history.get(normalize(w))||0));
-      const pair=shuffle(pairs,random).sort((a,b)=>score(a)-score(b))[0];
+      const score=p=>history.get('zin:'+p.words.slice().sort().join('|'))||0;
+      const original=shuffle(pairs,random).sort((a,b)=>score(a)-score(b))[0];
+      const order=shuffle([0,1],random),pair={...original,words:order.map(i=>original.words[i]),sentences:order.map(i=>original.sentences[i])};
       return {type:'sentences',answer:pair.words.join('|'),pair,tokens:shuffle(pair.words,random)};
     }
     if (cat.chunk && index % 2 === 0) return {type:'choice',answer,options:shuffle(spellingChoices(cat,word),random)};

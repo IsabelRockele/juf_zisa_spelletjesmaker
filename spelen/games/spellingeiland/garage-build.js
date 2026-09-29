@@ -53,13 +53,13 @@
  for(const m of models)if(!m.parts)m.parts=[{name:'het onderstel',region:m.chassis},...parts.slice(1,5),...m.regions.map((region,i)=>({name:m.sections[i],region,shell:true})),m.details[8],m.details[0],m.details[1],m.details[2],m.details[3],m.details[4],m.details[5],m.details[6],m.details[7],m.details[9],{name:'de vier velgen',rims:true},{name:'het racenummer',number:true}];
  const colors=[['Oceaanblauw',0],['Frambozenroze',125],['Appelgroen',280]];
  window.SpellingWorkshop=class extends Base {
-  constructor(opts){super(opts);this.buildReady=true;this.installed=new Set();this.rewardParts=[];this.colorChosen=false;this.number=7;this.buildPreview=false;
+  constructor(opts){super(opts);this.buildReady=true;this.installed=new Set();this.rewardParts=[];this.colorChosen=false;this.color=null;this.number=7;this.buildPreview=false;
    this.root.classList.add('parts-workshop');
    const panel=document.createElement('section');panel.id='build-color';panel.hidden=true;
-   panel.innerHTML='<h2>Welke kleur krijgt jouw auto?</h2><div>'+colors.map(([name,value])=>'<button data-paint="'+value+'" aria-pressed="'+(value===0)+'">'+name+'</button>').join('')+'</div><button class="primary" id="keep-paint">Deze kleur!</button>';
+   panel.innerHTML='<h2>Welke kleur krijgt jouw auto?</h2><div>'+colors.map(([name,value])=>'<button data-paint="'+value+'" aria-pressed="'+false+'">'+name+'</button>').join('')+'</div><button class="primary" id="keep-paint" disabled>Deze kleur!</button>';
    this.root.append(panel);this.paintPanel=panel;
-   panel.querySelectorAll('[data-paint]').forEach(b=>b.onclick=()=>{this.color=Number(b.dataset.paint);panel.querySelectorAll('[data-paint]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn===b)));});
-   panel.querySelector('#keep-paint').onclick=()=>{if(this.phase!=='paint-choice')return;this.colorChosen=true;this.nextBuild();};
+   panel.querySelectorAll('[data-paint]').forEach(b=>b.onclick=()=>{this.color=Number(b.dataset.paint);panel.querySelector('#keep-paint').disabled=false;panel.querySelectorAll('[data-paint]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn===b)));});
+   panel.querySelector('#keep-paint').onclick=()=>{if(this.phase!=='paint-choice'||this.color===null)return;this.colorChosen=true;this.nextBuild();};
    const reward=document.createElement('section');reward.id='build-reward';reward.setAttribute('aria-live','polite');reward.innerHTML='<span>Verdiend!</span><strong></strong><canvas width="320" height="180" aria-label="Jouw nieuwe onderdeel"></canvas>';this.root.append(reward);this.rewardPanel=reward;
    this.vehicle=1;this.built=[];this.phase='choose';this.renderControls();
    this.drawChoices();
@@ -68,7 +68,7 @@
   get buildModel(){return models[this.vehicle]||models[1];}
   batch(n){const start=Math.floor((n-1)*parts.length/this.count),end=Math.floor(n*parts.length/this.count);return Array.from({length:end-start},(_,i)=>start+i);}
   challenge(){if(this.phase!=='earn')return;this.phase='question';this.onChallenge();}
-  act(){if(!this.buildReady)return super.act();if(this.phase==='earn')this.challenge();else if(this.phase==='ready')this.startRace();else if(this.phase==='podium'){this.phase='complete';this.onFinish();}}
+  act(){if(!this.buildReady)return super.act();if(this.phase==='earn')this.challenge();else if(this.phase==='ready')this.pickTrack();else if(this.phase==='podium'){this.phase='complete';this.onFinish();}}
   solve(word){if(this.phase!=='question'||this.done>=this.count)return;this.word=word;this.done++;this.rewardParts=this.batch(this.done);this.rewardParts.forEach(i=>this.installed.add(i));this.rewardTime=0;this.phase='reward';this.renderControls();this.drawReward();}
   nextBuild(){this.rewardParts=[];this.phase=this.done>=this.count?'ready':'earn';this.renderControls();if(this.phase==='earn'&&!this.buildPreview)this.challenge();}
   finishReward(){if(this.phase!=='reward')return;if(!this.colorChosen&&this.done>=Math.ceil(this.count/2)){this.phase='paint-choice';this.renderControls();}else this.nextBuild();}
@@ -98,7 +98,7 @@
    if(p.number){c.save();c.fillStyle='#fff8e5';c.beginPath();c.arc(...model.badge,12,0,Math.PI*2);c.fill();c.fillStyle='#244c51';c.textAlign='center';c.textBaseline='middle';c.font='bold 17px sans-serif';c.fillText(String(this.number),model.badge[0],model.badge[1]+1);c.restore();return;}
    c.save();this.sourceTransform(c);if(p.path)c.clip(new Path2D(p.path));else{c.beginPath();c.rect(...p.region);c.clip();}
    if(p.shell||(this.vehicle===1&&p===details[0])){const mask=new Path2D();mask.rect(...this.vehicleGeometry(this.vehicle).r);for(const d of details){if(this.vehicle===1&&p.shell&&d===details[8])continue;if(!p.shell&&d!==details[8])continue;mask.addPath(new Path2D(d.path));}c.clip(mask,'evenodd');}
-   if(this.color&&(p.shell||[details[0],details[4],details[5],details[9]].includes(p)))c.filter='hue-rotate('+this.color+'deg)';c.drawImage(im,0,0);c.restore();
+   c.drawImage(this.carPaint(im,this.color===null?'primer':this.color,this.vehicle,false),0,0);c.restore();
   }
   drawAssembly(c){
    // Far wheels go behind the body; near wheels and their arches stay in front.
@@ -119,7 +119,7 @@
   document.body.dataset.view='world';const demo=new window.SpellingWorkshop({count:[10,15,20].includes(Number(query.get('aantal')))?Number(query.get('aantal')):20,onChallenge:()=>demo.solve('proefwoord'),onFinish:()=>location.reload(),onStop:()=>location.href='?spel=workshop'});demo.buildPreview=true;
   const panel=document.createElement('aside');panel.className='build-demo';panel.innerHTML='<span>Bouwproef · zonder oefeningen</span><p>Tik onderaan om een onderdeel te verdienen.</p><button id="demo-reset">Opnieuw bouwen</button><button id="demo-race">Meteen de race testen</button>';demo.root.append(panel);
   panel.querySelector('#demo-reset').onclick=()=>location.reload();
-  panel.querySelector('#demo-race').onclick=()=>{if(demo.phase==='choose')demo.choose([0,1,2].includes(Number(query.get('auto')))?Number(query.get('auto')):1);demo.installed=new Set(parts.map((_,i)=>i));demo.done=demo.count;demo.rewardParts=[];demo.colorChosen=true;demo.startRace();panel.hidden=true;};
+  panel.querySelector('#demo-race').onclick=()=>{if(demo.phase==='choose')demo.choose([0,1,2].includes(Number(query.get('auto')))?Number(query.get('auto')):1);demo.installed=new Set(parts.map((_,i)=>i));demo.done=demo.count;demo.rewardParts=[];demo.colorChosen=true;demo.pickTrack();panel.hidden=true;};
   demo.renderControls();if(query.get('proef')==='race')panel.querySelector('#demo-race').click();
  });
 })();
