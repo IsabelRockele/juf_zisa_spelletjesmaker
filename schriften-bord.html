@@ -9,7 +9,7 @@
   <script src="schriften-weergave.js?v=20260928-8" defer></script>
   <script src="schriften-strook.js?v=20260928-19" defer></script>
   <script src="schriften-schrijven.js?v=20260928-20" defer></script>
-</head>
+<link rel="stylesheet" href="schriften-verhalen.css?v=1"><script src="schriften-verhalen.js?v=1" defer></script></head>
 <body class="handling-wide">
   <header><a href="wiskanjers-2.html#blok-1">← Blok 1 · Lesoverzicht</a><h1>Les 19 · Even opfrissen – Eigenschappen van bewerkingen:<br>de omgekeerde bewerking bij optellen en aftrekken</h1><div class="view-controls"><button id="toggle-writing" aria-expanded="false" aria-controls="writing-panel">Schrijfvlak tonen</button><button id="fullscreen">Volledig scherm</button></div></header>
   <main>
@@ -18,7 +18,7 @@
       <form id="lesson-form"><label>Startaantal <input id="start" type="number" min="0" max="1000" value="13" required></label><button type="submit">Zet startaantal klaar</button><button type="button" id="build-start">Leg startaantal één voor één</button></form>
       <p id="error" role="alert"></p>
     </details>
-    <nav class="lesson-modes" aria-label="Voorstelling"><button id="mode-books" aria-pressed="true">Schriften</button><button id="mode-family" aria-pressed="false">Drie getallen</button></nav>
+    <nav class="lesson-modes" aria-label="Voorstelling"><button id="mode-books" aria-pressed="true">Schriften</button><button id="mode-family" aria-pressed="false">Drie getallen</button><button id="mode-stories" aria-pressed="false">Verhaaltjes</button></nav>
     </div>
     <div class="board-layout"><section class="handling" aria-label="Handelen met schriften">
     <div id="book-lesson">
@@ -87,6 +87,7 @@
       </svg>
       <p class="tip">Schrijf met je vinger, bordpen of muis. Je notities blijven staan als je verder handelt.</p>
     </section></div>
+    <section id="story-lesson" hidden><div class="story-controls"><button id="story-prev">←</button><strong id="story-counter"></strong><button id="story-next">→</button><button id="story-visual" aria-pressed="false">Toon voorwerpen</button></div><h2 id="story-text"></h2><div id="story-work"><section id="story-handling" hidden><div class="story-zones"><div><h3 id="story-home-label"></h3><div id="story-home" class="story-items" data-story-zone="home"></div></div><div><h3 id="story-side-label"></h3><div id="story-side" class="story-items" data-story-zone="side"></div></div></div><div class="story-controls"><button id="story-act"></button><button id="story-back"></button><button id="story-reset">Opnieuw</button></div><p class="tip">Sleep een voorwerp, of tik erop om het te verplaatsen.</p></section><section class="story-writing"><div class="story-controls"><button id="story-pen" aria-pressed="true">Pen</button><button id="story-gum" aria-pressed="false">Gum</button><button id="story-undo">↶ Pennenstreek</button><button id="story-clear">Wissen</button></div><svg id="story-paper" viewBox="0 0 700 380" aria-label="Schrijf de twee bewerkingen en de antwoordzin"><g fill="#526b71" font-size="24"><text x="25" y="40">Bewerkingen</text><text x="25" y="270">Antwoordzin</text></g><path d="M25 125H675 M25 225H675 M25 350H675" stroke="#bacbd0" stroke-width="2"/><g id="story-ink" fill="none" stroke="#243b45" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></g></svg><button id="story-answer">Toon antwoord</button><p id="story-result" role="status"></p></section></div></section>
     <p id="message" role="status"></p>
   </main>
 </body>
