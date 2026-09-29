@@ -8,6 +8,10 @@
   const home=document.querySelector('header a');
   home.textContent=grade===1?'← Bibi’s rekenhuis':'← Zisa’s rekeneiland';
   home.href=grade===1?'../start_leerjaar1.html#rekenen':'../eilanden-leerjaar2.html#rekenen';
+  if(new URLSearchParams(location.search).get('ontdek')==='1'){
+    home.textContent='← Terug naar Ontdek';
+    home.href='../../../ontdek/zisa-spelen.html';
+  }
   let config, exercises, index, stage, first, rest, answer, helped, error, records;
   let advanceTimer;
   const cancelAdvance = () => { clearTimeout(advanceTimer); advanceTimer=null; };
