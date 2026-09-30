@@ -287,9 +287,7 @@
     getAuth,
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
-    onAuthStateChanged,
-    setPersistence,
-    browserLocalPersistence
+    onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
 
   // Firebase configuratie voor zisa-collegas
@@ -305,8 +303,8 @@ const firebaseConfig = {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  // Zorg dat sessie bewaard blijft (collega's blijven ingelogd)
-  setPersistence(auth, browserLocalPersistence);
+  // getAuth bewaart de aanmelding duurzaam, net als auth-check.js.
+  // Wissel hier niet van opslag: andere open vensters delen dezelfde sessie.
 
   // Als al ingelogd → direct doorsturen naar gratis versie
   onAuthStateChanged(auth, (user) => {

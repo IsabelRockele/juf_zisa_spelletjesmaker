@@ -8,8 +8,6 @@ import {
   getAuth,
   onAuthStateChanged,
   signOut,
-  setPersistence,
-  browserLocalPersistence,
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword
@@ -28,7 +26,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-setPersistence(auth, browserLocalPersistence);
+// Behoud de standaard duurzame opslag van getAuth op alle gratis pagina's.
+// Opnieuw overschakelen naar localStorage kan andere open vensters uitloggen.
 
 // Verberg pagina-inhoud tot login-check klaar is (voorkomt flits van content)
 document.documentElement.style.visibility = 'hidden';
