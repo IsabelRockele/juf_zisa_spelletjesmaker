@@ -19,6 +19,13 @@ try{
   if(!token){auth=await createReadingAuth(readingConfig);await new Promise(resolve=>{const stop=auth.observe(()=>{stop();resolve();});});}
   const source=await(await request()).text();const blob=URL.createObjectURL(new Blob([source],{type:'application/javascript'}));
   await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=blob;script.onload=resolve;script.onerror=reject;document.body.append(script);});URL.revokeObjectURL(blob);
+  if(!token){
+    const accountLink=document.createElement('a');
+    accountLink.textContent='Mijn account';accountLink.className='library-btn reading-account';
+    accountLink.href=new URL('./mijn-account.html',import.meta.url).href+(new URLSearchParams(location.search).get('test')==='1'?'?test=1':'');
+    document.querySelector('.speech').replaceWith(accountLink);
+    document.body.classList.add('teacher-account');
+  }
   window.ZISA_ACCESS_MODE='full';const script=document.createElement('script');script.src='app.js?v=62';script.onload=()=>gate.remove();script.onerror=()=>{gate.textContent='De boeken konden niet worden geladen.';};document.body.append(script);
   // Recheck on return and periodically. Failure covers already-rendered content.
   const check=async()=>{try{await request();}catch(error){location.reload();}};
