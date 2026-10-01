@@ -77,6 +77,33 @@ async function refresh(){
   if(!data.invoices?.length)el('invoices').textContent='Na je eerste bevestigde betaling verschijnt hier je factuur.';
   message('Testomgeving: betalingen en facturen zijn geen echte aankopen.');
 }
+function clearFieldError(field){
+ field.removeAttribute('aria-invalid');field.removeAttribute('aria-describedby');
+ document.getElementById(field.id+'-error')?.remove();
+}
+function validatePurchase(){
+ const form=el('purchaseForm');let first;
+ const validGLN=value=>/^\d{13}$/.test(value)&&[...value].reduce((sum,digit,index)=>sum+Number(digit)*(index%2?3:1),0)%10===0;
+ for(const field of form.querySelectorAll('input,select')){
+  clearFieldError(field);let error='';const value=field.value.trim();
+  if(field.required&&(field.type==='checkbox'?!field.checked:!value))error=field.type==='checkbox'?'Vink dit aan om verder te gaan.':'Vul dit veld in.';
+  else if(!field.validity.valid)error=field.type==='email'?'Vul een geldig e-mailadres in.':field.id==='quantity'?'Vul een geldig aantal leerkrachten in.':'Controleer dit veld.';
+  if(el('peppolRequested').checked){
+   if(field.id==='peppolId'&&value&&!/^\d{4}:[A-Za-z0-9._-]+$/.test(value))error='Vul het volledige Peppol-ID in, bijvoorbeeld 0208: gevolgd door het ondernemingsnummer.';
+   if(field.id==='peppolId'&&value.startsWith('0088:')&&!validGLN(value.slice(5)))error='Na 0088: hoort een geldig GLN-nummer van 13 cijfers.';
+   if(field.id==='gln'&&value&&(!validGLN(value)||(el('peppolId').value.trim().startsWith('0088:')&&value!==el('peppolId').value.trim().slice(5))))error='Vul een geldig GLN-nummer van 13 cijfers in, gelijk aan het GLN in je Peppol-ID als je 0088: gebruikt.';
+  }
+  if(error){
+   const note=document.createElement('p');note.id=field.id+'-error';note.className='field-error';note.textContent=error;
+   field.setAttribute('aria-invalid','true');field.setAttribute('aria-describedby',note.id);
+   (field.type==='checkbox'?field.closest('label'):field).after(note);first ||= field;
+  }
+ }
+ if(first){first.focus({preventScroll:true});first.scrollIntoView({block:'center',behavior:'auto'});return false;}
+ return true;
+}
+el('purchaseForm').noValidate=true;
+el('purchaseForm').addEventListener('input',event=>{if(event.target.matches('input,select'))clearFieldError(event.target);});
 el('peppolRequested').onchange=()=>{const checked=el('peppolRequested').checked;el('billingEmailLabel').textContent=checked?'E-mailadres van de schooladministratie voor facturen (verplicht bij Peppol)':'E-mailadres voor facturen (leeg = je accountadres)';show('peppolFields',checked);for(const id of ['peppolId','organization','billingEmail'])el(id).required=checked;el('organization').required=checked||Number(el('quantity').value)>1;};
 if(!readingConfig.enabled){message('Deze koppeling wordt voorbereid. Er worden nog geen accounts of betalingen gestart. Je kunt het voorbeeld bekijken op de vorige pagina.');}
 else{
@@ -89,7 +116,7 @@ else{
   el('reset').onclick=()=>task(async()=>{if(!el('email').reportValidity()||!el('email').value)return;await auth.resetPassword(el('email').value);message('Als dit adres een account heeft, ontvang je een herstellink.');});
   el('verified').onclick=()=>task(refresh);el('resend').onclick=()=>task(async()=>{await auth.resendVerification();message('Een nieuwe bevestigingsmail is aangevraagd. De bezorging kan enkele minuten duren. Kijk ook in je spammap of ongewenste e-mail.');});el('logout').onclick=()=>task(async()=>{await auth.signOut();message('Meld je aan of maak een account.');});el('refresh').onclick=()=>task(refresh);
   el('acceptInvitation').onclick=()=>task(async()=>{await api('school-accept',{token:invitationToken()});sessionStorage.removeItem('zisa-reading-invitation');location.assign('bibliotheek.html?account=1'+(testQuery?'&test=1':''));});
-  el('purchaseForm').onsubmit=e=>{e.preventDefault();task(async()=>{const body={quantity:Number(el('quantity').value),consent:el('consent').checked,consentVersion:'reading-monthly-v1',peppolRequested:el('peppolRequested').checked};for(const key of ['name','address','organization','vatNumber','billingEmail','peppolId','gln','purchaseReference'])body[key]=el(key).value;const result=await(await api('checkout',body)).json();const url=new URL(result.checkoutUrl);if(url.protocol!=='https:'||!['www.mollie.com','checkout.mollie.com'].includes(url.hostname))throw new Error('Ongeldige betaallink.');location.assign(url.href);});};
+  el('purchaseForm').onsubmit=e=>{e.preventDefault();if(!validatePurchase())return;task(async()=>{const body={quantity:Number(el('quantity').value),consent:el('consent').checked,consentVersion:'reading-monthly-v1',peppolRequested:el('peppolRequested').checked};for(const key of ['name','address','organization','vatNumber','billingEmail','peppolId','gln','purchaseReference'])body[key]=el(key).value;const result=await(await api('checkout',body)).json();const url=new URL(result.checkoutUrl);if(url.protocol!=='https:'||!['www.mollie.com','checkout.mollie.com'].includes(url.hostname))throw new Error('Ongeldige betaallink.');location.assign(url.href);});};
   el('cancel').onclick=()=>{el('cancelText').textContent=`Wil je de automatische verlenging stoppen? Je behoudt je betaalde toegang${lastStatus.paidUntil?' tot '+date(lastStatus.paidUntil):''}.`;show('confirmCancel',true);};el('cancelNo').onclick=()=>show('confirmCancel',false);el('cancelYes').onclick=()=>task(async()=>{await api('cancel');show('confirmCancel',false);await refresh();});
   el('newLink').onclick=()=>task(async()=>{const result=await(await api('link')).json();const url=new URL('bibliotheek.html',location.href);if(testQuery)url.searchParams.set('test','1');url.hash=result.token;el('studentLink').value=url.href;el('qr').replaceChildren();if(window.QRCode)new window.QRCode(el('qr'),{text:url.href,width:220,height:220,colorDark:'#173f73',colorLight:'#ffffff'});show('share',true);message('Je nieuwe leerlinglink staat klaar. De vorige link is vervangen.');});
   el('copyLink').onclick=()=>task(async()=>{await navigator.clipboard.writeText(el('studentLink').value);message('Leeslink gekopieerd.');});
