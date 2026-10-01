@@ -21,6 +21,7 @@ import { getStorage } from "firebase-admin/storage";
 import type { Request, Response } from "express";
 import PDFDocument from "pdfkit";
 import { createHash, randomBytes } from "crypto";
+export { proInvoices } from './pro-invoices';
 import { createReadingFunctions } from './reading-http';
 
 // ------------------------------ Init -----------------------------------------
