@@ -2,7 +2,7 @@ const {createHash}=require('node:crypto');
 const worlds=new Set(['aqua','garden','space','forest']);
 class ApiError extends Error{constructor(status,message){super(message);this.status=status;}}
 const fail=(status,message)=>{throw new ApiError(status,message);};
-const ownerId=uid=>createHash('sha256').update('zisa-collegas:'+uid).digest('hex');
+const ownerId=(uid,project='zisa-collegas')=>createHash('sha256').update(project+':'+uid).digest('hex');
 const codeHash=code=>createHash('sha256').update(code).digest('hex');
 const validCode=code=>typeof code==='string'&&/^[a-f0-9]{24}$/.test(code);
 function requireSession(owner,code,now){

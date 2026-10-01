@@ -1,8 +1,14 @@
 import {initializeApp} from 'firebase/app';
 import {getAuth} from 'firebase/auth';
 
-// The same default Firebase app and persistence as login_collega.html.
-export const auth = getAuth(initializeApp({
+import {edition} from './edition';
+// Share the selected portal's default Firebase app and login persistence.
+export const auth = getAuth(initializeApp(edition !== 'gratis' ? {
+  apiKey:'AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw',
+  authDomain:'zisa-spelletjesmaker-pro.firebaseapp.com',projectId:'zisa-spelletjesmaker-pro',
+  storageBucket:'zisa-spelletjesmaker-pro.appspot.com',
+  messagingSenderId:'828063957776',appId:'1:828063957776:web:8d8686b478846fe980db95'
+} : {
   apiKey:'AIzaSyCYkB9CSNahs1UNv9pduNC7TTsj0LNNHSU',
   authDomain:'zisa-collegas.firebaseapp.com',projectId:'zisa-collegas',
   storageBucket:'zisa-collegas.firebasestorage.app',
@@ -16,7 +22,7 @@ export async function apiFetch(path:string,init:RequestInit={}):Promise<Response
   const headers=new Headers(init.headers);
   if(!headers.has('x-class-code')){
     await auth.authStateReady();
-    if(!auth.currentUser)return Response.json({error:'Meld je aan met je collega-account.'},{status:401});
+    if(!auth.currentUser)return Response.json({error:'Meld je aan met je Zisa-account.'},{status:401});
     headers.set('Authorization','Bearer '+await auth.currentUser.getIdToken());
   }
   const resource=path.replace(/^\/api\//,'');

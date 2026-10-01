@@ -1,6 +1,7 @@
 import { startOntdekAuth } from './ontdek-auth.js';
 
 const BESCHIKBAAR = new Map([
+  ["Zisa's tekenwereld", "../tekenwereld/index.html?editie=ontdek"],
   ['Bundel bewerkingen', './rekenbundel/index.html'],
   ['Tempotoetsen', './tempotoetsen/index.html'],
   ['Bundel getalinzicht', './bundel_getallen/getalkeuze.html'],
@@ -57,6 +58,7 @@ const BESCHIKBAAR = new Map([
 ]);
 
 const toolDescriptions = {
+  "Zisa's tekenwereld": "Test Aquarium volledig: alle tekenbladen, foto’s en klas-QR. De andere werelden zijn Pro.",
   'Rekenvierkant': 'Vul het rooster aan met de juiste bewerkingen.',
   'Rekenweg': 'Maak een rekenpad met opdrachten op maat.',
   'Rekenpiramide': 'Oefen verbanden tussen getallen in een piramide.',

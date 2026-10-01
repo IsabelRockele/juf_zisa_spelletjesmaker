@@ -4,7 +4,7 @@ const {createHandler}=require('../handler.cjs');
 const {ownerId}=require('../policy.cjs');
 const png='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aAuoAAAAASUVORK5CYII=';
 const drawing={name:'Testvis',world:'aqua',template:'aqua-vrij',motion:'swim',zone:'air',size:1,pivot:.55,flip:false,image:png};
-function setup(){
+function setup(options={}){
   const docs=new Map(),files=new Map();let time=1000000000,afterSave=null;
   const snap=p=>({exists:docs.has(p),id:p.split('/').pop(),data:()=>structuredClone(docs.get(p))});
   const ref=p=>({path:p,get:async()=>snap(p),collection:n=>collection(p+'/'+n)});
@@ -14,7 +14,7 @@ function setup(){
     const next=tail.then(async()=>{const pending=[];const result=await fn({get:r=>r.get(),delete:r=>pending.push(()=>docs.delete(r.path)),set:(r,d,o)=>pending.push(()=>docs.set(r.path,o?.merge?{...docs.get(r.path),...d}:d)),create:(r,d)=>pending.push(()=>{assert(!docs.has(r.path));docs.set(r.path,d);})});pending.forEach(f=>f());return result;});tail=next.catch(()=>{});return next;
   }};
   const bucket={file:p=>({save:async b=>{files.set(p,b);if(afterSave)await afterSave();},delete:async()=>files.delete(p),download:async()=>[files.get(p)]})};
-  const handler=createHandler({db,bucket,verifyToken:async token=>{if(!['alice','bob'].includes(token))throw Error('invalid');return {uid:token,firebase:{sign_in_provider:'password'}};},now:()=>time});
+  const handler=createHandler({db,bucket,getAccess:options.getAccess,verifyToken:async token=>{if(!['alice','bob','pro-alice'].includes(token))throw Error('invalid');return {uid:token==='pro-alice'?'alice':token,aud:token==='pro-alice'?'zisa-spelletjesmaker-pro':'zisa-collegas',firebase:{sign_in_provider:'password'}};},now:()=>time});
   async function request(path,method='GET',token='alice',body,code,extra={}){
     const url=new URL('https://example.test/'+path),headers={origin:'https://tools.jufzisa.be',...(token?{authorization:'Bearer '+token}:{}),...(code?{'x-class-code':code}:{}),...extra};
     const req={path:url.pathname,query:Object.fromEntries(url.searchParams),method,body,get:n=>headers[n.toLowerCase()]};
@@ -89,4 +89,45 @@ test('empty and whitespace names are optional for teachers and children',async()
   assert.equal(saved.statusCode,201);assert.equal(saved.body.name,name.trim());
  }
  const list=(await request('creatures')).body;assert.equal(list.filter(c=>c.name==='').length,4);
+});
+
+
+test('Pro account storage is isolated from colleagues with the same uid',async()=>{
+ const {request}=setup();
+ await request('creatures','POST','alice',drawing);
+ assert.equal((await request('creatures','GET','pro-alice')).body.length,0);
+ await request('creatures','POST','pro-alice',drawing);
+ assert.equal((await request('creatures','GET','alice')).body.length,1);
+});
+
+test('Ontdek can fully use Aquarium but cannot create another world or session',async()=>{
+ const {request}=setup({getAccess:async()=>({worlds:['aqua'],expires:Infinity})});
+ assert.deepEqual((await request('access')).body.worlds,['aqua']);
+ assert.equal((await request('access','POST')).statusCode,405);
+ const code=(await request('session','POST','pro-alice',{world:'aqua'})).body.code;
+ assert.equal((await request('creatures','POST','pro-alice',{...drawing,name:''})).statusCode,201);
+ assert.equal((await request('creatures','POST',null,{...drawing,name:''},code)).statusCode,201);
+ assert.equal((await request('creatures','GET','pro-alice')).body.length,2);
+ for(const world of ['garden','space','forest']){
+  assert.equal((await request('session','POST','pro-alice',{world})).statusCode,403);
+  assert.equal((await request('creatures','POST','pro-alice',{...drawing,world})).statusCode,403);
+  assert.equal((await request('creatures','POST',null,{...drawing,world},code)).statusCode,400);
+ }
+ assert.equal((await request('access','GET',null,null,code)).statusCode,403);
+});
+
+test('expired Pro hides other worlds and invalidates cached list; QR expires with license',async()=>{
+ let paid=true;
+ const {request,advance}=setup({getAccess:async()=>({worlds:paid?['aqua','garden','space','forest']:['aqua'],expires:1000001000})});
+ for(const world of ['aqua','garden','space','forest'])assert.equal((await request('creatures','POST','pro-alice',{...drawing,world})).statusCode,201);
+ const list=await request('creatures','GET','pro-alice');
+ const session=await request('session','POST','pro-alice',{world:'space'});
+ assert.equal(session.body.expires,1000001000);
+ paid=false;advance(1001);
+ const filtered=await request('creatures','GET','pro-alice',null,null,{'if-none-match':list.headers.etag});
+ assert.equal(filtered.statusCode,200);assert.equal(filtered.body.length,1);
+ const space=list.body.find(c=>c.world==='space');
+ assert.equal((await request('image?id='+space.id,'GET','pro-alice')).statusCode,404);
+ assert.equal((await request('session','GET','pro-alice')).body,null);
+ assert.equal((await request('creatures','POST',null,{...drawing,world:'space'},session.body.code)).statusCode,403);
 });

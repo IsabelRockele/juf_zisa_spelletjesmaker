@@ -1,4 +1,4 @@
-# Zisa's tekenwereld — zelfstandige gratis versie
+# Zisa's tekenwereld — Gratis, Pro en Ontdek
 
 De browsercode staat hier; de gepubliceerde bestanden staan in `../tekenwereld/`.
 De oorspronkelijke aangeleverde map `Zisa-Tekenwereld` blijft ongewijzigd.
@@ -28,12 +28,19 @@ printertest blijft nuttig voor belichting, onscherpte en printerinstellingen.
 
 ## Toegang en opslag
 
-- De leerkracht gebruikt dezelfde standaard Firebase-app en aanmelding als
-  `login_collega.html` (project `zisa-collegas`). Geen ChatGPT-account nodig.
-- Alleen de gratis startpagina heeft een tegel; Pro en Ontdek worden nog niet uitgebreid.
-- De aparte serverfunctie `tekenwereldApi` gebruikt de bestaande serveromgeving
-  `zisa-spelletjesmaker-pro`, maar accepteert uitsluitend de gratis collega-login.
-  Dit geeft geen toegang tot Pro en verandert geen andere serverfuncties.
+- Zonder editieparameter blijft de gratis collega-versie beschikbaar met de
+  bestaande aanmelding (`zisa-collegas`). Geen ChatGPT-account nodig.
+- `?editie=pro` en `?editie=ontdek` gebruiken de bestaande aanmelding van
+  `zisa-spelletjesmaker-pro` en keren terug naar hun eigen toolmenu.
+- Ontdek biedt Aquarium volledig aan: 17 bibliotheekbladen en testanimaties
+  zonder login; foto's bewaren en klas-QR na gratis Ontdek-login. De andere
+  werelden linken naar Pro. Er geldt geen PDF-proeflimiet voor deze bibliotheek.
+- De server verifieert beide tokenuitgevers en houdt hun opslag gescheiden.
+  Voor Pro-accounts bepaalt de nieuwste actieve, niet-verlopen licentie
+  (licenses/Licenties, eerst uid en dan email) welke werelden beschikbaar zijn.
+  Zonder Pro-licentie is alleen Aquarium toegestaan, ook bij directe API-aanroepen.
+  Licentietoegang wordt maximaal 60 seconden bewaard. Pro-klas-QR's verlopen
+  uiterlijk met de licentie. De URL-parameter verleent zelf geen rechten.
 - Metadata staat in `tekenwereldOwners` en `tekenwereldSessions`; PNG-bestanden
   onder `tekenwereld/` in de bestaande private bucket. Firebase-clientregels
   geven geen rechtstreekse toegang tot deze gegevens. Afbeeldingen worden via
@@ -60,7 +67,7 @@ Gebruik de aparte configuratie zodat andere lokale serverwijzigingen niet
 meegaan. De servertests controleren collega-isolatie, QR-rechten, verloop,
 vervanging, gelijktijdig sluiten/insturen, capaciteit en polling.
 
-De acht tests en een online proef met tijdelijk collega-account, QR-upload,
+De oorspronkelijke tests en een online proef met tijdelijk collega-account, QR-upload,
 privé-opslag, ophalen en verwijderen zijn geslaagd. De browserweergave,
 bibliotheek, testanimatie en QR-dialoog zijn gecontroleerd. Een fysieke
 iPadcamera met een echt ingekleurd blad blijft een praktijktest.
@@ -78,3 +85,7 @@ vorige verbindingspoging worden genegeerd. De leerkrachtdialoog toont alleen een
 QR die bij de gekozen wereld hoort. Browsercontrole: aquarium → bloementuin,
 verlopen QR, snel wisselen met vertraagd antwoord, Andere klas-QR, en nieuwe
 leerkracht-QR na een wereldwissel.
+
+De editie-tests controleren ook accountisolatie tussen Firebase-projecten,
+Aquarium-inzendingen door Ontdek-leerkracht en leerling, geblokkeerde Pro-werelden,
+licentiestatus en verlopen Pro-toegang inclusief QR en gecachte lijsten.

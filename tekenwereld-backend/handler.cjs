@@ -1,7 +1,7 @@
 const {randomBytes,randomUUID}=require('node:crypto');
 const {ApiError,fail,worlds,ownerId,codeHash,validCode,requireSession,validateDrawing}=require('./policy.cjs');
 const origins=new Set(['https://tools.jufzisa.be','https://isabelrockele.github.io','http://127.0.0.1:8765','http://127.0.0.1:5173','http://localhost:5173']);
-function createHandler({db,bucket,verifyToken,now=Date.now}){
+function createHandler({db,bucket,verifyToken,getAccess=async()=>({worlds:[...worlds],expires:Infinity}),now=Date.now}){
   const owners=db.collection('tekenwereldOwners');
   const sessions=db.collection('tekenwereldSessions');
   return async function(req,res){
@@ -15,10 +15,10 @@ function createHandler({db,bucket,verifyToken,now=Date.now}){
     if(req.method==='OPTIONS'){res.status(204).end();return;}
     try{
       const route=req.path.replace(/^\/+|\/+$/g,'');
-      if(!['session','creatures','image'].includes(route))fail(404,'Deze pagina bestaat niet.');
+      if(!['access','session','creatures','image'].includes(route))fail(404,'Deze pagina bestaat niet.');
       if(!['GET','POST','DELETE'].includes(req.method))fail(405,'Deze actie is niet beschikbaar.');
       const code=req.get('x-class-code');
-      let id;
+      let id,access;
       if(code){
         if(!validCode(code))fail(403,'Deze klascode is niet geldig.');
         if(!((route==='session'&&req.method==='GET')||(route==='creatures'&&req.method==='POST')))fail(403,'Alleen de leerkracht kan tekeningen bekijken of beheren.');
@@ -28,23 +28,30 @@ function createHandler({db,bucket,verifyToken,now=Date.now}){
         requireSession((await owners.doc(id).get()).data(),code,now());
       }else{
         const token=/^Bearer (.+)$/.exec(req.get('authorization')||'')?.[1];
-        if(!token)fail(401,'Meld je aan met je collega-account.');
+        if(!token)fail(401,'Meld je aan met je Zisa-account.');
         let user;
-        try{user=await verifyToken(token);}catch{fail(401,'Je aanmelding is verlopen. Meld je opnieuw aan als collega.');}
-        if(!user.uid||user.firebase?.sign_in_provider==='anonymous')fail(403,'Gebruik je collega-account.');
-        id=ownerId(user.uid);
+        try{user=await verifyToken(token);}catch{fail(401,'Je aanmelding is verlopen. Meld je opnieuw aan.');}
+        if(!user.uid||user.firebase?.sign_in_provider==='anonymous')fail(403,'Gebruik je Zisa-account.');
+        id=ownerId(user.uid,user.aud);
+        access=await getAccess(user);
       }
       const ref=owners.doc(id);
+      const allowed=world=>!access||access.worlds.includes(world);
+      if(route==='access'){
+        if(req.method!=='GET')fail(405,'Deze actie is niet beschikbaar.');
+        res.json({worlds:access.worlds});return;
+      }
       if(route==='session'){
         if(req.method==='GET'){
           const state=(await ref.get()).data();
           const s=code?requireSession(state,code,now()):state?.session;
-          res.json(s&&s.expires>now()?(code?{world:s.world,expires:s.expires}:s):null);return;
+          res.json(s&&s.expires>now()&&allowed(s.world)?(code?{world:s.world,expires:s.expires}:s):null);return;
         }
         const newCode=randomBytes(12).toString('hex');
         const world=req.body?.world;
         if(req.method==='POST'&&!worlds.has(world))fail(400,'Kies een geldige leefwereld.');
-        const next=req.method==='POST'?{code:newCode,world,expires:now()+12*3600000}:null;
+        if(req.method==='POST'&&!allowed(world))fail(403,'Deze leefwereld hoort bij Pro. In Ontdek kun je Aquarium volledig gebruiken.');
+        const next=req.method==='POST'?{code:newCode,world,expires:Math.min(now()+12*3600000,access.expires)}:null;
         await db.runTransaction(async tx=>{
           const old=(await tx.get(ref)).data();
           if(old?.session)tx.delete(sessions.doc(codeHash(old.session.code)));
@@ -57,17 +64,18 @@ function createHandler({db,bucket,verifyToken,now=Date.now}){
         if(req.method!=='GET')fail(405,'Deze actie is niet beschikbaar.');
         const imageId=req.query.id;
         if(typeof imageId!=='string'||!/^[a-f0-9-]{36}$/.test(imageId))fail(400,'Ongeldige tekening.');
-        if(!(await ref.collection('creatures').doc(imageId).get()).exists)fail(404,'Deze tekening bestaat niet meer.');
+        const drawing=await ref.collection('creatures').doc(imageId).get();
+        if(!drawing.exists||!allowed(drawing.data().world))fail(404,'Deze tekening is niet beschikbaar.');
         const [bytes]=await bucket.file(`tekenwereld/${id}/${imageId}.png`).download();
         res.type('image/png').send(bytes);return;
       }
       if(req.method==='GET'){
         // One cheap version read per poll. Image bytes are loaded separately only once.
-        const state=(await ref.get()).data();const tag='"'+(state?.version||'empty')+'"';
+        const state=(await ref.get()).data();const tag='"'+(state?.version||'empty')+'-'+access.worlds.join(',')+'"';
         res.set('ETag',tag);
         if(req.get('if-none-match')===tag){res.status(304).end();return;}
         const docs=await ref.collection('creatures').orderBy('createdAt').limit(100).get();
-        res.json(docs.docs.map(d=>{const {bytes,...data}=d.data();return {...data,id:d.id};}));return;
+        res.json(docs.docs.filter(d=>allowed(d.data().world)).map(d=>{const {bytes,...data}=d.data();return {...data,id:d.id};}));return;
       }
       if(req.method==='DELETE'){
         const drawingId=req.query.id;
@@ -82,6 +90,7 @@ function createHandler({db,bucket,verifyToken,now=Date.now}){
         res.json({ok:true});return;
       }
       const {data,bytes}=validateDrawing(req.body);
+      if(!allowed(data.world))fail(403,'Deze leefwereld hoort bij Pro. In Ontdek kun je Aquarium volledig gebruiken.');
       const drawingId=randomUUID(),image=bucket.file(`tekenwereld/${id}/${drawingId}.png`);
       const value={...data,id:drawingId,createdAt:new Date(now()).toISOString(),bytes:bytes.length};
       await image.save(bytes,{resumable:false,metadata:{contentType:'image/png',cacheControl:'private, no-store'}});
