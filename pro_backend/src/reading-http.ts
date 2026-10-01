@@ -126,7 +126,11 @@ export function createReadingFunctions(hasPro:(uid:string)=>Promise<boolean>,sel
         if(!/^Facturen\/test\/(?:Zisa Lezen\/[0-9]{4}\/factuur-zisa-lezen-|[0-9]{4}\/)TEST-[A-Za-z0-9-]+\.pdf$/.test(data.invoicePath))throw new Error('Invalid test invoice path');
         const [pdf]=await getStorage().bucket().file(data.invoicePath).download();
         attachments.push({filename:`factuur-zisa-lezen-${data.invoiceNumber}.pdf`,content:pdf.toString('base64'),encoding:'base64',contentType:'application/pdf'});
-        text=`Bedankt voor je testbetaling voor Zisa Lezen. Je testfactuur ${data.invoiceNumber} zit in de bijlage. Dit is geen echte factuur. Open je leesaccount via ${process.env.READING_RETURN_URL||''}`;
+        const accountUrl=process.env.READING_RETURN_URL||'';
+        const instructions='Bewaar deze mail. Meld je aan met het account waarmee je de bestelling plaatste. In Mijn account kun je je facturen downloaden en de automatische verlenging opzeggen. Bestelde je voor een school? Dan beheer je daar ook de leerkrachtplaatsen en uitnodigingen. Alleen de aankoper kan het schoolabonnement opzeggen. De betaalde toegang blijft na opzegging geldig tot het einde van de betaalde periode.';
+        text=`Bedankt voor je testbetaling voor Zisa Lezen. Je testfactuur ${data.invoiceNumber} zit in de bijlage. Dit is geen echte factuur.\n\n${instructions}\n\nOpen Mijn account: ${accountUrl}`;
+        const escape=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+        html=`<h1>Je Zisa Lezen-account</h1><p>Bedankt voor je testbetaling. Je testfactuur ${escape(data.invoiceNumber)} zit in de bijlage. Dit is geen echte factuur.</p><p>${escape(instructions)}</p><p><a href="${escape(accountUrl)}" style="display:inline-block;padding:14px 20px;background:#ed1764;color:white;text-decoration:none;border-radius:10px">Mijn account beheren</a></p>`;
         if(data.peppolInstructions)text+='\n\n'+data.peppolInstructions;
       }else if(data.paidUntil){text+=` Je betaalde toegang blijft geldig tot ${new Date(data.paidUntil).toLocaleDateString('nl-BE',{timeZone:'Europe/Brussels'})}.`;}
       const mail=db.collection('post_msft').doc(`reading-test-${job.id}`);
