@@ -20,11 +20,21 @@ try{
   const source=await(await request()).text();const blob=URL.createObjectURL(new Blob([source],{type:'application/javascript'}));
   await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=blob;script.onload=resolve;script.onerror=reject;document.body.append(script);});URL.revokeObjectURL(blob);
   if(!token){
-    const accountLink=document.createElement('a');
-    accountLink.textContent='Mijn account';accountLink.className='library-btn reading-account';
-    accountLink.href=new URL('./mijn-account.html',import.meta.url).href+(new URLSearchParams(location.search).get('test')==='1'?'?test=1':'');
-    document.querySelector('.speech').replaceWith(accountLink);
-    document.body.classList.add('teacher-account');
+    // Only a separate reading subscription gets reading account management.
+    // Failure to load account details must not block already-authorized books.
+    try{
+      const response=await fetch(`${readingConfig.api}/account`,{method:'POST',headers:{Authorization:`Bearer ${await auth.token()}`},cache:'no-store'});
+      if(response.ok){
+        const account=await response.json();
+        if(!account.pro&&(account.paidUntil>0||account.school||account.schoolMember)){
+          const accountLink=document.createElement('a');
+          accountLink.textContent='Mijn account';accountLink.className='library-btn reading-account';
+          accountLink.href=new URL('./mijn-account.html',import.meta.url).href+(new URLSearchParams(location.search).get('test')==='1'?'?test=1':'');
+          document.querySelector('.speech').replaceWith(accountLink);
+          document.body.classList.add('teacher-account');
+        }
+      }
+    }catch{/* Account management can be reopened later; reading remains available. */}
   }
   window.ZISA_ACCESS_MODE='full';const script=document.createElement('script');script.src='app.js?v=62';script.onload=()=>gate.remove();script.onerror=()=>{gate.textContent='De boeken konden niet worden geladen.';};document.body.append(script);
   // Recheck on return and periodically. Failure covers already-rendered content.
