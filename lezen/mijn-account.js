@@ -77,7 +77,7 @@ async function refresh(){
   if(!data.invoices?.length)el('invoices').textContent='Na je eerste bevestigde betaling verschijnt hier je factuur.';
   message('Testomgeving: betalingen en facturen zijn geen echte aankopen.');
 }
-el('peppolRequested').onchange=()=>{const checked=el('peppolRequested').checked;show('peppolFields',checked);for(const id of ['peppolId','organization','billingEmail'])el(id).required=checked;el('organization').required=checked||Number(el('quantity').value)>1;};
+el('peppolRequested').onchange=()=>{const checked=el('peppolRequested').checked;el('billingEmailLabel').textContent=checked?'E-mailadres van de schooladministratie voor facturen (verplicht bij Peppol)':'E-mailadres voor facturen (leeg = je accountadres)';show('peppolFields',checked);for(const id of ['peppolId','organization','billingEmail'])el(id).required=checked;el('organization').required=checked||Number(el('quantity').value)>1;};
 if(!readingConfig.enabled){message('Deze koppeling wordt voorbereid. Er worden nog geen accounts of betalingen gestart. Je kunt het voorbeeld bekijken op de vorige pagina.');}
 else{
   auth=await createReadingAuth(readingConfig);
