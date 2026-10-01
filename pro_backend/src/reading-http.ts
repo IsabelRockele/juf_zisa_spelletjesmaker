@@ -44,8 +44,10 @@ export function createReadingFunctions(hasPro:(uid:string)=>Promise<boolean>,sel
       }
       const owner=await readingAuthenticator('zisa-spelletjesmaker-pro',getAuth() as any)(req.get('Authorization')||'');
       const testers=new Set((process.env.READING_TEST_UIDS||'').split(',').map(v=>v.trim()).filter(Boolean));
-      if(!testers.has(owner.uid)){res.status(403).json({error:'Deze proef is alleen beschikbaar voor de ingestelde testaccounts.'});return;}
       const user=await getAuth().getUser(owner.uid);
+      const testEmails=new Set((process.env.READING_TEST_EMAILS||'').split(',').map(v=>v.trim().toLowerCase()).filter(Boolean));
+      const emailAllowed=user.emailVerified===true&&testEmails.has((user.email||'').toLowerCase());
+      if(user.disabled||(!testers.has(owner.uid)&&!emailAllowed)){res.status(403).json({error:'Deze proef is alleen beschikbaar voor de ingestelde testaccounts.'});return;}
       // A small per-account request budget protects checkout/link mutations.
       const rate=getFirestore().collection('readingTestRateLimits').doc(owner.uid);
       await getFirestore().runTransaction(async tx=>{
