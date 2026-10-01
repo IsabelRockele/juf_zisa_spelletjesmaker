@@ -1,7 +1,7 @@
 import { readingConfig } from './config.js?v=koop-1';
 import { createReadingAuth } from './reading-auth.js?v=google-1';
 const el=id=>document.getElementById(id),show=(id,visible)=>{el(id).hidden=!visible;};
-const message=text=>{el('message').textContent=text;el('message').hidden=!text;};
+const message=text=>{el('message').textContent=text;el('message').classList.toggle('empty',!text);};
 const testQuery=new URLSearchParams(location.search).get('test')==='1';
 if(testQuery)el('openBooks').href='bibliotheek.html?account=1&test=1';
 const date=n=>new Date(n).toLocaleDateString('nl-BE');
@@ -52,7 +52,18 @@ async function api(action,data={}){
   const response=await fetch(`${readingConfig.api}/${action}`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${await auth.token()}`},body:JSON.stringify(data),cache:'no-store'});
   if(!response.ok){const result=await response.json().catch(()=>({}));throw new Error(result.error||'Probeer later opnieuw.');}return response;
 }
-async function task(fn){if(busy)return;busy=true;message('Even geduld, we verwerken je aanvraag…');const buttons=[...document.querySelectorAll('button')].map(b=>[b,b.disabled]);buttons.forEach(([b])=>b.disabled=true);try{await fn();if(el('message').textContent==='Even geduld, we verwerken je aanvraag…')message('');}catch(error){message(friendly(error));}finally{busy=false;buttons.forEach(([b,disabled])=>b.disabled=disabled);}}
+// Keep button colours and layout stable while preventing duplicate actions.
+for(const eventName of ['click','submit'])document.addEventListener(eventName,event=>{
+ if(busy&&(eventName==='submit'||event.target.closest('button'))){event.preventDefault();event.stopImmediatePropagation();}
+},true);
+async function task(fn){
+ if(busy)return;
+ busy=true;document.querySelector('main').setAttribute('aria-busy','true');
+ message('Even geduld, we verwerken je aanvraag…');
+ try{await fn();if(el('message').textContent==='Even geduld, we verwerken je aanvraag…')message('');}
+ catch(error){message(friendly(error));}
+ finally{busy=false;document.querySelector('main').removeAttribute('aria-busy');}
+}
 function friendly(error){const code=error?.code||'';if(code==='auth/popup-closed-by-user')return 'Google-aanmelding werd gesloten. Klik opnieuw op Aanmelden met Google om verder te gaan.';if(code==='auth/popup-blocked')return 'Sta het Google-aanmeldvenster toe in je browser en probeer opnieuw.';if(code==='auth/unauthorized-domain')return 'Google-aanmelding is op dit webadres nog niet toegestaan. Geef deze melding door zodat het testadres gecontroleerd kan worden.';if(code.startsWith('auth/'))return code==='auth/email-already-in-use'?'Dit e-mailadres heeft al een account. Meld je aan of herstel je wachtwoord.':code==='auth/weak-password'?'Kies een sterker wachtwoord.':'Aanmelden is niet gelukt. Controleer je gegevens of herstel je wachtwoord.';return error?.message||'Probeer later opnieuw.';}
 async function refresh(){
   const data=await (await api('account')).json();lastStatus=data;show('verification',false);show('dashboard',true);show('invitation',!!invitationToken());show('acceptInvitation',!!invitationToken());renderSchool(data);
