@@ -1,7 +1,7 @@
 import { readingConfig } from './config.js?v=koop-1';
 import { createReadingAuth } from './reading-auth.js?v=google-1';
 const el=id=>document.getElementById(id),show=(id,visible)=>{el(id).hidden=!visible;};
-const message=text=>{el('message').textContent=text;el('message').classList.toggle('empty',!text);};
+const message=text=>{el('message').textContent=text;el('message').classList.toggle('empty',!text);if(!el('invitation').hidden)el('invitationStatus').textContent=text;};
 const testQuery=new URLSearchParams(location.search).get('test')==='1';
 if(testQuery)el('openBooks').href='bibliotheek.html?account=1&test=1';
 const date=n=>new Date(n).toLocaleDateString('nl-BE');
@@ -132,7 +132,8 @@ el('peppolRequested').onchange=()=>{const checked=el('peppolRequested').checked;
 if(!readingConfig.enabled){message('Deze koppeling wordt voorbereid. Er worden nog geen accounts of betalingen gestart. Je kunt het voorbeeld bekijken op de vorige pagina.');}
 else{
   auth=await createReadingAuth(readingConfig);
-  auth.observe(user=>{accountRevision++;clearTimeout(paymentTimer);paymentChecks=0;if(ordering)el('pageTitle').textContent='Zisa Lezen bestellen';lastStatus=null;show('school',false);el('schoolSeats').replaceChildren();show('includedNotice',false);el('buyerIdentity').textContent=user?.email?'Je bestelt als '+user.email:'';show('login',!user);show('invitation',!!invitationToken());show('acceptInvitation',false);show('dashboard',false);show('purchase',false);show('verification',!!user&&!user.emailVerified);if(user?.emailVerified)refresh().catch(error=>message(friendly(error)));else if(!busy)message(user?'Bevestig eerst je e-mailadres.':'Meld je aan of maak een account.');});
+  auth.observe(user=>{accountRevision++;clearTimeout(paymentTimer);paymentChecks=0;if(ordering)el('pageTitle').textContent='Zisa Lezen bestellen';lastStatus=null;show('school',false);el('schoolSeats').replaceChildren();show('includedNotice',false);el('buyerIdentity').textContent=user?.email?'Je bestelt als '+user.email:'';el('invitationIdentity').textContent=user?.email?'Je bent aangemeld als '+user.email+'. Gebruik het adres waarvoor je bent uitgenodigd.':'Meld je aan met het e-mailadres waarvoor je bent uitgenodigd.';show('invitationSignOut',!!user);el('invitationStatus').textContent='';show('login',!user);show('invitation',!!invitationToken());show('acceptInvitation',false);show('dashboard',false);show('purchase',false);show('verification',!!user&&!user.emailVerified);if(user?.emailVerified)refresh().catch(error=>message(friendly(error)));else if(!busy)message(user?'Bevestig eerst je e-mailadres.':'Meld je aan of maak een account.');});
+  el('invitationSignOut').onclick=()=>task(()=>auth.signOut());
   el('switchBuyer').onclick=()=>task(async()=>{await auth.signOut();show('includedNotice',false);message('Meld je aan met het account waarmee je wilt bestellen.');});
   el('googleLogin').onclick=()=>task(()=>auth.signInGoogle(el('email').value));
   el('loginForm').onsubmit=e=>{e.preventDefault();task(()=>auth.signIn(el('email').value,el('password').value));};

@@ -58,7 +58,9 @@ export function readingSchool(db:Firestore,now:()=>number,returnUrl:string){
    if(!/^[A-Za-z0-9_-]{43}$/.test(token||''))throw new Error('Deze uitnodiging is ongeldig.');
    return db.runTransaction(async tx=>{
      const ref=invites.doc(digest(token)),inv=(await tx.get(ref)).data();
-     if(!inv || inv.email!==buyer.email.toLowerCase() || inv.expiresAt<=now())throw new Error('Deze uitnodiging is verlopen of hoort bij een ander e-mailadres.');
+     if(!inv)throw new Error('Deze uitnodiging is niet gevonden. Open de nieuwste uitnodigingsmail.');
+     if(inv.email!==buyer.email.toLowerCase())throw new Error('Meld je aan met het e-mailadres waarvoor je bent uitgenodigd. Je huidige account hoort niet bij deze uitnodiging.');
+     if(inv.expiresAt<=now())throw new Error('Deze uitnodiging is verlopen. Vraag de schoolbesteller een nieuwe uitnodiging.');
      const orderRef=orders.doc(inv.orderId),order=(await tx.get(orderRef)).data() as SchoolOrder;
      const seat=order?.seats?.[String(inv.index)];
      if(!seat || seat.version!==inv.version || seat.email!==inv.email || readingPaidUntil(order,now())<=now())throw new Error('Deze uitnodiging is niet meer actief.');
