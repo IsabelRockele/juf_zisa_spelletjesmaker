@@ -1,7 +1,7 @@
 import { readingConfig } from './config.js?v=koop-1';
 import { createReadingAuth } from './reading-auth.js?v=google-1';
 const el=id=>document.getElementById(id),show=(id,visible)=>{el(id).hidden=!visible;};
-const message=text=>{el('message').textContent=text;};
+const message=text=>{el('message').textContent=text;el('message').hidden=!text;};
 const testQuery=new URLSearchParams(location.search).get('test')==='1';
 if(testQuery)el('openBooks').href='bibliotheek.html?account=1&test=1';
 const date=n=>new Date(n).toLocaleDateString('nl-BE');
@@ -52,7 +52,7 @@ async function api(action,data={}){
   const response=await fetch(`${readingConfig.api}/${action}`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${await auth.token()}`},body:JSON.stringify(data),cache:'no-store'});
   if(!response.ok){const result=await response.json().catch(()=>({}));throw new Error(result.error||'Probeer later opnieuw.');}return response;
 }
-async function task(fn){if(busy)return;busy=true;message('Even geduld, we verwerken je aanvraag…');const buttons=[...document.querySelectorAll('button')].map(b=>[b,b.disabled]);buttons.forEach(([b])=>b.disabled=true);try{await fn();}catch(error){message(friendly(error));}finally{busy=false;buttons.forEach(([b,disabled])=>b.disabled=disabled);}}
+async function task(fn){if(busy)return;busy=true;message('Even geduld, we verwerken je aanvraag…');const buttons=[...document.querySelectorAll('button')].map(b=>[b,b.disabled]);buttons.forEach(([b])=>b.disabled=true);try{await fn();if(el('message').textContent==='Even geduld, we verwerken je aanvraag…')message('');}catch(error){message(friendly(error));}finally{busy=false;buttons.forEach(([b,disabled])=>b.disabled=disabled);}}
 function friendly(error){const code=error?.code||'';if(code==='auth/popup-closed-by-user')return 'Google-aanmelding werd gesloten. Klik opnieuw op Aanmelden met Google om verder te gaan.';if(code==='auth/popup-blocked')return 'Sta het Google-aanmeldvenster toe in je browser en probeer opnieuw.';if(code==='auth/unauthorized-domain')return 'Google-aanmelding is op dit webadres nog niet toegestaan. Geef deze melding door zodat het testadres gecontroleerd kan worden.';if(code.startsWith('auth/'))return code==='auth/email-already-in-use'?'Dit e-mailadres heeft al een account. Meld je aan of herstel je wachtwoord.':code==='auth/weak-password'?'Kies een sterker wachtwoord.':'Aanmelden is niet gelukt. Controleer je gegevens of herstel je wachtwoord.';return error?.message||'Probeer later opnieuw.';}
 async function refresh(){
   const data=await (await api('account')).json();lastStatus=data;show('verification',false);show('dashboard',true);show('invitation',!!invitationToken());show('acceptInvitation',!!invitationToken());renderSchool(data);
@@ -62,7 +62,7 @@ async function refresh(){
   const hasOwnPaid=data.paidUntil>Date.now();if(ordering){show('dashboard',hasOwnPaid||data.pro||data.schoolMember);el('pageTitle').textContent=hasOwnPaid?'Je abonnement is actief':'Zisa Lezen bestellen';}show('purchase',!hasOwnPaid&&(!data.cancelRequested||data.renewalCanceled)&&!invitationToken());show('cancel',!data.renewalCanceled&&(data.paidUntil>0||data.paymentStatus==='paid'));
   applyOrderType();
   el('invoices').replaceChildren();
-  for(const invoice of data.invoices||[]){const button=document.createElement('button');button.textContent=invoice.ready?`Download ${invoice.number}`:'Factuur wordt aangemaakt';button.disabled=!invoice.ready;button.onclick=()=>task(async()=>{const response=await api('invoice',{id:invoice.id});const url=URL.createObjectURL(await response.blob());const link=document.createElement('a');link.href=url;link.download=`factuur-zisa-lezen-${invoice.number}.pdf`;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);});el('invoices').append(button);}
+  for(const invoice of data.invoices||[]){const button=document.createElement('button');button.textContent=invoice.ready?`Download ${invoice.number}`:'Factuur wordt aangemaakt';button.disabled=!invoice.ready;button.onclick=()=>task(async()=>{const response=await api('invoice',{id:invoice.id});const url=URL.createObjectURL(await response.blob());const link=document.createElement('a');link.href=url;link.download=`factuur-zisa-lezen-${invoice.number}.pdf`;link.click();message('De download van je factuur is gestart. Je vindt het bestand bij je downloads.');setTimeout(()=>URL.revokeObjectURL(url),60000);});el('invoices').append(button);}
   if(!data.invoices?.length)el('invoices').textContent='Na je eerste bevestigde betaling verschijnt hier je factuur.';
   message('Testomgeving: betalingen en facturen zijn geen echte aankopen.');
 }
