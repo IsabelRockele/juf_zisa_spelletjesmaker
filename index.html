@@ -529,6 +529,7 @@
       <a class="img-link" href="pentomino_studio_volledige_tool.html?teacher=1&amp;back=index.html"><img alt="Pentomino Studio" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/pentomino-studio-v2.svg" loading="lazy"/><span class="img-label">Pentomino Studio</span></a>
       <a class="img-link" href="plattegrond.html"><img alt="Plattegrond" class="drukknop-afbeelding" src="drukknop_afbeeldingen/plattegrond.webp" loading="lazy"/><span class="img-label">Plattegrond</span></a>
       <a class="img-link" href="tekenwereld/index.html?v=automatisch-20260922"><img alt="Zisa's tekenwereld" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/zisa-tekenwereld.svg" loading="lazy"/><span class="img-label">Zisa's tekenwereld</span></a>
+      <a class="img-link" href="Zisa-Muziekatelier/tool/index.html"><img alt="" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/zisa-muziekatelier.svg" loading="lazy"/><span class="img-label">Zisa Muziekatelier</span></a>
     </div>
     <div class="section-footer">
       <div class="footer-banner" style="background:#27ae60">
@@ -659,6 +660,7 @@
     'Rekenvierkant':'Vul het rooster aan met de juiste bewerkingen.','Rekenweg':'Maak een rekenpad met opdrachten op maat.','Rekenpiramide':'Oefen verbanden tussen getallen in een piramide.','Rekenrooster':'Combineer getallen en bewerkingen in een rooster.','Rekendriehoek':'Oefen splitsingen en getalfamilies.','Rekencirkel':'Reken vanuit het midden naar buiten.','MAB en schema':'Visualiseer getallen met MAB-materiaal en schema’s.','Verliefde harten':'Oefen getallenparen die samen een geheel vormen.','Lettercode':'Ontcijfer woorden met letters en symbolen.','Geheime boodschap':'Maak een gecodeerde taalopdracht.','Lettertetris':'Bouw woorden met vallende lettervormen.','Hexagonaal raster':'Maak opdrachten in een zeshoekig speelraster.','Schaduw':'Zoek of maak de passende schaduwvorm.','Punttekening':'Verbind punten tot een figuur.','Plattegrond':'Oefen plaats, richting en ruimtelijk inzicht.','Coderen':'Volg codes om een figuur te maken.','Blokkenbouwsels':'Bouw en bekijk constructies met blokken.','QR-generator':'Maak een QR-code voor tekst of een link.','Zisa Spelen':'Laat onbeperkt leerlingen oefenen via een QR-code of leerlinglink.'
   };
   toolDescriptions['Pentomino Studio']='Maak bouwkaarten op maat of kies een figuur om online te puzzelen.';
+  toolDescriptions['Zisa Muziekatelier']='Speel op instrumenten, oefen ritmes en neem je eigen muziek op.';
   document.querySelectorAll('a.img-link').forEach(link => {
     const img = link.querySelector('.drukknop-afbeelding');
     if (img && !img.parentElement.classList.contains('tool-image-stage')) {
@@ -775,7 +777,7 @@ window.addEventListener('load', () => {
   (()=>{
     const vernieuwd=new Set(['sudoku','zoek_de_verschillen','doolhof','slangendoolhof','hexagon','schaduw','pixelart','coderen','punttekening','blokkenbouwsels','bouwplaat','plattegrond','bingo','vieropeenrij','rad','QR','werkblad_kloklezen','kalender','timer','planbord']);
     document.querySelectorAll('img.drukknop-afbeelding').forEach(img=>{const naam=(img.getAttribute('src').split('/').pop()||'').replace(/\.webp$/,'');if(vernieuwd.has(naam))img.src=`drukknop_afbeeldingen_v3/${naam}.png`});
-    const orden={puzzels:['Sudoku','Doolhof','Zoek de verschillen','Slangendoolhof','Hexagonaal raster','Schaduw'],creatief:['Pixelart','Coderen','Punttekening','Blokkenbouwsels','Pentomino Studio','Bouwplaten','Plattegrond',"Zisa's tekenwereld"]};
+    const orden={puzzels:['Sudoku','Doolhof','Zoek de verschillen','Slangendoolhof','Hexagonaal raster','Schaduw'],creatief:['Pixelart','Coderen','Punttekening','Blokkenbouwsels','Pentomino Studio','Bouwplaten','Plattegrond',"Zisa's tekenwereld",'Zisa Muziekatelier']};
     Object.entries(orden).forEach(([categorie,namen])=>{const grid=document.querySelector(`#panel-${categorie} .button-grid`);if(!grid)return;const links=[...grid.querySelectorAll(':scope > a.img-link')];namen.forEach(naam=>{const link=links.find(item=>item.querySelector('.img-label')?.textContent.trim()===naam);if(link)grid.appendChild(link)})});
   })();
 </script>
