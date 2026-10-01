@@ -118,25 +118,26 @@ test('each paid month has its own invoice; pending and live payments cannot crea
   assert.match(first.renewalText,/Automatische/);
   for(const patch of [{status:'pending'},{mode:'live'},{amount:{currency:'EUR',value:'6.00'}}]) assert.throws(()=>prepareReadingInvoice({...input,payment:{...payment(),...patch}}));
 });
-test('invoice archive and separate customer/bookkeeping outbox jobs survive retries without duplicate numbers', async () => {
+test('invoice archive and buyer-only mail survive retries without duplicate numbers', async () => {
   const invoice=prepareReadingInvoice({payment:payment(),owner,period:readingPeriod(anchor,0),paidAt:new Date(anchor).toISOString(),customer:{name:'Testklant',email:'buyer@example.test',address:'Teststraat 1'}});
   const reservations=new Map(),files=new Map(),jobs=new Map();let fail=true;
   const ports={
     reserve:async value=>{if(!reservations.has(value.key))reservations.set(value.key,{number:'TEST-0001',snapshot:value});return reservations.get(value.key);},
     render:async()=>Buffer.from('fake PDF for orchestration test'),
     archive:async(path,pdf)=>{if(!files.has(path))files.set(path,pdf);},
-    enqueue:async(key,job)=>{if(key.endsWith(':bookkeeping')&&fail){fail=false;throw new Error('temporary mail queue failure');}if(!jobs.has(key))jobs.set(key,job);},
+    enqueue:async(key,job)=>{if(key.endsWith(':customer')&&fail){fail=false;throw new Error('temporary mail queue failure');}if(!jobs.has(key))jobs.set(key,job);},
   };
-  await assert.rejects(()=>archiveReadingInvoice(invoice,ports,'books@example.test'));
-  await archiveReadingInvoice(invoice,ports,'books@example.test');
-  assert.equal(reservations.size,1);assert.equal(files.size,1);assert.equal(jobs.size,2);
+  await assert.rejects(()=>archiveReadingInvoice(invoice,ports));
+  await archiveReadingInvoice(invoice,ports);
+  assert.equal(reservations.size,1);assert.equal(files.size,1);assert.equal(jobs.size,1);
   assert.equal(jobs.get(invoice.key+':customer').to,'buyer@example.test');
-  assert.equal(jobs.get(invoice.key+':bookkeeping').to,'books@example.test');
+  assert.equal(jobs.has(invoice.key+':bookkeeping'),false);
+  await archiveReadingInvoice(invoice,ports);assert.equal(jobs.size,1);
 });
 test('reading archive uses reserved calendar year and keeps an existing legacy invoice path on retry',async()=>{
  const invoice=prepareReadingInvoice({payment:payment(),owner,period:readingPeriod(anchor,0),paidAt:new Date(anchor).toISOString(),customer:{name:'School',email:'school@example.test',address:'Teststraat 1'}});
  const paths=[];let archivePath;
  const ports={reserve:async()=>({number:'TEST-0001',snapshot:invoice,storageYear:2027,archivePath}),render:async()=>Buffer.from('test'),archive:async path=>paths.push(path),enqueue:async()=>{}};
- await archiveReadingInvoice(invoice,ports,'books@example.test');assert.equal(paths[0],'Facturen/test/Zisa Lezen/2027/factuur-zisa-lezen-TEST-0001.pdf');
- archivePath='Facturen/test/2026/TEST-0001.pdf';await archiveReadingInvoice(invoice,ports,'books@example.test');assert.equal(paths[1],archivePath);
+ await archiveReadingInvoice(invoice,ports);assert.equal(paths[0],'Facturen/test/Zisa Lezen/2027/factuur-zisa-lezen-TEST-0001.pdf');
+ archivePath='Facturen/test/2026/TEST-0001.pdf';await archiveReadingInvoice(invoice,ports);assert.equal(paths[1],archivePath);
 });

@@ -61,7 +61,7 @@ const SELLER_VAT_EXEMPT = "Onderneming onderworpen aan de vrijstellingsregel voo
 
 // Reading test functions share Auth and accounting, never the Pro license collections.
 // Disabled unless READING_TEST_ENABLED=true; deployment is restricted to these names.
-export const { readingApi, readingMollieWebhook, readingReconcile, readingMail } = createReadingFunctions(
+export const { readingApi, readingMollieWebhook, readingReconcile, readingMail, readingMailCreated } = createReadingFunctions(
   async uid => Boolean(await activePlayLicense(uid)),
   { name:SELLER_NAME, address:`${SELLER_ADDR1}, ${SELLER_ADDR2}`, email:SELLER_EMAIL,
     enterprise:SELLER_ENTERPRISE, vatText:SELLER_VAT_EXEMPT },

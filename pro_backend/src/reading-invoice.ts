@@ -39,8 +39,8 @@ export type InvoicePorts = {
   /** Transactionally create-if-absent outbox job with attachment reference, not public URL. */
   enqueue(key: string, job: { to: string; subject: string; invoicePath: string; invoiceNumber: string; peppolInstructions?:string }): Promise<void>;
 };
-export async function archiveReadingInvoice(invoice: ReadingInvoice, ports: InvoicePorts, bookkeepingEmail: string) {
-  if (invoice.environment !== 'test' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bookkeepingEmail)) throw new Error('Test environment and bookkeeping recipient required');
+export async function archiveReadingInvoice(invoice: ReadingInvoice, ports: InvoicePorts) {
+  if (invoice.environment !== 'test') throw new Error('Test environment required');
   const { number, snapshot, storageYear, archivePath } = await ports.reserve(invoice);
   if (!/^TEST-[A-Za-z0-9-]+$/.test(number) || snapshot.key !== invoice.key || snapshot.environment !== 'test') throw new Error('Invalid invoice reservation');
   const year = storageYear || new Date(snapshot.issuedAt).getUTCFullYear();
@@ -48,14 +48,7 @@ export async function archiveReadingInvoice(invoice: ReadingInvoice, ports: Invo
   if(!/^Facturen\/test\/(?:Zisa Lezen\/[0-9]{4}\/factuur-zisa-lezen-|[0-9]{4}\/)TEST-[A-Za-z0-9-]+\.pdf$/.test(path))throw new Error('Invalid reading archive path');
   const pdf = await ports.render(snapshot, number);
   await ports.archive(path, pdf);
-  // Separate durable jobs: bookkeeping delivery can be retried without emailing the customer again.
+  // The seller retrieves the private archived PDF in Firebase; only the buyer receives mail.
   await ports.enqueue(`${snapshot.key}:customer`, { to:snapshot.customer.email, subject:`TEST — Zisa Lezen — factuur ${number}`, invoicePath:path, invoiceNumber:number });
-  await ports.enqueue(`${snapshot.key}:bookkeeping`, { to:bookkeepingEmail, subject:`TEST — ${snapshot.customer.peppolRequested?'Nog via Peppol te versturen — ':''}Boekhouding Zisa Lezen — ${number}`, invoicePath:path, invoiceNumber:number,
-    peppolInstructions:snapshot.customer.peppolRequested?[
-      'Nog via Peppol te versturen. Gebruik dezelfde factuur en hetzelfde factuurnummer; de PDF-mail is geen Peppol-verzending.',
-      `School: ${snapshot.customer.organization}`,`Naam: ${snapshot.customer.name}`,`Adres: ${snapshot.customer.address}`,
-      `E-mail: ${snapshot.customer.email}`,`Peppol-ID: ${snapshot.customer.peppolId}`,
-      `Ondernemingsnummer: ${snapshot.customer.vatNumber||'niet opgegeven'}`,`GLN: ${snapshot.customer.gln||'niet opgegeven'}`,
-      `Bestelreferentie: ${snapshot.customer.purchaseReference||'niet opgegeven'}`].join('\n'):'' });
   return { number, path };
 }

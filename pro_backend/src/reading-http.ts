@@ -1,5 +1,6 @@
 import { readingPaidUntil } from './reading-ledger';
 import { onRequest } from 'firebase-functions/v2/https';
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { defineSecret } from 'firebase-functions/params';
 import { getAuth } from 'firebase-admin/auth';
@@ -96,14 +97,16 @@ export function createReadingFunctions(hasPro:(uid:string)=>Promise<boolean>,sel
     }
     await state.set({cursor:batch.size===40?batch.docs[batch.size-1].id:null});
   });
-  const readingMail=onSchedule({schedule:'every 30 minutes',region:'europe-west1',maxInstances:1},async()=>{
+  async function deliverReadingMail(jobs:any[]) {
     // Test mail is rerouted to one explicit test recipient, never to real customer addresses.
     if(!enabled() || process.env.READING_TEST_MAIL_ENABLED!=='true')return;
     const recipient=process.env.READING_TEST_RECIPIENT||'';
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient))throw new Error('Explicit test mail recipient required');
-    const db=getFirestore();const jobs=await db.collection(READING_COLLECTIONS.outbox).where('sent','==',false).limit(25).get();
-    for(const job of jobs.docs){
+    const db=getFirestore();
+    for(const job of jobs){
       const data=job.data();
+      if(data.sent)continue;
+      if(job.id.endsWith(':bookkeeping')){await job.ref.update({sent:true,skipped:true,reason:'seller_copy_disabled'});continue;}
       let html:string|undefined;
       let text='Je automatische verlenging voor Zisa Lezen is gestopt.';
       const attachments:any[]=[];
@@ -131,6 +134,14 @@ export function createReadingFunctions(hasPro:(uid:string)=>Promise<boolean>,sel
         tx.update(job.ref,{sent:true,queuedAt:Date.now()}); // queued, not proof of delivery
       });
     }
+  }
+  const readingMail=onSchedule({schedule:'every 30 minutes',region:'europe-west1',maxInstances:1},async()=>{
+    if(!enabled() || process.env.READING_TEST_MAIL_ENABLED!=='true')return;
+    const jobs=await getFirestore().collection(READING_COLLECTIONS.outbox).where('sent','==',false).limit(25).get();
+    await deliverReadingMail(jobs.docs);
   });
-  return {readingApi,readingMollieWebhook,readingReconcile,readingMail};
+  const readingMailCreated=onDocumentCreated({document:'readingTestOutbox/{jobId}',region:'europe-west1',maxInstances:3,retry:true},async event=>{
+    if(event.data)await deliverReadingMail([event.data]);
+  });
+  return {readingApi,readingMollieWebhook,readingReconcile,readingMail,readingMailCreated};
 }
