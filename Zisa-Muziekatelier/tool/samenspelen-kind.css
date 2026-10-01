@@ -26,3 +26,10 @@
 .child-rhythm .transport{position:sticky;bottom:8px;z-index:5;align-items:center;background:#fffdf8f5;padding:10px;border:1px solid #e3d9c5;border-radius:18px;box-shadow:0 4px 16px #4a31551a}
 .child-rhythm #pause{font-size:20px;min-height:60px;background:#fff2c5;border-color:#ddc36f}
 .child-rhythm .presenting{height:100vh;overflow-y:auto}
+.child-along #falling{display:block;height:210px;min-height:0;padding:0;position:relative;overflow:hidden;background:#fff}
+.child-along .strike-line{top:62%;bottom:auto;height:6px;background:#66518c;box-shadow:0 0 0 3px #fff9;z-index:2;pointer-events:none}
+.child-along .strike-line>span{position:absolute;right:8px;top:10px;background:#f1eafc;color:#5e4487;border-radius:9px;padding:5px 8px;font-size:11px;font-weight:900;letter-spacing:.5px}
+.child-along #countdown{left:auto;right:12px;top:12px;transform:none;width:60px;height:60px;font-size:34px;z-index:3}
+.child-along #boardMessage{top:auto;bottom:10px;left:10px;right:10px;font-size:16px;color:#665177}
+.child-along .drop{z-index:3;cursor:default}.child-along #targets{grid-template-columns:repeat(8,minmax(0,1fr));gap:0;padding:8px 0 14px}.child-along .target{margin:0 4px}
+@media(max-width:650px){.child-along #falling{height:190px}.child-along .target{margin:0 2px;font-size:12px;min-height:64px}.child-along .target.active{outline-width:3px;outline-offset:0}.child-along #boardMessage{font-size:13px}.child-along .strike-line>span{font-size:9px}.child-along #countdown{width:48px;height:48px;font-size:28px}}
