@@ -1,0 +1,4 @@
+html[data-music-access="pending"] body > :not(#musicAccessGate),html[data-music-access="blocked"] body > :not(#musicAccessGate){display:none!important}
+#musicAccessGate{position:fixed;inset:0;z-index:10000;background:#fff9ed;display:grid;place-items:center;padding:24px;font:18px/1.6 Arial,sans-serif;color:#49386b}
+#musicAccessGate>div{max-width:540px;text-align:center;background:white;border:2px solid #e4d9f3;border-radius:24px;padding:30px}
+#musicAccessGate button,#musicAccessGate a{display:inline-block;margin:8px;padding:12px 20px;border:0;border-radius:12px;background:#6047aa;color:white;text-decoration:none;font:700 16px Arial;cursor:pointer}
