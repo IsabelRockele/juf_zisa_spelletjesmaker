@@ -1,0 +1,14 @@
+Hand clap: Solo Clap by OwlStorm
+Source: https://freesound.org/people/OwlStorm/sounds/151219/
+License: CC0 1.0, https://creativecommons.org/publicdomain/zero/1.0/
+Source preview: https://cdn.freesound.org/previews/151/151219_140737-hq.mp3
+Changes: leading silence removed, converted to mono WAV, shortened with a fade, peak normalized.
+
+Electric guitar: tonejs-instruments, Nicholaus P. Brosowsky
+Source: https://github.com/nbrosowsky/tonejs-instruments/tree/master/samples/guitar-electric
+License: CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
+Files: C4, Ds4, Fs4, A4, C5 MP3 samples. Unmodified files; playback may transpose pitch.
+
+kick-classroom.wav: derived from the bundled drum-kick.wav.
+Original source: https://github.com/Boochi44/free-drum-samples (CC0; see drums-license.txt).
+Changes: added harmonics and a pitched attack from the original sample for small loudspeakers; shortened, faded and normalized. Original drum-kick.wav retained.
