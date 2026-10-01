@@ -92,8 +92,9 @@ export function createReadingService(db:Firestore, config:ReadingServiceConfig, 
     await orders.doc(id).update({firstPaymentId:result.id,checkoutUrl:url.href});
     return {checkoutUrl:url.href};
   }
-  async function cancel(uid:string) {
+  async function cancel(uid:string,expectedOrderId?:string) {
     const order=await orderFor(uid);if(!order)throw new Error('Geen leesabonnement gevonden.');
+    if(expectedOrderId&&order.id!==expectedOrderId)throw new Error('Deze bestelling is gewijzigd. Zoek het abonnement opnieuw op.');
     await orders.doc(order.id).update({cancelRequested:requestReadingCancellation(order,identity(uid)).cancelRequested});
     await settleCancellation(order.id);
     return status(uid);

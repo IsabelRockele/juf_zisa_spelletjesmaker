@@ -1,3 +1,4 @@
+import { readingAdmin, requireReadingAdmin } from './reading-admin';
 import { readingPaidUntil } from './reading-ledger';
 import { onRequest } from 'firebase-functions/v2/https';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
@@ -54,6 +55,14 @@ export function createReadingFunctions(hasPro:(uid:string)=>Promise<boolean>,sel
         const snap=await tx.get(rate);const minute=Math.floor(Date.now()/60000);const count=snap.data()?.minute===minute?snap.data()!.count:0;
         if(count>=40)throw new Error('Even wachten en opnieuw proberen.');tx.set(rate,{minute,count:count+1});
       });
+      if(action?.startsWith('admin-')){
+        requireReadingAdmin(user,process.env.READING_ADMIN_UIDS||'');
+        if(action==='admin-status'){res.json({allowed:true});return;}
+        const admin=readingAdmin(getFirestore(),getAuth(),api);
+        if(action==='admin-find'){res.json(await admin.find(req.body?.email));return;}
+        if(action==='admin-cancel'){res.json(await admin.cancel(owner.uid,req.body));return;}
+        res.status(404).json({error:'Onbekende beheeractie.'});return;
+      }
       if(action==='account'){res.json(await api.status(owner.uid));return;}
       if(action==='checkout'){res.json(await api.checkout({uid:owner.uid,email:user.email!},req.body));return;}
       if(action==='school-invite'){res.json(await api.invite(owner.uid,req.body?.index,req.body?.email,false,req.body?.resend===true));return;}
