@@ -1,6 +1,6 @@
 import { createAccountLayout } from './account-layout.js?v=2';
 import { readingConfig } from './config.js?v=koop-1';
-import { createReadingAuth } from './reading-auth.js?v=google-1';
+import { createReadingAuth } from './reading-auth.js?v=verificatie-2';
 const el=id=>document.getElementById(id),show=(id,visible)=>{el(id).hidden=!visible;};
 const message=text=>{el('message').textContent=text;el('message').classList.toggle('empty',!text);if(!el('invitation').hidden)el('invitationStatus').textContent=text;};
 const testQuery=new URLSearchParams(location.search).get('test')==='1';

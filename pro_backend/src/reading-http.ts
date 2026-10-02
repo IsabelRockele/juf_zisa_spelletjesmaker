@@ -1,4 +1,5 @@
 import { readingAdmin, requireReadingAdmin } from './reading-admin';
+import { queueReadingVerification } from './reading-verification';
 import { readingPaidUntil } from './reading-ledger';
 import { onRequest } from 'firebase-functions/v2/https';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
@@ -36,6 +37,9 @@ export function createReadingFunctions(hasPro:(uid:string)=>Promise<boolean>,sel
     if(Number(req.get('content-length')||0)>16384){res.status(413).end();return;}
     const action=String(req.path).split('/').filter(Boolean).pop();
     try {
+      if(action==='verify-email'){
+        res.json(await queueReadingVerification(getAuth(),getFirestore(),req.get('Authorization')||'',process.env));return;
+      }
       const api=service();
       const studentToken=req.get('X-Reading-Token');
       if(studentToken){
