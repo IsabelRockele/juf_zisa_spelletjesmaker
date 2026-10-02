@@ -66,6 +66,12 @@ export const { readingApi, readingMollieWebhook, readingReconcile, readingMail, 
   { name:SELLER_NAME, address:`${SELLER_ADDR1}, ${SELLER_ADDR2}`, email:SELLER_EMAIL,
     enterprise:SELLER_ENTERPRISE, vatText:SELLER_VAT_EXEMPT },
 );
+export const { readingApi:readingLiveApi, readingMollieWebhook:readingLiveMollieWebhook, readingReconcile:readingLiveReconcile, readingMail:readingLiveMail, readingMailCreated:readingLiveMailCreated } = createReadingFunctions(
+  async uid => Boolean(await activePlayLicense(uid)),
+  { name:SELLER_NAME, address:`${SELLER_ADDR1}, ${SELLER_ADDR2}`, email:SELLER_EMAIL,
+    enterprise:SELLER_ENTERPRISE, vatText:SELLER_VAT_EXEMPT },
+  'live',
+);
 
 const PRICE_EUR_KOOP     = "40.00";
 const PRICE_EUR_WAITLIST = "35.00";

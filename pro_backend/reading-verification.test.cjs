@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('fs'),vm=require('vm'),ts=require('typescript');
-const exportsUnderTest={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('src/reading-verification.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports:exportsUnderTest,require});
+const exportsUnderTest={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('src/reading-verification.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports:exportsUnderTest,require:n=>n==='./reading-environment'?require('./lib/reading-environment'):require(n)});
 function setup(){
  const records=new Map();let generated=0;
  const user={uid:'reader',email:'reader@example.com',emailVerified:false};

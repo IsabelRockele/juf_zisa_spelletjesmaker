@@ -1,4 +1,5 @@
-/** Preparation only: not exported as a Cloud Function and not wired to live access. */
+/** Shared plan and pure payment payload builders. */
+import { assertReadingKey } from './reading-environment';
 export const READING_PLAN = Object.freeze({
   id: 'zisa-lezen-monthly',
   amount: Object.freeze({ currency: 'EUR', value: '3.99' }),
@@ -66,9 +67,9 @@ export function nextReadingMonth(start: Date): Date {
   return result;
 }
 
-type PreparationConfig = { mode: 'disabled' | 'test'; apiKey?: string; redirectUrl: string; webhookUrl: string };
-function requireTest(config: PreparationConfig) {
-  if (config.mode !== 'test' || !config.apiKey?.startsWith('test_')) throw new Error('Reading billing is disabled; a dedicated Mollie test key is required');
+type PreparationConfig = { mode: 'disabled' | 'test' | 'live'; apiKey?: string; redirectUrl: string; webhookUrl: string };
+function requireBillingConfig(config: PreparationConfig) {
+  assertReadingKey(config.mode,config.apiKey||'');
   for (const value of [config.redirectUrl, config.webhookUrl]) {
     if (new URL(value).protocol !== 'https:') throw new Error('HTTPS endpoints required');
   }
@@ -78,7 +79,7 @@ function requireTest(config: PreparationConfig) {
 export function firstReadingPayment(config: PreparationConfig, order: {
   id: string; customerId: string; owner: ReadingIdentity; consentRecorded: boolean; quantity?:number;
 }) {
-  requireTest(config);
+  requireBillingConfig(config);
   if (!order.id || !order.customerId.startsWith('cst_') || order.consentRecorded !== true) throw new Error('Order, customer and recurring-payment consent required');
   return {
     amount: readingAmount(order.quantity), customerId: order.customerId, sequenceType: 'first',
@@ -90,7 +91,7 @@ export function firstReadingPayment(config: PreparationConfig, order: {
 export function recurringReadingSubscription(config: PreparationConfig, setup: {
   firstPaymentPaid: boolean; mandateStatus: string; mandateId: string; paidUntil: Date; quantity?:number;
 }, now = new Date()) {
-  requireTest(config);
+  requireBillingConfig(config);
   if (setup.firstPaymentPaid !== true || setup.mandateStatus !== 'valid' || !setup.mandateId.startsWith('mdt_')) throw new Error('Verified paid first payment and valid mandate required');
   if (!Number.isFinite(setup.paidUntil.getTime()) || setup.paidUntil <= now) throw new Error('A future paid period is required');
   return {

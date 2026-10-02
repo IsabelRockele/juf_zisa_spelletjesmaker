@@ -1,12 +1,12 @@
-import {readingConfig} from './config.js';
+import {readingConfig} from './config.js?v=live-1';
 import {createReadingAuth} from './reading-auth.js';
 const gate=document.getElementById('readingGate');
 // Token only in memory. Fragments are not sent to servers or in HTTP referrers.
 const incoming=location.hash.slice(1);
 const accountMode=new URLSearchParams(location.search).get('account')==='1';
-if(accountMode)sessionStorage.removeItem('zisa-reading-student');
-if(incoming){sessionStorage.setItem('zisa-reading-student',incoming);history.replaceState(null,'',location.pathname+location.search);}
-const token=accountMode?'':incoming||sessionStorage.getItem('zisa-reading-student')||'';
+if(accountMode)sessionStorage.removeItem('zisa-reading-student-'+readingConfig.environment);
+if(incoming){sessionStorage.setItem('zisa-reading-student-'+readingConfig.environment,incoming);history.replaceState(null,'',location.pathname+location.search);}
+const token=accountMode?'':incoming||sessionStorage.getItem('zisa-reading-student-'+readingConfig.environment)||'';
 let auth;
 async function request(){
   const headers=token?{'X-Reading-Token':token}:{Authorization:`Bearer ${await auth.token()}`};

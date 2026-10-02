@@ -1,4 +1,6 @@
-import {readingConfig} from './config.js';
+document.querySelector('header .brand').href='mijn-account.html'+(new URLSearchParams(location.search).get('test')==='1'?'?test=1':'');
+document.querySelector('header .badge').textContent=new URLSearchParams(location.search).get('test')==='1'?'Beheer · alleen testabonnementen':'Beheer · echte abonnementen';
+import {readingConfig} from './config.js?v=live-1';
 import {createReadingAuth} from './reading-auth.js';
 const el=id=>document.getElementById(id);
 let auth,current=null,busy=false,revision=0;

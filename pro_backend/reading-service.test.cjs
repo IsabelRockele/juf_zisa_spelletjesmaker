@@ -11,18 +11,18 @@ function database(){
  return {db,records};
 }
 function fixture(options={}){
- const {db,records}=database(),invoices=new Map(),payments=new Map(),operations=new Map();let clock=Date.parse('2027-01-15T12:00:00Z'),subscriptions=0,cancels=0,subscriptionAmount=null;
+ const {db,records}=options.database||database(),mode=options.mode||'test',invoices=new Map(),payments=new Map(),operations=new Map();let clock=Date.parse('2027-01-15T12:00:00Z'),subscriptions=0,cancels=0,subscriptionAmount=null;
  const provider={
   getProfile:async()=>({id:options.profileId||'pfl_test'}),
   createCustomer:async()=>({id:'cst_customer'}),
-  createPayment:async(payload,key)=>{if(!operations.has(key)){const id='tr_'+(payments.size+1);const p={...payload,id,mode:'test',status:'open',createdAt:new Date(clock).toISOString(),_links:{checkout:{href:'https://www.mollie.com/checkout/test'}}};payments.set(id,p);operations.set(key,p);}return operations.get(key);},
+  createPayment:async(payload,key)=>{if(!operations.has(key)){const id='tr_'+(payments.size+1);const p={...payload,id,mode,status:'open',createdAt:new Date(clock).toISOString(),_links:{checkout:{href:'https://www.mollie.com/checkout/test'}}};payments.set(id,p);operations.set(key,p);}return operations.get(key);},
   getPayment:async id=>structuredClone(payments.get(id)),
   getMandate:async()=>({id:'mdt_test',status:'valid'}),
   createSubscription:async(customer,payload)=>{subscriptionAmount=payload.amount.value;subscriptions++;if(options.beforeSubscription)await options.beforeSubscription();return {id:'sub_test'};},
   cancelSubscription:async()=>{cancels++;return {id:'sub_test',status:'canceled'};},
   listSubscriptionPayments:async()=>({_embedded:{payments:[...payments.values()].filter(p=>p.sequenceType==='recurring')}}),
  };
- const api=createReadingService(db,{mode:'test',apiKey:'test_fixture',redirectUrl:'https://example.test/return',webhookUrl:'https://example.test/webhook',profileId:'pfl_test'},{provider,now:()=>clock,hasPro:async uid=>uid==='pro-user',invoice:async invoice=>invoices.set(invoice.key,invoice)});
+ const api=createReadingService(db,{mode,apiKey:mode+'_fixture',redirectUrl:'https://example.test/return',webhookUrl:'https://example.test/webhook',profileId:'pfl_test'},{provider,now:()=>clock,hasPro:async uid=>uid==='pro-user',invoice:async invoice=>invoices.set(invoice.key,invoice)});
  const buyer={uid:'reader',email:'reader@example.test'},input={name:'Reader',address:'Teststraat 1',consent:true,consentVersion:'reading-monthly-v1'};
  const pay=id=>{const p=payments.get(id);Object.assign(p,{status:'paid',paidAt:new Date(clock).toISOString(),mandateId:'mdt_test'});};
  return {api,records,invoices,payments,buyer,input,pay,clock:()=>clock,setClock:v=>clock=v,counts:()=>({subscriptions,cancels,subscriptionAmount})};
@@ -137,4 +137,31 @@ test('failed school renewal expires all teacher seats without generating another
  const f=await paidSchool(2);await f.api.invite('reader',0,'teacher@example.test');await f.api.accept({uid:'teacher',email:'teacher@example.test'},schoolToken(f));const qr=await f.api.link('teacher');
  const end=(await f.api.status('reader')).paidUntil;f.setClock(end-12*3600000);recurringPayment(f,'tr_schoolfail',f.clock(),'failed');await f.api.payment('tr_schoolfail');assert.equal((await f.api.status('teacher')).allowed,true);assert.equal(f.invoices.size,1);
  f.setClock(end+1);assert.equal((await f.api.status('teacher')).allowed,false);await assert.rejects(()=>f.api.student(qr.token));assert.equal(f.invoices.size,1);
+});
+
+for(const mode of ['test','live']) test(mode+': isolated purchase, school seats, QR and cancellation',async()=>{
+ const shared=database(),f=fixture({mode,database:shared}),other=fixture({mode:mode==='test'?'live':'test',database:shared});
+ await f.api.checkout(f.buyer,{...f.input,quantity:2,organization:'School'});f.pay('tr_1');await f.api.payment('tr_1');
+ assert.equal((await other.api.status(f.buyer.uid)).school,null);assert.equal([...f.invoices.values()][0].environment,mode);
+ await f.api.invite(f.buyer.uid,0,'teacher@example.test');
+ const inv=[...f.records.values()].find(x=>x.kind==='invitation');const token=new URL(inv.url).hash.slice(8);
+ await assert.rejects(()=>other.api.accept({uid:'teacher',email:'teacher@example.test'},token));
+ await f.api.accept({uid:'teacher',email:'teacher@example.test'},token);
+ const qr=await f.api.link('teacher');await assert.rejects(()=>other.api.student(qr.token));
+ assert.equal((await f.api.student(qr.token)).allowed,true);assert.equal((await other.api.status('teacher')).allowed,false);
+ await assert.rejects(()=>f.api.cancel('teacher'));await f.api.cancel(f.buyer.uid);assert.equal((await f.api.status('teacher')).allowed,true);
+ assert([...f.records.keys()].every(k=>k.startsWith(mode==='test'?'readingTest':'readingLive')));
+});
+test('live order rejects a provider test payment without granting access or invoice',async()=>{
+ const f=fixture({mode:'live'});await f.api.checkout(f.buyer,f.input);f.pay('tr_1');f.payments.get('tr_1').mode='test';await assert.rejects(()=>f.api.payment('tr_1'));assert.equal((await f.api.status('reader')).allowed,false);assert.equal(f.invoices.size,0);
+});
+test('failed renewal queues one customer notice, survives old first-payment callbacks, clears after recovery',async()=>{
+ const f=fixture({mode:'live'});await f.api.checkout(f.buyer,f.input);f.pay('tr_1');await f.api.payment('tr_1');
+ const end=(await f.api.status('reader')).paidUntil;f.setClock(end-1000);
+ f.payments.set('tr_failed',{...f.payments.get('tr_1'),id:'tr_failed',status:'failed',sequenceType:'recurring',subscriptionId:'sub_test',createdAt:new Date(end).toISOString()});
+ await f.api.payment('tr_failed');await f.api.payment('tr_failed');await f.api.payment('tr_1');
+ let status=await f.api.status('reader');assert.equal(status.renewalFailed,true);assert.equal(status.allowed,true);assert.equal(f.invoices.size,1);
+ assert.equal([...f.records.values()].filter(v=>v.kind==='renewal-failed').length,1);
+ f.setClock(end+1);assert.equal((await f.api.status('reader')).allowed,false);
+ f.pay('tr_failed');await f.api.payment('tr_failed');assert.equal((await f.api.status('reader')).renewalFailed,false);assert.equal((await f.api.status('reader')).allowed,true);assert.equal(f.invoices.size,2);
 });

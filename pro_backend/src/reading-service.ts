@@ -1,4 +1,5 @@
-/** Durable reading billing integration. Test-only; mounted only when explicitly enabled. */
+/** Durable reading billing integration, isolated per explicitly enabled environment. */
+import {readingCollections,ReadingEnvironment,assertReadingKey} from './reading-environment';
 import { randomUUID, createHash } from 'crypto';
 import type { Firestore } from 'firebase-admin/firestore';
 import { readingOwnerKey, firstReadingPayment, recurringReadingSubscription, readingQuantity, readingAmount } from './reading-plan';
@@ -9,7 +10,7 @@ import { prepareReadingInvoice, ReadingInvoice } from './reading-invoice';
 import { readingSchool } from './reading-school';
 import { readingBilling } from './reading-billing';
 
-export type ReadingServiceConfig = { mode:'test'; apiKey:string; redirectUrl:string; webhookUrl:string; profileId:string };
+export type ReadingServiceConfig = { mode:ReadingEnvironment; apiKey:string; redirectUrl:string; webhookUrl:string; profileId:string };
 type Buyer = { uid:string; email:string };
 type Order = ReadingOrder & { email:string; billing:ReadingInvoice['customer']; createdAt:number; anchor?:number; checkoutUrl?:string; paymentStatus?:string; consentVersion:string; consentAt:number };
 const identity = (uid:string) => ({ project:'zisa-spelletjesmaker-pro' as const, uid });
@@ -22,22 +23,24 @@ export function createReadingService(db:Firestore, config:ReadingServiceConfig, 
   provider?:ReturnType<typeof readingMollie>;
   now?:()=>number;
 }) {
+  assertReadingKey(config.mode,config.apiKey);
+  const collections=readingCollections(config.mode);
   const provider=deps.provider || readingMollie(config);
   const now=deps.now || Date.now;
-  const school=readingSchool(db,now,config.redirectUrl);
-  const orders=db.collection(READING_COLLECTIONS.orders),accounts=db.collection(READING_COLLECTIONS.accounts);
+  const school=readingSchool(db,now,config.redirectUrl,config.mode);
+  const orders=db.collection(collections.orders),accounts=db.collection(collections.accounts);
   async function orderFor(uid:string):Promise<Order|null> {
     const account=await accounts.doc(ownerId(uid)).get();
     const id=account.data()?.orderId;
     if(!id)return null;
     const snap=await orders.doc(id).get();const order=snap.data() as Order;
-    if(!order || order.owner.uid!==uid || order.owner.project!=='zisa-spelletjesmaker-pro')throw new Error('Invalid owner binding');
+    if(!order || (order.environment||'test')!==config.mode || order.owner.uid!==uid || order.owner.project!=='zisa-spelletjesmaker-pro')throw new Error('Invalid owner binding');
     return order;
   }
   /** Provider operations are outside transactions. Stable keys make short retries safe.
    * After 50 minutes an uncertain result needs reconciliation, not another POST. */
   async function operation<T>(key:string, run:(id:string)=>Promise<T>):Promise<T> {
-    const ref=db.collection(READING_COLLECTIONS.operations).doc(key);
+    const ref=db.collection(collections.operations).doc(key);
     const saved=await db.runTransaction(async tx=>{
       const snap=await tx.get(ref);const data=snap.data();
       if(data?.done)return {done:true,value:data.value};
@@ -55,8 +58,10 @@ export function createReadingService(db:Firestore, config:ReadingServiceConfig, 
     const paidUntil=order ? readingPaidUntil(order,now()):0;
     const member=await school.membership(uid);
     const personal=(order?.quantity||1)===1&&paidUntil>now();
-    const invoices=await db.collection(READING_COLLECTIONS.invoices).where('ownerKey','==',readingOwnerKey(identity(uid))).get();
-    return {pro,allowed:pro||personal||member.allowed,school:school.overview(order),schoolMember:member.allowed,quantity:order?.quantity||1,amountEUR:readingAmount(order?.quantity).value,accessUntil:Math.max(personal?paidUntil:0,member.paidUntil),paidUntil,renewalCanceled:order?.renewalCanceled||false,cancelRequested:order?.cancelRequested||false,paymentStatus:order?.paymentStatus||(order?.firstPaymentId?'open':'none'),
+    const failedPeriods=order?Object.values(order.entries).filter(e=>e.paymentId!==order.firstPaymentId&&e.failed&&!e.paid&&!Object.values(order.entries).some(p=>p.paid&&!p.reversed&&p.period.start===e.period.start)):[];
+    const renewalFailed=failedPeriods.some(e=>e.period.end>now());
+    const invoices=await db.collection(collections.invoices).where('ownerKey','==',readingOwnerKey(identity(uid))).get();
+    return {renewalFailed,hasSubscription:!!order?.subscriptionId&&!order.renewalCanceled,pro,allowed:pro||personal||member.allowed,school:school.overview(order),schoolMember:member.allowed,quantity:order?.quantity||1,amountEUR:readingAmount(order?.quantity).value,accessUntil:Math.max(personal?paidUntil:0,member.paidUntil),paidUntil,renewalCanceled:order?.renewalCanceled||false,cancelRequested:order?.cancelRequested||false,paymentStatus:order?.paymentStatus||(order?.firstPaymentId?'open':'none'),
       invoices:invoices.docs.map(d=>({id:d.id,number:d.data().number,date:d.data().snapshot?.issuedAt,ready:d.data().ready===true})).sort((a,b)=>(b.date||'').localeCompare(a.date||''))};
   }
   async function checkout(buyer:Buyer, input:any) {
@@ -78,7 +83,7 @@ export function createReadingService(db:Firestore, config:ReadingServiceConfig, 
         if(!old.renewalCanceled && !['failed','canceled','expired'].includes(old.paymentStatus||'')){if((old.quantity||1)!==quantity)throw new Error('Je hebt al een lopende bestelling met een ander aantal plaatsen.');return existingId as string;}
       }
       const orderId=randomUUID();
-      const fresh:Order={id:orderId,owner:identity(buyer.uid),email:buyer.email,billing,quantity,createdAt:now(),customerId:'',firstPaymentId:'',entries:{},cancelRequested:false,renewalCanceled:false,consentVersion:'reading-monthly-v1',consentAt:now()};
+      const fresh:Order={environment:config.mode,id:orderId,owner:identity(buyer.uid),email:buyer.email,billing,quantity,createdAt:now(),customerId:'',firstPaymentId:'',entries:{},cancelRequested:false,renewalCanceled:false,consentVersion:'reading-monthly-v1',consentAt:now()};
       tx.create(orders.doc(orderId),fresh);tx.set(accountRef,{orderId},{merge:true});return orderId;
     });
     let order=(await orders.doc(id).get()).data() as Order;
@@ -88,7 +93,7 @@ export function createReadingService(db:Firestore, config:ReadingServiceConfig, 
     order={...order,customerId:customer.id};
     const result=await operation(`${id}-payment`,()=>provider.createPayment(firstReadingPayment(config,{id,customerId:customer.id,owner:order.owner,quantity:order.quantity,consentRecorded:true}),`${id}:first`));
     const url=new URL(result?._links?.checkout?.href || '');
-    if(!/^tr_[A-Za-z0-9]+$/.test(result.id) || result.mode!=='test' || url.protocol!=='https:' || !['www.mollie.com','checkout.mollie.com'].includes(url.hostname))throw new Error('Invalid checkout response');
+    if(!/^tr_[A-Za-z0-9]+$/.test(result.id) || result.mode!==config.mode || url.protocol!=='https:' || !['www.mollie.com','checkout.mollie.com'].includes(url.hostname))throw new Error('Invalid checkout response');
     await orders.doc(id).update({firstPaymentId:result.id,checkoutUrl:url.href});
     return {checkoutUrl:url.href};
   }
@@ -106,7 +111,7 @@ export function createReadingService(db:Firestore, config:ReadingServiceConfig, 
     const remote=await provider.cancelSubscription(order.customerId,order.subscriptionId);
     const next=confirmReadingCancellation(order,remote);
     await orders.doc(id).update({renewalCanceled:next.renewalCanceled});
-    const ref=db.collection(READING_COLLECTIONS.outbox).doc(`${id}-canceled`);
+    const ref=db.collection(collections.outbox).doc(`${id}-canceled`);
     await db.runTransaction(async tx=>{const s=await tx.get(ref);if(!s.exists)tx.create(ref,{kind:'cancellation',to:order.email,ownerKey:readingOwnerKey(order.owner),paidUntil:readingPaidUntil(order,now()),createdAt:now(),sent:false});});
   }
   async function payment(paymentId:string) {
@@ -117,6 +122,7 @@ export function createReadingService(db:Firestore, config:ReadingServiceConfig, 
     const ref=found.docs[0].ref;
     const result=await db.runTransaction(async tx=>{
       const snap=await tx.get(ref);const order=snap.data() as Order;
+      if((order.environment||'test')!==config.mode)throw new Error('Unexpected order environment');
       const isFirst=paymentId===order.firstPaymentId;
       const paidAt=Date.parse(remote.paidAt||'');
       if(isFirst && !order.anchor && remote.status!=='paid'){
@@ -150,8 +156,13 @@ export function createReadingService(db:Firestore, config:ReadingServiceConfig, 
     });
     if(!result)return;
     if(remote.status==='paid' && !result.entries[paymentId].reversed){
-      await deps.invoice(prepareReadingInvoice({payment:remote,owner:result.owner,period:result.entries[paymentId].period,customer:result.billing,quantity:result.quantity,paidAt:remote.paidAt!}));
+      await deps.invoice(prepareReadingInvoice({environment:config.mode,payment:remote,owner:result.owner,period:result.entries[paymentId].period,customer:result.billing,quantity:result.quantity,paidAt:remote.paidAt!}));
       if(paymentId===result.firstPaymentId)await renew(result,remote.mandateId||'');
+    }
+    const entry=result.entries[paymentId];
+    if(paymentId!==result.firstPaymentId && entry.failed && !entry.paid){
+      const job=db.collection(collections.outbox).doc(`${result.id}-failed-${paymentId}`);
+      await db.runTransaction(async tx=>{const existing=await tx.get(job);if(!existing.exists)tx.create(job,{kind:'renewal-failed',orderId:result.id,paymentId,to:result.email,paidUntil:readingPaidUntil(result,now()),createdAt:now(),sent:false,subject:(config.mode==='test'?'TEST — ':'')+'Zisa Lezen — maandelijkse betaling niet gelukt'});});
     }
     await settleCancellation(result.id);
   }
@@ -170,11 +181,11 @@ export function createReadingService(db:Firestore, config:ReadingServiceConfig, 
     if(!(await status(uid)).allowed)throw new Error('Geen actieve leestoegang.');
     const ref=accounts.doc(ownerId(uid));const version=await db.runTransaction(async tx=>{const s=await tx.get(ref);const v=(s.data()?.linkVersion||0)+1;tx.set(ref,{linkVersion:v},{merge:true});return v;});
     const result=createReadingLink(identity(uid),version,null,now());
-    await db.collection(READING_COLLECTIONS.links).doc(result.record.hash).set({...result.record,uid});
+    await db.collection(collections.links).doc(result.record.hash).set({...result.record,uid});
     return {token:result.token};
   }
   async function student(token:string) {
-    const snap=await db.collection(READING_COLLECTIONS.links).doc(hashReadingToken(token)).get();const record=snap.data() as any;
+    const snap=await db.collection(collections.links).doc(hashReadingToken(token)).get();const record=snap.data() as any;
     if(!record)throw new Error('Deze leeslink is niet actief.');
     const account=await accounts.doc(ownerId(record.uid)).get();
     const allowed=canUseReadingLink(record,{token,ownerKey:readingOwnerKey(identity(record.uid)),version:account.data()?.linkVersion,hasReadingAccess:(await status(record.uid)).allowed,now:now(),scope:'reading'});

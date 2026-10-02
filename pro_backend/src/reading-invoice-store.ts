@@ -2,7 +2,7 @@ import type { Firestore } from 'firebase-admin/firestore';
 import type { Bucket } from '@google-cloud/storage';
 import PDFDocument from 'pdfkit';
 import { archiveReadingInvoice, ReadingInvoice } from './reading-invoice';
-import { READING_COLLECTIONS } from './reading-service';
+import {readingCollections,ReadingEnvironment} from './reading-environment';
 
 export type ReadingSeller = {name:string; address:string; email:string; enterprise:string; vatText:string};
 export function readingPdf(invoice:ReadingInvoice, number:string, seller:ReadingSeller):Promise<Buffer> {
@@ -11,8 +11,8 @@ export function readingPdf(invoice:ReadingInvoice, number:string, seller:Reading
     doc.on('data',c=>chunks.push(c));doc.on('end',()=>resolve(Buffer.concat(chunks)));doc.on('error',reject);
     const text=(s:string,x:number,y:number,size=10,bold=false,width=500)=>doc.fillColor('#173f73').font(bold?'Helvetica-Bold':'Helvetica').fontSize(size).text(s,x,y,{width});
     doc.rect(0,0,595,100).fill('#173f73');doc.fillColor('white').font('Helvetica-Bold').fontSize(26).text('Zisa Lezen',42,30);
-    doc.fontSize(17).text('TESTFACTUUR',365,34,{width:190,align:'right'});
-    text('TEST - niet betalen en niet inboeken.',42,122,11,true);
+    doc.fontSize(17).text(invoice.environment==='test'?'TESTFACTUUR':'FACTUUR',365,34,{width:190,align:'right'});
+    text(invoice.environment==='test'?'TEST - niet betalen en niet inboeken.':'Betaald via Mollie.',42,122,11,true);
     if(invoice.customer.peppolRequested)text('Deze factuur wordt binnen 3 werkdagen via Peppol verzonden.',42,142,10,true);
     text(seller.name,42,166,11,true,275);text(seller.address,42,187,10,false,275);text(seller.email,42,217,10,false,275);
     text(seller.enterprise,42,238,8,false,505);
@@ -48,19 +48,21 @@ export function readingPdf(invoice:ReadingInvoice, number:string, seller:Reading
   });
 }
 
-/** Same central TEST counter and archive as Pro. No write to licenses or production mail. */
-export function readingInvoiceStore(db:Firestore,bucket:Bucket,seller:ReadingSeller) {
+/** Share the corresponding Pro invoice counter; keep archives and owner records isolated. */
+export function readingInvoiceStore(db:Firestore,bucket:Bucket,seller:ReadingSeller,mode:ReadingEnvironment='test') {
+  const collections=readingCollections(mode);
   return async (invoice:ReadingInvoice)=>{
-    const record=db.collection(READING_COLLECTIONS.invoices).doc(invoice.key);
+    if(invoice.environment!==mode)throw new Error('Invoice environment does not match store');
+    const record=db.collection(collections.invoices).doc(invoice.key);
     const result=await archiveReadingInvoice(invoice,{
       reserve:async value=>db.runTransaction(async tx=>{
         const snap=await tx.get(record);if(snap.exists)return {number:snap.data()!.number,snapshot:snap.data()!.snapshot,storageYear:snap.data()!.storageYear,archivePath:snap.data()!.path || snap.data()!.archivePath || `Facturen/test/${snap.data()!.storageYear}/${snap.data()!.number}.pdf`};
-        const counter=db.doc('counters/test_invoice_seq');const seq=await tx.get(counter);
+        const counter=db.doc(`counters/${mode}_invoice_seq`);const seq=await tx.get(counter);
         const issuedAt=new Date();const snapshot={...value,issuedAt:issuedAt.toISOString()};
-        const year=Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Europe/Brussels'}).format(issuedAt));const next=seq.data()?.year===year?seq.data()!.next:1;
-        const number=`TEST-${String(next||1).padStart(4,'0')}`;
+        const year=mode==='live'?issuedAt.getFullYear():Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Europe/Brussels'}).format(issuedAt));const next=seq.data()?.year===year?seq.data()!.next:1;
+        const number=`${mode==='test'?'TEST':year}-${String(next||1).padStart(4,'0')}`;
         tx.set(counter,{year,next:(next||1)+1});
-        const archivePath=`Facturen/test/Zisa Lezen/${year}/factuur-zisa-lezen-${number}.pdf`;
+        const archivePath=`Facturen/${mode}/Zisa Lezen/${year}/factuur-zisa-lezen-${number}.pdf`;
         tx.create(record,{archivePath,number,snapshot,ownerKey:value.ownerKey,ready:false,storageYear:year,
           peppolStatus:value.customer.peppolRequested?'pending_manual':'not_requested'});
         return {number,snapshot,storageYear:year,archivePath};
@@ -71,7 +73,7 @@ export function readingInvoiceStore(db:Firestore,bucket:Bucket,seller:ReadingSel
         catch(error){if(Number((error as any).code)!==412)throw error;}
       },
       enqueue:async(key,job)=>{
-        const ref=db.collection(READING_COLLECTIONS.outbox).doc(key);
+        const ref=db.collection(collections.outbox).doc(key);
         await db.runTransaction(async tx=>{const s=await tx.get(ref);if(!s.exists)tx.create(ref,{...job,kind:'invoice',sent:false,createdAt:Date.now(),deliveryEnabled:false});});
       },
     });

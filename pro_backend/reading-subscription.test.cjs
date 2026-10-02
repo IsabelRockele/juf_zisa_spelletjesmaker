@@ -141,3 +141,17 @@ test('reading archive uses reserved calendar year and keeps an existing legacy i
  await archiveReadingInvoice(invoice,ports);assert.equal(paths[0],'Facturen/test/Zisa Lezen/2027/factuur-zisa-lezen-TEST-0001.pdf');
  archivePath='Facturen/test/2026/TEST-0001.pdf';await archiveReadingInvoice(invoice,ports);assert.equal(paths[1],archivePath);
 });
+
+test('live Mollie adapter binds key and responses to live and separates retry keys',async()=>{
+ const calls=[];const transport=async(url,o)=>{calls.push(o);return {ok:true,status:200,json:async()=>({id:'tr_first',mode:'test'})}};
+ const live=readingMollie({mode:'live',apiKey:'live_fixture'},transport),testClient=readingMollie({mode:'test',apiKey:'test_fixture'},transport);
+ await assert.rejects(()=>live.getPayment('tr_first'));await live.createCustomer('buyer@example.test','same-operation');await testClient.createCustomer('buyer@example.test','same-operation');assert.notEqual(calls[1].headers['Idempotency-Key'],calls[2].headers['Idempotency-Key']);
+});
+test('real invoice requires explicit live environment, matching reservation and private live archive',async()=>{
+ const input={environment:'live',payment:{...payment(),mode:'live'},owner,period:readingPeriod(anchor,0),customer:{name:'Buyer',address:'Street 1',email:'buyer@example.test'},paidAt:new Date(anchor).toISOString()};
+ const invoice=prepareReadingInvoice(input);assert.equal(invoice.key,'reading-live-tr_first');let path,mail;
+ const ports={reserve:async()=>({number:'2027-0012',snapshot:invoice,storageYear:2027}),render:async()=>Buffer.from('PDF'),archive:async p=>path=p,enqueue:async(k,j)=>mail=j};
+ await archiveReadingInvoice(invoice,ports);assert.match(path,/^Facturen\/live\/Zisa Lezen\/2027\//);assert(!mail.subject.includes('TEST'));assert.equal(mail.to,'buyer@example.test');
+ await assert.rejects(()=>archiveReadingInvoice(invoice,{...ports,reserve:async()=>({number:'TEST-0012',snapshot:invoice})}));
+ await assert.rejects(()=>archiveReadingInvoice(invoice,{...ports,reserve:async()=>({number:'2027-0012',snapshot:invoice,archivePath:'Facturen/test/2027/TEST-0012.pdf'})}));
+});

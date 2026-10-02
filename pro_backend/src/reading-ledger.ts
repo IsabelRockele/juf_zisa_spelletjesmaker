@@ -7,9 +7,9 @@ export type ReadingPayment = {
   amountRefunded?: { currency: string; value: string }; amountChargedBack?: { currency: string; value: string };
   metadata?: { product?: string; orderId?: string; ownerKey?: string };
 };
-export type LedgerEntry = { paymentId: string; period: ReadingPeriod; paid: boolean; reversed: boolean };
+export type LedgerEntry = { paymentId: string; period: ReadingPeriod; paid: boolean; reversed: boolean; failed?:boolean };
 export type ReadingOrder = {
-  id: string; owner: ReadingIdentity; customerId: string; subscriptionId?: string;
+  environment?: 'test' | 'live'; id: string; owner: ReadingIdentity; customerId: string; subscriptionId?: string;
   quantity?:number; firstPaymentId: string; entries: Record<string, LedgerEntry>; cancelRequested: boolean; renewalCanceled: boolean;
 };
 
@@ -35,7 +35,7 @@ function reversedAmount(amount?: { currency: string; value: string }) {
  * period must come from a durable payment->billing-period mapping, never webhook arrival time.
  * This preparation fails closed on any refund; partial refunds require manual review. */
 export function applyReadingPayment(order: ReadingOrder, payment: ReadingPayment, period: ReadingPeriod): ReadingOrder {
-  if (!/^tr_[A-Za-z0-9]+$/.test(payment.id) || payment.mode !== 'test' || payment.customerId !== order.customerId
+  if (!/^tr_[A-Za-z0-9]+$/.test(payment.id) || payment.mode !== (order.environment||'test') || payment.customerId !== order.customerId
     || payment.amount?.currency !== READING_PLAN.amount.currency || payment.amount?.value !== readingAmount(order.quantity).value) throw new Error('Payment does not match reading order');
   const first = payment.id === order.firstPaymentId;
   if (first) {
@@ -49,7 +49,7 @@ export function applyReadingPayment(order: ReadingOrder, payment: ReadingPayment
   if (previous && (previous.period.id !== period.id || previous.period.start !== period.start || previous.period.end !== period.end)) throw new Error('Payment period cannot change');
   const reversed = previous?.reversed === true || reversedAmount(payment.amountRefunded) || reversedAmount(payment.amountChargedBack);
   const paid = previous?.paid === true || payment.status === 'paid';
-  return { ...order, entries: { ...order.entries, [payment.id]: { paymentId: payment.id, period: { ...period }, paid, reversed } } };
+  return { ...order, entries: { ...order.entries, [payment.id]: { paymentId: payment.id, period: { ...period }, paid, reversed, failed:!paid && ['failed','canceled','expired'].includes(payment.status) } } };
 }
 export function readingPaidUntil(order: ReadingOrder, now: number): number {
   if (!Number.isFinite(now)) return 0;

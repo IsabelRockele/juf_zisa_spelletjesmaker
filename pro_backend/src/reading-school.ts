@@ -1,3 +1,4 @@
+import {readingCollections,ReadingEnvironment} from './reading-environment';
 import {randomBytes,createHash} from 'crypto';
 import type {Firestore} from 'firebase-admin/firestore';
 import {readingPaidUntil,ReadingOrder} from './reading-ledger';
@@ -7,9 +8,10 @@ type SchoolOrder=ReadingOrder & {seats?:Record<string,Seat>};
 const ownerKey=(uid:string)=>readingOwnerKey({project:'zisa-spelletjesmaker-pro',uid});
 const accountId=(uid:string)=>createHash('sha256').update(ownerKey(uid)).digest('hex');
 const digest=(value:string)=>createHash('sha256').update(value).digest('hex');
-export function readingSchool(db:Firestore,now:()=>number,returnUrl:string){
- const accounts=db.collection('readingTestAccounts'),orders=db.collection('readingTestOrders');
- const invites=db.collection('readingTestInvitations'),outbox=db.collection('readingTestOutbox');
+export function readingSchool(db:Firestore,now:()=>number,returnUrl:string,mode:ReadingEnvironment='test'){
+ const collections=readingCollections(mode);
+ const accounts=db.collection(collections.accounts),orders=db.collection(collections.orders);
+ const invites=db.collection(collections.invitations),outbox=db.collection(collections.outbox);
  function overview(order:SchoolOrder|null){
    if(!order || (order.quantity||1)<2)return null;
    return {quantity:order.quantity,active:readingPaidUntil(order,now())>now(),seats:Array.from({length:order.quantity!},(_,i)=>{
@@ -49,7 +51,7 @@ export function readingSchool(db:Firestore,now:()=>number,returnUrl:string){
      if(!remove){
        tx.create(invites.doc(hash),{orderId,index,email,version,expiresAt,acceptedUid:null});
        const url=new URL(returnUrl);url.hash=`invite=${token}`;
-       tx.create(outbox.doc(`invite-${hash}`),{kind:'invitation',to:email,subject:'TEST — Je school nodigt je uit voor Zisa Lezen',url:url.href,invitationHash:hash,createdAt:now(),sent:false});
+       tx.create(outbox.doc(`invite-${hash}`),{kind:'invitation',to:email,subject:(mode==='test'?'TEST — ':'')+'Je school nodigt je uit voor Zisa Lezen',url:url.href,invitationHash:hash,createdAt:now(),sent:false});
      }
      return {queued:!remove};
    });

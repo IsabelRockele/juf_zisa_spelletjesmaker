@@ -1,7 +1,8 @@
-/** Test-only HTTP adapter. No key fallback to the existing live Pro payment configuration. */
+/** Explicit environment and key binding; no credential fallback. */
+import { assertReadingKey } from './reading-environment';
 import { createHash } from 'crypto';
 export function readingMollie(config: { mode: string; apiKey: string }, transport: typeof fetch = fetch) {
-  if (config.mode !== 'test' || !/^test_[A-Za-z0-9]+$/.test(config.apiKey || '')) throw new Error('Reading payments are disabled');
+  assertReadingKey(config.mode,config.apiKey);
   const id = (value: string, prefix: string) => {
     if (!new RegExp(`^${prefix}_[A-Za-z0-9]+$`).test(value)) throw new Error('Invalid Mollie ID');
     return value;
@@ -11,7 +12,7 @@ export function readingMollie(config: { mode: string; apiKey: string }, transpor
     const response = await transport(`https://api.mollie.com/v2${path}`, {
       method, headers: {
         Authorization: `Bearer ${config.apiKey}`, 'Content-Type': 'application/json',
-        ...(operationId ? { 'Idempotency-Key': createHash('sha256').update(`reading-test:${operationId}`).digest('hex') } : {}),
+        ...(operationId ? { 'Idempotency-Key': createHash('sha256').update(`reading-${config.mode}:${operationId}`).digest('hex') } : {}),
       }, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(15000),
     });
     if (!response.ok) throw new Error(`Mollie request failed (${response.status}); retry the same operation`);
@@ -24,7 +25,7 @@ export function readingMollie(config: { mode: string; apiKey: string }, transpor
     createPayment: (payload: unknown, operationId: string) => request('POST', '/payments', payload, operationId),
     getPayment: async (paymentId: string) => {
       const result = await request('GET', `/payments/${id(paymentId, 'tr')}`);
-      if (result?.id !== paymentId || result?.mode !== 'test') throw new Error('Unexpected payment mode or ID');
+      if (result?.id !== paymentId || result?.mode !== config.mode) throw new Error('Unexpected payment mode or ID');
       return result;
     },
     getMandate: (customer: string, mandate: string) => request('GET', `/customers/${id(customer, 'cst')}/mandates/${id(mandate, 'mdt')}`),
