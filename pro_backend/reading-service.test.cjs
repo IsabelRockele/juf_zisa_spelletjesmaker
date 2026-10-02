@@ -111,3 +111,5 @@ test('forged school amount and unpaid school cannot grant places',async()=>{
 test('simultaneous acceptance cannot give one place to two accounts',async()=>{
  const f=await paidSchool();await f.api.invite('reader',0,'a@example.test');const token=schoolToken(f);const results=await Promise.allSettled(['a','b'].map(uid=>f.api.accept({uid,email:'a@example.test'},token)));assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
 });
+
+test('checkout waits for webhook automatically instead of reporting no payment',async()=>{const f=fixture();await f.api.checkout(f.buyer,f.input);const pending=await f.api.status('reader');assert.equal(pending.paymentStatus,'open');assert.equal(pending.allowed,false);f.pay('tr_1');await f.api.payment('tr_1');const paid=await f.api.status('reader');assert.equal(paid.paymentStatus,'paid');assert.equal(paid.allowed,true);});

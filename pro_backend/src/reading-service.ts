@@ -56,7 +56,7 @@ export function createReadingService(db:Firestore, config:ReadingServiceConfig, 
     const member=await school.membership(uid);
     const personal=(order?.quantity||1)===1&&paidUntil>now();
     const invoices=await db.collection(READING_COLLECTIONS.invoices).where('ownerKey','==',readingOwnerKey(identity(uid))).get();
-    return {pro,allowed:pro||personal||member.allowed,school:school.overview(order),schoolMember:member.allowed,quantity:order?.quantity||1,amountEUR:readingAmount(order?.quantity).value,accessUntil:Math.max(personal?paidUntil:0,member.paidUntil),paidUntil,renewalCanceled:order?.renewalCanceled||false,cancelRequested:order?.cancelRequested||false,paymentStatus:order?.paymentStatus||'none',
+    return {pro,allowed:pro||personal||member.allowed,school:school.overview(order),schoolMember:member.allowed,quantity:order?.quantity||1,amountEUR:readingAmount(order?.quantity).value,accessUntil:Math.max(personal?paidUntil:0,member.paidUntil),paidUntil,renewalCanceled:order?.renewalCanceled||false,cancelRequested:order?.cancelRequested||false,paymentStatus:order?.paymentStatus||(order?.firstPaymentId?'open':'none'),
       invoices:invoices.docs.map(d=>({id:d.id,number:d.data().number,date:d.data().snapshot?.issuedAt,ready:d.data().ready===true})).sort((a,b)=>(b.date||'').localeCompare(a.date||''))};
   }
   async function checkout(buyer:Buyer, input:any) {
