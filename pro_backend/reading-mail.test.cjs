@@ -1,11 +1,11 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('fs'),vm=require('vm'),ts=require('typescript');
-function setup(mode='test',extraEnv={}){
+function setup(mode='test',extraEnv={},order=null){
  const sent=new Map(),updates=[],triggers={};let downloads=0,fail=false;
  const data={kind:'invoice',sent:false,invoicePath:'Facturen/test/Zisa Lezen/2026/factuur-zisa-lezen-TEST-0004.pdf',invoiceNumber:'TEST-0004',to:'realbuyer@example.test'};
  if(mode==='live')Object.assign(data,{invoicePath:'Facturen/live/Zisa Lezen/2026/factuur-zisa-lezen-2026-0010.pdf',invoiceNumber:'2026-0010'});
  const job={id:'reading-test-tr_test:customer',data:()=>({...data}),ref:{update:async patch=>updates.push(patch)}};
- const db={collection:name=>({doc:id=>({id}),where:()=>({limit:()=>({get:async()=>({docs:[job]})})})}),runTransaction:async fn=>fn({get:async ref=>({exists:sent.has(ref.id)}),create:(ref,value)=>sent.set(ref.id,value),update:(_,patch)=>updates.push(patch)})};
- const overrides={'firebase-functions/v2/https':{onRequest:(_,f)=>f},'firebase-functions/v2/scheduler':{onSchedule:(_,f)=>f},'firebase-functions/v2/firestore':{onDocumentCreated:(opts,f)=>{triggers.options=opts;return f;}},'firebase-functions/params':{defineSecret:()=>({value:()=>''})},'firebase-admin/auth':{},'firebase-admin/firestore':{getFirestore:()=>db},'firebase-admin/storage':{getStorage:()=>({bucket:()=>({file:()=>({download:async()=>{downloads++;if(fail){fail=false;throw Error('temporary storage error');}return [Buffer.from('test PDF')];}})})})},'./reading-environment':require('./lib/reading-environment'),'./reading-invoice':require('./lib/reading-invoice'),'./reading-verification':{},'./reading-admin':{},'./reading-ledger':{},'./reading-security':{},'./reading-service':{READING_COLLECTIONS:{outbox:'readingTestOutbox'}},'./reading-invoice-store':{}};
+ const db={collection:name=>({doc:id=>({id,get:async()=>({data:()=>order})}),where:()=>({limit:()=>({get:async()=>({docs:[job]})})})}),runTransaction:async fn=>fn({get:async ref=>({exists:sent.has(ref.id)}),create:(ref,value)=>sent.set(ref.id,value),update:(_,patch)=>updates.push(patch)})};
+ const overrides={'firebase-functions/v2/https':{onRequest:(_,f)=>f},'firebase-functions/v2/scheduler':{onSchedule:(_,f)=>f},'firebase-functions/v2/firestore':{onDocumentCreated:(opts,f)=>{triggers.options=opts;return f;}},'firebase-functions/params':{defineSecret:()=>({value:()=>''})},'firebase-admin/auth':{},'firebase-admin/firestore':{getFirestore:()=>db},'firebase-admin/storage':{getStorage:()=>({bucket:()=>({file:()=>({download:async()=>{downloads++;if(fail){fail=false;throw Error('temporary storage error');}return [Buffer.from('test PDF')];}})})})},'./reading-environment':require('./lib/reading-environment'),'./reading-invoice':require('./lib/reading-invoice'),'./reading-verification':{},'./reading-admin':{},'./reading-ledger':require('./lib/reading-ledger'),'./reading-security':{},'./reading-service':{READING_COLLECTIONS:{outbox:'readingTestOutbox'}},'./reading-invoice-store':{}};
  const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('src/reading-http.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,require:n=>Object.hasOwn(overrides,n)?overrides[n]:require(n),Buffer,process:{env:{READING_LIVE_ENABLED:'true',READING_LIVE_MAIL_ENABLED:'true',READING_LIVE_RETURN_URL:'https://tools.jufzisa.be/lezen/mijn-account.html',READING_TEST_ENABLED:'true',READING_TEST_MAIL_ENABLED:'true',READING_TEST_RECIPIENT:'buyer@example.test',READING_RETURN_URL:'https://tools.jufzisa.be/lezen/mijn-account.html?test=1',...extraEnv}}});
  return {api:exports.createReadingFunctions(async()=>false,{},mode),job,sent,updates,triggers,failNext(){fail=true},get downloads(){return downloads}};
 }
@@ -20,3 +20,13 @@ test('live invoice sends only to invoice customer, never test recipient, immedia
 });
 test('live mail stays disabled until explicitly enabled',async()=>{const s=setup('live',{READING_LIVE_ENABLED:'false'});await s.api.readingMailCreated({data:s.job});assert.equal(s.sent.size,0)});
 test('live mail rejects attachment from test archive',async()=>{const s=setup('live');await assert.rejects(()=>s.api.readingMailCreated({data:{...s.job,data:()=>({...s.job.data(),invoicePath:'Facturen/test/2026/TEST-0004.pdf'})}}));assert.equal(s.sent.size,0)});
+
+test('failed live renewal sends buyer notice once, without invoice attachment',async()=>{
+ const now=Date.now(),order={entries:{tr_fail:{failed:true,paid:false,reversed:false,period:{start:now,end:now+86400000}}}};
+ const s=setup('live',{},order),job={...s.job,id:'order-failed-tr_fail',data:()=>({kind:'renewal-failed',orderId:'order',paymentId:'tr_fail',to:'realbuyer@example.test',subject:'Maandelijkse betaling niet gelukt'})};
+ await s.api.readingMailCreated({data:job});await s.api.readingMailCreated({data:job});assert.equal(s.sent.size,1);const mail=[...s.sent.values()][0];assert.equal(mail.to[0],'realbuyer@example.test');assert(mail.message.text.includes('niet gelukt'));assert.equal(mail.message.attachments.length,0);
+});
+test('recovered renewal skips an unsent failure notice',async()=>{
+ const s=setup('live',{}, {entries:{tr_fail:{paid:true,failed:false}}});
+ await s.api.readingMailCreated({data:{...s.job,data:()=>({kind:'renewal-failed',orderId:'order',paymentId:'tr_fail',to:'realbuyer@example.test'})}});assert.equal(s.sent.size,0);assert.equal(s.updates[0].reason,'payment_recovered');
+});
