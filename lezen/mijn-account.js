@@ -1,4 +1,5 @@
-import { createAccountLayout } from './account-layout.js?v=2';
+import { renderClassQr } from './klas-qr.js?v=1';
+import { createAccountLayout } from './account-layout.js?v=3';
 import { readingConfig } from './config.js?v=koop-1';
 import { createReadingAuth } from './reading-auth.js?v=verificatie-2';
 const el=id=>document.getElementById(id),show=(id,visible)=>{el(id).hidden=!visible;};
@@ -147,6 +148,6 @@ else{
   el('acceptInvitation').onclick=()=>task(async()=>{await api('school-accept',{token:invitationToken()});sessionStorage.removeItem('zisa-reading-invitation');show('acceptInvitation',false);show('invitation',false);await refresh();accountLayout.reading();message('Je leerkrachtplaats is actief. Open hieronder Zisa Lezen of maak een klas-QR voor je leerlingen.');el('accessText').scrollIntoView({block:'center',behavior:'auto'});el('newLink').focus({preventScroll:true});});
   el('purchaseForm').onsubmit=e=>{e.preventDefault();if(!validatePurchase())return;task(async()=>{const body={quantity:Number(el('quantity').value),consent:el('consent').checked,consentVersion:'reading-monthly-v1',peppolRequested:el('peppolRequested').checked};for(const key of ['name','address','organization','vatNumber','billingEmail','peppolId','gln','purchaseReference'])body[key]=el(key).value;const result=await(await api('checkout',body)).json();const url=new URL(result.checkoutUrl);if(url.protocol!=='https:'||!['www.mollie.com','checkout.mollie.com'].includes(url.hostname))throw new Error('Ongeldige betaallink.');location.assign(url.href);});};
   el('cancel').onclick=()=>{el('cancelText').textContent=`Wil je de automatische verlenging stoppen? Je behoudt je betaalde toegang${lastStatus.paidUntil?' tot '+date(lastStatus.paidUntil):''}.`;show('confirmCancel',true);};el('cancelNo').onclick=()=>show('confirmCancel',false);el('cancelYes').onclick=()=>task(async()=>{await api('cancel');show('confirmCancel',false);await refresh();});
-  el('newLink').onclick=()=>task(async()=>{const result=await(await api('link')).json();const url=new URL('bibliotheek.html',location.href);if(testQuery)url.searchParams.set('test','1');url.hash=result.token;el('studentLink').value=url.href;el('qr').replaceChildren();if(window.QRCode)new window.QRCode(el('qr'),{text:url.href,width:220,height:220,colorDark:'#173f73',colorLight:'#ffffff'});show('share',true);message('Je nieuwe leerlinglink staat klaar. De vorige link is vervangen.');});
+  el('newLink').onclick=()=>task(async()=>{const result=await(await api('link')).json();const url=new URL('bibliotheek.html',location.href);if(testQuery)url.searchParams.set('test','1');url.hash=result.token;el('studentLink').value=url.href;show('share',true);renderClassQr(el('qr'),url.href);message('Je klas-QR en leeslink staan klaar. De vorige QR is vervangen.');});
   el('copyLink').onclick=()=>task(async()=>{await navigator.clipboard.writeText(el('studentLink').value);message('Leeslink gekopieerd.');});
 }

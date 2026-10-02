@@ -10,7 +10,8 @@ export function createAccountLayout(){
   const panel=document.createElement('div');panel.id='account-'+key;panel.className='account-panel';panels[key]=panel;
  }
  const logout=el('logout');
- panels.school.append(el('school'));panels.reading.append(reading);panels.billing.append(subscription,invoices);
+ const share=el('share');share.classList.add('card');const shareTitle=document.createElement('h2');shareTitle.textContent='Je klas-QR en leeslink';share.prepend(shareTitle);shareTitle.after(el('qr'));
+ panels.school.append(el('school'));panels.reading.append(reading,share);panels.billing.append(subscription,invoices);
  const toolbar=document.createElement('div');toolbar.className='account-toolbar';const identity=document.createElement('p');identity.className='account-identity';toolbar.append(identity,logout);
  dashboard.replaceChildren(toolbar,nav,...Object.values(panels));
  function select(key){
