@@ -113,3 +113,28 @@ test('simultaneous acceptance cannot give one place to two accounts',async()=>{
 });
 
 test('checkout waits for webhook automatically instead of reporting no payment',async()=>{const f=fixture();await f.api.checkout(f.buyer,f.input);const pending=await f.api.status('reader');assert.equal(pending.paymentStatus,'open');assert.equal(pending.allowed,false);f.pay('tr_1');await f.api.payment('tr_1');const paid=await f.api.status('reader');assert.equal(paid.paymentStatus,'paid');assert.equal(paid.allowed,true);});
+
+function recurringPayment(f,id,start,status){
+ const first=f.payments.get('tr_1');
+ const payment={...first,id,sequenceType:'recurring',subscriptionId:'sub_test',status,createdAt:new Date(start).toISOString()};
+ if(status==='paid')payment.paidAt=new Date(start).toISOString();else delete payment.paidAt;
+ f.payments.set(id,payment);
+}
+test('paid renewal extends exactly one month, keeps existing pupil QR and deduplicates concurrent notifications',async()=>{
+ const f=fixture();await f.api.checkout(f.buyer,f.input);f.pay('tr_1');await f.api.payment('tr_1');
+ const end=(await f.api.status('reader')).paidUntil;const qr=await f.api.link('reader');f.setClock(end);
+ recurringPayment(f,'tr_renew',end,'paid');await Promise.all([f.api.payment('tr_renew'),f.api.payment('tr_renew')]);await f.api.payment('tr_renew');
+ const s=await f.api.status('reader');assert.equal(new Date(s.paidUntil).toISOString(),'2027-03-15T12:00:00.000Z');assert.equal(s.allowed,true);assert.equal(s.paymentStatus,'paid');assert.equal(f.invoices.size,2);assert.equal(f.counts().subscriptions,1);assert.equal((await f.api.student(qr.token)).allowed,true);
+});
+test('failed renewal preserves remaining paid hours, creates no invoice and closes access and QR at expiry',async()=>{
+ const f=fixture();await f.api.checkout(f.buyer,f.input);f.pay('tr_1');await f.api.payment('tr_1');
+ const end=(await f.api.status('reader')).paidUntil;const qr=await f.api.link('reader');const midnight=end-12*3600000;f.setClock(midnight);
+ recurringPayment(f,'tr_failed',midnight,'failed');await f.api.payment('tr_failed');await f.api.payment('tr_failed');
+ let s=await f.api.status('reader');assert.equal(s.paymentStatus,'failed');assert.equal(s.paidUntil,end);assert.equal(s.allowed,true);assert.equal(f.invoices.size,1);assert.equal((await f.api.student(qr.token)).allowed,true);
+ f.setClock(end+1);s=await f.api.status('reader');assert.equal(s.allowed,false);await assert.rejects(()=>f.api.student(qr.token));assert.equal(f.invoices.size,1);
+});
+test('failed school renewal expires all teacher seats without generating another school invoice',async()=>{
+ const f=await paidSchool(2);await f.api.invite('reader',0,'teacher@example.test');await f.api.accept({uid:'teacher',email:'teacher@example.test'},schoolToken(f));const qr=await f.api.link('teacher');
+ const end=(await f.api.status('reader')).paidUntil;f.setClock(end-12*3600000);recurringPayment(f,'tr_schoolfail',f.clock(),'failed');await f.api.payment('tr_schoolfail');assert.equal((await f.api.status('teacher')).allowed,true);assert.equal(f.invoices.size,1);
+ f.setClock(end+1);assert.equal((await f.api.status('teacher')).allowed,false);await assert.rejects(()=>f.api.student(qr.token));assert.equal(f.invoices.size,1);
+});
