@@ -19,7 +19,7 @@ function quarterFigure(g,shape,selected=new Set(),interactive=false,outline=true
  else for(let i=0;i<4;i++)rect(g,380+(i%2)*120,40+Math.floor(i/2)*120,120,120,'white',attrs(i));
 }
 let stripStep=0,stripAnswer=false,chosen=0;
-const titles=['Wat is het geheel?','Weet je nog: de helft.','Verdeel elke helft nog eens in twee.','Wijs één van de vier gelijke delen aan.','Kan het ook op een andere manier?','Zijn dit vier kwarten?'];
+const titles=['Wat is het geheel?','Weet je nog? Hoe noemen we het groene deel?','Verdeel elke helft nog eens in twee.','Wijs één van de vier gelijke delen aan.','Kan het ook op een andere manier?','Zijn dit vier kwarten?'];
 const explanations=['De hele figuur is het geheel.','Een helft is één van twee gelijke delen.','Het geheel is nu verdeeld in vier gelijke delen.','Dit deel is een kwart. Elk van de andere drie delen is óók een kwart.','Ja. Ook deze vier driehoeken zijn even groot. Elk deel is een kwart.','Nee. Er zijn vier delen, maar ze zijn niet even groot.'];
 function strips(){const g=$('strip-board');g.replaceChildren();$('strip-title').textContent=titles[stripStep];$('strip-progress').textContent=`Stap ${stripStep+1} van 6`;$('strip-back').disabled=stripStep===0;$('strip-next').disabled=stripStep===5;$('strip-result').textContent=stripAnswer?explanations[stripStep]:'';$('strip-reveal').textContent=stripAnswer?'Verberg uitleg':'Bespreek';$('strip-hint').textContent=stripStep===0?'We leren een geheel in vier gelijke delen verdelen en één kwart nemen.':stripStep===3||stripStep===4?'Tik op een deel. Kun je ook een ander kwart aanwijzen?':'Laat de kinderen meedenken en, met een eigen blad, meevouwen.';
  if(stripStep===0)rect(g,380,40,240,240,'#66abc1');
