@@ -8,7 +8,8 @@
     { block: 1, number: 21, title: 'Tijdsduur in dagen', description: 'Ervaar tijd met groepstimers en tel samen de nachten tussen twee dagen.', parts: ['Tijd ervaren', 'Dagen springen', 'Samen oefenen'], url: 'wiskanjers-b1-les21.html' },
     { block: 1, number: 24, title: 'Optellen en aftrekken tot 20 zonder en met brug', description: 'Oefen bewerkingen, ontbrekende getallen en verhaaltjes. Toon splitsbenen en reken via 10.', parts: ['Bewerkingen', 'Stappenplan', 'Verhaaltjes'], url: 'wiskanjers-b1-les24.html' },
     { block: 2, number: 1, title: 'Even en oneven getallen tot 20', description: 'Flits getalbeelden, verdeel voorwerpen en ontdek even en oneven getallen.', parts: ['Getalbeelden flitsen', 'Samen verdelen', 'Even of oneven?'], url: 'wiskanjers-b2-les1.html' },
-    { block: 2, number: 2, title: 'Een geheel verdelen in gelijke delen', description: 'Vouw papier, verdeel blokjes en oefen met het geheel en gelijke delen.', parts: ['Papier vouwen', 'Blokjes verdelen', 'Figuren oefenen'], url: 'wiskanjers-b2-les2.html' }
+    { block: 2, number: 2, title: 'Een geheel verdelen in gelijke delen', description: 'Vouw papier, verdeel blokjes en oefen met het geheel en gelijke delen.', parts: ['Papier vouwen', 'Blokjes verdelen', 'Figuren oefenen'], url: 'wiskanjers-b2-les2.html' },
+    { block: 2, number: 3, title: 'De helft en het dubbel', description: 'Ontdek helften en het dubbel met stroken en blokjes. Oefen samen tekenen, kleuren en verwoorden.', parts: ['Stroken', 'Blokjes', 'Samen oefenen'], url: 'wiskanjers-b2-les3.html' }
   ];
   const $ = id => document.getElementById(id);
   for (let block = 1; block <= 8; block++) {
