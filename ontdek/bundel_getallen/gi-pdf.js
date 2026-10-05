@@ -30,6 +30,7 @@ window.GI_Pdf = (() => {
     // Bewaar originele stijlen
     const origSheetW   = sheet.style.width;
     const origSheetPos = sheet.style.position;
+    const origGridScale = sheet.style.getPropertyValue('--gi-pdf-px-per-mm');
 
     // Reset bevroren breedtes van exercise-blokken en SVG's
     const bevroren = Array.from(sheet.querySelectorAll('.exercise, .exercise svg'));
@@ -47,7 +48,7 @@ window.GI_Pdf = (() => {
     // Verberg knoppen
     const knoppen = Array.from(document.querySelectorAll(
       '.title-add-btn, .title-delete-btn, .delete-btn, .row-delete-btn, ' +
-      '.block-delete-btn, .ruler-warning'
+      '.block-delete-btn, .ruler-warning, .basis-tools'
     ));
     knoppen.forEach(b => { b._savedDisplay = b.style.display; b.style.display = 'none'; });
 
@@ -57,11 +58,14 @@ window.GI_Pdf = (() => {
 
     // Markeer als exporting (CSS kan hierop reageren)
     document.documentElement.classList.add('exporting');
+    sheet.style.setProperty('--gi-pdf-px-per-mm', (sheet.getBoundingClientRect().width / (210 - PDF_MARGIN_LEFT - PDF_MARGIN_RIGHT)) + 'px');
 
     return () => {
       // Herstel alles
       sheet.style.width    = origSheetW;
       sheet.style.position = origSheetPos;
+      if (origGridScale) sheet.style.setProperty('--gi-pdf-px-per-mm', origGridScale);
+      else sheet.style.removeProperty('--gi-pdf-px-per-mm');
       // Zet bevroren breedtes terug
       bevroren.forEach(el => {
         el.style.width    = el._origW    || '';
@@ -145,7 +149,8 @@ window.GI_Pdf = (() => {
     function blokHoortBijTitel(blok, key) {
       if (!blok || !key) return false;
       if (blok.dataset?.titleKey === key) return true;
-      return Array.from(blok.querySelectorAll?.('[data-title-key]') || []).some(el => el.dataset.titleKey === key);
+      return Array.from(blok.querySelectorAll?.('[data-title-key]') || [])
+        .some(el => el.dataset.titleKey === key);
     }
 
     function eersteOefenItemNaTitel(titleRow) {
@@ -385,6 +390,10 @@ window.GI_Pdf = (() => {
         if (g > snij && g <= maxY && !isVerbodenSnede(g) && !isKaartRand(g)) snij = g;
       }
 
+      // Een titel en zijn eerste visuele oefenrij vormen samen één pakket.
+      // Als dat pakket niet meer volledig op de huidige pagina past, moet de
+      // snede vóór de titel komen. Latere opvuloptimalisaties mogen die keuze
+      // niet terugdraaien.
       const gedwongenPakketStart = startPakketten
         .filter(p => p.start > startY + 1 && p.start < maxY && p.end > maxY)
         .sort((a, b) => a.start - b.start)[0]?.start;
@@ -442,8 +451,15 @@ window.GI_Pdf = (() => {
         }
       }
 
-      const pakketOpSnede = startPakketten.filter(p => snij > p.start && snij < p.end && p.start > startY + 1).sort((a,b)=>a.start-b.start)[0];
+      // Laatste, dwingende veiligheidscontrole. Welke optimalisatie hierboven
+      // ook een snijpunt koos: een paginagrens mag nooit in een pakket van
+      // opdrachtzin + eerste oefenrij vallen. Dit vangt ook titels op die door
+      // afronding of de herstel-overlap anders halverwege gesneden zouden zijn.
+      const pakketOpSnede = startPakketten
+        .filter(p => snij > p.start && snij < p.end && p.start > startY + 1)
+        .sort((a, b) => a.start - b.start)[0];
       if (pakketOpSnede) snij = pakketOpSnede.start;
+
       if (snij <= startY) snij = Math.min(maxY, canvas.height);
       plakjes.push({ y: startY, h: snij - startY });
       startY = snij;
@@ -549,6 +565,7 @@ window.GI_Pdf = (() => {
             cl.contains('delete-btn')       ||
             cl.contains('row-delete-btn')   ||
             cl.contains('sheet-title-hint') ||
+            cl.contains('basis-tools') ||
             cl.contains('ruler-warning')
           );
         },
@@ -574,11 +591,20 @@ window.GI_Pdf = (() => {
         // Knip dit plakje uit het canvas. Bij html2canvas kan een afgeronde
         // snede soms nog 1-2 randpixels van het volgende kaartje meenemen.
         // Daarom tonen we onderaan niet-laatste pagina's een minieme marge minder.
-        // Vervolgpagina's nemen tegelijk een klein stukje boven de snede mee,
-        // zodat de bovenrand van een oefenkader op de nieuwe pagina behouden blijft.
-        const onderTrimPx = i < plakjes.length - 1
+        // Vervolgpagina's starten exact op de snede. Een overlap zou tekst van
+        // een opdrachtbalk op twee pagina's kunnen herhalen.
+        let onderTrimPx = i < plakjes.length - 1
           ? Math.min(Math.round(pxPerMm * 3), Math.max(0, sl.h - 1))
           : 0;
+        // De veiligheidsstrook mag geen rand of inhoud van een basiskaart wissen.
+        // De snijgrens ligt soms slechts enkele pixels onder de volledige kaart.
+        const factor = canvas.width / sheetRect.width;
+        sheet.querySelectorAll('.basis-card').forEach(card => {
+          const bottom = (card.getBoundingClientRect().bottom - sheetRect.top) * factor;
+          if (bottom > sl.y && bottom <= sl.y + sl.h + 1) {
+            onderTrimPx = Math.min(onderTrimPx, Math.max(0, Math.floor(sl.y + sl.h - bottom - 2 * factor)));
+          }
+        });
         const bovenHerstelPx = 0;
         const bronY = Math.max(0, sl.y - bovenHerstelPx);
         const renderH = Math.max(

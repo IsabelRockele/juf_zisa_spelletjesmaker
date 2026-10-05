@@ -20,6 +20,9 @@
       if (inp.classList.contains('seq-box') || inp.classList.contains('jump-box')) p += 0.5;
       else p += 1;
     });
+    el.querySelectorAll('.basis-card').forEach(card => {
+      if (!card.querySelector('input[type="text"]')) p += 1;
+    });
     return Math.round(p * 2) / 2;
   }
 
@@ -93,7 +96,7 @@
     const keyTotalen = {};
     const selectors = [
       '.exercise', '.jump-exercise-block', '.mixed-exercise-block',
-      '.rekentaal-exercise-block',
+      '.rekentaal-exercise-block', '.basis-block',
       '.sequence-exercise-block', '.honderdveld-exercise-block',
       '.mab-exercise-block', '.placevalue-exercise-block',
       '.hvp-block', '.hvicons-block', '.gb1000-exercise-block',
@@ -726,6 +729,8 @@ function addGetalbeelden1000(){
       addedTitles.add(key);
     }
   }
+
+  window.GI_BasisBridge = { title: ensureTitleOnce, register: _registerAddFn };
 
   // Bevries de renderbreedte van een blok en bijbehorend SVG
 function freezeBlockWidth(block, svg){
