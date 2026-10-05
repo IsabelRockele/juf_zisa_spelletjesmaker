@@ -49,6 +49,24 @@ const PdfVoorbeeld = (() => {
             acties.style.height = (anker.hoogte / doc.internal.pageSize.getHeight() * 100) + '%';
             doc.maakBewerking(acties, anker.groepId); papier.append(acties);
           }
+          const klokken=doc.klokAnkers || [];
+          for(const anker of klokken){
+            if(anker.pagina!==nummer)continue;
+            const acties=document.createElement('div');acties.className='pdf-klok-acties';
+            acties.dataset.klokId=anker.id;
+            acties.style.left=((anker.x+anker.breedte)/doc.internal.pageSize.getWidth()*100)+'%';
+            acties.style.top=(anker.y/doc.internal.pageSize.getHeight()*100)+'%';
+            doc.maakKlokBewerking(acties,anker.id);papier.append(acties);
+            // Also keep + Klok within reach on continuation pages.
+            const laatste=klokken.filter(k=>k.groepId===anker.groepId&&k.pagina===nummer).at(-1);
+            if(laatste===anker){
+              const toevoegen=document.createElement('button');toevoegen.type='button';
+              toevoegen.className='pdf-klok-toevoegen';toevoegen.textContent='+ Klok';
+              toevoegen.setAttribute('aria-label','Klok toevoegen aan deze opdracht');
+              toevoegen.style.top=((anker.y+anker.hoogte)/doc.internal.pageSize.getHeight()*100)+'%';
+              toevoegen.onclick=()=>doc.voegKlokToe(anker.groepId);papier.append(toevoegen);
+            }
+          }
           vel.append(label, papier); nieuwePaginas.append(vel);
           await pagina.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
           pagina.cleanup();

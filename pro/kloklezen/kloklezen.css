@@ -709,3 +709,12 @@ header .badge {
 
 .pdf-opdracht-acties .inline-bewerkingen { transform:translateY(-17px); }
 .pdf-opdracht-acties .inline-bewerkingen details[open] { position:absolute; right:0; top:28px; }
+
+/* Editing controls belong to the preview, never to the exported document. */
+.pdf-opdracht-acties .bundel-bewerkkop { opacity:1; }
+.losse-klok-acties { position:absolute; top:3px; right:3px; display:flex; gap:3px; z-index:3; pointer-events:auto; }
+.losse-klok-acties button { width:25px; height:25px; padding:0; margin:0; border:1px solid #9cbadb; border-radius:50%; background:#fff; color:#245d91; font-size:17px; cursor:pointer; }
+.losse-klok-acties button:last-child { background:#fff0f1; border-color:#edbec3; color:#b32335; }
+.pdf-klok-acties.losse-klok-acties { right:auto; transform:translate(-100%,2px); }
+.pdf-klok-toevoegen { position:absolute; right:5%; transform:translateY(-100%); z-index:3; border:1px solid #387c58; background:#e6f5eb; color:#216741; border-radius:6px; padding:3px 9px; cursor:pointer; }
+@media print { .losse-klok-acties,.pdf-klok-toevoegen,.pdf-opdracht-acties { display:none!important; } }

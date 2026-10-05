@@ -145,7 +145,7 @@ const HulpKlok = (() => {
     tekenKleuren(canvas, inst); container.appendChild(canvas);
   }
 
-  function pdf(doc, inst, canvas, y, margin, volgendePagina) {
+  function pdf(doc, inst, canvas, y, margin, volgendePagina, onRij) {
     const isKleur = inst.type === 'kleurparen', bron = isKleur ? inst.kaarten : inst.tijden;
     const stap = isKleur ? bron.length : 3;
     const pageW = doc.internal.pageSize.getWidth();
@@ -156,7 +156,8 @@ const HulpKlok = (() => {
       (isKleur ? tekenKleuren : teken)(canvas, rij);
       const hoogte = breedte * canvas.height / canvas.width;
       if (y + hoogte > doc.internal.pageSize.getHeight() - margin - 5) y = volgendePagina();
-      doc.addImage(canvas.toDataURL('image/png'), 'PNG', links, y, breedte, hoogte);
+      doc.addImage(canvas.toDataURL('image/png'), 'PNG', links, y, breedte, hoogte, undefined, 'FAST');
+      onRij?.(i,rij[isKleur?'kaarten':'tijden'].length,links,y,breedte,hoogte);
       y += hoogte;
     }
     return y;

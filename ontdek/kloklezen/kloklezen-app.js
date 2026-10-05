@@ -390,8 +390,7 @@ const KlokLezen = (() => {
       }
       document.getElementById('meldingContainer').textContent = '';
 
-      const numRijen   = Math.min(20, Math.max(1, parseInt(document.getElementById('numRijen')?.value) || 3));
-      const numClocks  = numRijen * 3;
+      const numClocks = Math.min(60, Math.max(1, parseInt(document.getElementById('numKlokken')?.value) || 9));
       const klokType   = document.querySelector('input[name="klokType"]:checked')?.value || 'analoog';
       const leerjaar   = document.querySelector('input[name="klokLeerjaar"]:checked')?.value || '2';
       const isDigitaal = klokType === 'digitaal';
@@ -457,7 +456,7 @@ const KlokLezen = (() => {
      * @param {number} margin
      * @returns {number}  hoogte die gebruikt werd in mm
      */
-    tekenInPdf(doc, instellingen, hulpCanvas, yStart, margin) {
+    tekenInPdf(doc, instellingen, hulpCanvas, yStart, margin, volgendePagina, onRij) {
       const pageWidth  = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       const usableW    = pageWidth - 2 * margin;
@@ -478,21 +477,27 @@ const KlokLezen = (() => {
         let imgH = imgW / ratio;
 
         // Pas beschikbare hoogte op deze pagina
-        const beschikbaar = pageHeight - y - margin;
+        const beschikbaar = pageHeight - y - margin - 5;
 
         if (imgH > beschikbaar) {
           // Rij past niet meer — nieuwe pagina
-          doc.addPage();
-          y = margin;
+          if (volgendePagina) y = volgendePagina();
+          else { doc.addPage(); y = margin; }
         }
 
         const dataURL = hulpCanvas.toDataURL('image/png');
         const xPos    = (pageWidth - imgW) / 2;
-        doc.addImage(dataURL, 'PNG', xPos, y, imgW, imgH);
+        doc.addImage(dataURL, 'PNG', xPos, y, imgW, imgH, undefined, 'FAST');
+        onRij?.(start, rijTijden.length, xPos, y, imgW, imgH);
         y += imgH; // geen extra tussenruimte — canvas heeft al ingebouwde padding
       }
 
       return y;
+    },
+
+    meetPdfRij(inst, canvas, breedte) {
+      tekenOpCanvas(canvas, {...inst, numClocks:Math.min(3,inst.tijden.length), tijden:inst.tijden.slice(0,3)}, 'pdf');
+      return breedte * canvas.height / canvas.width;
     },
 
     tekenEnkeleKlok(ctx, x, y, radius, t, inst) {
@@ -3041,6 +3046,22 @@ const Bundel = (() => {
     toonMelding(`✓ ${aantalKlokken ? aantalKlokken + ' klokken' : 'Oefening'} toegevoegd`);
   }
 
+  function vernieuwKlok(id) {
+    const item = oefeningen.find(o => o.id === id && o.type === 'kloklezen');
+    if (!item) return;
+    const inst = item.basisInstellingen || item.instellingen;
+    item.instellingen = {...item.instellingen, tijden:KlokLezen.vernieuwTijden(inst, 1)};
+    renderAlles();
+  }
+
+  function renderKlokBewerkingen(container, id) {
+    container.classList.add('losse-klok-acties');
+    [['↻','Vervang deze klok',()=>vernieuwKlok(id)],['×','Verwijder deze klok',()=>verwijder(id)]].forEach(([tekst,label,actie])=>{
+      const knop=document.createElement('button');knop.type='button';knop.textContent=tekst;
+      knop.title=label;knop.setAttribute('aria-label',label);knop.onclick=actie;container.append(knop);
+    });
+  }
+
   // ── Eén klok toevoegen aan een bestaande groep ───────────────
   function voegKlokToe(groepId) {
     // Zoek de groep en haar basisinstellingen
@@ -3165,7 +3186,7 @@ const Bundel = (() => {
           inhoud.className = 'preview-inhoud';
           inhoud.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;';
 
-          alleTijden.forEach(t => {
+          alleTijden.forEach((t, i) => {
             if (!t) return;
             const cel = document.createElement('div');
             cel.style.cssText = 'border:2px solid #90bce0;border-radius:8px;overflow:hidden;background:#f0f8ff;';
@@ -3186,6 +3207,9 @@ const Bundel = (() => {
               ? `Het is<br><span style="display:block;border-bottom:1px solid #555;margin:6px 0 8px;"></span><span style="display:block;border-bottom:1px solid #555;margin-top:2px;"></span>`
               : `Het is <span style="display:block;border-bottom:1px solid #555;margin-top:4px;"></span>`;
 
+            cel.style.position='relative';
+            const acties=document.createElement('div');
+            renderKlokBewerkingen(acties,groep.items[i].id);cel.append(acties);
             cel.appendChild(display);
             cel.appendChild(lijn);
             inhoud.appendChild(cel);
@@ -3230,24 +3254,10 @@ const Bundel = (() => {
             groep.items.forEach((item, i) => {
               const col = i % cols;
               const row = Math.floor(i / cols);
-              const btn = document.createElement('button');
-              btn.textContent = '🗑';
-              btn.title = 'Verwijder deze klok';
-              btn.style.cssText = `
-                position:absolute;
-                right:${(cols - col - 1) / cols * 100 + 1}%;
-                top:${row / numRows * 100 + 1}%;
-                pointer-events:all;
-                background:rgba(255,255,255,0.92);
-                border:1px solid #fcc;color:#c00;
-                border-radius:50%;width:20px;height:20px;
-                cursor:pointer;font-size:10px;line-height:1;
-                padding:0;margin:0;
-                opacity:0;transition:opacity .15s;`;
-              btn.onclick = () => Bundel.verwijder(item.id);
-              blok.addEventListener('mouseenter', () => { btn.style.opacity = '1'; });
-              blok.addEventListener('mouseleave', () => { btn.style.opacity = '0'; });
-              overlay.appendChild(btn);
+              const acties = document.createElement('div');
+              acties.style.cssText = `position:absolute;right:${(cols-col-1)/cols*100+1}%;top:${row/numRows*100+1}%;`;
+              renderKlokBewerkingen(acties,item.id);
+              overlay.appendChild(acties);
             });
           }, 50);
         }
@@ -3422,7 +3432,7 @@ const Bundel = (() => {
   }
 
   // ── Digitale wekkers tekenen in PDF ──────────────────────────
-  function tekenDigitaleWekkersPdf(doc, tijden, inst, yStart, margin, pageW, pageH) {
+  function tekenDigitaleWekkersPdf(doc, tijden, inst, yStart, margin, pageW, pageH, volgendePagina, onKlok) {
     const breedte  = pageW - 2 * margin;
     const cols     = 3;
     const colW     = (breedte - (cols - 1) * 8) / cols;
@@ -3438,9 +3448,10 @@ const Bundel = (() => {
       if (!t) return;
       const col = i % cols;
       if (col === 0 && i > 0) y += celH + 8;
-      if (y + celH + margin > pageH) { doc.addPage(); y = yStart; }
+      if (col === 0 && y + celH + margin + 5 > pageH) { y = volgendePagina(); }
 
       const x    = margin + col * (colW + 8);
+      onKlok?.(i, x - 2, y - 1, colW + 4, celH + 1);
       const cx   = x + colW / 2;
       const wx   = cx - wekkerW / 2;
 
@@ -3515,7 +3526,7 @@ const Bundel = (() => {
     });
 
     const aantalRijen = Math.ceil(tijden.length / cols);
-    return yStart + aantalRijen * (celH + 8);
+    return tijden.length ? y + celH + 8 : yStart;
   }
 
   // ── PDF genereren ─────────────────────────────────────────────
@@ -3568,6 +3579,7 @@ const Bundel = (() => {
     // ── Opdrachtzin in kader ──────────────────────────────────
     let actieveGroep = null;
     const previewAnkers = [];
+    const klokAnkers = [];
     function tekenOpdrachtzin(doc, y, tekst) {
       doc.setFontSize(14); doc.setFont(undefined, 'italic');
       const regels = doc.splitTextToSize(tekst, pageW - 2 * margin - 8);
@@ -3608,7 +3620,7 @@ const Bundel = (() => {
         doc.addPage();
         isEerstePagina = false;
         const ny = tekenHeader(false);
-        return tekenOpdrachtzin(doc, ny + 2, groep.opdrachtzin) + 2;
+        return ny;
       }
 
       // ── Bereken hoeveel ruimte opdrachtzin + eerste blok nodig heeft ──
@@ -3616,7 +3628,16 @@ const Bundel = (() => {
       const opdrachtzinH = Math.max(10, doc.splitTextToSize(groep.opdrachtzin, pageW - 2 * margin - 8).length * 6 + 4) + 4;
       doc.setFont(undefined, 'normal'); // kader + marge
       let eersteBlokH = 0;
-      if (groep.type === 'kloklezen')    eersteBlokH = 100;
+      if (groep.type === 'kloklezen') {
+        const inst=groep.items[0].basisInstellingen || groep.items[0].instellingen;
+        const tijden=groep.items.map(o=>o.instellingen.tijden[0]);
+        if(inst.klokType==='digitaal') eersteBlokH=inst.digitaalNotatie==='stopwatch'?65:57;
+        else {
+          const rij={...inst,tijden:tijden.slice(0,3),oplossingen};
+          if(oplossingen || HulpKlok.gebruikt(rij)) {HulpKlok.teken(hulpCanvas,rij);eersteBlokH=(pageW-2*margin)*hulpCanvas.height/hulpCanvas.width;}
+          else eersteBlokH=KlokLezen.meetPdfRij(rij,hulpCanvas,pageW-2*margin);
+        }
+      }
       if (groep.type === 'tijdsduur') eersteBlokH = (pageW - 2 * margin - 5) / 2 * .7;
       if (groep.type === 'kleurparen') eersteBlokH = Math.ceil(groep.items[0].instellingen.kaarten.length / 4) * (pageW - 2 * margin) * .85 / 4;  // één rij klokken
       if (groep.type === 'maateenheden') eersteBlokH = 30;
@@ -3658,25 +3679,18 @@ const Bundel = (() => {
         const alleTijden = groep.items.map(item => item.instellingen.tijden[0]);
         const basisInst  = groep.items[0].basisInstellingen || groep.items[0].instellingen;
 
+        const klokAnker=(i,x,y,breedte,hoogte)=>{
+          if(alleenVoorbeeld)klokAnkers.push({id:groep.items[i].id,groepId:groep.groepId,pagina:doc.internal.getCurrentPageInfo().pageNumber,x,y,breedte,hoogte});
+        };
+        const rijAnker=(start,aantal,x,y,breedte,hoogte)=>{
+          for(let i=0;i<aantal;i++)klokAnker(start+i,x+i*breedte/3,y,breedte/3,hoogte);
+        };
         if (basisInst.klokType !== 'digitaal' && (oplossingen || HulpKlok.gebruikt({...basisInst, tijden:alleTijden}))) {
-          y = HulpKlok.pdf(doc, {...basisInst, tijden:alleTijden, oplossingen}, hulpCanvas, y, margin, nieuweVervolgpagina);
+          y = HulpKlok.pdf(doc, {...basisInst, tijden:alleTijden, oplossingen}, hulpCanvas, y, margin, nieuweVervolgpagina, rijAnker);
         } else if (basisInst.klokType === 'digitaal') {
-          // Digitale wekkers: raster met wekker-display + schrijflijn
-          y = tekenDigitaleWekkersPdf(doc, alleTijden, basisInst, y, margin, pageW, pageH);
-
+          y = tekenDigitaleWekkersPdf(doc, alleTijden, basisInst, y, margin, pageW, pageH, nieuweVervolgpagina, klokAnker);
         } else {
-          // Analoge klokken (bestaande route)
-          const PER_PAGINA = 9;
-          for (let start = 0; start < alleTijden.length; start += PER_PAGINA) {
-            if (start > 0) {
-              doc.addPage();
-              y = tekenHeader(false);
-              y = tekenOpdrachtzin(doc, y + 2, groep.opdrachtzin) + 2;
-            }
-            const pageTijden = alleTijden.slice(start, start + PER_PAGINA);
-            const pageInst   = { ...basisInst, numClocks: pageTijden.length, tijden: pageTijden };
-            y = KlokLezen.tekenInPdf(doc, pageInst, hulpCanvas, y, margin);
-          }
+          y = KlokLezen.tekenInPdf(doc, {...basisInst,numClocks:alleTijden.length,tijden:alleTijden}, hulpCanvas, y, margin, nieuweVervolgpagina, rijAnker);
         }
 
       } else if (groep.type === 'tijdsduur') {
@@ -3710,7 +3724,7 @@ const Bundel = (() => {
           () => {
             doc.addPage();
             const ny = tekenHeader(false);
-            return tekenOpdrachtzin(doc, ny + 2, groep.opdrachtzin) + 2;
+            return ny;
           }
         );
       }
@@ -3729,6 +3743,9 @@ const Bundel = (() => {
 
     if (alleenVoorbeeld) {
       doc.previewAnkers = previewAnkers;
+      doc.klokAnkers = klokAnkers;
+      doc.maakKlokBewerking = renderKlokBewerkingen;
+      doc.voegKlokToe = voegKlokToe;
       doc.maakBewerking = (container, id) => renderBewerkingen(container, id);
       return doc;
     }
