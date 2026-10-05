@@ -10,21 +10,35 @@
     {name:'Boomwhackers',file:'boom-C4.wav',art:[0,1,2,3,4].map(n=>`<rect x="${8+n*26}" y="${8+n*10}" width="20" height="${93-n*10}" rx="6" fill="${['#e64451','#ef8d2c','#e9c92d','#58b465','#8655b2'][n]}"/><ellipse cx="${18+n*26}" cy="${13+n*10}" rx="7" ry="3" fill="#0004"/>`).join('')},
     {name:'Elektrische gitaar',file:'guitar-electric-C4.mp3',art:guitar(true)+'<path d="M116 52l-13 22h12l-12 25 27-31h-13l12-16z" fill="#e7b423"/>'}
   ];
-  let ctx, sources=[], operation=0, level=2, round=0, deck=[], answer, solved=false, heard=false;
+  let ctx, sources=[], operation=0, level=2, round=0, deck=[], positions=[], answer, solved=false, heard=false;
   const buffers=new Map();
   const shuffle = list => {const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
   const pool = () => instruments.slice(0,level===2?4:6);
+  // Balance all six rounds without imposing a predictable left/right cycle.
+  function answerPositions(count){
+    const arrangements=[], remaining=Array(count).fill(6/count);
+    function build(row){
+      if(row.length===6){arrangements.push(row);return}
+      for(let i=0;i<count;i++){
+        if(!remaining[i]||(row.length>=2&&row.at(-1)===i&&row.at(-2)===i))continue;
+        remaining[i]--;build([...row,i]);remaining[i]++;
+      }
+    }
+    build([]);
+    return arrangements[Math.floor(Math.random()*arrangements.length)];
+  }
   function stop(){operation++;for(const s of sources){try{s.stop()}catch{}}sources=[];$('listen').disabled=false;}
   function show(){
     stop();solved=false;heard=false;answer=deck[round];
     $('listen').hidden=false;$('listen').textContent='🔊 Luister';$('next').hidden=true;$('restart').hidden=true;
     $('round').textContent=`Geluid ${round+1} van 6`;$('feedback').textContent='Tik eerst op Luister.';
     $('stars').textContent=Array.from({length:6},(_,i)=>i<round?'★':'☆').join(' ');$('stars').setAttribute('aria-label',`${round} van 6 gevonden`);
-    const choices=shuffle([answer,...shuffle(pool().filter(i=>i!==answer)).slice(0,level-1)]);
+    const choices=shuffle(pool().filter(i=>i!==answer)).slice(0,level-1);
+    choices.splice(positions[round],0,answer);
     $('choices').replaceChildren();$('choices').style.setProperty('--count',level);
     choices.forEach(inst=>{const b=document.createElement('button');b.className='choice';b.disabled=true;b.innerHTML=`<svg viewBox="0 0 140 112" aria-hidden="true">${inst.art}</svg><span>${inst.name}</span>`;b.onclick=()=>choose(inst,b);$('choices').append(b)});
   }
-  function begin(n){level=n;round=0;deck=[];while(deck.length<6){const options=shuffle(pool());for(const inst of options)if(inst!==deck.at(-1)&&deck.length<6)deck.push(inst)}$('easy').setAttribute('aria-pressed',n===2);$('hard').setAttribute('aria-pressed',n===3);show();}
+  function begin(n){level=n;round=0;positions=answerPositions(n);deck=[];while(deck.length<6){const options=shuffle(pool());for(const inst of options)if(inst!==deck.at(-1)&&deck.length<6)deck.push(inst)}$('easy').setAttribute('aria-pressed',n===2);$('hard').setAttribute('aria-pressed',n===3);show();}
   async function listen(){
     stop();const run=operation,inst=answer;$('listen').disabled=true;$('feedback').textContent='Even de klank laden…';
     try{
