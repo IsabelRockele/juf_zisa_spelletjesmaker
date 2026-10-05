@@ -439,7 +439,8 @@ function blockViewsColorHTML(ids){const colors={front:'#d9a900',left:'#e83e72',t
 function objectViewsHTML(variant=0){
   const objects=['poppetje','auto','vrachtwagen','huis'],views=['voor','achter','zij','boven'],labels=['vooraanzicht','achteraanzicht','zijaanzicht','bovenaanzicht'];
   const object=objects[variant%objects.length];
-  return views.map((view,i)=>{const choices=labels.map((_,j)=>labels[(j+i+variant)%labels.length]);return `<div class="object-view-card"><img src="aanzichten/${object}-${view}.png" alt="${object}, bekeken vanuit een onbekend aanzicht"><div class="view-choices">${choices.map(label=>`<span style="${state.solutionMode&&label===labels[i]?'color:#16743a;font-weight:800':''}">${state.solutionMode&&label===labels[i]?'☒':'○'} ${label}</span>`).join('')}</div></div>`}).join('');
+  const correctPositions=shuffled([0,1,2,3]);
+  return views.map((view,i)=>{const choices=shuffled(labels.filter(label=>label!==labels[i]));choices.splice(correctPositions[i],0,labels[i]);return `<div class="object-view-card"><img src="aanzichten/${object}-${view}.png" alt="${object}, bekeken vanuit een onbekend aanzicht"><div class="view-choices">${choices.map(label=>`<span style="${state.solutionMode&&label===labels[i]?'color:#16743a;font-weight:800':''}">${state.solutionMode&&label===labels[i]?'☒':'○'} ${label}</span>`).join('')}</div></div>`}).join('');
 }
 function lineVocabularySVG(variant=0){
   const sets=[['A','B','C','D','a'],['P','R','S','T','b'],['K','M','N','V','c'],['E','F','G','H','d'],['J','L','Q','W','e'],['U','X','Y','Z','f'],['B','D','F','K','g'],['C','H','L','P','h'],['M','Q','R','S','i'],['N','T','V','X','j'],['A','E','K','U','k'],['D','G','P','Z','l']],s=sets[variant%sets.length],[point1,start,end,point2,line]=s;
@@ -893,5 +894,6 @@ render();
 <script src="lijnen-figuren.js"></script>
 <script src="figuren-extra.js"></script>
 <script src="plaats-richting.js?v=6"></script>
+<script src="kijkplaatsen.js?v=4"></script>
 </body>
 </html>
