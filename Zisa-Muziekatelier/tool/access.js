@@ -2,12 +2,14 @@ const params = new URLSearchParams(location.search);
 const code = params.get('code') || '';
 const edition = params.has('code') || params.get('edition') === 'pro' ? 'pro' : params.get('edition') === 'ontdek' ? 'ontdek' : 'gratis';
 const student = params.has('code');
+const child = document.documentElement.dataset.musicAudience === 'child';
 const root = new URL('./', import.meta.url);
 const home = new URL(edition === 'pro' ? '../../pro/app.html' : edition === 'ontdek' ? '../../ontdek/app.html' : '../../index.html', root);
 export function musicUrl(file, studentCode = code) {
   const url = new URL(file, root);
   if (edition !== 'gratis') url.searchParams.set('edition', edition);
   if (studentCode) url.searchParams.set('code', studentCode);
+  url.searchParams.set('leerling', child ? '1' : '0');
   return url.href;
 }
 function links() {
@@ -17,13 +19,19 @@ function links() {
     if (url.pathname.startsWith(root.pathname) && /(?:\/|\.html)$/.test(url.pathname)) {
       if (edition !== 'gratis') url.searchParams.set('edition', edition);
       if (student) url.searchParams.set('code', code);
+      url.searchParams.set('leerling', child ? '1' : '0');
       link.href = url.href;
     } else if (url.pathname === new URL('../../index.html', root).pathname) {
-      link.href = student ? musicUrl('index.html') : home.href;
-      if (student) link.textContent = '← Muziekatelier';
+      link.href = child ? musicUrl('index.html') : home.href;
+      if (child) link.textContent = '← Muziekatelier';
     }
   });
-  if (student) document.querySelectorAll('.qr-entry').forEach(link => link.hidden = true);
+  if (child) {
+    document.querySelectorAll('.qr-entry, #teacherButton, #teacherOpen, #teacher, .teacher-notes, .rhythm-options, [data-teacher-only]').forEach(el => { el.hidden = true; el.inert = true; });
+    document.querySelectorAll('details').forEach(el => {
+      if (el.querySelector('summary')?.textContent.toLowerCase().includes('leerkracht')) { el.hidden = true; el.inert = true; }
+    });
+  }
 }
 let gate;
 export function blocked(message, login = false) {
@@ -51,7 +59,7 @@ function errorText(error) {
   if (/resource-exhausted/.test(error.code || '')) return 'De limiet voor leerlingentoestellen is bereikt. Vraag je leerkracht om de toestellen bij Zisa Spelen na te kijken.';
   return 'De toegang kon niet worden gecontroleerd. Controleer je internetverbinding en probeer opnieuw.';
 }
-export const access = {edition, student, code, musicUrl};
+export const access = {edition, student, child, code, musicUrl};
 export const ready = (async () => {
   links();
   if (edition !== 'pro') return true;

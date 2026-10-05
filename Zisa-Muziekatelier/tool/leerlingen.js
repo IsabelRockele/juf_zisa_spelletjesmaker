@@ -1,7 +1,8 @@
-import { ready, access, blocked } from './access.js';
+import { ready, access, blocked } from './access.js?v=2';
 if (await ready) {
   try {
     let url = new URL('https://tools.jufzisa.be/Zisa-Muziekatelier/tool/');
+    url.searchParams.set('leerling', '1');
     const note = document.querySelector('.note');
     if (access.edition === 'pro') {
       let code = access.code;

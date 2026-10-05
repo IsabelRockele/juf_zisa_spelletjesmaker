@@ -1,4 +1,4 @@
-import { ready, blocked } from './access.js';
+import { ready, blocked } from './access.js?v=2';
 if (await ready) {
   try {
     for (const placeholder of document.querySelectorAll('script[data-music-src]')) {
