@@ -73,6 +73,9 @@ const App = (() => {
     // Scroll de tabbar zodat de actieve tab gecentreerd in beeld komt
     if (window.scrollNaarActieveTab) scrollNaarActieveTab(tabEl);
 
+    const isHalveren = bewerking === 'halveren-verdubbelen';
+    const tabHalveren = document.getElementById('tab-halveren');
+    if (tabHalveren) tabHalveren.style.display = isHalveren ? 'block' : 'none';
     const isHerken       = bewerking === 'herken-brug';
     const isSplitsingen  = bewerking === 'splitsingen';
     const isTafels       = bewerking === 'tafels';
@@ -100,7 +103,7 @@ const App = (() => {
     const tabBreuken      = document.getElementById('tab-breuken');
     const tabPercentages  = document.getElementById('tab-percentages');
     const tabRekenrelaties = document.getElementById('tab-rekenrelaties');
-    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal && !isGemengd && !isKomma && !isSchatten && !isBreuken && !isPercentages && !isRekenrelaties) ? 'block' : 'none';
+    if (tabHoofd)        tabHoofd.style.display        = (!isHalveren && !isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal && !isGemengd && !isKomma && !isSchatten && !isBreuken && !isPercentages && !isRekenrelaties) ? 'block' : 'none';
     if (tabGemengd)      tabGemengd.style.display      = isGemengd       ? 'block' : 'none';
     if (tabKomma)        tabKomma.style.display        = isKomma         ? 'block' : 'none';
     if (tabTafels)       tabTafels.style.display       = isTafels        ? 'block' : 'none';
@@ -113,6 +116,7 @@ const App = (() => {
     if (tabPercentages)  tabPercentages.style.display  = isPercentages   ? 'block' : 'none';
     if (tabRekenrelaties) tabRekenrelaties.style.display = isRekenrelaties ? 'block' : 'none';
 
+    if (isHalveren) return;
     if (isRekenrelaties) { _updateRelatieUI(); return; }
     if (isBreuken) return;
     if (isPercentages) return;
@@ -1807,6 +1811,10 @@ function _getSplitsConfig() {
   }
 
   /* ── Rekentaal: blok toevoegen vanuit RekentaalModule ───────── */
+  function voegHalverenBlokToe(blok) {
+    bundelData.push(blok); Preview.render(bundelData);
+    toonToast('Halveren en verdubbelen toegevoegd.');
+  }
   function voegRekentaalBlokToe(blok) {
     bundelData.push(blok);
     Preview.render(bundelData);
@@ -2636,7 +2644,7 @@ function _getSplitsConfig() {
     selecteerCijferInvulling, selecteerCijferStartpijl, selecteerCijferSchatting,
     voegCijferenBlokToe,
     voegVraagstukBlokToe,
-    voegRekentaalBlokToe,
+    voegRekentaalBlokToe, voegHalverenBlokToe,
     selecteerSchattenType, selecteerSchattenNiveau, selecteerSchattenBewerking, selecteerSchattenAfronden,
     voegSchattenBlokToe,
     selecteerBreukRadio, voegBreukenBlokToe, selecteerPercentageRadio, voegPercentageBlokToe, selecteerKommaRadio, voegKommaBlokToe,

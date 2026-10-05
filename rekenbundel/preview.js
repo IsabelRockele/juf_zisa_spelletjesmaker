@@ -213,7 +213,7 @@ const Preview = (() => {
       blok.bewerking === 'breuken' &&
       blok.config?.soort === 'vermenigvuldigen'
     );
-    if (heeftCompZonderHulp || heeftBreukSchrapping || _laatsteBundelData.some(b => b.config?.hulpPerBewerking || (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(b)) || (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(b)))) {
+    if (_laatsteBundelData.some(b => b.bewerking === 'halveren-verdubbelen') || heeftCompZonderHulp || heeftBreukSchrapping || _laatsteBundelData.some(b => b.config?.hulpPerBewerking || (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(b)) || (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(b)))) {
       render(_laatsteBundelData);
       // Toggle knop state behouden na re-render
       if (btn) {
@@ -548,6 +548,7 @@ const Preview = (() => {
     const isRekentaal     = blok.bewerking === 'rekentaal';
 
     // ── Vraagstuk: eigen renderer ────────────────────────────
+    if (blok.bewerking === 'halveren-verdubbelen') return HalverenVerdubbelen.render(blok, _toonOplossingen);
     if (isVraagstuk)  return _maakVraagstukElement(blok);
     // ── Rekentaal: eigen renderer ────────────────────────────
     if (isRekentaal)  return _maakRekentaalElement(blok);

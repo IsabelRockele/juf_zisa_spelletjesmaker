@@ -257,6 +257,8 @@ const Generator = (() => {
       return false;
     }
 
+    if (blok.bewerking === 'halveren-verdubbelen') return HalverenVerdubbelen.append(blok);
+
     // Rekentaal: gebruik RekentaalGenerator
     if (blok.bewerking === 'rekentaal') {
       if (!window.RekentaalGenerator) return false;

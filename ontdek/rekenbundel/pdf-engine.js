@@ -2066,7 +2066,27 @@ const onthoudH = c;
     lijn(ML, y-4, ML+CW, y-4, [210,220,230], 0.4);
   }
 
+ async function _tekenHalverenBlok(blok) {
+    const hv=HalverenVerdubbelen,[sw,sh]=hv.maten(blok.config.type);
+    const breedte=(CW-8)/2,hoogte=breedte*sh/sw;
+    doc.setFont('helvetica','bold');doc.setFontSize(12);
+    const regels=doc.splitTextToSize(blok.opdrachtzin,CW),titelH=regels.length*6;
+    const uitlegH=blok.config.uitleg?CW*178/720+5:0;
+    checkRuimte(titelH+uitlegH+hoogte+8);
+    y+=3;doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(26,58,92);doc.text(regels,ML,y);y+=titelH;
+    if(blok.config.uitleg){doc.addImage(await hv.png(hv.uitleg()),'PNG',ML,y,CW,uitlegH-5,undefined,'FAST');y+=uitlegH;}
+    for(let i=0;i<blok.oefeningen.length;i+=2){
+      checkRuimte(hoogte+6);
+      for(let k=0;k<2&&i+k<blok.oefeningen.length;k++){
+        const oef=blok.oefeningen[i+k],solved=_metAntwoorden||(blok.config.voorbeeld&&i+k===0);
+        doc.addImage(await hv.png(hv.layout(blok.config.type,oef,solved).svg),'PNG',ML+k*(breedte+8),y,breedte,hoogte,undefined,'FAST');
+      }
+      y+=hoogte+6;
+    }
+    y+=NABLOK;
+  }
  async function _tekenBlok(blok) {
+    if(blok.bewerking==='halveren-verdubbelen'){await _tekenHalverenBlok(blok);return;}
   blok = Generator.normaliseerGemengdBlok(blok);
   if(blok.config?.hulpPerBewerking) {
     for(let i=0;i<blok.oefeningen.length;) {
