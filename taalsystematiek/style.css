@@ -19,3 +19,16 @@
 .page .hint,.page .example,.page .support-note,.page .identity{font-size:14pt}.text-exercise{line-height:2.2!important}
 
 .tab-rhyme{background:#f7dff0;color:#853568}.tell-choice{display:flex;align-items:center;gap:12px}.tick-box{display:inline-flex;align-items:center;justify-content:center;flex:0 0 23px;height:23px;border:1px solid #72998d}.rhyme-gap{display:inline-block;width:150px;vertical-align:middle;margin:0 7px}.rhyme-match{max-width:520px;margin:8px auto}.rhyme-match-row{display:flex;justify-content:space-between;gap:100px;padding:12px 0}.rhyme-match-row>span{min-width:130px;display:flex;justify-content:space-between;gap:12px}.rhyme-words{display:flex;flex-wrap:wrap;gap:18px 28px;padding:15px 0}.rhyme-words>span{padding:4px 10px;border:1px solid #c5d5ce;border-radius:7px}
+
+/* Schrijflijnen kunnen ook binnen een zin staan. */
+.write-line{display:block}
+
+/* Houd aankruisvakjes even groot, ook naast een lange beschrijving. */
+.choice input[type="checkbox"]{flex:0 0 16px;width:16px;height:16px;appearance:auto;border-radius:0}.choice>span{min-width:0;flex:1}
+
+/* Rijmrijen houden dezelfde afstand over de grens van een pagineerbaar groepje. */
+.question-block:has(>.rhyme-match){padding:0}.question-block>.rhyme-match{margin:0 auto}
+
+.task-level{display:table;margin-top:8px;padding:3px 9px;border-radius:6px;background:#edf3f8;color:#244b60;font-size:12px;font-weight:700}.task-level-select{font-size:13px;padding:5px;margin-top:8px}
+
+.sentence-prompt{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:28px;row-gap:5px}.sentence-prompt>span{white-space:nowrap}
