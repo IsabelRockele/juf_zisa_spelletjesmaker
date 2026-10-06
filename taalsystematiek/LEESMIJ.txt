@@ -1,0 +1,44 @@
+BUNDEL TAALSYSTEMATIEK — GRATIS
+
+Open http://127.0.0.1:8766/taalsystematiek/ zolang de lokale server draait.
+Beschikbaar in Gratis bij Taal en letters. Pro en Ontdek volgen na goedkeuring.
+
+Inhoud
+- 26 opdrachtsoorten: lidwoorden (5), zelfstandige naamwoorden (4), hoofdletters (3), gemengde schrijfopdracht (1), leestekens en mededelende zinnen (8: alleen . ? !), rijmwoorden (5).
+- Extra steun, basis en uitbreiding; optionele niveausymbolen.
+- Zeven schrijflijntypes via dezelfde tekenfunctie als Bundel spelling.
+- Lettertype en lettergrootte instelbaar; standaard Arial 14 punt, ook in PDF.
+- Compacte woordopdrachten: de/het drie per rij; herschrijven en enkelvoud twee per rij.
+- Opdrachten vullen dezelfde pagina. De opdrachtzin blijft bij de eerste rij.
+- Plus/min in de preview wijzigen losse vragen, woorden of prenten. Oplossingen volgen dezelfde selectie.
+- Bewaren/heropenen als JSON en automatisch lokaal bewaren. De PNG's blijven lokaal in assets.
+- PDF-export gebruikt bestaande lokale jsPDF- en html2canvas-bibliotheken; geen CDN nodig.
+
+Validatie
+78 combinaties van opdrachtsoort en niveau gecontroleerd op 14 en 22 punt bij leerlingbladen en oplossingen.
+Gecontroleerd: afbeeldingen, pagina-einden, opdrachtkop bij eerste rij, alle zeven lijnkeuzes, bewaren/heropenen,
+verkeerd importbestand, herschikken, filters, tabbladen, toetsenbord, compacte kolommen en toevoegen/verwijderen.
+Getest dat verwijderen van de enige zin op de laatste pagina die pagina laat verdwijnen.
+De voorbeeld-PDF's zijn gerenderd en visueel bekeken.
+
+Uitbreiden
+data.js bevat woorden, zinnen en opdrachtcatalogus.
+generator.js bevat de didactische varianten en vaste randomisatie per opdracht.
+app.js beheert de samenstelling, pagina-indeling en export.
+style.css bevat scherm- en werkbladopmaak.
+
+Bij open schrijfopdrachten bevat de oplossingenbundel mogelijke antwoorden of beoordelingshulp.
+Bij lidwoorden in tekst kunnen meerdere antwoorden grammaticaal passen; die staan bij de oplossingen.
+
+Aanvulling zoekprenten en naamwoorden
+- Zelfstandige naamwoorden omkringen wordt gevolgd door kolommen dier, persoon en ding.
+  De kolommen en oplossingen volgen de overgebleven woorden na verwijderen van een zin.
+- Zoekprenten: schooltuin, klas en boerderij. Prent en opdrachtvorm zijn per bundelitem aanpasbaar.
+- Woorden: standaard zes, in twee kolommen met korte schrijflijnen.
+- Zinnen: twee lange schrijflijnen per zin; ook keuze woorden plus één uitdagingszin.
+- Bij losse prenten en zinnen staat één prent links en twee lange schrijflijnen rechts.
+- Onderwerptabs staan op één horizontaal scrollbare rij, met toetsenbordbediening.
+- Getest: drie prenten maal drie opdrachtvormen; bewaren van prentkeuze; kolommen op alle niveaus;
+  verwijderde zinnen en bijpassende oplossingen; lange lijnen; PDF-export; horizontale tabs op smal scherm.
+
+Downloadknoppen, selectie en oplossingen staan in de groene bovenbalk.

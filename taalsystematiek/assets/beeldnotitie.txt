@@ -1,0 +1,10 @@
+EIGEN BEELDMATERIAAL
+
+schooltuin.png: nieuw gemaakt met de ingebouwde image_gen-tool op 6 oktober 2026.
+De andere PNG's zijn kopieën van bestaande eigen afbeeldingen uit spelling/afbeeldingen/graad1.
+Er zijn geen prenten of teksten uit de meegestuurde methode overgenomen.
+
+Volledige generatieprompt voor schooltuin.png:
+Create one original PNG educational search picture for a Dutch second-grade grammar worksheet (children 7–8). Landscape 3:2. A calm sunny school garden, clean friendly flat children's illustration with crisp dark outlines, large unambiguous objects and ample white/light space. Exactly two people: one adult female teacher standing left, one school-age boy standing right. Exactly two animals: one orange cat seated foreground left, one brown dog seated foreground right. Clear separate large objects: a single tree back left, a simple wooden bench middle back, a red football foreground center, an open book resting on the bench, a blue backpack on ground beside the boy, one yellow flower growing lower left, a red bicycle leaning on a low fence back right. All requested objects fully visible, not overlapping each other, no tiny scattered decorative objects, no text, no letters, no logos. Visually obvious silhouettes, suitable to print at 16 cm width. This is an original scene, not a copy of textbook art.
+
+Controle: gevraagde personen, dieren en voorwerpen zijn zichtbaar. De prent is volledig opgenomen en niet vervormd.
