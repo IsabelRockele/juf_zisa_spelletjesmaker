@@ -69,6 +69,33 @@ const goDevices  = () => safeGo(proUrl("apparaten.html"));
 const goKoop     = (r) => safeGo(proUrl("koop.html"), r);
 const goVerlopen = (r, until) => safeGoWithUntil(proUrl("verlopen.html"), r, until);
 
+// Een technische fout betekent niet dat de gebruiker uitgelogd is.
+// Terugsturen naar login zou via de automatische loginredirect een lus maken.
+function showVerificationError() {
+  const show = () => {
+    if (document.getElementById("pro-verification-error")) return;
+    const dialog = document.createElement("dialog");
+    dialog.id = "pro-verification-error";
+    dialog.setAttribute("aria-labelledby", "pro-verification-title");
+    dialog.style.cssText = "max-width:440px;padding:28px;border:0;border-radius:16px;font:16px/1.5 system-ui;box-shadow:0 12px 60px #0005";
+    const title = document.createElement("h2");
+    title.id = "pro-verification-title";
+    title.textContent = "Pro-toegang even niet bereikbaar";
+    const message = document.createElement("p");
+    message.textContent = "We kunnen je toegang momenteel niet controleren. Controleer je internetverbinding en probeer opnieuw. Je wordt niet automatisch doorgestuurd.";
+    const retry = document.createElement("button");
+    retry.textContent = "Opnieuw proberen";
+    retry.style.cssText = "padding:12px 18px;border:0;border-radius:8px;background:#1673b8;color:white;font:inherit;cursor:pointer";
+    retry.addEventListener("click", () => location.reload());
+    dialog.addEventListener("cancel", event => event.preventDefault());
+    dialog.append(title, message, retry);
+    document.body.append(dialog);
+    dialog.showModal();
+  };
+  if (document.body) show();
+  else document.addEventListener("DOMContentLoaded", show, { once: true });
+}
+
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, onIdTokenChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
@@ -142,7 +169,7 @@ if (!GUARD_OFF) {
         status = res?.data || {};
       } catch (e) {
         console.error("getAccessStatus error:", e);
-        goLogin(); return;
+        showVerificationError(); return;
       }
       if (!status.allowed) { goVerlopen(status?.reason || "no_access", status?.expiresAt); return; }
 
@@ -159,7 +186,7 @@ if (!GUARD_OFF) {
             msg.includes("resource-exhausted") ||
             msg.includes("429");
           if (limitHit) { goDevices(); return; }
-          goLogin(); return;
+          showVerificationError(); return;
         }
       } else {
         console.info("[GUARD] apparaten.html: registratie overgeslagen (bewust).");
@@ -174,7 +201,7 @@ if (!GUARD_OFF) {
       }
     } catch (err) {
       console.error("Guard error:", err);
-      goLogin();
+      showVerificationError();
     }
   });
 

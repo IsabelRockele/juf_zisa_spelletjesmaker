@@ -1,1302 +1,324 @@
-// sudoku_versie2.js – uitgebreid met loader + paginering 6×6/9×9
+'use strict';
+const sudokuImageBase = new URL('sudoku_afbeeldingen/', document.currentScript.src);
+document.addEventListener('DOMContentLoaded', () => {
+    const { GRID_SPECS, shuffle, createSudokuWithDifficulty, planPages } = window.SudokuV2;
+    const $ = id => document.getElementById(id);
+    const canvas = $('mainCanvas');
+    const type = () => document.querySelector('[name="sudokuType"]:checked').value;
+    const variety = () => document.querySelector('[name="imageVariety"]:checked').value;
+    const size = () => Number($('gridSizeSelect').value);
+    const count = () => Number($('aantalSudokus').value);
+    const themeCount = () => window.SUDOKU_THEME_COUNTS?.[$('themeSelect').value] || 20;
+    const needed = () => size() * (variety() === 'different' ? count() : 1);
+    const downloadButtons = ['downloadPngBtn', 'downloadPdfBtn', 'toggleSolutionsBtn', 'downloadSolutionsPdfBtn'];
+    let themeImages = [], selectedImages = [], uploads = [];
+    let worksheet = null, pages = [], pageIndex = 0, showingSolutions = false;
+    let sourceRevision = 0, generationRevision = 0, loadingImages = false, generating = false;
+    let sourceError = '';
 
-document.addEventListener("DOMContentLoaded", () => {
-    // --- Config voor formaten ---
-    const GRID_SPECS = {
-        4: { blockRows: 2, blockCols: 2 },
-        6: { blockRows: 2, blockCols: 3 },
-        9: { blockRows: 3, blockCols: 3 }
-    };
-
-    let currentSize = 4; // standaard 4×4
-
-    // --- Canvas ---
-    const canvas = document.getElementById("mainCanvas");
-    const ctx = canvas.getContext("2d");
-
-    // --- Loader ---
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    function showLoading(on) {
-        if (!loadingOverlay) return;
-        loadingOverlay.style.display = on ? "flex" : "none";
+    function message(text, error = false) {
+        $('meldingContainer').textContent = text;
+        $('meldingContainer').style.color = error ? '#a32121' : '#17476d';
     }
-
-    // --- Afbeeldingsbeheer ---
-    let userImages = [];
-    let uploadedImageData = new Set();
-
-    let selectedTheme = null;
-    let allLoadedThemeImages = [];
-    let selectedThemeImagesForSudoku = [];
-
-    // --- Worksheet state (gedeeld door canvas + PDF) ---
-    let worksheetSudokus = [];
-    let worksheetSolutions = [];
-    let worksheetImageSets = [];
-    // Per sudoku: eigen knipafbeeldingen
-    let worksheetMissingImagesPerSudoku = [];
-    // Geaggregeerd (handig voor 4×4)
-    let worksheetMissingImages = [];
-
-    // --- DOM-elementen ---
-    const typeRadios = document.querySelectorAll('input[name="sudokuType"]');
-    const themeSelectionGroup = document.getElementById('themeSelectionGroup');
-    const themeSelect = document.getElementById('themeSelect');
-    const themeImageSelection = document.getElementById('themeImageSelection');
-    const selectableThemeImagePreviews = document.getElementById('selectableThemeImagePreviews');
-    const confirmThemeImagesBtn = document.getElementById('confirmThemeImagesBtn');
-    const themeImageSelectionLabel = document.getElementById('themeImageSelectionLabel');
-    const imageControls = document.getElementById('image-controls');
-    const userUploadControls = document.getElementById('userUploadControls');
-    const imageInput = document.getElementById('imageInput');
-    const imageInputLabel = document.getElementById('imageInputLabel');
-    const imagePreviews = document.getElementById('image-previews');
-    const clearImagesBtn = document.getElementById('clearImagesBtn');
-    const imageVarietyControls = document.getElementById('image-variety-controls');
-    const imageVarietyRadios = document.querySelectorAll('input[name="imageVariety"]');
-    const difficultySelect = document.getElementById('difficulty');
-    const aantalSelect = document.getElementById('aantalSudokus');
-    const gridSizeSelect = document.getElementById('gridSizeSelect');
-    const aantalMelding = document.getElementById('aantalMelding');
-    const generateBtn = document.getElementById('genereerBtn');
-    const downloadPngBtn = document.getElementById('downloadPngBtn');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    const meldingContainer = document.getElementById('meldingContainer');
-
-    // --- Thema-afbeeldingen configuratie ---
-    const themeImagePaths = {
-        "terug_naar_school": [], "herfst": [], "Halloween": [], "Sinterklaas": [],
-        "winter": [], "Kerst": [], "lente": [], "Pasen": [], "Carnaval": [], "zomer": []
-    };
-
-    function populateThemeImagePaths() {
-        for (const theme in themeImagePaths) {
-            for (let i = 1; i <= 20; i++) {
-                const paddedIndex = i.toString().padStart(2, '0');
-                themeImagePaths[theme].push(`sudoku_afbeeldingen/${theme}/${paddedIndex}.png`);
-            }
-        }
+    function ready() {
+        return type() === 'getallen' || (!loadingImages && !sourceError &&
+            ($('themeSelect').value ? selectedImages.length === needed() : uploads.length >= needed()));
     }
-    populateThemeImagePaths();
-
-    // --- Hulpfuncties: algemene utils ---
-    const shuffle = (array) => {
-        let currentIndex = array.length, randomIndex;
-        while (currentIndex !== 0) {
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex--;
-            [array[currentIndex], array[randomIndex]] = [
-                array[randomIndex], array[currentIndex]];
-        }
-        return array;
-    };
-
-    function deepCopyGrid(grid) {
-        return grid.map(row => row.slice());
+    function invalidate() {
+        generationRevision++;
+        generating = false;
+        worksheet = null; pages = []; pageIndex = 0; showingSolutions = false;
+        canvas.width = 840; canvas.height = 1188;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#526b82'; ctx.font = '24px Arial'; ctx.textAlign = 'center';
+        ctx.fillText('Kies je instellingen en afbeeldingen.', 420, 140);
+        updateButtons();
     }
-
-    // --- Sudoku solved grid generator (algemeen voor 4×4, 6×6, 9×9) ---
-    function generateSolvedGrid(size) {
-        const spec = GRID_SPECS[size];
-        if (!spec) throw new Error("Onbekend formaat: " + size);
-
-        const { blockRows, blockCols } = spec;
-        const grid = Array(size).fill(null).map(() => Array(size).fill(0));
-
-        // Basispatroon
-        for (let r = 0; r < size; r++) {
-            for (let c = 0; c < size; c++) {
-                grid[r][c] = ((r * blockCols + Math.floor(r / blockRows) + c) % size) + 1;
-            }
-        }
-
-        // Rijen binnen banden shufflen
-        const bandCount = size / blockRows;
-        for (let band = 0; band < bandCount; band++) {
-            const rowIndices = [];
-            for (let i = 0; i < blockRows; i++) {
-                rowIndices.push(band * blockRows + i);
-            }
-            const shuffledRows = shuffle(rowIndices.slice());
-            const tempRows = shuffledRows.map(idx => grid[idx]);
-            for (let i = 0; i < blockRows; i++) {
-                grid[band * blockRows + i] = tempRows[i];
-            }
-        }
-
-        // Kolommen binnen stacks shufflen
-        const stackCount = size / blockCols;
-        for (let stack = 0; stack < stackCount; stack++) {
-            const colIndices = [];
-            for (let i = 0; i < blockCols; i++) {
-                colIndices.push(stack * blockCols + i);
-            }
-            const shuffledCols = shuffle(colIndices.slice());
-            for (let r = 0; r < size; r++) {
-                const tempCols = shuffledCols.map(idx => grid[r][idx]);
-                for (let i = 0; i < blockCols; i++) {
-                    grid[r][stack * blockCols + i] = tempCols[i];
-                }
-            }
-        }
-
-        // Banden shufflen
-        {
-            const bands = [];
-            for (let b = 0; b < bandCount; b++) bands.push(b);
-            const bandOrder = shuffle(bands);
-            const newGrid = Array(size).fill(null).map(() => Array(size).fill(0));
-            for (let newBand = 0; newBand < bandCount; newBand++) {
-                const oldBand = bandOrder[newBand];
-                for (let i = 0; i < blockRows; i++) {
-                    const oldRow = oldBand * blockRows + i;
-                    const newRow = newBand * blockRows + i;
-                    newGrid[newRow] = grid[oldRow];
-                }
-            }
-            for (let r = 0; r < size; r++) grid[r] = newGrid[r];
-        }
-
-        // Stacks shufflen
-        {
-            const stacks = [];
-            for (let s = 0; s < stackCount; s++) stacks.push(s);
-            const stackOrder = shuffle(stacks);
-            const newGrid = Array(size).fill(null).map(() => Array(size).fill(0));
-            for (let r = 0; r < size; r++) {
-                for (let newStack = 0; newStack < stackCount; newStack++) {
-                    const oldStack = stackOrder[newStack];
-                    for (let i = 0; i < blockCols; i++) {
-                        const oldCol = oldStack * blockCols + i;
-                        const newCol = newStack * blockCols + i;
-                        newGrid[r][newCol] = grid[r][oldCol];
-                    }
-                }
-            }
-            for (let r = 0; r < size; r++) grid[r] = newGrid[r];
-        }
-
-        // Cijfer-permutatie
-        const perm = shuffle(Array.from({ length: size }, (_, i) => i + 1));
-        for (let r = 0; r < size; r++) {
-            for (let c = 0; c < size; c++) {
-                grid[r][c] = perm[grid[r][c] - 1];
-            }
-        }
-
-        return grid;
+    function updateButtons() {
+        canvas.dataset.pageCount = String(pages.length);
+        downloadButtons.forEach(id => { $(id).disabled = !worksheet || generating || (type() === 'afbeeldingen' && loadingImages); });
+        $('genereerBtn').disabled = !ready() || generating;
+        $('confirmThemeImagesBtn').disabled = !ready() || generating;
+        $('autoThemeImagesBtn').disabled = loadingImages || generating || themeImages.length < needed();
+        $('toggleSolutionsBtn').textContent = showingSolutions ? 'Terug naar werkblad' : 'Oplossingen tonen';
+        $('downloadPdfBtn').textContent = showingSolutions ? '↓ PDF oplossingen' : '↓ PDF werkblad';
+        $('previousPageBtn').disabled = pageIndex <= 0 || !pages.length;
+        $('nextPageBtn').disabled = pageIndex >= pages.length - 1;
+        $('pageIndicator').textContent = pages.length ? `Pagina ${pageIndex + 1} van ${pages.length}` : 'Nog geen werkblad';
+        $('previewStatus').textContent = pages.length
+            ? `${pages.length} pagina${pages.length === 1 ? '' : "’s"}. PDF en PNG bevatten alle pagina’s van deze weergave.` : '';
+        $('main-content').setAttribute('aria-busy', String(generating || loadingImages));
     }
-
-    // --- Validator & oplosser voor unieke oplossing ---
-    function isSafe(grid, row, col, num, size, blockRows, blockCols) {
-        for (let i = 0; i < size; i++) {
-            if (grid[row][i] === num) return false;
-            if (grid[i][col] === num) return false;
-        }
-        const startRow = row - (row % blockRows);
-        const startCol = col - (col % blockCols);
-        for (let r = 0; r < blockRows; r++) {
-            for (let c = 0; c < blockCols; c++) {
-                if (grid[startRow + r][startCol + c] === num) return false;
-            }
-        }
-        return true;
+    function updateUi() {
+        const images = type() === 'afbeeldingen';
+        $('imageSettings').hidden = !images;
+        const theme = $('themeSelect').value;
+        const different = document.querySelector('[name="imageVariety"][value="different"]');
+        const impossible = images && Boolean(theme) && size() * count() > themeCount();
+        different.disabled = impossible;
+        if (impossible && different.checked) document.querySelector('[name="imageVariety"][value="same"]').checked = true;
+        selectedImages = selectedImages.slice(0, needed());
+        $('themeSelectionGroup').style.display = images ? 'flex' : 'none';
+        $('image-variety-controls').style.display = images && count() > 1 ? 'flex' : 'none';
+        $('themeImageSelection').style.display = images && theme ? 'flex' : 'none';
+        $('image-controls').style.display = images && !theme ? 'block' : 'none';
+        $('varietyHint').textContent = impossible
+            ? `Dit thema bevat ${themeCount()} afbeeldingen. Voor deze combinatie gebruiken we dezelfde afbeeldingen. Kies minder sudoku’s of upload eigen afbeeldingen voor aparte sets.` : '';
+        $('aantalMelding').textContent = (size() === 4
+            ? 'Tot 4 sudoku’s op een roosterpagina.'
+            : 'Eén sudoku per roosterpagina.') + (images ? ' Knipstroken komen op extra pagina’s.' : '');
+        $('themeImageSelectionLabel').textContent = `Kies ${needed()} afbeeldingen uit het thema (${selectedImages.length} geselecteerd):`;
+        $('imageInputLabel').textContent = `Upload minstens ${needed()} verschillende afbeeldingen:`;
+        if (images && loadingImages) message('Afbeeldingen laden…');
+        else if (images && sourceError) message(sourceError, true);
+        else if (images && !ready()) {
+            const amount = theme ? selectedImages.length : uploads.length;
+            message(`Nog ${Math.max(0, needed()-amount)} afbeeldingen nodig.`, true);
+        } else if (!generating) message(images ? 'Afbeeldingen klaar. Je kunt een nieuwe sudoku maken.' : '');
+        renderImageChoices(); updateButtons();
     }
-
-    function countSolutions(grid, size, blockRows, blockCols, limit = 2) {
-        let solutionCount = 0;
-
-        function backtrack() {
-            if (solutionCount >= limit) return;
-
-            let row = -1, col = -1;
-            outer:
-            for (let r = 0; r < size; r++) {
-                for (let c = 0; c < size; c++) {
-                    if (grid[r][c] === 0) {
-                        row = r;
-                        col = c;
-                        break outer;
-                    }
-                }
-            }
-
-            if (row === -1) {
-                solutionCount++;
-                return;
-            }
-
-            for (let num = 1; num <= size; num++) {
-                if (isSafe(grid, row, col, num, size, blockRows, blockCols)) {
-                    grid[row][col] = num;
-                    backtrack();
-                    grid[row][col] = 0;
-                    if (solutionCount >= limit) return;
-                }
-            }
-        }
-
-        backtrack();
-        return solutionCount;
-    }
-
-    function hasUniqueSolution(puzzle, size) {
-        const spec = GRID_SPECS[size];
-        const copy = deepCopyGrid(puzzle);
-        const numSolutions = countSolutions(copy, size, spec.blockRows, spec.blockCols, 2);
-        return numSolutions === 1;
-    }
-
-    function getTargetRemovals(size, difficulty) {
-        if (size === 4) {
-            switch (difficulty) {
-                case 'easy': return 6;
-                case 'medium': return 8;
-                case 'hard': return 10;
-                case 'expert': return 12;
-                default: return 8;
-            }
-        } else if (size === 6) {
-            switch (difficulty) {
-                case 'easy': return 14;
-                case 'medium': return 18;
-                case 'hard': return 22;
-                case 'expert': return 26;
-                default: return 18;
-            }
-        } else if (size === 9) {
-            switch (difficulty) {
-                case 'easy': return 40;
-                case 'medium': return 50;
-                case 'hard': return 55;
-                case 'expert': return 60;
-                default: return 50;
-            }
-        }
-        return Math.floor((size * size) / 2);
-    }
-
-    function createSudokuWithDifficulty(size, difficulty) {
-        const spec = GRID_SPECS[size];
-        const targetRemovals = getTargetRemovals(size, difficulty);
-        const solution = generateSolvedGrid(size);
-        const puzzle = deepCopyGrid(solution);
-
-        let cells = [];
-        for (let r = 0; r < size; r++) {
-            for (let c = 0; c < size; c++) {
-                cells.push({ r, c });
-            }
-        }
-        shuffle(cells);
-
-        let removed = 0;
-        for (const cell of cells) {
-            if (removed >= targetRemovals) break;
-            const { r, c } = cell;
-            if (puzzle[r][c] === 0) continue;
-
-            const backup = puzzle[r][c];
-            puzzle[r][c] = 0;
-
-            if (hasUniqueSolution(puzzle, size)) {
-                removed++;
-            } else {
-                puzzle[r][c] = backup;
-            }
-        }
-
-        return { solution, puzzle };
-    }
-
-    // --- Canvas tekenlogica ---
-    function drawGrid(ctx, x, y, gridSizePx, size) {
-        const cellSize = gridSizePx / size;
-        ctx.save();
-        ctx.translate(x, y);
-
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, gridSizePx, gridSizePx);
-
-        ctx.strokeStyle = '#004080';
-        for (let i = 0; i <= size; i++) {
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(i * cellSize, 0);
-            ctx.lineTo(i * cellSize, gridSizePx);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(0, i * cellSize);
-            ctx.lineTo(gridSizePx, i * cellSize);
-            ctx.stroke();
-        }
-
-        // Dikkere lijnen rond blokken
-        const spec = GRID_SPECS[size];
-        const br = spec.blockRows;
-        const bc = spec.blockCols;
-        ctx.lineWidth = 2.5;
-        for (let r = 0; r <= size; r += br) {
-            ctx.beginPath();
-            ctx.moveTo(0, r * cellSize);
-            ctx.lineTo(gridSizePx, r * cellSize);
-            ctx.stroke();
-        }
-        for (let c = 0; c <= size; c += bc) {
-            ctx.beginPath();
-            ctx.moveTo(c * cellSize, 0);
-            ctx.lineTo(c * cellSize, gridSizePx);
-            ctx.stroke();
-        }
-
-        ctx.restore();
-    }
-
-    function drawPuzzle(ctx, puzzle, type, imagesToUse, x, y, gridSizePx, size) {
-        drawGrid(ctx, x, y, gridSizePx, size);
-        const cellSize = gridSizePx / size;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        for (let r = 0; r < size; r++) {
-            for (let c = 0; c < size; c++) {
-                const value = puzzle[r][c];
-                if (value === 0) continue;
-
-                const centerX = x + c * cellSize + cellSize / 2;
-                const centerY = y + r * cellSize + cellSize / 2;
-
-                if (type === 'getallen') {
-                    ctx.fillStyle = '#000';
-                    ctx.font = `${cellSize * 0.6}px Arial`;
-                    ctx.fillText(value, centerX, centerY);
-                } else {
-                    const imgIndex = value - 1;
-                    if (imagesToUse &&
-                        imagesToUse[imgIndex] &&
-                        imagesToUse[imgIndex].complete) {
-
-                        const img = imagesToUse[imgIndex];
-                        const margin = cellSize * 0.1;
-                        const availableSpace = cellSize - 2 * margin;
-
-                        const aspectRatio = img.naturalWidth / img.naturalHeight;
-                        let newWidth, newHeight;
-                        if (aspectRatio > 1) {
-                            newWidth = availableSpace;
-                            newHeight = availableSpace / aspectRatio;
-                        } else {
-                            newHeight = availableSpace;
-                            newWidth = availableSpace * aspectRatio;
-                        }
-
-                        const drawX = x + c * cellSize + (cellSize - newWidth) / 2;
-                        const drawY = y + r * cellSize + (cellSize - newHeight) / 2;
-                        ctx.drawImage(img, drawX, drawY, newWidth, newHeight);
-                    }
-                }
-            }
-        }
-    }
-
-    // --- UI / validatie ---
-    function getNeededImagesCount() {
-        const type = document.querySelector('input[name="sudokuType"]:checked').value;
-        if (type !== 'afbeeldingen') return 0;
-
-        const aantal = parseInt(aantalSelect.value, 10);
-        const variety = document.querySelector('input[name="imageVariety"]:checked').value;
-
-        return (variety === 'different' && aantal > 1) ? currentSize * aantal : currentSize;
-    }
-
-    function updateUiForImageOptions() {
-        const aantal = parseInt(aantalSelect.value, 10);
-        const type = document.querySelector('input[name="sudokuType"]:checked').value;
-
-        themeSelectionGroup.style.display = (type === 'afbeeldingen') ? 'block' : 'none';
-        imageControls.style.display = (type === 'afbeeldingen') ? 'block' : 'none';
-
-        const needed = getNeededImagesCount();
-        const isThemeConfirmed =
-            (selectedTheme && selectedThemeImagesForSudoku.length === needed);
-
-        themeImageSelection.style.display =
-            (type === 'afbeeldingen' && selectedTheme && !isThemeConfirmed) ? 'block' : 'none';
-
-        userUploadControls.style.display =
-            (type === 'afbeeldingen' && !selectedTheme) ? 'block' : 'none';
-
-        imageVarietyControls.style.display =
-            (type === 'afbeeldingen' && aantal > 1) ? 'block' : 'none';
-
-        aantalMelding.textContent =
-            (aantal > 1) ? `Het werkblad zal ${aantal} verschillende sudoku's bevatten.` : '';
-
-        updateImageUploadLabel();
-        renderImagePreviews();
-    }
-
-    function updateImageUploadLabel() {
-        const type = document.querySelector('input[name="sudokuType"]:checked').value;
-        if (type === 'getallen') {
-            meldingContainer.textContent = '';
-            return;
-        }
-
-        const needed = getNeededImagesCount();
-
-        if (selectedTheme) {
-            themeImageSelectionLabel.textContent = `Kies ${needed} afbeelding(en) uit het thema:`;
-            const currentSelectedCount = selectedThemeImagesForSudoku.length;
-            if (currentSelectedCount < needed) {
-                meldingContainer.textContent =
-                    `Selecteer nog ${needed - currentSelectedCount} afbeelding(en).`;
-                meldingContainer.style.color = '#d9534f';
-                confirmThemeImagesBtn.disabled = true;
-            } else if (currentSelectedCount > needed) {
-                meldingContainer.textContent =
-                    `Je hebt er ${currentSelectedCount - needed} te veel geselecteerd.`;
-                meldingContainer.style.color = '#d9534f';
-                confirmThemeImagesBtn.disabled = true;
-            } else {
-                meldingContainer.textContent = `Perfect! Klik op 'Bevestig selectie'.`;
-                meldingContainer.style.color = 'green';
-                confirmThemeImagesBtn.disabled = false;
-            }
-            return;
-        }
-
-        const currentUploadedCount = userImages.length;
-        imageInputLabel.textContent = `Kies ${needed} afbeeldingen:`;
-        if (needed > 0 && currentUploadedCount < needed) {
-            meldingContainer.textContent =
-                `${currentUploadedCount}/${needed} geselecteerd. Nog ${needed - currentUploadedCount} nodig.`;
-            meldingContainer.style.color = '#d9534f';
-        } else if (currentUploadedCount >= needed && needed > 0) {
-            meldingContainer.textContent =
-                `Perfect! Je hebt ${currentUploadedCount} unieke afbeeldingen.`;
-            meldingContainer.style.color = 'green';
-        } else {
-            meldingContainer.textContent = '';
-        }
-    }
-
-    function renderImagePreviews() {
-        imagePreviews.innerHTML = '';
-        selectableThemeImagePreviews.innerHTML = '';
-
-        const imagesToRender = selectedTheme ? allLoadedThemeImages : userImages;
-        const previewContainer = selectedTheme ? selectableThemeImagePreviews : imagePreviews;
-
-        imagesToRender.forEach(img => {
-            const imgWrapper = document.createElement('div');
-            imgWrapper.classList.add('theme-image-wrapper');
-
-            const previewImg = document.createElement('img');
-            previewImg.src = img.src;
-            imgWrapper.appendChild(previewImg);
-            previewContainer.appendChild(imgWrapper);
-
-            if (selectedTheme) {
-                if (selectedThemeImagesForSudoku.some(sImg => sImg.src === img.src)) {
-                    imgWrapper.classList.add('selected');
-                }
-                imgWrapper.addEventListener('click', () => {
-                    const index =
-                        selectedThemeImagesForSudoku.findIndex(sImg => sImg.src === img.src);
-                    const needed = getNeededImagesCount();
-                    if (index > -1) {
-                        selectedThemeImagesForSudoku.splice(index, 1);
-                        imgWrapper.classList.remove('selected');
-                    } else if (selectedThemeImagesForSudoku.length < needed) {
-                        selectedThemeImagesForSudoku.push(img);
-                        imgWrapper.classList.add('selected');
-                    }
-                    updateImageUploadLabel();
+    function renderImageChoices() {
+        const choices = $('selectableThemeImagePreviews');
+        const scrollTop = choices.scrollTop;
+        const focusedIndex = Array.from(choices.children).indexOf(document.activeElement);
+        $('selectableThemeImagePreviews').replaceChildren(); $('image-previews').replaceChildren();
+        const theme = $('themeSelect').value;
+        const parent = theme ? $('selectableThemeImagePreviews') : $('image-previews');
+        (theme ? themeImages : uploads).forEach((img, index) => {
+            const wrapper = document.createElement(theme ? 'button' : 'div');
+            wrapper.className = 'theme-image-wrapper';
+            const chosen = selectedImages.includes(img);
+            if (chosen) wrapper.classList.add('selected');
+            const preview = document.createElement('img');
+            preview.src = img.src; preview.alt = `Afbeelding ${index + 1}`;
+            wrapper.appendChild(preview); parent.appendChild(wrapper);
+            if (theme) {
+                wrapper.type = 'button'; wrapper.setAttribute('aria-pressed', String(chosen));
+                wrapper.addEventListener('click', () => {
+                    if (!chosen && selectedImages.length >= needed()) return;
+                    selectedImages = chosen ? selectedImages.filter(value => value !== img) : [...selectedImages, img];
+                    invalidate(); updateUi();
                 });
             }
         });
+        if (focusedIndex >= 0) choices.children[focusedIndex]?.focus({ preventScroll: true });
+        choices.scrollTop = scrollTop;
     }
-
     function loadImage(src) {
         return new Promise((resolve, reject) => {
             const img = new Image();
+            img.onload = () => img.naturalWidth > 0 ? resolve(img) : reject(new Error('Lege afbeelding'));
+            img.onerror = () => reject(new Error('Afbeelding kon niet worden geladen'));
             img.src = src;
-            img.onload = () => resolve(img);
-            img.onerror = () => reject(new Error(`Afbeelding niet geladen: ${src}`));
         });
     }
-
-    // --- State opbouw + canvastekening ---
-    function buildWorksheetState() {
-        const type = document.querySelector('input[name="sudokuType"]:checked').value;
-        const aantal = parseInt(aantalSelect.value, 10);
-        const difficulty = difficultySelect.value;
-        const variety = document.querySelector('input[name="imageVariety"]:checked').value;
-        const useDifferentImagesPerSudoku =
-            (type === 'afbeeldingen' && aantal > 1 && variety === 'different');
-
-        if (!GRID_SPECS[currentSize]) {
-            meldingContainer.textContent = "Onbekend formaat.";
-            return { valid: false };
-        }
-
-        let imagesForWorksheet = [];
-        if (type === 'afbeeldingen') {
-            const needed = getNeededImagesCount();
-            const sourceImages = selectedTheme ? selectedThemeImagesForSudoku : userImages;
-            if (sourceImages.length < needed) {
-                worksheetSudokus = [];
-                worksheetSolutions = [];
-                worksheetImageSets = [];
-                worksheetMissingImagesPerSudoku = [];
-                worksheetMissingImages = [];
-                updateImageUploadLabel();
-                return { valid: false };
-            }
-            imagesForWorksheet = sourceImages;
-        }
-
-        worksheetSudokus = [];
-        worksheetSolutions = [];
-        worksheetImageSets = [];
-        worksheetMissingImagesPerSudoku = [];
-        worksheetMissingImages = [];
-
-        for (let i = 0; i < aantal; i++) {
-            const { solution, puzzle } =
-                createSudokuWithDifficulty(currentSize, difficulty);
-
-            worksheetSolutions.push(solution);
-            worksheetSudokus.push(puzzle);
-
-            let imageSet = [];
-            if (type === 'afbeeldingen') {
-                const baseImages = useDifferentImagesPerSudoku
-                    ? imagesForWorksheet.slice(i * currentSize, (i + 1) * currentSize)
-                    : imagesForWorksheet.slice(0, currentSize);
-                imageSet = shuffle([...baseImages]);
-            }
-            worksheetImageSets.push(imageSet);
-
-            const missingForThis = [];
-            if (type === 'afbeeldingen') {
-                for (let r = 0; r < currentSize; r++) {
-                    for (let c = 0; c < currentSize; c++) {
-                        if (puzzle[r][c] === 0) {
-                            const value = solution[r][c];
-                            const img = imageSet[value - 1];
-                            if (img) {
-                                missingForThis.push(img);
-                                worksheetMissingImages.push(img); // totaal (4×4)
-                            }
-                        }
-                    }
-                }
-            }
-            worksheetMissingImagesPerSudoku.push(missingForThis);
-        }
-
-        return { valid: true, type, aantal };
-    }
-
-  function drawWorksheetOnCanvas(type, aantal) {
-    if (worksheetSudokus.length === 0) {
-        canvas.width = 700;
-        canvas.height = 500;
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        return;
-    }
-
-    const isLarge = (currentSize === 6 || currentSize === 9);
-    const aantalToDraw = isLarge ? 1 : aantal;
-
-    canvas.width = 700;
-
-    // Hoeveel sudoku's naast/boven elkaar op CANVAS?
-    const cols = (!isLarge && (aantalToDraw === 2 || aantalToDraw === 4)) ? 2 : 1;
-    const rows = (!isLarge && aantalToDraw === 3) ? 3 :
-                 (!isLarge && aantalToDraw === 4) ? 2 : 1;
-
-    const padding = 20;
-    const topTextHeight = (isLarge && aantal > 1) ? 25 : 0;
-
-    const availableWidth = canvas.width - (cols + 1) * padding;
-
-    // ⭐ Rooster bewust iets kleiner maken
-    const sudokuSize = (availableWidth / cols) * 0.8;
-
-    const sudokuAreaHeight =
-        topTextHeight + rows * sudokuSize + (rows + 1) * padding;
-
-    // Welke knipafbeeldingen tonen op canvas?
-    let knipImages;
-    if (!isLarge) {
-        knipImages = worksheetMissingImages;
-    } else {
-        knipImages = worksheetMissingImagesPerSudoku[0] || [];
-    }
-
-    // ===== Hoogte voor het knipblad berekenen =====
-    let knipHeight = 0;
-    let cutCfg = null;
-
-    if (type === 'afbeeldingen' && knipImages.length > 0) {
-        const marginX = 20;
-        const cutSpacing = 12;
-        const targetCutSize = 95; // ⭐ groter knipvakje
-
-        const cutImagesPerRow = Math.max(
-            1,
-            Math.floor(
-                (canvas.width - 2 * marginX + cutSpacing) /
-                (targetCutSize + cutSpacing)
-            )
-        );
-
-        const numRows = Math.ceil(knipImages.length / cutImagesPerRow);
-
-        // Titel + ruimte + rijen knipvakjes + marge onderaan
-        knipHeight = 35 + 25 + numRows * (targetCutSize + cutSpacing) + 20;
-
-        cutCfg = {
-            marginX,
-            cutSpacing,
-            targetCutSize,
-            cutImagesPerRow,
-            numRows
-        };
-    }
-
-    const totalHeight =
-        sudokuAreaHeight + (knipHeight > 0 ? knipHeight : padding * 2);
-
-    canvas.height = totalHeight;
-
-    // Achtergrond
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Eventuele melding bovenaan bij grote formaten
-    if (isLarge && aantal > 1) {
-        ctx.fillStyle = '#004080';
-        ctx.font = "16px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        ctx.fillText(
-            `Voorbeeld van pagina 1 – PDF zal ${aantal} pagina's bevatten.`,
-            canvas.width / 2,
-            5
-        );
-    }
-
-    // ===== Sudoku's tekenen =====
-    for (let i = 0; i < aantalToDraw; i++) {
-        const puzzle = worksheetSudokus[i];
-        const imageSet = worksheetImageSets[i];
-
-        const col = (cols === 1) ? 0 : (i % cols);
-        const row = (cols === 1) ? i : Math.floor(i / cols);
-
-        const x = padding + col * (sudokuSize + padding);
-        const y = topTextHeight + padding + row * (sudokuSize + padding);
-
-        drawPuzzle(ctx, puzzle, type, imageSet, x, y, sudokuSize, currentSize);
-    }
-
-    // ===== Knipblad tekenen (groot) =====
-    if (type === 'afbeeldingen' && cutCfg && knipImages.length > 0) {
-        const {
-            marginX,
-            cutSpacing,
-            targetCutSize,
-            cutImagesPerRow,
-            numRows
-        } = cutCfg;
-
-        const titleY = sudokuAreaHeight + 20;
-
-        ctx.fillStyle = '#000';
-        ctx.font = "20px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(
-            "Knip de afbeeldingen uit en plak ze op de juiste plaats:",
-            canvas.width / 2,
-            titleY
-        );
-
-        let index = 0;
-        const firstBoxY = titleY + 25;
-
-        for (let r = 0; r < numRows; r++) {
-            for (let c = 0; c < cutImagesPerRow && index < knipImages.length; c++) {
-
-                const boxX = marginX + c * (targetCutSize + cutSpacing);
-                const boxY = firstBoxY + r * (targetCutSize + cutSpacing);
-
-                // Gestreept knipkader
-                ctx.save();
-                ctx.strokeStyle = '#004080';
-                ctx.setLineDash([5, 4]);
-                ctx.lineWidth = 1.7;
-                ctx.strokeRect(boxX, boxY, targetCutSize, targetCutSize);
-                ctx.restore();
-
-                const img = knipImages[index];
-                if (img && img.complete) {
-                    const marginInside = 8;
-                    const available = targetCutSize - 2 * marginInside;
-                    const ratio = img.naturalWidth / img.naturalHeight;
-                    let w, h;
-
-                    if (ratio > 1) {
-                        w = available;
-                        h = available / ratio;
-                    } else {
-                        h = available;
-                        w = available * ratio;
-                    }
-
-                    const drawX = boxX + (targetCutSize - w) / 2;
-                    const drawY = boxY + (targetCutSize - h) / 2;
-                    ctx.drawImage(img, drawX, drawY, w, h);
-                }
-
-                index++;
-            }
-        }
-    }
-}
-
-    async function generateAndDraw() {
-        showLoading(true);
-        try {
-            const stateInfo = buildWorksheetState();
-            if (!stateInfo.valid) {
-                canvas.width = 700;
-                canvas.height = 500;
-                ctx.fillStyle = "white";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                return;
-            }
-            const { type, aantal } = stateInfo;
-            drawWorksheetOnCanvas(type, aantal);
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    // --- Event handlers ---
-   [...typeRadios, ...imageVarietyRadios, aantalSelect, difficultySelect].forEach(el => {
-    el.addEventListener('change', () => {
-
-        const selectedType = document.querySelector('input[name="sudokuType"]:checked').value;
-        const previousType = (worksheetImageSets.length > 0 || userImages.length > 0 || selectedThemeImagesForSudoku.length > 0)
-            ? "afbeeldingen"
-            : "getallen";
-
-        // Alleen wissen wanneer het type écht verandert
-        if (selectedType !== previousType) {
-            clearSelectionAndResetUI(false);
-            updateUiForImageOptions();   // <— BELANGRIJK: UI opnieuw opbouwen
-            return;
-        }
-
-        // In alle andere gevallen: niets wissen, enkel UI bijwerken en opnieuw tekenen
-        updateUiForImageOptions();
-        generateAndDraw();
-    });
-});
-
-
-    gridSizeSelect.addEventListener('change', () => {
-        currentSize = parseInt(gridSizeSelect.value, 10) || 4;
-        clearSelectionAndResetUI(false);
-    });
-
-    themeSelect.addEventListener('change', async (event) => {
-        const theme = event.target.value;
-        clearSelectionAndResetUI(false);
-        selectedTheme = theme;
-
-        if (theme) {
-            meldingContainer.textContent =
-                `Thema ${themeSelect.options[themeSelect.selectedIndex].text} laden...`;
-            try {
-                allLoadedThemeImages =
-                    await Promise.all(themeImagePaths[theme].map(path => loadImage(path)));
-                meldingContainer.textContent = '';
-            } catch (error) {
-                meldingContainer.textContent = "Fout bij laden thema-afbeeldingen.";
-                allLoadedThemeImages = [];
-                selectedTheme = null;
-                themeSelect.value = "";
-            }
-        }
-        updateUiForImageOptions();
-        generateAndDraw();
-    });
-
-    confirmThemeImagesBtn.addEventListener('click', async () => {
-        const needed = getNeededImagesCount();
-        if (selectedThemeImagesForSudoku.length === needed) {
-            await Promise.all(
-                selectedThemeImagesForSudoku.map(img =>
-                    img.complete ? Promise.resolve()
-                        : new Promise(resolve => { img.onload = resolve; })
-                )
-            );
-            updateUiForImageOptions();
-            generateAndDraw();
-        }
-    });
-
-    imageInput.addEventListener('change', async (event) => {
-        const files = Array.from(event.target.files);
-        if (selectedTheme || files.length === 0) {
-            imageInput.value = null;
-            return;
-        }
-
-        const needed = getNeededImagesCount();
-        userImages = [];
-        uploadedImageData.clear();
-
-        const readers = files.map(file => new Promise(resolve => {
+    function readFile(file) {
+        return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = (e) => resolve({ dataURL: e.target.result });
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Bestand kon niet worden gelezen'));
+            reader.onabort = () => reject(new Error('Bestand lezen afgebroken'));
             reader.readAsDataURL(file);
-        }));
-
-        const results = await Promise.all(readers);
-        let newImagesLoaded = [];
-        for (const { dataURL } of results) {
-            if (!uploadedImageData.has(dataURL) && newImagesLoaded.length < needed) {
-                uploadedImageData.add(dataURL);
-                const img = new Image();
-                img.src = dataURL;
-                newImagesLoaded.push(img);
-            }
-        }
-        userImages = newImagesLoaded;
-
-        updateUiForImageOptions();
-        generateAndDraw();
-        imageInput.value = null;
-    });
-
-    function clearSelectionAndResetUI(resetThemeDropdown = true) {
-        userImages = [];
-        uploadedImageData.clear();
-        allLoadedThemeImages = [];
-        selectedThemeImagesForSudoku = [];
-        worksheetSudokus = [];
-        worksheetSolutions = [];
-        worksheetImageSets = [];
-        worksheetMissingImagesPerSudoku = [];
-        worksheetMissingImages = [];
-
-        if (resetThemeDropdown) {
-            selectedTheme = null;
-            themeSelect.value = "";
-        }
-        imageInput.value = null;
-        updateUiForImageOptions();
-        generateAndDraw();
+        });
     }
-
-    clearImagesBtn.addEventListener('click', () => clearSelectionAndResetUI(true));
-    generateBtn.addEventListener('click', generateAndDraw);
-
-    // --- Hulpfunctie: wacht tot alle afbeeldingen geladen zijn ---
-    async function ensureAllImagesLoaded(arr) {
-        const promises = arr.map(img =>
-            img && !img.complete
-                ? new Promise(resolve => { img.onload = resolve; img.onerror = resolve; })
-                : Promise.resolve()
-        );
-        await Promise.all(promises);
-    }
-// =========================
-//   KNIPBLAD OP APARTE PAGINA – VASTE MAAT (20 mm)
-// =========================
-function renderKnipbladOnNewPage(doc, missingForThis, pageWidth, pageHeight, margin) {
-
-    if (!missingForThis || missingForThis.length === 0) return;
-
-    doc.addPage();
-
-    const cutSize = 20;      // ⭐ vaste knipmaat
-    const spacing = 4;       // ruimte tussen vakjes
-    const maxPerRow = 5;     // ⭐ altijd 5 per rij
-
-    const count = missingForThis.length;
-    const rows = Math.ceil(count / maxPerRow);
-
-    // Titel
-    doc.setFontSize(16);
-    doc.text(
-        "Knip de afbeeldingen uit en plak ze op de juiste plaats:",
-        pageWidth / 2,
-        margin,
-        { align: 'center' }
-    );
-
-    let index = 0;
-    let y = margin + 10;
-
-    for (let r = 0; r < rows; r++) {
-        let x = margin;
-
-        for (let c = 0; c < maxPerRow && index < count; c++) {
-
-            const img = missingForThis[index];
-
-            doc.setLineWidth(0.3);
-            doc.setDrawColor(0, 64, 128);
-            doc.setLineDash([2, 2], 0);
-            doc.rect(x, y, cutSize, cutSize);
-
-            if (img && img.complete) {
-                const inner = cutSize - 4;
-                const ratio = img.naturalWidth / img.naturalHeight;
-                let w, h;
-                if (ratio > 1) { w = inner; h = inner / ratio; }
-                else { h = inner; w = inner * ratio; }
-
-                const dx = x + (cutSize - w) / 2;
-                const dy = y + (cutSize - h) / 2;
-
-                doc.addImage(img, "PNG", dx, dy, w, h);
-            }
-
-            x += cutSize + spacing;
-            index++;
-        }
-
-        y += cutSize + spacing;
-    }
-}
-
-    // --- Downloadfuncties ---
-    downloadPngBtn.addEventListener('click', () => {
-        const aantal = parseInt(aantalSelect.value, 10);
-        const dataURL = canvas.toDataURL("image/png");
-        const a = document.createElement("a");
-        a.href = dataURL;
-        a.download = `sudoku-werkblad-${aantal}.png`;
-        a.click();
-    });
-
-    downloadPdfBtn.addEventListener('click', async () => {
-        showLoading(true);
+    async function changeTheme() {
+        const revision = ++sourceRevision;
+        const theme = $('themeSelect').value;
+        themeImages = []; selectedImages = []; sourceError = ''; loadingImages = Boolean(theme);
+        invalidate(); updateUi();
+        if (!theme) { loadingImages = false; updateUi(); if (ready()) await generate(); return; }
         try {
-            const type = document.querySelector('input[name="sudokuType"]:checked').value;
-            const aantal = parseInt(aantalSelect.value, 10);
-
-            if (worksheetSudokus.length === 0) {
-                await generateAndDraw();
-            }
-
-            // Zorg dat alle afbeeldingen volledig zijn geladen
-            await ensureAllImagesLoaded(worksheetMissingImages);
-            for (let imgSet of worksheetImageSets) {
-                await ensureAllImagesLoaded(imgSet);
-            }
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
-
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
-            const margin = 10;
-
-            const isLarge = (currentSize === 6 || currentSize === 9);
-
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = 512;
-            tempCanvas.height = 512;
-            const tempCtx = tempCanvas.getContext('2d');
-
-            if (!isLarge) {
-                // --- 4×4: alles op 1 pagina ---
-                let knipbladHoogte = 0;
-                if (type === 'afbeeldingen' && worksheetMissingImages.length > 0) {
-                    const cutImagesPerRow = Math.min(6, worksheetMissingImages.length);
-                    const imgBoxSpacing = 2;
-                    const cutImageSize =
-                        (pageWidth - 2 * margin - (cutImagesPerRow - 1) * imgBoxSpacing) /
-                        cutImagesPerRow;
-                    const numRows =
-                        Math.ceil(worksheetMissingImages.length / cutImagesPerRow);
-                    knipbladHoogte =
-                        numRows * (cutImageSize + imgBoxSpacing) + margin + 10;
-                }
-
-                const layouts = calculateLayouts(aantal, pageWidth, pageHeight,
-                    margin, knipbladHoogte, 0);
-
-                for (let i = 0; i < aantal && i < worksheetSudokus.length; i++) {
-                    tempCtx.fillStyle = "white";
-                    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-                    const puzzle = worksheetSudokus[i];
-                    const imageSet = worksheetImageSets[i];
-
-                    drawPuzzle(tempCtx, puzzle, type, imageSet,
-                        0, 0, tempCanvas.width, currentSize);
-
-                    const layout = layouts[i];
-                    doc.addImage(
-                        tempCanvas.toDataURL('image/png'),
-                        'PNG',
-                        layout.x,
-                        layout.y,
-                        layout.size,
-                        layout.size
-                    );
-                }
-
-                // Knipblad onderaan
-                if (type === 'afbeeldingen' && worksheetMissingImages.length > 0) {
-                    const cutImagesPerRow = Math.min(10, worksheetMissingImages.length);
-                    const imgBoxSpacing = 2;
-                    const cutImageSize =
-                        (pageWidth - 2 * margin - (cutImagesPerRow - 1) * imgBoxSpacing) /
-                        cutImagesPerRow;
-
-                    const startY = pageHeight - knipbladHoogte + margin;
-
-                    doc.setFontSize(14);
-                    doc.text(
-                        "Knip de afbeeldingen uit en plak ze op de juiste plaats:",
-                        pageWidth / 2,
-                        startY - 5,
-                        { align: 'center' }
-                    );
-
-                    let index = 0;
-                    const imgStartY = startY + 2;
-
-                    for (let r = 0; index < worksheetMissingImages.length; r++) {
-                        for (let c = 0;
-                             c < cutImagesPerRow && index < worksheetMissingImages.length;
-                             c++) {
-
-                            const boxX = margin + c * (cutImageSize + imgBoxSpacing);
-                            const boxY = imgStartY + r * (cutImageSize + imgBoxSpacing);
-
-                            doc.setDrawColor('#004080');
-                            doc.setLineDashPattern([2, 1.5], 0);
-                            doc.rect(boxX, boxY, cutImageSize, cutImageSize);
-                            doc.setLineDashPattern([], 0);
-
-                            const img = worksheetMissingImages[index];
-                            if (img && img.complete) {
-                                const marginInBox = 1;
-                                const availableSpace = cutImageSize - 2 * marginInBox;
-                                const aspectRatio = img.naturalWidth / img.naturalHeight;
-                                let newWidth, newHeight;
-                                if (aspectRatio > 1) {
-                                    newWidth = availableSpace;
-                                    newHeight = availableSpace / aspectRatio;
-                                } else {
-                                    newHeight = availableSpace;
-                                    newWidth = availableSpace * aspectRatio;
-                                }
-                                const drawX = boxX + (cutImageSize - newWidth) / 2;
-                                const drawY = boxY + (cutImageSize - newHeight) / 2;
-                                doc.addImage(img.src, 'PNG', drawX, drawY, newWidth, newHeight);
-                            }
-
-                            index++;
-                        }
-                    }
-                }
-
-            } else {
-                // --- 6×6 of 9×9: 1 sudoku per pagina ---
-                for (let i = 0; i < aantal && i < worksheetSudokus.length; i++) {
-                    if (i > 0) doc.addPage();
-
-                    const missingForThis = worksheetMissingImagesPerSudoku[i] || [];
-
-                    let knipbladHoogte = 0;
-                    if (type === 'afbeeldingen' && missingForThis.length > 0) {
-                        const cutImagesPerRow = Math.min(6, missingForThis.length);
-                        const imgBoxSpacing = 2;
-                        const cutImageSize =
-                            (pageWidth - 2 * margin - (cutImagesPerRow - 1) * imgBoxSpacing) /
-                            cutImagesPerRow;
-                        const numRows =
-                            Math.ceil(missingForThis.length / cutImagesPerRow);
-                        knipbladHoogte =
-                            numRows * (cutImageSize + imgBoxSpacing) + margin + 10;
-                    }
-
-                    const layouts = calculateLayouts(1, pageWidth, pageHeight,
-                        margin, knipbladHoogte, 0);
-
-                    tempCtx.fillStyle = "white";
-                    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-                    const puzzle = worksheetSudokus[i];
-                    const imageSet = worksheetImageSets[i];
-
-                    drawPuzzle(tempCtx, puzzle, type, imageSet,
-                        0, 0, tempCanvas.width, currentSize);
-
-                    const layout = layouts[0];
-                    doc.addImage(
-                        tempCanvas.toDataURL('image/png'),
-                        'PNG',
-                        layout.x,
-                        layout.y,
-                        layout.size,
-                        layout.size
-                    );
-
-                    if (type === 'afbeeldingen' && missingForThis.length > 0) {
-                       const targetCutSize = 30; // grotere vakjes
-const imgBoxSpacing = 4;
-
-const cutImagesPerRow = Math.max(
-    1,
-    Math.floor(
-        (pageWidth - 2 * margin + imgBoxSpacing) /
-        (targetCutSize + imgBoxSpacing)
-    )
-);
-
-const cutImageSize = targetCutSize;
-
-
-                        const startY = pageHeight - knipbladHoogte + margin;
-
-                        doc.setFontSize(14);
-                        doc.text(
-                            "Knip de afbeeldingen uit en plak ze op de juiste plaats:",
-                            pageWidth / 2,
-                            startY - 5,
-                            { align: 'center' }
-                        );
-
-                        let index = 0;
-                        const imgStartY = startY + 2;
-
-                        for (let r = 0; index < missingForThis.length; r++) {
-                            for (let c = 0;
-                                 c < cutImagesPerRow && index < missingForThis.length;
-                                 c++) {
-
-                                const boxX = margin + c * (cutImageSize + imgBoxSpacing);
-                                const boxY = imgStartY + r * (cutImageSize + imgBoxSpacing);
-
-                                doc.setDrawColor('#004080');
-                                doc.setLineDashPattern([2, 1.5], 0);
-                                doc.rect(boxX, boxY, cutImageSize, cutImageSize);
-                                doc.setLineDashPattern([], 0);
-
-                                const img = missingForThis[index];
-                                if (img && img.complete) {
-                                    const marginInBox = 1;
-                                    const availableSpace = cutImageSize - 2 * marginInBox;
-                                    const aspectRatio = img.naturalWidth / img.naturalHeight;
-                                    let newWidth, newHeight;
-                                    if (aspectRatio > 1) {
-                                        newWidth = availableSpace;
-                                        newHeight = availableSpace / aspectRatio;
-                                    } else {
-                                        newHeight = availableSpace;
-                                        newWidth = availableSpace * aspectRatio;
-                                    }
-                                    const drawX = boxX + (cutImageSize - newWidth) / 2;
-                                    const drawY = boxY + (cutImageSize - newHeight) / 2;
-                                    doc.addImage(img.src, 'PNG', drawX, drawY, newWidth, newHeight);
-                                }
-
-                                index++;
-                            }
-                        }
-                    }
-                }
-            }
-
-            doc.save(`sudoku-werkblad-${aantal}.pdf`);
-            meldingContainer.textContent = '';
+            const results = await Promise.all(Array.from({length: themeCount()}, (_, i) =>
+                loadImage(new URL(`${theme}/${String(i+1).padStart(2, '0')}.png`, sudokuImageBase).href)));
+            if (revision !== sourceRevision) return;
+            themeImages = results;
+        } catch (error) {
+            if (revision !== sourceRevision) return;
+            sourceError = 'Dit thema kon niet worden geladen. Kies het thema opnieuw via de lege keuze, of kies een ander thema.';
         } finally {
-            showLoading(false);
+            if (revision === sourceRevision) { loadingImages = false; updateUi(); }
         }
-    });
-
-    // Zelfde layoutfunctie als in je vorige versie
-    function calculateLayouts(aantal, pageWidth, pageHeight, margin, bottomSpace, topSpace) {
-        const layouts = [];
-        const vPadding = 10;
-        const hPadding = 10;
-        const contentStartY = topSpace + margin;
-
-        let availableHeight = pageHeight - topSpace - bottomSpace - 2 * margin;
-        let availableWidth = pageWidth - 2 * margin;
-
-        let sudokuSize, startX, startY, totalContentWidth, totalContentHeight;
-
-        if (aantal === 1) {
-            sudokuSize = Math.min(availableWidth, availableHeight);
-            layouts.push({
-                x: margin + (availableWidth - sudokuSize) / 2,
-                y: contentStartY + (availableHeight - sudokuSize) / 2,
-                size: sudokuSize
-            });
-        } else if (aantal === 2) {
-            sudokuSize = Math.min((availableWidth - hPadding) / 2, availableHeight);
-            totalContentWidth = 2 * sudokuSize + hPadding;
-            startX = margin + (availableWidth - totalContentWidth) / 2;
-            startY = contentStartY + (availableHeight - sudokuSize) / 2;
-            layouts.push({ x: startX, y: startY, size: sudokuSize });
-            layouts.push({ x: startX + sudokuSize + hPadding, y: startY, size: sudokuSize });
-        } else if (aantal === 3) {
-            sudokuSize = Math.min(availableWidth, (availableHeight - 2 * vPadding) / 3);
-            totalContentHeight = 3 * sudokuSize + 2 * vPadding;
-            startX = margin + (availableWidth - sudokuSize) / 2;
-            startY = contentStartY + (availableHeight - totalContentHeight) / 2;
-            layouts.push({ x: startX, y: startY, size: sudokuSize });
-            layouts.push({ x: startX, y: startY + sudokuSize + vPadding, size: sudokuSize });
-            layouts.push({
-                x: startX,
-                y: startY + 2 * (sudokuSize + vPadding),
-                size: sudokuSize
-            });
-        } else if (aantal === 4) {
-            sudokuSize = Math.min(
-                (availableWidth - hPadding) / 2,
-                (availableHeight - vPadding) / 2
-            );
-            totalContentWidth = 2 * sudokuSize + hPadding;
-            totalContentHeight = 2 * sudokuSize + vPadding;
-            startX = margin + (availableWidth - totalContentWidth) / 2;
-            startY = contentStartY + (availableHeight - totalContentHeight) / 2;
-            layouts.push({ x: startX, y: startY, size: sudokuSize });
-            layouts.push({ x: startX + sudokuSize + hPadding, y: startY, size: sudokuSize });
-            layouts.push({
-                x: startX,
-                y: startY + sudokuSize + vPadding,
-                size: sudokuSize
-            });
-            layouts.push({
-                x: startX + sudokuSize + hPadding,
-                y: startY + sudokuSize + vPadding,
-                size: sudokuSize
-            });
-        }
-        return layouts;
     }
-
-    // --- Initieel ---
-    updateUiForImageOptions();
-    generateAndDraw();
+    async function uploadFiles(event) {
+        const files = Array.from(event.target.files);
+        if (!files.length) return;
+        const revision = ++sourceRevision;
+        uploads = []; sourceError = ''; loadingImages = true;
+        invalidate(); updateUi();
+        try {
+            const urls = [...new Set(await Promise.all(files.map(readFile)))];
+            const loaded = await Promise.all(urls.map(loadImage));
+            if (revision !== sourceRevision) return;
+            uploads = loaded;
+        } catch (error) {
+            if (revision !== sourceRevision) return;
+            sourceError = 'Een bestand is geen leesbare afbeelding. Kies de afbeeldingen opnieuw.';
+        } finally {
+            if (revision === sourceRevision) {
+                loadingImages = false; $('imageInput').value = ''; updateUi();
+                if (ready()) await generate();
+            }
+        }
+    }
+    async function generate() {
+        if (!ready()) { invalidate(); updateUi(); return; }
+        const revision = ++generationRevision;
+        generating = true; updateButtons(); message('Sudoku’s maken en oplossingen controleren…');
+        await new Promise(resolve => setTimeout(resolve, 0));
+        if (revision !== generationRevision) return;
+        try {
+            const config = { size: size(), type: type(), difficulty: $('difficulty').value, puzzles: [] };
+            const amount = count();
+            const source = $('themeSelect').value ? selectedImages : uploads;
+            const separate = variety() === 'different';
+            for (let i = 0; i < amount; i++) {
+                const { puzzle, solution } = createSudokuWithDifficulty(config.size, config.difficulty);
+                const offset = separate ? i*config.size : 0;
+                const images = config.type === 'afbeeldingen' ? source.slice(offset, offset+config.size) : [];
+                const missing = [];
+                puzzle.forEach((row, r) => row.forEach((value, c) => { if (!value) missing.push(solution[r][c]); }));
+                shuffle(missing);
+                config.puzzles.push({ puzzle, solution, images, missing });
+                await new Promise(resolve => setTimeout(resolve, 0));
+                if (revision !== generationRevision) return;
+            }
+            worksheet = config; showingSolutions = false; pageIndex = 0;
+            pages = planPages(worksheet); renderPreview();
+            message('Werkblad klaar. Druk af op ware grootte (100%) zodat de knipplaatjes passen.');
+        } catch (error) {
+            invalidate(); message('Het werkblad kon niet worden gemaakt. Probeer opnieuw.', true);
+            console.error(error);
+        } finally {
+            if (revision === generationRevision) { generating = false; updateButtons(); }
+        }
+    }
+    function drawImage(ctx, image, x, y, side) {
+        const ratio = Math.min(side/image.naturalWidth, side/image.naturalHeight);
+        const w = image.naturalWidth*ratio, h = image.naturalHeight*ratio;
+        ctx.drawImage(image, x+(side-w)/2, y+(side-h)/2, w, h);
+    }
+    function drawGrid(ctx, item, showSolutions) {
+        const { index, x, y, side } = item;
+        const data = worksheet.puzzles[index], n = worksheet.size, cell = side/n;
+        const grid = showSolutions ? data.solution : data.puzzle;
+        ctx.fillStyle = '#17476d'; ctx.font = 'bold 3.8px Arial'; ctx.textAlign = 'left';
+        ctx.fillText(`Sudoku ${index+1}`, x, y-4);
+        for (let r=0; r<n; r++) for (let c=0; c<n; c++) {
+            const value = grid[r][c]; if (!value) continue;
+            const added = showSolutions && data.puzzle[r][c] === 0;
+            const cx = x+c*cell, cy = y+r*cell;
+            if (worksheet.type === 'getallen') {
+                ctx.fillStyle = added ? '#16834f' : '#111'; ctx.font = `${cell*0.55}px Arial`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(String(value), cx+cell/2, cy+cell/2);
+                ctx.textBaseline = 'alphabetic';
+            } else {
+                drawImage(ctx, data.images[value-1], cx+cell*0.12, cy+cell*0.12, cell*0.76);
+                if (added) { ctx.strokeStyle = '#16834f'; ctx.lineWidth = 0.6; ctx.strokeRect(cx+1,cy+1,cell-2,cell-2); }
+            }
+        }
+        const spec = GRID_SPECS[n]; ctx.strokeStyle = '#17476d';
+        for (let i=0; i<=n; i++) {
+            ctx.lineWidth = i%spec.blockCols === 0 ? 0.7 : 0.22;
+            ctx.beginPath(); ctx.moveTo(x+i*cell,y); ctx.lineTo(x+i*cell,y+side); ctx.stroke();
+            ctx.lineWidth = i%spec.blockRows === 0 ? 0.7 : 0.22;
+            ctx.beginPath(); ctx.moveTo(x,y+i*cell); ctx.lineTo(x+side,y+i*cell); ctx.stroke();
+        }
+    }
+    function renderPage(page, index, total, target = document.createElement('canvas'), scale = 4) {
+        target.width = 210*scale; target.height = 297*scale;
+        const ctx = target.getContext('2d'); ctx.scale(scale,scale);
+        ctx.fillStyle = '#fff'; ctx.fillRect(0,0,210,297);
+        ctx.fillStyle = '#17476d'; ctx.font = '3.5px Arial'; ctx.textAlign = 'left';
+        ctx.fillText('Naam: __________________________',10,14);
+        ctx.fillText('Datum: _______________',135,14);
+        const cuts = page.kind === 'cuts';
+        ctx.font = 'bold 6px Arial'; ctx.textAlign = 'center';
+        ctx.fillText(cuts ? 'KNIPSTROKEN SUDOKU' : page.solutions ? 'OPLOSSINGEN SUDOKU' : 'SUDOKU',105,25);
+        ctx.font = '3.5px Arial'; ctx.fillStyle = '#43566b';
+        ctx.fillText(cuts ? 'Knip de plaatjes uit en plak ze bij de juiste sudoku.' : page.solutions
+            ? 'De aangevulde vakjes zijn groen gemarkeerd.'
+            : `Elk ${worksheet.type === 'getallen' ? 'getal' : 'plaatje'} komt één keer voor in elke rij, kolom en elk dik omlijnd blok.`,105,33);
+        if (cuts) {
+            for (const section of page.sections) {
+                const data = worksheet.puzzles[section.index];
+                ctx.textAlign = 'left'; ctx.font = 'bold 4px Arial'; ctx.fillStyle = '#17476d';
+                ctx.fillText(`Voor sudoku ${section.index+1}`,section.x,section.y+4);
+                data.missing.forEach((value,i) => {
+                    const x = section.x+(i%section.columns)*(section.cell+3);
+                    const y = section.y+10+Math.floor(i/section.columns)*(section.cell+3);
+                    ctx.strokeStyle = '#526b82'; ctx.lineWidth = 0.25; ctx.setLineDash([1,1]);
+                    ctx.strokeRect(x,y,section.cell,section.cell); ctx.setLineDash([]);
+                    drawImage(ctx,data.images[value-1],x+section.cell*0.12,y+section.cell*0.12,section.cell*0.76);
+                });
+            }
+        } else page.grids.forEach(grid => drawGrid(ctx,grid,page.solutions));
+        ctx.fillStyle = '#526b82'; ctx.font = '3px Arial'; ctx.textAlign = 'left';
+        ctx.fillText('Afdrukken op ware grootte (100%).',10,290);
+        ctx.textAlign = 'right'; ctx.fillText(`Pagina ${index+1} van ${total}`,200,290);
+        return target;
+    }
+    function renderPreview() {
+        if (!worksheet || !pages.length) return;
+        renderPage(pages[pageIndex],pageIndex,pages.length,canvas); updateButtons();
+    }
+    function saveBlob(blob, filename) {
+        const url = URL.createObjectURL(blob), a = document.createElement('a');
+        a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+    }
+    function downloadPng() {
+        if (!worksheet || generating) return;
+        // Eén bestand voorkomt dat de browser meerdere downloads blokkeert.
+        const combined = document.createElement('canvas');
+        const filename = `sudoku-${showingSolutions ? 'oplossingen' : 'werkblad'}-alle-paginas.png`;
+        const scale = 3, height = 297*scale;
+        combined.width = 210*scale; combined.height = height*pages.length;
+        const ctx = combined.getContext('2d');
+        pages.forEach((page,i) => ctx.drawImage(renderPage(page,i,pages.length,undefined,scale),0,i*height));
+        combined.toBlob(blob => {
+            if (blob) saveBlob(blob,filename);
+            else message('PNG maken is mislukt. Probeer PDF.',true);
+        },'image/png');
+    }
+    function downloadPdf(solutions = showingSolutions) {
+        if (!worksheet || generating) return;
+        try {
+            if (!window.jspdf?.jsPDF) throw new Error('PDF-bibliotheek niet geladen');
+            const exported = planPages(worksheet,solutions);
+            const doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+            exported.forEach((page,i) => {
+                if (i) doc.addPage();
+                doc.addImage(renderPage(page,i,exported.length),'PNG',0,0,210,297,undefined,'FAST');
+            });
+            doc.save(`sudoku-${solutions ? 'oplossingen' : 'werkblad'}-${worksheet.size}x${worksheet.size}.pdf`);
+        } catch (error) { message('PDF maken is mislukt. Vernieuw de pagina en probeer opnieuw.',true); console.error(error); }
+    }
+    document.querySelectorAll('[name="sudokuType"], [name="imageVariety"], #gridSizeSelect, #aantalSudokus, #difficulty').forEach(el => {
+        el.addEventListener('change', () => { invalidate(); updateUi(); if (ready()) generate(); });
+    });
+    $('themeSelect').addEventListener('change',changeTheme);
+    $('imageInput').addEventListener('change',uploadFiles);
+    $('clearImagesBtn').addEventListener('click', () => {
+        sourceRevision++; uploads = []; sourceError = ''; loadingImages = false; $('imageInput').value = '';
+        invalidate(); updateUi();
+    });
+    $('genereerBtn').addEventListener('click',generate);
+    $('confirmThemeImagesBtn').addEventListener('click',generate);
+    $('autoThemeImagesBtn').addEventListener('click', () => {
+        if (loadingImages || themeImages.length < needed()) return;
+        selectedImages = shuffle([...themeImages]).slice(0, needed());
+        invalidate(); updateUi(); generate();
+    });
+    $('toggleSolutionsBtn').addEventListener('click', () => {
+        if (!worksheet) return;
+        showingSolutions = !showingSolutions; pages = planPages(worksheet,showingSolutions); pageIndex = 0; renderPreview();
+    });
+    $('downloadPngBtn').addEventListener('click',downloadPng);
+    $('downloadPdfBtn').addEventListener('click', () => downloadPdf());
+    $('downloadSolutionsPdfBtn').addEventListener('click', () => downloadPdf(true));
+    $('previousPageBtn').addEventListener('click', () => { if (pageIndex > 0) { pageIndex--; renderPreview(); } });
+    $('nextPageBtn').addEventListener('click', () => { if (pageIndex+1 < pages.length) { pageIndex++; renderPreview(); } });
+    updateUi(); generate();
 });
