@@ -86,7 +86,8 @@ function model(item,s,solutions){
   if(item.type==='syn-match')for(let i=0;i<selected.length;i+=4){const group=selected.slice(i,i+4);let right=G.shuffle(group,r);if(right.length>1&&right.every((x,j)=>x===group[j]))right.push(right.shift());add('<div class="rhyme-match'+(solutions?' match-solved':'')+'">'+group.map((x,j)=>'<div class="rhyme-match-row" data-question-key="'+x.key+'"><span>'+e(x.value[0])+' <b data-match-left="'+x.key+'">•</b></span><span><b data-match-right="'+right[j].key+'">•</b> '+e(right[j].value[1])+'</span></div>').join('')+'</div>')}
   else selected.forEach(({value:[word,syn,text],key})=>add(item.type==='syn-replace'?'<p>'+e(text).replace(word,'<b>'+e(word)+'</b>')+'</p>'+answer('Bijvoorbeeld: '+e(text.replace(word,syn)),2):'<p>Woord: <b>'+e(word)+'</b></p><div class="grammar-field"><span>Synoniem:</span><div>'+answer('Bijvoorbeeld: '+e(syn))+'</div></div><p>Mijn zin:</p>'+answer('Eigen zin met bijvoorbeeld '+e(syn)+'. Andere passende synoniemen zijn ook juist.',2),key));
  }
- return {instruction,hint,example,blocks};
+ const hintStructure=item.type.startsWith('subject-')?{steps:['Zoek over wie iets wordt gezegd.','Maak een vraag die begint met Wie.','Het volledige antwoord is het onderwerp.'],example:[['Zin','De nieuwe buurman fietst naar huis.'],['Wie-vraag','Wie fietst naar huis?'],['Onderwerp','De nieuwe buurman']],note:'Bij dingen gebruik je een wat-vraag. Hier oefenen we met personen.'}:null;
+ return {instruction,hint,example,blocks,hintStructure};
 }
 window.TaalGrammar={model,limits,types,dimin,diminPool,normalizeEndings,sentences,stories,synonyms,subjectSentences,subjectStories};
 })();

@@ -51,3 +51,4 @@
 .adj-picture{min-width:0;padding:8px}.adj-picture img{display:block;width:100px;height:90px;object-fit:contain;margin:0 auto}.adj-picture>p{text-align:center}.adj-picture .answer{font-size:.82em}
 
 .edition-back{display:flex;align-items:center;width:fit-content;max-width:100%;box-sizing:border-box;min-height:42px;margin:0 0 18px;padding:9px 14px;border:1px solid #ffffff65;border-radius:10px;background:#ffffff15;color:#fff;font-size:14px;font-weight:700;line-height:1.4;text-decoration:none}.edition-back:hover{background:#ffffff28;border-color:#ffffffa0}.edition-back:focus-visible{outline:3px solid #ffcf56;outline-offset:3px}
+.hint-steps{margin:8px 0 12px;padding-left:24px}.hint-steps li{margin:3px 0}.hint-example{padding-top:10px;border-top:1px solid #bfd5cd}.hint-example>b{display:block;margin-bottom:5px}.hint-example>div{margin:3px 0}.hint-example strong{display:inline-block;min-width:108px}.page .hint-note{margin:10px 0 0;font-size:.85em;color:#49625c}
