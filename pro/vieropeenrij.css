@@ -128,3 +128,22 @@ h2 {
     margin: 0;
     font-weight: normal;
 }
+
+/* Bordstijlen: toegankelijke radiokeuze met een voorbeeld van elk bord. */
+.bordstijl-keuze { margin: 24px 0 0; padding: 18px; border: 1px solid #cbdce7; border-radius: 12px; min-width: 0; }
+.bordstijl-keuze legend { padding: 0 8px; font-size: 20px; font-weight: 700; color: #2c3e50; }
+.bordstijl-keuze p { margin: 0 0 16px; line-height: 1.5; }
+.bordstijl-opties { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.bordstijl-optie { position: relative; cursor: pointer; }
+.bordstijl-optie input { position: absolute; top: 12px; left: 10px; width: 17px; height: 17px; margin: 0; accent-color: #236589; }
+.bordstijl-kaart { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 12px 8px 12px 30px; border: 2px solid #dce5eb; border-radius: 10px; background: #fff; text-align: center; font-size: 14px; font-weight: 700; }
+.bordstijl-optie input:checked + .bordstijl-kaart { border-color: #236589; background: #f0f8fc; }
+.bordstijl-optie input:focus-visible + .bordstijl-kaart { outline: 3px solid #236589; outline-offset: 3px; }
+.bordstijl-optie:hover .bordstijl-kaart { border-color: #83b5d6; }
+.bordstijl-mini { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; width: 100%; max-width: 126px; aspect-ratio: 7 / 6; padding: 5px; border: 2px solid; border-radius: 7px; box-sizing: border-box; }
+.bordstijl-mini > span { border: 1px solid; border-radius: 50%; }
+.spelregels-uitleg { margin-top: 24px; padding: 16px 20px; background: #f0f8fc; border-radius: 12px; line-height: 1.6; }
+.spelregels-uitleg h2 { margin: 0 0 10px; font-size: 20px; text-align: left; }
+.spelregels-uitleg ol { padding-left: 22px; }
+.spelregels-uitleg li + li { margin-top: 6px; }
+.spelregels-uitleg p:last-child { margin-bottom: 0; }

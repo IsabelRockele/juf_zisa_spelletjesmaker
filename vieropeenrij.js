@@ -65,6 +65,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const tafelCheckboxesDiv        = document.getElementById('tafel-checkboxes');
     const genereerBordKnop  = document.getElementById('genereer-bord-knop');
 
+    const bordStijlen = {
+        lichtblauw: { naam: 'Lichtblauw', achtergrond: '#dceefa', rand: '#83b5d6', vakje: '#ffffff', vakrand: '#83b5d6' },
+        mintgroen: { naam: 'Mintgroen', achtergrond: '#dff3e9', rand: '#83bca3', vakje: '#ffffff', vakrand: '#83bca3' },
+        zachtroze: { naam: 'Zachtroze', achtergrond: '#f8e3ed', rand: '#d5a0b8', vakje: '#ffffff', vakrand: '#d5a0b8' },
+        inktzuinig: { naam: 'Inktzuinig', achtergrond: '#ffffff', rand: '#777777', vakje: '#ffffff', vakrand: '#777777' },
+        klassiek: { naam: 'Klassiek donker', achtergrond: '#005f73', rand: '#0a9396', vakje: '#e9d8a6', vakrand: '#e9d8a6' }
+    };
+    let gekozenBordStijl = 'lichtblauw';
+    try {
+        const bewaard = localStorage.getItem('vieroprij-bordstijl');
+        if (Object.hasOwn(bordStijlen, bewaard)) gekozenBordStijl = bewaard;
+    } catch (_) { /* De stijlkeuze werkt ook zonder lokale opslag. */ }
+
+    const stijlKeuze = document.createElement('fieldset');
+    stijlKeuze.className = 'bordstijl-keuze';
+    stijlKeuze.innerHTML = `<legend>Kies het uiterlijk van je bord</legend>
+        <p>Lichte kleuren of liever inktzuinig? Je keuze geldt ook voor afdrukken en PDF.</p>
+        <div class="bordstijl-opties">${Object.entries(bordStijlen).map(([id, stijl]) => `
+            <label class="bordstijl-optie">
+                <input type="radio" name="bordstijl" value="${id}" ${id === gekozenBordStijl ? 'checked' : ''}>
+                <span class="bordstijl-kaart">
+                    <span class="bordstijl-mini" aria-hidden="true" style="background:${stijl.achtergrond};border-color:${stijl.rand}">
+                        ${Array.from({ length: 42 }, () => `<span style="background:${stijl.vakje};border-color:${stijl.vakrand}"></span>`).join('')}
+                    </span>
+                    <span>${stijl.naam}</span>
+                </span>
+            </label>`).join('')}</div>`;
+    genereerBordKnop.before(stijlKeuze);
+    const spelregels = document.createElement('section');
+    spelregels.className = 'spelregels-uitleg';
+    spelregels.innerHTML = `<h2>Zo speel je Vier op een rij</h2>
+        <ol>
+            <li>Elke speler kiest een eigen kleur schijfjes.</li>
+            <li>Lees om de beurt een woord in een vrij vakje en leg er een schijfje van jouw kleur op.</li>
+            <li>Wie als eerste vier schijfjes van dezelfde kleur op een rij heeft, wint! Dat mag horizontaal, verticaal of schuin.</li>
+        </ol>
+        <p>Bij een getallenbord lees je het getal; bij een tafelbord los je de oefening op.</p>
+        <p><strong>Tip:</strong> Lamineer het bord. Elk kind kiest een eigen kleur whiteboardstift en zet een kruis over het gelezen woord. Vier kruisjes van jouw kleur op een rij? Gewonnen! Daarna wis je het bord en speel je opnieuw.</p>`;
+    genereerBordKnop.after(spelregels);
+    stijlKeuze.addEventListener('change', event => {
+        if (!Object.hasOwn(bordStijlen, event.target.value)) return;
+        gekozenBordStijl = event.target.value;
+        try { localStorage.setItem('vieroprij-bordstijl', gekozenBordStijl); } catch (_) {}
+    });
+
     function formatteerGetal(getal) {
         if (getal === 0) return '0E';
         const h = Math.floor(getal / 100);
@@ -83,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function genereerPrintbarePagina(bordHTML) {
         const isOntdek = Boolean(window.VierOpRijDownloadPolicy);
+        const stijl = bordStijlen[gekozenBordStijl];
         // --- AANGEPASTE STYLES ---
         const printStyles = `<style>
             @page { size: A4 landscape; margin: 1cm }
@@ -105,8 +151,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             .bord-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center }
-            .vier-op-rij-bord { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 8px; aspect-ratio: 7 / 6; max-width: 100%; max-height: 100%; background-color: #005f73; padding: 10px; border-radius: 15px; border: 5px solid #0a9396; box-sizing: border-box }
-            .spel-vakje { position: relative; width: 100%; height: 100%; background-color: #e9d8a6; border-radius: 50%; display: flex; justify-content: center; align-items: center }
+            .vier-op-rij-bord { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 8px; aspect-ratio: 7 / 6; max-width: 100%; max-height: 100%; background-color: ${stijl.achtergrond}; padding: 10px; border-radius: 15px; border: 5px solid ${stijl.rand}; box-sizing: border-box }
+            .spel-vakje { position: relative; width: 100%; height: 100%; background-color: ${stijl.vakje}; border: 1px solid ${stijl.vakrand}; box-sizing: border-box; border-radius: 50%; display: flex; justify-content: center; align-items: center }
+            .spelregels-blad { box-sizing: border-box; width: 277mm; height: 190mm; padding: 14mm 18mm; background: #fff; color: #253e4c; font-family: Arial, sans-serif; border: 3px solid ${stijl.rand}; border-radius: 18px; }
+            .regels-label { font-size: 11pt; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; color: #416777; }
+            .spelregels-blad h1 { font-size: 34pt; margin: 8px 0; }
+            .regels-intro { font-size: 15pt; margin: 0 0 22px; }
+            .regels-stappen { display: flex; gap: 16px; }
+            .regel-stap { flex: 1; padding: 18px; border-radius: 14px; background: ${stijl.achtergrond}; color: ${gekozenBordStijl === 'klassiek' ? '#ffffff' : '#253e4c'}; border: 1px solid ${stijl.rand}; }
+            .regel-nummer { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #fff; color: #253e4c; font-weight: bold; font-size: 18pt; border: 1px solid ${stijl.rand}; }
+            .regel-stap h2 { font-size: 17pt; margin: 12px 0 8px; }
+            .regel-stap p { font-size: 12pt; line-height: 1.5; margin: 0; }
+            .regels-winnen { display: flex; gap: 20px; align-items: center; margin: 24px 0; font-size: 13pt; line-height: 1.5; }
+            .regels-rij { display: flex; gap: 7px; flex-shrink: 0; }
+            .regels-rij span { width: 35px; height: 35px; border-radius: 50%; background: ${stijl.rand}; border: 2px solid #416777; }
+            .regels-tip { padding: 16px 20px; border: 2px dashed ${stijl.rand}; border-radius: 14px; font-size: 12pt; line-height: 1.5; }
+            .regels-tip h2 { font-size: 16pt; margin: 0 0 6px; }
+            .regels-tip p { margin: 0; }
+            @media screen { body { display: block; overflow-x: auto; } .bord-container { height: calc(100vh - 70px); min-height: 450px; } .spelregels-blad { margin: 24px auto; } }
+            @media print { .bord-container { height: 190mm; break-after: page; page-break-after: always; } .spelregels-blad { break-inside: avoid; } }
             
             .spel-vakje .tekst {
                 color: #333;
@@ -132,12 +195,25 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const actieKnoppenHTML = `<div class="actie-balk"><button id="print-knop">🖨️ Afdrukken</button><button id="download-pdf-knop">📄 Download als PDF</button><button onclick="window.close()">❌ Sluiten</button></div>`;
         const watermerkHTML = isOntdek ? `<div id="ontdek-watermerk" style="position:absolute;inset:0;z-index:5;pointer-events:none;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);place-items:center;overflow:hidden">${'<span style="font:900 32px Arial;color:rgba(151,38,111,.32);transform:rotate(-25deg)">ONTDEK<br><small style="font-size:12px">voorbeeldweergave</small></span>'.repeat(9)}</div>` : '';
+        const opdracht = gekozenSpeltype === 'woorden' ? 'Lees een woord in een vrij vakje.' : gekozenSpeltype === 'getallen' ? 'Lees een getal in een vrij vakje.' : 'Los een oefening in een vrij vakje op.';
+        const regelsHTML = `<section class="spelregels-blad">
+            <div class="regels-label">Samen spelen · om de beurt</div>
+            <h1>Vier op een rij</h1>
+            <p class="regels-intro">Lees, leg en maak een rij van vier!</p>
+            <div class="regels-stappen">
+                <div class="regel-stap"><span class="regel-nummer">1</span><h2>Kies je kleur</h2><p>Elke speler kiest een eigen kleur schijfjes. Leg het spelbord tussen jullie in.</p></div>
+                <div class="regel-stap"><span class="regel-nummer">2</span><h2>Speel om de beurt</h2><p>${opdracht} Leg op dat vakje een schijfje van jouw kleur. Nu is de andere speler aan de beurt.</p></div>
+                <div class="regel-stap"><span class="regel-nummer">3</span><h2>Maak een rij van vier</h2><p>Wie als eerste vier schijfjes van de eigen kleur op een rij heeft, wint!</p></div>
+            </div>
+            <div class="regels-winnen"><div class="regels-rij" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><strong>Vier op een rij? Gewonnen!</strong><br>Je rij mag horizontaal (naast elkaar), verticaal (onder elkaar) of schuin zijn.</div></div>
+            <div class="regels-tip"><h2>Tip: lamineren en opnieuw spelen</h2><p>Lamineer het spelbord. Elk kind kiest een eigen kleur whiteboardstift. Zet om de beurt een kruis over het woord of getal dat je gelezen hebt, of de oefening die je opgelost hebt. Wie als eerste vier kruisjes van de eigen kleur op een rij heeft, wint. Wis het bord en speel opnieuw!</p></div>
+        </section>`;
         const containerHTML = `<div class="bord-container" style="position:relative">${bordHTML}${watermerkHTML}</div>`;
-        const pdfScript = `<script>window.onload=()=>{const e=document.getElementById("download-pdf-knop"),t=document.querySelector(".vier-op-rij-bord");e.addEventListener("click",()=>{e.textContent="Bezig met genereren...",e.disabled=!0,html2canvas(t,{scale:3,useCORS:!0}).then(t=>{const n=t.toDataURL("image/png"),{jsPDF:o}=window.jspdf,d=new o({orientation:"landscape",unit:"mm",format:"a4"}),a=10,l=d.internal.pageSize.getWidth(),s=d.internal.pageSize.getHeight(),i=l-2*a,c=s-2*a;let r=i,u=r/1.1666666666666667;u>c&&(u=c,r=u*1.1666666666666667);const p=a+(i-r)/2,m=a+(c-u)/2;d.addImage(n,"PNG",p,m,r,u),d.save("4-op-een-rij-spelbord.pdf")}).catch(t=>{console.error("Fout bij het genereren van de PDF:",t),alert("Er is een fout opgetreden bij het genereren van de PDF. Controleer de console voor details.")}).finally(()=>{e.textContent="📄 Download als PDF",e.disabled=!1})})}<\/script>`;
+        const pdfScript = `<script>window.onload=()=>{const knop=document.getElementById('download-pdf-knop');knop.addEventListener('click',async()=>{knop.textContent='Bezig met genereren...';knop.disabled=true;try{const {jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});const bladen=[document.querySelector('.vier-op-rij-bord'),document.querySelector('.spelregels-blad')];for(let i=0;i<bladen.length;i++){const canvas=await html2canvas(bladen[i],{scale:3,useCORS:true});if(i)pdf.addPage();const breedte=pdf.internal.pageSize.getWidth()-20;const hoogte=pdf.internal.pageSize.getHeight()-20;const factor=Math.min(breedte/canvas.width,hoogte/canvas.height);const w=canvas.width*factor,h=canvas.height*factor;pdf.addImage(canvas.toDataURL('image/png'),'PNG',10+(breedte-w)/2,10+(hoogte-h)/2,w,h);}pdf.save('4-op-een-rij-spelbord.pdf');}catch(error){console.error(error);alert('De PDF kon niet worden gemaakt. Probeer opnieuw.');}finally{knop.textContent='Download als PDF';knop.disabled=false;}})}<\/script>`;
         
         const policyScript = `<script>window.addEventListener("load",()=>{const p=document.getElementById("print-knop"),e=document.getElementById("download-pdf-knop"),w=document.getElementById("ontdek-watermerk"),policy=window.opener?.VierOpRijDownloadPolicy;p.addEventListener("click",async()=>{if(policy?.authorize&&!await policy.authorize("print"))return;if(w)w.style.display="none";window.addEventListener("afterprint",()=>{if(w)w.style.display="grid"},{once:true});window.print()});if(policy?.authorize)e.addEventListener("click",async event=>{if(e.dataset.toegestaan==="ja"){delete e.dataset.toegestaan;return}event.preventDefault();event.stopImmediatePropagation();if(!await policy.authorize("pdf"))return;if(w)w.style.display="none";e.dataset.toegestaan="ja";e.click();const herstel=setInterval(()=>{if(!e.disabled){clearInterval(herstel);if(w)w.style.display="grid"}},250)},true)})<\/script>`;
         // Voeg lang="nl" toe voor eventuele automatische woordafbreking door de browser
-        return `<html lang="nl"><head><title>4-op-een-Rij Spelbord</title>${printStyles}<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script></head><body>${actieKnoppenHTML}${containerHTML}${pdfScript}${policyScript}</body></html>`;
+        return `<html lang="nl"><head><title>4-op-een-Rij Spelbord</title>${printStyles}<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script></head><body>${actieKnoppenHTML}${containerHTML}${regelsHTML}${pdfScript}${policyScript}</body></html>`;
     }
 
     // Helper: maak veilige ID zonder spaties/accents e.d.
