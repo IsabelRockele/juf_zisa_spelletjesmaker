@@ -1,7 +1,7 @@
-BUNDEL TAALSYSTEMATIEK — GRATIS
+BUNDEL TAALSYSTEMATIEK — GRATIS, PRO EN ONTDEK
 
 Open http://127.0.0.1:8766/taalsystematiek/ zolang de lokale server draait.
-Beschikbaar in Gratis bij Taal en letters. Pro en Ontdek volgen na goedkeuring.
+Beschikbaar in Gratis, Pro en Ontdek bij Taal en letters. Elke editie keert terug naar haar eigen keuzemenu.
 
 Inhoud
 - 26 opdrachtsoorten: lidwoorden (5), zelfstandige naamwoorden (4), hoofdletters (3), gemengde schrijfopdracht (1), leestekens en mededelende zinnen (8: alleen . ? !), rijmwoorden (5).
@@ -42,3 +42,11 @@ Aanvulling zoekprenten en naamwoorden
   verwijderde zinnen en bijpassende oplossingen; lange lijnen; PDF-export; horizontale tabs op smal scherm.
 
 Downloadknoppen, selectie en oplossingen staan in de groene bovenbalk.
+
+Edities
+- Pro gebruikt /pro/guard.js voor bestaande account- en toegangscontrole.
+- Ontdek toont een watermerk op alle voorbeeldpagina's. PDF-export is zonder watermerk.
+- Werkbladen, oplossingen en PDF afdrukken delen toolId taalsystematiek: maximaal 3 downloads per Ontdek-account, binnen het totale tegoed. Controle via reserveDiscoverDownload.
+- De bestaande server kent nieuwe toolIds automatisch; hiervoor is geen backendaanpassing nodig.
+- Browsercontroles in tools/test-taal-editions.cjs gebruiken gesimuleerde accountantwoorden en maken echte PDF's uitsluitend in geheugen.
+- grammar.js voegt verkleinwoorden, onderwerp/persoonsvorm en synoniemen toe; word-classes.js bevat bijvoeglijke naamwoorden, gemengde woordsoorten en eigennamen.

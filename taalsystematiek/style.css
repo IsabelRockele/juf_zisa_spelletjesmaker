@@ -32,3 +32,22 @@
 .task-level{display:table;margin-top:8px;padding:3px 9px;border-radius:6px;background:#edf3f8;color:#244b60;font-size:12px;font-weight:700}.task-level-select{font-size:13px;padding:5px;margin-top:8px}
 
 .sentence-prompt{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:28px;row-gap:5px}.sentence-prompt>span{white-space:nowrap}
+
+/* Tips bij extra steun: dezelfde herkenbare vorm in voorbeeld en PDF. */
+.lesson-tip{display:block;background:#fff8e8;border:1px solid #eadcb9;border-left:3px solid #d4b168;border-radius:5px;padding:8px 11px;font-size:.82em;line-height:1.45;color:#52636a;margin:8px 0 12px;white-space:normal;break-inside:avoid}.lesson-tip strong em{font-weight:700;font-style:italic}.question-block .lesson-tip{margin:8px 0 12px}.given-word .lesson-tip{padding:5px 7px}
+.page .lesson-tip{font-size:.82em}
+
+/* Compacte hulp naast de zin, met ruimte om op smalle regels om te lopen. */
+.lesson-tip{width:fit-content;max-width:100%;padding:4px 8px}.question-block .lesson-tip.inline-tip{display:inline-block;vertical-align:baseline;margin:0 0 0 10px;padding:3px 7px;line-height:1.35}
+
+.tab-dimin{background:#fce4d2;color:#804220}.tab-syntax{background:#dfebfa;color:#285181}.tab-syn{background:#e8e2f8;color:#604582}.grammar-word-row,.grammar-field{display:grid;grid-template-columns:minmax(100px,auto) minmax(0,1fr);align-items:center;gap:16px}.grammar-word-row{grid-template-columns:180px minmax(0,1fr)}.grammar-card,.grammar-story{border:1px solid #c5d5ce;border-radius:8px;padding:12px 15px}.grammar-card .grammar-field{grid-template-columns:130px minmax(0,1fr)}.subject-answer{text-decoration-thickness:2px;text-underline-offset:4px}
+
+.dimin-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px}.dimin-pair .grammar-word-row{grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:10px;min-width:0}.dimin-pair .grammar-word-row>div{min-width:0}.dimin-pair .answer{overflow-wrap:anywhere}
+
+.match-solved{position:relative}.match-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}.match-lines line{stroke:#1878a0;stroke-width:1.7;stroke-linecap:round}
+
+.tab-adj{background:#ffe8cc;color:#865118}.tab-classes{background:#dcefea;color:#245f52}.tab-proper{background:#f3dfeb;color:#7a3b63}.word-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.85em}.word-color{padding:1px 4px;border-radius:3px}.word-color-LW{background:#d6eaff;color:#124b87}.word-color-ZN{background:#dcefd9;color:#235c28}.word-color-BN{background:#ffe0bb;color:#834300}.word-tag{display:inline-flex;flex-direction:column;vertical-align:top;align-items:center;margin:4px 5px 10px 0}.word-tag-space{display:block;min-width:28px;width:100%;height:27px;font-size:.75em;text-align:center;color:#17675e}.tagged-sentence{line-height:1.65}.dimin-pair>[data-question-key]{min-width:0}
+
+.adj-picture{min-width:0;padding:8px}.adj-picture img{display:block;width:100px;height:90px;object-fit:contain;margin:0 auto}.adj-picture>p{text-align:center}.adj-picture .answer{font-size:.82em}
+
+.edition-back{display:inline-block;margin-bottom:12px;color:inherit;font-weight:700;text-decoration:none}.edition-back:hover{text-decoration:underline}
