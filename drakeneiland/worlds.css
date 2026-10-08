@@ -14,9 +14,14 @@ body[data-world=castle] .arena-sky{background:linear-gradient(#e2edff,#f5ebd7)}b
 .world-animals .goal-collection{grid-template-rows:repeat(var(--collection-rows,2),minmax(0,1fr));height:68%;bottom:-25%}.rescued-animal{height:100%;min-height:0}.world-ocean .goal-collection{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(var(--collection-rows,2),minmax(0,1fr));gap:1px}.collected-pearl{width:100%;height:100%;min-height:0;aspect-ratio:auto;max-width:12px;max-height:12px}
 @keyframes astronaut-board{to{transform:translate(140%,-48%) scale(.2);opacity:0}}
 .world-castle .goal-stage{aspect-ratio:1208/1302}.world-ocean .goal-stage{aspect-ratio:1286/1223}.world-animals.world-won .goal-collection{animation:parade-march 3s infinite alternate ease-in-out}@keyframes parade-march{from{transform:translateX(-8%)}to{transform:translateX(18%)}}
-/* Bound the chest by both dimensions; pearls retain the same image coordinates. */
-.world-ocean .world-stage{container-type:size}
+/* Bound proportional scenery by both dimensions, including its decorations. */
+.world-ocean .world-stage,.world-animals .world-stage,.world-castle .world-stage{container-type:size}
 .world-ocean .goal-stage{width:min(72%,calc(100cqh * 1286 / 1223))}
+.world-animals .goal-stage{width:min(88%,calc(80cqh * 3 / 2))}
+.world-castle .goal-stage{width:min(74%,calc(92cqh * 1208 / 1302))}
+/* The dragon's shield must follow its height, not a wide two-team column. */
+.personal-dragon{container-type:size}
+.personal-shield{width:min(100%,100cqh);margin-inline:auto}
 
 /* Ten pearls fit in the opening; each next ten form a higher layer. */
 .world-ocean .goal-collection{display:block;left:0;top:0;width:100%;height:100%;transform:none;overflow:visible}
