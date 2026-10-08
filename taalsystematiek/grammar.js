@@ -27,16 +27,25 @@ const stories=[
  [['Mila viert haar verjaardag.','Mila','viert'],['Op de tafel staat een taart.','een taart','staat'],['Haar vrienden zingen een lied.','haar vrienden','zingen'],['Na het eten spelen de kinderen buiten.','de kinderen','spelen']],
  [['Sam wandelt door het bos.','Sam','wandelt'],['Tussen de bomen loopt een ree.','een ree','loopt'],['Een eekhoorn verzamelt noten.','een eekhoorn','verzamelt'],['Bij de beek rust Sam even.','Sam','rust']]
 ];
+// Alleen personen, zodat een wie-vraag bij elke zin natuurlijk past.
+const subjectStories=[
+ [['De juf opent de klasdeur.','Wie opent de klasdeur?','de juf'],['Bij het raam legt Mila haar boek.','Wie legt bij het raam haar boek?','Mila'],['Mijn beste vriend deelt de schriften uit.','Wie deelt de schriften uit?','mijn beste vriend'],['Daarna leest onze meester een verhaal.','Wie leest daarna een verhaal?','onze meester']],
+ [['Oma bakt een appeltaart.','Wie bakt een appeltaart?','oma'],['In de keuken wast mijn grote broer de appels.','Wie wast in de keuken de appels?','mijn grote broer'],['Mijn zusje zet de borden klaar.','Wie zet de borden klaar?','mijn zusje'],['Na het eten ruimt papa de tafel af.','Wie ruimt na het eten de tafel af?','papa']],
+ [['Onze buurvrouw wandelt naar het park.','Wie wandelt naar het park?','onze buurvrouw'],['Bij de vijver tekent Sam een eend.','Wie tekent bij de vijver een eend?','Sam'],['De man met de rode pet leest de krant.','Wie leest de krant?','de man met de rode pet'],['Op het gras speelt mijn kleine neef met een bal.','Wie speelt op het gras met een bal?','mijn kleine neef']]
+];
+const subjectSentences=subjectStories.flat();
 const synonyms=[
  ['blij','vrolijk','Mila is blij met haar cadeau.'],['boos','kwaad','De buurman is boos over het lawaai.'],['mooi','prachtig','De tekening is mooi.'],['lekker','heerlijk','De soep is lekker.'],['snel','vlug','Sam loopt snel naar huis.'],['langzaam','traag','De slak kruipt langzaam vooruit.'],['bang','angstig','Het kind kijkt bang naar de grote hond.'],['moe','vermoeid','Na de wandeling is oma moe.'],['praten','spreken','De kinderen praten over hun vakantie.'],['dikwijls','vaak','Ik speel dikwijls met mijn buurmeisje.'],['beginnen','starten','We beginnen met het spel.']
 ];
 const types=[
  ['dimin-choice','Verkleinwoorden','Kies het verkleinwoord','support'],['dimin-write','Verkleinwoorden','Maak een verkleinwoord','basic'],['dimin-sentence','Verkleinwoorden','Gebruik een verkleinwoord in een zin','challenge'],
+ ['subject-who','Onderwerp en persoonsvorm','Onderwerp: beantwoord de wie-vraag','support'],['subject-ask','Onderwerp en persoonsvorm','Onderwerp: maak zelf de wie-vraag','basic'],['subject-text','Onderwerp en persoonsvorm','Onderwerp: zoek met wie-vragen in een tekst','challenge'],
  ['syntax-steps','Onderwerp en persoonsvorm','Zoek met een ja-neevraag','support'],['syntax-mark','Onderwerp en persoonsvorm','Duid onderwerp en persoonsvorm aan','basic'],['syntax-question','Onderwerp en persoonsvorm','Maak een ja-neevraag','basic'],['syntax-text','Onderwerp en persoonsvorm','Zoek onderwerp en persoonsvorm in een tekst','challenge'],
  ['syn-match','Synoniemen','Verbind de synoniemen','support'],['syn-replace','Synoniemen','Vervang door een synoniem','basic'],['syn-sentence','Synoniemen','Schrijf met een synoniem','challenge']
 ].map(([id,topic,name,level])=>({id,topic,name,level,description:name}));
 TaalData.types.push(...types);
 const limits=Object.fromEntries(types.map(t=>[t.id,t.id==='syntax-text'?stories.length:t.id.startsWith('syntax-')?sentences.length:t.id.startsWith('dimin-')?dimin.length:synonyms.length]));
+Object.assign(limits,{'subject-who':subjectSentences.length,'subject-ask':subjectSentences.length,'subject-text':subjectStories.length});
 function model(item,s,solutions){
  const G=TaalGenerator,e=G.esc,r=G.rng(item.seed),removed=new Set(item.removed||[]),blocks=[];
  const lines=(n=1)=>Array.from({length:n},()=>'<div class="write-line">'+SpellingSchrijflijnen.htmlCanvas(s.lineType,s.lineHeight,640)+'</div>').join('');
@@ -54,6 +63,12 @@ function model(item,s,solutions){
    if(item.type==='dimin-choice'){const stem=word.split(' ').slice(1).join(' ');const choices=G.shuffle([small,stem+'s',stem],r);add('<p>'+e(word)+' → '+choices.map(w=>solutions&&w===small?'<b class="marked">het '+e(w)+'</b>':'het '+e(w)).join(' / ')+'</p>',key)}
    else add('<p>Gebruik het verkleinwoord van <b>'+e(word)+'</b> in een zin.</p>'+answer('Eigen volledige zin met <b>het '+e(small)+'</b>. Controleer de hoofdletter en het leesteken.',2),key);
   });
+ }
+ if(item.type.startsWith('subject-')){
+  hint='Zoek over wie iets wordt gezegd. Maak een vraag die begint met Wie. Het volledige antwoord is het onderwerp. Voorbeeld: De nieuwe buurman fietst naar huis. → Wie fietst naar huis? → De nieuwe buurman. Bij dingen gebruik je een wat-vraag; hier oefenen we met personen.';
+  instruction=item.type==='subject-who'?'Lees de zin en de wie-vraag. Schrijf het volledige onderwerp op.':item.type==='subject-ask'?'Lees de zin. Schrijf een passende wie-vraag en daarna het volledige onderwerp op.':'Lees de tekst. Stel bij elke zin in je hoofd een wie-vraag. Onderstreep het volledige onderwerp.';
+  if(item.type==='subject-text')chosen(subjectStories).forEach(({value,key})=>add('<div class="grammar-story">'+value.map(([text,question,subject])=>{const start=text.toLowerCase().indexOf(subject.toLowerCase());return '<p>'+(solutions?e(text.slice(0,start))+'<u class="subject-answer">'+e(text.slice(start,start+subject.length))+'</u>'+e(text.slice(start+subject.length)):e(text))+'</p>'+(solutions?'<div class="answer">'+e(question)+' → '+e(subject)+'</div>':'')}).join('')+'</div>',key));
+  else chosen(subjectSentences).forEach(({value:[text,question,subject],key})=>add('<div class="grammar-card"><p>'+e(text)+'</p>'+(item.type==='subject-who'?'<p>Wie-vraag: '+e(question)+'</p>':'<div class="grammar-field"><span>Wie-vraag:</span><div>'+answer(e(question))+'</div></div>')+'<div class="grammar-field"><span>Onderwerp:</span><div>'+answer(e(subject))+'</div></div></div>',key));
  }
  if(item.type.startsWith('syntax-')){
   hint='Maak een ja-neevraag van de zin. De persoonsvorm komt dan vooraan. Vraag: wie of wat doet iets of over wie of wat wordt iets gezegd? Dat is het onderwerp. Voorbeeld: De poes slaapt. → Slaapt de poes? Persoonsvorm: slaapt. Onderwerp: de poes.';
@@ -73,5 +88,5 @@ function model(item,s,solutions){
  }
  return {instruction,hint,example,blocks};
 }
-window.TaalGrammar={model,limits,types,dimin,diminPool,normalizeEndings,sentences,stories,synonyms};
+window.TaalGrammar={model,limits,types,dimin,diminPool,normalizeEndings,sentences,stories,synonyms,subjectSentences,subjectStories};
 })();
