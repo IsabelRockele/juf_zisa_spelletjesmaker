@@ -75,6 +75,16 @@ function addZisaNavigation(){
   panel.innerHTML=`<button type="button" id="zisaCloseNav" aria-label="Menu sluiten">✕ Sluiten</button><strong>Wat wil je doen?</strong>${fractionStudio?'<button type="button" class="primary" id="zisaFractionMenu">🧩 Andere oefenvorm in de Breukenstudio</button>':''}${help?'<button type="button" class="primary" id="zisaShowHelp">🔊 Leg het spel uit</button>':''}<a href="${gradeHomeUrl}">🎮 Ander spel van mijn leerjaar</a><a href="${isDiscoverPreview?discoverHomeUrl:playHomeUrl}">🔢 Een ander leerjaar kiezen</a>${teacher?`<a href="${proHomeUrl}">← Leerkracht: terug naar PRO</a>`:''}`;
   document.body.append(button,panel);
   button.onclick=()=>panel.hidden=!panel.hidden;
+  if(isDiscoverPreview&&(discoverParams.get('ontdek')==='1'||(!discoverParams.has('code')&&!isTeacherPreview&&!isColleaguePlay))){
+    panel.querySelectorAll('a').forEach((link,index)=>{if(index){link.remove();return}link.href=discoverHomeUrl;link.textContent='← Terug naar de Ontdek-spellen'});
+    // Keep in-game choices intact; only replace exits to full-version menus.
+    document.addEventListener('click',event=>{
+      const exit=event.target.closest('a,button');if(!exit)return;
+      const destination=(exit.getAttribute('href')||'')+' '+(exit.getAttribute('onclick')||'');
+      if(!/(?:start_leerjaar[1-4]|eilanden-leerjaar[12]|splits_spelletjes|spelletjes_hoofdrekenen1|tafel(?:[23])?_(?:overzicht|spelletjes))\.html/.test(destination))return;
+      event.preventDefault();event.stopImmediatePropagation();location.assign(discoverHomeUrl);
+    },true);
+  }
   panel.querySelector('#zisaCloseNav').onclick=()=>panel.hidden=true;
   document.addEventListener('pointerdown',event=>{if(!panel.hidden&&!panel.contains(event.target)&&event.target!==button)panel.hidden=true});
   if(fractionStudio)panel.querySelector('#zisaFractionMenu').onclick=()=>{panel.hidden=true;window.dispatchEvent(new CustomEvent('zisa:breuken-menu'))};
