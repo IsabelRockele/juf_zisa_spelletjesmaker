@@ -93,6 +93,7 @@ function insertButtons() {
   });
 
   accountContainer.appendChild(changePassBtn);
+
   accountContainer.appendChild(logoutBtn);
   sidebarHelp.appendChild(accountContainer);
 

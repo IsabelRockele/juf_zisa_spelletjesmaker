@@ -1,0 +1,7 @@
+/* Only the active game fits the board; settings remain freely scrollable. */
+body.board-playing { overflow: hidden; }
+body.board-playing .topbar { padding-block: 6px; }
+body.board-playing #game { max-width: 2000px; }
+body.board-playing .question { height: clamp(85px, 13vh, 145px); }
+body.board-playing .split-diagram { max-height: 100%; }
+body.board-playing .feedback { min-height: 30px; padding-top: 6px; }
