@@ -134,7 +134,7 @@ const back = document.getElementById('categoryBack');
 const noResults = document.getElementById('proNoResults');
 const CATEGORY_KEY = 'zisa-ontdek-laatste-categorie';
 const VALID_CATEGORIES = new Set(['reken', 'taal', 'puzzels', 'creatief', 'spel', 'tijd', 'klasmanagement']);
-let lastCategory = VALID_CATEGORIES.has(sessionStorage.getItem(CATEGORY_KEY)) ? sessionStorage.getItem(CATEGORY_KEY) : 'overview';
+let lastCategory = location.hash === '#taal' ? 'taal' : VALID_CATEGORIES.has(sessionStorage.getItem(CATEGORY_KEY)) ? sessionStorage.getItem(CATEGORY_KEY) : 'overview';
 
 function setActive(target) {
   document.querySelectorAll('.nav-btn').forEach(button => button.classList.toggle('active', button.dataset.target === target));

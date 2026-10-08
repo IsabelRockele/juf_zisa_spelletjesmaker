@@ -731,7 +731,7 @@
       <ul>
         <li data-datum="2026-10-08">
           <span class="update-datum">8 oktober 2026</span>
-          <span><span class="update-tool">Nieuw: Bundel taalsystematiek</span> - Bij <strong>Taal en letters</strong> stel je taalwerkbladen samen voor het tweede leerjaar. Kies oefeningen rond lidwoorden, zelfstandige en bijvoeglijke naamwoorden, eigennamen, hoofdletters, leestekens, rijmen, verkleinwoorden, synoniemen en onderwerp en persoonsvorm. Bij elke opdracht staat of ze past bij <strong>extra steun, basis of uitbreiding</strong>. Combineer woordsoorten in kleuroefeningen, kies thematekstjes en vink bij verkleinwoorden de al aangeleerde uitgangen aan. Voeg eventueel één onthoudkader per stukje leerstof toe en pas vragen rechtstreeks in het voorbeeld aan. Download je werkbladen en de aparte oplossingen, met verbindlijnen bij verbindopdrachten.</span>
+          <span><span class="update-tool">Nieuw: Bundel taalsystematiek</span> - Bij <strong>Taal en letters</strong> stel je taalwerkbladen samen voor de lagere school. De bundel wordt stap voor stap uitgebreid met leerstof tot en met het zesde leerjaar. Kies oefeningen rond lidwoorden, zelfstandige en bijvoeglijke naamwoorden, eigennamen, hoofdletters, leestekens, rijmen, verkleinwoorden, synoniemen en onderwerp en persoonsvorm. Bij elke opdracht staat of ze past bij <strong>extra steun, basis of uitbreiding</strong>. Combineer woordsoorten in kleuroefeningen, kies thematekstjes en vink bij verkleinwoorden de al aangeleerde uitgangen aan. Voeg eventueel één onthoudkader per stukje leerstof toe en pas vragen rechtstreeks in het voorbeeld aan. Download je werkbladen en de aparte oplossingen, met verbindlijnen bij verbindopdrachten.</span>
         </li>
         <li data-datum="2026-10-01">
           <span class="update-datum">1 oktober 2026</span>
@@ -1080,6 +1080,9 @@
     setProNavActive(target);
     document.querySelector('.main').scrollTop=0;
   };
+
+  // De terugknop uit de taalbundel opent rechtstreeks de gekozen categorie.
+  if(location.hash === '#taal')window.showProCategory('taal');
 
   categoryBack.addEventListener('click',()=>{proToolSearch.value='';window.showProOverview()});
   proToolSearch.addEventListener('input',()=>{
