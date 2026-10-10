@@ -1,0 +1,103 @@
+
+:root{font-family:Arial,sans-serif;color:#193c36;background:#f5f8f7;font-synthesis:none;--signal:#19845d;--wash:#e6f5ec}*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer;min-height:48px;border-radius:12px;border:1px solid #cbd9d3;background:white;padding:12px 20px;color:inherit;font-weight:700}button:hover{filter:brightness(.96)}button:focus-visible,input:focus-visible{outline:3px solid #147fac;outline-offset:4px}button:disabled{opacity:.55;cursor:wait}header{max-width:1440px;margin:auto;padding:25px 38px;display:flex;justify-content:space-between;align-items:center;gap:16px}.brand{display:flex;align-items:center;gap:13px}.mark{background:#193c36;color:white;border-radius:12px;padding:10px 12px;font-size:23px;letter-spacing:2px}.brand b{font-size:23px}.brand small{display:block;margin-top:4px;color:#61766f;font-size:14px}.plain{background:transparent}main{max-width:1440px;margin:0 auto;padding:8px 38px 28px;display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:24px}.stage{min-height:650px;border:1px solid #dae6df;border-radius:26px;background:white;overflow:hidden;display:flex;flex-direction:column}.stage-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:24px 30px;font-size:15px;color:#61766f}.tag{padding:8px 12px;border-radius:30px;background:#f0f5f2;color:#36594c;font-weight:700}.visual{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:10px 28px 25px;text-align:center}.orb{width:235px;height:235px;border-radius:50%;background:var(--wash);display:grid;place-items:center;margin:6px 0 24px;transition:background .4s;box-shadow:0 0 0 15px color-mix(in srgb,var(--wash) 45%,white)}.bars{height:110px;display:flex;align-items:center;gap:12px}.bars i{display:block;width:16px;border-radius:20px;background:var(--signal);height:var(--h);transition:height .16s,background .4s}h1{font-size:clamp(34px,4vw,58px);letter-spacing:-1.5px;margin:8px 0 12px;line-height:1.12}.subtitle{font-size:21px;color:#60756c;margin:0;min-height:50px;max-width:540px;line-height:1.4}.meter{width:min(100%,560px);margin-top:25px}.track{height:19px;border-radius:12px;position:relative;background:linear-gradient(to right,#35a274 0%,#35a274 45%,#edbd4d 45%,#edbd4d 65%,#e46560 65%)}.needle{position:absolute;left:0%;height:31px;width:6px;top:-6px;background:#193c36;border:2px solid white;border-radius:8px;transform:translateX(-3px);transition:left .12s}.scale{display:flex;justify-content:space-between;margin-top:12px;color:#6c7e75;font-size:14px}.stage-bottom{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;border-top:1px solid #e7eee9;padding:22px}.primary{background:#193c36;color:white;border-color:#193c36;min-width:210px}.side{display:flex;flex-direction:column;gap:18px}.panel{padding:24px;border:1px solid #dae6df;border-radius:22px;background:white}.panel h2{font-size:18px;margin:0 0 20px}.modes{display:grid;gap:9px}.mode{text-align:left;font-size:16px;display:flex;align-items:center;gap:12px;border-color:#e0e8e3}.mode span{font-size:22px;width:28px;text-align:center}.mode[aria-pressed=true]{border:2px solid #24775a;background:#edf8f1;padding:11px 19px}.mode small{display:block;font-size:13px;font-weight:400;color:#61766f;margin-top:4px}.setting{margin-top:22px}.setting label{display:flex;justify-content:space-between;gap:10px;font-weight:700;font-size:15px}.setting input[type=range]{width:100%;accent-color:#24775a;margin:18px 0 8px}.hint{font-size:14px;line-height:1.5;color:#63776d;margin:10px 0 0}.ends{display:flex;justify-content:space-between;font-size:13px;color:#63776d}.toggle{display:flex;align-items:center;gap:10px;margin-top:21px;font-size:15px}.toggle input{width:20px;height:20px;accent-color:#24775a}.privacy{padding:0 12px;line-height:1.6;color:#697c73;font-size:14px}.privacy b{color:#36594c}.error{color:#9a3227;background:#fff0ec;padding:12px 16px;border-radius:12px;font-size:15px;line-height:1.5;margin:0 24px 16px}.error[hidden]{display:none}footer{text-align:center;font-size:13px;color:#72847b;padding:0 20px 22px}body.focus main{grid-template-columns:1fr;max-width:none}body.focus .side,body.focus footer{display:none}body.focus .stage{min-height:calc(100vh - 125px)}body.focus .orb{width:270px;height:270px}body.focus h1{font-size:clamp(44px,6vw,80px)}@media(max-width:850px){header{padding:20px}main{padding:4px 18px 20px;grid-template-columns:1fr}.stage{min-height:590px}.side{display:grid;grid-template-columns:1fr 1fr}.privacy{grid-column:1/-1}.stage-top{padding:20px}.orb{width:200px;height:200px}header button{padding:10px;font-size:14px}}@media(max-width:520px){.side{grid-template-columns:1fr}.brand b{font-size:20px}.brand small{font-size:12px}.mark{display:none}.stage{min-height:565px}.subtitle{font-size:18px}.stage-top{font-size:13px}.stage-bottom button{flex:1}.panel{padding:22px}body.focus .orb{width:220px;height:220px}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.character{position:relative;width:min(100%,440px);aspect-ratio:1;margin:-20px 0 -40px;isolation:isolate}.sprite{width:100%;height:100%;background-image:url('zebra.png');background-repeat:no-repeat;background-size:300% 200%;background-position:0 0;transform-origin:50% 77%;animation:breathe 3s ease-in-out infinite}.character[data-mood=yellow] .sprite{animation:stir 3.5s ease-in-out infinite}.character[data-mood=red] .sprite{animation:wake .55s ease-out 1}.zz{position:absolute;top:15%;right:20%;font-weight:bold;color:#24775a;font-size:27px;animation:dream 3s ease-in-out infinite}.character[data-mood=yellow] .zz,.character[data-mood=red] .zz{display:none}.view-choice{display:flex;gap:6px;margin-bottom:20px}.view-choice button{flex:1;font-size:14px;padding:10px 6px}.view-choice button[aria-pressed=true]{background:#193c36;color:white;border-color:#193c36}.character[hidden],.orb[hidden]{display:none}.visual{padding-top:0}body.focus .character{width:min(48vh,540px);margin-bottom:-25px}@keyframes breathe{50%{transform:scale(1.025,1.035) translateY(-2px)}}@keyframes stir{25%{transform:rotate(-1deg)}75%{transform:rotate(1deg)}}@keyframes wake{0%{transform:translateY(0)}35%{transform:translateY(-15px) scale(1.02)}100%{transform:translateY(0)}}@keyframes dream{0%,100%{opacity:.3;transform:translateY(0) scale(.8)}60%{opacity:1;transform:translateY(-15px) scale(1)}}@media(max-width:520px){.character{width:300px;margin:-5px 0 -20px}.stage{min-height:630px}}@media(prefers-reduced-motion:reduce){.sprite,.zz{animation:none!important}}
+
+.scene{width:100%;max-width:900px;aspect-ratio:3/2;max-height:440px;position:relative;background:url('achtergrond.png') center center/cover;border-radius:20px;overflow:hidden;isolation:isolate;margin:0 0 18px}.scene .character,body.focus .scene .character{position:absolute;bottom:1%;left:30%;width:51%;margin:0;isolation:auto}.scene[hidden]{display:none}.scene .zz{color:#174d47;right:22%;top:12%}.visual{justify-content:flex-start;padding:0 24px 24px}h1{font-size:clamp(28px,3.2vw,44px);margin:2px 0 10px}.subtitle{font-size:18px;min-height:0}.meter{margin-top:18px}.stage{min-height:0}.stage-top{padding:18px 24px;flex-wrap:wrap}.timer-box{margin:0 24px 18px;background:#eff8f2;border:1px solid #c4decd;border-radius:18px;padding:15px 20px}.timer-box[hidden],.timer-settings[hidden]{display:none}.timer-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.time-digits{font-size:clamp(38px,5vw,66px);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}.timer-caption{font-size:15px;color:#3f6153;margin-top:5px}.timer-actions{display:flex;gap:8px;flex-wrap:wrap}.timer-actions button{font-size:14px;padding:10px 12px}.time-track{height:10px;background:#d3e7d9;border-radius:10px;margin-top:14px;overflow:hidden}.time-fill{height:100%;width:100%;background:#267653;transition:width .2s linear}.timer-box.done{background:#fff5cd;border-color:#e6cf73}.timer-settings input[type=number]{width:90px;padding:10px;border:1px solid #b9cfc2;border-radius:9px;font-size:18px;color:inherit}.minutes-label{display:flex;justify-content:space-between;align-items:center;margin:18px 0 12px}.presets{display:flex;gap:6px}.presets button{padding:7px 8px;font-size:14px;flex:1;min-height:40px}.test-sound{margin-top:14px;width:100%;font-size:14px}.timer-message{font-size:14px;line-height:1.5;color:#63776d}.timer-panel .toggle{margin-top:0}.stage-bottom{padding:16px}.side{gap:14px}.panel{padding:21px}body.focus h1{font-size:clamp(30px,4vw,56px)}body.focus .scene{max-height:49vh;max-width:900px}body.focus .visual{flex:1}.scene .character[hidden]{display:none}@media(max-width:520px){.scene{aspect-ratio:1.15;margin-bottom:16px}.scene .character{left:17%;width:74%}.visual{padding:0 12px 20px}.timer-box{margin:0 12px 16px;padding:14px}.timer-row{flex-wrap:wrap}.timer-actions{width:100%}.timer-actions button{flex:1}.stage-top{padding:16px}.stage{min-height:0}}
+
+.back{color:#193c36;font-weight:700;text-decoration:none;padding:12px;border-radius:10px}.back:focus-visible{outline:3px solid #147fac}header{flex-wrap:wrap}.view-choice{flex-wrap:wrap}.view-choice button{min-width:85px}.traffic-light{background:#243b35;border-radius:30px;padding:22px;display:grid;gap:16px;margin:10px auto 24px;box-shadow:0 8px 22px #193c3622}.traffic-light[hidden]{display:none}.lamp{width:92px;height:92px;border-radius:50%;background:#53645e;border:3px solid #ffffff25}.traffic-light[data-mood=red] .red{background:#e46560;box-shadow:0 0 22px #e4656070}.traffic-light[data-mood=yellow] .yellow{background:#edbd4d;box-shadow:0 0 22px #edbd4d70}.traffic-light[data-mood=green] .green{background:#35a274;box-shadow:0 0 22px #35a27470}@media(max-width:520px){.lamp{width:65px;height:65px}}
+/* Board view keeps the scene and enabled timer inside the viewport. */
+.character .sprite{animation:none!important;transform:none!important}
+body.focus{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+body.focus header{width:100%;max-width:none;padding:8px 16px;flex:0 0 auto;gap:10px}
+body.focus header .brand small,body.focus header .mark,body.focus header .back{display:none}
+body.focus header .brand b{font-size:21px}
+body.focus header button{min-height:40px;padding:8px 14px}
+body.focus main{width:100%;flex:1;min-height:0;padding:0 8px 8px;display:flex}
+body.focus .stage{width:100%;height:100%;min-height:0;border-radius:16px}
+body.focus .stage-top{flex:0 0 auto;padding:6px 14px;font-size:13px}
+body.focus .tag{padding:4px 10px}
+body.focus .visual{position:relative;isolation:isolate;flex:1;min-height:0;padding:8px 12px;overflow:hidden;justify-content:flex-end;gap:4px}
+body.focus .scene{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto;margin:0;border-radius:0;z-index:-1;background-position:center 60%}
+body.focus .scene .character{width:min(55vw,calc(100dvh - 290px));left:50%;bottom:112px;transform:translateX(-50%);margin:0}
+body.focus h1{font-size:clamp(22px,3vw,40px);letter-spacing:-.5px;margin:0;padding:4px 16px;border-radius:12px;background:#fffffff0;line-height:1.1}
+body.focus .subtitle{font-size:15px;min-height:0;padding:2px 12px;border-radius:8px;background:#fffffff0}
+body.focus .meter{width:min(620px,92%);margin:2px 0 0;padding:8px 14px 4px;background:#fffffff0;border-radius:12px}
+body.focus .track{height:12px}
+body.focus .needle{height:22px;top:-5px}
+body.focus .scale{margin-top:5px;font-size:12px}
+body.focus .timer-box{flex:0 0 auto;margin:6px 10px;padding:6px 14px}
+body.focus .time-digits{font-size:clamp(32px,4vw,52px)}
+body.focus .timer-caption{font-size:13px;margin:0}
+body.focus .time-track{margin-top:5px;height:6px}
+body.focus .stage-bottom{flex:0 0 auto;padding:4px 10px;gap:8px}
+body.focus .stage-bottom button{min-height:34px;padding:5px 12px;font-size:13px}
+body.focus .error{flex:0 0 auto;margin:4px 10px;padding:5px 10px}
+body.focus .orb{width:min(24vh,200px);height:min(24vh,200px);margin:auto}
+body.focus .traffic-light{margin:auto;padding:10px;gap:8px}
+body.focus .lamp{width:min(8vh,65px);height:min(8vh,65px)}
+@media(max-width:600px){body.focus .scene .character{width:min(85vw,calc(100dvh - 310px))}body.focus .timer-row{flex-wrap:nowrap}body.focus .timer-actions{width:auto}body.focus .timer-actions button{min-height:34px;padding:6px;font-size:12px}body.focus .timer-caption{max-width:180px}body.focus .brand b{font-size:18px}}
+body.focus .scene{container-type:size}
+body.focus .scene .character{width:min(65cqw,calc(100cqh - 105px));bottom:105px}
+@media(max-width:600px){body.focus .scene .character{width:min(90cqw,calc(100cqh - 105px))}}
+/* Compact timer over the top-right corner of the board scene. */
+body.focus .stage{position:relative}
+body.focus .timer-box{position:absolute;z-index:3;top:52px;right:18px;width:250px;max-width:calc(100% - 36px);margin:0;padding:12px 16px;background:#f4fbf6f2;box-shadow:0 4px 18px #193c3626;border-radius:18px}
+body.focus .timer-box.done{background:#fff5cdf5}
+body.focus .timer-row{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+body.focus .time-digits{font-size:52px;text-align:center}
+body.focus .timer-caption{text-align:center;font-size:13px;max-width:none}
+body.focus .timer-actions{width:100%;display:flex;gap:6px}
+body.focus .timer-actions button{flex:1;min-height:34px;padding:6px 8px;font-size:13px}
+body.focus .time-track{margin-top:9px}
+@media(max-width:600px){body.focus .timer-box{top:48px;right:8px;width:170px;padding:8px 10px}body.focus .time-digits{font-size:36px}body.focus .timer-caption{font-size:11px}body.focus .timer-actions button{font-size:11px;padding:5px}body.focus .timer-row{gap:5px}}
+/* A classroom-sized stoplight with readable cues, also before listening starts. */
+body.focus .visual:has(#trafficLight:not([hidden])){container-type:size;background:radial-gradient(ellipse at 15% 20%,#fff4d7 0,transparent 48%),radial-gradient(ellipse at 90% 75%,#d6efe8 0,transparent 52%),#edf6f3}
+body.focus .traffic-light{width:min(560px,65%);padding:clamp(12px,3cqh,28px);gap:clamp(8px,2cqh,18px);border-radius:36px;background:#fffdf5;border:2px solid #d3e3db;box-shadow:0 14px 40px #254f4220;position:relative}
+body.focus .lamp{width:100%;height:clamp(48px,15cqh,130px);border:0;border-radius:20px;display:flex;align-items:center;gap:clamp(12px,3vw,28px);padding:10px 20px;background:#f3e8e4;color:#71514d;box-shadow:none;font-size:clamp(18px,2.4vw,34px);font-weight:700;position:relative}
+body.focus .lamp::before{content:'';flex:0 0 auto;width:clamp(30px,10cqh,94px);height:clamp(30px,10cqh,94px);border-radius:50%;background:#cc837b;box-shadow:inset 0 3px 8px #0002;border:4px solid #ffffffb0}
+body.focus .lamp.yellow{background:#f6efdc;color:#79632d}
+body.focus .lamp.yellow::before{background:#d9b96b}
+body.focus .lamp.green{background:#e2eee5;color:#3c6654}
+body.focus .lamp.green::before{background:#81b198}
+body.focus .traffic-light[data-mood=red] .red{background:#ffdad3;color:#842b20;box-shadow:0 0 0 3px #d35948}
+body.focus .traffic-light[data-mood=red] .red::before{background:#ee5645;box-shadow:0 0 24px #ee564580,inset 0 5px 8px #fff5}
+body.focus .traffic-light[data-mood=yellow] .yellow{background:#fff0bb;color:#73520b;box-shadow:0 0 0 3px #dcae32}
+body.focus .traffic-light[data-mood=yellow] .yellow::before{background:#ffcb36;box-shadow:0 0 24px #ffcb3690,inset 0 5px 8px #fff5}
+body.focus .traffic-light[data-mood=green] .green{background:#ccefd9;color:#155b3b;box-shadow:0 0 0 3px #32976a}
+body.focus .traffic-light[data-mood=green] .green::before{background:#32bc7c;box-shadow:0 0 24px #32bc7c80,inset 0 5px 8px #fff5}
+.lamp-label{display:none}body.focus .lamp-label{display:block}
+@media(max-width:700px){body.focus .traffic-light{width:94%;max-width:440px;padding:10px;border-radius:22px}body.focus .lamp{padding:6px 12px;font-size:20px}body.focus .stage:has(.timer-box:not([hidden])) .visual:has(#trafficLight:not([hidden])){padding-top:165px}body.focus .stage:has(.timer-box:not([hidden])) .traffic-light .lamp{height:clamp(42px,9cqh,75px)}body.focus .stage:has(.timer-box:not([hidden])) .traffic-light .lamp::before{width:32px;height:32px}}
+/* Keep the stoplight visual: the status below supplies the explanation. */
+body.focus .traffic-light{width:auto;max-width:90%;padding:clamp(12px,2.5cqh,24px)}
+body.focus .lamp{width:clamp(56px,14cqh,120px);height:clamp(56px,14cqh,120px);padding:0;justify-content:center;border-radius:50%}
+body.focus .lamp::before{width:85%;height:85%}
+@media(max-width:700px){body.focus .traffic-light{width:auto}body.focus .stage:has(.timer-box:not([hidden])) .traffic-light .lamp{width:clamp(42px,9cqh,75px);height:clamp(42px,9cqh,75px)}body.focus .stage:has(.timer-box:not([hidden])) .traffic-light .lamp::before{width:85%;height:85%}}
+/* The officer and light share one clear classroom signal. */
+.traffic-scene{display:flex;align-items:center;justify-content:center;gap:20px;margin:10px auto 24px;max-width:100%}
+.traffic-scene:has(#trafficLight[hidden]){display:none}
+.traffic-scene .traffic-light{margin:0;flex-shrink:0}
+.officer{width:240px;aspect-ratio:1;background:url('agent.png') 0% 50% / 300% 100% no-repeat;flex-shrink:1}
+.traffic-scene:has([data-mood=yellow]) .officer{background-position:50% 50%}
+.traffic-scene:has([data-mood=red]) .officer{background-position:100% 50%}
+body.focus .traffic-scene{margin:auto;gap:clamp(12px,3vw,48px);width:min(780px,85%)}
+body.focus .traffic-scene .traffic-light{margin:0;width:auto}
+body.focus .officer{width:min(48cqh,440px);max-width:65%;}
+body.focus .subtitle:empty{display:none}
+@media(max-width:700px){body.focus .traffic-scene{width:98%;gap:10px}body.focus .officer{width:min(40cqh,280px)}}
+/* Speech stays with the officer; the timer has its own reserved area. */
+.officer-group{display:flex;flex-direction:column;align-items:center;gap:18px;min-width:0;width:280px;max-width:70%}
+.officer-group .officer{width:100%;max-width:none}
+.speech-bubble{position:relative;background:#fffef8;border:2px solid #b6cfc2;border-radius:24px;padding:14px 20px;text-align:center;color:#193c36;font-size:clamp(19px,2.3vw,32px);font-weight:700;line-height:1.2;box-shadow:0 5px 16px #193c3614;width:100%;box-sizing:border-box}
+.speech-bubble::after{content:'';position:absolute;bottom:-11px;left:48%;width:18px;height:18px;transform:rotate(45deg);background:#fffef8;border-right:2px solid #b6cfc2;border-bottom:2px solid #b6cfc2}
+.visual:has(#trafficLight:not([hidden])) #headline{display:none}
+body.focus .officer-group{width:min(42cqh,400px);max-width:70%;gap:18px}
+body.focus .officer-group .officer{width:100%;max-width:none}
+body.focus .traffic-scene{width:100%;min-height:0;gap:clamp(12px,2vw,32px)}
+body.focus .stage:has(.timer-box:not([hidden])) .visual:has(#trafficLight:not([hidden])){padding-right:290px;padding-top:8px}
+@media(max-width:900px){body.focus .stage:has(.timer-box:not([hidden])) .visual:has(#trafficLight:not([hidden])){padding-right:12px;padding-top:210px}body.focus .officer-group{width:min(36cqh,310px)}body.focus .speech-bubble{font-size:clamp(17px,2.8vw,25px);padding:10px 12px}body.focus .traffic-scene .lamp{width:clamp(40px,10cqh,85px);height:clamp(40px,10cqh,85px)}}
+@media(max-width:600px){body.focus .stage:has(.timer-box:not([hidden])) .visual:has(#trafficLight:not([hidden])){padding-top:175px}body.focus .officer-group{width:min(34cqh,260px)}body.focus .speech-bubble{font-size:17px;padding:8px 10px}}
+
+/* Keep the edition-specific exit available in board mode too. */
+body.focus header .back{display:inline-flex;align-items:center;font-size:14px;padding:8px;min-height:40px;flex-shrink:0}
+@media(max-width:520px){body.focus header .brand{display:none}}
