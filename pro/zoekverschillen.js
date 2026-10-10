@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPlacingNewObject = false;
     let currentCatalogSelection=null;
     let currentAutoDifferenceCount=0;
+    let imageLoadVersion = 0;
     
     let transformAction = 'none'; 
     let dragStart = { x: 0, y: 0 };
@@ -106,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     openHelpBtn.addEventListener('click', () => helpOverlay.classList.remove('hidden'));
     [closeHelpBtn, helpDoneBtn].forEach(btn => btn.addEventListener('click', () => helpOverlay.classList.add('hidden')));
     [catalogOverlay, helpOverlay].forEach(overlay => overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.add('hidden'); }));
-    differenceCount.addEventListener('change',()=>{worksheetInstruction.value=`Zoek de ${differenceCount.value} verschillen.`;makeAutoDifferencesBtn.textContent=`Maak automatisch ${differenceCount.value} verschillen`;differenceSummary.hidden=true;solutionActions.classList.add('hidden');hideSolution();});
+    differenceCount.addEventListener('change',()=>{++imageLoadVersion;worksheetInstruction.value=`Zoek de ${differenceCount.value} verschillen.`;makeAutoDifferencesBtn.textContent=`Maak automatisch ${differenceCount.value} verschillen`;differenceSummary.hidden=true;solutionActions.classList.add('hidden');hideSolution();});
     makeAutoDifferencesBtn.addEventListener('click',applyAutomaticDifferences);
     toggleSolutionBtn.addEventListener('click',toggleSolution);downloadSolutionPdfBtn.addEventListener('click',()=>downloadPuzzel('pdf',true));
     downloadPngBtn.addEventListener('click', () => downloadPuzzel('png'));
@@ -165,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialiseGuidance(){renderCatalog(catalog[0][0]);showToolExplanation(currentTool);}
     function showToolExplanation(tool){const info=toolInfo[tool];if(info)toolExplanation.innerHTML=`<strong>${info.name}</strong><span>${info.text}</span>`;}
     const automaticThemes=new Set(['naar-school','herfst','sinterklaas','kerst','pasen','lente','carnaval','winter','zomer','valentijn','dieren','ruimte','de-zee']);
+    catalog.forEach(([theme,,names]) => { if (names.every(name => window.ZoekVerschillenAanvullingen?.scenes[name])) automaticThemes.add(theme); });
     function renderCatalog(activeSlug){catalogThemes.innerHTML=catalog.map(([slug,label])=>`<button class="catalog-theme ${slug===activeSlug?'active':''}" data-theme="${slug}">${label}</button>`).join('');const[,label,images]=catalog.find(item=>item[0]===activeSlug),automaticAvailable=automaticThemes.has(activeSlug),automaticStatus=automaticAvailable?'<em class="catalog-status available">Automatisch beschikbaar</em>':'<em class="catalog-status pending">Zelf bewerken · automatisch binnenkort</em>';catalogImages.innerHTML=images.map((name,index)=>`<button class="catalog-image" data-theme="${activeSlug}" data-name="${name}" data-src="../zoekverschillen_catalogus/${activeSlug}/${name}.png"><img src="../zoekverschillen_catalogus/${activeSlug}/${name}.png" alt="Voorbeeld ${index+1}: ${label}" loading="lazy"><span>${label} – kleurplaat ${index+1}</span>${automaticStatus}</button>`).join('');catalogThemes.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>renderCatalog(btn.dataset.theme)));catalogImages.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{currentCatalogSelection={theme:btn.dataset.theme,name:btn.dataset.name,src:btn.dataset.src};loadImageSource(btn.dataset.src,'Kleurplaat geladen. Maak nu verschillen in de rechterafbeelding.');autoDifferencesPanel.classList.toggle('hidden',!automaticThemes.has(btn.dataset.theme));solutionActions.classList.add('hidden');hideSolution();differenceSummary.hidden=true;catalogOverlay.classList.add('hidden');}));}
     initialiseGuidance();
     const automaticDifferenceDescriptions={'klas-met-kinderen':['Op het bord staat ABC.','De klok wijst een ander uur aan.','De juf draagt een bril.','Op de wereldbol ontbreekt een werelddeel.','In de potloodbeker zit nog maar één potlood.','De plant op de tafel heeft minder bladeren.','De linker boekentas heeft een ster.','De rechter boekentas heeft een ronde knop.','Uit het boek steekt een boekenlegger.','De wolk aan het raam is een zon geworden.'],'speelplaats':['De bal heeft minder strepen.','De ruit op de linker boekentas is een cirkel geworden.','De ster op de rechter boekentas is een hart geworden.','In het ronde schoolraam ontbreekt een lijn.','De bank heeft minder poten.','In het hinkelspel staat het getal 5.','De bloem linksonder heeft minder bloemblaadjes.','Onder een wolk hangt een regendruppel.','Eén deurknop van de school is verdwenen.','Het meisje met het springtouw draagt een strik.'],'dieren-in-het-bos':['Het konijn heeft één slap oor.','De eekhoorn houdt twee eikels vast.','De uil knipoogt.','Het hert heeft minder vlekken.','De vos heeft een streep op zijn staart.','Een paddenstoel is verdwenen.','Er ligt een dennenappel bij de boomstam.','De boomstam heeft een extra knoest.','De egel draagt een appel.','Het boomhol heeft een andere vorm.'],'boswandeling':['De eekhoorn houdt twee eikels vast.','De kleinste paddenstoel is verdwenen.','De egel draagt een appel.','De pompon van de muts heeft een andere vorm.','In de mand liggen minder kastanjes.','De laars heeft een extra streep.','Een kastanjebolster is verdwenen.','De grote paddenstoel heeft minder stippen.','Er zit een vogel in de boom.','Een dwarrelend blad is een dennenappel geworden.']};
@@ -241,7 +243,27 @@ document.addEventListener('DOMContentLoaded', () => {
       'moderne-stad':[[.07,.15,.09],[.43,.40,.15],[.26,.28,.08],[.55,.20,.08],[.91,.50,.11],[.54,.89,.09],[.22,.80,.08],[.90,.77,.10],[.64,.69,.09],[.81,.40,.07]],'duurzame-buurt':[[.41,.13,.10],[.25,.20,.10],[.70,.12,.08],[.43,.47,.15],[.16,.51,.07],[.81,.51,.10],[.93,.52,.11],[.81,.78,.12],[.19,.74,.09],[.06,.66,.10]],
       'ruimtestation':[[.58,.10,.07],[.51,.28,.16],[.27,.17,.08],[.76,.17,.08],[.11,.42,.09],[.30,.49,.09],[.48,.61,.10],[.64,.64,.12],[.44,.86,.10],[.956,.277,.045]],'maanverkenning':[[.22,.14,.14],[.86,.39,.10],[.79,.18,.08],[.37,.43,.08],[.49,.54,.08],[.20,.48,.10],[.40,.80,.11],[.57,.84,.10],[.90,.57,.10],[.12,.83,.11]]
     });
-    function applyAutomaticDifferences(){if(!currentCatalogSelection||!automaticThemes.has(currentCatalogSelection.theme))return;const count=Number(differenceCount.value),variantSrc=currentCatalogSelection.src.replace(/\.(png|svg)$/i,`-verschillen-${count}.$1`);currentAutoDifferenceCount=count;loadImagePair(currentCatalogSelection.src,variantSrc,`${count} automatische verschillen geladen.`);differenceSummaryList.innerHTML=automaticDifferenceDescriptions[currentCatalogSelection.name].slice(0,count).map(text=>`<li>${text}</li>`).join('');differenceSummary.hidden=false;differenceSummary.open=false;solutionActions.classList.remove('hidden');hideSolution();}
+    // De nieuwe scènes gebruiken één bron voor tekening, tekst en oplossing.
+    for (const [name, scene] of Object.entries(window.ZoekVerschillenAanvullingen?.scenes || {})) {
+        automaticDifferenceDescriptions[name] = scene.changes.map(change => change[4]);
+        automaticDifferencePoints[name] = window.ZoekVerschillenAanvullingen.points(name);
+    }
+
+    async function applyAutomaticDifferences() {
+        if (!currentCatalogSelection || !automaticThemes.has(currentCatalogSelection.theme)) return;
+        const selection = currentCatalogSelection;
+        const count = Number(differenceCount.value);
+        const additions = window.ZoekVerschillenAanvullingen;
+        const directed = additions?.scenes[selection.name];
+        const variantSrc = directed ? selection.src : selection.src.replace(/\.(png|svg)$/i, `-verschillen-${count}.$1`);
+        solutionActions.classList.add('hidden'); hideSolution(); differenceSummary.hidden = true;
+        const loaded = await loadImagePair(selection.src, variantSrc, `${count} automatische verschillen geladen.`, directed ? selection.name : null, count);
+        if (!loaded || currentCatalogSelection !== selection) return;
+        currentAutoDifferenceCount = count;
+        differenceSummaryList.innerHTML = automaticDifferenceDescriptions[selection.name].slice(0,count).map(text => `<li>${text}</li>`).join('');
+        differenceSummary.hidden = false; differenceSummary.open = false;
+        solutionActions.classList.remove('hidden'); hideSolution();
+    }
     function drawSolutionCircles(ctx){const points=automaticDifferencePoints[currentCatalogSelection?.name]||[];ctx.save();ctx.strokeStyle='#d62828';ctx.lineWidth=Math.max(3,canvasVerschillen.width*.009);ctx.setLineDash([9,5]);points.slice(0,currentAutoDifferenceCount).forEach(([x,y,r])=>{ctx.beginPath();ctx.arc(x*canvasVerschillen.width,y*canvasVerschillen.height,r*canvasVerschillen.width,0,Math.PI*2);ctx.stroke();});ctx.restore();}
     function hideSolution(){solutionOverlayCanvas.classList.remove('visible');toggleSolutionBtn.classList.remove('solution-visible');toggleSolutionBtn.textContent='Bekijk oplossing';}
     function toggleSolution(){if(solutionOverlayCanvas.classList.contains('visible')){hideSolution();return;}solutionOverlayCanvas.width=canvasVerschillen.width;solutionOverlayCanvas.height=canvasVerschillen.height;solutionOverlayCtx.clearRect(0,0,solutionOverlayCanvas.width,solutionOverlayCanvas.height);drawSolutionCircles(solutionOverlayCtx);solutionOverlayCanvas.classList.add('visible');toggleSolutionBtn.classList.add('solution-visible');toggleSolutionBtn.textContent='Verberg oplossing';}
@@ -261,6 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetApplication() {
+        ++imageLoadVersion;
         ctxOrigineel.clearRect(0, 0, canvasOrigineel.width, canvasOrigineel.height);
         ctxVerschillen.clearRect(0, 0, canvasVerschillen.width, canvasVerschillen.height);
         originalImage = null; undoStack = []; selectionRect = null;
@@ -289,8 +312,10 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsDataURL(file);
     }
     function loadImageSource(source, message) {
+            const version = ++imageLoadVersion;
             originalImage = new Image();
             originalImage.onload = () => {
+                if (version !== imageLoadVersion) return;
                 const aspectRatio = originalImage.width / originalImage.height;
                 const canvasWidth = 400;
                 const canvasHeight = canvasWidth / aspectRatio;
@@ -304,7 +329,28 @@ document.addEventListener('DOMContentLoaded', () => {
             originalImage.onerror = () => { statusText.textContent = 'Deze kleurplaat kon niet worden geladen. Probeer een andere.'; };
             originalImage.src = source;
     }
-    function loadImagePair(originalSource,differentSource,message){const left=new Image(),right=new Image();Promise.all([new Promise((resolve,reject)=>{left.onload=resolve;left.onerror=reject;left.src=originalSource;}),new Promise((resolve,reject)=>{right.onload=resolve;right.onerror=reject;right.src=differentSource;})]).then(()=>{originalImage=left;const width=400,height=width/(left.width/left.height);canvasOrigineel.width=canvasVerschillen.width=width;canvasOrigineel.height=canvasVerschillen.height=height;ctxOrigineel.drawImage(left,0,0,width,height);ctxVerschillen.drawImage(right,0,0,width,height);resetApplicationStateAfterUpload();statusText.textContent=message;}).catch(()=>{statusText.textContent='De automatische verschillen konden niet worden geladen.';});}
+    async function loadImagePair(originalSource, differentSource, message, directedName = null, count = 0) {
+        const version = ++imageLoadVersion;
+        const load = source => new Promise((resolve, reject) => {
+            const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = source;
+        });
+        try {
+            const [left, right] = await Promise.all([load(originalSource), load(differentSource), directedName ? window.ZoekVerschillenAanvullingen.prepare(directedName) : Promise.resolve()]);
+            if (version !== imageLoadVersion) return false;
+            originalImage = left;
+            const width = 400, height = Math.round(width / (left.width / left.height));
+            canvasOrigineel.width = canvasVerschillen.width = width;
+            canvasOrigineel.height = canvasVerschillen.height = height;
+            ctxOrigineel.drawImage(left, 0, 0, width, height);
+            ctxVerschillen.drawImage(right, 0, 0, width, height);
+            if (directedName) window.ZoekVerschillenAanvullingen.draw(ctxVerschillen, directedName, count);
+            resetApplicationStateAfterUpload(); statusText.textContent = message;
+            return true;
+        } catch (error) {
+            if (version === imageLoadVersion) statusText.textContent = 'De automatische verschillen konden niet worden geladen. Probeer opnieuw.';
+            return false;
+        }
+    }
 
     function resetApplicationStateAfterUpload() {
         undoStack = []; saveState();

@@ -98,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPlacingNewObject = false;
     let currentCatalogSelection = null;
     let currentAutoDifferenceCount = 0;
+    let imageLoadVersion = 0;
     
     let transformAction = 'none'; 
     let dragStart = { x: 0, y: 0 };
@@ -117,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     [closeHelpBtn, helpDoneBtn].forEach(btn => btn.addEventListener('click', () => helpOverlay.classList.add('hidden')));
     [catalogOverlay, helpOverlay].forEach(overlay => overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.add('hidden'); }));
     differenceCount.addEventListener('change', () => {
+        ++imageLoadVersion;
         worksheetInstruction.value = `Zoek de ${differenceCount.value} verschillen.`;
         makeAutoDifferencesBtn.textContent = `Maak automatisch ${differenceCount.value} verschillen`;
         differenceSummary.hidden = true;
@@ -206,6 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const automaticThemes = new Set(['naar-school','herfst','sinterklaas','kerst','pasen','lente','carnaval','winter','zomer','valentijn','dieren','ruimte','de-zee']);
+    catalog.forEach(([theme,,names]) => { if (names.every(name => window.ZoekVerschillenAanvullingen?.scenes[name])) automaticThemes.add(theme); });
     function renderCatalog(activeSlug) {
         catalogThemes.innerHTML = catalog.map(([slug,label]) => `<button class="catalog-theme ${slug===activeSlug?'active':''}" data-theme="${slug}">${label}</button>`).join('');
         const [,label,images] = catalog.find(item => item[0] === activeSlug);
@@ -310,15 +313,25 @@ document.addEventListener('DOMContentLoaded', () => {
       'ruimtestation':[[.58,.10,.07],[.51,.28,.16],[.27,.17,.08],[.76,.17,.08],[.11,.42,.09],[.30,.49,.09],[.48,.61,.10],[.64,.64,.12],[.44,.86,.10],[.956,.277,.045]],'maanverkenning':[[.22,.14,.14],[.86,.39,.10],[.79,.18,.08],[.37,.43,.08],[.49,.54,.08],[.20,.48,.10],[.40,.80,.11],[.57,.84,.10],[.90,.57,.10],[.12,.83,.11]]
     });
 
-    function applyAutomaticDifferences() {
+    // De nieuwe scènes gebruiken één bron voor tekening, tekst en oplossing.
+    for (const [name, scene] of Object.entries(window.ZoekVerschillenAanvullingen?.scenes || {})) {
+        automaticDifferenceDescriptions[name] = scene.changes.map(change => change[4]);
+        automaticDifferencePoints[name] = window.ZoekVerschillenAanvullingen.points(name);
+    }
+
+    async function applyAutomaticDifferences() {
         if (!currentCatalogSelection || !automaticThemes.has(currentCatalogSelection.theme)) return;
+        const selection = currentCatalogSelection;
         const count = Number(differenceCount.value);
+        const additions = window.ZoekVerschillenAanvullingen;
+        const directed = additions?.scenes[selection.name];
+        const variantSrc = directed ? selection.src : selection.src.replace(/\.(png|svg)$/i, `-verschillen-${count}.$1`);
+        solutionActions.classList.add('hidden'); hideSolution(); differenceSummary.hidden = true;
+        const loaded = await loadImagePair(selection.src, variantSrc, `${count} automatische verschillen geladen.`, directed ? selection.name : null, count);
+        if (!loaded || currentCatalogSelection !== selection) return;
         currentAutoDifferenceCount = count;
-        const variantSrc = currentCatalogSelection.src.replace('.png', `-verschillen-${count}.png`);
-        loadImagePair(currentCatalogSelection.src, variantSrc, `${count} automatische verschillen geladen.`);
-        differenceSummaryList.innerHTML = automaticDifferenceDescriptions[currentCatalogSelection.name].slice(0,count).map(text => `<li>${text}</li>`).join('');
-        differenceSummary.hidden = false;
-        differenceSummary.open = false;
+        differenceSummaryList.innerHTML = automaticDifferenceDescriptions[selection.name].slice(0,count).map(text => `<li>${text}</li>`).join('');
+        differenceSummary.hidden = false; differenceSummary.open = false;
         solutionActions.classList.remove('hidden'); hideSolution();
     }
     function drawSolutionCircles(ctx) { const points=automaticDifferencePoints[currentCatalogSelection?.name]||[]; ctx.save(); ctx.strokeStyle='#d62828'; ctx.lineWidth=Math.max(3,canvasVerschillen.width*.009); ctx.setLineDash([9,5]); points.slice(0,currentAutoDifferenceCount).forEach(([x,y,r])=>{ctx.beginPath();ctx.arc(x*canvasVerschillen.width,y*canvasVerschillen.height,r*canvasVerschillen.width,0,Math.PI*2);ctx.stroke();}); ctx.restore(); }
@@ -340,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetApplication() {
+        ++imageLoadVersion;
         ctxOrigineel.clearRect(0, 0, canvasOrigineel.width, canvasOrigineel.height);
         ctxVerschillen.clearRect(0, 0, canvasVerschillen.width, canvasVerschillen.height);
         originalImage = null; undoStack = []; selectionRect = null;
@@ -369,8 +383,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadImageSource(source, message) {
+            const version = ++imageLoadVersion;
             originalImage = new Image();
             originalImage.onload = () => {
+                if (version !== imageLoadVersion) return;
                 const aspectRatio = originalImage.width / originalImage.height;
                 const canvasWidth = 400;
                 const canvasHeight = canvasWidth / aspectRatio;
@@ -385,15 +401,27 @@ document.addEventListener('DOMContentLoaded', () => {
             originalImage.src = source;
     }
 
-    function loadImagePair(originalSource, differentSource, message) {
-        const left = new Image(), right = new Image();
-        Promise.all([new Promise((resolve,reject)=>{left.onload=resolve;left.onerror=reject;left.src=originalSource;}),new Promise((resolve,reject)=>{right.onload=resolve;right.onerror=reject;right.src=differentSource;})]).then(()=>{
+    async function loadImagePair(originalSource, differentSource, message, directedName = null, count = 0) {
+        const version = ++imageLoadVersion;
+        const load = source => new Promise((resolve, reject) => {
+            const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = source;
+        });
+        try {
+            const [left, right] = await Promise.all([load(originalSource), load(differentSource), directedName ? window.ZoekVerschillenAanvullingen.prepare(directedName) : Promise.resolve()]);
+            if (version !== imageLoadVersion) return false;
             originalImage = left;
-            const width = 400, height = width / (left.width / left.height);
-            canvasOrigineel.width = canvasVerschillen.width = width; canvasOrigineel.height = canvasVerschillen.height = height;
-            ctxOrigineel.drawImage(left,0,0,width,height); ctxVerschillen.drawImage(right,0,0,width,height);
+            const width = 400, height = Math.round(width / (left.width / left.height));
+            canvasOrigineel.width = canvasVerschillen.width = width;
+            canvasOrigineel.height = canvasVerschillen.height = height;
+            ctxOrigineel.drawImage(left, 0, 0, width, height);
+            ctxVerschillen.drawImage(right, 0, 0, width, height);
+            if (directedName) window.ZoekVerschillenAanvullingen.draw(ctxVerschillen, directedName, count);
             resetApplicationStateAfterUpload(); statusText.textContent = message;
-        }).catch(()=>{statusText.textContent='De automatische verschillen konden niet worden geladen.';});
+            return true;
+        } catch (error) {
+            if (version === imageLoadVersion) statusText.textContent = 'De automatische verschillen konden niet worden geladen. Probeer opnieuw.';
+            return false;
+        }
     }
 
     function resetApplicationStateAfterUpload() {

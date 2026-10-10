@@ -1,0 +1,1402 @@
+{
+  "drukke-straat": [
+    [
+      585,
+      28,
+      55,
+      76,
+      "De schoorsteen op het grote dak is verdwenen."
+    ],
+    [
+      262,
+      196,
+      48,
+      95,
+      "Het middelste boograam is rechthoekig geworden."
+    ],
+    [
+      51,
+      355,
+      516,
+      295,
+      "De bus is een dubbeldekker geworden.",
+      [
+        [
+          51,
+          355
+        ],
+        [
+          567,
+          355
+        ],
+        [
+          567,
+          575
+        ],
+        [
+          515,
+          575
+        ],
+        [
+          515,
+          584
+        ],
+        [
+          461,
+          587
+        ],
+        [
+          379,
+          630
+        ],
+        [
+          320,
+          650
+        ],
+        [
+          51,
+          650
+        ]
+      ]
+    ],
+    [
+      569,
+      368,
+      305,
+      231,
+      "De bestelwagen is een pick-up geworden.",
+      [
+        [
+          569,
+          368
+        ],
+        [
+          874,
+          368
+        ],
+        [
+          874,
+          599
+        ],
+        [
+          662,
+          599
+        ],
+        [
+          662,
+          577
+        ],
+        [
+          569,
+          577
+        ]
+      ]
+    ],
+    [
+      1158,
+      510,
+      36,
+      36,
+      "De middelste koplamp van de tram is verdwenen."
+    ],
+    [
+      951,
+      490,
+      74,
+      105,
+      "De scooter heeft een bezorgbak gekregen."
+    ],
+    [
+      324,
+      577,
+      397,
+      230,
+      "De auto is een taxi geworden.",
+      null
+    ],
+    [
+      1029,
+      304,
+      87,
+      200,
+      "Het verkeerslicht heeft twee lampen in plaats van drie."
+    ],
+    [
+      272,
+      838,
+      152,
+      132,
+      "De hond aan de lijn is een poes geworden."
+    ],
+    [
+      703,
+      106,
+      35,
+      40,
+      "Het ovale gevelraam is rechthoekig geworden."
+    ]
+  ],
+  "bouwwerf": [
+    [
+      64,
+      83,
+      146,
+      88,
+      "De wolk linksboven is verdwenen."
+    ],
+    [
+      650,
+      40,
+      485,
+      216,
+      "De middelste wolk staat hoger en verder naar rechts."
+    ],
+    [
+      1115,
+      855,
+      155,
+      180,
+      "De rechter verkeerskegel is een gereedschapskist geworden."
+    ],
+    [
+      475,
+      628,
+      137,
+      253,
+      "De graafbak is een boor geworden."
+    ],
+    [
+      863,
+      541,
+      384,
+      213,
+      "De betonmolen is een watertank geworden."
+    ],
+    [
+      49,
+      923,
+      370,
+      143,
+      "De buizen zijn houten balken geworden."
+    ],
+    [
+      626,
+      848,
+      142,
+      177,
+      "De middelste verkeerskegel is een houten kist geworden."
+    ],
+    [
+      465,
+      934,
+      103,
+      125,
+      "De onderste verkeerskegel is een emmer geworden."
+    ],
+    [
+      206,
+      502,
+      29,
+      20,
+      "De deurklink van de kiepwagen is verdwenen."
+    ],
+    [
+      792,
+      386,
+      109,
+      114,
+      "Het linker raam van het huis heeft een boog gekregen."
+    ]
+  ],
+  "prehistorisch-kamp": [
+    [
+      300,
+      210,
+      177,
+      402,
+      "De ingang van de grote tent is gesloten."
+    ],
+    [
+      718,
+      312,
+      100,
+      80,
+      "Het grazende hert is een everzwijn geworden."
+    ],
+    [
+      630,
+      260,
+      112,
+      125,
+      "Het staande hert heeft een kleiner gewei."
+    ],
+    [
+      1121,
+      449,
+      51,
+      180,
+      "De middelste hangende vis is verdwenen."
+    ],
+    [
+      1212,
+      658,
+      155,
+      142,
+      "De mand rechts is een pot geworden."
+    ],
+    [
+      574,
+      697,
+      310,
+      256,
+      "Het kampvuur is uit."
+    ],
+    [
+      53,
+      849,
+      219,
+      166,
+      "In de mand liggen paddenstoelen in plaats van bessen."
+    ],
+    [
+      933,
+      977,
+      83,
+      74,
+      "Een van de stenen werktuigen op de huid is verdwenen."
+    ],
+    [
+      1203,
+      968,
+      195,
+      99,
+      "De houten knots is een stenen bijl geworden.",
+      null,
+      "prehistorisch-kamp-bijl"
+    ],
+    [
+      521,
+      959,
+      120,
+      104,
+      "Het losse steentje vooraan is verplaatst."
+    ]
+  ],
+  "grotschilderingen": [
+    [
+      580,
+      150,
+      188,
+      205,
+      "Het geschilderde paard is een mammoet geworden.",
+      [
+        [
+          580,
+          150
+        ],
+        [
+          768,
+          150
+        ],
+        [
+          768,
+          300
+        ],
+        [
+          758,
+          320
+        ],
+        [
+          730,
+          335
+        ],
+        [
+          730,
+          355
+        ],
+        [
+          580,
+          355
+        ]
+      ],
+      "grotschilderingen-mammoet"
+    ],
+    [
+      965,
+      82,
+      413,
+      252,
+      "De geschilderde bizon kijkt de andere kant op.",
+      [
+        [
+          965,
+          82
+        ],
+        [
+          1378,
+          82
+        ],
+        [
+          1378,
+          241
+        ],
+        [
+          1368,
+          241
+        ],
+        [
+          1368,
+          257
+        ],
+        [
+          1328,
+          257
+        ],
+        [
+          1328,
+          334
+        ],
+        [
+          965,
+          334
+        ]
+      ]
+    ],
+    [
+      579,
+      339,
+      147,
+      167,
+      "Het geschilderde hert is verdwenen."
+    ],
+    [
+      993,
+      355,
+      105,
+      130,
+      "De middelste handafdruk is een voetafdruk geworden."
+    ],
+    [
+      1332,
+      243,
+      80,
+      91,
+      "De handafdruk rechtsboven is verdwenen.",
+      [
+        [
+          1368,
+          243
+        ],
+        [
+          1412,
+          243
+        ],
+        [
+          1412,
+          334
+        ],
+        [
+          1332,
+          334
+        ],
+        [
+          1332,
+          257
+        ],
+        [
+          1368,
+          257
+        ]
+      ]
+    ],
+    [
+      255,
+      787,
+      175,
+      141,
+      "De linker verfkom is een mand geworden."
+    ],
+    [
+      570,
+      937,
+      150,
+      125,
+      "Het kleine olielampje is uit."
+    ],
+    [
+      381,
+      879,
+      155,
+      104,
+      "De voorste verfkom is verdwenen."
+    ],
+    [
+      1135,
+      850,
+      305,
+      210,
+      "De opgerolde huid is een bundel brandhout geworden."
+    ],
+    [
+      275,
+      512,
+      84,
+      95,
+      "De vrouw draagt een halsketting met tanden in plaats van kralen."
+    ]
+  ],
+  "romeinse-markt": [
+    [
+      0,
+      45,
+      541,
+      200,
+      "Het linker marktdoek heeft een rechte onderrand."
+    ],
+    [
+      198,
+      313,
+      178,
+      177,
+      "De verkoper houdt een schaal in plaats van een kruik vast."
+    ],
+    [
+      883,
+      171,
+      40,
+      56,
+      "Het raam van het achterste huis is verdwenen."
+    ],
+    [
+      128,
+      454,
+      145,
+      200,
+      "Het kleine schaaltje op de tafel is een kannetje geworden."
+    ],
+    [
+      599,
+      503,
+      122,
+      105,
+      "De fruitmand onder de middelste kraam is een fruitkist geworden."
+    ],
+    [
+      1152,
+      594,
+      203,
+      112,
+      "De jongen draagt vissen in plaats van broden."
+    ],
+    [
+      978,
+      770,
+      145,
+      316,
+      "De grootste kruik rechtsonder heeft geen oren meer.",
+      [
+        [
+          978,
+          770
+        ],
+        [
+          1123,
+          770
+        ],
+        [
+          1123,
+          920
+        ],
+        [
+          1090,
+          938
+        ],
+        [
+          1090,
+          1086
+        ],
+        [
+          978,
+          1086
+        ]
+      ]
+    ],
+    [
+      1080,
+      847,
+      298,
+      239,
+      "De kleinste kruik rechtsonder heeft twee oren gekregen."
+    ],
+    [
+      167,
+      812,
+      233,
+      110,
+      "In de voorste fruitmand liggen druiven."
+    ],
+    [
+      863,
+      213,
+      89,
+      104,
+      "De man in het midden draagt een Romeinse helm."
+    ]
+  ],
+  "egyptische-nijl": [
+    [
+      397,
+      201,
+      180,
+      137,
+      "De linker kleine piramide is verdwenen."
+    ],
+    [
+      397,
+      139,
+      511,
+      205,
+      "De rechter kleine piramide is verdwenen."
+    ],
+    [
+      850,
+      507,
+      166,
+      169,
+      "De middelste ibis is een eend geworden."
+    ],
+    [
+      979,
+      121,
+      53,
+      57,
+      "De vlag van de zeilboot is verdwenen."
+    ],
+    [
+      978,
+      721,
+      138,
+      178,
+      "De vrouw houdt een ronde pot met twee oren vast."
+    ],
+    [
+      985,
+      887,
+      247,
+      179,
+      "De fruitmand vooraan is een houten fruitkist geworden."
+    ],
+    [
+      1206,
+      966,
+      140,
+      112,
+      "Het kleine potje is een mandje geworden."
+    ],
+    [
+      159,
+      188,
+      74,
+      124,
+      "De tros dadels aan de palmboom is verdwenen."
+    ],
+    [
+      1335,
+      515,
+      113,
+      240,
+      "De vogel rechts heeft een rechte snavel gekregen."
+    ],
+    [
+      810,
+      120,
+      365,
+      365,
+      "Het zeil is opgerold."
+    ]
+  ],
+  "kasteelleven": [
+    [
+      711,
+      29,
+      129,
+      92,
+      "De kasteelvlag is verdwenen."
+    ],
+    [
+      810,
+      338,
+      231,
+      286,
+      "Het paard is een ezel geworden."
+    ],
+    [
+      659,
+      623,
+      86,
+      99,
+      "De emmer in de put is een mand geworden."
+    ],
+    [
+      552,
+      835,
+      187,
+      170,
+      "De linker kip vooraan is een eend geworden.",
+      null,
+      "kasteelleven-vogels"
+    ],
+    [
+      840,
+      730,
+      150,
+      175,
+      "De kip naast de put is een gans geworden.",
+      null,
+      "kasteelleven-vogels"
+    ],
+    [
+      1277,
+      457,
+      86,
+      55,
+      "Het vuur bij de smid is uit."
+    ],
+    [
+      1082,
+      354,
+      80,
+      115,
+      "De smid houdt een tang in plaats van een hamer vast."
+    ],
+    [
+      1118,
+      850,
+      104,
+      88,
+      "Het cakeje op de tafel is een krakeling geworden.",
+      [
+        [
+          1118,
+          850
+        ],
+        [
+          1220,
+          850
+        ],
+        [
+          1220,
+          887
+        ],
+        [
+          1207,
+          887
+        ],
+        [
+          1207,
+          938
+        ],
+        [
+          1118,
+          938
+        ]
+      ]
+    ],
+    [
+      1153,
+      698,
+      136,
+      82,
+      "De bakker draagt een taart in plaats van een brood."
+    ],
+    [
+      730,
+      257,
+      58,
+      77,
+      "Het smalle raam van de rechter toren is rond geworden."
+    ]
+  ],
+  "middeleeuwse-markt": [
+    [
+      617,
+      19,
+      42,
+      44,
+      "De vlag op de toren is verdwenen."
+    ],
+    [
+      518,
+      797,
+      230,
+      246,
+      "De hond vooraan is een poes geworden."
+    ],
+    [
+      285,
+      534,
+      224,
+      184,
+      "De muzikant speelt op een trommel in plaats van een luit."
+    ],
+    [
+      571,
+      458,
+      241,
+      269,
+      "De fontein spuit geen water meer."
+    ],
+    [
+      20,
+      758,
+      221,
+      184,
+      "De broodmand linksonder is een appelkist geworden."
+    ],
+    [
+      1302,
+      104,
+      72,
+      123,
+      "Het rechter luik van het grote raam is verdwenen."
+    ],
+    [
+      1310,
+      645,
+      138,
+      140,
+      "Het kleine schaaltje op de rechter tafel is verdwenen."
+    ],
+    [
+      801,
+      825,
+      251,
+      244,
+      "De ton vooraan is een houten kist geworden."
+    ],
+    [
+      1101,
+      790,
+      275,
+      209,
+      "In de mand liggen bollen wol in plaats van rollen stof."
+    ],
+    [
+      878,
+      148,
+      59,
+      75,
+      "De schoorsteen van het achterste huis is rond geworden."
+    ]
+  ],
+  "ontdekkingsreis": [
+    [
+      529,
+      36,
+      132,
+      63,
+      "De grote scheepsvlag is rechthoekig geworden."
+    ],
+    [
+      104,
+      81,
+      177,
+      77,
+      "De meeuw linksboven is verdwenen."
+    ],
+    [
+      1085,
+      60,
+      340,
+      90,
+      "De meeuw rechtsboven vliegt andersom."
+    ],
+    [
+      1040,
+      351,
+      147,
+      153,
+      "De kapitein houdt een kaart in plaats van een verrekijker vast."
+    ],
+    [
+      750,
+      392,
+      111,
+      87,
+      "De stuurman draagt een hoed in plaats van een hoofddoek."
+    ],
+    [
+      490,
+      613,
+      110,
+      104,
+      "De kompasroos op de kaart is verdwenen."
+    ],
+    [
+      828,
+      640,
+      122,
+      241,
+      "Het anker is verdwenen."
+    ],
+    [
+      1230,
+      616,
+      198,
+      220,
+      "De kleine zeilboot is een roeiboot geworden."
+    ],
+    [
+      47,
+      862,
+      208,
+      211,
+      "De voorste ton is een houten kist geworden."
+    ],
+    [
+      1262,
+      364,
+      36,
+      46,
+      "Het middelste raam van de vuurtoren is verdwenen."
+    ]
+  ],
+  "drukkerij": [
+    [
+      23,
+      113,
+      194,
+      33,
+      "Een horizontale lat in het raam is verdwenen."
+    ],
+    [
+      420,
+      134,
+      105,
+      28,
+      "Het bovenste liggende boek op de plank is korter geworden."
+    ],
+    [
+      459,
+      236,
+      60,
+      71,
+      "Het kleine inktpotje is een kaars geworden."
+    ],
+    [
+      522,
+      462,
+      47,
+      34,
+      "De klink van de bovenste lade is verdwenen."
+    ],
+    [
+      129,
+      674,
+      178,
+      95,
+      "Het voorste linkervak van de letterbak is leeg."
+    ],
+    [
+      513,
+      540,
+      269,
+      152,
+      "De inktrol is een veerpen geworden."
+    ],
+    [
+      565,
+      238,
+      222,
+      178,
+      "De man houdt een open boek in plaats van een blad vast."
+    ],
+    [
+      428,
+      797,
+      266,
+      289,
+      "Het krukje heeft een vierkante zitting."
+    ],
+    [
+      1090,
+      770,
+      327,
+      290,
+      "Het bovenste boek van de voorste stapel is verdwenen."
+    ],
+    [
+      771,
+      606,
+      123,
+      108,
+      "Het ronde inktbakje is vierkant geworden."
+    ]
+  ],
+  "stoomtreinstation": [
+    [
+      615,
+      186,
+      155,
+      86,
+      "De kleine middelste wolk is verdwenen."
+    ],
+    [
+      1145,
+      334,
+      122,
+      116,
+      "De stationsklok wijst zes uur aan."
+    ],
+    [
+      211,
+      252,
+      105,
+      129,
+      "De koplamp van de locomotief is vierkant geworden."
+    ],
+    [
+      145,
+      690,
+      180,
+      137,
+      "De bovenste koffer op het karretje is een reisknoop geworden."
+    ],
+    [
+      793,
+      767,
+      80,
+      80,
+      "De jongen draagt een mand in plaats van een koffer."
+    ],
+    [
+      882,
+      850,
+      192,
+      164,
+      "De hoge koffer vooraan is een houten reiskist geworden."
+    ],
+    [
+      655,
+      738,
+      91,
+      151,
+      "De vrouw houdt een opgevouwen paraplu vast."
+    ],
+    [
+      1374,
+      523,
+      33,
+      31,
+      "De deurknop van het station is verdwenen."
+    ],
+    [
+      348,
+      480,
+      100,
+      74,
+      "De man draagt een bolhoed in plaats van een hoge hoed."
+    ],
+    [
+      1026,
+      471,
+      68,
+      51,
+      "Op de hoed van de vrouw staat een strik in plaats van bloemen."
+    ]
+  ],
+  "oude-fabriek": [
+    [
+      853,
+      207,
+      111,
+      96,
+      "Het belletje aan de muur is verdwenen."
+    ],
+    [
+      619,
+      217,
+      38,
+      38,
+      "De wijzer van de meter wijst de andere kant op."
+    ],
+    [
+      72,
+      685,
+      144,
+      68,
+      "De steeksleutel op de tafel is een tang geworden."
+    ],
+    [
+      169,
+      675,
+      110,
+      63,
+      "De hamer op de tafel is een schroevendraaier geworden."
+    ],
+    [
+      333,
+      684,
+      90,
+      44,
+      "Het losse tandwiel is verdwenen."
+    ],
+    [
+      404,
+      822,
+      81,
+      133,
+      "De oliekan onder de tafel is een pot geworden."
+    ],
+    [
+      189,
+      849,
+      226,
+      162,
+      "De gereedschapskist onder de tafel is een werkmand geworden."
+    ],
+    [
+      1227,
+      880,
+      204,
+      206,
+      "De losse houten kist is een ton geworden."
+    ],
+    [
+      438,
+      748,
+      35,
+      40,
+      "De knop van de rechter lade is verdwenen."
+    ],
+    [
+      132,
+      355,
+      48,
+      106,
+      "De hamer aan de muur is verdwenen."
+    ]
+  ],
+  "sportdag": [
+    [
+      333,
+      468,
+      75,
+      75,
+      "De voetbal is een basketbal geworden."
+    ],
+    [
+      19,
+      409,
+      81,
+      101,
+      "De kegel helemaal links is verdwenen."
+    ],
+    [
+      1025,
+      637,
+      395,
+      145,
+      "De kegel naast het podium staat verder naar links.",
+      [
+        [
+          1025,
+          637
+        ],
+        [
+          1170,
+          637
+        ],
+        [
+          1170,
+          660
+        ],
+        [
+          1305,
+          660
+        ],
+        [
+          1305,
+          637
+        ],
+        [
+          1420,
+          637
+        ],
+        [
+          1420,
+          782
+        ],
+        [
+          1025,
+          782
+        ]
+      ]
+    ],
+    [
+      1138,
+      832,
+      247,
+      181,
+      "De sporttas is een ballenmand geworden."
+    ],
+    [
+      892,
+      863,
+      61,
+      120,
+      "De linker drinkfles is verdwenen."
+    ],
+    [
+      944,
+      867,
+      156,
+      126,
+      "De rechter drinkfles is een opgevouwen handdoek geworden."
+    ],
+    [
+      269,
+      100,
+      48,
+      58,
+      "Een vlaggetje in de slinger is verdwenen."
+    ],
+    [
+      400,
+      696,
+      126,
+      67,
+      "Het turntoestel heeft één grote handgreep in plaats van twee."
+    ],
+    [
+      1208,
+      607,
+      37,
+      39,
+      "De medaille is rechthoekig geworden."
+    ],
+    [
+      646,
+      193,
+      79,
+      77,
+      "De bal in de hand van de jongen is een volleybal geworden."
+    ]
+  ],
+  "moderne-stad": [
+    [
+      28,
+      118,
+      165,
+      140,
+      "De bloembak op het balkon is verdwenen."
+    ],
+    [
+      1132,
+      420,
+      70,
+      73,
+      "Het raam van het speelhuisje is vierkant geworden."
+    ],
+    [
+      153,
+      562,
+      41,
+      53,
+      "Het vaasje op de terrastafel is een suikerpotje geworden."
+    ],
+    [
+      0,
+      746,
+      103,
+      155,
+      "In de bloempot staat een cactus."
+    ],
+    [
+      1264,
+      708,
+      140,
+      143,
+      "De bezorgdoos op de fiets is een mand geworden."
+    ],
+    [
+      829,
+      877,
+      135,
+      199,
+      "De rechter afvalbak is verdwenen."
+    ],
+    [
+      285,
+      825,
+      95,
+      85,
+      "De linker fiets heeft een mandje gekregen."
+    ],
+    [
+      814,
+      99,
+      63,
+      50,
+      "Het kleine bovenste balkon van het middelste gebouw is verdwenen."
+    ],
+    [
+      485,
+      618,
+      78,
+      65,
+      "De handtas van de vrouw is rond geworden."
+    ],
+    [
+      0,
+      264,
+      336,
+      112,
+      "Het zonnescherm heeft geen strepen meer."
+    ]
+  ],
+  "duurzame-buurt": [
+    [
+      286,
+      57,
+      137,
+      80,
+      "De wolk boven het linker huis is verdwenen."
+    ],
+    [
+      711,
+      160,
+      78,
+      59,
+      "De vogel bij de windmolen vliegt andersom."
+    ],
+    [
+      1007,
+      39,
+      88,
+      77,
+      "De vogel rechtsboven is verdwenen."
+    ],
+    [
+      1253,
+      470,
+      181,
+      225,
+      "De regenton is een rechthoekige watertank geworden."
+    ],
+    [
+      1100,
+      496,
+      96,
+      124,
+      "De middelste afvalbak is verdwenen."
+    ],
+    [
+      423,
+      950,
+      179,
+      123,
+      "De gieter is een emmer geworden."
+    ],
+    [
+      0,
+      604,
+      149,
+      246,
+      "De zonnebloem is een boompje geworden."
+    ],
+    [
+      226,
+      823,
+      88,
+      93,
+      "Het meisje gebruikt een harkje in plaats van een schepje."
+    ],
+    [
+      209,
+      155,
+      247,
+      127,
+      "Het zonnepaneel op het linker dak is een dakraam geworden."
+    ],
+    [
+      205,
+      489,
+      103,
+      87,
+      "De laadkabel tussen de bus en de laadpaal is verdwenen."
+    ]
+  ],
+  "sporthal": [
+    [
+      384,
+      86,
+      72,
+      72,
+      "De volleybal is een basketbal geworden."
+    ],
+    [
+      287,
+      607,
+      159,
+      122,
+      "Het netje van de tafeltennistafel is verdwenen."
+    ],
+    [
+      1113,
+      181,
+      54,
+      59,
+      "De shuttle is verdwenen."
+    ],
+    [
+      1370,
+      563,
+      157,
+      196,
+      "De ballenmand is een sporttas geworden."
+    ],
+    [
+      162,
+      802,
+      62,
+      110,
+      "De linker drinkfles op de bank is verdwenen."
+    ],
+    [
+      269,
+      822,
+      50,
+      97,
+      "De middelste drinkfles is een thermos geworden."
+    ],
+    [
+      332,
+      881,
+      125,
+      99,
+      "De handdoek is opgerold."
+    ],
+    [
+      917,
+      478,
+      305,
+      216,
+      "Het hockeydoel heeft geen net meer."
+    ],
+    [
+      1049,
+      847,
+      46,
+      45,
+      "De hockeybal is een puck geworden."
+    ],
+    [
+      1372,
+      116,
+      101,
+      106,
+      "De trainer draagt een pet."
+    ]
+  ]
+}
