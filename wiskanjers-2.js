@@ -3,6 +3,7 @@
   // Gratis omgeving, 2de leerjaar. Voeg nieuwe bordlessen hier aan hun blok toe.
   // De URL wijst naar de eigen lespagina; bestaande lessen blijven behouden.
   const lessons = [
+    { block: 2, number: 8, title: 'De vermenigvuldiging', description: 'Maak gelijke groepen, schrijf een herhaalde optelling en ontdek het maalteken.', parts: ['Tellen met sprongen', 'Groepjes maken', 'Samen oefenen'], url: 'wiskanjers-b2-les8.html' },
     { block: 1, number: 19, title: 'Even opfrissen – Eigenschappen van bewerkingen: de omgekeerde bewerking bij optellen en aftrekken', description: 'Handel met schriften en noteer de bewerkingen op het bord.', parts: ['Schriften verplaatsen', 'Strookvoorstelling', 'Drie getallen'], url: 'schriften-bord.html' },
     { block: 1, number: 20, title: 'Het uur aflezen en schrijven', description: 'Verzet de wijzer, schrijf het hele uur en koppel de digitale klok aan de wijzerklok.', parts: ['Wijzerklok', 'Zelf noteren', 'Welke klok?'], url: 'wiskanjers-b1-les20.html' },
     { block: 1, number: 21, title: 'Tijdsduur in dagen', description: 'Ervaar tijd met groepstimers en tel samen de nachten tussen twee dagen.', parts: ['Tijd ervaren', 'Dagen springen', 'Samen oefenen'], url: 'wiskanjers-b1-les21.html' },
