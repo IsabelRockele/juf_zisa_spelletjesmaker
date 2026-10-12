@@ -3,6 +3,7 @@
   // Gratis omgeving, 2de leerjaar. Voeg nieuwe bordlessen hier aan hun blok toe.
   // De URL wijst naar de eigen lespagina; bestaande lessen blijven behouden.
   const lessons = [
+    { block: 2, number: 10, title: 'De deling', description: 'Maak groepen van een gegeven grootte en schrijf de herhaalde aftrekking als een deling.', parts: ['Groepen maken', 'Samen oefenen', 'Onthouden'], url: 'wiskanjers-b2-les10.html' },
     { block: 2, number: 9, title: 'De maaltafel van 2', description: 'Bouw de tafel van 2 op met groepjes, sprongen en eigen notities. Oefen zoals in het werkboek.', parts: ['Groepjes van 2', 'Onze maaltafel', 'Samen oefenen'], url: 'wiskanjers-b2-les9.html' },
     { block: 2, number: 8, title: 'De vermenigvuldiging', description: 'Maak gelijke groepen, schrijf een herhaalde optelling en ontdek het maalteken.', parts: ['Tellen met sprongen', 'Groepjes maken', 'Samen oefenen'], url: 'wiskanjers-b2-les8.html' },
     { block: 1, number: 19, title: 'Even opfrissen – Eigenschappen van bewerkingen: de omgekeerde bewerking bij optellen en aftrekken', description: 'Handel met schriften en noteer de bewerkingen op het bord.', parts: ['Schriften verplaatsen', 'Strookvoorstelling', 'Drie getallen'], url: 'schriften-bord.html' },
