@@ -1,3 +1,11 @@
 #group-board,#group-board:has(.group:nth-child(9)){grid-template-columns:repeat(5,1fr)}.group{grid-template-columns:repeat(2,1fr);padding:12px;justify-items:center}.group button{width:40px;height:40px;max-height:none;border-radius:50%}#table-board{display:block;width:100%;height:60vh;touch-action:none;user-select:none}#question{max-width:1200px;margin:10px auto}#practice.story h2{font-size:25px}#jump-board{touch-action:none}@media(min-width:950px) and (max-height:800px){.group{padding:7px}.group button{width:32px;height:32px}#build-write{height:140px}.memory p{font-size:21px}#practice.story h2{font-size:22px}#table-board{height:58vh}}@media(max-width:760px){#group-board,#group-board:has(.group:nth-child(9)){grid-template-columns:repeat(3,1fr)}#table-board{height:auto;min-height:300px}}
 
 .group button.filled{background:white url("assets/kers.svg") center/contain no-repeat;border:1px dashed #c2d4c8;border-radius:6px}.group{grid-template-columns:repeat(2,48px);justify-content:center;gap:4px}
+
+/* Large picture cards for the step-by-step teaching demonstration. */
+#group-board .group{height:106px;box-sizing:border-box;grid-template-columns:repeat(2,48px);gap:0;padding:4px;align-items:center}
+#group-board .group button{width:48px;height:92px;max-height:none;min-height:0;aspect-ratio:auto}
+#group-board .cherry-pair{background:white url("assets/kersen-paar.svg") center/100px 100px no-repeat}
+#group-board .cherry-pair button.filled{background:transparent;border:0}
+#group-board .group button:focus-visible{outline:3px solid #164bd6;outline-offset:0}
+@media(min-width:950px) and (max-height:800px){#build .hint{font-size:18px;margin:8px 0}#build-title{margin:10px 0}#build .controls{margin:8px 0}#group-board .group{height:94px}#group-board .group button{height:80px}#group-board .cherry-pair{background-size:88px 88px}}
