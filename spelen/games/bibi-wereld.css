@@ -4,3 +4,5 @@
 @media(prefers-reduced-motion:reduce){.bee-card:hover{transform:none}}
 
 .bee-card>a>img[src*="tegel-dagenavontuur"]{border-radius:14px;background:#cdf0e7}
+
+@media(min-width:801px){.bee-choice[data-count="5"] .cards{grid-template-columns:repeat(5,minmax(0,1fr))}.bee-choice[data-count="5"] .bee-card>a{font-size:18px;padding:12px 8px 8px}}
