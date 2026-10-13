@@ -11,6 +11,7 @@
    ['Plus en min','#sommen',asset+'bibi_bloemenweide.png','Kies de bloemenweide, de honingpot of de bijenrace.'],
    ['De wolkentrein','../../wolkentrein/?leerjaar=1','train','Reis met Bo en de Wolkentrein. Oefen plus en min tot twintig.'],
    ['Bibi’s winkeltje','bibi-winkel.html',asset+'bibi_honingpot.png','Kom winkelen! Betaal met euro’s. Je kiest tot tien of tot twintig euro.'],
+   ['Bibi’s dagenavontuur','bibi-dagen/index.html','bibi-dagen/tegel-dagenavontuur.png','Oefen de dagen van de week met Bibi. Vandaag, gisteren en morgen. In level twee ook eergisteren en overmorgen.'],
    ['Bibi’s rekenbrug · tot 20','rekenbrug-proef/index.html?leerjaar=1','rekenbrug-proef/brug.svg','Oefen met Bibi plus en min tot twintig. Herken de brug en leer de stappen.']]},
   {id:'puzzelen',name:'Puzzelen',title:'De puzzelweide',speech:'Hier kun je puzzelen. Leg de stukken op hun plek.',box:[4,48,39,38],mobile:[3,48],games:[
    ['Puzzelstukken','../../pentomino_studio_volledige_tool.html?play=1&leerjaar=1','../../drukknop_afbeeldingen/pentomino-studio.png','Kies een figuur en leg de puzzelstukken op hun plek.']]},
