@@ -1,0 +1,80 @@
+/* Elke illustratie is een eigen bestand; contain bewaart alle pixels en verhoudingen. */
+.seasonal-illustration{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:contain!important;object-position:center;background:#fffaf0}
+.seasonal-reader .art{background:#fffaf0}
+.seasonal-card .cover-image{object-fit:contain;background:#fffaf0}
+.match-board{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;width:100%}
+.match-column{display:flex;flex-direction:column;gap:10px}
+.match-row{display:flex;gap:5px;align-items:center;flex:1}
+.match-card{width:100%;min-height:64px;padding:13px;border:2px solid #a4c4df;border-radius:16px;background:#f5fbff;color:#173f73;font-family:inherit;font-weight:700;font-size:18px;line-height:1.35;cursor:pointer;overflow-wrap:anywhere}
+.seasonal-label{font-weight:800;color:#85501c}
+.match-card.selected{border-color:#be7019;background:#fff0c6;box-shadow:0 0 0 3px #f9d998}
+.match-card.matched{background:#def4e2;border-color:#368151;color:#20582e;opacity:1}
+.match-card:focus-visible{outline:3px solid #075a9a;outline-offset:3px}
+.seasonal-trail{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:0 45px 12px}
+.seasonal-trail span{display:grid;place-items:center;min-width:30px;height:30px;padding:3px;border-radius:50%;background:#eaf0f6;color:#47627b;font-size:15px;font-weight:800}
+.seasonal-trail .current{background:#fff0c6;outline:2px solid #bd771d}
+.seasonal-trail .collected{background:#e4f5e7}
+.theme-halloween .mission-bar i{background:#bd701d}
+.theme-sint .mission-bar i{background:#b63451}
+.story-play{width:100%;text-align:center}
+.mission-card.compact-play{justify-content:flex-start;padding:12px 16px;gap:6px;overflow:visible}
+.compact-play .mission-zebra,.compact-play .mission-icon,.compact-play .seasonal-trail{display:none}
+.compact-play h2{font-size:25px;margin:0;flex-shrink:0}
+.compact-play .mission-question-row{margin:0;flex-shrink:0;gap:8px}
+.compact-play .mission-question{font-size:18px}
+.compact-play #missionActivity{flex:1;min-height:0;width:100%}
+.compact-play .mission-feedback{min-height:22px;margin:0;font-size:16px;flex-shrink:0}
+.compact-play .mission-next{position:static;align-self:center;margin:0;flex-shrink:0}
+.compact-game{height:100%;display:flex;flex-direction:column;gap:8px;min-height:0}
+.compact-progress{display:flex;justify-content:center;align-items:center;gap:8px;height:42px;flex-shrink:0;color:#244e70;font-weight:800}
+.compact-mark{display:grid;place-items:center;width:42px;height:38px;border:2px solid #adc4d3;border-radius:8px;background:#f0f5fa}
+.compact-mark.filled{border-color:#369665;background:#dbf3df}
+.compact-mark img{width:100%;height:100%;object-fit:contain}
+.compact-frames{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:10px;flex:1;min-height:0}
+.compact-frame{display:flex;flex-direction:column;align-items:center;gap:4px;border:3px solid #99b5cf;border-radius:16px;background:#fffaf0;padding:8px;min-height:0;min-width:0;cursor:pointer;font-family:inherit;color:#193d65;font-weight:700;font-size:17px}
+.compact-frame img{width:100%;height:0;min-height:0;flex:1;object-fit:contain}
+.compact-frame span{flex-shrink:0;line-height:1.25}
+.compact-frame:disabled{opacity:.45;border-color:#388f61}
+.compact-delivery{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:20px}
+.compact-parcel{align-self:center;display:flex;align-items:center;justify-content:center;gap:12px;border:3px solid #c18c43;border-radius:18px;background:#fff1d6;padding:18px;font-size:23px;max-width:90%;cursor:grab}
+.parcel-symbol{display:grid;place-items:center;flex-shrink:0;width:54px;height:54px;border-radius:10px;background:#edc972;font-size:34px}
+.compact-targets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.compact-target{border:3px solid #83adc7;border-radius:18px;background:#edf7ff;min-height:100px;padding:14px;cursor:pointer;font:inherit;font-size:21px;font-weight:800;color:#173f68;overflow-wrap:anywhere}
+.compact-target:focus-visible,.compact-frame:focus-visible{outline:4px solid #e7a126;outline-offset:2px}
+.compact-target.try-again,.compact-frame.try-again{border-color:#dc8a28;background:#fff1dd}
+.compact-win{grid-column:1/-1;grid-row:1/-1;display:grid;place-items:center;font-size:40px;color:#268456}
+.picture-sorting{display:grid;grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:18px;padding:8px 0}
+.picture-slots,.picture-bank{display:grid;grid-template-columns:repeat(var(--slots),minmax(0,1fr));gap:12px;min-height:0;align-items:stretch}
+.picture-slots{padding:12px;background:#ece4ff;border:3px solid #b49bd3;border-radius:20px}
+.picture-bank{padding:10px;background:#fff1ce;border:2px solid #e5bf70;border-radius:20px}
+.picture-slot{position:relative;display:flex;min-width:0;min-height:0;border:3px dashed #9b7fbc;border-radius:14px;background:#fffdf9;padding:20px 4px 4px}
+.slot-number{position:absolute;top:-9px;left:calc(50% - 15px);width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#76559e;color:white;font-weight:900;z-index:1}
+.sorting-piece{display:flex;align-items:center;justify-content:center;border:3px solid white;border-radius:12px;background:#fffaf1;box-shadow:0 3px 0 #bba777;padding:3px;min-height:0;min-width:0;width:100%;cursor:grab;touch-action:none}
+.sorting-piece img{width:100%;height:100%;min-height:0;object-fit:contain;pointer-events:none}
+.sorting-piece.selected,.sorting-piece:focus-visible{outline:4px solid #edab2b;outline-offset:1px}
+.sorting-piece.dragging{opacity:.5;outline:4px solid #edab2b}
+.empty-picture-slot{width:100%;border:0;background:transparent;color:#c8b7dd;font-size:40px;cursor:pointer;min-height:44px}
+.picture-slot.try-again{border-color:#e18b2d;background:#fff1d5}
+.theme-halloween .compact-play{background:#35396d url('images/speldecor/halloweentuin.png') center/cover no-repeat;border-color:#8e64b8;box-shadow:inset 0 0 0 3px #c4a6ed,0 14px 30px #24304b44}
+.theme-halloween .compact-play h2{color:#fff5d8;text-shadow:0 2px 3px #27204a}
+.theme-halloween .compact-play .mission-question-row{align-self:center;background:#fff8e9f2;border-radius:18px;padding:3px 12px}
+.theme-halloween .compact-play .mission-feedback{color:white;text-shadow:0 1px 3px #151a33}
+.theme-halloween .compact-progress{color:#fff5d8}
+.theme-halloween .compact-target{background:linear-gradient(#ffefc9,#e5c792);border:3px solid #a86d38;box-shadow:0 5px 0 #644532;color:#4d3528;border-radius:24px 10px 24px 10px}
+.theme-halloween .compact-parcel{background:#fff9ed;box-shadow:0 8px 22px #1b173c55;border-color:#e7be67;border-radius:26px;transform:rotate(-2deg)}
+.theme-halloween .picture-slots{background:#2f235b99;border-color:#cab4ed}
+.theme-halloween .picture-bank{background:#28334b99;border-color:#dabd7c}
+.theme-sint .compact-play{background:radial-gradient(circle at 12% 85%,#f9d58b 0,transparent 35%),linear-gradient(135deg,#fff3db,#e5f2f7);border-color:#bc5272}
+.theme-sint .compact-target{background:linear-gradient(#fff9ef,#fce0c1);border-color:#b95f54;box-shadow:0 5px 0 #b68460;border-radius:22px 22px 12px 12px}
+.theme-sint .compact-parcel{border-color:#c14967;background:#fff6e4;box-shadow:0 7px 0 #dcac79;transform:rotate(-2deg)}
+.compact-mark.filled{animation:reward-pop .3s ease-out}
+@keyframes reward-pop{50%{transform:scale(1.18)}}
+@media(prefers-reduced-motion:reduce){.compact-mark.filled{animation:none}}
+@media(max-width:600px){.picture-sorting{grid-template-rows:minmax(0,1fr) minmax(0,2fr);gap:12px}.picture-slots{gap:5px;padding:8px 5px}.picture-slot{padding:18px 1px 1px;border-width:2px;border-radius:8px}.picture-bank{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px;padding:8px}.sorting-piece{padding:1px;border-width:2px}.slot-number{width:24px;height:24px;left:calc(50% - 12px);font-size:14px}.empty-picture-slot{font-size:26px}}
+@media(max-width:600px){.mission-card.compact-play{padding:10px;gap:5px}.compact-play h2{font-size:20px}.compact-play .mission-question{font-size:15px}.compact-play .mission-feedback{font-size:13px;min-height:32px}.compact-frames{gap:8px}.compact-frame{font-size:14px;padding:5px}.compact-targets{grid-template-columns:1fr;gap:8px}.compact-target{min-height:60px;font-size:17px;padding:10px}.compact-parcel{font-size:18px;padding:12px;gap:8px}.compact-delivery{gap:14px}.compact-progress{height:34px}.compact-mark{height:30px;width:34px}}
+@media(max-height:600px) and (min-width:601px){.compact-play h2{font-size:19px}.compact-play .mission-question{font-size:15px}.compact-progress{height:28px}.compact-mark{height:26px}.compact-parcel{padding:7px;font-size:18px}.compact-target{min-height:58px;font-size:16px}.compact-delivery{gap:8px}.compact-frame{font-size:13px}}
+.cover-game-menu{display:grid;gap:8px;max-height:220px;overflow-y:auto;padding:10px;border:2px solid #a9c8dc;border-radius:14px;background:#f1f8fc}
+.cover-game-menu button{font-size:15px}
+@media(max-width:600px){.seasonal-reader .inline-answers{grid-template-columns:1fr}}
+@media(max-width:600px){.match-board{gap:8px}.match-card{font-size:15px;min-height:58px;padding:8px}.match-column{gap:8px}.match-row .mini-listen{width:28px;height:28px;flex-shrink:0}.seasonal-trail{margin:0 25px 10px;gap:5px}.seasonal-trail span{min-width:24px;height:24px;font-size:12px}}
+@media(max-height:800px) and (min-width:700px){.match-card{min-height:44px;padding:7px;font-size:16px}.match-column{gap:6px}.seasonal-trail{margin-bottom:6px}.seasonal-trail span{min-width:24px;height:24px;font-size:12px}}

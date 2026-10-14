@@ -36,7 +36,7 @@ try{
       }
     }catch{/* Account management can be reopened later; reading remains available. */}
   }
-  window.ZISA_ACCESS_MODE='full';const script=document.createElement('script');script.src='app.js?v=62';script.onload=()=>gate.remove();script.onerror=()=>{gate.textContent='De boeken konden niet worden geladen.';};document.body.append(script);
+  window.ZISA_ACCESS_MODE='full';const script=document.createElement('script');script.src='app.js?v=66';script.onload=()=>gate.remove();script.onerror=()=>{gate.textContent='De boeken konden niet worden geladen.';};document.body.append(script);
   // Recheck on return and periodically. Failure covers already-rendered content.
   const check=async()=>{try{await request();}catch(error){location.reload();}};
   setInterval(check,5*60*1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});

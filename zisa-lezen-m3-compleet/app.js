@@ -198,6 +198,9 @@ function spreadCorrectAnswerPositions(){
     if(!value||typeof value!=="object"||visited.has(value))return;
     visited.add(value);
     if(Array.isArray(value.a)&&value.a.length>1&&Number.isInteger(value.correct)){
+      // Een leesvraag en een herhaaloefening kunnen dezelfde bronlijst delen.
+      // Wissel alleen deze eigen kopie, anders verschuift elders het juiste antwoord.
+      value.a=value.a.slice();
       const bucket=String(value.type||value.title||"leesvraag").toLowerCase();
       const sequence=counters.get(bucket)||0;
       const desired=sequence%value.a.length;
@@ -303,6 +306,7 @@ function isDiscoverLocked(book){
 
 function spriteStyle(src){return `background-image:url('${src.src}');--sprite-x:${src.x}%;--sprite-y:${src.y}%;--sprite-w:${src.w||300}%;--sprite-h:${src.h||400}%`}
 function imageBlock(src, alt){
+  if(typeof src==="string"&&src.startsWith("images/seizoenen/"))return `<img class="seasonal-illustration" src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" decoding="async">`;
   if(src&&typeof src==="object")return `<div class="story-sprite" role="img" aria-label="${escapeAttr(alt)}" style="${spriteStyle(src)}"></div>`;
   return `<div class="story-image" role="img" aria-label="${escapeAttr(alt)}" style="background-image:url('${src}')"></div>`;
 }
@@ -347,7 +351,7 @@ function renderLibrary(){
     tabs.querySelectorAll("[data-method]").forEach(button=>button.onclick=()=>{startMethod=button.dataset.method;localStorage.setItem("zisa_start_method",startMethod);renderLibrary()});
     const heading=document.createElement("h2");heading.className="start-group-heading";heading.textContent=startMethod==="kim"?"Lezen volgens Kim-versie":startMethod==="zoem"?"Lezen volgens Zoem-versie":"Mijn eerste leesoefeningen";grid.before(heading);
   }
-  const list = books.filter(b=>b.level===currentLevel&&(currentLevel!=="START"||(startMethod==="original"?!b.method:b.method===startMethod)));
+  const list = books.filter(b=>b.level===currentLevel&&(currentLevel!=="START"||b.theme||(startMethod==="original"?!b.method:b.method===startMethod)));
 
   if(!list.length){
     grid.innerHTML = `<section class="hero"><div class="z">📚</div><div><h1>${currentLevel}</h1><p>De twee boeken voor dit AVI-niveau worden hier later toegevoegd.</p></div></section>`;
@@ -359,7 +363,7 @@ function renderLibrary(){
     const cardWrap=document.createElement("div");
     cardWrap.className="card-wrap";
     const card = document.createElement("button");
-    card.className = `card${locked?" pro-locked":""}`;
+    card.className = `card${locked?" pro-locked":""}${book.theme?" seasonal-card":""}`;
     if(locked){
       card.setAttribute("aria-disabled","true");
       card.setAttribute("aria-label",`${book.title} – enkel beschikbaar in Pro`);
@@ -371,6 +375,7 @@ function renderLibrary(){
         ${book.startBook?`<div class="start-card-cover tone-${book.coverTone||"blue"}">${book.coverEmoji?`<span class="start-cover-icon" aria-hidden="true">${book.coverEmoji}</span>`:`<img src="${book.coverImage}" alt="">`}<strong>${book.title}</strong><small>AVI START</small></div>`:book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="${spriteStyle(book.cover)}"></div>`:`<img class="cover-image" src="${book.cover}" alt="Voorkaft van ${escapeAttr(book.title)}">`}
       </div>
       <div class="cardtext">
+        ${book.theme?`<small class="seasonal-label">${book.theme==='sint'?'🎁 Sint':'🎃 Halloween'}</small>`:''}
         <h3>${book.title}</h3>
         <p>${book.blurb}</p>
       </div>`;
@@ -395,7 +400,7 @@ function renderBookCover(){
   document.body.classList.add("reading-mode");
   document.body.classList.remove("mission-mode");
   document.querySelector(".level-display span").textContent=`AVI ${currentBook.level}`;
-  const booksAtLevel = books.filter(book=>book.level===currentBook.level);
+  const booksAtLevel = books.filter(book=>book.level===currentBook.level&&!book.startBook);
   const bookNumber = booksAtLevel.findIndex(book=>book.id===currentBook.id)+1;
   const hasWordStart = Boolean(preReadingGames[currentBook.id]);
   const hasPractice = Boolean(window.ZISA_FLUENCY_BOOKS?.[currentBook.id]?.length);
@@ -415,6 +420,20 @@ function renderBookCover(){
   </div>`;
   document.querySelector("#coverBack").onclick=renderLibrary;
   document.querySelector("#coverStart").onclick=renderReader;
+  if(bookGames[currentBook.id]?.length){
+    const preview=document.createElement('button');preview.id='coverGames';preview.className='cover-secondary';preview.textContent='Spellen bekijken ›';
+    preview.onclick=()=>{
+      let menu=document.querySelector('.cover-game-menu');
+      if(menu){menu.remove();return;}
+      menu=document.createElement('div');menu.className='cover-game-menu';
+      bookGames[currentBook.id].forEach((game,index)=>{
+        const button=document.createElement('button');button.className='cover-secondary';button.textContent=`${index+1}. ${game.title||'Spel'}`;
+        button.onclick=()=>{reviewMode=false;missionIndex=index;missionScore=0;renderMission();};menu.append(button);
+      });
+      preview.after(menu);
+    };
+    document.querySelector('.cover-actions').append(preview);
+  }
   document.querySelector("#coverWords")?.addEventListener("click",renderWordStart);
   document.querySelector("#coverPractice")?.addEventListener("click",startFluencyBook);
   document.querySelectorAll(".book-thumb:not(.pro-locked)").forEach(btn=>btn.onclick=()=>openBook(books.find(book=>book.id===btn.dataset.book)));
@@ -455,11 +474,11 @@ function renderReader(){
   document.querySelector(".level-display span").textContent=`AVI ${currentBook.level}`;
   const page = currentBook.pages[pageIndex];
   const total = currentBook.pages.length;
-  const booksAtLevel = books.filter(book=>book.level===currentBook.level);
+  const booksAtLevel = books.filter(book=>book.level===currentBook.level&&!book.startBook);
   const bookNumber = booksAtLevel.findIndex(book=>book.id===currentBook.id)+1;
 
   app.innerHTML = `
-    <div class="reader ${currentBook.level==="E6"?"e6-reader":""}">
+    <div class="reader ${currentBook.level==="E6"?"e6-reader":""} ${currentBook.theme?"seasonal-reader":""}">
       <aside class="rail">
         <span class="lvl">${currentBook.level}</span>
         <small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
@@ -479,7 +498,7 @@ function renderReader(){
             <div class="art">
               ${imageBlock(page.image, `Illustratie bij ${currentBook.title}, pagina ${pageIndex+1}`)}
             </div>
-            <article class="story ${currentBook.level==="M3"?"m3-story":""} ${["M6","E6"].includes(currentBook.level)?"m6-story":""}">
+            <article class="story ${["START","M3"].includes(currentBook.level)?"m3-story":""} ${["M6","E6"].includes(currentBook.level)?"m6-story":""}">
               ${reviewMode?`<div class="review-note">📖 Lees deze ${reviewEndPage>pageIndex?"bladzijden":"bladzijde"} opnieuw. De leesvragen zijn nu weg.</div>`:""}
               ${hasAudioSupport("story")?`<button class="story-listen" data-say="${escapeAttr(page.text)}" aria-label="Lees de bladzijde voor">🔊 Lees voor</button>`:""}
               <div class="storytext">${storyTextMarkup(page.text)}</div>
@@ -622,13 +641,19 @@ function renderMission(){
   document.body.classList.add("reading-mode","mission-mode");
   const games=bookGames[currentBook.id]||[currentBook.endTask];
   const game=games[missionIndex];
-  app.innerHTML=`<section class="mission-stage">
+  app.innerHTML=`<section class="mission-stage ${currentBook.theme?`seasonal-mission theme-${currentBook.theme}`:""}">
     <header class="mission-progress"><button id="missionBack" aria-label="Terug naar het boek">‹ Boek</button><div><b>Taalreis na het verhaal</b><span>${missionIndex+1} van ${games.length}</span></div><button id="missionFullscreen" class="mission-fullscreen" type="button" aria-label="Open volledig scherm">⛶ <span>Volledig scherm</span></button><div class="mission-bar"><i style="width:${missionIndex/games.length*100}%"></i></div></header>
     <div class="mission-card"><img class="mission-zebra" src="images/zisa-zebra.png" alt=""><div class="mission-icon">${game.icon||"⭐"}</div><h2>${game.title||"Leesmissie"}</h2>${game.showBookTitle?`<div class="question-book-title"><small>Titel van het verhaal</small><strong>${escapeAttr(currentBook.title)}</strong></div>`:""}${game.context?`<blockquote class="meaning-context">${escapeAttr(game.context)}</blockquote>`:""}<div class="mission-question-row"><p class="mission-question">${game.q}</p>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(`${game.context?`${game.context} `:""}${game.q}`)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="missionActivity"></div><p id="missionFeedback" class="mission-feedback" aria-live="polite"></p></div>
   </section>`;
   document.querySelector("#missionBack").onclick=()=>{reviewMode=false;renderReader()};
   bindMissionFullscreen();
   renderGame(game);
+  if(currentBook.theme){
+    const heading=document.querySelector('.mission-progress b');heading.textContent=currentBook.missionTitle;
+    const trail=document.createElement('div');trail.className='seasonal-trail';trail.setAttribute('aria-label',`${missionIndex} van ${games.length} missies opgelost`);
+    trail.innerHTML=games.map((_,i)=>`<span class="${i<missionIndex?'collected':i===missionIndex?'current':''}" aria-hidden="true">${i<missionIndex?(currentBook.theme==='sint'?'🎁':'🎃'):i+1}</span>`).join('');
+    document.querySelector('.mission-card').prepend(trail);
+  }
   bindSpeechButtons(app);
 }
 
@@ -645,9 +670,11 @@ function bindMissionFullscreen(){
 
 function renderGame(game){
   const activity=document.querySelector("#missionActivity");
+  if(game.type==='story-board'||game.type==='story-comic')return renderSeasonalPlay(game,activity);
   if(game.image){const figure=document.createElement("figure");figure.className="game-picture";figure.innerHTML=imageBlock(game.image,game.imageAlt||"Prent uit het verhaal");activity.append(figure)}
   if(game.type==="sentence") return renderSentenceGame(game,activity);
   if(game.type==="sequence") return renderSequenceGame(game,activity);
+  if(game.type==="match") return renderMatchGame(game,activity);
   if(game.type==="speed") return renderSpeedGame(game,activity);
   const answers=game.type==="article"?["de","het"]:game.a;
   if(game.type==="sound"){
@@ -666,6 +693,42 @@ function renderGame(game){
     };
     if(hasAudioSupport()){const wrap=document.createElement("div");wrap.className="game-choice-wrap";wrap.append(btn,makeListenButton(answerText,`Beluister ${answerText}`));choices.append(wrap)}
     else choices.append(btn);
+  });
+}
+
+function renderMatchGame(game,activity){
+  const board=document.createElement('div');board.className='match-board';
+  const left=document.createElement('div'),right=document.createElement('div');
+  left.className=right.className='match-column';board.append(left,right);activity.append(board);
+  let selection=null,matched=0,complete=false;
+  const buttons=[];
+  const clearSelection=()=>{buttons.forEach(b=>{b.classList.remove('selected');b.setAttribute('aria-pressed','false')});selection=null;};
+  const choose=button=>{
+    if(complete||button.disabled)return;
+    if(!selection||selection.dataset.side===button.dataset.side){
+      const same=selection===button;clearSelection();
+      if(!same){selection=button;button.classList.add('selected');button.setAttribute('aria-pressed','true');}
+      return;
+    }
+    const first=selection;
+    if(first.dataset.pair===button.dataset.pair){
+      first.disabled=button.disabled=true;first.classList.add('matched');button.classList.add('matched');
+      first.textContent+=' ✓';button.textContent+=' ✓';matched++;clearSelection();
+      setMissionFeedback(`Dat paar klopt! ${matched} van ${game.pairs.length} gevonden.`,'good');
+      if(matched===game.pairs.length){complete=true;finishGame(null,'Alle sporen passen bij elkaar! ⭐');}
+    }else{
+      clearSelection();setMissionFeedback(game.hint||'Die kaartjes horen nog niet bij elkaar. Lees terug en probeer opnieuw.','bad');offerReread(game);
+    }
+  };
+  [left,right].forEach((column,side)=>{
+    const indexed=game.pairs.map((pair,index)=>({text:pair[side],index}));
+    (side?shuffledWrong(indexed,item=>item.index):indexed).forEach(item=>{
+      const row=document.createElement('div');row.className='match-row';
+      const button=document.createElement('button');button.type='button';button.className='match-card';button.textContent=item.text;
+      button.dataset.side=side;button.dataset.pair=item.index;button.setAttribute('aria-pressed','false');button.onclick=()=>choose(button);
+      buttons.push(button);row.append(button);
+      if(hasAudioSupport())row.append(makeListenButton(item.text,`Beluister ${item.text}`));column.append(row);
+    });
   });
 }
 
@@ -770,6 +833,7 @@ function checkSequenceGame(game,line){
 
 function reviewPageForGame(game){
   if(game.type==="sequence")return {start:0,end:currentBook.pages.length-1};
+  if(Number.isInteger(game.reviewStart)&&Number.isInteger(game.reviewPage))return {start:game.reviewStart,end:game.reviewPage};
   if(Number.isInteger(game.reviewPage))return {start:game.reviewPage,end:game.reviewPage};
   const page=targetedReviewPages[currentBook.id]?.[missionIndex];
   return Number.isInteger(page)?{start:page,end:page}:null;
@@ -818,7 +882,10 @@ function renderSpeedGame(game,activity,onComplete=null){
 
 function setMissionFeedback(text,kind){const el=document.querySelector("#missionFeedback");el.textContent=text;el.className=`mission-feedback ${kind||""}`}
 function finishGame(button,message){
+  if(document.querySelector('.mission-next'))return;
   document.querySelectorAll("#missionActivity .game-choice").forEach(btn=>btn.disabled=true);document.querySelector(".reread-btn")?.remove();button?.classList.add("correct");missionScore++;setMissionFeedback(message,"good");
+  const trail=document.querySelector('.seasonal-trail');
+  if(trail){const token=trail.children[missionIndex];if(token){token.className='collected';token.textContent=currentBook.theme==='sint'?'🎁':'🎃';}trail.setAttribute('aria-label',`${missionIndex+1} van ${trail.children.length} missies opgelost`);}
   const last=missionIndex===(bookGames[currentBook.id]?.length||1)-1;
   if(last){
     const card=document.querySelector(".mission-card");card.classList.add("mission-finished");
