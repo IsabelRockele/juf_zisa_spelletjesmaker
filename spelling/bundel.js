@@ -752,11 +752,12 @@ window.SpellingBundel = {
           pagebreak: {
             mode: "css",
             before: ".pagina-break-voor",
-            avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".ov11-blad", ".ov12-blad", ".ov13-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-rooster", ".ov09-verdieping-afbeeldingen", ".ov09-verdieping-kolommen", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid", ".ov11-kaart", ".ov11-zin", ".ov11-sorteer section", ".ov12-kaart", ".ov12-uitbreiding-rij", ".ov13-basisrij", ".ov13-zin", ".ov13-tekst", ".ov13-herschrijf", ".ov02-rij", ".ov03-cel"]
+            avoid: ["img", ".spelling-pdf-rij", ".to-prentvraag", ".to-zinrij", ".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".ov11-blad", ".ov12-blad", ".ov13-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-rooster", ".ov09-verdieping-afbeeldingen", ".ov09-verdieping-kolommen", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid", ".ov11-kaart", ".ov11-zin", ".ov11-sorteer section", ".ov12-kaart", ".ov12-uitbreiding-rij", ".ov13-basisrij", ".ov13-zin", ".ov13-tekst", ".ov13-herschrijf", ".ov02-rij", ".ov03-cel"]
           }
         };
 
-        html2pdf().set(pdfOpties).from(kloon).save().then(() => {
+        window.SpellingPDF.bereidAfbeeldingenVoor(kloon)
+          .then(() => html2pdf().set(pdfOpties).from(kloon).save()).then(() => {
           tijdelijk.remove();
           knoppen.forEach(k => k.disabled = false);
           this._sluitPDFVoortgang(voortgang, true);

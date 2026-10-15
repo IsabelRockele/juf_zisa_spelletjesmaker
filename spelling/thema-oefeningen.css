@@ -31,7 +31,7 @@
 .to-blad[data-oefenvorm="klankzin"] .to-vraag:last-child,
 .to-blad[data-oefenvorm="woordzin"] .to-vraag:last-child{margin-bottom:0}
 .to-prenten{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 12px}
-.to-prenten>div{padding:8px;text-align:center;border:1px solid #ccc;border-radius:4px;break-inside:avoid}
+.to-prenten:not(.spelling-pdf-rooster)>div,.to-prenten>.spelling-pdf-rij>div{padding:8px;text-align:center;border:1px solid #ccc;border-radius:4px;break-inside:avoid}
 .to-tafereel{display:block;width:auto;max-width:100%;height:72mm;margin:0 auto 18px}
 .to-tekenzin{display:flex;justify-content:space-between;align-items:center;min-height:45px;margin:0 0 14px;padding:8px 12px;border:1px solid #bfd8e5;border-radius:8px;break-inside:avoid}
 .to-tekenvak{display:inline-flex;width:32px;height:30px;border:1px solid #859ea5;align-items:center;justify-content:center;color:#176239;font-size:20px;flex:none;margin-left:10px}

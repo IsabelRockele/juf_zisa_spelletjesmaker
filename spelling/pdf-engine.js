@@ -7,6 +7,52 @@
 
 window.SpellingPDF = {
 
+  // Wacht op echte afbeeldingsmaten voordat html2pdf pagina-einden berekent.
+  bereidAfbeeldingenVoor: async function(element) {
+    await Promise.all(Array.from(element.querySelectorAll("img"), img => {
+      img.loading = "eager";
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.addEventListener("load", resolve, { once: true });
+        img.addEventListener("error", resolve, { once: true });
+      });
+    }));
+    if (document.fonts) await document.fonts.ready;
+
+    // Een html2pdf-pagebreak-spacer mag geen losse gridcel worden.
+    // Groepeer complete rijen binnen de exportkloon in verplaatsbare blokken.
+    element.querySelectorAll(".ov03-rooster-2kol, .to-prenten").forEach(grid => {
+      const stijl = getComputedStyle(grid);
+      if (stijl.display !== "grid") return;
+      const kolommen = stijl.gridTemplateColumns;
+      const kolomRuimte = stijl.columnGap;
+      const rijRuimte = stijl.rowGap;
+      const rijen = [];
+      Array.from(grid.children).forEach(cel => {
+        const top = cel.getBoundingClientRect().top;
+        let rij = rijen[rijen.length - 1];
+        if (!rij || Math.abs(rij.top - top) > 1) {
+          rij = { top, cellen: [] };
+          rijen.push(rij);
+        }
+        rij.cellen.push(cel);
+      });
+      grid.style.display = "block";
+      grid.classList.add("spelling-pdf-rooster");
+      rijen.forEach((rij, index) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "spelling-pdf-rij";
+        Object.assign(wrapper.style, {
+          display: "grid", gridTemplateColumns: kolommen, columnGap: kolomRuimte,
+          marginBottom: index < rijen.length - 1 ? rijRuimte : "0",
+          breakInside: "avoid", pageBreakInside: "avoid"
+        });
+        rij.cellen.forEach(cel => wrapper.appendChild(cel));
+        grid.appendChild(wrapper);
+      });
+    });
+  },
+
   /* download(false) → werkblad
      download(true)  → oplossingenbundel */
   download: function(metOplossingen = false) {
@@ -158,7 +204,7 @@ window.SpellingPDF = {
         before: ".pagina-break-voor",
         // .werkblad mag NOOIT gesplitst worden — anders krijgt elk werkblad
         // een lege restant-pagina. Een werkblad past op exact één A4.
-        avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".ov11-blad", ".ov12-blad", ".ov13-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-rooster", ".ov09-verdieping-afbeeldingen", ".ov09-verdieping-kolommen", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid", ".ov11-kaart", ".ov11-zin", ".ov11-sorteer section", ".ov12-kaart", ".ov12-uitbreiding-rij", ".ov13-basisrij", ".ov13-zin", ".ov13-tekst", ".ov13-herschrijf", ".ov02-rij", ".ov03-cel"]
+        avoid: ["img", ".spelling-pdf-rij", ".to-prentvraag", ".to-zinrij", ".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".ov11-blad", ".ov12-blad", ".ov13-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-rooster", ".ov09-verdieping-afbeeldingen", ".ov09-verdieping-kolommen", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid", ".ov11-kaart", ".ov11-zin", ".ov11-sorteer section", ".ov12-kaart", ".ov12-uitbreiding-rij", ".ov13-basisrij", ".ov13-zin", ".ov13-tekst", ".ov13-herschrijf", ".ov02-rij", ".ov03-cel"]
       }
     };
 
@@ -168,7 +214,8 @@ window.SpellingPDF = {
       knop.disabled = true;
     }
 
-    html2pdf().set(pdfOpties).from(element).save()
+    this.bereidAfbeeldingenVoor(element)
+      .then(() => html2pdf().set(pdfOpties).from(element).save())
       .then(() => {
         if (knop) {
           knop.textContent = oudeTekst;
