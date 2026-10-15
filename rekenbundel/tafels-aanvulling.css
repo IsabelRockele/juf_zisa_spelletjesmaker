@@ -1,0 +1,33 @@
+.tafel-kaart {display:block;width:100%;height:auto;font-family:Arial,sans-serif;background:white}
+.tafel-oefening {position:relative;border:1px solid #b9cbd8;border-radius:8px;margin:0 0 16px;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
+.tafel-oplossing {visibility:hidden}
+.toont-oplossingen .tafel-oplossing {visibility:visible}
+.toont-oplossingen .tafel-leerling {visibility:hidden}
+.tafel-eerste-rij {break-inside:avoid;page-break-inside:avoid}
+.tafel-voorbeeld {padding:10px;background:#f0f7fb;border-radius:6px;font-size:13px;line-height:1.5;margin-top:10px}
+.tafel-vraagkeuzes label {display:block;margin:8px 0}
+.tafel-oefening > .btn-del-oef {position:absolute;top:3px;right:3px;border:0;border-radius:4px;background:#fff;color:#b33;cursor:pointer}
+.tafel-keuzevoorbeeld {border:1px solid #b7d1e3}
+.tafel-keuzevoorbeeld p {font-size:12px;color:#38566b;margin:8px 0 4px}
+.tafel-keuzevoorbeeld button,#tafel-voorbeeld-dialog>button {border:1px solid #a9c8de;background:#f1f8fc;border-radius:6px;padding:6px 12px;cursor:pointer;margin-top:8px}
+.tafel-mini {overflow:hidden;background:white}
+.tafel-rij {display:grid;gap:16px;break-inside:avoid;page-break-inside:avoid}
+.tafel-rij-2 {grid-template-columns:repeat(2,minmax(0,1fr))}
+.tafel-uitgewerkt {background:#fff8df!important;border:2px solid #dc9c2a!important;border-radius:8px}
+.tafel-uitgewerkt .tafel-kaart {background:transparent}
+.tafel-uitgewerkt .tafel-oplossing {visibility:visible}
+.tafel-uitgewerkt .tafel-leerling {visibility:hidden}
+.tafel-vast-antwoord {color:#16803b!important;font-weight:bold}
+.tafels-grid>.tafel-uitgewerkt {grid-column:1/-1;width:calc((100% - 32px)/3)}
+.tafels-grid-2kol>.tafel-uitgewerkt {width:calc((100% - 16px)/2)}
+.tafel-keuzevoorbeeld .tafels-grid>.tafel-uitgewerkt,#tafel-voorbeeld-dialog .tafels-grid>.tafel-uitgewerkt {width:100%}
+.tafel-voorbeeld-groep {display:inline-flex;flex-wrap:wrap;max-width:100px;border:1px solid #dc9c2a;border-radius:8px;margin:4px;padding:4px}
+.tafel-mini .preview-blok-body {padding:8px;box-sizing:border-box}
+.tafel-keuzevoorbeeld .oefeningen-grid {grid-template-columns:1fr!important}
+#tafel-voorbeeld-dialog {width:min(820px,95vw);max-height:90vh;overflow:auto;border:1px solid #a9c8de;border-radius:12px;padding:18px}
+#tafel-voorbeeld-dialog::backdrop {background:#152e4866}
+#tafel-voorbeeld-dialog .oefeningen-grid {grid-template-columns:1fr!important}
+@media print {
+  .opdrachtzin-wrapper {break-after:avoid;page-break-after:avoid}
+  .oefening-item,.inzicht-oef,.gl-oef,.vs-oefening,.tafel-oefening {break-inside:avoid;page-break-inside:avoid}
+}

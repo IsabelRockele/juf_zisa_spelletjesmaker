@@ -69,7 +69,7 @@ window.HalverenVerdubbelen=(()=>{
     });return div;
   }
   function init(){
-    const tab=document.createElement('div');tab.className='sidebar-tab tab-halveren';tab.textContent='½ Halveren en verdubbelen';tab.onclick=()=>App.toonBewerking('halveren-verdubbelen',tab);document.querySelector('.tab-splits').after(tab);
+    const tab=document.createElement('div');tab.className='sidebar-tab tab-halveren';tab.innerHTML='½ Halveren en<br>verdubbelen';tab.onclick=()=>App.toonBewerking('halveren-verdubbelen',tab);document.querySelector('.tab-splits').after(tab);
     const panel=document.createElement('div');panel.id='tab-halveren';panel.className='sidebar-content';panel.style.display='none';
     panel.innerHTML=`<div class="sectie-titel">Halveren en verdubbelen tot 20</div><p>Halveer even getallen tot 20. Verdubbel aantallen tot 10.</p><div class="config-kaart"><label><input id="hv-uitleg" type="checkbox" checked> Uitlegkader toevoegen</label><br><label><input id="hv-voorbeeld" type="checkbox"> Eerste oefening uitwerken</label></div><div class="config-kaart">${Object.keys(soorten).map((type,i)=>`<div class="hv-keuze"><label><input name="hv-type" type="checkbox" value="${type}" ${i===0?'checked':''}> ${namen[type]}</label><label>Aantal <input id="hv-count-${type}" type="number" min="1" max="${type==='kort'?20:type==='schema'?20:10}" value="4"></label></div>`).join('')}</div><button id="hv-add" class="btn-toevoegen">➕ Voeg gekozen oefeningen toe</button>`;
     document.getElementById('tab-rekentaal').after(panel);

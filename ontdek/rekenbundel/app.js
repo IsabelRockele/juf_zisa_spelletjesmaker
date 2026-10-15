@@ -1144,10 +1144,107 @@ function _getSplitsConfig() {
     el.classList.add('geselecteerd');
   }
 
+
+  function verversTafelVoorbeelden() {
+    const renderVoorbeelden=(hostId,blokken)=>{
+      const host=document.getElementById(hostId);if(!host)return;
+      host.innerHTML='';
+      for(const blok of blokken){
+        if(!blok.oefeningen.length)continue;
+        const element=Preview.maakBlokElement(blok);
+        const body=element.querySelector('.preview-blok-body');
+        if(!body)continue;
+        body.querySelectorAll('button').forEach(e=>e.remove());
+        body.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));
+        const caption=document.createElement('p');caption.textContent=blok.voorbeeldNaam||'Voorbeeld van je keuze';host.appendChild(caption);
+        const mini=document.createElement('div');mini.className='tafel-mini';mini.appendChild(body);host.appendChild(mini);
+      }
+      if(!host.childElementCount)host.textContent='Kies minstens één tafel en oefenvorm om een voorbeeld te zien.';
+      const breedte=host.clientWidth||280;
+      host.querySelectorAll('.preview-blok-body').forEach(el=>{el.style.width='680px';el.style.zoom=String(breedte/680);});
+    };
+    const basis={id:'tafel-keuzevoorbeeld',hulpmiddelen:[],brug:'zonder',niveau:20,config:{}};
+    const t=_tafelsKeuze[0]||2;
+    let voorbeelden=[];
+    if(document.getElementById('tafel-oefenvorm').value==='vraagstukken') {
+      for(const el of document.querySelectorAll('[name="tafel-vraagsoort"]:checked')){
+        const soort=el.value;
+        voorbeelden.push({...basis,bewerking:'tafels-aanvulling',config:{variant:'vraagstukken',antwoordzin:document.getElementById('tafel-antwoordzin').value},opdrachtzin:document.getElementById('inp-opdrachtzin-tafels').value,oefeningen:[TafelsAanvulling.verhalen(t,soort)[0]],voorbeeldNaam:soort==='vermenigvuldigen'?'Vermenigvuldigen':soort==='groepjes'?'Delen: groepjes maken':'Delen: eerlijk verdelen'});
+      }
+    } else {
+      for(const el of document.querySelectorAll('#cg-tafels-types input:checked')){
+        const types=el.value==='Gemengd'?['Vermenigvuldigen','Gedeeld door','Ontbrekende factor']:[el.value];
+        for(const type of types)voorbeelden.push({...basis,bewerking:'tafels',opdrachtzin:document.getElementById('inp-opdrachtzin-tafels').value,voorbeeldNaam:type==='Gedeeld door'?'Delen':type,config:{oefeningstypes:[type]},oefeningen:Tafels.genereer({tafels:[t],tafelPositie:_tafelPositie,tafelMax:_tafelMax,oefeningstypes:[type],aantalOefeningen:1})});
+      }
+    }
+    voorbeelden.forEach(b=>b.config.eersteVoorbeeld=document.getElementById('tafels-eerste-voorbeeld').checked);
+    renderVoorbeelden('tafel-voorbeeld-oefenen',voorbeelden);
+    const variant=document.getElementById('inzicht-oefenvorm').value;
+    const c={modus:_inzichtModus,tafels:[..._inzichtTafel],maxUitkomst:_inzichtMaxUitkomst,tafelMax:_inzichtTafelMax,aantalOefeningen:1,emojiSet:_inzichtEmoji};
+    let b={...basis,config:c,opdrachtzin:document.getElementById('inp-opdrachtzin-inzicht').value};
+    if(variant!=='bestaand'){
+      c.variant=variant;c.bewerking=_inzichtBewerking;
+      b.bewerking='tafels-aanvulling';b.oefeningen=TafelsAanvulling.genereer(c);
+    } else if(_inzichtType==='getallenlijn'&&_inzichtBewerking!=='delen-verdelen'){
+      c.variant=_glVariantInzicht;c.positie=_glPositie;b.bewerking='tafels-getallenlijn';b.oefeningen=TafelsGetallenlijn.genereer(c);
+    } else {
+      c.inzichtType=_inzichtBewerking==='delen-verdelen'?_verdelenType:_inzichtBewerking==='vermenigvuldigen'?'groepjes':_inzichtBewerking;
+      b.bewerking='tafels-inzicht';b.oefeningen=TafelsInzicht.genereer(c);
+    }
+    b.config.eersteVoorbeeld=document.getElementById('inzicht-eerste-voorbeeld').checked;
+    renderVoorbeelden('tafel-voorbeeld-begrijpen',[b]);
+  }
+
+  function kiesTafelOefenvorm() {
+    const vragen = document.getElementById('tafel-oefenvorm').value === 'vraagstukken';
+    document.getElementById('tafel-vraagkeuzes').hidden = !vragen;
+    ['#cg-tafels-types','[name="tafel-max"]','[name="tafel-positie"]'].forEach(sel => {
+      document.querySelector(sel).closest('.config-kaart').style.display = vragen ? 'none' : '';
+    });
+    document.getElementById('inp-aantal-tafels').innerHTML = (vragen ? [3,6,12,18,0] : [8,10,12,16,20,24]).map(n => `<option value="${n}" ${n===(vragen?6:12)?'selected':''}>${n||'Alle beschikbare vraagstukken'}</option>`).join('');
+    document.getElementById('inp-opdrachtzin-tafels').value = vragen ? TafelsAanvulling.opdrachten.vraagstukken : 'Reken de tafels.';
+  }
+
+  function _voegTafelAanvullingToe(config, opdrachtzin) {
+    config.eersteVoorbeeld=document.getElementById(config.variant==='vraagstukken'?'tafels-eerste-voorbeeld':'inzicht-eerste-voorbeeld').checked;
+    const oefeningen = TafelsAanvulling.genereer(config);
+    if (!oefeningen.length) { toonToast('Geen oefeningen bij deze keuze. Kies een tafel, soort of groter bereik.', '#E74C3C'); return; }
+    bundelData.push({id: `blok-tafel-aanvulling-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, bewerking:'tafels-aanvulling', niveau:Math.max(...config.tafels)*10, hulpmiddelen:[], config, opdrachtzin, oefeningen});
+    Preview.render(bundelData);
+    toonToast(`${oefeningen.length} oefeningen toegevoegd.`, '#27AE60');
+  }
+
+  function kiesInzichtOefenvorm() {
+    const sel=document.getElementById('inzicht-oefenvorm');
+    const toegestaan=['vermenigvuldigen','delen-aftrekking'].includes(_inzichtBewerking);
+    document.getElementById('inzicht-vorm-kaart').style.display=toegestaan?'':'none';
+    for(const opt of sel.options) opt.hidden=opt.value==='tekenen'&&_inzichtBewerking!=='delen-aftrekking';
+    if(!toegestaan || sel.selectedOptions[0].hidden) sel.value='bestaand';
+    const aantalKeuze=document.getElementById('inp-aantal-inzicht');
+    if(sel.value==='koppelen' && aantalKeuze.dataset.vorigeVorm!=='koppelen') {
+      aantalKeuze.dataset.vorigAantal=aantalKeuze.value;
+      aantalKeuze.value='1';
+    } else if(sel.value!=='koppelen' && aantalKeuze.dataset.vorigeVorm==='koppelen') {
+      aantalKeuze.value=aantalKeuze.dataset.vorigAantal||'4';
+    }
+    aantalKeuze.dataset.vorigeVorm=sel.value;
+    const nieuw=sel.value!=='bestaand';
+    document.getElementById('inzicht-type-normaal').closest('.config-kaart').style.display=nieuw?'none':'';
+    document.getElementById('inzicht-emoji-kaart').style.display=nieuw?'none':(_inzichtBewerking==='delen-verdelen'?(_verdelenType==='verdelen-emoji'?'':'none'):(_inzichtType==='afbeeldingen'?'':'none'));
+    document.getElementById('inzicht-gl-kaart').style.display=!nieuw&&_inzichtBewerking!=='delen-verdelen'&&_inzichtType==='getallenlijn'?'':'none';
+    document.getElementById('inp-opdrachtzin-inzicht').value=_defaultZinInzicht();
+  }
+
   function voegTafelBlokToe() {
     const tafels = [..._tafelsKeuze].sort((a, b) => a - b);
     if (tafels.length === 0) {
       toonToast('⚠️ Kies minstens één tafel!', '#E74C3C');
+      return;
+    }
+    if (document.getElementById('tafel-oefenvorm').value === 'vraagstukken') {
+      const soorten=[...document.querySelectorAll('[name="tafel-vraagsoort"]:checked')].map(c=>c.value);
+      if(!soorten.length){toonToast('Kies minstens één soort vraagstukken.','#E74C3C');return;}
+      _voegTafelAanvullingToe({variant:'vraagstukken', tafels, soorten, antwoordzin:document.getElementById('tafel-antwoordzin').value, aantalOefeningen:Number(document.getElementById('inp-aantal-tafels').value)}, document.getElementById('inp-opdrachtzin-tafels').value.trim() || TafelsAanvulling.opdrachten.vraagstukken);
       return;
     }
     const types = [...document.querySelectorAll('#cg-tafels-types input:checked')].map(c => c.value);
@@ -1176,6 +1273,7 @@ function _getSplitsConfig() {
       return;
     }
 
+    blok.config.eersteVoorbeeld=document.getElementById('tafels-eerste-voorbeeld').checked;
     bundelData.push(blok);
     Preview.render(bundelData);
     toonToast(`✅ Tafelblok toegevoegd! (${blok.oefeningen.length} oefeningen)`, '#27AE60');
@@ -1193,6 +1291,8 @@ function _getSplitsConfig() {
   let _verdelenType      = 'verdelen-emoji'; // actief weergave-type bij eerlijk verdelen
 
   function _defaultZinInzicht() {
+    const vorm=document.getElementById('inzicht-oefenvorm')?.value;
+    if(vorm && vorm!=='bestaand')return TafelsAanvulling.opdrachten[vorm];
     if (_inzichtType === 'getallenlijn') {
       if (_glVariantInzicht === 'delen-getekend')      return 'Kijk naar de getallenlijn. Schrijf de herhaalde aftrekking en de deling.';
       if (_glVariantInzicht === 'delen-zelf')          return 'Teken de sprongen op de getallenlijn. Schrijf de herhaalde aftrekking en de deling.';
@@ -1209,6 +1309,7 @@ function _getSplitsConfig() {
 
   function selecteerInzichtBewerking(waarde, el) {
     _inzichtBewerking = waarde;
+    kiesInzichtOefenvorm();
     document.querySelectorAll('[name="inzicht-bewerking"]').forEach(r =>
       r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
@@ -1226,7 +1327,7 @@ function _getSplitsConfig() {
       document.getElementById('inzicht-gl-kaart').style.display    = _inzichtType === 'getallenlijn'  ? 'block' : 'none';
       _filterGlVarianten(waarde);
     }
-    document.getElementById('inp-opdrachtzin-inzicht').value = _defaultZinInzicht();
+    kiesInzichtOefenvorm();
   }
 
   function _filterGlVarianten(bewerking) {
@@ -1332,9 +1433,15 @@ function _getSplitsConfig() {
   }
 
   function voegInzichtBlokToe() {
+    const eersteVoorbeeld=document.getElementById('inzicht-eerste-voorbeeld').checked;
     const aantal = parseInt(document.getElementById('inp-aantal-inzicht').value);
     const zin    = document.getElementById('inp-opdrachtzin-inzicht').value.trim() || _defaultZinInzicht();
 
+    const variant=document.getElementById('inzicht-oefenvorm').value;
+    if(variant!=='bestaand') {
+      _voegTafelAanvullingToe({variant,bewerking:_inzichtBewerking,tafels:_inzichtModus==='per-tafel'?[..._inzichtTafel]:Array.from({length:9},(_,i)=>i+2),modus:_inzichtModus,maxUitkomst:_inzichtMaxUitkomst,tafelMax:_inzichtTafelMax,aantalOefeningen:aantal},zin);
+      return;
+    }
     // ── Getallenlijn ─────────────────────────────────────────
     if (_inzichtType === 'getallenlijn' && _inzichtBewerking !== 'delen-verdelen') {
       const oefeningen = TafelsGetallenlijn.genereer({
@@ -1358,7 +1465,7 @@ function _getSplitsConfig() {
         opdrachtzin:  zin,
         hulpmiddelen: [],
         oefeningen,
-        config: { modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
+        config: { eersteVoorbeeld, modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
                   maxUitkomst: _inzichtMaxUitkomst, variant: _glVariantInzicht },
       });
       Preview.render(bundelData);
@@ -1391,7 +1498,7 @@ function _getSplitsConfig() {
         opdrachtzin:  zin,
         hulpmiddelen: [],
         oefeningen,
-        config: { modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
+        config: { eersteVoorbeeld, modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
                   maxUitkomst: _inzichtMaxUitkomst, emojiSet: _inzichtEmoji,
                   aantalOefeningen: aantal, inzichtType },
       });
@@ -1426,7 +1533,7 @@ function _getSplitsConfig() {
       opdrachtzin:  zin,
       hulpmiddelen: [],
       oefeningen,
-      config: { modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
+      config: { eersteVoorbeeld, modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
                 maxUitkomst: _inzichtMaxUitkomst, emojiSet: _inzichtEmoji,
                 aantalOefeningen: aantal, inzichtType },
     });
@@ -2677,7 +2784,7 @@ function _getSplitsConfig() {
   return {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, selecteerStrategie, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
-    toggleTafel, toggleTafelType, selecteerTafelMax, selecteerTafelPositie, voegTafelBlokToe,
+    verversTafelVoorbeelden, kiesTafelOefenvorm, kiesInzichtOefenvorm, toggleTafel, toggleTafelType, selecteerTafelMax, selecteerTafelPositie, voegTafelBlokToe,
     selecteerInzichtModus, selecteerInzichtTafel, selecteerInzichtTafelMax, selecteerInzichtMaxUitkomst, selecteerInzichtEmoji, selecteerInzichtType, selecteerInzichtBewerking, selecteerGlVariantInzicht, voegInzichtBlokToe, selecteerVerdelenType,
     selecteerGlVariant, selecteerGlModus, selecteerGlTafel, selecteerGlTafelMax, selecteerGlMaxUitkomst, selecteerGlPositie, voegGlBlokToe,
     voegBlokToe, verwijderBlok, verwijderOefening,

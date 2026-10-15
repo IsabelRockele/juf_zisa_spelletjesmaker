@@ -71,7 +71,7 @@ const Tafels = (() => {
           // Ontbrekende factor: altijd beide posities (links én rechts) aanbieden,
           // ongeacht tafelPositie — zodat het invulvakje afwisselend 1e of 2e factor is.
           // ___ × multiplier = product  (tafel is de ontbrekende 1e factor)
-          poolFactor.push({ type: 'ontbrekende-factor', positie: 'links', a: null, b: multiplier, antwoord: tafel,
+          if (multiplier > 0) poolFactor.push({ type: 'ontbrekende-factor', positie: 'links', a: null, b: multiplier, antwoord: tafel,
             product, sleutel: `f-l-${tafel}-${multiplier}` });
           // tafel × ___ = product  (multiplier is de ontbrekende 2e factor)
           poolFactor.push({ type: 'ontbrekende-factor', positie: 'rechts', a: tafel, b: null, antwoord: multiplier,
@@ -85,7 +85,7 @@ const Tafels = (() => {
             sleutel: `red-${product}-${tafel}` });
         }
 
-        if (wilKoppel) {
+        if (wilKoppel && product > 0) {
           // factor1 × factor2 = ___ , dus ___ : factor2 = ___
           if (voegVooraan) {
             poolKoppel.push({ type: 'koppel', factor1: tafel, factor2: multiplier, product,

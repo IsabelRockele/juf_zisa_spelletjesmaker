@@ -216,6 +216,12 @@ const Generator = (() => {
 
   /* ── Voeg één extra oefening toe aan een bestaand blok ───── */
   function voegOefeningToe(blok) {
+    if(blok.bewerking==='tafels-aanvulling') {
+      const bestaand=new Set(blok.oefeningen.map(o=>o.sleutel));
+      const nieuw=TafelsAanvulling.genereer({...blok.config,aantalOefeningen:0}).find(o=>!bestaand.has(o.sleutel));
+      if(!nieuw)return false;
+      blok.oefeningen.push(nieuw);return true;
+    }
     if (blok.config?.hulpPerBewerking) {
       const nieuw = maakGemengdBlok({...blok.config,aantalOefeningen:12});
       const bestaand = new Set(blok.oefeningen.map(o=>o.vraag));

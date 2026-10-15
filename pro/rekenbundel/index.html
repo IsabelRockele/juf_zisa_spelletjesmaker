@@ -157,6 +157,7 @@
       white-space: nowrap;
     }
   </style>
+<link rel="stylesheet" href="tafels-aanvulling.css?v=1">
 </head>
 <body>
 
@@ -198,8 +199,8 @@
 <div class="sidebar-tab tab-brug" onclick="App.toonBewerking('herken-brug',this)">🔦 Herken brug<br>tot 100</div>
   <div class="sidebar-tab tab-rekentaal" onclick="App.toonBewerking('rekentaal',this)">🗣️ Reken<br>taal</div>
   <div class="sidebar-tab tab-splits" onclick="App.toonBewerking('splitsingen',this)">✂️ Splits</div>
-  <div class="sidebar-tab tab-tafels" onclick="App.toonBewerking('tafels',this)">✖️ Tafels</div>
-  <div class="sidebar-tab tab-tafels-inzicht" onclick="App.toonBewerking('tafels-inzicht',this)">🔍 Tafels inzicht</div>
+  <div class="sidebar-tab tab-tafels" onclick="App.toonBewerking('tafels',this)">✖️ Tafels oefenen</div>
+  <div class="sidebar-tab tab-tafels-inzicht" onclick="App.toonBewerking('tafels-inzicht',this)">🔍 Tafels begrijpen</div>
 <div class="sidebar-tab tab-cijferen" onclick="App.toonBewerking('cijferen',this)">🧮 Cijferen</div>
   <div class="sidebar-tab tab-schatten" onclick="App.toonBewerking('schatten',this)">🔮 Schatten</div>
   <div class="sidebar-tab tab-breuken" onclick="App.toonBewerking('breuken',this)">🍰 Breuken</div>
@@ -1033,6 +1034,19 @@
         </div>
       </div>
 
+      <div class="config-kaart">
+        <label for="tafel-oefenvorm">Hoe wil je oefenen?</label>
+        <select id="tafel-oefenvorm" onchange="App.kiesTafelOefenvorm()"><option value="bewerkingen">Bewerkingen</option><option value="vraagstukken">Vraagstukken</option></select>
+        <div id="tafel-vraagkeuzes" class="tafel-vraagkeuzes" hidden>
+          <label><input type="checkbox" name="tafel-vraagsoort" value="vermenigvuldigen" checked> Vermenigvuldigen</label>
+          <label><input type="checkbox" name="tafel-vraagsoort" value="groepjes"> Delen: groepjes maken</label>
+          <label><input type="checkbox" name="tafel-vraagsoort" value="eerlijk"> Delen: eerlijk verdelen</label>
+          <label for="tafel-antwoordzin">Antwoordzin</label><select id="tafel-antwoordzin"><option value="deels">Al begonnen</option><option value="zelf">Zelf schrijven</option></select>
+          <p>6 verschillende vraagstukken per gekozen tafel en per gekozen soort. Het aantal hieronder geldt voor het hele blok.</p>
+          <div class="tafel-voorbeeld">Groepjes maken: 12 koekjes, telkens 2 in een zakje. Hoeveel zakjes?<br>Eerlijk verdelen: 12 koekjes over 2 kinderen. Hoeveel per kind?</div>
+        </div>
+      </div>
+      <div class="config-kaart tafel-keuzevoorbeeld"><label><input type="checkbox" id="tafels-eerste-voorbeeld"> Eerste oefening als uitgewerkt voorbeeld</label><p>In een gekleurd kader. Telt mee in het gekozen aantal.</p><strong>Voorbeeld van je keuze</strong><div id="tafel-voorbeeld-oefenen"></div><button type="button" onclick="TafelVoorbeelden.vergroot('oefenen')">Vergroot voorbeeld</button></div>
       <!-- Oefeningstypes -->
       <div class="config-kaart">
         <div class="kaart-titel">
@@ -1046,7 +1060,7 @@
               <span class="vink-box">✓</span><input type="checkbox" value="Vermenigvuldigen" checked style="display:none"><span>Vermenigvuldigen (a × b = ___)</span>
             </label>
             <label class="vink-chip" onclick="App.toggleTafelType(this,'Gedeeld door')">
-              <span class="vink-box"></span><input type="checkbox" value="Gedeeld door" style="display:none"><span>Gedeeld door (a : b = ___)</span>
+              <span class="vink-box"></span><input type="checkbox" value="Gedeeld door" style="display:none"><span>Delen (a : b = ___)</span>
             </label>
             <label class="vink-chip" onclick="App.toggleTafelType(this,'Ontbrekende factor')">
               <span class="vink-box"></span><input type="checkbox" value="Ontbrekende factor" style="display:none"><span>Ontbrekende factor (___ × b = c)</span>
@@ -1146,7 +1160,7 @@
               <input type="radio" name="inzicht-bewerking" value="vermenigvuldigen" checked>✖️ Vermenigvuldigen
             </label>
             <label class="radio-chip" onclick="App.selecteerInzichtBewerking('delen-aftrekking',this)">
-              <input type="radio" name="inzicht-bewerking" value="delen-aftrekking">➗ Delen (herhaalde aftrekking)
+              <input type="radio" name="inzicht-bewerking" value="delen-aftrekking">➗ Delen: groepjes maken (herhaalde aftrekking)
             </label>
             <label class="radio-chip" onclick="App.selecteerInzichtBewerking('delen-rest',this)">
               <input type="radio" name="inzicht-bewerking" value="delen-rest">➗ Delen (met rest)
@@ -1158,6 +1172,18 @@
         </div>
       </div>
 
+      <div class="config-kaart" id="inzicht-vorm-kaart">
+        <label for="inzicht-oefenvorm">Op welke manier?</label>
+        <select id="inzicht-oefenvorm" onchange="App.kiesInzichtOefenvorm()">
+          <option value="bestaand">Kijken en invullen</option>
+          <option value="taal">Kijken en schrijven met rekentaal</option>
+          <option value="tussenstap">Van tussenstap naar bewerking</option>
+          <option value="tekenen">Zelf groepjes tekenen met kruisjes</option>
+          <option value="koppelen">Wat hoort bij elkaar?</option>
+        </select>
+        <p>Werk met afbeeldingen of sprongen op de getallenlijn, of kies een andere opdracht.</p>
+      </div>
+      <div class="config-kaart tafel-keuzevoorbeeld"><label><input type="checkbox" id="inzicht-eerste-voorbeeld"> Eerste oefening als uitgewerkt voorbeeld</label><p>In een gekleurd kader. Telt mee in het gekozen aantal.</p><strong>Voorbeeld van je keuze</strong><div id="tafel-voorbeeld-begrijpen"></div><button type="button" onclick="TafelVoorbeelden.vergroot('begrijpen')">Vergroot voorbeeld</button></div>
       <!-- STAP 2: Weergave -->
       <div class="config-kaart">
         <div class="kaart-titel"><div class="icon">🖼️</div>Weergave</div>
@@ -1323,6 +1349,7 @@
         <div class="form-rij">
           <label>Aantal oefeningen</label>
           <select id="inp-aantal-inzicht">
+            <option value="1">1</option>
             <option value="2">2</option>
             <option value="4" selected>4</option>
             <option value="6">6</option>
@@ -2388,17 +2415,18 @@
 <script src="modules/kommagetallen.js?v=3"></script>
 <script src="tot100-hulp.js?v=6"></script>
 <script src="tot20-hulp.js?v=vijfstructuur-20260924"></script>
-<script src="generator.js?v=halveren1"></script>
+<script src="modules/tafels-aanvulling.js?v=1"></script>
+<script src="generator.js?v=tafels-20261015"></script>
 <script src="gemengd-hulp.js?v=vijfstructuur-20260924"></script>
-<script src="preview.js?v=halveren1"></script>
-<script src="pdf-engine.js?v=halveren1"></script>
+<script src="preview.js?v=tafels-20261015"></script>
+<script src="pdf-engine.js?v=tafels-20261015"></script>
 <script src="vraagstukken.js?v=39"></script>
 
 <script src="modules/rekentaal.js?v=16"></script>
 
 <link rel="stylesheet" href="halveren-verdubbelen.css?v=2">
-<script src="modules/halveren-verdubbelen.js?v=2"></script>
-<script src="app.js?v=halveren1"></script>
+<script src="modules/halveren-verdubbelen.js?v=3"></script>
+<script src="app.js?v=tafels-20261015"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {
@@ -2672,5 +2700,7 @@ function vsKiesProcentSub(w,l,el){
 </script>
 <script src="../device-id.js"></script>
 <script type="module" src="../guard.js"></script>
+<dialog id="tafel-voorbeeld-dialog"><button type="button" onclick="this.closest('dialog').close()">Sluiten</button><div id="tafel-voorbeeld-groot"></div></dialog>
+<script src="tafels-voorbeelden.js?v=1"></script>
 </body>
 </html>

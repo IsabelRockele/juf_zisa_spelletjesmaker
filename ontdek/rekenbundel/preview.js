@@ -538,6 +538,11 @@ const Preview = (() => {
   }
 
   function _maakBlokElement(blok) {
+    if(blok.config?.eersteVoorbeeld && ['tafels','tafels-inzicht','tafels-getallenlijn','tafels-aanvulling'].includes(blok.bewerking)) {
+      const el=_maakBlokElement({...blok,config:{...blok.config,eersteVoorbeeld:false}});
+      return TafelsAanvulling.markeerVoorbeeld(el,blok.oefeningen[0]);
+    }
+    if(blok.bewerking==='tafels-aanvulling')return TafelsAanvulling.maakBlokElement(blok);
     blok = Generator.normaliseerGemengdBlok(blok);
     const isHerken        = blok.bewerking === 'herken-brug';
     const isSplitsingen   = blok.bewerking === 'splitsingen';

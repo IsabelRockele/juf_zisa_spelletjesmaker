@@ -2086,6 +2086,22 @@ const onthoudH = c;
     y+=NABLOK;
   }
  async function _tekenBlok(blok) {
+  if(blok.config?.eersteVoorbeeld && ['tafels','tafels-inzicht','tafels-getallenlijn'].includes(blok.bewerking) && blok.oefeningen.length) {
+    const config={...blok.config,eersteVoorbeeld:false};
+    const antwoorden=_metAntwoorden,roundedRect=doc.roundedRect;
+    let eersteKader=true;
+    doc.roundedRect=function(...args){
+      if(eersteKader){eersteKader=false;doc.setFillColor(255,248,223);doc.setDrawColor(220,156,42);doc.setLineWidth(.65);args[6]='FD';}
+      return roundedRect.apply(doc,args);
+    };
+    try {_metAntwoorden=true;await _tekenBlok({...blok,config,oefeningen:blok.oefeningen.slice(0,1)});}
+    finally {_metAntwoorden=antwoorden;doc.roundedRect=roundedRect;}
+    if(blok.oefeningen.length>1)await _tekenBlok({...blok,config,opdrachtzin:'',oefeningen:blok.oefeningen.slice(1)});
+    return;
+  }
+  if(blok.bewerking==='tafels-aanvulling') {
+    y=TafelsAanvulling.tekenPdf(blok,doc,y,{ML,CW,MT,PH,MB,metAntwoorden:_metAntwoorden,nieuwePagina:nieuweBladzijde});return;
+  }
     if(blok.bewerking==='halveren-verdubbelen'){await _tekenHalverenBlok(blok);return;}
   blok = Generator.normaliseerGemengdBlok(blok);
   if(blok.config?.hulpPerBewerking) {
@@ -3707,14 +3723,7 @@ doc.setTextColor(26, 58, 92);
  return 72;
 }
 
-    checkRuimte(ZINR + oefHoogte(blok.oefeningen[0]) + OEF_GAP);
-
-    y += VOOR_ZIN;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-doc.setTextColor(26, 58, 92);
-    doc.text(blok.opdrachtzin, ML, y + 5);
-    y += ZINR;
+    _tekenTafelKop(blok.opdrachtzin, oefHoogte(blok.oefeningen[0]) + OEF_GAP);
 
     blok.oefeningen.forEach((oef, oefIdx) => {
       const oh = oefHoogte(oef);
@@ -4623,6 +4632,18 @@ lijnKort(fx, formY);
   }
 
   /* ── Tafels blok tekenen ─────────────────────────────────── */
+  // Meet een eventueel meerregelige opdracht samen met de volledige eerste rij.
+  function _tekenTafelKop(opdrachtzin, eersteHoogte) {
+    if(!opdrachtzin)return;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+    const regels=doc.splitTextToSize(opdrachtzin, CW);
+    const hoogte=Math.max(ZINRUIMTE, regels.length*6+3);
+    checkRuimte(VOOR_ZIN+hoogte+eersteHoogte);
+    y+=VOOR_ZIN;
+    doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(26,58,92);
+    doc.text(regels,ML,y+5);y+=hoogte;
+  }
+
   function _tekenTafelsBlok(blok) {
     const eersteType = blok.oefeningen[0]?.type;
     const isBreed    = eersteType === 'redeneren' || eersteType === 'koppel';
@@ -4637,15 +4658,7 @@ lijnKort(fx, formY);
     const aantalRijen = Math.ceil(blok.oefeningen.length / KOLS);
 
     // Zorg dat opdrachtzin + eerste rij samen op dezelfde pagina starten
-    checkRuimte(VOOR_ZIN + ZINRUIMTE + rijH + 4);
-
-    // Opdrachtzin
-    y += VOOR_ZIN;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(26, 58, 92);
-    doc.text(blok.opdrachtzin, ML, y + 5);
-    y += ZINRUIMTE;
+    _tekenTafelKop(blok.opdrachtzin, rijH + 4);
 
     // Teken rij per rij — vanaf rij 1 mag er een paginawissel zijn
     for (let rij = 0; rij < aantalRijen; rij++) {
@@ -4880,13 +4893,7 @@ lijnKort(fx, formY);
       return OEF_PAD_V * 2 + Math.max(linksH, rechtsH);
     }
 
-    checkRuimte(VOOR_ZIN + ZINRUIMTE + _oefHoogte(blok.oefeningen[0]) + OEF_GAP);
-    y += VOOR_ZIN;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-doc.setTextColor(26, 58, 92);
-    doc.text(blok.opdrachtzin, ML, y + 5);
-    y += ZINRUIMTE;
+    _tekenTafelKop(blok.opdrachtzin, _oefHoogte(blok.oefeningen[0]) + OEF_GAP);
 
     const rechtsX = ML + 2 + linksW + 6;
 
@@ -5248,16 +5255,21 @@ doc.setTextColor(26, 58, 92);
   /* ── Eerlijk verdelen: dispatch vanuit _tekenInzichtBlok ─── */
   function _tekenVerdelenBlok(blok) {
     // Reserveer ruimte voor opdrachtzin + eerste oefening samen
-    checkRuimte(VOOR_ZIN + ZINRUIMTE + 60);
+    const tekenaar = oef => oef.type === 'verdelen-emoji' ? _tekenVerdelenEmoji : oef.type === 'verdelen-splitshuis' ? _tekenVerdelenSplitshuis : _tekenVerdelen100Veld;
+    if (!blok.oefeningen.length) return;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+    const opdrachtRegels = doc.splitTextToSize(blok.opdrachtzin, CW);
+    const opdrachtHoogte = Math.max(ZINRUIMTE, opdrachtRegels.length * 6 + 3);
+    checkRuimte(VOOR_ZIN + opdrachtHoogte + tekenaar(blok.oefeningen[0])(blok.oefeningen[0], true));
     y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.setTextColor(26, 58, 92);
-    doc.text(blok.opdrachtzin, ML, y + 5);
-    y += ZINRUIMTE;
+    doc.text(opdrachtRegels, ML, y + 5);
+    y += opdrachtHoogte;
 
     blok.oefeningen.forEach((oef, i) => {
-      if (i > 0) { checkRuimte(60); y += 6; }
+      if (i > 0) { checkRuimte(tekenaar(oef)(oef, true) + 6); y += 6; }
       if (oef.type === 'verdelen-emoji')      _tekenVerdelenEmoji(oef);
       else if (oef.type === 'verdelen-splitshuis') _tekenVerdelenSplitshuis(oef);
       else if (oef.type === 'verdelen-100veld')    _tekenVerdelen100Veld(oef);
@@ -5266,7 +5278,7 @@ doc.setTextColor(26, 58, 92);
   }
 
   /* ── Verdelen: emoji-variant ─────────────────────────────── */
-  function _tekenVerdelenEmoji(oef) {
+  function _tekenVerdelenEmoji(oef, alleenMeten = false) {
     const OEF_PAD_V  = 6;
     const OEF_PAD_H  = 5;
     const LIJN_DIKTE = 0.25;
@@ -5288,6 +5300,7 @@ doc.setTextColor(26, 58, 92);
     const rechtsH = RIJ_H * 4 + 10;
     const oh = OEF_PAD_V * 2 + Math.max(linksH, rechtsH);
 
+    if (alleenMeten) return oh + 6;
     checkRuimte(oh + 6);
     const ox = ML + 2, oy = y;
     doc.setFillColor(255,255,255);
@@ -5387,7 +5400,7 @@ doc.setTextColor(26, 58, 92);
   }
 
   /* ── Verdelen: splitshuis-variant ───────────────────────── */
-  function _tekenVerdelenSplitshuis(oef) {
+  function _tekenVerdelenSplitshuis(oef, alleenMeten = false) {
     const n          = oef.aantalGroepen;
     const DOOS_H     = 10;   // hoogte van elk vakje
     const DOOS_GAP   = 2;
@@ -5406,6 +5419,7 @@ doc.setTextColor(26, 58, 92);
     const zinH       = 10 * 2 + 4; // 2 zinnen
     const oh         = PAD_V * 2 + huisH + zinH;
 
+    if (alleenMeten) return oh + 6;
     checkRuimte(oh + 6);
     const ox = ML + 2, oy = y;
     doc.setFillColor(255,255,255);
@@ -5516,7 +5530,7 @@ doc.setTextColor(26, 58, 92);
   }
 
   /* ── Verdelen: 100-veld-variant ─────────────────────────── */
-  function _tekenVerdelen100Veld(oef) {
+  function _tekenVerdelen100Veld(oef, alleenMeten = false) {
     const KLEUREN = [
       [231, 76, 60], [93, 173, 226], [46, 204, 113],
       [243, 156, 18], [155, 89, 182], [26, 188, 156],
@@ -5536,6 +5550,7 @@ doc.setTextColor(26, 58, 92);
     const ZIN_H  = 10;
     const oh     = PAD_V * 2 + GRID_H;
 
+    if (alleenMeten) return oh + 6;
     checkRuimte(oh + 6);
     const ox = ML + 2, oy = y;
     doc.setFillColor(255,255,255);
