@@ -34,7 +34,7 @@ function isKleinScherm() {
     let vraag, correct;
 
     if (soort === 'maal') {
-      vraag = `${getal1} × ${getal2}`;
+      vraag = ZisaTafelVolgorde.format(getal1,getal2);
       correct = getal1 * getal2;
     } else { 
       if (getal1 === 0) return genereerOefening();

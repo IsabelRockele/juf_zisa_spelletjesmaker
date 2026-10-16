@@ -24,6 +24,12 @@
       this.partCanvas.onpointerup=e=>{if(this.drag?.id!==e.pointerId)return;const d=this.drag;this.drag=null;const p=this.part(),target=this.screen(p.x,p.y);if(Math.hypot(e.clientX-d.startX,e.clientY-d.startY)<10||Math.hypot(e.clientX-target.x,e.clientY-target.y)<Math.max(65,100*this.scale))this.place();else this.message('Bijna! Sleep naar de gouden rand. Of tik op het onderdeel.');};
       this.partCanvas.onpointercancel=()=>{this.drag=null;};this.partCanvas.onkeydown=e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();this.place();}};
       this.resize=()=>{const d=Math.min(devicePixelRatio||1,2);this.w=innerWidth;this.h=innerHeight;this.canvas.width=this.w*d;this.canvas.height=this.h*d;this.ctx.setTransform(d,0,0,d,0,0);this.scale=Math.min(this.w/1000,this.h/670);this.ox=(this.w-1000*this.scale)/2;this.oy=(this.h-670*this.scale)*.48;};
+      // iPad zoom and browser bars can shrink the visible area without changing
+      // the layout viewport. Keep the whole game, including pedals, inside it.
+      this.fitViewport=()=>{const v=window.visualViewport;if(!v)return;Object.assign(this.root.style,{inset:'auto',left:v.offsetLeft+'px',top:v.offsetTop+'px',width:v.width+'px',height:v.height+'px'});};
+      window.visualViewport?.addEventListener('resize',this.fitViewport);
+      window.visualViewport?.addEventListener('scroll',this.fitViewport);
+      this.fitViewport();
       this.observer=new ResizeObserver(this.resize);this.observer.observe(this.root);this.resize();this.renderControls();
       this.frame=t=>{if(this.destroyed)return;const dt=Math.min((t-(this.last||t))/1000,.04);this.last=t;if(!document.hidden&&!document.querySelector('dialog[open]')){this.t+=dt;this.updateRace?.(dt);if(this.phase==='drive'){this.drive+=dt;if(this.drive>4.5)this.endDrive();}if(['world','play'].includes(document.body.dataset.view))this.draw();}this.raf=requestAnimationFrame(this.frame);};this.raf=requestAnimationFrame(this.frame);
     }
@@ -81,7 +87,7 @@
       c.restore();
       if(this.drag){this.partImage(c,this.part().kit,this.drag.x,this.drag.y,140,130,.9);}
     }
-    destroy(){this.destroyed=true;cancelAnimationFrame(this.raf);this.observer.disconnect();this.root.remove();}
+    destroy(){this.destroyed=true;cancelAnimationFrame(this.raf);this.observer.disconnect();window.visualViewport?.removeEventListener('resize',this.fitViewport);window.visualViewport?.removeEventListener('scroll',this.fitViewport);this.root.remove();}
   }
   window.SpellingWorkshop=Workshop;
 })();

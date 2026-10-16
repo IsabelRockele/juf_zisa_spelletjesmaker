@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+<script src="tafel-volgorde.js?v=2"></script>
 <script src="ipad-play-safety.js?v=1"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -464,7 +465,7 @@
                 const getal1 = tafels[Math.floor(Math.random() * tafels.length)];
                 const getal2 = Math.floor(Math.random() * 10) + 1;
                 if (gekozenSoort === 'maal') {
-                    return { vraag: `${getal1} × ${getal2} = ?`, correct: getal1 * getal2 };
+                    return { vraag: ZisaTafelVolgorde.format(getal1,getal2)+' = ?', correct: getal1 * getal2 };
                 } else {
                     const product = getal1 * getal2;
                     if (getal1 === 0 || product % getal1 !== 0) {

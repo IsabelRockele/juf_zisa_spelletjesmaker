@@ -1,0 +1,150 @@
+/* Table games: navigation occupies space instead of floating over the task. */
+html body.tafel-layout{box-sizing:border-box;margin:0!important;padding:8px!important;min-height:100dvh}
+html body.tafel-layout *{box-sizing:border-box}
+html body.tafel-layout .container{width:100%!important;max-width:1400px!important;margin:0 auto!important;padding:10px!important}
+html body.tafel-layout h1{font-size:clamp(21px,2.5vw,30px)!important;margin:4px 0 10px!important;line-height:1.1}
+html body.tafel-layout :is(.btn-opnieuw,#restartButton,#opnieuw-knop,#zisaNavButton){position:static!important;inset:auto!important;transform:none!important;min-height:44px!important;width:auto!important;max-width:180px!important;padding:8px 14px!important;margin:0!important;font:700 16px/1.2 Arial!important}
+html body.tafel-layout #island-navigation{margin:0!important;gap:6px!important}
+html body.tafel-layout #island-navigation button{margin:0!important;padding:8px 12px!important;min-height:44px!important;font-size:16px!important;width:auto!important}
+html body.tafel-layout :is(.spel-links,.pijl-links-boven,.keuze-links-fixed,#knoppen-links,.game-ui-controls,.knoppen-container){position:static!important;inset:auto!important;transform:none!important}
+html body.tafel-layout :is(.spel-links,#knoppen-links,.knoppen-container){display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px!important;margin:0!important;padding:0!important}
+html body.tafel-layout .knoppen-container #island-navigation{order:-1}
+html body.tafel-layout .table-settings{display:grid!important;grid-template-columns:170px 1fr 1fr;gap:10px!important;align-items:start;width:100%!important;max-width:none!important;margin:0!important;padding:10px!important}
+html body.tafel-layout .table-settings[style*="display: none"],html body.tafel-layout .table-settings[hidden]{display:none!important}
+html body.tafel-layout .table-settings>#island-navigation,html body.tafel-layout .table-settings>#zisaNavButton{grid-column:1;grid-row:1/5}
+html body.tafel-layout .table-settings>:is(.zisa-afbeelding,.menu-afbeelding),html body.tafel-layout .table-settings .menu-afbeelding{display:none!important}
+html body.tafel-layout .table-settings>.keuze-blok{grid-column:auto;width:100%!important;min-width:0;margin:0!important;padding:10px!important}
+html body.tafel-layout .table-settings>.keuze-blok h2{display:none!important}
+html body.tafel-layout .table-settings .zisa-step-label{font-size:16px!important;margin:0 0 8px!important}
+html body.tafel-layout .table-settings .zisa-step-number{width:26px;height:26px;flex-basis:26px;font-size:16px}
+html body.tafel-layout .table-settings :is(.opties,.tafels-selectie){flex-direction:row!important;gap:6px!important;margin:0!important}
+html body.tafel-layout .table-settings :is(button.keuze,button.tafel,button.level){min-width:44px!important;min-height:44px!important;padding:7px 10px!important;font-size:16px!important;flex:0 1 auto!important}
+html body.tafel-layout .table-settings .aanduiding{font-size:13px!important;margin:5px 0 0!important}
+html body.tafel-layout .table-settings #tafel-volgorde{grid-column:2/4;margin:0!important;padding:10px!important}
+html body.tafel-layout #tafel-volgorde p{font-size:14px!important;margin-bottom:8px!important}
+html body.tafel-layout #tafel-volgorde button{min-height:88px!important;padding:8px!important}
+html body.tafel-layout #tafel-volgorde button>span:first-child{font-size:24px!important}
+html body.tafel-layout .table-settings>:is(.start-blok,.zisa-start-step){grid-column:2/4;margin:0!important;padding:0!important}
+html body.tafel-layout .table-settings .zisa-start-step>.zisa-step-label{display:none}
+html body.tafel-layout .table-settings :is(#startSpel,#startOefening,#start-spel-knop){margin:0!important;min-height:46px!important}
+/* Bubble game: a real sidebar and a bounded play field. */
+html body.tafel-layout[data-table-game="tafels"][data-table-screen="play"] #spelScherm{display:grid!important;grid-template-columns:155px minmax(0,1fr);gap:12px;height:calc(100dvh - 75px);min-height:0}
+html body.tafel-layout[data-table-game="tafels"] .spel-links{flex-direction:column!important;width:155px}
+html body.tafel-layout[data-table-game="tafels"] .spel-gebied{margin:0!important;min-height:0!important;height:100%;overflow:hidden}
+html body.tafel-layout[data-table-game="tafels"] #vraagContainer{margin:8px auto!important;padding:10px 20px;font-size:32px}
+html body.tafel-layout[data-table-game="tafels"] #visueleTimerContainer{width:90px;height:90px}
+html body.tafel-layout[data-table-game="tafels"] #klokzone{width:135px;margin:0}
+html body.tafel-layout[data-table-game="tafels"] #timer{font-size:25px}
+html body.tafel-layout[data-table-game="tafels"] #klok-en-scorezone{margin-top:6px}
+html body.tafel-layout[data-table-game="tafels"] .score-kolom img{width:35px}
+html body.tafel-layout[data-table-game="tafels"] .bad-onderaan{height:55px;object-fit:cover;position:fixed;pointer-events:none;z-index:0}
+/* Ik oefen: board, keyboard and controls each have their own grid cell. */
+html body.tafel-layout[data-table-game^="level"] #layout{display:grid;grid-template-columns:140px minmax(0,1fr);gap:10px;max-width:1300px;margin:auto}
+html body.tafel-layout[data-table-game^="level"] #knoppen-links{flex-direction:column;padding-top:8px!important}
+html body.tafel-layout[data-table-game^="level"] #bord-container{display:grid!important;grid-template-columns:minmax(0,1fr) 240px;grid-template-rows:auto auto 1fr;gap:12px;align-items:center;width:100%;height:calc(100dvh - 125px);min-height:350px;margin:0!important;padding:24px;background:#174f48;border:12px solid #b87b3c;border-radius:18px}
+html body.tafel-layout[data-table-game^="level"] #bord,html body.tafel-layout[data-table-game^="level"] #juf{display:none!important}
+html body.tafel-layout[data-table-game^="level"] :is(#opgave,#invoerveld,#toetsenbord,#antwoorden,#instructie-zin,#start-knop,#feedback,#ballon){position:static!important;inset:auto!important;transform:none!important;margin:0!important;max-width:100%;width:auto}
+html body.tafel-layout[data-table-game^="level"] #opgave{grid-column:1;grid-row:1;font-size:clamp(28px,4vw,44px)!important;color:white}
+html body.tafel-layout[data-table-game^="level"] #invoerveld{grid-column:1;grid-row:2;justify-self:center;width:110px;height:54px;font-size:30px}
+html body.tafel-layout[data-table-game^="level"] #toetsenbord{grid-column:2;grid-row:1/4;display:grid;grid-template-columns:repeat(4,48px);gap:8px}
+html body.tafel-layout[data-table-game^="level"] .toets{width:48px;height:48px;font-size:20px}
+html body.tafel-layout[data-table-game^="level"] #antwoorden{grid-column:1/-1;grid-row:2;justify-content:center;flex-wrap:wrap;gap:12px}
+html body.tafel-layout[data-table-game^="level"] #feedback{grid-column:1;grid-row:3;font-size:20px!important}
+html body.tafel-layout[data-table-game^="level"] #instructie-zin{grid-column:1;grid-row:1;font-size:18px!important}
+html body.tafel-layout[data-table-game^="level"] #start-knop{grid-column:1;grid-row:2;justify-self:center}
+@media(max-width:850px){
+ html body.tafel-layout .table-settings{grid-template-columns:140px 1fr 1fr;gap:8px!important}
+ html body.tafel-layout .table-settings .keuze-blok{padding:8px!important}
+ html body.tafel-layout[data-table-game^="level"] #layout{grid-template-columns:110px minmax(0,1fr)}
+ html body.tafel-layout[data-table-game^="level"] #bord-container{grid-template-columns:minmax(0,1fr) 216px;padding:12px}
+}
+@media(max-width:600px){
+ html body.tafel-layout .table-settings{grid-template-columns:1fr 1fr}
+ html body.tafel-layout .table-settings>#island-navigation{grid-column:1/-1;grid-row:auto}
+ html body.tafel-layout .table-settings #tafel-volgorde,html body.tafel-layout .table-settings>:is(.start-blok,.zisa-start-step){grid-column:1/-1}
+ html body.tafel-layout[data-table-game^="level"] #layout{grid-template-columns:1fr}
+ html body.tafel-layout[data-table-game^="level"] #knoppen-links{flex-direction:row}
+ html body.tafel-layout[data-table-game^="level"] #bord-container{grid-template-columns:1fr;height:auto}
+ html body.tafel-layout[data-table-game^="level"] #toetsenbord{grid-column:1;grid-row:4;justify-content:center}
+}
+/* Use the available screen instead of a fixed-width card on a large monitor. */
+@media(min-width:700px){
+ html body.tafel-layout{--table-space:clamp(8px,1.2vh,18px);--table-font:clamp(16px,1.3vw,25px);--table-tap:clamp(44px,6.2vh,70px);padding:var(--table-space)!important}
+ html body.tafel-layout .container{max-width:none!important;padding:var(--table-space)!important}
+ html body.tafel-layout[data-table-screen="settings"]>.container{min-height:calc(100dvh - 2 * var(--table-space));display:flex;flex-direction:column}
+ html body.tafel-layout[data-table-screen="settings"]>.container>header{flex-shrink:0}
+ html body.tafel-layout[data-table-screen="settings"] h1{font-size:clamp(24px,3vw,46px)!important;margin:0 0 var(--table-space)!important}
+ html body.tafel-layout .table-settings{flex:1;grid-template-columns:clamp(140px,13vw,230px) minmax(0,1fr) minmax(0,1fr);align-content:space-between;gap:var(--table-space)!important}
+ html body.tafel-layout .table-settings .keuze-blok{padding:var(--table-space)!important}
+ html body.tafel-layout .table-settings :is(button.keuze,button.tafel,button.level){font-size:var(--table-font)!important;min-height:var(--table-tap)!important;min-width:var(--table-tap)!important;padding:8px clamp(8px,1vw,20px)!important}
+ html body.tafel-layout .table-settings .zisa-step-label{font-size:var(--table-font)!important}
+ html body.tafel-layout #tafel-volgorde-titel{font-size:var(--table-font)!important}
+ html body.tafel-layout #tafel-volgorde p{font-size:clamp(14px,1.1vw,20px)!important}
+ html body.tafel-layout #tafel-volgorde button{min-height:clamp(88px,17vh,190px)!important}
+ html body.tafel-layout #tafel-volgorde button>span:first-child{font-size:clamp(26px,2.7vw,48px)!important}
+ html body.tafel-layout #tafel-volgorde button>span:nth-child(2){font-size:var(--table-font)!important}
+ html body.tafel-layout .table-settings :is(#startSpel,#startOefening,#start-spel-knop){min-height:var(--table-tap)!important;font-size:var(--table-font)!important;width:min(850px,100%)!important}
+ html body.tafel-layout .table-settings>.table-single-block{grid-column:2/4;display:flex;flex-wrap:wrap;justify-content:center;align-content:start;gap:6px}
+ html body.tafel-layout .table-single-block>:is(.opties,.zisa-step-label,#tafel-volgorde,.zisa-start-step,h2){flex-basis:100%;width:100%}
+ html body.tafel-layout .table-single-block #tafel-volgorde{margin:4px 0!important}
+ html body.tafel-layout .table-single-block .zisa-step-label{margin:0!important}
+ html body.tafel-layout .table-single-block #tafel-volgorde button{min-height:88px!important}
+ html body.tafel-layout .table-single-block #tafel-volgorde p{margin:0 0 5px!important}
+ html body.tafel-layout[data-table-game="tafel_oefenen"] .table-settings>.keuze-blok:nth-of-type(3){grid-column:2/4}
+ html body.tafel-layout[data-table-game^="level"] #bord-container{height:calc(100dvh - 120px);min-height:0}
+}
+
+html body.tafel-layout[data-table-game^="level"] :is(#klokzone,#scorebord,#tafels-overzicht){position:static!important;inset:auto!important;transform:none!important;width:100%!important;max-width:140px;margin:8px 0!important;padding:6px!important;font-size:14px!important}
+html body.tafel-layout[data-table-game^="level"] #visueleTimerContainer{width:90px!important;height:90px!important;margin:auto}
+html body.tafel-layout[data-table-game^="level"] #timer{font-size:22px!important}
+html body.tafel-layout[data-table-game^="level"] .score-kolom img{width:32px!important}
+@media(min-width:700px) and (max-width:850px){
+ html body.tafel-layout .table-settings{grid-template-columns:130px minmax(0,1fr)}
+ html body.tafel-layout .table-settings>.keuze-blok,html body.tafel-layout .table-settings>#tafel-volgorde,html body.tafel-layout .table-settings>.zisa-start-step,html body.tafel-layout .table-settings>.start-blok{grid-column:2!important}
+ html body.tafel-layout .table-settings #tafel-volgorde button{min-height:100px!important;flex-basis:150px!important}
+ html body.tafel-layout .table-settings>#island-navigation{grid-row:1/7}
+}
+/* Play fields reserve the sidebar and use the remaining viewport height. */
+html body.tafel-layout[data-table-game="tafels"][data-table-screen="play"] #spelScherm{height:calc(100dvh - 115px)}
+html body.tafel-layout[data-table-game^="level"] #layout{max-width:none}
+html body.tafel-layout[data-table-game^="level"] #vuurwerk{position:fixed!important;min-height:0!important;height:100dvh!important;pointer-events:none}
+html body.tafel-layout[data-table-game="sombrero_spel"]>.container{display:grid;grid-template-columns:150px minmax(0,1fr);grid-template-rows:auto 1fr;gap:12px;height:calc(100dvh - 2 * var(--table-space,8px))}
+html body.tafel-layout[data-table-game="sombrero_spel"] header{grid-column:1/-1}
+html body.tafel-layout[data-table-game="sombrero_spel"] .spel-links{flex-direction:column;width:150px}
+html body.tafel-layout[data-table-game="sombrero_spel"] .spel-gebied{margin:0!important;padding:0!important;min-height:0!important;display:flex;justify-content:space-around;height:100%}
+html body.tafel-layout[data-table-game="sombrero_spel"] :is(#hoedenContainer,#cactussenContainer){position:relative;inset:auto;flex-direction:row;flex-wrap:wrap;min-height:0;max-width:none;margin:0;padding:0;gap:10px;width:100%}
+html body.tafel-layout[data-table-game="sombrero_spel"] .hoed{width:clamp(110px,15vw,220px);height:clamp(80px,13vh,150px);font-size:clamp(20px,2vw,30px)}
+html body.tafel-layout[data-table-game="sombrero_spel"] .cactus{width:clamp(110px,15vw,200px);height:clamp(150px,24vh,250px)}
+html body.tafel-layout[data-table-game="sombrero_spel"] .cactus-antwoord-vak{top:42%;font-size:22px;height:36px;width:55px}
+html body.tafel-layout[data-table-game="woestijnjacht_spel"]{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:start}
+html body.tafel-layout[data-table-game="woestijnjacht_spel"] .spel-links{width:150px;flex-direction:column}
+html body.tafel-layout[data-table-game="woestijnjacht_spel"] .spel-gebied{position:relative;inset:auto;width:100%;height:calc(100dvh - 2 * var(--table-space,8px));padding:10px 0 0}
+html body.tafel-layout[data-table-game="woestijnjacht_spel"] #vraagContainer{margin:0;font-size:clamp(30px,3vw,48px);padding:15px 25px}
+html body.tafel-layout[data-table-game="woestijnjacht_spel"] .cactus-optie{width:clamp(100px,13vw,180px);height:clamp(160px,23vh,250px)}
+html body.tafel-layout:is([data-table-game="woestijnjacht_spel"],[data-table-game="sombrero_spel"]) #klok-en-scorezone{width:100%;padding:8px;margin-top:10px}
+html body.tafel-layout:is([data-table-game="woestijnjacht_spel"],[data-table-game="sombrero_spel"]) #visueleTimerContainer{width:90px;height:90px}
+html body.tafel-layout[data-table-game="tornado"] .spel-container{width:100%;height:calc(100dvh - 2 * var(--table-space,8px));display:grid;grid-template-columns:145px minmax(0,1fr);grid-template-rows:80px minmax(0,1fr);gap:10px}
+html body.tafel-layout[data-table-game="tornado"] .game-ui{position:static;grid-column:1;grid-row:1/3;align-self:start}
+html body.tafel-layout[data-table-game="tornado"] .tornado-zone{grid-column:2;grid-row:2;width:100%;height:100%;min-width:0}
+html body.tafel-layout[data-table-game="tornado"] .oefening{grid-column:2;grid-row:1;margin:0;justify-self:center}
+html body.tafel-layout[data-table-game="tornado"] #cactus-container{left:50%;top:50%;scale:clamp(.65,calc((100vw - 180px) / 580px),1.2)}
+html body.tafel-layout[data-table-game="tornado"] #scorebord{flex-direction:column}
+html body.tafel-layout[data-table-game="vierop1rij"]{transform:none!important}
+html body.tafel-layout[data-table-game="vierop1rij"] .spel-links{flex-direction:row!important}
+html body.tafel-layout[data-table-game="vierop1rij"] .spel-inhoud{--cell:clamp(32px,min(5vw,6vh),70px);display:grid!important;grid-template-columns:minmax(100px,1fr) auto minmax(100px,1fr);gap:10px!important;transform:none!important}
+html body.tafel-layout[data-table-game="vierop1rij"] :is(#speler1Zone,#speler2Zone){width:100%!important;min-width:0!important;margin:0!important;padding:8px!important}
+html body.tafel-layout[data-table-game="vierop1rij"] #kolomKnoppen{grid-template-columns:repeat(7,var(--cell))!important;gap:5px!important}
+html body.tafel-layout[data-table-game="vierop1rij"] #bordContainer{gap:5px!important;padding:8px!important}
+html body.tafel-layout[data-table-game="vierop1rij"] .vakje{width:var(--cell);height:var(--cell)}
+html body.tafel-layout[data-table-game="vierop1rij"] #oefeningContainer{height:auto!important;margin-bottom:8px!important}
+html body.tafel-layout[data-table-game="tornado"] .karl{left:50%;top:50%;width:220px}
+html body.tafel-layout[data-table-game="level1"] #bord-container{height:calc(100dvh - 150px)}
+@media(min-width:900px){
+ html body.tafel-layout .table-settings>.keuze-blok:not(.table-single-block){align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+ html body.tafel-layout .table-settings .tafels-selectie{display:grid!important;grid-template-columns:repeat(6,minmax(44px,1fr));justify-content:center}
+ html body.tafel-layout .table-settings .tafels-selectie button{width:100%}
+}
+html body.tafel-layout[data-table-game="level1"] #bord-container{display:flex!important;flex-direction:column;justify-content:center;gap:24px}
+html body.tafel-layout[data-table-game="level1"] #opgave{font-size:clamp(36px,4vw,64px)!important}
+html body.tafel-layout[data-table-game="level1"] .antwoord{min-width:64px;min-height:56px;font-size:clamp(24px,2.5vw,40px);padding:12px 20px}
+html body.tafel-layout[data-table-game="level1"] #knop-level2{position:static!important}

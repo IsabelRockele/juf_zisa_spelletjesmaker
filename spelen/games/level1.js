@@ -29,7 +29,7 @@ function genereerOpgavenPerTafel() {
     if (gekozenType === "maal" || gekozenType === "beide") {
       for (let i = 0; i <= 10; i++) {
         lijst.push({
-          vraag: `${i} × ${tafel}`,
+          vraag: ZisaTafelVolgorde.format(tafel,i),
           juist: i * tafel,
           tafel: tafel,
           index: i,

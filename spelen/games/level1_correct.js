@@ -25,7 +25,7 @@ function genereerOpgaven() {
   const lijst = [];
   for (let i = 0; i <= 10; i++) {
     lijst.push({
-      vraag: `${i} × ${huidigeTafel}`,
+      vraag: ZisaTafelVolgorde.format(huidigeTafel,i),
       juist: i * huidigeTafel
     });
   }

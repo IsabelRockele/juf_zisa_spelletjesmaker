@@ -154,7 +154,7 @@ function genereerOefening() {
       tafel = tafels[Math.floor(Math.random() * tafels.length)];
       getal = Math.floor(Math.random() * 11);
       juisteAntwoord = tafel * getal;
-      nieuwOpgave = `${getal} × ${tafel}`;
+      nieuwOpgave = ZisaTafelVolgorde.format(tafel,getal);
     }
 
     if (nieuwOpgave && nieuwOpgave !== vorigeOpgave) opgaveGemaakt = true;

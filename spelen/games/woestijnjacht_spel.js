@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (soort === 'maal') {
             getal1 = geselecteerdeTafels[Math.floor(Math.random() * geselecteerdeTafels.length)];
             getal2 = Math.floor(Math.random() * 11); // Keer tot 10
-            vraag = `${getal1} × ${getal2}`; // Correcte vraag voor vermenigvuldigen
+            vraag = ZisaTafelVolgorde.format(getal1,getal2); // Correcte vraag voor vermenigvuldigen
             correct = getal1 * getal2;
         } else { // delen
             if (tafelsVoorDelen.length === 0) {
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Genereert een maal-oefening als delen niet mogelijk is door gekozen tafels
         const getal1 = Math.floor(Math.random() * 11);
         const getal2 = Math.floor(Math.random() * 11);
-        return { vraag: `${getal1} × ${getal2}`, correct: getal1 * getal2 };
+        return { vraag: ZisaTafelVolgorde.format(getal1,getal2), correct: getal1 * getal2 };
     }
 
     function genereerAntwoorden(correctAntwoord) {

@@ -52,7 +52,7 @@
     app.querySelectorAll('[data-group]').forEach(button=>button.onclick=()=>{categoryPage=Number(button.dataset.group);setup();});
     app.querySelectorAll('.chip input').forEach(box=>box.onchange=()=>{settings.categories=settings.categories.filter(id=>id!==box.value);if(box.checked)settings.categories.push(box.value);save();setup();});
     app.querySelectorAll('[data-count]').forEach(button=>button.onclick=()=>{settings.count=Number(button.dataset.count);save();setup();});
-    $('#setup-back').onclick=()=>{if(setupStep>1){setupStep--;setup();}else location.href='../eilanden-leerjaar2.html#spelling';};
+    $('#setup-back').onclick=()=>{location.href='../eilanden-leerjaar2.html#spelling';};
     $('#setup-next')?.addEventListener('click',()=>{setupStep++;setup();});
     if(setupStep===2)$('#setup-next').disabled=!n;
     $('#clear-categories')?.addEventListener('click',()=>{settings.categories=[];save();setup();});
@@ -195,6 +195,7 @@
     app.innerHTML=`<section class="celebration"><div class="celebration-buddy">${buddy()}</div><p class="eyebrow">Missie volbracht</p><h1>${settings.mode==='detective'?'Hoera, Pip gevonden!':'Jullie wonderwagen rijdt!'}</h1><p>${settings.mode==='detective'?`Je hebt Pip gevonden en veilig thuisgebracht. Dank je wel, detective!`:'Jullie wonderwagen rijdt! Bedankt voor je hulp!'}<br>${settings.mode==='detective'?'Je volgde '+queue.length+' sporen van Pip.':'Je oefende '+queue.length+' woorden, bouwde jouw raceauto en reed de eilandrace.'}</p><p class="note">Je hebt geoefend met ${cats.length} ${cats.length===1?'categorie':'categorieën'}.</p><div class="actions"><button class="primary" id="again">Nog een avontuur</button><button id="choose">Andere keuzes</button></div><p><a href="../eilanden-leerjaar2.html">Terug naar de eilanden</a></p></section>`;
     $('#again').onclick=start;$('#choose').onclick=setup;speak(settings.mode==='detective'?'Hoera, Pip gevonden! Goed geoefend.':'Hoera, jullie wonderwagen rijdt! Goed geoefend.');
   }
+  window.addEventListener('zisa:game-settings',setup);
   function stop(){clearAdvance();openDialog('Even stoppen?', '<p>Je keuzes blijven bewaard.</p>',[{label:'Verder spelen',action:()=>{if(stage==='correct')autoAdvance();}},{label:'Naar de keuzes',action:setup}]);}
   document.addEventListener('keydown',event=>{
     if(dialog.open||stage!=='question'||exercise?.type!=='type'||event.ctrlKey||event.metaKey||event.altKey)return;

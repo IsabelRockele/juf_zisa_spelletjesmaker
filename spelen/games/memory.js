@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         if (actueelSoort === "maal") {
-          vraag = `${getal1} × ${i}`;
+          vraag = ZisaTafelVolgorde.format(getal1,i);
           antwoord = getal1 * i;
         } else { // Delen
           if (getal1 === 0) continue;

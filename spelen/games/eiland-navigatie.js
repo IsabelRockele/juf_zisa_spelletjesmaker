@@ -8,6 +8,8 @@
  const families=[
   ...['splits_spelletjes.html','splitsen_bibi.html','splits_bijenkorf.html','splits_bingo.html','honingpot.html'].map(path=>({island:'splitsen',grade:1,path,entry:path==='splits_bijenkorf.html'?'splitsen_bibi.html':path})),
   ...['spelletjes_hoofdrekenen1.html','bloemenweide_keuze.html','bloemenweide_spel.html','honingpot_vullen_keuze.html','honingpot_vullen_spel.html','bijenrace_keuze.html','bijenrace_spel.html','bibi-winkel.html'].map(path=>({island:'rekenen',grade:1,path,entry:path.replace('_spel.html','_keuze.html')})),
+  {island:'rekenen',grade:1,path:'bibi-dagen/',entry:'bibi-dagen/index.html'},
+  {island:'rekenen',path:'rekenbrug-proef/',entry:'rekenbrug-proef/index.html'},
   {island:'spelling',grade:2,path:'spellingeiland/',entry:'spellingeiland/index.html'},
   {island:'spelling',grade:2,path:'zinnenfabriek/',entry:'zinnenfabriek/index.html'},
   {island:'rekenen',path:'splitsmachine/',entry:'splitsmachine/index.html?leerjaar=2'},
@@ -33,27 +35,74 @@
  function decorate(url,id){url.searchParams.set('eiland',id);url.searchParams.set('leerjaar',grade);if(discover)url.searchParams.set('ontdek','1');return url;}
  function ready(){
   document.documentElement.classList.add('zisa-island-navigation');
-  const css=document.createElement('style');css.textContent=`.zisa-island-navigation #zisaNavButton,.zisa-island-navigation #zisaNavPanel{display:none!important}#island-menu-button{position:fixed;right:12px;top:86px;z-index:2147483002;border:2px solid #d7bd75;border-radius:15px;background:#fff8e7;color:#174e48;padding:10px 15px;min-height:46px;font:700 16px Arial;touch-action:manipulation;box-shadow:0 3px 12px #173e4533}#island-menu{padding:22px;border:3px solid #dfc281;border-radius:24px;background:#fffaf0;color:#244c51;width:min(390px,calc(100vw - 32px));max-height:90dvh;font:17px Arial;box-sizing:border-box;z-index:2147483003}#island-menu::backdrop{background:#153c5277}#island-menu h2{margin:0 0 16px;font-size:25px}#island-menu a,#island-menu button{box-sizing:border-box;display:block;text-decoration:none;text-align:center;width:100%;padding:13px 8px;margin:9px 0 0;min-height:46px;border:0;border-radius:12px;background:#e0eee5;color:#17564d;font:700 16px Arial;touch-action:manipulation}#island-menu .nav-choice{display:grid;grid-template-columns:minmax(0,1fr)52px;gap:8px;margin-top:9px}#island-menu .nav-choice>a,#island-menu .nav-choice>button{margin:0;min-height:52px}#island-menu .nav-choice .nav-speak{background:#fff0c3;border:2px solid #d7bd75;padding:8px}#island-menu .nav-speak img{display:block;margin:auto;object-fit:contain}#island-menu .continue{background:#176f59;color:white}#island-menu [hidden]{display:none!important}@media(max-width:600px){#island-menu-button{right:8px;font-size:15px;padding:8px 12px}}.zisa-island-navigation .topbar .back,.zisa-island-navigation .choice-head .previous,.zisa-island-navigation .btn-terug,.zisa-island-navigation #backLink,.zisa-island-navigation #menuLink,.zisa-island-navigation #otherGames,.zisa-island-navigation #changeGame,.zisa-island-navigation #otherButton{display:none!important}[data-island-menu]{border:2px solid #d7bd75!important;border-radius:15px!important;background:#fff8e7!important;color:#174e48!important;padding:10px 15px!important;min-height:46px!important;font:700 16px Arial!important;cursor:pointer}`;
-  document.head.append(css);const button=document.createElement('button');button.id='island-menu-button';button.type='button';button.textContent='← Terug';button.setAttribute('aria-haspopup','dialog');
-  const dialog=document.createElement('dialog');dialog.id='island-menu';dialog.setAttribute('aria-labelledby','island-menu-title');dialog.innerHTML='<h2 id="island-menu-title">Waar wil je naartoe?</h2>';
-  function link(label,url,id){const a=document.createElement('a');a.textContent=label;a.href=url;if(id)a.id=id;dialog.append(a);return a;}
-  if(family){const entry=new URL(family.entry,root);if(family.path==='spellingeiland/'&&['detective','workshop'].includes(q.get('spel')))entry.searchParams.set('spel',q.get('spel'));link('Keuzes van dit spel',decorate(entry,island).href,'island-game-choices');if(!discover)link((grade===1?'Spellen bij ':'Spellen op ')+names[island],mapURL.href+'#'+island,'island-siblings');}
-  link(discover?'← Terug naar de Ontdek-spellen':grade===1?'Bibi’s wereld':'Alle eilanden',discover?discoverHome:mapURL.href,'island-all');const grades=link('Ander leerjaar',gradeURL(),'island-grades');grades.hidden=discover||!hasOtherGrade();
-  const close=document.createElement('button');close.className='continue';close.textContent='Verder spelen';dialog.append(close);document.body.append(button,dialog);
-  const speaker=new URL('spellingeiland/assets/luidspreker.png',root).href;
-  for(const choice of [...dialog.querySelectorAll('a,button')]){const row=document.createElement('div');row.className='nav-choice';row.hidden=choice.hidden;choice.before(row);row.append(choice);const listen=document.createElement('button');listen.type='button';listen.className='nav-speak';listen.setAttribute('aria-label','Luister: '+choice.textContent);listen.innerHTML='<img src="'+speaker+'" alt="" width="28" height="28">';listen.onclick=()=>{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const voice=new SpeechSynthesisUtterance(choice.textContent);voice.lang='nl-BE';voice.rate=.82;speechSynthesis.speak(voice);};row.append(listen);}
-  function updateGradeChoice(){grades.hidden=discover||!hasOtherGrade();grades.parentElement.hidden=grades.hidden;}
-  button.onclick=()=>{if(dialog.open)return;window.dispatchEvent(new CustomEvent('zisa:navigation-open'));window.dispatchEvent(new Event('blur'));if('speechSynthesis'in window)speechSynthesis.cancel();dialog.showModal();};close.onclick=()=>dialog.close();dialog.addEventListener('close',()=>{window.dispatchEvent(new CustomEvent('zisa:navigation-close'));button.focus();});
-  dialog.addEventListener('keydown',e=>e.stopPropagation());
-  document.addEventListener('keydown',e=>{if(dialog.open&&e.key!=='Escape'&&e.key!=='Tab'&&!dialog.contains(e.target)){e.preventDefault();e.stopImmediatePropagation();}},true);
-  window.addEventListener('zisa:access-updated',()=>{updateGradeChoice();refreshMapBack();});
-  function refreshMapBack(){if(!isMap)return;const back=document.querySelector('.topbar .back');if(back&&!location.hash){back.textContent=hasOtherGrade()?'Ander leerjaar':'Spelmenu';back.href=hasOtherGrade()?gradeURL():new URL('start_leerjaar'+grade+'.html',root).href;}}
-  function updateLinks(){document.querySelectorAll('a[href]').forEach(a=>{if(dialog.contains(a))return;let u;try{u=new URL(a.href)}catch{return}if(u.origin!==location.origin)return;const f=families.find(f=>f.path.endsWith('/')?u.pathname.startsWith(new URL(f.path,root).pathname):u.pathname===new URL(f.path,root).pathname);if(f)a.href=decorate(u,grade===1&&f.path==='splitsmachine/'?'splitsen':f.island).href;else if(family&&u.pathname===new URL('start_leerjaar'+grade+'.html',root).pathname)a.href=mapURL.href+'#'+island;});refreshMapBack();}
-  updateLinks();addEventListener('hashchange',updateLinks);
-  // Logos and legacy exit controls use the same route picker, never a different exit.
-  document.addEventListener('click',e=>{const exit=e.target.closest('[data-island-menu],.topbar a.brand,#brand');if(exit){e.preventDefault();e.stopImmediatePropagation();button.click();}},true);
-
-  const observer=new MutationObserver(()=>document.querySelectorAll('dialog[open]:not(#island-menu)').forEach(d=>{if(d.querySelector('[data-island-menu]'))return;const b=document.createElement('button');b.type='button';b.dataset.islandMenu='1';b.textContent='← Terug';b.onclick=()=>button.click();d.append(b);}));observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['open']});
+  const css=document.createElement('style');
+  css.textContent=`.zisa-island-navigation #zisaNavButton,.zisa-island-navigation #zisaNavPanel,.zisa-island-navigation .zisa-old-exit{display:none!important}#island-navigation{position:static;display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin:12px 0;padding:0;flex-shrink:0;grid-column:1/-1}#island-navigation button{position:static!important;min-height:44px;padding:10px 16px;border:2px solid #d7bd75;border-radius:12px;background:#fff8e7;color:#174e48;font:700 16px Arial;cursor:pointer;touch-action:manipulation}#island-navigation [hidden]{display:none!important}.zisa-island-navigation .pijl-links-boven,.zisa-island-navigation .spel-links:has(#island-navigation){position:static!important;inset:auto!important}.zisa-island-navigation #island-navigation[hidden]{display:none!important}`;
+  document.head.append(css);
+  const nav=document.createElement('nav');nav.id='island-navigation';nav.setAttribute('aria-label','Teruggaan');
+  const back=document.createElement('button');back.type='button';back.textContent='← Terug';
+  const other=document.createElement('button');other.type='button';other.textContent='🏝️ Ander eiland';nav.append(back,other);
+  const previous={
+    'tafel_spelletjes.html':'tafel_overzicht.html',
+    'tafel_oefenen.html':'tafel_overzicht.html',
+    'tafels.html':'tafel_spelletjes.html',
+    'memory.html':'tafel_spelletjes.html','vierop1rij.html':'tafel_spelletjes.html',
+    'level1.html':'tafel_oefenen.html','level2.html':'tafel_oefenen.html','level3.html':'tafel_oefenen.html',
+    'bloemenweide_keuze.html':mapURL.href+'#sommen',
+    'honingpot_vullen_keuze.html':mapURL.href+'#sommen',
+    'bijenrace_keuze.html':mapURL.href+'#sommen'
+  };
+  const file=here.pathname.split('/').pop();
+  const settingsSelector='#settingsPanel,#menuPanel,#keuzeScherm,#keuzescherm,#settings,#setup,.setup-shell';
+  const exitSelector='.topbar .back,.choice-head .previous,.btn-terug,#backLink,#menuLink,#otherGames,#changeGame,#otherButton,#changeButton,#finishChangeButton,#backButton,#back,#choose,#menu,#setup-back,#world-stop,#stop,[data-island-menu]';
+  function visible(el){
+    if(!el)return false;
+    // Our duplicate marker affects only the control, not its screen's visibility.
+    for(let node=el;node&&node!==document.body;node=node.parentElement){
+      if(node.hidden||node.classList.contains('hidden')||node.style.display==='none')return false;
+      if(node!==el&&getComputedStyle(node).display==='none')return false;
+    }
+    return true;
+  }
+  let nativeBack=null,playing=false;
+  function sync(){
+    const settings=[...document.querySelectorAll(settingsSelector)].find(visible);
+    const world=document.body.dataset.view==='world'?document.querySelector('#adventure-root'):null;
+    const game=world||[...document.querySelectorAll('#gamePanel,#finishPanel,#spelScherm,#game,#finish')].find(visible);
+    const exits=[...document.querySelectorAll(exitSelector)].filter(el=>el.matches('a,button')&&!nav.contains(el));
+    nativeBack=exits.find(el=>visible(el)&&!el.closest(settingsSelector)&&(
+      ['changeButton','finishChangeButton','otherButton','backButton','back','choose','menu','knopKiezen','world-stop','stop'].includes(el.id)||
+      el.closest('#spelScherm,#gamePanel,#finishPanel,#game,#finish,#knoppen-links')||
+      /_keuze\.html/.test(el.getAttribute('href')||'')
+    ));
+    playing=!isMap&&!settings&&!!(game||nativeBack||/_spel\.html$/.test(file));
+    exits.forEach(el=>{if(!el.classList.contains('zisa-old-exit'))el.classList.add('zisa-old-exit')});
+    const hideOther=playing||isMap||discover;if(other.hidden!==hideOther)other.hidden=hideOther;
+    const label=isMap&&!location.hash?'← Ander leerjaar':'← Terug';if(back.textContent!==label)back.textContent=label;
+    const hideNav=isMap&&!location.hash&&!discover&&!hasOtherGrade();if(nav.hidden!==hideNav)nav.hidden=hideNav;
+    const setupBack=document.querySelector('#setup-back');
+    const anchor=playing&&nativeBack?nativeBack:settings&&setupBack?setupBack:null;
+    const host=anchor?.parentElement||settings||document.querySelector('main,.container')||document.body;
+    if(anchor){if(nav.parentElement!==host||nav.nextElementSibling!==anchor)host.insertBefore(nav,anchor)}
+    else if(nav.parentElement!==host)host.prepend(nav);
+  }
+  back.onclick=()=>{
+    window.speechSynthesis?.cancel();
+    if(playing&&['world-stop','stop'].includes(nativeBack?.id)){window.dispatchEvent(new Event('zisa:game-settings'));return;}
+    if(playing&&nativeBack){nativeBack.click();return;}
+    const destination=discover?discoverHome:isMap?(location.hash?mapURL.href:gradeURL()):playing?decorate(new URL(family.entry,root),island).href:new URL(previous[file]||mapURL.href+'#'+island,root).href;
+    location.assign(destination);
+  };
+  other.onclick=()=>{window.speechSynthesis?.cancel();location.assign(mapURL.href)};
+  function updateLinks(){
+    document.querySelectorAll('a[href]').forEach(a=>{
+      if(a.classList.contains('zisa-old-exit'))return;
+      let u;try{u=new URL(a.href)}catch{return}if(u.origin!==location.origin)return;
+      const f=families.find(f=>f.path.endsWith('/')?u.pathname.startsWith(new URL(f.path,root).pathname):u.pathname===new URL(f.path,root).pathname);
+      if(f){const next=decorate(u,grade===1&&f.path==='splitsmachine/'?'splitsen':f.island).href;if(a.href!==next)a.href=next;}
+    });sync();
+  }
+  updateLinks();addEventListener('hashchange',updateLinks);addEventListener('zisa:access-updated',sync);
+  new MutationObserver(sync).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','style','class','open']});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready();
 })();

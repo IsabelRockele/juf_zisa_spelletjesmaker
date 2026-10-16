@@ -23,7 +23,7 @@ function genereerGemengdeOpgaven() {
   gekozenTafels.forEach(tafel => {
     if (gekozenType === "maal" || gekozenType === "beide") {
       for (let i = 0; i <= 10; i++) {
-        alleOpgaven.push({ vraag: `${i} × ${tafel}`, juist: i * tafel });
+        alleOpgaven.push({ vraag: ZisaTafelVolgorde.format(tafel,i), juist: i * tafel });
       }
     }
     if (gekozenType === "delen" || gekozenType === "beide") {

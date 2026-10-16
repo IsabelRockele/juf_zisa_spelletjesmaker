@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const soort = geselecteerdeSoort === 'beide' ? (Math.random() < 0.5 ? 'maal' : 'delen') : geselecteerdeSoort;
 
             if (soort === 'maal') {
-                vraag = `${tafel} × ${getal2}`;
+                vraag = ZisaTafelVolgorde.format(tafel,getal2);
                 correctAntwoord = tafel * getal2;
             } else {
                 if (tafel === 0) {
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const getal2 = Math.floor(Math.random() * 11);
         const soort = geselecteerdeSoort === 'beide' ? (Math.random() < 0.5 ? 'maal' : 'delen') : geselecteerdeSoort;
         if (soort === 'maal') {
-            return { vraag: `${tafel} × ${getal2}`, correctAntwoord: tafel * getal2 };
+            return { vraag: ZisaTafelVolgorde.format(tafel,getal2), correctAntwoord: tafel * getal2 };
         } else {
             return { vraag: `${tafel * getal2} ÷ ${tafel}`, correctAntwoord: getal2 };
         }

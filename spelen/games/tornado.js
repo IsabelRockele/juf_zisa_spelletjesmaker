@@ -79,7 +79,7 @@ function genereerOefening() {
         getal1 = tafel;
         getal2 = Math.floor(Math.random() * 10) + 1;
         antwoord = getal1 * getal2;
-        vraagTekst = `${getal1} × ${getal2} = ?`;
+        vraagTekst = ZisaTafelVolgorde.format(getal1,getal2)+' = ?';
     } else {
         isMaal = false;
         let product;
@@ -185,7 +185,7 @@ function roteerCactussenLoop() {
         cactus.style.top = `${Math.round(200 + y)}px`;
 
         // De scale transformatie wordt nog steeds toegepast
-        cactus.style.transform = `scale(${schaal})`;
+        cactus.style.transform = `translate(-50%, -50%) scale(${schaal})`;
 
         const KARL_Z_INDEX = 100;
         const normalizedY = (y + straal) / (2 * straal);
