@@ -7,7 +7,8 @@ const startMethodParam=new URLSearchParams(location.search).get("methode");
 const lockedStartMethod=["kim","zoem"].includes(startMethodParam)?startMethodParam:null;
 let startMethod=lockedStartMethod||localStorage.getItem("zisa_start_method")||null;
 if(!["original","kim","zoem"].includes(startMethod))startMethod="original";
-let currentLevel = null;
+const returnParams=new URLSearchParams(location.search);
+let currentLevel = levels.includes(returnParams.get('niveau'))?returnParams.get('niveau'):null;
 let currentBook = null;
 let pageIndex = 0;
 let pageTaskPassed = false;
@@ -306,7 +307,7 @@ function isDiscoverLocked(book){
 
 function spriteStyle(src){return `background-image:url('${src.src}');--sprite-x:${src.x}%;--sprite-y:${src.y}%;--sprite-w:${src.w||300}%;--sprite-h:${src.h||400}%`}
 function imageBlock(src, alt){
-  if(typeof src==="string"&&src.startsWith("images/seizoenen/"))return `<img class="seasonal-illustration" src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" decoding="async">`;
+  if(typeof src==="string"&&/^images\/seizoenen(?:-v2)?\//.test(src))return `<img class="seasonal-illustration" src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" decoding="async">`;
   if(src&&typeof src==="object")return `<div class="story-sprite" role="img" aria-label="${escapeAttr(alt)}" style="${spriteStyle(src)}"></div>`;
   return `<div class="story-image" role="img" aria-label="${escapeAttr(alt)}" style="background-image:url('${src}')"></div>`;
 }
@@ -420,19 +421,10 @@ function renderBookCover(){
   </div>`;
   document.querySelector("#coverBack").onclick=renderLibrary;
   document.querySelector("#coverStart").onclick=renderReader;
-  if(bookGames[currentBook.id]?.length){
-    const preview=document.createElement('button');preview.id='coverGames';preview.className='cover-secondary';preview.textContent='Spellen bekijken ›';
-    preview.onclick=()=>{
-      let menu=document.querySelector('.cover-game-menu');
-      if(menu){menu.remove();return;}
-      menu=document.createElement('div');menu.className='cover-game-menu';
-      bookGames[currentBook.id].forEach((game,index)=>{
-        const button=document.createElement('button');button.className='cover-secondary';button.textContent=`${index+1}. ${game.title||'Spel'}`;
-        button.onclick=()=>{reviewMode=false;missionIndex=index;missionScore=0;renderMission();};menu.append(button);
-      });
-      preview.after(menu);
-    };
-    document.querySelector('.cover-actions').append(preview);
+  if(currentBook.readingAdventure){
+    const play=document.createElement('a');play.id='coverAdventure';play.className='cover-secondary';
+    play.textContent='Extra leesspel ›';play.href=readingGameUrl(currentBook.readingAdventure);
+    document.querySelector('.cover-actions').append(play);
   }
   document.querySelector("#coverWords")?.addEventListener("click",renderWordStart);
   document.querySelector("#coverPractice")?.addEventListener("click",startFluencyBook);
@@ -1060,6 +1052,15 @@ function renderFinish(){
       <button class="btn next" id="backBooks">Kies een nieuw boek</button>
     </section>`;
   document.querySelector("#backBooks").addEventListener("click",renderLibrary);
+  if(currentBook.readingAdventure){
+    const extra=document.createElement('a');extra.className='btn next';extra.href=readingGameUrl(currentBook.readingAdventure);extra.textContent='Extra leesspel ›';
+    document.querySelector('.finish').append(extra);
+    document.querySelector('.finish p').textContent='Je hebt het verhaal gelezen en de opdrachten gemaakt. Zin in een extra leesspelletje?';
+  }
 }
 
 renderLibrary();
+
+function readingGameUrl(path){const url=new URL(path,location.href);for(const key of ['gratis','ontdek','teacher','code','methode']){const value=new URLSearchParams(location.search).get(key);if(value!==null)url.searchParams.set(key,value)}return url.href}
+const returnBook=books.find(b=>b.id===returnParams.get('verhaal'));
+if(returnBook&&!isDiscoverLocked(returnBook)){currentLevel=returnBook.level;openBook(returnBook)}
