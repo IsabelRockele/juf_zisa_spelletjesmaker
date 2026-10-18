@@ -307,7 +307,7 @@ function isDiscoverLocked(book){
 
 function spriteStyle(src){return `background-image:url('${src.src}');--sprite-x:${src.x}%;--sprite-y:${src.y}%;--sprite-w:${src.w||300}%;--sprite-h:${src.h||400}%`}
 function imageBlock(src, alt){
-  if(typeof src==="string"&&/^images\/(?:seizoenen(?:-v2)?|woordenschat-seizoenen)\//.test(src))return `<img class="seasonal-illustration" src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" decoding="async">`;
+  if(typeof src==="string"&&/^images\/(?:seizoenen(?:-v2)?|woordenschat-seizoenen|woordenschat-m6-e6)\//.test(src))return `<img class="seasonal-illustration" src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" decoding="async">`;
   if(src&&typeof src==="object")return `<div class="story-sprite" role="img" aria-label="${escapeAttr(alt)}" style="${spriteStyle(src)}"></div>`;
   return `<div class="story-image" role="img" aria-label="${escapeAttr(alt)}" style="background-image:url('${src}')"></div>`;
 }
@@ -470,7 +470,7 @@ function renderReader(){
   const bookNumber = booksAtLevel.findIndex(book=>book.id===currentBook.id)+1;
 
   app.innerHTML = `
-    <div class="reader ${currentBook.level==="E6"?"e6-reader":""} ${currentBook.theme?"seasonal-reader":""} ${currentBook.seasonalUpper&&currentBook.level==="E5"?"upper-season-reader":""}">
+    <div class="reader ${currentBook.level==="E6"?"e6-reader":""} ${currentBook.theme?"seasonal-reader":""} ${currentBook.seasonalUpper&&['E5','M6','E6'].includes(currentBook.level)?"upper-season-reader":""}">
       <aside class="rail">
         <span class="lvl">${currentBook.level}</span>
         <small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
