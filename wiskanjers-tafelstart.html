@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tafelstart · Wiskanjers · Juf Zisa</title>
+  <link rel="stylesheet" href="wiskanjers-tafelstart.css">
+  <script type="module" src="auth-check.js"></script>
+  <script src="wiskanjers-tafelstart.js" defer></script>
+</head>
+<body>
+<header><a href="wiskanjers-2.html">← Wiskanjers instructielessen</a><span>Juf Zisa · Samen aan het bord</span></header>
+<main>
+  <p class="eyebrow">Elke dag een beetje vlotter</p><h1>Tafelstart</h1>
+  <section id="setup" class="panel">
+    <h2>Vijf minuten samen oefenen</h2>
+    <p>Kies alleen tafels die al aangeleerd zijn. Iedereen denkt, schrijft op een wisbordje en toont tegelijk. Bespreek een handige tussenstap als een som nog moeilijk is.</p>
+    <form id="settings">
+      <fieldset><legend>Welke tafels oefenen we?</legend><div id="tables" class="choices"></div></fieldset>
+      <fieldset><legend>Welke bewerkingen?</legend><div class="choices"><label><input type="radio" name="operation" value="mul"> Maal</label><label><input type="radio" name="operation" value="div"> Deel</label><label><input type="radio" name="operation" value="mix" checked> Maal en deel</label></div></fieldset>
+      <p class="hint">Elke tafel van 0 tot en met 10, ook bijvoorbeeld 0 × 2 en 0 : 2. Jouw tafelkeuze en moeilijke sommen worden op dit toestel bewaard.</p>
+      <p id="saved-info" class="hint"></p><p id="error" role="alert"></p>
+      <div class="actions"><button id="recite-start" type="button">Samen opzeggen</button><button class="primary" type="submit">Oefen door elkaar →</button></div>
+    </form>
+    <details><summary>Zo gebruik je de tafelstart in je klas</summary><ol><li><strong>Opwarmen:</strong> drie sommen om erin te komen. Geef iedereen denktijd.</li><li><strong>Door elkaar:</strong> acht sommen uit de gekozen tafels. Toon de antwoorden pas als iedereen klaar is.</li><li><strong>Nog eens:</strong> herhaal maximaal drie sommen die je als moeilijk aanduidde. Zijn er geen? Dan volgen drie gemengde sommen.</li></ol><p>Start met één vertrouwde tafel. Voeg later andere gekende tafels toe. Laat kinderen eerst juist antwoorden en verhoog daarna geleidelijk het tempo. Gebruik ‘Nog oefenen’ zodra je merkt dat meerdere kinderen twijfelen.</p></details>
+  </section>
+  <section id="recite" class="panel board" hidden aria-label="Samen de tafels opzeggen">
+    <p class="eyebrow">Samen opzeggen</p><h2 id="recite-title"></h2>
+    <p>Zeg samen de hele som en het antwoord. Probeer daarna met de antwoorden verstopt.</p>
+    <div id="recite-rows" class="recite-rows"></div>
+    <div class="actions"><button id="recite-toggle" aria-pressed="false">Verberg de antwoorden</button><button id="recite-next">Volgende tafel →</button><button id="recite-practice" class="primary">Nu door elkaar oefenen →</button></div>
+    <button id="recite-back" class="quiet">Terug naar de tafelkeuze</button>
+  </section>
+  <section id="practice" class="panel board" hidden aria-label="Klassikaal oefenen">
+    <div class="topline"><span id="phase"></span><span id="progress"></span></div>
+    <progress id="meter" value="0" max="14" aria-label="Voortgang"></progress>
+    <p id="instruction">Denk zelf. Schrijf. Toon samen.</p>
+    <div id="sum" class="sum" aria-live="polite"></div>
+    <div id="answer" class="answer" aria-live="polite">&nbsp;</div>
+    <button id="reveal" class="primary">Toon het antwoord</button>
+    <div id="assessment" class="actions" hidden><button id="hard">↻ Nog oefenen</button><button id="next" class="primary">Dat lukt · Volgende →</button></div>
+    <p class="hint">‘Nog oefenen’ is een signaal voor de klas, geen individuele score.</p>
+    <button id="stop" class="quiet">Stop en kies opnieuw</button>
+  </section>
+  <section id="finished" class="panel" hidden><p class="eyebrow">Goed geoefend!</p><h2>De tafelstart zit erop.</h2><p id="recap"></p><p>Neem één lastige som nog even samen door. Daarna kan de wiskundeles beginnen.</p><button id="restart" class="primary">Terug naar de tafelkeuze</button></section>
+</main>
+</body></html>

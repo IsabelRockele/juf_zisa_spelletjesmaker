@@ -3,6 +3,10 @@
   // Gratis omgeving, 2de leerjaar. Voeg nieuwe bordlessen hier aan hun blok toe.
   // De URL wijst naar de eigen lespagina; bestaande lessen blijven behouden.
   const lessons = [
+    { block: 2, number: 16, title: 'De getallen tot 100 ordenen', description: 'Toon voor, na en tussen met sprongen op een hulpgetallenlijn. Plaats getallen en tel met sprongen van 1, 2, 5 en 10.', parts: ['Voor, na en tussen', 'Sprongen', 'Samen oefenen', 'Onthouden'], url: 'wiskanjers-b2-les16.html' },
+    { block: 2, number: 15, title: 'De getallen tot 100 lezen en schrijven', description: 'Lees getallen met tientallen en eenheden, oefen een getallendictee en verbind getalwoorden met cijfers.', parts: ['Lezen en schrijven', 'Getallendictee', 'Samen oefenen', 'Onthouden'], url: 'wiskanjers-b2-les15.html' },
+    { block: 2, number: 14, title: 'De getallen tot 100: de plaatswaarde', description: 'Leg getallen met MAB-materiaal, ontdek H, T en E en voeg getalwaarde­kaarten samen.', parts: ['Getallen leggen', 'Getalwaarde­kaarten', 'Samen oefenen', 'Onthouden'], url: 'wiskanjers-b2-les14.html' },
+    { block: 2, number: 13, title: 'De getallen tot 100: groepen van 10 maken', description: 'Bundel voorwerpen per tien, tel vooruit en terug en plaats tientallen op de getallenas.', parts: ['Groepen van 10', 'Tellen met tientallen', 'Samen oefenen', 'Onthouden'], url: 'wiskanjers-b2-les13.html' },
     { block: 2, number: 10, title: 'De deling', description: 'Maak groepen van een gegeven grootte en schrijf de herhaalde aftrekking als een deling.', parts: ['Groepen maken', 'Samen oefenen', 'Onthouden'], url: 'wiskanjers-b2-les10.html' },
     { block: 2, number: 9, title: 'De maaltafel van 2', description: 'Bouw de tafel van 2 op met groepjes, sprongen en eigen notities. Oefen zoals in het werkboek.', parts: ['Groepjes van 2', 'Onze maaltafel', 'Samen oefenen'], url: 'wiskanjers-b2-les9.html' },
     { block: 2, number: 8, title: 'De vermenigvuldiging', description: 'Maak gelijke groepen, schrijf een herhaalde optelling en ontdek het maalteken.', parts: ['Tellen met sprongen', 'Groepjes maken', 'Samen oefenen'], url: 'wiskanjers-b2-les8.html' },
