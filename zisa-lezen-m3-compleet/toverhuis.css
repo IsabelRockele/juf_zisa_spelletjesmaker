@@ -1,0 +1,36 @@
+.house{background:#54394a url('images/toverhuis-spel/toverhal.png') center/cover;justify-content:space-between;gap:14px;padding:24px;isolation:isolate}
+.house:before{background:linear-gradient(#35204215,#30203f38)}
+.house .inventory{margin:0;font-size:16px;box-shadow:0 3px 12px #1b142655;flex-shrink:0}
+.house .doors{align-items:center;flex:1;gap:28px;min-height:0;padding:18px 12px 8px}
+.house .door{perspective:900px;width:30%;height:min(37vh,330px);max-height:none;min-height:130px;position:relative;padding:0;background:#2e233a;border:7px solid #8f592d;box-shadow:0 0 0 3px #edce8b,0 10px 16px #130e2966,inset 0 0 25px #110c18;border-radius:90px 90px 7px 7px;overflow:visible}
+.house .door:after{display:none}
+.house .door:hover{filter:none;box-shadow:0 0 0 4px #ffeeb6,0 0 25px #ffd87c99}
+.house .door:disabled{opacity:1;cursor:default}
+.door-leaf{position:absolute;inset:0;transform-origin:left center;transition:transform .8s ease-in-out;transform-style:preserve-3d;backface-visibility:hidden;border-radius:82px 82px 4px 4px;border:3px solid #d5a25b;background:repeating-linear-gradient(90deg,#0000 0 31px,#241b2630 32px 34px),linear-gradient(110deg,#658e89,#2b595b);box-shadow:inset 5px 0 16px #fff3,inset -4px 0 10px #0006;display:flex;align-items:center;flex-direction:column;justify-content:center;gap:12px}
+.door:nth-child(2) .door-leaf{background:repeating-linear-gradient(90deg,#0000 0 31px,#241b2630 32px 34px),linear-gradient(110deg,#8775a5,#46355d)}
+.door:nth-child(3) .door-leaf{background:repeating-linear-gradient(90deg,#0000 0 31px,#241b2630 32px 34px),linear-gradient(110deg,#b5766d,#6a384a)}
+.door-emblem{display:block;width:75px;height:75px;background:#2b233c55;border:2px solid #edc974;border-radius:50%;padding:10px;box-shadow:0 3px 5px #0004}
+.door-emblem svg{display:block;width:100%;height:100%;fill:#ffe49a;filter:drop-shadow(0 2px 1px #5b3428)}
+.door-panels{width:70%;height:32%;border:3px double #dcb37177;border-radius:5px;box-shadow:inset 0 3px 8px #182e3d55}
+.door-lock{position:absolute;right:8%;top:58%;font-size:27px;color:#ffdf85;text-shadow:1px 3px 2px #49271a}
+.door-beyond{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:82px 82px 4px 4px;overflow:hidden;background:radial-gradient(ellipse,#ffeeb7,#9c7cad 60%,#30213e);box-shadow:inset 0 0 30px #30213e}
+.door-beyond img{width:95%;height:95%;object-fit:contain;opacity:0;transform:translateY(12px);transition:opacity .4s .25s,transform .6s .2s;filter:drop-shadow(0 5px 6px #45284a55)}
+.door.opening .door-leaf{transform:rotateY(-105deg)}
+.door.opening .door-beyond img{opacity:1;transform:translateY(0)}
+.house .bank{flex-shrink:0;background:#fff4dbed;padding:10px;border:2px solid #dfbc7a;border-radius:20px;min-height:0;gap:15px;flex-wrap:nowrap}
+.house .key{min-width:0;width:29%;padding:7px;background:#fff9e9;border:2px solid #d8b678;border-radius:14px;box-shadow:0 4px 0 #9f784a;min-height:0}
+.house .key svg{display:block;width:100%;height:65px;filter:drop-shadow(0 3px 1px #76542a44)}
+.house .key span{font-size:16px;display:block}
+.house .key.selected{border-color:#ed126b;background:#ffe6ee;box-shadow:0 4px 0 #b8416b;transform:translateY(-3px)}
+.house-goal{font-size:15px;color:#74604c}.magic-progress{display:flex;gap:8px;justify-content:center;margin-top:auto;padding-top:12px}.magic-progress span{font-size:36px;color:#c9c5d0;transition:color .3s,transform .3s}.magic-progress .lit{color:#df9a15;text-shadow:0 0 12px #ffd357;transform:scale(1.12)}.house-sound{font-size:14px;padding:8px}
+.resident-welcome{display:flex;align-items:center;gap:16px;background:#fff9eaf5;border:2px solid #f1d086;border-radius:18px;padding:14px 18px;box-shadow:0 5px 20px #24183055;animation:welcomeIn .4s ease-out;flex-shrink:0}.resident-welcome div{flex:1}.resident-welcome small{font-weight:bold;color:#926023}.resident-welcome h2{margin:2px 0;font-size:22px}.resident-welcome p{margin:0;font-size:16px}.resident-welcome .primary{margin:0;max-width:210px;font-size:16px}.has-visitor .bank{display:none}
+.rattle{animation:doorRattle .35s ease-in-out}@keyframes doorRattle{25%,75%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}@keyframes welcomeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1050px){.house{padding:14px;gap:10px}.house .doors{gap:17px;padding-inline:6px}.house .door{height:30vh;border-width:5px}.door-emblem{width:60px;height:60px}.house .key svg{height:48px}.house .key span{font-size:13px}.resident-welcome{padding:10px;gap:10px}.resident-welcome p{font-size:14px}.resident-welcome h2{font-size:18px}.resident-welcome .primary{font-size:14px;padding:10px;max-width:150px}}
+@media(max-width:650px){.house{padding:10px;gap:8px}.house .inventory{font-size:12px;padding:6px}.house .doors{padding:5px 2px;gap:14px}.house .door{height:150px;min-height:95px;border-width:4px;width:29%}.door-emblem{width:42px;height:42px;padding:6px}.door-leaf{gap:6px;border-width:2px}.door-lock{font-size:17px}.house .bank{gap:6px;padding:6px}.house .key{width:32%;padding:3px}.house .key svg{height:38px}.house .key span{font-size:10px}.house-goal{font-size:12px}.magic-progress{margin:0;padding:0;gap:10px}.magic-progress span{font-size:23px}.house-sound{position:absolute;right:20px;top:123px;font-size:10px;padding:4px}.resident-welcome{padding:8px;gap:7px}.resident-welcome small{font-size:10px}.resident-welcome h2{font-size:14px}.resident-welcome p{font-size:12px}.resident-welcome .primary{font-size:12px;padding:8px;max-width:100px}.has-visitor .door{height:130px}}
+@media(max-width:650px) and (max-height:700px){.house .door{height:105px}.house-goal{display:none}.house .doors{padding:0}.house .inventory{font-size:10px}.resident-welcome p{font-size:10px}.resident-welcome h2{font-size:12px}.house-sound{display:none}.magic-progress span{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.door-leaf,.door-beyond img,.magic-progress span{transition:none}.resident-welcome,.rattle{animation:none}}
+.house .key{touch-action:none;cursor:grab;user-select:none}
+.house .key.key-dragging{opacity:.4;cursor:grabbing}
+.house .door.key-over{outline:5px solid #ffe08a;outline-offset:4px;box-shadow:0 0 30px #ffd86a}
+.dragged-magic-key{position:fixed;z-index:10000;pointer-events:none;transform:translate(-50%,-50%) rotate(-12deg);width:150px;padding:8px;background:#fff6dcee;border:3px solid #e9be57;border-radius:18px;box-shadow:0 8px 25px #24152b55;color:#503922;font-size:13px;text-align:center}
+.dragged-magic-key svg{display:block;width:100%;height:65px}

@@ -307,7 +307,7 @@ function isDiscoverLocked(book){
 
 function spriteStyle(src){return `background-image:url('${src.src}');--sprite-x:${src.x}%;--sprite-y:${src.y}%;--sprite-w:${src.w||300}%;--sprite-h:${src.h||400}%`}
 function imageBlock(src, alt){
-  if(typeof src==="string"&&/^images\/seizoenen(?:-v2)?\//.test(src))return `<img class="seasonal-illustration" src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" decoding="async">`;
+  if(typeof src==="string"&&/^images\/(?:seizoenen(?:-v2)?|woordenschat-seizoenen)\//.test(src))return `<img class="seasonal-illustration" src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" decoding="async">`;
   if(src&&typeof src==="object")return `<div class="story-sprite" role="img" aria-label="${escapeAttr(alt)}" style="${spriteStyle(src)}"></div>`;
   return `<div class="story-image" role="img" aria-label="${escapeAttr(alt)}" style="background-image:url('${src}')"></div>`;
 }
@@ -470,7 +470,7 @@ function renderReader(){
   const bookNumber = booksAtLevel.findIndex(book=>book.id===currentBook.id)+1;
 
   app.innerHTML = `
-    <div class="reader ${currentBook.level==="E6"?"e6-reader":""} ${currentBook.theme?"seasonal-reader":""}">
+    <div class="reader ${currentBook.level==="E6"?"e6-reader":""} ${currentBook.theme?"seasonal-reader":""} ${currentBook.seasonalUpper&&currentBook.level==="E5"?"upper-season-reader":""}">
       <aside class="rail">
         <span class="lvl">${currentBook.level}</span>
         <small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
@@ -690,6 +690,7 @@ function renderGame(game){
 
 function renderMatchGame(game,activity){
   const board=document.createElement('div');board.className='match-board';
+  if(game.pairs.some(pair=>pair.some(item=>item?.image)))board.classList.add('word-picture-match');
   const left=document.createElement('div'),right=document.createElement('div');
   left.className=right.className='match-column';board.append(left,right);activity.append(board);
   let selection=null,matched=0,complete=false;
@@ -705,7 +706,7 @@ function renderMatchGame(game,activity){
     const first=selection;
     if(first.dataset.pair===button.dataset.pair){
       first.disabled=button.disabled=true;first.classList.add('matched');button.classList.add('matched');
-      first.textContent+=' ✓';button.textContent+=' ✓';matched++;clearSelection();
+      for(const card of [first,button]){const tick=document.createElement('span');tick.className='match-tick';tick.textContent=' ✓';card.append(tick);}matched++;clearSelection();
       setMissionFeedback(`Dat paar klopt! ${matched} van ${game.pairs.length} gevonden.`,'good');
       if(matched===game.pairs.length){complete=true;finishGame(null,'Alle sporen passen bij elkaar! ⭐');}
     }else{
@@ -716,10 +717,12 @@ function renderMatchGame(game,activity){
     const indexed=game.pairs.map((pair,index)=>({text:pair[side],index}));
     (side?shuffledWrong(indexed,item=>item.index):indexed).forEach(item=>{
       const row=document.createElement('div');row.className='match-row';
-      const button=document.createElement('button');button.type='button';button.className='match-card';button.textContent=item.text;
+      const button=document.createElement('button');button.type='button';button.className='match-card';
+      if(item.text?.image){button.classList.add('word-picture-card');button.innerHTML=imageBlock(item.text.image,item.text.alt||'Woordprent');}
+      else button.textContent=item.text;
       button.dataset.side=side;button.dataset.pair=item.index;button.setAttribute('aria-pressed','false');button.onclick=()=>choose(button);
       buttons.push(button);row.append(button);
-      if(hasAudioSupport())row.append(makeListenButton(item.text,`Beluister ${item.text}`));column.append(row);
+      if(hasAudioSupport()&&typeof item.text==='string')row.append(makeListenButton(item.text,`Beluister ${item.text}`));column.append(row);
     });
   });
 }

@@ -1,0 +1,25 @@
+/* The illustrated water stays behind the interactive, clearly numbered jetties. */
+.dock{background:#68c6d4 url('images/woordenschat-seizoenen/haven.png') center 30% / cover no-repeat;justify-content:flex-end;padding:20px;gap:16px;isolation:isolate}
+.dock:before{background:linear-gradient(transparent 20%,#1a7b9522 50%,#07526866)}
+.dock .instruction{align-self:center;margin:0 0 auto;max-width:92%;font-size:16px;background:#fffcf0f5;box-shadow:0 3px 12px #16394320;padding:10px 18px}
+.dock .slots{padding:0 12px 24px;gap:22px;position:relative;flex-shrink:0}
+.dock .slots:after{content:'';position:absolute;bottom:0;left:0;right:0;height:27px;border:2px solid #825129;border-radius:7px;background:repeating-linear-gradient(90deg,#c99558 0 37px,#946135 38px 40px);box-shadow:0 7px 0 #553c2d,0 12px 15px #15475a55;z-index:-1}
+.dock .slot{position:relative;min-height:clamp(145px,26vh,230px);padding:32px 5px 12px;justify-content:flex-end;border:2px dashed #ffffffa8;border-bottom:0;border-radius:28px 28px 0 0;background:#defbff25;box-shadow:none;cursor:pointer}
+.dock .slot:before{content:'';position:absolute;left:-10px;top:15px;bottom:-5px;width:12px;border-radius:6px;background:repeating-linear-gradient(0deg,#bc874b 0 23px,#9a6433 24px 26px);border:2px solid #81532c;box-shadow:2px 4px 3px #164b5355;z-index:-1}
+.dock .slot>b{position:absolute;top:-13px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:6px 12px;color:#653c20;background:#fff2cc;border:2px solid #a8733c;border-radius:9px;box-shadow:0 3px 0 #664625;font-size:15px}
+.dock .slot:not(:has(.piece)):after{content:'Leg hier aan';color:white;text-shadow:0 1px 4px #154255;position:absolute;top:50%;left:0;right:0;text-align:center;font-size:15px;font-weight:bold}
+.dock .bank{min-height:150px;align-items:center;flex-wrap:nowrap;background:#fff9eaf2;border:2px solid #f6e4bd;border-radius:22px;box-shadow:0 5px 15px #103f4a33;padding:8px;position:relative;margin-top:6px}
+.dock .bank:empty{min-height:48px}
+.dock .bank:empty:after{content:'Alle boten liggen klaar. Klopt jouw havenplan?';color:#365f6a;text-align:center;font-size:15px}
+.dock .piece{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;min-width:0;width:clamp(80px,12vw,170px);padding:0 3px 5px;border:3px solid transparent;transition:transform .18s,border-color .18s}
+.dock .piece:hover{transform:translateY(-4px);filter:none}
+.harbour-boat{width:100%;height:clamp(75px,12vh,125px);object-fit:contain;filter:drop-shadow(0 6px 3px #12485444);pointer-events:none}
+.boat-name{font-size:17px;background:#fffdf1;border-radius:20px;padding:2px 14px;box-shadow:0 2px 3px #143f4422}
+.dock .slot .piece{width:100%}
+.dock .slot .harbour-boat{height:clamp(100px,17vh,160px)}
+.dock .done{background:#b8f0c866!important}
+.dock .done .harbour-boat{animation:harbourBob 2.4s ease-in-out infinite}
+@keyframes harbourBob{50%{transform:translateY(-4px) rotate(-2deg)}}
+@media(max-width:1050px){.dock .slots{gap:12px;padding-inline:6px}.dock .instruction{font-size:14px}.dock .bank{min-height:115px}.boat-name{font-size:14px;padding:2px 9px}}
+@media(max-width:650px){.dock{padding:9px;gap:10px;background-position:center 24%}.dock .instruction{font-size:11px;max-width:100%;padding:5px 7px}.dock .slots{gap:8px;padding-bottom:16px}.dock .slot{min-height:105px;padding:20px 1px 3px;border-radius:15px 15px 0 0}.dock .slot>b{font-size:10px;padding:3px 5px;top:-6px}.dock .slot:before{width:7px;left:-6px;top:12px}.dock .slots:after{height:18px}.dock .slot:not(:has(.piece)):after{font-size:10px}.dock .piece{width:23%;padding:0;border-width:2px}.dock .bank{min-height:80px;padding:3px;gap:3px;border-radius:12px}.dock .harbour-boat,.dock .slot .harbour-boat{height:65px}.boat-name{font-size:11px;padding:1px 6px}.dock .bank:empty{min-height:28px}.dock .bank:empty:after{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.dock .done .harbour-boat{animation:none}.dock .piece{transition:none}}

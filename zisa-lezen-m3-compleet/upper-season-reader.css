@@ -1,0 +1,13 @@
+/* Langere E5-alinea's en de leesvraag blijven samen binnen de bladzijde. */
+@media(min-width:841px){
+ body.reading-mode .upper-season-reader .story{padding:36px 34px 20px;gap:12px}
+ body.reading-mode .upper-season-reader .storytext{font-size:clamp(21px,1.75vw,27px);line-height:1.45}
+ body.reading-mode .upper-season-reader .inline-task{margin-top:10px;padding:12px}
+}
+@media(min-width:841px) and (max-width:1100px){
+ body.reading-mode .reader.upper-season-reader{grid-template-columns:1fr}
+ body.reading-mode .upper-season-reader .rail{display:none}
+ body.reading-mode .upper-season-reader .story{padding:28px 20px 12px;gap:8px}
+ body.reading-mode .upper-season-reader .storytext{font-size:19.5px;line-height:1.36}
+ body.reading-mode .upper-season-reader .inline-task{margin-top:6px;padding:9px}
+}
