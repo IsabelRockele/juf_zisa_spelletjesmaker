@@ -16,6 +16,7 @@ let isTurning = false;
 let missionIndex = 0;
 let missionScore = 0;
 let reviewMode = false;
+let lookupPausedMs = 0;
 let reviewEndPage = 0;
 let speedTimer = null;
 let fluencyIndex = 0;
@@ -637,9 +638,12 @@ function renderMission(){
     <header class="mission-progress"><button id="missionBack" aria-label="Terug naar het boek">‹ Boek</button><div><b>Taalreis na het verhaal</b><span>${missionIndex+1} van ${games.length}</span></div><button id="missionFullscreen" class="mission-fullscreen" type="button" aria-label="Open volledig scherm">⛶ <span>Volledig scherm</span></button><div class="mission-bar"><i style="width:${missionIndex/games.length*100}%"></i></div></header>
     <div class="mission-card"><img class="mission-zebra" src="images/zisa-zebra.png" alt=""><div class="mission-icon">${game.icon||"⭐"}</div><h2>${game.title||"Leesmissie"}</h2>${game.showBookTitle?`<div class="question-book-title"><small>Titel van het verhaal</small><strong>${escapeAttr(currentBook.title)}</strong></div>`:""}${game.context?`<blockquote class="meaning-context">${escapeAttr(game.context)}</blockquote>`:""}<div class="mission-question-row"><p class="mission-question">${game.q}</p>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(`${game.context?`${game.context} `:""}${game.q}`)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="missionActivity"></div><p id="missionFeedback" class="mission-feedback" aria-live="polite"></p></div>
   </section>`;
-  document.querySelector("#missionBack").onclick=()=>{reviewMode=false;renderReader()};
+  document.querySelector("#missionBack").textContent="📖 Zoek op in het verhaal";
+  document.querySelector("#missionBack").setAttribute("aria-label","Zoek op in het verhaal");
+  document.querySelector("#missionBack").onclick=()=>openStoryLookup();
   bindMissionFullscreen();
   renderGame(game);
+  addStoryLookupHelp(game);
   if(currentBook.theme){
     const heading=document.querySelector('.mission-progress b');heading.textContent=currentBook.missionTitle;
     const trail=document.createElement('div');trail.className='seasonal-trail';trail.setAttribute('aria-label',`${missionIndex} van ${games.length} missies opgelost`);
@@ -833,13 +837,46 @@ function reviewPageForGame(game){
   const page=targetedReviewPages[currentBook.id]?.[missionIndex];
   return Number.isInteger(page)?{start:page,end:page}:null;
 }
-function offerReread(game){
+function addStoryLookupHelp(game){
   const target=reviewPageForGame(game);
-  if(!target)return;
-  if(document.querySelector(".reread-btn"))return;
-  const button=document.createElement("button");button.type="button";button.className="reread-btn";button.textContent=target.start===target.end?`📖 Lees bladzijde ${target.start+1} opnieuw`:`📖 Lees het verhaal opnieuw`;
-  button.onclick=()=>{reviewMode=true;pageIndex=target.start;reviewEndPage=target.end;pageTaskPassed=true;renderReader()};
-  document.querySelector(".mission-card")?.append(button);
+  // Only explicit, bounded source references can suggest a page.
+  if(!target||target.start!==target.end||target.start<0||target.end>=currentBook.pages.length)return;
+  const tip=document.createElement('button');tip.type='button';tip.className='lookup-tip';tip.textContent='💡 Toon een tipbladzijde';
+  tip.onclick=()=>openStoryLookup(target.start);
+  document.querySelector('.mission-progress').insertBefore(tip,document.querySelector('.mission-bar'));
+}
+function offerReread(){
+  const button=document.querySelector('#missionBack');
+  if(button){button.classList.remove('lookup-notice');void button.offsetWidth;button.classList.add('lookup-notice');}
+}
+function openStoryLookup(hintPage=null){
+  if(document.querySelector('.story-lookup'))return;
+  const openedAt=Date.now();let lookupPage=Number.isInteger(hintPage)?hintPage:0;
+  const dialog=document.createElement('dialog');dialog.className='story-lookup';dialog.setAttribute('aria-label','Opzoeken in '+currentBook.title);
+  const host=document.fullscreenElement||document.body;host.append(dialog);
+  let lookupClosed=false;
+  function close(){dialog.close();cleanup();}
+  function cleanup(){
+    if(lookupClosed)return;lookupClosed=true;
+    lookupPausedMs+=Date.now()-openedAt;
+    if('speechSynthesis' in window)speechSynthesis.cancel();
+    dialog.remove();
+    // A wrong ordering can be revised after looking back, without losing its cards.
+    const line=document.querySelector('.sequence-build.locked');
+    if(line){line.classList.remove('locked');line.querySelectorAll('.sequence-piece').forEach(card=>{card.draggable=true;card.querySelector('.sequence-text').disabled=false;});}
+  }
+  dialog.addEventListener('close',cleanup);
+  function draw(){
+    const page=currentBook.pages[lookupPage];
+    if('speechSynthesis' in window)speechSynthesis.cancel();
+    dialog.innerHTML=`<header class="lookup-head"><div><strong>${escapeAttr(currentBook.title)}</strong><small>${Number.isInteger(hintPage)?'Tip: kijk op deze bladzijde.':'Zoek rustig op. Je opdracht blijft bewaard.'}</small></div><button class="lookup-return" type="button">Terug naar mijn opdracht ›</button></header><section class="lookup-spread"><div class="lookup-art">${imageBlock(page.image,`Bladzijde ${lookupPage+1}`)}</div><article class="lookup-text"><button class="lookup-listen" type="button">🔊 Lees voor</button><div>${String(page.text).split('\n').map(line=>`<p>${escapeAttr(line)}</p>`).join('')}</div></article></section><footer class="lookup-controls"><button class="lookup-prev" type="button" ${lookupPage===0?'disabled':''}>‹ Vorige</button><label>Bladzijde <select aria-label="Kies een bladzijde">${currentBook.pages.map((_,i)=>`<option value="${i}" ${i===lookupPage?'selected':''}>${i+1}</option>`).join('')}</select> van ${currentBook.pages.length}</label><button class="lookup-next" type="button" ${lookupPage===currentBook.pages.length-1?'disabled':''}>Volgende ›</button></footer>`;
+    dialog.querySelector('.lookup-return').onclick=close;
+    dialog.querySelector('.lookup-prev').onclick=()=>{lookupPage--;draw();};
+    dialog.querySelector('.lookup-next').onclick=()=>{lookupPage++;draw();};
+    dialog.querySelector('select').onchange=e=>{lookupPage=Number(e.target.value);draw();};
+    dialog.querySelector('.lookup-listen').onclick=()=>speak(page.text);
+  }
+  draw();dialog.showModal();dialog.querySelector('.lookup-return').focus();
 }
 
 function renderSpeedGame(game,activity,onComplete=null){
@@ -858,9 +895,10 @@ function renderSpeedGame(game,activity,onComplete=null){
     activity.querySelector(".speed-read").onclick=()=>advance(true);
     activity.querySelector(".speed-skip").onclick=()=>advance(false);
     showWord();
-    const started=Date.now();
+    const started=Date.now();lookupPausedMs=0;
     speedTimer=setInterval(()=>{
-      secondsLeft=Math.max(0,60-Math.floor((Date.now()-started)/1000));clock.textContent=`${Math.floor(secondsLeft/60)}:${String(secondsLeft%60).padStart(2,"0")}`;
+      if(document.querySelector(".story-lookup"))return;
+      secondsLeft=Math.max(0,60-Math.floor((Date.now()-started-lookupPausedMs)/1000));clock.textContent=`${Math.floor(secondsLeft/60)}:${String(secondsLeft%60).padStart(2,"0")}`;
       if(secondsLeft===0){clearInterval(speedTimer);speedTimer=null;running=false;scores.push(readCount);showRoundResult()}
     },200);
   };
@@ -1067,3 +1105,4 @@ renderLibrary();
 function readingGameUrl(path){const url=new URL(path,location.href);for(const key of ['gratis','ontdek','teacher','code','methode']){const value=new URLSearchParams(location.search).get(key);if(value!==null)url.searchParams.set(key,value)}return url.href}
 const returnBook=books.find(b=>b.id===returnParams.get('verhaal'));
 if(returnBook&&!isDiscoverLocked(returnBook)){currentLevel=returnBook.level;openBook(returnBook)}
+
