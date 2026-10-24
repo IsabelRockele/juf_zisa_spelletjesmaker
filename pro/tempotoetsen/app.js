@@ -317,6 +317,8 @@ function genereerSplitsing(config) {
 function genereerGebalanceerdRekenen(max, config, aantal) {
   const resultaat = [], gezien = new Set();
   let metEen = 0, metNul = 0;
+  // De meeste toetsen bevatten geen nul- of eenoefeningen; soms mag er eentje tussen.
+  const maxEenvoudig = Math.random() < 0.7 ? 0 : Math.max(1, Math.floor(aantal / 10));
   for (const bewerking of ['plus', 'min']) {
     const n = config.bewerking === 'gemengd'
       ? (bewerking === 'plus' ? Math.floor(aantal / 2) : Math.ceil(aantal / 2))
@@ -337,8 +339,7 @@ function genereerGebalanceerdRekenen(max, config, aantal) {
     const hoogMogelijk = max === 20 && pool.some(o => o.antwoord > 10 && !o.een && !o.nul);
     const patroon = shuffle(Array.from({ length: n }, (_, i) => hoogMogelijk && i < Math.ceil(n * 0.7)));
     for (const hoog of patroon) {
-      const geldig = pool.filter(o => (!o.een || metEen < Math.max(1, Math.floor(aantal / 5)))
-        && (!o.nul || metNul < Math.floor(aantal / 10)));
+      const geldig = pool.filter(o => !(o.een || o.nul) || metEen + metNul < maxEenvoudig);
       const voorkeur = hoog ? geldig.filter(o => o.antwoord > 10) : geldig;
       const kandidaten = voorkeur.length ? voorkeur : geldig;
       const uniek = kandidaten.filter(o => !gezien.has(o.vraag));
