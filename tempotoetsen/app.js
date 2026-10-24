@@ -314,7 +314,48 @@ function genereerSplitsing(config) {
     antwoord
   };
 }
+function genereerGebalanceerdRekenen(max, config, aantal) {
+  const resultaat = [], gezien = new Set();
+  let metEen = 0, metNul = 0;
+  for (const bewerking of ['plus', 'min']) {
+    const n = config.bewerking === 'gemengd'
+      ? (bewerking === 'plus' ? Math.floor(aantal / 2) : Math.ceil(aantal / 2))
+      : (config.bewerking === bewerking ? aantal : 0);
+    if (!n) continue;
+    const pool = [];
+    for (let a = 1; a <= max; a++) for (let b = 0; b <= max; b++) {
+      const antwoord = bewerking === 'plus' ? a + b : a - b;
+      if (antwoord < 0 || antwoord > max) continue;
+      const brug = bewerking === 'plus'
+        ? a % 10 + b % 10 > 10 && a % 10 !== 0 && b % 10 !== 0
+        : b % 10 > a % 10 && a > 10 && b <= 10;
+      if (max === 20 && config.brug !== 'gemengd' && brug !== (config.brug === 'met')) continue;
+      pool.push({ vraag: a + (bewerking === 'plus' ? ' + ' : ' - ') + b,
+        antwoord, een: b === 1 || (bewerking === 'plus' && a === 1), nul: b === 0 });
+    }
+    // Bij aftrekken met brug tot 20 zijn uitkomsten boven 10 onmogelijk.
+    const hoogMogelijk = max === 20 && pool.some(o => o.antwoord > 10 && !o.een && !o.nul);
+    const patroon = shuffle(Array.from({ length: n }, (_, i) => hoogMogelijk && i < Math.ceil(n * 0.7)));
+    for (const hoog of patroon) {
+      const geldig = pool.filter(o => (!o.een || metEen < Math.max(1, Math.floor(aantal / 5)))
+        && (!o.nul || metNul < Math.floor(aantal / 10)));
+      const voorkeur = hoog ? geldig.filter(o => o.antwoord > 10) : geldig;
+      const kandidaten = voorkeur.length ? voorkeur : geldig;
+      const uniek = kandidaten.filter(o => !gezien.has(o.vraag));
+      const oef = pickFrom(uniek.length ? uniek : kandidaten);
+      if (!oef) continue;
+      gezien.add(oef.vraag);
+      if (oef.een) metEen++;
+      if (oef.nul) metNul++;
+      resultaat.push({ vraag: oef.vraag, antwoord: oef.antwoord });
+    }
+  }
+  return shuffle(resultaat);
+}
+
 function genereerToets(type, config, aantal = 10) {
+  const rekenMax = { 'optel-aftrek-5': 5, 'optel-aftrek-10': 10, 'optel-aftrek-20': 20 }[type];
+  if (rekenMax) return genereerGebalanceerdRekenen(rekenMax, config, aantal);
   const oefeningen = [];
   const gezien = new Set();
   let veiligheid = 0;
