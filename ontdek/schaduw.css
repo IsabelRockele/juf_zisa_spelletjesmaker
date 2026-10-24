@@ -320,4 +320,46 @@ button:disabled {
 
 
 canvas { display: none; }
-footer { margin-top: auto; padding: 20px; color: #555; }
+footer { margin-top: auto; padding: 20px; color: #555; }/* Dezelfde rustige blauw-witte stijl als de andere werkbladmakers. */
+*{box-sizing:border-box}body{padding:0;background:#f4f7f9;color:#17324a}header:not(.pro-header){max-width:none;min-height:100px;padding:24px 4%;background:linear-gradient(110deg,#123f67,#1d6fad);margin-bottom:24px;gap:20px}header h1{color:#fff;font-size:1.85rem}#menuBtn{background:#fff;color:#123f67;font-weight:bold}#main-content{max-width:1440px;padding:0 24px;gap:20px}#left-panel,#right-panel-buttons{border:1px solid #dbe6ed;background:#fff;border-radius:16px;padding:18px;box-shadow:0 5px 18px #183c5710}#left-panel{flex-basis:270px}#right-panel-buttons{flex-basis:200px}#center-panel{min-width:0;border:1px solid #dbe6ed;border-radius:16px;padding:24px;box-shadow:0 5px 18px #183c5710}h3{font-size:1rem;text-align:left;color:#123f67;border-color:#e2edf4;padding:0 0 12px}#controls{display:flex;flex-direction:column;gap:22px}#left-panel button,#right-panel-buttons button{border-radius:10px;background:#1d6fad;font-size:.9rem;font-weight:bold}#left-panel button:disabled,#right-panel-buttons button:disabled{background:#dce5ec;color:#718493;cursor:not-allowed}#resetBtn{background:#edf4f8!important;color:#123f67!important}.library-panel{width:calc(100% - 48px);max-width:1392px;background:white;border:1px solid #dbe6ed;border-radius:18px;padding:24px;margin:0 auto 24px;text-align:left;box-shadow:0 5px 18px #183c5710}.eyebrow{font-size:.7rem;letter-spacing:.1em;font-weight:bold;color:#1d6fad}.library-panel h2{margin:8px 0;color:#123f67}.library-panel p{color:#667b8c;font-size:.9rem}.library-filters{display:flex;gap:16px;margin:20px 0}.library-filters label{display:flex;flex-direction:column;gap:7px;font-size:.85rem;font-weight:bold;flex:1}.library-filters select{padding:11px;border:1px solid #cbddea;border-radius:9px;background:white;color:#17324a;font:inherit}#library-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.library-card{display:flex;align-items:center;gap:15px;text-align:left;border:1px solid #cbddea;background:#f7fbfe;border-radius:12px;padding:14px;color:#123f67;font:inherit;font-weight:bold;cursor:pointer}.library-card:hover{background:#eaf5fc;border-color:#1d6fad}.library-card img{width:60px;height:65px;object-fit:contain}.library-card:focus-visible,button:focus-visible{outline:3px solid #f5b841;outline-offset:3px}.library-sheet canvas{display:block!important;width:100%;height:auto}.library-sheet{background:white}.item-wrapper{box-shadow:none;border-color:#dbe6ed}footer{font-size:.8rem;color:#667b8c}.pro-header{max-width:none!important}.werkblad-container-final{gap:0 40px}.werkblad-container-final .item-wrapper{width:110px;height:110px}@media(max-width:1100px){#main-content{flex-wrap:wrap}#left-panel{flex-basis:260px}#center-panel{flex-basis:calc(100% - 285px)}#right-panel-buttons{flex-basis:100%}#right-panel-buttons .control-group{display:grid;grid-template-columns:repeat(3,1fr)}#right-panel-buttons h3{grid-column:1/-1}#library-cards{grid-template-columns:1fr}.library-card img{height:45px}}@media(max-width:650px){header:not(.pro-header){flex-wrap:wrap}header h1{font-size:1.4rem}.header-spacer{display:none}#main-content{padding:0 12px}#left-panel,#center-panel{flex-basis:100%;width:100%}.library-panel{width:calc(100% - 24px);padding:18px}.library-filters{flex-direction:column}#right-panel-buttons .control-group{display:flex}#center-panel{padding:12px}.item-wrapper{max-width:100%}} 
+
+#library-cards{max-height:300px;overflow-y:auto;padding:3px 5px 3px 3px;scrollbar-color:#9cb5c7 #edf4f8}.library-card{min-height:88px}.library-filters{align-items:end}.library-card span{font-size:.85rem;line-height:1.4}@media(max-width:1100px){#library-cards{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){#library-cards{grid-template-columns:1fr;max-height:270px}}
+
+/* Keuzes links en een direct zichtbaar voorbeeld rechts. */
+#main-content{display:grid;grid-template-columns:360px minmax(0,1fr);align-items:start}
+#left-panel{width:100%;min-width:0;max-height:calc(100vh - 40px);overflow-y:auto;position:sticky;top:20px}
+#left-panel .library-panel{width:100%;padding:0;margin:0;border:0;box-shadow:none}
+#left-panel .library-panel h2{font-size:1.25rem}
+#left-panel .library-filters{flex-direction:column;align-items:stretch;gap:12px;margin:16px 0}
+#left-panel .library-filters select{width:100%;min-width:0}
+#left-panel #library-cards{grid-template-columns:1fr;max-height:280px;gap:8px}
+#left-panel .library-card{background:#f7fbfe;color:#123f67;border:1px solid #cbddea;padding:9px;margin:0;min-height:65px;gap:10px}
+#left-panel .library-card:hover{background:#eaf5fc;border-color:#1d6fad}
+#left-panel .library-card img{width:45px;height:48px;flex-shrink:0}
+#left-panel #right-panel-buttons{width:100%;padding:16px 0;border:0;border-top:1px solid #dbe6ed;border-radius:0;box-shadow:none;gap:0}
+#left-panel #right-panel-buttons .control-group{display:flex;gap:6px}
+.custom-options{border-top:1px solid #dbe6ed;padding-top:16px}
+.custom-options summary{cursor:pointer;font-weight:bold;color:#123f67;padding:4px 0 14px}
+#center-panel{width:100%;position:sticky;top:20px}
+@media(max-width:800px){#main-content{grid-template-columns:1fr}#left-panel,#center-panel{position:static;max-height:none}#left-panel #library-cards{max-height:220px}#center-panel{min-height:400px}}
+
+.maker-tabs{grid-column:1/-1;display:flex;gap:8px;padding:6px;background:#e5edf4;border-radius:14px}
+.maker-tabs button{flex:1;border:0;border-radius:10px;padding:14px 18px;font:inherit;font-weight:bold;color:#34536b;background:transparent;cursor:pointer}
+.maker-tabs button[aria-selected="true"]{background:#fff;color:#123f67;box-shadow:0 2px 8px #183c5718}
+#left-panel [role="tabpanel"][hidden]{display:none!important}
+#left-panel .custom-options{border:0;padding:0}
+.custom-options h2{font-size:1.25rem;margin:8px 0 20px;color:#123f67}
+@media(max-width:500px){.maker-tabs{gap:4px}.maker-tabs button{font-size:.85rem;padding:12px 8px}}
+
+/* Tabs in de keuzebalk; acties blijven boven het voorbeeld zichtbaar. */
+#left-panel .maker-tabs{display:flex;flex-shrink:0;position:sticky;top:-18px;z-index:3;margin:-4px -4px 6px;padding:5px;background:#e5edf4}
+#left-panel .maker-tabs button{margin:0;padding:11px 7px;width:auto;font-size:.82rem;background:transparent;color:#34536b;line-height:1.35}
+#left-panel .maker-tabs button[aria-selected="true"]{background:#fff;color:#123f67}
+#preview-column{min-width:0;width:100%}
+#preview-column #right-panel-buttons{position:sticky;top:16px;z-index:10;width:100%;padding:12px;margin-bottom:14px;background:#fff;border:1px solid #dbe6ed;border-radius:14px;box-shadow:0 4px 16px #183c5718}
+#preview-column #right-panel-buttons .control-group{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;align-items:center}
+#preview-column #right-panel-buttons h3{border:0;padding:0;margin:0 4px 0 0;width:auto;font-size:.9rem}
+#preview-column #right-panel-buttons button{width:auto;flex:1 1 140px;margin:0;padding:10px;font-size:.82rem}
+#preview-column #center-panel{position:static}
+body:has(.pro-header) #preview-column #right-panel-buttons{top:60px}
+@media(max-width:800px){#preview-column #right-panel-buttons{top:8px}body:has(.pro-header) #preview-column #right-panel-buttons{top:56px}}

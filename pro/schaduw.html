@@ -37,68 +37,81 @@
 </header>
 
 <header>
-    <h1>Schaduw Match Werkblad Generator</h1>
+    <h1>Schaduw werkbladmaker</h1>
 </header>
 
 <div id="main-content">
-    <div id="left-panel">
-        <div id="controls">
-            <div class="control-group">
-                <h3>Stap 1: Kies afbeeldingen</h3>
-                <input type="file" id="imageUpload" accept="image/png" multiple>
-                <button id="uploadTriggerBtn">Kies bestanden...</button>
-                <span id="file-feedback">Geen bestanden geselecteerd.</span>
-            </div>
 
-            <div class="control-group">
-                <h3>Stap 2: Maak schaduwen</h3>
-                <button id="create-shadows-btn" disabled>Maak Schaduwen</button>
-            </div>
-
-            <div class="control-group">
-                <h3>Stap 3: Kies werkblad</h3>
-                <div id="keuze-werkblad-type">
-                    <label>
-                        <input type="radio" name="werkbladType" value="type2" checked disabled> Twee Kolommen
-                    </label>
-                    <label>
-                        <input type="radio" name="werkbladType" value="type1" disabled> Midden Object
-                    </label>
-                </div>
-            </div>
-            
-            <div class="control-group">
-                <h3>Stap 4: Toon resultaat</h3>
-                <button id="render-worksheet-btn" disabled>Toon Werkblad</button>
-            </div>
-            
-            <div class="control-group" id="edit-controls" style="display: none;">
-                <h3>Stap 5: Verfijnen</h3>
-                <button id="enable-move-btn">Verplaats & Pas Grootte Aan</button>
-                
-                <div id="resize-controls" class="sub-control-group" style="display: none;">
-                    <button id="increase-size-btn">Vergroot</button>
-                    <button id="decrease-size-btn">Verklein</button>
-                    <span id="size-feedback">Selecteer een item</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="center-panel">
-        <div id="werkbladWeergave">
-            <p class="placeholder-text">Begin bij Stap 1 om afbeeldingen te kiezen.</p>
-        </div>
-    </div>
-
-    <div id="right-panel-buttons">
-        <div class="control-group">
-            <h3>Acties</h3>
-            <button id="downloadPdfBtn">Download als PDF</button>
-            <button id="resetBtn">Opnieuw Maken</button>
-        </div>
-    </div>
+        <div id="left-panel">
+<div class="maker-tabs" role="tablist" aria-label="Werkblad maken">
+<button type="button" id="library-tab" role="tab" aria-selected="true" aria-controls="library-options" tabindex="0">Werkbladenbibliotheek</button>
+<button type="button" id="custom-tab" role="tab" aria-selected="false" aria-controls="custom-options" tabindex="-1">Zelf een werkblad maken</button>
 </div>
+<section id="library-options" class="library-panel" role="tabpanel" aria-labelledby="library-tab"><div><span class="eyebrow">DIRECT AAN DE SLAG</span><h2 id="library-title">Werkbladenbibliotheek</h2><p>Kies een thema en een kant-en-klaar werkblad. Of voeg zelf afbeeldingen toe.</p></div><div class="library-filters"><label>Thema<select id="library-theme"></select></label><label>Oefening<select id="library-kind"><option value="match">Verbind · hetzelfde onderwerp in varianten</option><option value="mixed">Verbind · verschillende voorwerpen</option><option value="detail">Omcirkel · makkelijk (houdingen)</option><option value="detail-fine">Omcirkel · moeilijker (kleine verschillen)</option></select></label></div><div id="library-cards"></div><p id="library-status" role="status"></p></section>
+        <section id="custom-options" class="custom-options" role="tabpanel" aria-labelledby="custom-tab" hidden><h2>Eigen afbeeldingen</h2>
+            <div id="controls">
+                <div class="control-group">
+                    <h3>Stap 1: Kies afbeeldingen</h3>
+                    <input type="file" id="imageUpload" accept="image/png" multiple>
+                    <button id="uploadTriggerBtn">Kies bestanden...</button>
+                    <span id="file-feedback">Geen bestanden geselecteerd.</span>
+                </div>
+
+                <div class="control-group">
+                    <h3>Stap 2: Maak schaduwen</h3>
+                    <button id="create-shadows-btn" disabled>Maak Schaduwen</button>
+                </div>
+
+                <div class="control-group">
+                    <h3>Stap 3: Kies werkblad</h3>
+                    <div id="keuze-werkblad-type">
+                        <label>
+                            <input type="radio" name="werkbladType" value="type2" checked disabled> Twee Kolommen
+                        </label>
+                        <label>
+                            <input type="radio" name="werkbladType" value="type1" disabled> Midden Object
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Stap 4: Toon resultaat</h3>
+                    <button id="render-worksheet-btn" disabled>Toon Werkblad</button>
+                </div>
+                
+                <div class="control-group" id="edit-controls" style="display: none;">
+                    <h3>Stap 5: Verfijnen</h3>
+                    <button id="enable-move-btn">Verplaats & Pas Grootte Aan</button>
+                    
+                    <div id="resize-controls" class="sub-control-group" style="display: none;">
+                        <button id="increase-size-btn">Vergroot</button>
+                        <button id="decrease-size-btn">Verklein</button>
+                        <span id="size-feedback">Selecteer een item</span>
+                    </div>
+                </div>
+            </div>
+</section>
+
+
+        </div>
+
+        <div id="preview-column">
+<div id="right-panel-buttons">
+            <div class="control-group">
+                <h3>Je werkblad</h3><button id="library-solution" disabled>Toon oplossing</button>
+                <button id="downloadPdfBtn">Download getoond blad (PDF)</button><button id="downloadSolutionPdfBtn" disabled>Download oplossingssleutel (PDF)</button>
+                <button id="resetBtn">Opnieuw Maken</button>
+            </div>
+        </div>
+<div id="center-panel" aria-label="Voorbeeld van je werkblad">
+            <div id="werkbladWeergave">
+                <p class="placeholder-text">Kies links een thema en werkblad om hier het voorbeeld te zien.</p>
+            </div>
+        </div>
+        </div>
+
+    </div>
+
 
 <footer>
     <p>© 2025 Isabel Rockelé - Juf Zisa. Alle rechten voorbehouden.</p>
@@ -111,7 +124,7 @@
 <script type="module" src="./guard.js"></script>
 
 <!-- Paginascript NA de guard, eenmalig laden -->
-<script src="schaduw.js"></script>
+<script src="../schaduw-bibliotheek.js?v=20261024-unique9"></script><script src="schaduw.js?v=20261024-unique9"></script>
 </body>
 </html>
 
