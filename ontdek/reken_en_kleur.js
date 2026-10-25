@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         doc.save(bestandsnaam);
     }
+
     // --- Globale variabelen en DOM-elementen ---
     const canvas = document.getElementById("drawingCanvas");
     const ctx = canvas.getContext("2d");
@@ -127,6 +128,15 @@ document.addEventListener("DOMContentLoaded", () => {
         doc.setTextColor(0,0,0); doc.setFont('helvetica','normal'); return 53;
     }
     function showSettingsTab(tab) {
+        const coloring=tab==='coloring';
+        document.body.classList.toggle('coloring-tab-open',coloring);
+        document.getElementById('coloring-panel').hidden=!coloring;
+        if(coloring){
+            const frame=document.getElementById('coloring-frame');
+            if(!frame.getAttribute('src'))frame.src=frame.dataset.src;
+        }
+        settingsTabButtons.forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.settingsTab===tab)));
+
         document.querySelectorAll('.drawing-setting').forEach(el=>el.classList.toggle('settings-hidden',tab!=='drawing'));
         document.querySelectorAll('.worksheet-setting').forEach(el=>el.classList.toggle('settings-hidden',tab!=='worksheet'));
         settingsTabButtons.forEach(btn=>btn.classList.toggle('active',btn.dataset.settingsTab===tab));
@@ -418,7 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.setTextColor(0, 0, 0); doc.text(`${exercise.problem} = `, xPos + 10, currentY);
             currentY += legendLineHeight;
         });
-        await ontdekBewaarPdf(doc, 'reken-en-kleur-werkblad.pdf');
+        await ontdekBewaarPdf(doc, `reken-en-kleur-werkblad.pdf`);
     }
     function drawRedrawPreview() {
         werkbladTitle.textContent = "Werkbladpreview";

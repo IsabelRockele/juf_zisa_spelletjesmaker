@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Reken & Kleur Generator</title>
-    <link rel="stylesheet" href="reken_en_kleur.css">
+    <link rel="stylesheet" href="reken_en_kleur.css?v=20261025-26">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -14,9 +14,19 @@
         <div><h1>Reken &amp; Kleur Generator</h1><p>Maak een kleurplaat met oefeningen, een natekenblad, pixeltekening of spiegelopdracht.</p></div>
     </header>
 
+
+    <nav class="settings-tabs" aria-label="Onderdelen van de generator">
+        <button type="button" class="active" data-settings-tab="drawing" aria-pressed="true">1. Kies of teken</button>
+        <button type="button" data-settings-tab="worksheet" aria-pressed="false">2. Werkblad</button>
+        <button type="button" data-settings-tab="coloring" aria-pressed="false">3. Rekenkleurplaten</button>
+    </nav>
+    <section id="coloring-panel" hidden aria-label="Thematische rekenkleurplaten">
+        <iframe id="coloring-frame" title="Rekenkleurplaten met oefeningen" data-src="kleurplaat-rekenen.html?embedded=1&amp;collectie=20261025-26"></iframe>
+    </section>
+
     <div id="main-content">
         <div id="left-panel">
-            <div class="settings-tabs"><button type="button" class="active" data-settings-tab="drawing">1. Kies of teken</button><button type="button" data-settings-tab="worksheet">2. Werkblad</button></div>
+
             <details class="tool-guide drawing-setting">
                 <summary>Wat kun je met deze tool maken?</summary>
                 <p>Teken zelf een eenvoudige pixeltekening of kies een kant-en-klaar voorbeeld uit de catalogus. Zisa zet je ontwerp daarna om in een afdrukbaar werkblad.</p>
@@ -103,7 +113,7 @@
                         <label><input type="checkbox" name="tafel" value="all" checked> Alle</label>
                     </div>
                 </div>
-                
+
                <div class="control-group drawing-setting grid-settings-card">
                     <h3>Raster en afmetingen</h3>
                     <div style="display: flex; gap: 10px; justify-content: space-between;">
@@ -189,7 +199,7 @@
                 <h2 id="werkblad-title">Werkblad Voorbeeld</h2>
                 <button id="sluit-werkblad-btn">&times;</button>
             </header>
-            
+
             <div class="worksheet-paper">
                 <div class="worksheet-identity"><span>Naam: <i></i></span><span>Datum: <i></i></span></div>
                 <h1 id="worksheet-preview-title">Reken en kleur</h1>
@@ -209,6 +219,6 @@
         </div>
     </div>
 
-    <script src="reken_en_kleur.js"></script>
+    <script src="reken_en_kleur.js?v=20261025-26"></script>
 </body>
 </html>

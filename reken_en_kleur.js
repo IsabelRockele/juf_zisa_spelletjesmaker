@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const undoBtn = document.getElementById('undoBtn');
     const redoBtn = document.getElementById('redoBtn');
     const clearDrawingBtn = document.getElementById('clearDrawingBtn');
+    const nextToWorksheetBtn = document.getElementById('nextToWorksheetBtn');
     const showPreviewBtn = document.getElementById('showPreviewBtn');
     const operationTypeRadios = document.querySelectorAll('input[name="operationType"]');
     const rangeControls = document.getElementById('rangeControls');
@@ -119,6 +120,15 @@ document.addEventListener("DOMContentLoaded", () => {
         doc.setTextColor(0,0,0); doc.setFont('helvetica','normal'); return 53;
     }
     function showSettingsTab(tab) {
+        const coloring=tab==='coloring';
+        document.body.classList.toggle('coloring-tab-open',coloring);
+        document.getElementById('coloring-panel').hidden=!coloring;
+        if(coloring){
+            const frame=document.getElementById('coloring-frame');
+            if(!frame.getAttribute('src'))frame.src=frame.dataset.src;
+        }
+        settingsTabButtons.forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.settingsTab===tab)));
+
         document.querySelectorAll('.drawing-setting').forEach(el=>el.classList.toggle('settings-hidden',tab!=='drawing'));
         document.querySelectorAll('.worksheet-setting').forEach(el=>el.classList.toggle('settings-hidden',tab!=='worksheet'));
         settingsTabButtons.forEach(btn=>btn.classList.toggle('active',btn.dataset.settingsTab===tab));
@@ -355,8 +365,18 @@ document.addEventListener("DOMContentLoaded", () => {
     function drawExercisesPreview() {
         werkbladTitle.textContent = "Werkbladpreview"; werkbladLegendContainer.style.display = 'block'; werkbladLegendTitle.textContent = "Kleurcode:";
         const { legendData, distractorNumbers } = getWorksheetData();
-        const exerciseCount=[...legendData.values()].reduce((sum,list)=>sum+list.length,0),legendReserve=48+Math.ceil(exerciseCount/2)*27;
-        const metrics=previewPageMetrics(legendReserve),werkbladCellSize=Math.min(metrics.width/gridWidth,metrics.maxCanvasHeight/gridHeight);
+        generateAndDisplayLegend(legendData);
+        const pageWidth = worksheetPaper.clientWidth;
+        const pageHeight = pageWidth * 297 / 210;
+        worksheetPaper.style.height = `${pageHeight}px`;
+        const paperRect = worksheetPaper.getBoundingClientRect();
+        const canvasTop = werkbladCanvas.getBoundingClientRect().top - paperRect.top;
+        const paperStyle = getComputedStyle(worksheetPaper);
+        const bottomPadding = parseFloat(paperStyle.paddingBottom) || 0;
+        const legendHeight = werkbladLegendContainer.getBoundingClientRect().height;
+        const availableCanvasHeight = Math.max(40, pageHeight - canvasTop - legendHeight - bottomPadding - 16);
+        const availableCanvasWidth = Math.max(180, pageWidth - 64);
+        const werkbladCellSize=Math.min(availableCanvasWidth/gridWidth,availableCanvasHeight/gridHeight);
         werkbladCanvas.width = werkbladCellSize*gridWidth; werkbladCanvas.height = werkbladCellSize*gridHeight;
         werkbladCtx.clearRect(0, 0, werkbladCanvas.width, werkbladCanvas.height);
         drawGridLines(werkbladCtx, gridWidth, gridHeight, werkbladCellSize);
@@ -375,7 +395,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         cachedExercisePreview = {legendData,distractorNumbers,gridNumbers};
-        generateAndDisplayLegend(legendData);
     }
     async function generateExercisesPdf() {
         const { jsPDF } = window.jspdf; const doc = new jsPDF('p', 'mm', 'a4');
@@ -690,6 +709,7 @@ document.addEventListener("DOMContentLoaded", () => {
     worksheetTitleInput.addEventListener('input', updateWorksheetHeaderPreview);
     worksheetInstructionInput.addEventListener('input', updateWorksheetHeaderPreview);
     settingsTabButtons.forEach(btn=>btn.addEventListener('click',()=>showSettingsTab(btn.dataset.settingsTab)));
+    nextToWorksheetBtn.addEventListener('click', () => showSettingsTab('worksheet'));
 
     // --- INITIALISATIE ---
     async function init() {

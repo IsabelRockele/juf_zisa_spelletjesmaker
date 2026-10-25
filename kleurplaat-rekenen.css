@@ -1,0 +1,36 @@
+*{box-sizing:border-box}body{margin:0;background:#f2f6f8;color:#243b49;font:16px system-ui,sans-serif}header{padding:22px 4%;background:#fff;border-bottom:1px solid #dce5e9}header a{color:#237c80}h1{margin:10px 0 4px}header p{margin:0}main{display:grid;grid-template-columns:310px minmax(0,820px);gap:28px;padding:28px;justify-content:center}aside{background:white;padding:22px;border-radius:16px;align-self:start}label{display:block;margin:10px 0}select,button{width:100%;padding:11px;border:1px solid #b9cdd2;border-radius:7px;font:inherit}select{margin-top:6px}fieldset{border:1px solid #dce5e9;margin:18px 0;padding:12px}#tables{display:grid;grid-template-columns:repeat(5,1fr)}#tables label{font-size:14px}button{background:#237c80;color:white;cursor:pointer;margin-top:10px}button+button{background:white;color:#237c80}.hint,#status{font-size:13px;line-height:1.6}#status{color:#a13623}#preview{background:white;padding:28px;box-shadow:0 5px 25px #243b4914;color:#111}#preview h2{text-align:center;margin:4px 0 12px;font-size:29px}.name{display:flex;justify-content:space-between;font-size:14px}.instruction{text-align:center;font-size:14px}svg{display:block;width:100%;height:auto}.key{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:16px}.key span{display:flex;align-items:center;gap:6px;font-size:14px}.key i{width:18px;height:18px;border:1px solid #333;border-radius:50%;print-color-adjust:exact;-webkit-print-color-adjust:exact}.solution{text-align:center;font-weight:bold}@media(max-width:800px){main{grid-template-columns:1fr;padding:14px}#preview{padding:15px}}@page{size:A4;margin:12mm}@media print{body{background:white}header,aside{display:none}main{display:block;padding:0}#preview{box-shadow:none;padding:0;width:100%}svg{max-height:220mm}.key{margin-top:8px}}
+/* Use the available workspace instead of centering a fixed-width pair of panels. */
+header{padding-left:20px;padding-right:20px}
+main{grid-template-columns:310px minmax(0,1fr);gap:20px;padding:20px;width:100%;justify-content:stretch;align-items:start}
+aside{min-width:0}
+#preview{min-width:0}
+#preview{width:min(100%,720px);justify-self:center;padding:20px}
+#status{color:#237c80}
+.name{justify-content:flex-start;gap:20px;flex-wrap:wrap}
+.name span{white-space:nowrap}
+.name{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.name span{display:flex;gap:8px;align-items:baseline}
+.name i{display:block;flex:1;border-bottom:1px solid #333;height:1em}
+html[data-preview-size="normal"] #preview{width:min(100%,720px)}
+html[data-preview-size="large"] #preview{width:min(100%,960px)}
+#preview h2{font-size:clamp(18px,1.8vw,26px)}
+@media(max-width:800px){main{grid-template-columns:1fr;padding:12px;gap:14px}}
+@media print{main{display:block;padding:0}#preview,html[data-preview-size] #preview{width:100%;padding:0}svg{max-height:205mm}#preview h2{font-size:24px}.key{gap:6px 12px}.key span{font-size:12px}}
+@page{size:A4;margin:14mm}
+@media print{svg{height:198mm;max-height:198mm}#preview h2{font-size:20pt;margin:0 0 3mm}.name{font-size:10pt;margin:2mm 0;gap:12mm}.instruction{font-size:9pt;line-height:1.3;margin:2mm 0 3mm}.key{display:grid;grid-template-columns:repeat(3,1fr);gap:2mm 4mm;margin:3mm 0 0}.key span{font-size:9pt;white-space:nowrap}.solution{margin:2mm 0;font-size:10pt}}
+
+/* Shared worksheet heading and left-aligned color key. */
+#preview h2{border:2px solid #222;padding:10px 12px;margin:0 0 22px;line-height:1.25}
+.name{margin-bottom:14px}
+.key{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));justify-content:start;gap:9px 14px;text-align:left}
+.key span{font-size:13px;white-space:nowrap}
+.key i{flex-shrink:0}
+@media(max-width:500px){.key{grid-template-columns:repeat(2,minmax(0,1fr))}.key span{font-size:12px}}
+@media print{#preview h2{padding:3mm;margin:0 0 6mm}.name{margin:0 0 3mm}.key{grid-template-columns:repeat(3,minmax(0,1fr));justify-content:start}}
+
+/* Readable color key inset beneath the drawing. */
+.key{padding-left:24px;gap:11px 14px}.key span{font-size:15px}
+@media(max-width:500px){.key{padding-left:12px}.key span{font-size:14px}}
+@media print{.key{padding-left:6mm;gap:2.5mm 4mm}.key span{font-size:11pt}}
+
+.embedded-coloring body>header{display:none}

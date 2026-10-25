@@ -379,3 +379,20 @@ button{border:0;border-radius:9px;padding:9px 12px;background:var(--zisa-blue);c
 #werkblad-knoppen{order:2;position:sticky;top:78px;z-index:25;width:100%;margin:0 0 12px;padding:9px;border:1px solid var(--zisa-line);border-radius:10px;background:#eef2f6;box-shadow:0 3px 10px rgba(28,59,89,.08)}
 .worksheet-paper{order:3}.worksheet-preview-open #right-panel-buttons{display:none}.worksheet-preview-open #center-panel{padding-top:12px}.preview-active>.design-stage-heading,.preview-active>#drawingCanvasContainer{display:none}
 .worksheet-paper{min-height:0;overflow:hidden}.worksheet-paper #werkblad-canvas{display:block;width:auto;max-width:100%;height:auto;margin-left:auto;margin-right:auto}
+
+/* Compact colored tabs remain available above each tool. */
+.settings-tabs{position:relative;top:auto;display:flex;flex-wrap:nowrap;gap:8px;max-width:100%;margin:0;padding:10px 18px 8px;border:0;border-bottom:1px solid #d5e1eb;border-radius:0;overflow-x:scroll;overflow-y:hidden;scrollbar-width:auto;scrollbar-color:#8ca8bd #edf2f6;background:#fff;flex-shrink:0}
+.settings-tabs::-webkit-scrollbar{height:9px}.settings-tabs::-webkit-scrollbar-track{background:#edf2f6}.settings-tabs::-webkit-scrollbar-thumb{background:#8ca8bd;border-radius:6px}
+.settings-tabs button{flex:0 0 auto;width:164px;min-height:39px;padding:8px 10px;font-size:.82rem;white-space:nowrap;border:2px solid transparent}
+.settings-tabs button[data-settings-tab="drawing"]{background:#dceafa;color:#174a73}
+.settings-tabs button[data-settings-tab="worksheet"]{background:#dff1e7;color:#21603d}
+.settings-tabs button[data-settings-tab="coloring"]{background:#efe1f8;color:#713e8d}
+.settings-tabs button.active{border-color:currentColor;box-shadow:inset 0 -3px 0 currentColor}
+.settings-tabs button[data-settings-tab="drawing"].active{background:#174a73;color:#fff}
+.settings-tabs button[data-settings-tab="worksheet"].active{background:#21603d;color:#fff}
+.settings-tabs button[data-settings-tab="coloring"].active{background:#713e8d;color:#fff}
+.coloring-tab-open #main-content{display:none}
+#coloring-panel[hidden]{display:none}
+#coloring-panel{flex:1;min-height:calc(100vh - 160px)}
+#coloring-frame{display:block;width:100%;height:calc(100vh - 160px);min-height:650px;border:0;background:#f2f6f8}
+@media(max-width:520px){.settings-tabs{padding-left:10px}.settings-tabs button{width:150px}}
