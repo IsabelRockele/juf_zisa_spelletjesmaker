@@ -200,6 +200,12 @@ function genereerPlusTot20(brug) {
 }
 
 function genereerMinTot20(brug) {
+  // Met brug vertrekt van een getal met eenheden, nooit van een rond tiental.
+  if (brug === 'met') {
+    const a = randInt(11, 18);
+    const b = randInt(a % 10 + 1, 9);
+    return { vraag: `${a} - ${b}`, antwoord: a - b };
+  }
   // Brug bij aftrekken: eenheden aftrekker > eenheden aftrektal
   let a, b;
   let pogingen = 0;
@@ -208,7 +214,7 @@ function genereerMinTot20(brug) {
     b = randInt(1, a);
     const eenhA = a % 10;
     const eenhB = b % 10;
-    const heeftBrug = (eenhB > eenhA) && (a > 10) && (b <= 10);
+    const heeftBrug = (eenhB > eenhA) && (eenhA !== 0) && (a > 10) && (b <= 10);
     if (brug === 'met' && heeftBrug) break;
     if (brug === 'zonder' && !heeftBrug) break;
     pogingen++;
@@ -254,6 +260,12 @@ function genereerPlusTot100(brug) {
 }
 
 function genereerMinTot100(brug) {
+  // Met brug vertrekt van een getal met eenheden, nooit van een rond tiental.
+  if (brug === 'met') {
+    const a = randInt(1, 9) * 10 + randInt(1, 8);
+    const b = randInt(0, Math.floor(a / 10) - 1) * 10 + randInt(a % 10 + 1, 9);
+    return { vraag: `${a} - ${b}`, antwoord: a - b };
+  }
   let a, b;
   let pogingen = 0;
   while (pogingen < 50) {
@@ -261,7 +273,7 @@ function genereerMinTot100(brug) {
     b = randInt(2, a - 1);
     const eenhA = a % 10;
     const eenhB = b % 10;
-    const heeftBrug = (eenhB > eenhA);
+    const heeftBrug = (eenhB > eenhA) && (eenhA !== 0);
     if (brug === 'met' && heeftBrug) break;
     if (brug === 'zonder' && !heeftBrug) break;
     pogingen++;
@@ -330,7 +342,7 @@ function genereerGebalanceerdRekenen(max, config, aantal) {
       if (antwoord < 0 || antwoord > max) continue;
       const brug = bewerking === 'plus'
         ? a % 10 + b % 10 > 10 && a % 10 !== 0 && b % 10 !== 0
-        : b % 10 > a % 10 && a > 10 && b <= 10;
+        : b % 10 > a % 10 && a % 10 !== 0 && a > 10 && b <= 10;
       if (max === 20 && config.brug !== 'gemengd' && brug !== (config.brug === 'met')) continue;
       pool.push({ vraag: a + (bewerking === 'plus' ? ' + ' : ' - ') + b,
         antwoord, een: b === 1 || (bewerking === 'plus' && a === 1), nul: b === 0 });
