@@ -64,7 +64,9 @@ function start() {
   const preview = document.getElementById('preview');
   const toolbar = document.createElement('div'); toolbar.className = 'ontdek-werkbalk';
   toolbar.innerHTML = '<span class="ontdek-pagina-status">Ontdek: deze PDF’s tellen 1–2 pagina’s · download mogelijk · PRO heeft geen paginalimiet</span><span class="ontdek-download-status">Gratis account nodig voor een PDF zonder watermerk</span>';
-  preview?.insertAdjacentElement('beforebegin', toolbar);
+  const zijbalk = document.querySelector('.tp-zijbalk');
+  if (zijbalk) zijbalk.appendChild(toolbar);
+  else preview?.insertAdjacentElement('beforebegin', toolbar);
 
   blokkeerProKaart('modus-flits', 'De volledige flits- en smartboardmodus is beschikbaar in PRO. In Ontdek kun je de oefeningen samenstellen en de voorbeeldweergave bekijken.');
   const observer = new MutationObserver(() => {

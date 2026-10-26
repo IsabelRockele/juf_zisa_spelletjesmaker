@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="preview-editor.css?v=20261026-preview4">
 <link rel="stylesheet" href="ontdek-tempotoetsen.css?v=1">
 <style>
   /* ── PRO BANNER ──────────────────────────────────────────────────────── */
@@ -64,18 +65,21 @@
     </div>
   </header>
 
+  <aside class="tp-zijbalk" aria-label="Instellingen en toetsvorm">
   <!-- Tabbladen -->
   <div id="tabs" class="tabs"></div>
 
   <!-- Configuratie -->
   <section id="config-paneel" class="config-kaart"></section>
 
-  <!-- Preview -->
-  <section id="preview" class="preview-wrap"></section>
 
   <!-- Modi -->
   <h2 style="margin:28px 0 12px;color:var(--paars);">Hoe wil je de toets gebruiken?</h2>
   <div id="modi" class="modus-grid"></div>
+
+  </aside>
+
+  <section id="preview" class="preview-wrap" aria-label="Voorbeeld en bewerken"></section>
 
 </div>
 
@@ -86,9 +90,10 @@
 <script>window.ISPRO = false;</script>
 
 <!-- Alles in 1 bestand -->
-<script src="app.js?v=20261026-brug"></script>
+<script src="app.js?v=20261026-preview4"></script>
+<script src="preview-editor.js?v=20261026-preview4"></script>
 
-<script type="module" src="ontdek-tempotoetsen.js?v=2"></script>
+<script type="module" src="ontdek-tempotoetsen.js?v=20261026-preview4"></script>
 
 </body>
 </html>

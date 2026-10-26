@@ -819,6 +819,7 @@ function configGeldig() {
 // Preview
 // ============================================
 function updatePreview() {
+  if (window.TempotoetsenPreview) { window.TempotoetsenPreview.updateDay(); return; }
   if (!configGeldig()) {
     document.getElementById('preview').innerHTML =
       '<p style="color:var(--roze);font-weight:700;">Kies minstens één tafel om verder te gaan.</p>';
@@ -861,7 +862,8 @@ function updatePreview() {
 function startFlitsModus() {
   if (!configGeldig()) { alert('Kies eerst je instellingen.'); return; }
 
-  const oefeningen = window.TempotoetsenGen.genereerToets(state.type, huidigeConfig(), 10);
+  const oefeningen = state.huidigeOefeningen.map(o => JSON.parse(JSON.stringify(o)));
+  if (!oefeningen.length) { alert('Voeg eerst een oefening toe in het voorbeeld.'); return; }
 
   const overlay = document.createElement('div');
   overlay.className = 'flits-overlay';
@@ -1278,6 +1280,7 @@ function tekenSplitsingElementen(doc, pos, vraag, cirkelR, vorm) {
 // PDF-EXPORT (papier-modus en antwoordblad-modus)
 // ============================================
 function maakPdfPapier() {
+  if (window.TempotoetsenPreview) { window.TempotoetsenPreview.showDay('papier'); return; }
   if (!configGeldig()) { alert('Kies eerst je instellingen.'); return; }
   const oefeningen = window.TempotoetsenGen.genereerToets(state.type, huidigeConfig(), 10);
 
@@ -1296,6 +1299,7 @@ function maakPdfPapier() {
 }
 
 function maakPdfAntwoordblad(forceerGetalbeeld = false) {
+  if (window.TempotoetsenPreview) { window.TempotoetsenPreview.showDay('antwoordblad'); return; }
   genereerPdf({
     titel: toetsTitel(),
     oefeningen: forceerGetalbeeld
@@ -1320,12 +1324,14 @@ function toetsTitel() {
   return labels[state.type] || 'Tempotoets';
 }
 
-function genereerPdf({ titel, oefeningen, modus }) {
+function genereerPdf({ titel, oefeningen, modus, kolommen = null, alleenVoorbeeld = false }) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const breedte = 210;
   const hoogte = 297;
   const marge = 18;
+
+  const posities = kolommen ? kolommen.flatMap((kolom, k) => kolom.map((o, rij) => ({ kolom: k, rij }))) : null;
 
   // --- Header ---
   doc.setFillColor(245, 159, 59); // oranje
@@ -1371,7 +1377,26 @@ function genereerPdf({ titel, oefeningen, modus }) {
   // (Kinderen schrijven gewoon het antwoord op terwijl je flitst)
   const splitsingenAlsTekening = isSplitsingen && modus !== 'antwoordblad';
 
-  if (splitsingenAlsTekening) {
+  if (kolommen) {
+    const kolomBreedte = (breedte - marge * 2) / 2;
+    const rijHoogte = oefeningen.some(o => o.vraag?.type === 'splitsing') && modus === 'papier' ? 37 : 24;
+    let nummer = 0;
+    kolommen.forEach((kolom, k) => kolom.forEach((o, rij) => {
+      const x = marge + k * kolomBreedte;
+      const y = 82 + rij * rijHoogte;
+      nummer++;
+      if (modus === 'papier' && o.vraag?.type === 'splitsing') {
+        tekenSplitsingOpPdf(doc, o.vraag, x + kolomBreedte / 2, y + 10, kolomBreedte * .8, 23, nummer, modus);
+      } else {
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(160, 160, 160);
+        doc.text(nummer + '.', x, y);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(45, 42, 38);
+        if (modus === 'papier') doc.text((typeof o.vraag === 'string' ? o.vraag : '') + '  =', x + 8, y);
+        doc.setDrawColor(190, 190, 190); doc.setLineWidth(.4);
+        doc.line(x + (modus === 'papier' ? 50 : 8), y + 1, x + kolomBreedte - 6, y + 1);
+      }
+    }));
+  } else if (splitsingenAlsTekening) {
     // Splitsingen: 2 rijen × 5 kolommen
     const startY = 68;
     const kolomBreedte = (breedte - marge * 2) / 5;
@@ -1394,8 +1419,8 @@ function genereerPdf({ titel, oefeningen, modus }) {
     doc.setTextColor(45, 42, 38);
 
     oefeningen.forEach((o, i) => {
-      const kolom = i < 5 ? 0 : 1;
-      const rij = i % 5;
+      const kolom = posities ? posities[i].kolom : i < 5 ? 0 : 1;
+      const rij = posities ? posities[i].rij : i % 5;
       const x = marge + kolom * kolomBreedte;
       const y = startY + rij * regelHoogte;
 
@@ -1450,8 +1475,8 @@ function genereerPdf({ titel, oefeningen, modus }) {
     let antY = 40;
 
     oefeningen.forEach((o, i) => {
-      const kolom = i < 5 ? 0 : 1;
-      const rij = i % 5;
+      const kolom = posities ? posities[i].kolom : i < 5 ? 0 : 1;
+      const rij = posities ? posities[i].rij : i % 5;
       const x = marge + kolom * antKolomBreedte;
       const y = antY + rij * antRegelHoogte;
 
@@ -1485,6 +1510,7 @@ function genereerPdf({ titel, oefeningen, modus }) {
     });
   }
 
+  if (alleenVoorbeeld) return { doc, naam: `${titel.replace(/—/g, '-')}.pdf` };
   doc.save(`${titel.replace(/—/g, '-')}.pdf`);
 }
 
@@ -1615,7 +1641,7 @@ function openWeekbladDialoog(variant) {
   const intro = isHuistaak
     ? 'Kies welke dagen het kind thuis oefent en welk oefeningtype per dag. Ouders noteren hoe lang het kind nodig had (doel: binnen 1 minuut).'
     : 'Kies welke dagen op het blad komen en welk oefeningtype per dag.';
-  const knopTekst = isHuistaak ? '🏠 Huistaakblad maken' : '📄 Weekblad maken';
+  const knopTekst = 'Voorbeeld bekijken en bewerken';
 
   const overlay = document.createElement('div');
   overlay.className = 'week-overlay';
@@ -2228,6 +2254,7 @@ function maakWeekbladPdf() {
       kort: slot.kort,
       datum: st.datum || '',
       type,
+      config: JSON.parse(JSON.stringify(getConfigVoorDag(slot.stateKey))),
       vorm,
       oefeningen: vorm === 'invulblad'
         ? null
@@ -2239,7 +2266,8 @@ function maakWeekbladPdf() {
   // 1–5 dagen → 1 blad. 6 dagen → 4+2. 7 dagen → 4+3.
   const groepen = splitsInBladen(dagenMetOef);
 
-  genereerWeekbladPdf(groepen, weekState.weekVan || '', isHuistaak);
+  if (window.TempotoetsenPreview) window.TempotoetsenPreview.openWeek(dagenMetOef, weekState.weekVan || '', isHuistaak);
+  else genereerWeekbladPdf(groepen, weekState.weekVan || '', isHuistaak);
   return true;
 }
 
@@ -2252,7 +2280,7 @@ function splitsInBladen(dagen) {
   return [dagen.slice(0, 5), dagen.slice(5)];
 }
 
-function genereerWeekbladPdf(groepen, weekVan, isHuistaak) {
+function genereerWeekbladPdf(groepen, weekVan, isHuistaak, alleenVoorbeeld = false) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
   const breedte = 297;
@@ -2414,7 +2442,7 @@ function genereerWeekbladPdf(groepen, weekVan, isHuistaak) {
       doc.setTextColor(107, 76, 155);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      doc.text('___/10', scoreX + scoreBreedte / 2, scoreY + 4.2, { align: 'center' });
+      doc.text('___/' + (d.vorm === 'invulblad' ? (d.aantal ?? 10) : d.oefeningen.length), scoreX + scoreBreedte / 2, scoreY + 4.2, { align: 'center' });
 
       // Bij huistaak: ruim tijd-vakje ONDER de paarse balk
       if (isHuistaak) {
@@ -2464,7 +2492,7 @@ function genereerWeekbladPdf(groepen, weekVan, isHuistaak) {
       const dagIsInvulblad = d.vorm === 'invulblad';
 
       if (dagIsInvulblad) {
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < (d.aantal ?? 10); i++) {
           const y = oefStartY + i * oefHoogte + 6;
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
@@ -2638,6 +2666,7 @@ function genereerWeekbladPdf(groepen, weekVan, isHuistaak) {
   } else {
     naam = allesInvulblad ? 'Tempotoets-Weekblad-invulblad.pdf' : 'Tempotoets-Weekblad.pdf';
   }
+  if (alleenVoorbeeld) return { doc, naam };
   doc.save(naam);
 }
 
@@ -2676,8 +2705,8 @@ function renderModi() {
   document.getElementById('modus-flits').addEventListener('click', startFlitsModus);
   document.getElementById('modus-papier').addEventListener('click', maakPdfPapier);
   document.getElementById('modus-antwblad').addEventListener('click', () => maakPdfAntwoordblad(false));
-  document.getElementById('modus-week').addEventListener('click', () => openWeekbladDialoog('weekblad'));
-  document.getElementById('modus-huistaak').addEventListener('click', () => openWeekbladDialoog('huistaak'));
+  document.getElementById('modus-week').addEventListener('click', () => window.TempotoetsenPreview ? window.TempotoetsenPreview.beginWeek('weekblad') : openWeekbladDialoog('weekblad'));
+  document.getElementById('modus-huistaak').addEventListener('click', () => window.TempotoetsenPreview ? window.TempotoetsenPreview.beginWeek('huistaak') : openWeekbladDialoog('huistaak'));
 }
 
 // ============================================
@@ -2721,7 +2750,7 @@ const uitlegStappen = [
         <li><strong>Bewerking</strong>: alleen +, alleen −, of gemengd (dan altijd 5 plus + 5 min)</li>
         <li><strong>Brug</strong>: zonder brug, met brug, of gemengd</li>
       </ul>
-      <p>In het <strong>Voorbeeld</strong> zie je meteen 10 oefeningen. Klik <strong>🔄 Nieuwe voorbeelden</strong> voor een andere set.</p>`
+      <p>In het <strong>Voorbeeld</strong> zie je de echte PDF en de bewerkbare kolommen. Vervang een oefening met <strong>↻</strong>, verwijder ze met <strong>×</strong> of voeg een oefening toe. Via <strong>Instellingen van deze kolom</strong> pas je alleen die kolom aan. Download daarna precies dit ontwerp.</p>`
   },
   {
     titel: 'Stap 3 — De 4 manieren',
@@ -2738,7 +2767,7 @@ const uitlegStappen = [
   {
     titel: 'Stap 4 — Het weekblad',
     illustratie: 'weekblad',
-    tekst: `<p>Met één klik op <strong>📅 Weekblad</strong> opent een dialoogvenster waar je een hele week in elkaar zet.</p>
+    tekst: `<p>Kies links <strong>Weekblad</strong>. Het blad verschijnt rechts. Klik op een dagkolom om links de instellingen van die kolom aan te passen. Via <strong>Dagen en volgorde</strong> voeg je dagen toe of verander je hun volgorde.</p>
       <p>Per dag kun je:</p>
       <ul>
         <li>De dag <strong>aan- of uitvinken</strong> (bv. woensdag weglaten bij een brugdag)</li>
