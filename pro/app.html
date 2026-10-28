@@ -1184,6 +1184,7 @@
   document.getElementById('logout').onclick = () => signOut(auth);
 
   window.onProReady = ({ user, expiresAt, limit }) => {
+    import('../zisa-bezoekers.js').then(() => window.startZisaBezoekers('pro'));
     window._zisaUser = user; // consent.js heeft dit nodig
     try { userPill.textContent = user.email ?? user.uid; } catch {}
     // Geef gebruiker door aan vraagstukken module voor per-gebruiker limiet

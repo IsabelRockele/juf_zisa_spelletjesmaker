@@ -50,6 +50,7 @@ onAuthStateChanged(auth, (user) => {
   } else {
     // Wel ingelogd → toon pagina + voeg knoppen toe aan sidebar
     currentUser = user;
+    import('./zisa-bezoekers.js').then(() => window.startZisaBezoekers('gratis'));
     document.documentElement.style.visibility = 'visible';
     addSidebarButtons();
   }
@@ -64,6 +65,21 @@ function addSidebarButtons() {
 }
 
 function insertButtons() {
+  document.getElementById('zisa-mijn-statistieken')?.remove();
+  if (currentUser?.email?.toLowerCase() === 'isabel.rockele@bsdelinde.net') {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+      const statisticsLink = document.createElement('a');
+      statisticsLink.id = 'zisa-mijn-statistieken';
+      statisticsLink.href = new URL('./mijn-statistieken.html', import.meta.url).href;
+      statisticsLink.textContent = '📊 Mijn statistieken';
+      statisticsLink.style.cssText = 'display:block;width:100%;padding:12px 10px;margin:10px 0;background:#ffcf56;color:#2a2a2a;border-radius:10px;text-align:center;text-decoration:none;font-weight:bold;';
+      const logo = sidebar.querySelector('.sidebar-logo');
+      if (logo) logo.after(statisticsLink);
+      else sidebar.prepend(statisticsLink);
+    }
+  }
+
   const sidebarHelp = document.querySelector('.sidebar-help');
   if (!sidebarHelp) return;
 

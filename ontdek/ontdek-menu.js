@@ -1,4 +1,6 @@
 import { startOntdekAuth } from './ontdek-auth.js';
+import '../zisa-bezoekers.js';
+window.startZisaBezoekers('ontdek');
 
 const BESCHIKBAAR = new Map([
   ["Zisa's tekenwereld", "../tekenwereld/index.html?editie=ontdek"],
