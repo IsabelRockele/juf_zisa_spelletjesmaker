@@ -1,8 +1,8 @@
 // Alleen aantallen en vaste toolnamen; geen accountgegevens of materiaalinhoud.
 (function(){
   'use strict';
-  window.startZisaBezoekers=function(site){
-    if(window.__zisaBezoekers||!['tools.jufzisa.be','demo.jufzisa.be','isabelrockele.github.io'].includes(location.hostname)||window.top!==window.self)return;
+  window.startZisaBezoekers=function(site,{exclude=()=>false}={}){
+    if(exclude()||window.__zisaBezoekers||!['tools.jufzisa.be','demo.jufzisa.be','isabelrockele.github.io'].includes(location.hostname)||window.top!==window.self)return;
     window.__zisaBezoekers=true;
     const endpoint='https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net/recordZisaTraffic';
     const test=new URLSearchParams(location.search).get('zisa_traffic_test')==='1';
@@ -17,6 +17,7 @@
       return value;
     }
     async function send(event,tool){
+      if(exclude())return;
       const state=identity(),body={site,visitor:state.visitor,visit:state.visit,id:crypto.randomUUID(),event,test};if(tool)body.tool=tool;
       for(let i=0;i<3;i++){
         try{const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),credentials:'omit',referrerPolicy:'no-referrer',keepalive:true});if(!r.ok)throw Error();const result=await r.json();document.documentElement.dataset.zisaTrafficStatus=result.status;return;}catch{if(i<2)await new Promise(resolve=>setTimeout(resolve,1000*(i+1)));}

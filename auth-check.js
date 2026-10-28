@@ -50,7 +50,10 @@ onAuthStateChanged(auth, (user) => {
   } else {
     // Wel ingelogd → toon pagina + voeg knoppen toe aan sidebar
     currentUser = user;
-    import('./zisa-bezoekers.js').then(() => window.startZisaBezoekers('gratis'));
+    const eigenAccount = () => auth.currentUser?.email?.toLowerCase() === 'isabel.rockele@bsdelinde.net';
+    if (!eigenAccount()) {
+      import('./zisa-bezoekers.js').then(() => window.startZisaBezoekers('gratis', { exclude: eigenAccount }));
+    }
     document.documentElement.style.visibility = 'visible';
     addSidebarButtons();
   }
