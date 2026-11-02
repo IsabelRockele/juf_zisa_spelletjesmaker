@@ -2,28 +2,81 @@
 const Tot100Hulp = (() => {
   const modes = ['vakje', 'mab', 'sprongen', 'sprongen-leeg', 'lijnen'];
   function actief(blok) {
+    if(blok.tot100Hulp?.includes('tiental'))return true;
+    if (Number(blok.niveau) === 100 && blok.brug === 'met' && ['optellen','aftrekken'].includes(blok.bewerking) && blok.tot100Hulp?.includes('brug')) return true;
     return Number(blok.niveau) === 100 && blok.brug === 'zonder' &&
       ['optellen', 'aftrekken'].includes(blok.bewerking) &&
       modes.slice(1).includes(blok.tot100Hulp);
   }
-  function gegevens(oef) {
+  function gegevens(oef, blok = {}) {
     const m = oef.vraag.match(/^(\d+)\s*([+−-])\s*(\d+)/);
     if (!m) return null;
     const a = Number(m[1]), b = Number(m[3]), min = m[2] !== '+';
+    if(blok.tot100Hulp?.includes('tiental'))return {a,b,op:'+',tiental:true};
+    if (blok.tot100Hulp?.includes('brug')) {if(a<11 || b<1 || (min ? a<b || a%10>=b%10 : a+b>100 || a%10+b%10<=10))return null;const t=Math.floor(b/10)*10,e=b%10;return {a,b,t,e,tussen:a+(min?-t:t),uit:a+(min?-b:b),min,op:min?'−':'+',brug:true};}
     if (a < 11 || b < 11 || a >= 100 || b >= 100 || ! (a % 10) || !(b % 10)) return null;
     if (min ? a < b || a % 10 < b % 10 : a + b > 100 || a % 10 + b % 10 > 10) return null;
     const t = Math.floor(b / 10) * 10, e = b % 10, tussen = a + (min ? -t : t);
     return { a, b, min, t, e, tussen, uit: tussen + (min ? -e : e), op: min ? '−' : '+' };
   }
-  function maten(mode) { return mode.startsWith('sprongen') ? [740, 180] : [360, mode === 'mab' ? 350 : 140]; }
+  function maten(mode) { if(mode.startsWith('tiental-')) return [360,80]; if(mode.includes('brug')) return [mode.startsWith('sprongen')?740:360,mode.includes('splits')?240:180]; return mode.startsWith('sprongen') ? [740, 180] : [360, mode === 'mab' ? 350 : 140]; }
   function svg(blok, oef, oplossing = false) {
-    const d = gegevens(oef);
+    const d = gegevens(oef, blok);
     if (!d) return '';
     const mode = blok.tot100Hulp, [w, h] = maten(mode), blauw = '#006bb6';
     let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${d.a} ${d.op} ${d.b}"><rect width="${w}" height="${h}" fill="white"/>`;
     const line = (x,y,X,Y,c='#b9bfc5') => { s += `<path d="M${x} ${y} L${X} ${Y}" fill="none" stroke="${c}" stroke-width="1"/>`; };
     const text = (x,y,v,c='#222',anchor='start',size=17) => { s += `<text x="${x}" y="${y}" fill="${c}" font-family="Arial, sans-serif" font-size="${size}" text-anchor="${anchor}">${v}</text>`; };
     const rect = (x,y,W,H,fill,stroke='#777',rx=0) => { s += `<rect x="${x}" y="${y}" width="${W}" height="${H}" rx="${rx}" fill="${fill}" stroke="${stroke}" stroke-width="0.8"/>`; };
+    if(d.tiental){
+      const lo=Math.floor(d.a/10)*10,hi=lo+10;
+      if(mode.startsWith('tiental-')){
+        const min=mode==='tiental-min'||(mode==='tiental-mix'&&oef.tientalMin),op=min?'−':'+';
+        text(18,42,d.a+' '+op);line(75,48,140,48);text(150,42,'= '+(min?lo:hi));
+        if(oplossing)text(95,42,min?d.a-lo:hi-d.a,blauw);return s+'</svg>';
+      }
+      text(20,65,d.a+' −');text(20,115,d.a+' +');line(72,70,135,70);line(72,120,135,120);text(145,65,'= '+lo);text(145,115,'= '+hi);
+      if(oplossing){text(90,65,d.a-lo,blauw);text(90,115,hi-d.a,blauw);}
+      const bovenElkaar=!!blok.keuzeVoorbeeld;
+      if(bovenElkaar)s+='<g transform="translate(-280 120)">';
+      line(310,125,710,125,'#222');const x=330+(d.a-lo)/10*350;
+      [[330,lo],[x,d.a],[680,hi]].forEach(([X,n])=>{text(X,150,n,'#222','middle');if(n===d.a){s+='<path d="M'+(X-6)+' 119 L'+(X+6)+' 131 M'+(X+6)+' 119 L'+(X-6)+' 131" stroke="'+blauw+'" stroke-width="1.5"/>';}else{s+='<circle cx="'+X+'" cy="125" r="3"/>';}});
+      [[x,330,'−',d.a-lo,'#c33'],[x,680,'+',hi-d.a,'#287d32']].forEach(([X,Y,op,n,c])=>{const cx=(X+Y)/2;s+='<path d="M'+X+' 125 Q'+cx+' 20 '+Y+' 125" fill="none" stroke="'+c+'"/>';const dir=Y>X?1:-1;s+='<path d="M'+(cx-dir*5)+' 67 L'+cx+' 72 L'+(cx-dir*5)+' 77" fill="none" stroke="'+c+'"/>';text(cx,55,op+(oplossing?' '+n:''),c,'middle');line(cx-17,60,cx+17,60);});if(bovenElkaar){s+='</g>';s=s.replace('viewBox="0 0 740 180"','viewBox="0 0 460 300"').replace('width="740" height="180"','width="460" height="300"');}
+      return s+'</svg>';
+    }
+    if(d.brug) {
+      const splits=mode.includes('splits'),as=mode.startsWith('sprongen'),aan=d.min?d.a%10:10-d.a%10;
+      const first=d.b<10?'('+d.a+' '+d.op+' '+aan+') '+d.op+' '+(d.b-aan):'('+d.a+' '+d.op+' '+d.t+') '+d.op+' '+d.e;
+      const mid=d.b<10?(d.a+(d.min?-aan:aan))+' '+d.op+' '+(d.b-aan):d.tussen+' '+d.op+' '+d.e;
+      const ys=[35,85,splits?190:140];text(10,35,d.a+' '+d.op+' '+d.b);
+      ys.forEach((y,i)=>{text(88,y,'=');line(108,y+6,345,y+6);if(oplossing)text(110,y,[first,mid,d.uit][i],blauw);});
+      if(splits && oplossing && d.b>=10){const x=110+mid.length*8-5,n=d.min?d.tussen%10:10-d.tussen%10;line(x,94,x-12,110,blauw);line(x,94,x+12,110,blauw);text(x-12,132,n,blauw,'middle');text(x+12,132,d.e-n,blauw,'middle');}
+      if(as){line(385,145,720,145,'#222');text(d.min?700:405,168,d.a,'#222','middle');s+='<circle cx="'+(d.min?700:405)+'" cy="145" r="3" fill="#222"/>';
+        if(oplossing){
+          const groen='#287d32', y=145;
+          // De top van een kwadratische boog ligt halverwege de controlehoogte.
+          const boog=(x,X,top,label,stippel=false)=>{
+            const cx=(x+X)/2,cy=(y+top)/2;
+            s+='<path d="M'+x+' '+y+' Q'+cx+' '+top+' '+X+' '+y+'" fill="none" stroke="'+groen+'" stroke-width="1.5"'+(stippel?' stroke-dasharray="4 3"':'')+'/>';
+            s+='<path d="M'+(cx-(d.min?-6:6))+' '+(cy-6)+' L'+cx+' '+cy+' L'+(cx-(d.min?-6:6))+' '+(cy+6)+'" fill="none" stroke="'+groen+'" stroke-width="1.5"/>';
+            text(cx,cy-12,d.op+' '+label,groen,'middle');
+          };
+          boog(d.min?700:405,d.min?405:700,-55,d.b);
+          let ns,xs;
+          if(d.b<10){ns=[d.a,d.a+(d.min?-aan:aan),d.uit];xs=[405,550,700];}
+          else {
+            ns=[d.a,d.tussen,d.tussen+(d.min?-d.tussen%10:10-d.tussen%10),d.uit];xs=[405,510,605,700];
+            boog(d.min?595:510,d.min?405:700,35,d.e,true);
+          }
+          if(d.min)xs=xs.map(x=>1105-x);
+          for(let i=1;i<ns.length;i++)boog(xs[i-1],xs[i],ns.length===4&&i>1?95:65,Math.abs(ns[i]-ns[i-1]),true);
+          xs.forEach((x,i)=>{
+            s+='<circle cx="'+x+'" cy="145" r="3" fill="'+groen+'"/>';
+            if(i)text(x,168,ns[i],groen,'middle');
+          });
+        }
+      }return s+'</svg>';
+    }
     if (mode === 'mab') {
       rect(12,8,160,25,'#50b848'); rect(172,8,160,25,'#ffda00');
       text(92,27,'T','#111','middle'); text(252,27,'E','#111','middle');

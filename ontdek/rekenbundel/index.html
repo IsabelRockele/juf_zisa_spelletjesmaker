@@ -361,6 +361,10 @@
             <option value="sprongen">Ingevulde sprongen + 3 schrijflijnen</option>
             <option value="sprongen-leeg">Sprongen om in te vullen + 3 schrijflijnen</option>
             <option value="lijnen">Enkel oefening met 3 schrijflijnen</option>
+<option value="brug-lijnen">Brug: 3 schrijflijnen (2 per rij)</option>
+<option value="brug-splits">Brug: ruimte om zelf te splitsen (2 per rij)</option>
+<option value="sprongen-brug-as">Brug: 3 schrijflijnen + lege getallenas (1 per rij)</option>
+<option value="sprongen-brug-splits">Brug: zelf splitsen + lege getallenas (1 per rij)</option>
           </select>
         </div>
         <label id="tot100-voorbeeld-rij" style="display:none;margin-top:10px">
@@ -720,7 +724,19 @@
       </div>
 
       <!-- Brug -->
-      <div class="config-kaart" id="kaart-gem-brug">
+      <div class="config-kaart" id="gem-tiental-kaart">
+<div class="kaart-titel">Aanvullen en wegdoen tot een tiental</div>
+<label><input type="checkbox" id="gem-tiental"> Deze oefensoort gebruiken (tot 100, zonder brug)</label>
+<label for="gem-tiental-soort" class="tiental-soort-label">Kies het soort oefening</label>
+<select id="gem-tiental-soort" onchange="document.getElementById('gem-tiental-visueel').innerHTML=Tot100Hulp.svg({tot100Hulp:this.value,keuzeVoorbeeld:true},{vraag:'88 + 0',tientalMin:false},true)">
+<option value="sprongen-tiental">Wegdoen én aanvullen met getallenas</option>
+<option value="tiental-plus">Aanvullen tot het volgende tiental</option>
+<option value="tiental-min">Wegdoen tot het vorige tiental</option>
+<option value="tiental-mix">Aanvullen en wegdoen door elkaar</option>
+</select><div id="gem-tiental-visueel"></div>
+<label><input type="checkbox" id="gem-tiental-voorbeeld"> Eerste oefening als uitgewerkt voorbeeld</label>
+</div>
+<div class="config-kaart" id="kaart-gem-brug">
         <div class="kaart-titel"><div class="icon">🌉</div>Bruglogica</div>
         <div class="form-rij">
           <label>Met of zonder brug?</label>
@@ -2438,6 +2454,7 @@
 
 <link rel="stylesheet" href="halveren-verdubbelen.css?v=2">
 <script src="modules/halveren-verdubbelen.js?v=3"></script>
+<script>document.getElementById('gem-tiental-visueel').innerHTML=Tot100Hulp.svg({tot100Hulp:'sprongen-tiental',keuzeVoorbeeld:true},{vraag:'88 + 0'},true);</script>
 <script src="app.js?v=tafels-20261015"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is

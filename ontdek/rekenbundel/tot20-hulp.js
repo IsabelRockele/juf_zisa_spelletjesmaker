@@ -143,7 +143,7 @@ const Tot20Hulp = (() => {
     details.innerHTML = '<summary>Voorbeeld</summary><div class="hulp-voorbeeld-inhoud"></div>';
     details.addEventListener('toggle', () => {
       if (!details.open) return;
-      document.querySelectorAll('.hulp-voorbeeld[open]').forEach(el => { if (el !== details) el.open = false; });
+
       voorbeeld(details);
     });
     rij.append(details);
@@ -167,7 +167,7 @@ const Tot20Hulp = (() => {
       cb.closest('.hulp-keuzerij').style.display = passend ? '' : 'none';
       if (!passend) { cb.checked=false; cb.closest('label').classList.remove('geselecteerd'); cb.closest('label').querySelector('.vink-box').textContent=''; }
     });
-    document.querySelectorAll('.hulp-voorbeeld[open]').forEach(el => { el.open = false; });
+    document.querySelectorAll('#kaart-hulpmiddelen .hulp-voorbeeld').forEach(el => { el.open = true; voorbeeld(el); });
   }
   return {soorten, soort, actief, maten, svg, png, update};
 })();

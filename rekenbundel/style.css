@@ -3857,3 +3857,19 @@ body.pdf-opname .komma-h-schijf-som{font-size:27px}
 .rr-soort-keuzes .radio-chip { display:flex; align-items:center; width:calc(100% - 80px); min-height:46px; padding:9px 10px; margin:0; border:0; border-radius:7px; font-size:13px; }
 .oefeningen-grid.tot20-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
 .tot20-oefening svg { width:100%; height:auto; }
+
+/* Hulpmiddelen: twee keuzes naast elkaar, elk met zichtbaar voorbeeld. */
+#cg-hulpmiddelen, #tot100-hulp-opties, #kaart-hulpmiddelen .tot20-keuzes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; align-items:start; }
+#tot100-hulp-opties { grid-column:1 / -1; }
+#kaart-hulpmiddelen .hulp-keuzerij > .vink-chip { width:100%; box-sizing:border-box; min-height:60px; }
+#kaart-hulpmiddelen .hulp-voorbeeld > summary { display:none; }
+#kaart-hulpmiddelen .hulp-voorbeeld-inhoud { box-sizing:border-box; padding:8px; }
+#kaart-hulpmiddelen .hulp-voorbeeld-inhoud > svg { width:100%; height:auto; display:block; }
+
+#gem-tiental-visueel {width:100%;min-width:0;overflow:hidden;}
+#gem-tiental-visueel svg {display:block;width:100%;height:auto;max-width:100%;}
+
+#gem-tiental-kaart .tiental-soort-label {display:block;margin:18px 0 8px;font-size:15px;font-weight:700;color:#183c5b;}
+#gem-tiental-soort {display:block;width:100%;box-sizing:border-box;min-height:48px;padding:10px 32px 10px 12px;border:2px solid #3682c4;border-radius:9px;background-color:#f0f7ff;color:#183c5b;font:inherit;cursor:pointer;}
+#gem-tiental-soort:focus-visible {outline:3px solid #a4cff4;outline-offset:2px;}
+#gem-tiental-visueel {margin-top:14px;}

@@ -597,8 +597,60 @@ const App = (() => {
     const types = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
     const type = actieveBewerking === 'optellen' ? 'TE+TE' : 'TE-TE';
     const toon = ['optellen', 'aftrekken'].includes(actieveBewerking) && niveau === 100 &&
-      _getBrugWaarde() === 'zonder' && types.length === 1 && types[0] === type;
-    if (kaart) kaart.style.display = toon ? 'block' : 'none';
+      ((_getBrugWaarde() === 'zonder' && types.length === 1 && types[0] === type) || (['optellen','aftrekken'].includes(actieveBewerking) && _getBrugWaarde() === 'met' && types.length > 0 && types.every(t => (actieveBewerking === 'optellen' ? ['TE+E','TE+TE'] : ['TE-E','TE-TE']).includes(t))));
+    document.querySelectorAll('#tot100-hulp option').forEach(o => {o.hidden = o.value !== 'vakje' && (_getBrugWaarde() === 'met' ? !o.value.includes('brug') : o.value.includes('brug')); if(o.hidden && o.selected) document.getElementById('tot100-hulp').value='vakje';});
+    const hoofd = document.getElementById('kaart-hulpmiddelen');
+    const lijst = document.getElementById('cg-hulpmiddelen');
+    if (kaart && lijst && !document.getElementById('tot100-hulp-opties')) {
+      const select = document.getElementById('tot100-hulp');
+      const opties = document.createElement('div'); opties.id = 'tot100-hulp-opties';
+      const sync = () => {
+        opties.querySelectorAll('input').forEach(input => {
+          input.checked = select.value === input.value;
+          input.closest('label').classList.toggle('geselecteerd', input.checked);
+        });
+        document.getElementById('tot100-voorbeeld-rij').style.display = select.value === 'vakje' ? 'none' : 'block';
+      };
+      [...select.options].filter(o => o.value !== 'vakje').forEach(o => {
+        const label = document.createElement('label');label.className='vink-chip';label.style.marginBottom='8px';
+        const input = document.createElement('input');input.type='checkbox';input.value=o.value;
+        const tekst = document.createElement('span');tekst.textContent=o.textContent.replace(/^Brug: /,'');
+        label.append(input,tekst);
+        const kaartje=document.createElement('div');kaartje.className='hulp-keuzerij';
+        const voorbeeld=document.createElement('div');voorbeeld.className='hulp-voorbeeld-inhoud';
+        const blok={niveau:100,brug:o.value.includes('brug')?'met':'zonder',bewerking:actieveBewerking,tot100Hulp:o.value};
+        voorbeeld.innerHTML=Tot100Hulp.svg(blok,{vraag:o.value.includes('brug')?'37 + 29':'23 + 14'},true);
+        kaartje.append(label,voorbeeld);opties.append(kaartje);
+        input.addEventListener('change',()=>{
+          select.value=input.checked?input.value:'vakje';
+          if(input.checked) document.querySelectorAll('[name="hulpmiddelen"]:checked').forEach(cb=>cb.closest('.vink-chip')?.click());
+          sync();
+        });
+      });
+      lijst.append(opties);
+      lijst.after(document.getElementById('tot100-voorbeeld-rij'));
+      lijst.addEventListener('click',event=>{
+        if(event.target.closest('#tot100-hulp-opties'))return;
+        if(event.target.closest('[id^="chip-"]')){select.value='vakje';sync();}
+      });
+      kaart.style.display='none';
+    }
+    if(kaart) kaart.style.display = toon ? 'block' : 'none';
+    // De oude kaart bewaart alleen de interne selectie; de keuzes staan in één lijst.
+    if(kaart) {kaart.style.visibility='hidden';kaart.style.height='0';kaart.style.padding='0';kaart.style.margin='0';kaart.style.border='0';kaart.style.overflow='hidden';}
+    const opties = document.getElementById('tot100-hulp-opties');
+    if(opties) {
+      opties.style.display=toon?'':'none';
+      opties.querySelectorAll('label').forEach(label=>{
+        const input=label.querySelector('input');
+        const option=[...document.getElementById('tot100-hulp').options].find(o=>o.value===input.value);
+        label.parentElement.style.display=option.hidden?'none':'';
+        const mode=input.value;const min=actieveBewerking==='aftrekken';
+        label.parentElement.querySelector('.hulp-voorbeeld-inhoud').innerHTML=Tot100Hulp.svg({niveau:100,brug:mode.includes('brug')?'met':'zonder',bewerking:actieveBewerking,tot100Hulp:mode},{vraag:mode.includes('brug')?(min?'63 − 29':'37 + 29'):(min?'57 − 23':'23 + 14')},true);
+        input.checked=document.getElementById('tot100-hulp').value===input.value;
+        label.classList.toggle('geselecteerd',input.checked);
+      });
+    }
     if (!toon) {
       const keuze = document.getElementById('tot100-hulp');
       if (keuze) keuze.value = 'vakje';
@@ -626,7 +678,7 @@ const App = (() => {
     if (niveau < 20) { kaart.style.display = 'none'; return; }
 
     // Toon bij brug (alle niveaus) of bij zonder+tot1000
-    const toon = (isBrug || isZonderTot1000 || isTussenstappenTot20) && (actieveBewerking !== 'herken-brug');
+    const toon = (document.getElementById('kaart-tot100-hulp')?.style.display === 'block' || isBrug || isZonderTot1000 || isTussenstappenTot20) && (actieveBewerking !== 'herken-brug');
     kaart.style.display = toon ? 'block' : 'none';
 
     if (!toon) {
@@ -771,7 +823,7 @@ const App = (() => {
       oefeningstypes: types,
       brug:      effectiefBrug,
       aantalOefeningen: effectiefAantal,
-      opdrachtzin: zin,
+      opdrachtzin: document.getElementById('tot100-hulp')?.value.startsWith('sprongen-brug') ? 'Los op.\nGebruik de getallenlijn als je ze nodig hebt.' : document.getElementById('tot100-hulp')?.value.startsWith('brug-') ? 'Schrijf de tussenstappen en de som.' : zin,
       hulpmiddelen,
       splitspositie,
       aanvullenVariant,
@@ -2249,6 +2301,7 @@ function _getSplitsConfig() {
 
   function _updateGemengdTypesUI() {
     const brug = _gemengdBrug;
+    const tiental=document.getElementById('gem-tiental-kaart');if(tiental)tiental.style.display=_gemengdNiveau===100?'':'none';
     GemengdHulp.update(_gemengdNiveau, brug);
     _vulTypesContainer('cg-gem-opt-types', 'optellen',  _gemengdNiveau, brug);
     _vulTypesContainer('cg-gem-aft-types', 'aftrekken', _gemengdNiveau, brug);
@@ -2262,6 +2315,15 @@ function _getSplitsConfig() {
   }
 
   function voegGemengdBlokToe() {
+    if(_gemengdNiveau===100 && document.getElementById('gem-tiental')?.checked){
+      const aantal=Math.max(1,Math.min(100,parseInt(document.getElementById('inp-aantal-gemengd').value)||8));
+      const pool=Array.from({length:90},(_,i)=>i+10).filter(n=>n%10);
+      for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+      const soort=document.getElementById('gem-tiental-soort').value;
+      const oefeningen=Array.from({length:aantal},(_,i)=>({vraag:pool[i%pool.length]+' + 0',tientalMin:soort==='tiental-min'||(soort==='tiental-mix'&&i%2===1),antwoord:Math.ceil(pool[i%pool.length]/10)*10}));
+      const blok={id:'tiental-'+Date.now(),bewerking:'gemengd',niveau:100,brug:'zonder',tot100Hulp:soort,tot100Voorbeeld:document.getElementById('gem-tiental-voorbeeld').checked,hulpmiddelen:[],opdrachtzin:soort==='tiental-plus'?'Vul aan tot het volgende tiental.':soort==='tiental-min'?'Trek af tot het vorige tiental.':soort==='tiental-mix'?'Vul aan of trek af tot het tiental.':'Vul aan. Doe weg tot het vorige tiental en vul aan tot het volgende tiental.',oefeningen,config:{}};
+      bundelData.push(blok);Preview.render(bundelData);toonToast('✅ Oefeningen tot een tiental toegevoegd!');return;
+    }
     const brugVoor = _gemengdNiveau <= 100
       ? (_gemengdBrug === 'zonder' || _gemengdBrug === 'gemengd' ? _gemengdBrug : 'met')
       : _gemengdBrug;

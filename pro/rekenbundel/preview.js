@@ -636,7 +636,7 @@ const Preview = (() => {
 
   function _zinWeergave(blok) {
     return `
-      <span class="opdrachtzin-tekst" id="zin-tekst-${blok.id}">${esc(blok.opdrachtzin)}</span>
+      <span class="opdrachtzin-tekst" id="zin-tekst-${blok.id}">${esc(blok.opdrachtzin).replace(/\n/g, '<br>')}</span>
       <button class="btn-bewerk-zin" onclick="App.bewerkZin('${blok.id}')" title="Bewerk">✏️</button>`;
   }
 
@@ -650,7 +650,7 @@ const Preview = (() => {
     if (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(blok)) {
       return `<div class="oefening-item tot20-oefening">${Tot20Hulp.svg(blok, oef, _toonOplossingen || (blok.metVoorbeeld && idx === 0))}<button class="btn-del-oef" onclick="App.verwijderOefening('${blok.id}',${idx})" title="Verwijder oefening">×</button></div>`;
     }
-    if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok) && Tot100Hulp.gegevens(oef)) {
+    if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok) && Tot100Hulp.gegevens(oef, blok)) {
       return `<div class="oefening-item tot100-oefening">${Tot100Hulp.svg(blok, oef, _toonOplossingen || (blok.tot100Voorbeeld && idx === 0))}<button class="btn-del-oef" onclick="App.verwijderOefening('${blok.id}',${idx})" title="Verwijder oefening">×</button></div>`;
     }
     const blokId        = blok.id;

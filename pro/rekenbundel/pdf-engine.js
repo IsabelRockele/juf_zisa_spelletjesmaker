@@ -2049,10 +2049,11 @@ const onthoudH = c;
     const kolommen = blok.tot100Hulp.startsWith('sprongen') ? 1 : 2;
     const breedte = (CW - (kolommen - 1) * 8) / kolommen;
     const hoogte = breedte * sh / sw;
-    checkRuimte(VOOR_ZIN + ZINRUIMTE + hoogte + 6);
+    const zinnen=blok.opdrachtzin.split('\n');
+    checkRuimte(VOOR_ZIN + ZINRUIMTE*zinnen.length + hoogte + 6);
     y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(26,58,92);
-    doc.text(blok.opdrachtzin, ML, y); y += ZINRUIMTE;
+    zinnen.forEach(zin=>{doc.text(zin, ML, y); y += ZINRUIMTE;});
     for (let i = 0; i < blok.oefeningen.length; i += kolommen) {
       checkRuimte(hoogte + 6);
       for (let k = 0; k < kolommen && i + k < blok.oefeningen.length; k++) {
