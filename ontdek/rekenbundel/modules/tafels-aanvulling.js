@@ -1,10 +1,10 @@
 /* Aanvullende tafelvormen. Eén tekening in mm voor preview en PDF. */
 const TafelsAanvulling = (() => {
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-  const namen = { taal:'Kijken en schrijven met rekentaal', tussenstap:'Van tussenstap naar bewerking', tekenen:'Zelf groepjes tekenen', koppelen:'Wat hoort bij elkaar?', vraagstukken:'Vraagstukken' };
+  const namen = { taal:'Kijken en schrijven met rekentaal', tussenstap:'Bewerking en tussenstap', tekenen:'Zelf groepjes tekenen', koppelen:'Wat hoort bij elkaar?', vraagstukken:'Vraagstukken' };
   const opdrachten = {
     taal:'Bekijk de groepjes. Schrijf de tussenstap, de rekentaal en de bewerking.',
-    tussenstap:'Schrijf de passende bewerking bij de tussenstap. Reken uit.',
+    tussenstap:'Vul aan met de passende bewerking of tussenstap. Reken uit.',
     tekenen:'Teken de deling met kruisjes in groepjes. Schrijf de herhaalde aftrekking en de deling.',
     koppelen:'Geef wat bij elkaar hoort dezelfde kleur.',
     vraagstukken:'Lees elk vraagstuk. Schrijf de bewerking en de antwoordzin.'
@@ -71,7 +71,9 @@ const TafelsAanvulling = (() => {
       const idx=pool.findIndex(o=>o.m>=2&&o.m<=5);
       if(idx>0)[pool[0],pool[idx]]=[pool[idx],pool[0]];
     }
-    return pool.slice(0,c.aantalOefeningen||pool.length);
+    const selectie=pool.slice(0,c.aantalOefeningen||pool.length);
+    if(type==='tussenstap')selectie.forEach((o,i)=>{o.omgekeerd=i%2===1;});
+    return selectie;
   }
   function regels(s,max=76) {
     const out=[]; let lijn='';

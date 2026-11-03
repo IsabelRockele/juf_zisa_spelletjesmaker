@@ -22,6 +22,19 @@ const App = (() => {
 
   /* ── Tab wisselen tussen optellen / aftrekken ────────────── */
   function toonBewerking(bewerking, tabEl) {
+    const rekenbewerkingen = ['optellen', 'aftrekken'];
+    if(bewerking !== actieveBewerking && rekenbewerkingen.includes(bewerking) && rekenbewerkingen.includes(actieveBewerking)) {
+      document.querySelectorAll('#kaart-hulpmiddelen [name="hulpmiddelen"]:checked').forEach(input => input.closest('.vink-chip')?.click());
+      const keuze = document.getElementById('tot100-hulp');
+      if(keuze) {
+        keuze.value = 'vakje';
+        keuze.dispatchEvent(new Event('change'));
+      }
+      for(const id of ['tot100-voorbeeld','cirkel-letters','cirkel-kleuren','cirkel-fiche']) {
+        const input = document.getElementById(id);
+        if(input) input.checked = false;
+      }
+    }
     actieveBewerking = bewerking;
 
     // Reset alle keuzes bij tab wissel
@@ -596,15 +609,24 @@ const App = (() => {
     const niveau = Number(document.querySelector('[name="niveau"]:checked')?.value);
     const types = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
     const type = actieveBewerking === 'optellen' ? 'TE+TE' : 'TE-TE';
-    const toon = ['optellen', 'aftrekken'].includes(actieveBewerking) && niveau === 100 &&
+    const toon100 = ['optellen', 'aftrekken'].includes(actieveBewerking) && niveau === 100 &&
       ((_getBrugWaarde() === 'zonder' && types.length === 1 && types[0] === type) || (['optellen','aftrekken'].includes(actieveBewerking) && _getBrugWaarde() === 'met' && types.length > 0 && types.every(t => (actieveBewerking === 'optellen' ? ['TE+E','TE+TE'] : ['TE-E','TE-TE']).includes(t))));
-    document.querySelectorAll('#tot100-hulp option').forEach(o => {o.hidden = o.value !== 'vakje' && (_getBrugWaarde() === 'met' ? !o.value.includes('brug') : o.value.includes('brug')); if(o.hidden && o.selected) document.getElementById('tot100-hulp').value='vakje';});
+    const cirkels = ['optellen','aftrekken'].includes(actieveBewerking) && [20,100,1000].includes(niveau);
+    const toon = toon100 || cirkels;
+    if(cirkels) document.getElementById('kaart-hulpmiddelen').style.display = 'block';
+    document.querySelectorAll('#tot100-hulp option').forEach(o => {o.hidden = o.value === 'cirkelrekenen' ? !cirkels : o.value !== 'vakje' && (!toon100 || (_getBrugWaarde() === 'met' ? !o.value.includes('brug') : o.value.includes('brug'))); if(o.hidden && o.selected) document.getElementById('tot100-hulp').value='vakje';});
     const hoofd = document.getElementById('kaart-hulpmiddelen');
     const lijst = document.getElementById('cg-hulpmiddelen');
     if (kaart && lijst && !document.getElementById('tot100-hulp-opties')) {
       const select = document.getElementById('tot100-hulp');
       const opties = document.createElement('div'); opties.id = 'tot100-hulp-opties';
+      const cirkelOpties = document.createElement('div');
+      cirkelOpties.id = 'cirkel-opties';
+      cirkelOpties.innerHTML = '<label><input id="cirkel-letters" type="checkbox"> Rangletters boven de cirkels</label><br><label><input id="cirkel-kleuren" type="checkbox"> Kleuren per rang</label><br><label><input id="cirkel-fiche" type="checkbox"> Hulpfiche op de pagina</label>';
+      lijst.after(cirkelOpties);
+      cirkelOpties.addEventListener('change', _updateTot100HulpUI);
       const sync = () => {
+        cirkelOpties.hidden = select.value !== 'cirkelrekenen';
         opties.querySelectorAll('input').forEach(input => {
           input.checked = select.value === input.value;
           input.closest('label').classList.toggle('geselecteerd', input.checked);
@@ -639,6 +661,8 @@ const App = (() => {
     // De oude kaart bewaart alleen de interne selectie; de keuzes staan in één lijst.
     if(kaart) {kaart.style.visibility='hidden';kaart.style.height='0';kaart.style.padding='0';kaart.style.margin='0';kaart.style.border='0';kaart.style.overflow='hidden';}
     const opties = document.getElementById('tot100-hulp-opties');
+    const cirkelOpties = document.getElementById('cirkel-opties');
+    if(cirkelOpties) cirkelOpties.hidden = !toon || document.getElementById('tot100-hulp').value !== 'cirkelrekenen';
     if(opties) {
       opties.style.display=toon?'':'none';
       opties.querySelectorAll('label').forEach(label=>{
@@ -646,7 +670,7 @@ const App = (() => {
         const option=[...document.getElementById('tot100-hulp').options].find(o=>o.value===input.value);
         label.parentElement.style.display=option.hidden?'none':'';
         const mode=input.value;const min=actieveBewerking==='aftrekken';
-        label.parentElement.querySelector('.hulp-voorbeeld-inhoud').innerHTML=Tot100Hulp.svg({niveau:100,brug:mode.includes('brug')?'met':'zonder',bewerking:actieveBewerking,tot100Hulp:mode},{vraag:mode.includes('brug')?(min?'63 − 29':'37 + 29'):(min?'57 − 23':'23 + 14')},true);
+        label.parentElement.querySelector('.hulp-voorbeeld-inhoud').innerHTML=mode==='cirkelrekenen' ? Tot100Hulp.svg({niveau,tot100Hulp:mode,cirkelLetters:document.getElementById('cirkel-letters')?.checked,cirkelKleuren:document.getElementById('cirkel-kleuren')?.checked},{vraag:_getBrugWaarde()==='zonder' ? (min ? (niveau===20?'16 − 4':niveau===100?'54 − 32':'432 − 121') : (niveau===20?'13 + 4':niveau===100?'35 + 24':'234 + 352')) : min ? (niveau===20?'13 − 8':niveau===100?'54 − 38':'432 − 147') : (niveau===20?'8 + 7':niveau===100?'35 + 27':'234 + 357')},true) : Tot100Hulp.svg({niveau:100,brug:mode.includes('brug')?'met':'zonder',bewerking:actieveBewerking,tot100Hulp:mode},{vraag:mode.includes('brug')?(min?'63 − 29':'37 + 29'):(min?'57 − 23':'23 + 14')},true);
         input.checked=document.getElementById('tot100-hulp').value===input.value;
         label.classList.toggle('geselecteerd',input.checked);
       });
@@ -815,6 +839,9 @@ const App = (() => {
     const blok = Generator.maakBlok({
       tienraamStructuur: document.getElementById('tot20-structuur')?.value || 'twee',
       tot100Hulp: document.getElementById('tot100-hulp')?.value || 'vakje',
+      cirkelLetters: !!document.getElementById('cirkel-letters')?.checked,
+      cirkelFiche: !!document.getElementById('cirkel-fiche')?.checked,
+      cirkelKleuren: !!document.getElementById('cirkel-kleuren')?.checked,
       tot100Voorbeeld: document.getElementById('tot100-voorbeeld')?.checked || false,
       bewerking: actieveBewerking,
       niveau:    (isHerken || isSplitsingen) ? (isSplitsingen ? effectiefNiveau : 100) : niveau,
@@ -1701,6 +1728,7 @@ function _getSplitsConfig() {
   /* ── Initialisatie ───────────────────────────────────────── */
   function init() {
     _updateTypesUI(20, 'zonder');
+    _updateHulpmiddelenUI(_getBrugWaarde());
     Preview.render(bundelData);
 
 

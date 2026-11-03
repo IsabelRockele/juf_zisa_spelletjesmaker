@@ -47,7 +47,7 @@ const Generator = (() => {
   }
 
   /* ── Maak een nieuw blok ─────────────────────────────────── */
-  function maakBlok({ tienraamStructuur = 'twee', tot100Hulp = 'vakje', tot100Voorbeeld = false, bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', transformerenVariant = 'schema', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', puntBewerking = 'optellen', splitsGetallen = null, splitsModus = 'tot', tafels = null, tafelPositie = 'vooraan', tafelMax = 10, strategie = 'aftrekker' }) {
+  function maakBlok({ tienraamStructuur = 'twee', tot100Hulp = 'vakje', tot100Voorbeeld = false, cirkelLetters = false, cirkelKleuren = false, cirkelFiche = false, bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', transformerenVariant = 'schema', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', puntBewerking = 'optellen', splitsGetallen = null, splitsModus = 'tot', tafels = null, tafelPositie = 'vooraan', tafelMax = 10, strategie = 'aftrekker' }) {
     const isHerken        = bewerking === 'herken-brug';
     const isSplitsingen   = bewerking === 'splitsingen';
     const isTafels        = bewerking === 'tafels';
@@ -192,7 +192,7 @@ const Generator = (() => {
     return {
       id:          `blok-${Date.now()}-${_teller}`,
       bewerking,
-      tienraamStructuur, tot100Hulp, tot100Voorbeeld,
+      tienraamStructuur, tot100Hulp, tot100Voorbeeld, cirkelLetters, cirkelKleuren, cirkelFiche,
       subtype:     `${bewerking}-tot${niveau}`,
       niveau,
       brug,
@@ -209,7 +209,7 @@ const Generator = (() => {
       tafelPositie,
       tafelMax,
       strategie,
-      config: { tienraamStructuur, tot100Hulp, tot100Voorbeeld, bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie: effectiefSplitspositie, aanvullenVariant, compenserenVariant, transformerenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, puntBewerking, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax, strategie },
+      config: { tienraamStructuur, tot100Hulp, tot100Voorbeeld, cirkelLetters, cirkelKleuren, cirkelFiche, bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie: effectiefSplitspositie, aanvullenVariant, compenserenVariant, transformerenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, puntBewerking, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax, strategie },
       oefeningen,
     };
   }

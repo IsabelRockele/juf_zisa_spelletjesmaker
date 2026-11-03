@@ -2049,18 +2049,45 @@ const onthoudH = c;
   async function _tekenTot100HulpBlok(blok) {
     const [sw, sh] = Tot100Hulp.maten(blok.tot100Hulp);
     const kolommen = blok.tot100Hulp.startsWith('sprongen') ? 1 : 2;
-    const breedte = (CW - (kolommen - 1) * 8) / kolommen;
+    const breedte = blok.tot100Hulp === 'cirkelrekenen' ? (CW - 8) / 2 : (CW - (kolommen - 1) * 8) / kolommen;
     const hoogte = breedte * sh / sw;
+    const fiche = blok.tot100Hulp === 'cirkelrekenen' && blok.cirkelFiche;
     const zinnen=blok.opdrachtzin.split('\n');
-    checkRuimte(VOOR_ZIN + ZINRUIMTE*zinnen.length + hoogte + 6);
+    checkRuimte(VOOR_ZIN + ZINRUIMTE*zinnen.length + hoogte + 6 + (fiche ? hoogte + 22 : 0));
     y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(26,58,92);
     zinnen.forEach(zin=>{doc.text(zin, ML, y); y += ZINRUIMTE;});
+    if(fiche) {
+      const kaderY = y;
+      doc.setDrawColor(132,170,202);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(ML, kaderY, CW, hoogte + 17, 3, 3, 'S');
+      doc.text('Zisa legt uit · Cirkelrekenen', ML + 6, kaderY + 6);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text('Ik reken per rang. Onder elke cirkel zie je mijn berekening.', ML + 6, kaderY + 12);
+      const png = await Tot100Hulp.png(blok, Tot100Hulp.fiche(blok), true);
+      doc.addImage(png, 'PNG', ML + 6, kaderY + 14, breedte, hoogte, undefined, 'FAST');
+      const zisa = new Image();
+      zisa.src = '/afbeeldingen_hoofdrekenen/zisa-whiteboard.png';
+      try {
+        await zisa.decode();
+        const hoogteZisa = 20;
+        const breedteZisa = hoogteZisa * zisa.naturalWidth / zisa.naturalHeight;
+        doc.addImage(zisa, 'PNG', ML + CW - breedteZisa - 6, kaderY + 4, breedteZisa, hoogteZisa);
+      } catch (error) {
+        console.warn('Zisa kon niet worden geladen voor de hulpfiche.', error);
+      }
+      y += hoogte + 22;
+    }
     for (let i = 0; i < blok.oefeningen.length; i += kolommen) {
       checkRuimte(hoogte + 6);
       for (let k = 0; k < kolommen && i + k < blok.oefeningen.length; k++) {
         const oef = blok.oefeningen[i+k];
-        const png = await Tot100Hulp.png(blok, oef, _metAntwoorden || (blok.tot100Voorbeeld && i+k === 0));
+        const tekenBlok = blok.tot100Hulp === 'cirkelrekenen'
+          ? {...blok, cirkelPdfLettergrootte: 14 * 25.4 / 72 * sw / breedte}
+          : blok;
+        const png = await Tot100Hulp.png(tekenBlok, oef, _metAntwoorden || (blok.tot100Voorbeeld && i+k === 0));
         doc.addImage(png, 'PNG', ML+k*(breedte+8), y, breedte, hoogte, undefined, 'FAST');
       }
       y += hoogte + 6;

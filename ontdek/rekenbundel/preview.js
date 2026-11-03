@@ -622,6 +622,7 @@ const Preview = (() => {
         <div class="opdrachtzin-wrapper" id="zin-wrapper-${blok.id}">
           ${_zinWeergave(blok)}
         </div>
+        ${blok.tot100Hulp === 'cirkelrekenen' && blok.cirkelFiche ? `<aside style="border:2px solid #84aaca;border-radius:12px;padding:12px;margin:10px 0 20px"><div style="display:flex;align-items:center;gap:12px"><img src="/afbeeldingen_hoofdrekenen/zisa-whiteboard.png" alt="Zisa" style="width:88px;height:50px;object-fit:contain"><div><strong>Zisa legt uit · Cirkelrekenen</strong><div>Ik reken per rang. Onder elke cirkel zie je mijn berekening.</div></div></div><div class="tot100-oefening" style="max-width:520px">${Tot100Hulp.svg(blok,Tot100Hulp.fiche(blok),true)}</div></aside>` : ''}
         <div class="oefeningen-grid ${gridKlasse}" id="grid-${blok.id}">
           ${blok.oefeningen.map((o, i) => _oefeningHTML(blok, o, i)).join('')}
         </div>

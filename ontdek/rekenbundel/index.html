@@ -360,6 +360,7 @@
             <option value="mab">MAB-materiaal + 3 schrijflijnen</option>
             <option value="sprongen">Ingevulde sprongen + 3 schrijflijnen</option>
             <option value="sprongen-leeg">Sprongen om in te vullen + 3 schrijflijnen</option>
+            <option value="cirkelrekenen">Cirkelrekenen</option>
             <option value="lijnen">Enkel oefening met 3 schrijflijnen</option>
 <option value="brug-lijnen">Brug: 3 schrijflijnen (2 per rij)</option>
 <option value="brug-splits">Brug: ruimte om zelf te splitsen (2 per rij)</option>
@@ -1201,7 +1202,7 @@
         <select id="inzicht-oefenvorm" onchange="App.kiesInzichtOefenvorm()">
           <option value="bestaand">Kijken en invullen</option>
           <option value="taal">Kijken en schrijven met rekentaal</option>
-          <option value="tussenstap">Van tussenstap naar bewerking</option>
+          <option value="tussenstap">Bewerking en tussenstap</option>
           <option value="tekenen">Zelf groepjes tekenen met kruisjes</option>
           <option value="koppelen">Wat hoort bij elkaar?</option>
         </select>
@@ -2441,10 +2442,10 @@
 <script src="modules/breuken.js?v=5"></script>
 <script src="modules/percentages.js?v=1"></script>
 <script src="modules/kommagetallen.js?v=3"></script>
-<script src="tot100-hulp.js?v=6"></script>
+<script src="tot100-hulp.js?v=8"></script>
 <script src="tot20-hulp.js?v=vijfstructuur-20260924"></script>
 <script src="modules/tafels-aanvulling.js?v=1"></script>
-<script src="generator.js?v=tafels-20261015"></script>
+<script src="generator.js?v=cirkelrekenen-20261103"></script>
 <script src="gemengd-hulp.js?v=vijfstructuur-20260924"></script>
 <script src="preview.js?v=tafels-20261015"></script>
 <script src="pdf-engine.js?v=tafels-20261015"></script>
@@ -2455,7 +2456,7 @@
 <link rel="stylesheet" href="halveren-verdubbelen.css?v=2">
 <script src="modules/halveren-verdubbelen.js?v=3"></script>
 <script>document.getElementById('gem-tiental-visueel').innerHTML=Tot100Hulp.svg({tot100Hulp:'sprongen-tiental',keuzeVoorbeeld:true},{vraag:'88 + 0'},true);</script>
-<script src="app.js?v=tafels-20261015"></script>
+<script src="app.js?v=cirkelrekenen-20261103-init"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {
