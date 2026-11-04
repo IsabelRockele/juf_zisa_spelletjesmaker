@@ -7,6 +7,24 @@
   const pick = a => a[rand(0,a.length-1)];
   const NS = 'http://www.w3.org/2000/svg';
   const types = {
+    fractionParts: ["grade3","Omkring het gevraagde onderdeel van de breuk."],
+    fractionFindStem: ["grade3","Omkring alle stambreuken."],
+    fractionFindOther: ["grade3","Omkring alle breuken met een teller groter dan 1."],
+    fractionMatch: ["grade3","Verbind elke voorstelling met de juiste breuk."],
+    fractionMatchReverse: ["grade3","Verbind elke breuk met de juiste voorstelling."],
+    fractionChoose: ["grade3","Kruis de voorstelling aan die bij de breuk past."],
+    fractionAmountRead: ["grade3","Schrijf welke breuk van het aantal omringd is. Gebruik “van”."],
+    fractionAmountChoose: ["grade3","Kruis de stippenvoorstelling aan die bij de breuk past."],
+    fractionAmountMatch: ["grade3","Verbind elke voorstelling met de passende breuk van een aantal."],
+    fractionAmountMatchReverse: ["grade3","Verbind elke breuk van een aantal met de passende voorstelling."],
+    fractionAmountFinish: ["grade3","Teken de ontbrekende stippen. Maak de verdeling af en omring de gevraagde groepjes."],
+    fractionTwoWays: ["grade3","Verdeel beide figuren op een andere manier. Kleur telkens dezelfde breuk."],
+    fractionRead: ["grade3","Schrijf de breuk die bij het gekleurde deel past."],
+    fractionColor: ["grade3","Kleur de gevraagde breuk."],
+    fractionStem: ["grade3","Verdeel in gelijke delen. Kleur de stambreuk."],
+    fractionDivide: ["grade3","Verdeel. Kleur. Schrijf de breuk."],
+    fractionAmount: ["grade3","Verdeel de stippen in gelijke groepjes. Omkring de gevraagde groepjes en vul in."],
+    fractionQuestions: ["grade3","Bekijk de figuur en beantwoord de breukvragen."],
     pairs: ['even','Maak twee groepen. Kleur het vakje groen bij even en oranje bij oneven.'],
     parity: ['even','Tel. Kleur het vakje groen bij even en oranje bij oneven.'],
     numbers: ['even','Kleur even getallen groen en oneven getallen oranje.'],
@@ -30,6 +48,24 @@
     quarteramount: ['quarter','Omring een kwart van het aantal. Vul aan.'],
   };
   const labels = {
+    fractionParts: "Teller, noemer en breukstreep",
+    fractionFindStem: "Stambreuken herkennen",
+    fractionFindOther: "Niet-stambreuken herkennen",
+    fractionMatch: "Voorstelling met breuk verbinden",
+    fractionMatchReverse: "Breuk met voorstelling verbinden",
+    fractionChoose: "Passende voorstelling aankruisen",
+    fractionAmountRead: "Breuk bij verdeelde stippen schrijven",
+    fractionAmountChoose: "Passende stippenvoorstelling aankruisen",
+    fractionAmountMatch: "Stippenvoorstelling met breuk verbinden",
+    fractionAmountMatchReverse: "Breuk met stippenvoorstelling verbinden",
+    fractionAmountFinish: "Stippenvoorstelling aanvullen",
+    fractionTwoWays: "Op twee manieren verdelen",
+    fractionRead: "Breuk bij een figuur schrijven",
+    fractionColor: "Kleuren met gegeven verdeellijnen",
+    fractionStem: "Stambreuk verdelen en kleuren",
+    fractionDivide: "Zelf verdelen, kleuren en schrijven",
+    fractionAmount: "Breuk van een aantal",
+    fractionQuestions: "De vijf breukvragen",
     pairs:'Twee groepen maken',parity:'Even of oneven bij afbeeldingen',numbers:'Getallenrooster kleuren',axis:'Getallenlijn aanvullen',riddles:'Getalraadsels',
     whole:'Het geheel kleuren',equal:'Gelijke of ongelijke delen',divide:'Zelf in gelijke delen verdelen',count:'Gelijke delen tellen',colorparts:'Gevraagde delen kleuren',compare:'Delen vergelijken',
     halfshape:'Een halve figuur',halfamount:'De helft van een hoeveelheid',doubleshape:'Het dubbel op een rooster',doubleamount:'Het dubbel van een hoeveelheid',statements:'Juiste uitspraken',problems:'Korte vraagjes',
@@ -102,8 +138,343 @@
   function check(label){const row=el('div');const box=el('span','basis-check');box.setAttribute('role','checkbox');box.setAttribute('aria-checked','false');box.tabIndex=0;box.setAttribute('aria-label',label);const toggle=()=>{const on=box.getAttribute('aria-checked')!=='true';box.setAttribute('aria-checked',String(on));box.textContent=on?'×':'';};box.onclick=toggle;box.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();}};row.append(box,document.createTextNode(label));return row;}
   function swatch(card){const p=el('p');p.append(document.createTextNode('Even of oneven: '));const b=el('span','basis-check');b.tabIndex=0;b.setAttribute('role','button');b.setAttribute('aria-label','Kies groen voor even of oranje voor oneven');let i=0;const cycle=()=>{i=(i+1)%3;b.style.backgroundColor=['white','#86cfa0','#ffbd7a'][i];};b.onclick=cycle;b.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();cycle();}};p.append(b);card.append(p);}
   function gridDrawing(n){const s=svg(620,160);for(let y=15;y<=135;y+=24)shape(s,'line',{x1:10,y1:y,x2:610,y2:y,stroke:'#b9d0df','stroke-dasharray':'2 3'});for(let x=10;x<=610;x+=24)shape(s,'line',{x1:x,y1:15,x2:x,y2:135,stroke:'#b9d0df','stroke-dasharray':'2 3'});for(let i=0;i<n;i++)shape(s,'rect',{x:34+(i%4)*24,y:39+Math.floor(i/4)*24,width:24,height:24,fill:'#b7e2f0',stroke:'#344d60'});text(s,255,76,'→',30);return s;}
+
+  const blue = '#006ca8';
+  function layers(pupil, solution) {
+    pupil.dataset.fractionPupil = '';
+    solution.dataset.fractionSolution = '';
+    solution.style.display = 'none';
+  }
+
+  function writeFractions(node, content) {
+    const parts = content.split(/(\d+\/\d+)/g);
+    parts.forEach((part,index) => {
+      if (index % 2 === 0) {
+        node.append(document.createTextNode(part));
+        return;
+      }
+      const [num,den] = part.split('/');
+      const fraction = el('span', 'basis-fraction');
+      fraction.setAttribute('role','img');
+      fraction.setAttribute('aria-label', num + ' op ' + den);
+      fraction.append(el('span','',num),el('span','',den));
+      node.append(fraction);
+    });
+    return node;
+  }
+  function fractionAnswer(card, label, value, long = false) {
+    answer(card, label, value, long);
+    const row = card.lastElementChild;
+    const input = row.querySelector('input');
+    const solution = writeFractions(el('span'), value);
+    solution.style.color = blue;
+    if (long) row.insertBefore(el('br'), input);
+    layers(input, solution);
+    row.append(solution);
+  }
+
+  function markFraction(node) {
+    node.dataset.fractionMark = '';
+  }
+  function amountModel(num, den, perGroup, shown = den * perGroup, correction = false) {
+    const model = svg(300, 28 + (perGroup - 1) * 16);
+    const x = col => 24 + col * 28;
+    for (let col = 0; col < den; col++) {
+      for (let row = 0; row < perGroup; row++) {
+        const missing = col * perGroup + row >= shown;
+        if (missing && !correction) continue;
+        shape(model,'circle',{cx:x(col),cy:14+row*16,r:4,fill:missing?blue:'#536c7d'});
+      }
+    }
+    if (shown === den * perGroup || correction) {
+      const stroke = correction ? blue : '#344d60';
+      for (let col=1;col<den;col++) shape(model,'line',{x1:x(col)-14,x2:x(col)-14,y1:5,y2:23+(perGroup-1)*16,stroke});
+      shape(model,'rect',{x:x(0)-8,y:5,width:(num-1)*28+16,height:18+(perGroup-1)*16,rx:7,fill:'none',stroke,'stroke-width':2});
+      if (correction) model.querySelectorAll('line').forEach(line => line.style.setProperty('stroke',blue,'important'));
+    }
+    return model;
+  }
+  function matchingFractions(card, samples, reverse) {
+    card.classList.add('basis-wide');
+    const row = el('div','basis-fraction-match');
+    const ordered = [...samples];
+    for (let i=ordered.length-1;i>0;i--) {
+      const j=rand(0,i);
+      [ordered[i],ordered[j]]=[ordered[j],ordered[i]];
+    }
+    const band = (items, top) => {
+      const line = el('div',top ? 'basis-fraction-band' : 'basis-fraction-band basis-fraction-band-bottom');
+      row.append(line);
+      items.forEach(item => {
+        const cell = el('div','basis-fraction-match-cell');
+        const dot = el('span','basis-fraction-dot');
+        const showFigure = top !== reverse;
+        cell.append(showFigure ? item.model : writeFractions(el('span'),item.label),dot);
+        line.append(cell);
+        giConnect(row,top?dot:null,top?null:dot,item.label);
+      });
+    };
+    band(samples,true);
+    band(ordered,false);
+    card.append(row);
+  }
+
+
+  function possibleFractionSolution(card) {
+    const note = el('p','','Een mogelijke oplossing');
+    note.style.cssText = 'display:none;color:#006ca8';
+    note.dataset.basisModel = '';
+    card.append(note);
+  }
+  function guidedFractionFigure(kind, parts) {
+    const model = figure(kind);
+    const tick = (x1,y1,x2,y2) => {
+      shape(model,'line',{x1,y1,x2,y2,stroke:'#536c7d','stroke-width':1,'pointer-events':'none'});
+    };
+    if (kind === 'circle') {
+      const marks = parts * 2;
+      for (let i=0;i<marks;i++) {
+        const angle = i * 2 * Math.PI / marks - Math.PI / 2;
+        const x = Math.cos(angle), y = Math.sin(angle);
+        tick(150+66*x,80+66*y,150+60*x,80+60*y);
+      }
+    } else if (kind === 'triangle') {
+      tick(150,146,150,140);
+      tick(116,80,121,83);
+      tick(184,80,179,83);
+    } else {
+      const width = kind === 'square' ? 110 : 200;
+      const marks = new Set([0.5]);
+      for (let i=1;i<parts;i++) marks.add(i/parts);
+      for (const mark of marks) {
+        const x = 150 - width/2 + mark*width;
+        const y = 25 + mark*110;
+        tick(x,25,x,31);
+        tick(x,135,x,129);
+        tick(150-width/2,y,156-width/2,y);
+        tick(150+width/2,y,144+width/2,y);
+      }
+    }
+    model.style.pointerEvents = 'none';
+    return model;
+  }
+  function extraFractionCard(card, type, kind) {
+    if (type === 'fractionParts') {
+      const row = el('div','basis-fraction-band');
+      ['teller','breukstreep','noemer'].forEach((word,index) => {
+        const cell=el('div','basis-fraction-part');
+        const fraction=writeFractions(el('div'), rand(1,4)+'/'+rand(5,10));
+        cell.append(el('p','', 'Omkring de ' + word + '.'),fraction);
+        const display=fraction.querySelector('.basis-fraction');
+        if (index === 1) display.dataset.fractionBar = '';
+        else markFraction(display.children[index === 0 ? 0 : 1]);
+        row.append(cell);
+      });
+      card.classList.add('basis-wide');
+      card.append(row);
+      return true;
+    }
+    if (type === 'fractionFindStem' || type === 'fractionFindOther') {
+      card.classList.add('basis-wide');
+      const row = el('div','basis-fraction-series');
+      const stems = Array.from({length:9}, (_, index) => index < 4);
+      for (let i=stems.length-1;i>0;i--) {
+        const j=rand(0,i);
+        [stems[i],stems[j]]=[stems[j],stems[i]];
+      }
+      for (const stem of stems) {
+        const den=rand(3,12);
+        const cell=writeFractions(el('span','basis-fraction-choice'),(stem?1:rand(2,den-1))+'/'+den);
+        if (stem === (type === 'fractionFindStem')) markFraction(cell);
+        row.append(cell);
+      }
+      card.append(row);
+      return true;
+    }
+    const amount = type.startsWith('fractionAmount');
+    if (type === 'fractionAmountRead' || type === 'fractionAmountFinish') {
+      const den=rand(3,6), num=rand(1,den-1), perGroup=rand(2,3);
+      const notation=num+'/'+den+' van '+den*perGroup;
+      if (type === 'fractionAmountRead') {
+        card.append(amountModel(num,den,perGroup));
+        fractionAnswer(card,'Breuk van het aantal',notation,true);
+      } else {
+        const shown = rand(perGroup+1,den*perGroup-1);
+        const pupil=amountModel(num,den,perGroup,shown);
+        const solution=amountModel(num,den,perGroup,shown,true);
+        layers(pupil,solution);
+        card.append(writeFractions(el('p'),notation),pupil,solution);
+      }
+      return true;
+    }
+    if (type === 'fractionTwoWays') {
+      const den=pick([3,4,5,6]), num=rand(1,den-1);
+      card.classList.add('basis-wide');
+      card.append(writeFractions(el('p'),'Kleur '+num+'/'+den+' van elke rechthoek.'));
+      const pair=el('div','basis-grid');
+      [false,true].forEach(horizontal => {
+        const cell=el('div');
+        const pupil=guidedFractionFigure('rect',den);
+        const solution=svg(300,160);
+        for (let i=0;i<den;i++) {
+          shape(solution,'rect',{x:50+(horizontal?0:i*200/den),y:25+(horizontal?i*110/den:0),width:horizontal?200:200/den,height:horizontal?110/den:110,fill:i<num?blue:'white',stroke:blue});
+        }
+        layers(pupil,solution);
+        cell.append(pupil,solution);
+        pair.append(cell);
+      });
+      card.append(pair);
+      possibleFractionSolution(card);
+      return true;
+    }
+    if (['fractionMatch','fractionMatchReverse','fractionChoose','fractionAmountMatch','fractionAmountMatchReverse','fractionAmountChoose'].includes(type)) {
+      const offset=rand(0,2);
+      const sameDen = kind === 'triangle' ? 4 : rand(4,8);
+      const firstNum = rand(1,sameDen-3);
+      const samples=Array.from({length:3},(_,index)=>{
+        const den=amount?index+3+offset:sameDen;
+        const num=amount?rand(1,den-1):firstNum+index;
+        const perGroup=2;
+        return {label:num+'/'+den+(amount?' van '+den*perGroup:''),model:amount?amountModel(num,den,perGroup):figure(kind,den,false,num)};
+      });
+      samples.forEach(item=>{item.model.style.pointerEvents='none';});
+      if (type.endsWith('Choose')) {
+        card.classList.add('basis-wide');
+        const target=rand(0,samples.length-1);
+        const band=el('div','basis-fraction-band');
+        samples.forEach(({model},index)=>{
+          const cell=el('div');
+          const choice=check('Voorstelling '+(index+1));
+          choice.querySelector('.basis-check').dataset.giAnswer=index===target?'×':'';
+          cell.append(model,choice);
+          band.append(cell);
+        });
+        card.append(writeFractions(el('p'),samples[target].label),band);
+      } else matchingFractions(card,samples,type.endsWith('Reverse'));
+      return true;
+    }
+    return false;
+  }
+  function fractionCard(card, type, kind) {
+    if (extraFractionCard(card, type, kind)) return;
+    const den = pick(kind === 'triangle' ? [2,4] : [2,3,4,5,6,8,10]);
+    const num = type === 'fractionStem' ? 1 : rand(type === 'fractionDivide' && den > 2 ? 2 : 1, den - 1);
+    const notation = num + '/' + den;
+    if (type === 'fractionAmount') {
+      const perGroup = rand(2, Math.floor(20 / den));
+      const total = den * perGroup;
+      const rowSpacing = 16;
+      const height = 28 + (perGroup - 1) * rowSpacing;
+      const columnSpacing = 28;
+      const columnX = col => 24 + col * columnSpacing;
+      const pupil = svg(300, height);
+      for (let col = 0; col < den; col++) {
+        for (let row = 0; row < perGroup; row++) {
+          shape(pupil, 'circle', {cx:columnX(col), cy:14 + row * rowSpacing, r:4, fill:'#536c7d'});
+        }
+      }
+      const solution = pupil.cloneNode(true);
+      for (let col = 0; col < den; col++) {
+        shape(solution, 'rect', {x:columnX(col) - 9, y:6, width:18, height:height - 12, rx:7, fill:'none', stroke:blue, 'stroke-width':col < num ? 2.5 : 1, 'stroke-dasharray':col < num ? 'none' : '3 3'});
+      }
+      layers(pupil, solution);
+      card.append(writeFractions(el('p'), notation + ' van ' + total), pupil, solution);
+      fractionAnswer(card, 'Aantal omringde stippen', String(num * perGroup));
+      return;
+    }
+    const given = type === 'fractionRead' || type === 'fractionQuestions';
+    const pupil = given || type === 'fractionColor'
+      ? figure(kind, den, false, given ? num : 0)
+      : guidedFractionFigure(kind, den);
+    if (given) {
+      pupil.style.pointerEvents = 'none';
+      card.append(pupil);
+      if (type === 'fractionRead') {
+        fractionAnswer(card, '', notation);
+        return;
+      }
+      const names = {rect:'de rechthoek', square:'het vierkant', circle:'de cirkel', triangle:'de driehoek'};
+      fractionAnswer(card, 'Wat is het geheel?', names[kind], true);
+      fractionAnswer(card, 'In hoeveel gelijke delen is het geheel verdeeld?', den + ' gelijke delen', true);
+      fractionAnswer(card, 'Hoe groot is één deel?', '1/' + den + ' van het geheel', true);
+      fractionAnswer(card, 'Hoeveel gelijke delen neem ik?', num + ' gelijke delen', true);
+      fractionAnswer(card, 'Welke breuk van het geheel is gekleurd?', notation, true);
+      return;
+    }
+    const solution = figure(kind, den, false, num);
+    [...solution.children].forEach((part, i) => {
+      if (i < num) part.setAttribute('fill', blue);
+      if (type !== 'fractionColor') part.setAttribute('stroke', blue);
+    });
+    solution.style.pointerEvents = 'none';
+    layers(pupil, solution);
+    card.append(writeFractions(el('p'), type === 'fractionDivide' ? num + ' van de ' + den + ' gelijke delen' : notation + ' van de figuur'), pupil, solution);
+    if (type !== 'fractionColor') possibleFractionSolution(card);
+    if (type === 'fractionDivide') fractionAnswer(card, 'Schrijf als breuk', notation);
+  }
+  function showFractionSolutions(show) {
+    document.querySelectorAll('#sheet [data-fraction-pupil]').forEach(node => { node.style.display = show ? 'none' : ''; });
+    document.querySelectorAll('#sheet [data-fraction-solution]').forEach(node => { node.style.display = show ? '' : 'none'; });
+  }
+
+  function basisModel(card, type, kind, parts, n, result) {
+    const source = card.querySelector('svg');
+    let model;
+    if (['whole','colorparts','quartercolor'].includes(type)) {
+      const count = type === 'quartercolor' ? 4 : parts;
+      model = figure(kind, count, false, type === 'whole' ? count : type === 'quartercolor' ? 1 : n);
+    } else if (['divide','halfshape','quartershape'].includes(type)) {
+      model = divisionFigure(kind, type === 'halfshape' ? 2 : type === 'quartershape' ? 4 : parts, true);
+      if (type !== 'divide') model.querySelector('[data-color]').setAttribute('fill', blue);
+      model.querySelectorAll('[data-color]').forEach(node => node.setAttribute('stroke', blue));
+    } else if (['pairs','halfamount','quarteramount'].includes(type)) {
+      model = source.cloneNode(true);
+      const count = type === 'quarteramount' ? n/4 : Math.floor(n/2);
+      [...model.querySelectorAll('[data-color]')].forEach((dot, index) => {
+        if (index < count) dot.setAttribute('fill', blue);
+        else if (type === 'pairs' && index < count*2) dot.setAttribute('fill', '#9ecbe9');
+      });
+    }
+    if (model) {
+      model.querySelectorAll('[fill="#86cfa0"]').forEach(node => node.setAttribute('fill', blue));
+      model.style.pointerEvents = 'none';
+      layers(source, model);
+      source.after(model);
+    }
+    if (type === 'numbers') {
+      card.querySelectorAll('.basis-number-grid span').forEach(node => {
+        node.dataset.basisColor = Number(node.textContent) % 2 === 0 ? '#86cfa0' : '#ffbd7a';
+      });
+    }
+    if (type === 'pairs' || type === 'parity') {
+      card.querySelector('.basis-check').dataset.basisColor = n % 2 === 0 ? '#86cfa0' : '#ffbd7a';
+    }
+    if (['equal','compare','quarterfind','statements'].includes(type)) {
+      card.querySelectorAll('.basis-check').forEach((box,index) => {
+        const selected = type === 'quarterfind' ? index + 1 === result : type === 'statements' ? index !== 1 : box.getAttribute('aria-label') === result || box.getAttribute('aria-label').toLowerCase() === result;
+        box.dataset.giAnswer = selected ? '×' : '';
+      });
+    }
+    if (type === 'doubleshape' || type === 'doubleamount') {
+      const blank = type === 'doubleshape' ? source : card.querySelectorAll('svg')[1];
+      const example = blank.cloneNode(true);
+      const spacing = type === 'doubleshape' ? 24 : 27;
+      for (let i=0;i<n*2;i++) {
+        const x = (type === 'doubleshape' ? 330 : 28) + (i%8)*spacing;
+        const y = 35 + Math.floor(i/8)*spacing;
+        if (type === 'doubleshape') shape(example,'rect',{x:322+(i%8)*24,y:39+Math.floor(i/8)*24,width:24,height:24,fill:blue,stroke:'#344d60'});
+        else shape(example,'circle',{cx:x,cy:y,r:6,fill:blue});
+      }
+      layers(blank, example);
+      blank.after(example);
+    }
+  }
   function cardFor(type,o,index){
     const card=el('div','basis-card row-delete-wrap keep-together');card.dataset.type=type;
+    if (types[type][0] === 'grade3') {
+      fractionCard(card, type, o.shape === 'mix' ? pick(['rect','square','circle','triangle']) : o.shape);
+      return card;
+    }
     let n,parts,s,result;
     const kind=o.shape==='mix'?pick(['rect','square','circle','triangle']):o.shape;
     const validParts=kind==='triangle'?[2,4]:kind==='square'?[2,4,8]:[2,3,4,6,8];
@@ -120,8 +491,23 @@
         card.classList.add('basis-wide');const length=pick([10,20]),start=rand(0,o.max-length);const even=index%2===0;
         card.append(el('p','',`Schrijf de ${even?'even':'oneven'} getallen van ${start} tot ${start+length}.`));s=svg(660,100);
         shape(s,'line',{x1:20,y1:42,x2:640,y2:42,stroke:'#344d60'});
-        for(let i=0;i<=length;i++){const x=20+i*620/length;shape(s,'line',{x1:x,y1:34,x2:x,y2:50,stroke:'#344d60'});if(i===0||i===length)text(s,x,75,start+i,14);}
-        card.append(s);drawing(s,card);answer(card,'Antwoorden:',Array.from({length:length+1},(_,i)=>start+i).filter(v=>v%2===(even?0:1)).join(', '),true);break;
+        for (let i = 0; i <= length; i++) {
+          const x = 20 + i * 620 / length;
+          const value = start + i;
+          shape(s,'line',{x1:x,y1:34,x2:x,y2:50,stroke:'#344d60'});
+          const given = i === 0 || i === length;
+          if (given || value % 2 === (even ? 0 : 1)) {
+            const label = text(s,x,75,value,14);
+            if (!given) {
+              label.setAttribute('fill', blue);
+              label.dataset.basisModel = '';
+              label.style.display = 'none';
+            }
+          }
+        }
+        card.append(s);
+        drawing(s,card);
+        break;
       }
       case 'riddles':{
         n=rand(2,o.max-2);let question;
@@ -169,10 +555,12 @@
       card.querySelector('.basis-tools').prepend(guide);
       guide.onclick=()=>{const example=divisionFigure(kind,divisions,true);s.replaceChildren(...Array.from(example.childNodes));s.dataset.drawing='false';guide.nextElementSibling.textContent='Kleuren aan';};
     }
+    basisModel(card, type, kind, parts, n, result);
     if(result!==undefined)card.dataset.antwoord=String(result);
     return card;
   }
   const explanations={
+    grade3:'Verdeel een geheel in vier gelijke delen. Eén deel is één kwart. Dat schrijf je als 1/4. Neem je drie van diezelfde delen, dan schrijf je 3/4. De noemer 4 zegt in hoeveel gelijke delen je verdeelt. De teller zegt hoeveel delen je neemt. Een breuk met teller 1 heet een stambreuk.',
     even:'Even (paar): je kunt een aantal in twee even grote groepen verdelen. Even getallen eindigen op 0, 2, 4, 6 of 8. Bij oneven (onpaar) blijft er één over; die getallen eindigen op 1, 3, 5, 7 of 9.',
     parts:'Het geheel is alles samen: een hele figuur of alle voorwerpen. Bij een gelijke verdeling is elk deel even groot of bevat elke groep evenveel voorwerpen. Hoe meer gelijke delen van hetzelfde geheel, hoe kleiner elk deel.',
     half:'Verdeel een geheel in twee gelijke delen: één deel is de helft. Neem iets twee keer: dat is het dubbel. De helft van 12 is 6. Het dubbel van 6 is 12.',
@@ -183,7 +571,7 @@
     api.title(sheet,key,types[type][1]);
     const title=sheet.querySelector(`.exercise-title[data-title-key="${key}"]`);title.contentEditable='true';title.spellcheck=false;title.title='Klik om de opdrachtzin te bewerken';
     const block=el('div','basis-block');block.dataset.titleKey=key;
-    if(o.explain)block.append(el('div','basis-explain',explanations[types[type][0]]));
+    if(o.explain)block.append(writeFractions(el('div','basis-explain'), explanations[types[type][0]]));
     const grid=el('div','basis-grid');block.append(grid);sheet.append(block);
     let index=0;
     const append=()=>{
@@ -193,17 +581,27 @@
       let card,signature;
       for(let attempt=0;attempt<160;attempt++){
         card=cardFor(type,o,index++);signature=card.innerHTML;
+        if (types[type][0] === 'grade3') {
+          const copy = card.cloneNode(true);
+          copy.querySelectorAll('[data-fraction-mark],[data-fraction-bar]').forEach(node => {
+            delete node.dataset.fractionMark;
+            delete node.dataset.fractionBar;
+          });
+          signature = copy.innerHTML;
+        }
         if(!used.has(signature))break;
         card=null;
       }
       if(!card)return false;
       card._basisOpgave=signature;
       const del=el('button','row-delete-btn','×');del.type='button';del.title='Verwijder deze oefening';del.onclick=()=>{card.remove();if(!grid.children.length)title.closest('.title-row').querySelector('.title-delete-btn').click();window.GI_Toets?.updateScoreVakken();};card.append(del);grid.append(card);
+      if (sheet.classList.contains('solutions-mode')) setSolutionsMode(true);
       requestAnimationFrame(()=>{window.GI_Toets?.scanEnVoeg();window.GI_Toets?.updateScoreVakken();});
       return true;
     };
     const exhausted=()=>{
-      const tab=types[type][0]==='even'?'evenoneven':'verdelen';
+      const group = types[type][0];
+      const tab = group === 'grade3' ? 'grade3' : group === 'even' ? 'evenoneven' : 'verdelen';
       const notice=el('p','basis-notice',`${labels[type]}: ${grid.children.length} toegevoegd. Er zijn met deze instellingen geen andere unieke opgaven meer. Kies andere figuren of een ander bereik voor meer variatie.`);
       notice.setAttribute('role','status');$(`${tab}-add`).before(notice);
     };
@@ -216,32 +614,145 @@
   function panel(id,groups){
     const root=el('div','sidebar-content');root.id=`tab-${id}`;root.style.display='none';
     root.innerHTML=`<div class="sectie-titel">${id==='evenoneven'?'Even en oneven':'Verdelen en breuken'}</div><div class="config-kaart"><div class="kaart-titel">Instellingen</div>${id==='evenoneven'?`<label>Getallen tot <select id="${id}-max"><option value="20">20</option><option value="100">100</option></select></label><p class="harm-beschrijving">Afbeeldingen blijven tot 20. Het bereik geldt voor getallenroosters, lijnen en raadsels.</p>`:`<label>Figuren <select id="${id}-shape"><option value="mix">Afwisselend</option><option value="rect">Rechthoeken</option><option value="square">Vierkanten</option><option value="circle">Cirkels</option><option value="triangle">Driehoeken</option></select></label><label class="check-label"><input id="${id}-notation" type="checkbox"> Toon ook ½ en ¼</label><p class="harm-beschrijving">Hoeveelheden tot 20; het dubbel van aantallen tot 10.</p>`}<label class="check-label"><input id="${id}-explain" type="checkbox"> Uitlegkader toevoegen</label></div>`;
+    const grades = id === 'verdelen' ? {2:el('div'),3:el('div')} : null;
+    let gradeSelect;
+    if (grades) {
+      const choice = el('div','config-kaart');
+      choice.append(el('div','kaart-titel','Leerjaar'));
+      const label = el('label','','Leerjaar ');
+      gradeSelect = el('select');
+      gradeSelect.id = 'verdelenLeerjaar';
+      ['2','3'].forEach(grade => {
+        const option = el('option','',grade + 'de leerjaar');
+        option.value = grade;
+        gradeSelect.append(option);
+      });
+      label.append(gradeSelect);
+      choice.append(label);
+      root.children[0].after(choice);
+      root.append(grades[2],grades[3]);
+    }
     groups.forEach(([group,title])=>{
       const box=el('div','config-kaart basis-options');box.append(el('div','kaart-titel',title));
-      Object.keys(types).filter(k=>types[k][0]===group).forEach((k,i)=>{
+      if (group === 'grade3') {
+        box.append(writeFractions(el('p', 'harm-beschrijving'), 'Eén kwart schrijf je als 1/4. Drie van diezelfde kwarten schrijf je als 3/4. Oefen eerst met figuren die al verdeeld zijn. Laat de kinderen daarna zelf verdelen, ook bij groepjes stippen.'));
+      }
+      const steps = {
+        fractionParts: 'Teller, noemer en stambreuken',
+        fractionRead: 'Breuk lezen en schrijven',
+        fractionColor: 'Kleuren met gegeven delen',
+        fractionStem: 'Zelf verdelen en kleuren',
+        fractionQuestions: 'Uitleggen wat je doet',
+        fractionAmount: 'Toepassen op een aantal'
+      };
+      const options = group === 'grade3' ? [
+        'fractionParts','fractionFindStem','fractionFindOther','fractionRead','fractionMatch','fractionMatchReverse','fractionChoose',
+        'fractionColor','fractionStem','fractionDivide','fractionTwoWays','fractionQuestions',
+        'fractionAmount','fractionAmountRead','fractionAmountChoose','fractionAmountMatch','fractionAmountMatchReverse','fractionAmountFinish'
+      ] : Object.keys(types).filter(k=>types[k][0]===group);
+      options.forEach((k,i)=>{
+        if (steps[k]) box.append(el('h4', 'kaart-titel', steps[k]));
         const row=el('div','basis-option-row'),label=el('label','check-label'),input=el('input');
-        input.type='checkbox';input.value=k;input.name=`${id}-type`;input.checked=i===0;
+        input.type='checkbox';input.value=k;input.name=group==='grade3'?'grade3-type':`${id}-type`;input.checked=group!=='grade3'&&i===0;
         label.append(input,document.createTextNode(labels[k]));
         const countLabel=el('label','basis-count-label','Aantal');
         const count=el('input');count.type='number';count.min='1';count.max='12';count.value='4';count.id=`basis-count-${k}`;count.setAttribute('aria-label',`Aantal: ${labels[k]}`);
         countLabel.append(count);row.append(label,countLabel);box.append(row);
-      });root.append(box);
+      });
+      (grades ? grades[group === 'grade3' ? 3 : 2] : root).append(box);
     });
     const btn=el('button','btn-toevoegen','➕ Voeg gekozen oefeningen toe');btn.type='button';btn.id=`${id}-add`;
-    btn.onclick=()=>{
+    const addSelected = (name) => {
       root.querySelectorAll('.basis-notice').forEach(n=>n.remove());
-      const selected=[...root.querySelectorAll(`input[name="${id}-type"]:checked`)];
+      const selected=[...root.querySelectorAll(`input[name="${name}"]:checked`)];
       if(!selected.length){alert('Kies minstens één oefensoort.');return;}
       const o={max:Number($(`${id}-max`)?.value)||20,shape:$(`${id}-shape`)?.value||'mix',notation:$(`${id}-notation`)?.checked||false,explain:$(`${id}-explain`).checked};
       selected.forEach(input=>{const field=$(`basis-count-${input.value}`);const count=Math.max(1,Math.min(12,Math.floor(Number(field.value)||1)));field.value=String(count);add(input.value,{...o,count});});
-    };root.append(btn);return root;
+    };
+    btn.onclick = () => addSelected(id + '-type');
+    if (grades) {
+      const addGrade3 = el('button','btn-toevoegen','Voeg oefeningen voor het 3de leerjaar toe');
+      addGrade3.type = 'button';
+      addGrade3.id = 'grade3-add';
+      addGrade3.onclick = () => addSelected('grade3-type');
+      grades[2].append(btn);
+      grades[3].append(addGrade3);
+      const notation = root.querySelector('#verdelen-notation').closest('label');
+      const updateGrade = () => {
+        const third = gradeSelect.value === '3';
+        grades[2].hidden = third;
+        grades[3].hidden = !third;
+        notation.hidden = third;
+      };
+      gradeSelect.onchange = updateGrade;
+      updateGrade();
+    } else {
+      root.append(btn);
+    }
+    return root;
+  }
+
+  const savedAnswers = new WeakMap();
+  function setSolutionsMode(show) {
+    const sheet = $('sheet');
+    sheet.classList.toggle('solutions-mode', show);
+    showFractionSolutions(show);
+    const toggle = $('btnToggleSolutions');
+    toggle.textContent = show ? 'Verberg oplossingen' : 'Toon oplossingen';
+    toggle.setAttribute('aria-pressed', String(show));
+
+    sheet.querySelectorAll('input[data-antwoord]:not([data-fraction-pupil]), input[data-gi-answer], .rekentaal-item[data-antwoord] input, .hvp-cell[data-gi-answer], .basis-check[data-gi-answer]').forEach(node => {
+      const isInput = node.tagName === 'INPUT';
+      const property = isInput ? 'value' : 'textContent';
+      if (show) {
+        if (!savedAnswers.has(node)) savedAnswers.set(node, [node[property], node.style.color, node.readOnly]);
+        node[property] = node.dataset.giAnswer ?? node.dataset.antwoord ?? node.closest('[data-antwoord]').dataset.antwoord;
+        node.style.color = blue;
+        if (isInput) node.readOnly = true;
+        node.dataset.giCorrected = '';
+      } else if (savedAnswers.has(node)) {
+        const [value, color, readOnly] = savedAnswers.get(node);
+        node[property] = value;
+        node.style.color = color;
+        if (isInput) node.readOnly = readOnly;
+        delete node.dataset.giCorrected;
+        savedAnswers.delete(node);
+      }
+    });
+    sheet.querySelectorAll('[data-basis-color]').forEach(node => {
+      if (show) {
+        if (node.dataset.basisOriginalColor === undefined) node.dataset.basisOriginalColor = node.style.backgroundColor;
+        node.style.backgroundColor = node.dataset.basisColor;
+      } else if (node.dataset.basisOriginalColor !== undefined) {
+        node.style.backgroundColor = node.dataset.basisOriginalColor;
+        delete node.dataset.basisOriginalColor;
+      }
+    });
+    sheet.querySelectorAll('[data-gi-fill]').forEach(node => {
+      node.style.backgroundColor = show ? node.dataset.giFill || blue : '';
+    });
+    sheet.querySelectorAll('[data-gi-svg-fill]').forEach(node => {
+      if (show) node.style.setProperty('fill', node.dataset.giSvgFill, 'important');
+      else node.style.removeProperty('fill');
+    });
+    sheet.querySelectorAll('[data-basis-model]').forEach(node => {
+      node.style.display = show ? '' : 'none';
+    });
+    window.GI4DrawSolutionLines?.();
   }
   function init(){
     if(!window.GI_BasisBridge||$('tab-evenoneven'))return;
+    window.GI4SetSolutionsMode = setSolutionsMode;
+    $('btnToggleSolutions').onclick = () => setSolutionsMode(!$('sheet').classList.contains('solutions-mode'));
+    new MutationObserver(records => {
+      if ($('sheet').classList.contains('solutions-mode') &&
+          records.some(record => [...record.addedNodes].some(node => node.nodeType === 1))) setSolutionsMode(true);
+    }).observe($('sheet'), {childList:true, subtree:true});
+    new ResizeObserver(() => window.GI4DrawSolutionLines?.()).observe($('sheet'));
     const tabs=$('sidebarTabs');
     [['evenoneven','⚖️ Even en oneven'],['verdelen','◒ Verdelen en breuken']].forEach(([id,label])=>{const tab=el('div',`sidebar-tab tab-${id}`,label);tab.onclick=()=>GI_UI.toonTab(id,tab);if(id==='evenoneven')tabs.querySelector('.tab-getallenrij').after(tab);else tabs.append(tab);});
     const footer=document.querySelector('.sidebar-footer');
-    footer.before(panel('evenoneven',[['even','Even en oneven']]),panel('verdelen',[['parts','1. Gelijke delen'],['half','2. Helft en dubbel'],['quarter','3. Een kwart']]));
+    footer.before(panel('evenoneven',[['even','Even en oneven']]),panel('verdelen',[['parts','1. Gelijke delen'],['half','2. Helft en dubbel'],['quarter','3. Een kwart'],['grade3','Breuken oefenen']]));
     const help=document.querySelector('#infoModal h2');
     if(help){const note=el('p','','Nieuw: Even en oneven en Verdelen en breuken. Kies oefensoorten en voeg ze toe. In de preview kun je de opdrachtzin aanpassen, antwoorden invullen, kleuren en tekenen. Met “Toon verdeellijnen” kun je gelijke delen zichtbaar maken. + oefening behoudt de instellingen van die opdracht. Je aanpassingen gaan mee naar de PDF.');note.style.cssText='font-size:14px;line-height:1.6';help.after(note);}
   }

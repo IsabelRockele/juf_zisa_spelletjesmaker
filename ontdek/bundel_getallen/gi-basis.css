@@ -24,3 +24,70 @@
 .basis-count-label input{display:block;width:58px!important;margin-top:3px}
 .exporting .basis-tools{display:none!important}
 @media print{.basis-tools{display:none!important}.basis-card,.basis-explain{break-inside:avoid}.title-row{break-after:avoid}}
+
+/* De leerling schrijft in de tabelcel. Toon de ingevulde waarde bij de correctie. */
+#sheet.solutions-mode .honderdveld-te-table input[data-gi-corrected],
+#sheet.solutions-mode .mab-te-table input[data-gi-corrected] {
+  display: inline-block !important;
+  max-width: 100%;
+  padding: 0;
+  border: 0 !important;
+  background: transparent !important;
+  text-align: center;
+}
+
+/* Eén cijfer bij T/E, maximaal drie cijfers bij het totaal. */
+#sheet .aanvul-vragen-onder .aanvul-input {
+  box-sizing: border-box;
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  padding: 0 3px !important;
+  line-height: normal;
+}
+#sheet .aanvul-vragen-onder .aanvul-rij:not(:last-child) .aanvul-input:last-child {
+  width: 56px !important;
+  min-width: 56px !important;
+}
+#sheet .aanvul-vragen-onder .aanvul-input[data-gi-corrected] {
+  color: #006ca8 !important;
+}
+
+.basis-fraction {
+  display: inline-flex;
+  flex-direction: column;
+  vertical-align: middle;
+  text-align: center;
+  line-height: 1.15;
+  margin-inline: .1em;
+}
+.basis-fraction > span {
+  padding-inline: .15em;
+}
+.basis-fraction > span:first-child {
+  border-bottom: 1px solid currentColor;
+}
+
+.basis-fraction-series,.basis-fraction-band{display:flex;justify-content:space-around;gap:8px;text-align:center}
+.basis-fraction-series{flex-wrap:wrap}
+.basis-fraction-band>div{flex:1;min-width:0}
+.basis-fraction-choice{padding:3px 6px}
+.basis-fraction-match .basis-fraction-band-bottom{margin-top:72px}
+.basis-fraction-match-cell{display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+.basis-fraction-match .basis-fraction-band-bottom .basis-fraction-match-cell{flex-direction:column-reverse}
+.basis-fraction-dot{display:block;width:8px;height:8px;border-radius:50%;background:#344d60;margin:4px auto}
+#sheet.solutions-mode [data-fraction-mark]{outline:2px solid #006ca8;border-radius:999px}
+#sheet.solutions-mode [data-fraction-bar]>span:first-child{border-bottom:3px solid #006ca8}
+
+.sidebar-footer.basis-footer {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.basis-footer > button {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.basis-footer > #btnClearSheet {
+  color: #344d60;
+}

@@ -53,7 +53,7 @@ window.GI_Pdf = (() => {
     knoppen.forEach(b => { b._savedDisplay = b.style.display; b.style.display = 'none'; });
 
     // Verberg overlay-inputs boven getallenlijn
-    const overlays = Array.from(document.querySelectorAll('.print-overlay-input'));
+    const overlays = Array.from(document.querySelectorAll('.print-overlay-input:not([data-gi-corrected])'));
     overlays.forEach(i => { i._savedVis = i.style.visibility; i.style.visibility = 'hidden'; });
 
     // Markeer als exporting (CSS kan hierop reageren)
@@ -643,24 +643,28 @@ window.GI_Pdf = (() => {
   function init() {
     const btn = document.getElementById('btnDownloadPdf');
     if (!btn) return;
+    const solutions = document.getElementById('btnDownloadSolutions');
+    const toggle = document.querySelector('#btnToggleSolutions[data-gi-basis]');
     let bezig = false;
-    btn.addEventListener('click', async () => {
+    const download = async (show) => {
       if (bezig) return;
-      bezig = true; btn.disabled = true;
-      const sheet = document.getElementById('sheet');
-      const hadOplossingen = !!sheet?.classList.contains('solutions-mode');
+      bezig = true;
+      btn.disabled = true;
+      if (solutions) solutions.disabled = true;
+      if (toggle) toggle.disabled = true;
       try {
-        if (hadOplossingen) {
-          window.GI4SetSolutionsMode?.(false);
-          await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-        }
-        await maakPdf('werkblad-getalinzicht.pdf', { solutions: false });
+        await maakPdf(show ? 'oplossingen-getalinzicht.pdf' : 'werkblad-getalinzicht.pdf', { solutions: show });
       } finally {
-        if (hadOplossingen) window.GI4SetSolutionsMode?.(true);
         bezig = false;
         btn.disabled = false;
+        if (solutions) solutions.disabled = false;
+        if (toggle) toggle.disabled = false;
       }
-    });
+    };
+    btn.addEventListener('click', () => download(false));
+    if (solutions && toggle) {
+      solutions.addEventListener('click', () => download(true));
+    }
   }
 
   document.addEventListener('DOMContentLoaded', init);

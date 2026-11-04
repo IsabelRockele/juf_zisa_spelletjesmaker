@@ -1,3 +1,92 @@
+function giMatchingColor(cell, table) {
+  const valueOf = node => {
+    const parts = [...node.textContent.matchAll(/(\d+)\s*([HTE])/g)];
+    return parts.length ? parts.reduce((sum, [,n,unit]) => sum + n * {H:100,T:10,E:1}[unit], 0) : Number(node.textContent);
+  };
+  const colors = ['#a8d8ff','#f7c58d','#a7dcba','#dfc8ef','#f5b9c5','#e7df89','#b6e4e3','#e2c8b4','#bac3f3','#d5d9ae'];
+  const previous = [...table.children].find(node => valueOf(node) === valueOf(cell));
+  cell.dataset.basisColor = previous?.dataset.basisColor || colors[table.children.length];
+}
+const giConnectionGroups = new WeakMap();
+function giConnect(host, from, to, key, fromEdge = 'center', toEdge = 'center') {
+  host.dataset.giConnections = '';
+  let group = giConnectionGroups.get(host);
+  if (!group) {
+    if (!host.style.position) host.style.position = 'relative';
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;display:none;overflow:visible';
+    host.append(svg);
+    group = {svg, from: new Map(), to: new Map(), lines: []};
+    giConnectionGroups.set(host, group);
+  }
+  if (from) group.from.set(key, [from, fromEdge]);
+  if (to) group.to.set(key, [to, toEdge]);
+  if (group.from.has(key) && group.to.has(key)) {
+    const line = document.createElementNS(group.svg.namespaceURI, 'line');
+    line.style.setProperty('stroke', '#006ca8', 'important');
+    line.setAttribute('stroke-width', '2');
+    line.setAttribute('stroke-linecap', 'round');
+    group.svg.append(line);
+    group.lines.push([line, group.from.get(key), group.to.get(key)]);
+    group.from.delete(key);
+    group.to.delete(key);
+  }
+}
+window.GI4DrawSolutionLines = () => {
+  const sheet = document.getElementById('sheet');
+  const show = sheet.classList.contains('solutions-mode');
+  sheet.querySelectorAll('[data-gi-connections]').forEach(host => {
+    const group = giConnectionGroups.get(host);
+    if (!group) return;
+    group.svg.style.display = show ? 'block' : 'none';
+    if (!show) return;
+    const bounds = group.svg.getBoundingClientRect();
+    const scaleX = bounds.width / group.svg.clientWidth || 1;
+    const scaleY = bounds.height / group.svg.clientHeight || 1;
+    const point = ([node, edge]) => {
+      const rect = node.getBoundingClientRect();
+      const x = edge === 'left' ? rect.left : edge === 'right' ? rect.right : rect.left + rect.width / 2;
+      return [(x - bounds.left) / scaleX, (rect.top + rect.height / 2 - bounds.top) / scaleY];
+    };
+    group.lines.forEach(([line, from, to]) => {
+      const [x1,y1] = point(from);
+      const [x2,y2] = point(to);
+      Object.entries({x1,y1,x2,y2}).forEach(([name,value]) => line.setAttribute(name, value));
+    });
+  });
+};
+
+function giMixedAnswers(item, type) {
+  const order = item.querySelector('.mix-order-top');
+  if (order) {
+    const values = [...order.children].map(node => Number(node.textContent));
+    giAnswers(item, ...values.sort((a,b) => type === 'orderDesc' ? b-a : a-b));
+    return;
+  }
+  const terms = [...item.querySelectorAll('.mix-num,.mix-label')].map(node => {
+    const parts = [...node.textContent.matchAll(/(\d+)\s*([HTE])/g)];
+    return parts.length ? parts.reduce((sum, [,n,unit]) => sum + n * {H:100,T:10,E:1}[unit], 0) : Number(node.textContent);
+  });
+  if (!terms.length) return;
+  const [left,right] = terms;
+  if (type.startsWith('compare')) giAnswers(item, left === right ? '=' : left < right ? '<' : '>');
+  else if (type.startsWith('compose')) giAnswers(item, left);
+  else if (type === 'neighborHundreds') giAnswers(item, Math.floor(left/100)*100, Math.floor(left/100)*100+100);
+  else if (type === 'neighborTens') giAnswers(item, Math.floor(left/10)*10, Math.floor(left/10)*10+10);
+  else if (type === 'neighbors') giAnswers(item, left-1, left+1);
+}
+
+function giAnswers(container, ...answers) {
+  container.querySelectorAll('input').forEach((input, index) => {
+    if (answers[index] !== undefined) input.dataset.giAnswer = answers[index];
+  });
+}
+function giPlaceAnswers(container, number, includeHundreds, includeNumber = false) {
+  const digits = [Math.floor(number / 10) % 10, number % 10];
+  if (includeHundreds) digits.unshift(Math.floor(number / 100));
+  if (includeNumber) digits.push(number);
+  giAnswers(container, ...digits);
+}
 // @ts-nocheck
 /* ══════════════════════════════════════════════════════════════
    getalinzicht.js  —  oefening-renderers + UI-koppeling
@@ -290,6 +379,7 @@ piece.style.gridAutoRows = '34px';
       const isGiven = revealIdx.has(idx);
       cell.className   = 'hvp-cell ' + (isGiven ? 'given' : 'blank');
       cell.textContent = isGiven ? n : '';
+      if (!isGiven) cell.dataset.giAnswer = n;
       piece.appendChild(cell);
     }
   }
@@ -435,7 +525,7 @@ function buildLegend(items){
   const legend = document.createElement('div');
   legend.className = 'hvicons-legend';
 
-  items.forEach(({icon}) => {
+  items.forEach(({icon,n}) => {
     const row = document.createElement('div');
     row.className = 'hvicons-legend-item';
 
@@ -443,7 +533,8 @@ function buildLegend(items){
     ico.className = 'hvicons-legend-icon';
     ico.textContent = icon;
 
-    const input = document.createElement('input'); // leerling schrijft getal
+    const input = document.createElement('input');
+    input.dataset.giAnswer = n;
     row.append(ico, input);
     legend.appendChild(row);
   });
@@ -601,6 +692,7 @@ function addGetalbeelden1000(){
       const task = document.createElement('div');
       task.className = 'gb1000-task-onder';
       task.append(table, numBox);
+      giPlaceAnswers(task, num, maxVal > 100, true);
       card.appendChild(task);
     } else {
       // Tot 1000: TE-tabel uitbreiden met H-kolom
@@ -618,6 +710,7 @@ function addGetalbeelden1000(){
       const task = document.createElement('div');
       task.className = 'honderdveld-task';
       task.append(table, numBox);
+      giPlaceAnswers(task, num, maxVal > 100, true);
       card.appendChild(task);
     }
 
@@ -908,6 +1001,16 @@ requestAnimationFrame(() => {
       const c = document.createElement('div');
       c.className = 'kaartje';
       c.textContent = val;
+      const tick = ticks.find(t => t.v === val);
+      if (tick) {
+        const mark = document.createElementNS(NS, 'circle');
+        mark.setAttribute('cx', tick.x);
+        mark.setAttribute('cy', baseY);
+        mark.setAttribute('r', 4);
+        mark.setAttribute('fill', 'transparent');
+        g.appendChild(mark);
+        giConnect(ex, dot, mark, val);
+      }
       wrap.appendChild(c);
 
       kaartRij.appendChild(wrap);
@@ -971,6 +1074,7 @@ requestAnimationFrame(() => {
       const inp = document.createElement('input');
       inp.type = 'text';
       inp.className = 'print-overlay-input';
+      inp.dataset.giAnswer = t.v;
       inp.style.cssText = `position:absolute;left:${pxLeft}px;top:${pxTop}px;width:${bw}px;height:${bh}px;font-size:16px;font-weight:700;text-align:center;background:transparent;border:0;outline:none;z-index:3;box-sizing:border-box;`;
       ex.appendChild(inp);
 
@@ -1063,7 +1167,8 @@ t.setAttribute('dominant-baseline','text-before-edge'); // stabieler in PDF
     const block=document.createElement('div'); block.className='jump-exercise-block'; block.appendChild(createDeleteButton(block)); block.dataset.titleKey = key;
     if (discover) {
       const p=document.createElement('div'); p.className='discover-jump-prompt';
-      p.innerHTML='De sprong is + <input type="text" class="jump-box" style="width:46px;height:34px;display:inline-block;vertical-align:middle;">';
+      p.innerHTML='De sprong is <input type="text" class="jump-box" style="width:46px;height:34px;display:inline-block;vertical-align:middle;">';
+      giAnswers(p, step);
       block.appendChild(p);
     }
     const ex=document.createElement('div'); ex.className='jump-exercise';
@@ -1087,12 +1192,12 @@ row.appendChild(createRowDeleteButton(row));
       const startEl=document.createElement('div'); startEl.className='jump-start'; startEl.textContent=seq[0]; row.appendChild(startEl);
       for(let i=1;i<count;i++){
         if (indices.has(i)){ const g=document.createElement('div'); g.className='jump-given'; g.textContent=seq[i]; row.appendChild(g); }
-        else { const b=document.createElement('input'); b.className='jump-box'; row.appendChild(b); }
+        else { const b=document.createElement('input'); b.className='jump-box'; b.dataset.giAnswer=seq[i];row.appendChild(b); }
       }
       ex.appendChild(row); block.appendChild(ex);
     } else {
       const startEl=document.createElement('div'); startEl.className='jump-start'; startEl.textContent=start; row.appendChild(startEl);
-      for(let i=0;i<count-1;i++){ const box=document.createElement('input'); box.className='jump-box'; row.appendChild(box); }
+      for(let i=0;i<count-1;i++){ const box=document.createElement('input'); box.className='jump-box'; box.dataset.giAnswer=seq[i+1]; row.appendChild(box); }
       ex.appendChild(row); block.appendChild(ex);
     }
     placeAfterLastOfKey(block, key);
@@ -1138,7 +1243,7 @@ function exprForValue(v, range){
   if (t) forms.push(`${t} T`);
   if (e) forms.push(`${e} E`);
   if (forms.length >= 2 && Math.random()<0.7){
-    return forms.sort(()=>Math.random()-0.5).slice(0, Math.random()<0.6?2:3).join(' ');
+    return forms.sort(()=>Math.random()-0.5).join(' ');
   }
   return forms.length ? forms.join(' ') : String(v);
 }
@@ -1380,6 +1485,7 @@ function isCleanTen(n){ return n % 10 === 0; }
       item.append(box(), makeNum(x), box());
     }
 
+    giMixedAnswers(item, type);
     // Vul eerst mixed-first aan als die nog niet vol is
     const first = blok.querySelector('.mixed-first');
     const isHTE  = grid.classList.contains('hte-2col');
@@ -1517,10 +1623,10 @@ else if (type==='nextTen'){
   vragen.innerHTML = `
     <div class="fillnext-num-groot">${x}</div>
     <div class="fillnext-line">Het volgende <strong>T</strong> is
-      ${(showExample && i===0) ? `<span style="font-weight:700;">${target}</span>` : `<input type="text" class="fillnext-box">`}.
+      ${(showExample && i===0) ? `<span style="font-weight:700;">${target}</span>` : `<input type="text" class="fillnext-box" data-gi-answer="${target}">`}.
     </div>
     <div class="fillnext-line">Dat is
-      ${(showExample && i===0) ? `<span style="font-weight:700;">${diff}</span>` : `<input type="text" class="fillnext-box">`} erbij.
+      ${(showExample && i===0) ? `<span style="font-weight:700;">${diff}</span>` : `<input type="text" class="fillnext-box" data-gi-answer="${diff}">`} erbij.
     </div>`;
 
   card.appendChild(vragen);
@@ -1565,10 +1671,10 @@ else if (type==='nextHundred'){
   card.innerHTML = `
     <div class="fillnext-top"><div class="fillnext-num">${x}</div></div>
     <div class="fillnext-line">Het volgende <strong>H</strong> is
-      ${(showExample && i===0) ? `<span style="font-weight:700;">${target}</span>` : `<input type="text" class="fillnext-box">`} .
+      ${(showExample && i===0) ? `<span style="font-weight:700;">${target}</span>` : `<input type="text" class="fillnext-box" data-gi-answer="${target}">`} .
     </div>
     <div class="fillnext-line">Dat is
-      ${(showExample && i===0) ? `<span style="font-weight:700;">${diff}</span>` : `<input type="text" class="fillnext-box">`} erbij.
+      ${(showExample && i===0) ? `<span style="font-weight:700;">${diff}</span>` : `<input type="text" class="fillnext-box" data-gi-answer="${diff}">`} erbij.
     </div>`;
   item.appendChild(card);
   grid.appendChild(item);
@@ -1583,6 +1689,7 @@ else
       else if(type==='compareTE'){const left=makeSideTEorNumber(max);const right=makeSideTEorNumber(max);const mid=box('small');const leftEl=left.isTE?makeLabel(left.text):makeNum(left.value);const rightEl=right.isTE?makeLabel(right.text):makeNum(right.value);item.append(leftEl,mid,rightEl);}
       else if(type==='composeHTE'){const hte=makeHTE(max);const eq=document.createElement('span');eq.className='mix-eq';eq.textContent='=';item.append(makeLabel(hte.text),eq,box());}
       else if(type==='compareHTE'){const left=makeSideHTEorNumber(max);const right=makeSideHTEorNumber(max);const mid=box('small');const leftEl=left.isHTE?makeLabel(left.text):makeNum(left.value);const rightEl=right.isHTE?makeLabel(right.text):makeNum(right.value);item.append(leftEl,mid,rightEl);}
+      giMixedAnswers(item, type);
       grid.appendChild(item);
     }
 
@@ -1675,7 +1782,7 @@ placeAfterLastOfKey(block, key);
     const row = document.createElement('div');
 row.className = 'seq-row row-delete-wrap';
 row.appendChild(createRowDeleteButton(row));
-    seq.forEach((n,i)=>{ if(blankSet.has(i)){ const inp=document.createElement('input'); inp.type='text'; inp.className='seq-box'; row.appendChild(inp);} else { const d=document.createElement('div'); d.className='seq-num'; d.textContent=n; row.appendChild(d);} });
+    seq.forEach((n,i)=>{ if(blankSet.has(i)){ const inp=document.createElement('input'); inp.type='text'; inp.className='seq-box';inp.dataset.giAnswer=n; row.appendChild(inp);} else { const d=document.createElement('div'); d.className='seq-num'; d.textContent=n; row.appendChild(d);} });
     block.appendChild(row); placeAfterLastOfKey(block, key);
   }
 
@@ -1774,6 +1881,7 @@ function addHonderdveldExercise() {
     for (let j = 1; j <= 100; j++) {
       const cell = document.createElement('div');
       cell.className = 'honderdveld-cell';
+      if (type === "aanvullen-tiental" && j > num && j <= (tens + 1) * 10) cell.dataset.giFill = "";
       if (type === 'veld-naar-getal' || type === 'aanvullen-tiental') {
         if (j <= tens * 10) cell.classList.add('filled-ten');   // hele tientallen
         else if (j <= num)  cell.classList.add('filled-unit');  // losse eenheden
@@ -1806,6 +1914,7 @@ function addHonderdveldExercise() {
       numBox.type = 'text';
       numBox.className = 'honderdveld-num-box';
       task.append(table, numBox);
+      giPlaceAnswers(task, num, false, true);
       container.appendChild(task);
 
     } else if (type === 'getal-naar-veld') {
@@ -1813,6 +1922,7 @@ function addHonderdveldExercise() {
       const givenNum = document.createElement('div');
       givenNum.className = 'honderdveld-given-num';
       givenNum.textContent = num;
+      grid.querySelectorAll('.honderdveld-cell').forEach((cell, index) => { if (index < num) cell.dataset.giFill = index < tens * 10 ? '#4caf50' : '#ffeb3b'; });
       container.appendChild(givenNum);
       container.appendChild(grid);
 
@@ -1833,6 +1943,7 @@ function addHonderdveldExercise() {
          <div class="aanvul-rij">
            Dat zijn <input type="text" class="aanvul-input"> E erbij.
          </div>`;
+      giAnswers(task, tens, num % 10, num, tens + 1, (tens + 1) * 10, 10 - num % 10);
       container.appendChild(task);
     }
 
@@ -1892,6 +2003,12 @@ function addHonderdveldExercise() {
       if (isWhite) {
         const numDiv = document.createElement('div'); numDiv.className='mab-connect-num'; numDiv.textContent=num;
         container.append(numDiv, visual);
+        [h,t,u].forEach((count,index) => {
+          const group = visual.querySelector(['.mab-hundreds-wrapper','.mab-tens-wrapper','.mab-units-wrapper'][index]);
+          [...(group?.children || [])].slice(0,count).forEach(block => {
+            block.querySelector('rect').dataset.giSvgFill = ['#42a5f5', '#4caf50', '#ffeb3b'][index];
+          });
+        });
       } else {
         const table = document.createElement('table'); table.className='mab-te-table';
         if (includeHundreds) {
@@ -1900,6 +2017,7 @@ function addHonderdveldExercise() {
           table.innerHTML=`<tr><td class="te-label">T</td><td class="te-label e">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td></tr>`;
         }
         container.append(visual, table);
+          giPlaceAnswers(table, num, includeHundreds);
       }
 
       // Vul mab-first aan als niet vol, anders naar grid
@@ -1932,6 +2050,12 @@ container.className = 'mab-tellen-container row-delete-wrap';
         if(isWhite){
           const numDiv=document.createElement('div'); numDiv.className='mab-connect-num'; numDiv.textContent=num;
           container.append(numDiv, visual);
+        [h,t,u].forEach((count,index) => {
+          const group = visual.querySelector(['.mab-hundreds-wrapper','.mab-tens-wrapper','.mab-units-wrapper'][index]);
+          [...(group?.children || [])].slice(0,count).forEach(block => {
+            block.querySelector('rect').dataset.giSvgFill = ['#42a5f5', '#4caf50', '#ffeb3b'][index];
+          });
+        });
         }else{
           const table=document.createElement('table'); table.className='mab-te-table';
           if (includeHundreds){
@@ -1940,6 +2064,7 @@ container.className = 'mab-tellen-container row-delete-wrap';
             table.innerHTML=`<tr><td class="te-label">T</td><td class="te-label e">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td></tr>`;
           }
           container.append(visual, table);
+          giPlaceAnswers(table, num, includeHundreds);
         }
         grid.appendChild(container);
       }
@@ -1989,6 +2114,7 @@ wrap.style.display='grid';
           const dot=document.createElement('div');
           dot.style.position='absolute'; dot.style.left='50%'; dot.style.transform='translate(-50%, 0)'; dot.style.bottom='-14px';
           dot.style.width='10px'; dot.style.height='10px'; dot.style.background='#000'; dot.style.borderRadius='50%';
+          giConnect(wrap, dot, null, n);
           card.append(vis,dot); topRow.appendChild(card);
         });
 
@@ -2004,6 +2130,7 @@ wrap.style.display='grid';
           const num=document.createElement('div'); num.className='mab-connect-num'; num.textContent=n;
           num.style.display='inline-block'; num.style.minWidth='72px';
           card.append(dot, num); botRow.appendChild(card);
+          giConnect(wrap, null, dot, n);
         });
 
         wrap.append(topRow, document.createElement('div'), botRow);
@@ -2044,6 +2171,7 @@ wrap.style.display='grid';
           dot.style.top='50%';
           dot.style.transform='translateY(-50%)';
           dot.style.width='10px'; dot.style.height='10px'; dot.style.background='#000'; dot.style.borderRadius='50%';
+          giConnect(wrap, dot, null, n);
           card.append(vis, dot); leftCol.appendChild(card);
         });
 
@@ -2060,6 +2188,7 @@ wrap.style.display='grid';
           const num=document.createElement('div'); num.className='mab-connect-num'; num.textContent = n;
           num.style.minWidth='80px'; num.style.textAlign='center';
           card.append(dot, num); rightCol.appendChild(card);
+          giConnect(wrap, null, dot, n);
         });
 
         block.appendChild(wrap); placeAfterLastOfKey(block, key);
@@ -2283,14 +2412,17 @@ svg.style.height = h + 'px';
     if (pos === 'mid' || pos === 'bot') {
       const dotTop = document.createElement('div'); dotTop.className = 'pv-dot top';
       cell.appendChild(dotTop);
+      giConnect(wrap, null, dotTop, (pos === 'mid' ? 'top:' : 'bottom:') + it.v);
     }
 
     const card = document.createElement('div'); card.className = 'pv-card'; card.textContent = it.txt;
+
     cell.appendChild(card);
 
     if (pos === 'top' || pos === 'mid') {
       const dotBottom = document.createElement('div'); dotBottom.className = 'pv-dot bottom';
       cell.appendChild(dotBottom);
+      giConnect(wrap, dotBottom, null, (pos === 'top' ? 'top:' : 'bottom:') + it.v);
     }
 
     band.appendChild(cell);
@@ -2331,6 +2463,7 @@ addCells(botCards, bandBot, 'bot');   // punt bovenaan
     const cell = document.createElement('div');
     cell.className = 'pv-color-cell';
     cell.textContent = String(txt);
+    giMatchingColor(cell, tbl);
     tbl.appendChild(cell);
   });
 
@@ -2399,6 +2532,9 @@ rowT.innerHTML = `<input type="text" class="pv3-small"> <span class="pv3-label">
 const rowH = document.createElement('div'); rowH.className = 'pv3-row';
 // E weggelaten om compacter te zijn
 rowH.innerHTML = `<input type="text" class="pv3-small"> <span class="pv3-label">H =</span> <input type="text" class="pv3-box"> <span class="pv3-label">T =</span> <input type="text" class="pv3-box pv3-box-wide">`;
+        giAnswers(rowE, u, u);
+        giAnswers(rowT, t, t*10);
+        giAnswers(rowH, h, h*100, h*10, h*100);
         ans.append(rowE,rowT,rowH);
 
         const svg = document.createElementNS(NS, 'svg'); svg.classList.add('pv-arrows');
@@ -2478,6 +2614,8 @@ ans.style.transform = `translateX(${SHIFT_TE_LEFT}px)`;
   const tLabE = document.createElement('span');  tLabE.className = 'pv-label'; tLabE.textContent = 'E =';
   const tBoxE = document.createElement('input'); tBoxE.type = 'text'; tBoxE.className = 'pv-box';
   rowT.append(tSmall, tLab, tBox, tLabE, tBoxE);
+  giAnswers(rowE, u, u);
+  giAnswers(rowT, t, t*10, t*10);
 
   ans.append(rowE, rowT);
 
@@ -2564,10 +2702,10 @@ placeAfterLastOfKey(block, key);
       else{while(idx.size<Math.min(wc,count))idx.add(Math.floor(Math.random()*count));}
       if(iS)idx.add(0);if(iE)idx.add(count-1);
       const sEl=document.createElement('div');sEl.className='jump-start';sEl.textContent=seq[0];row.appendChild(sEl);
-      for(let i=1;i<count;i++){if(idx.has(i)){const g=document.createElement('div');g.className='jump-given';g.textContent=seq[i];row.appendChild(g);}else{const b=document.createElement('input');b.className='jump-box';row.appendChild(b);}}
+      for(let i=1;i<count;i++){if(idx.has(i)){const g=document.createElement('div');g.className='jump-given';g.textContent=seq[i];row.appendChild(g);}else{const b=document.createElement('input');b.className='jump-box';b.dataset.giAnswer=seq[i];row.appendChild(b);}}
     }else{
       const sEl=document.createElement('div');sEl.className='jump-start';sEl.textContent=start;row.appendChild(sEl);
-      for(let i=0;i<count-1;i++){const b=document.createElement('input');b.className='jump-box';row.appendChild(b);}
+      for(let i=0;i<count-1;i++){const b=document.createElement('input');b.className='jump-box';b.dataset.giAnswer=seq[i+1];row.appendChild(b);}
     }
     ex.appendChild(row);
     requestAnimationFrame(()=>drawJumpArcsInline(row,Array(count-1).fill(discover?'?':('+'+step))));
@@ -2618,6 +2756,7 @@ placeAfterLastOfKey(block, key);
     const nb=document.createElement('input');nb.type='text';nb.className='honderdveld-num-box';
     if(mv<=100){tbl.innerHTML='<tr><td class="te-label t">T</td><td class="te-label e">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td></tr>';card.style.cssText='display:flex;flex-direction:column;align-items:center;gap:8px;';const t=document.createElement('div');t.className='gb1000-task-onder';t.append(tbl,nb);card.appendChild(t);}
     else{tbl.innerHTML='<tr><td class="te-label h" style="background:#42a5f5;color:#fff">H</td><td class="te-label t">T</td><td class="te-label e">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>';const t=document.createElement('div');t.className='honderdveld-task';t.append(tbl,nb);card.appendChild(t);}
+    giPlaceAnswers(card, num, mv > 100, true);
     const hc=head?head.querySelectorAll('.gb1000-card').length:2;
     if(head&&hc<2)head.appendChild(card);else if(grid)grid.appendChild(card);
   }
@@ -2634,7 +2773,7 @@ placeAfterLastOfKey(block, key);
     const mb=lk?Math.max(0,seq.length-2):seq.length,bl=Math.min(bw,mb);
     const bs=new Set();while(bs.size<bl&&ai.length){const k=Math.floor(Math.random()*ai.length);bs.add(ai.splice(k,1)[0]);}
     const row=document.createElement('div');row.className='seq-row row-delete-wrap';row.appendChild(createRowDeleteButton(row));
-    seq.forEach((n,i)=>{if(bs.has(i)){const inp=document.createElement('input');inp.type='text';inp.className='seq-box';row.appendChild(inp);}else{const d=document.createElement('div');d.className='seq-num';d.textContent=n;row.appendChild(d);}});
+    seq.forEach((n,i)=>{if(bs.has(i)){const inp=document.createElement('input');inp.type='text';inp.className='seq-box';inp.dataset.giAnswer=n;row.appendChild(inp);}else{const d=document.createElement('div');d.className='seq-num';d.textContent=n;row.appendChild(d);}});
     blok.appendChild(row);
     requestAnimationFrame(()=>requestAnimationFrame(()=>{if(window.GI_Toets){window.GI_Toets.scanEnVoeg();window.GI_Toets.updateScoreVakken();}}));
   }
@@ -2657,19 +2796,19 @@ placeAfterLastOfKey(block, key);
     const row=document.createElement('div');
     row.className=(mode==='connect'?'pv-connect3-row':'pv-color-row')+' row-delete-wrap';
     row.appendChild(createRowDeleteButton(row));
-    const vals=[];for(let i=0;i<3;i++){let t,u;if(range==='20'){const n=Math.floor(Math.random()*21);t=Math.floor(n/10);u=n%10;}else{t=1+Math.floor(Math.random()*9);u=Math.floor(Math.random()*10);}vals.push(t*10+u);}
+    const vals = uniqueRandoms(3, range === '20' ? 20 : 99, range === '20' ? 0 : 10);
     if(mode==='connect'){
       const lc=document.createElement('div');lc.className='pv-connect-col';
       const rc=document.createElement('div');rc.className='pv-connect-col pv-connect-right';
       const sh=[...vals].sort(()=>Math.random()-.5);
-      vals.forEach(v=>{const c=document.createElement('div');c.className='pv-connect-cell';c.textContent=exprForValue(v,range);lc.appendChild(c);});
-      sh.forEach(v=>{const c=document.createElement('div');c.className='pv-connect-cell pv-connect-num';c.textContent=String(v);rc.appendChild(c);});
+      vals.forEach(v=>{const c=document.createElement('div');c.className='pv-connect-cell';c.textContent=exprForValue(v,range);lc.appendChild(c);giConnect(row,c,null,v,"right");});
+      sh.forEach(v=>{const c=document.createElement('div');c.className='pv-connect-cell pv-connect-num';c.textContent=String(v);rc.appendChild(c);giConnect(row,null,c,v,"center","left");});
       row.append(lc,rc);
     }else{
       const tbl=document.createElement('div');tbl.className='pv-color-grid';
       const its=[];vals.forEach(v=>{let a=exprForValue(v,range),b,g=0;do{b=exprForValue(v,range);g++;}while(b===a&&g<10);its.push(a,b);});
       its.sort(()=>Math.random()-.5);
-      its.forEach(t=>{const c=document.createElement('div');c.className='pv-color-cell';c.textContent=String(t);tbl.appendChild(c);});
+      its.forEach(t=>{const c=document.createElement('div');c.className='pv-color-cell';c.textContent=String(t);giMatchingColor(c, tbl);tbl.appendChild(c);});
       row.appendChild(tbl);
     }
     grid.appendChild(row);
@@ -2703,6 +2842,7 @@ placeAfterLastOfKey(block, key);
     const rH=document.createElement('div');rH.className='pv3-row';rH.innerHTML='<input type="text" class="pv3-small"> <span class="pv3-label">H =</span> <input type="text" class="pv3-box"> <span class="pv3-label">T =</span> <input type="text" class="pv3-box pv3-box-wide">';
     ans.append(rE,rT,rH);
     const sv=document.createElementNS(N,'svg');sv.classList.add('pv-arrows');sv.style.cssText='position:absolute;inset:0;z-index:0;';
+    giAnswers(ans, u2, u2, t2, t2*10, h2, h2*100, h2*10, h2*100);
     item.append(nm,ans,sv);
     const hc=head?head.querySelectorAll('.pv3-item').length:2;
     if(head&&hc<2)head.appendChild(item);else grid.appendChild(item);
@@ -2752,6 +2892,7 @@ placeAfterLastOfKey(block, key);
     mk.appendChild(tp);df.appendChild(mk);sv.appendChild(df);
     const ep=document.createElementNS(N,'path');ep.setAttribute('d','M 62 44 V 70 H 80');ep.setAttribute('fill','none');ep.setAttribute('stroke','#333');ep.setAttribute('stroke-width','1.5');ep.setAttribute('marker-end','url(#'+mid+')');
     const tp2=document.createElementNS(N,'path');tp2.setAttribute('d','M 26 44 V 120 H 80');tp2.setAttribute('fill','none');tp2.setAttribute('stroke','#333');tp2.setAttribute('stroke-width','1.5');tp2.setAttribute('marker-end','url(#'+mid+')');
+    giAnswers(ans, u3, u3, t3, t3*10, t3*10);
     sv.append(ep,tp2);it.append(nm,ans,sv);
     const hc=head?head.querySelectorAll('.pv-item').length:2;
     if(head&&hc<2)head.appendChild(it);else grid.appendChild(it);
@@ -2767,18 +2908,19 @@ placeAfterLastOfKey(block, key);
     if(type==='nextTen'){
       const ms=document.getElementById('fillNextSchema')?.checked!==false;
       let x;do{x=Math.floor(Math.random()*99)+1;}while(x%10===0);
-      const tgt=nextTen(x),diff=tgt-x,tens=Math.floor(x/10);
+      const target=nextTen(x),diff=target-x,tens=Math.floor(x/10);
       card.className=(ms?'fillnext-card fillnext-card-met-schema':'fillnext-card');
       if(ms){const sc=document.createElement('div');sc.className='fillnext-schema';const sg=document.createElement('div');sg.className='honderdveld-grid';for(let j=1;j<=100;j++){const cl=document.createElement('div');cl.className='honderdveld-cell';if(j<=tens*10)cl.classList.add('filled-ten');else if(j<=x)cl.classList.add('filled-unit');sg.appendChild(cl);}sc.appendChild(sg);card.appendChild(sc);}
       const vr=document.createElement('div');vr.className='fillnext-vragen';
-      vr.innerHTML=`<div class="fillnext-num-groot">${x}</div><div class="fillnext-line">Het volgende <strong>T</strong> is <input type="text" class="fillnext-box">.</div><div class="fillnext-line">Dat is <input type="text" class="fillnext-box"> erbij.</div>`;
+      vr.innerHTML=`<div class="fillnext-num-groot">${x}</div><div class="fillnext-line">Het volgende <strong>T</strong> is <input type="text" class="fillnext-box" data-gi-answer="${target}">.</div><div class="fillnext-line">Dat is <input type="text" class="fillnext-box" data-gi-answer="${diff}"> erbij.</div>`;
       card.appendChild(vr);
     }else{
       let x,tries=0;const n2=parseInt($('#mixedMax')?.value,10)||100;const cap=Math.min(990,n2);
       if(cap>=110){do{const tc=Math.floor((cap-110)/10)+1;x=110+10*Math.floor(Math.random()*tc);tries++;if(tries>200)break;}while(x%100===0);}
       else{do{x=10+10*Math.floor(Math.random()*9);tries++;if(tries>200)break;}while(x%100===0);}
+      const target=nextHundred(x),diff=target-x;
       card.className='fillnext-card';
-      card.innerHTML=`<div class="fillnext-top"><div class="fillnext-num">${x}</div></div><div class="fillnext-line">Het volgende <strong>H</strong> is <input type="text" class="fillnext-box"> .</div><div class="fillnext-line">Dat is <input type="text" class="fillnext-box"> erbij.</div>`;
+      card.innerHTML=`<div class="fillnext-top"><div class="fillnext-num">${x}</div></div><div class="fillnext-line">Het volgende <strong>H</strong> is <input type="text" class="fillnext-box" data-gi-answer="${target}"> .</div><div class="fillnext-line">Dat is <input type="text" class="fillnext-box" data-gi-answer="${diff}"> erbij.</div>`;
     }
     item.appendChild(card);
     const first=blok.querySelector('.fillnext-first');

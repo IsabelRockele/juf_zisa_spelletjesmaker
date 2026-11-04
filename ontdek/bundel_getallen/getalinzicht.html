@@ -8,11 +8,11 @@
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <!-- Volgorde: eerst oefeningen, dan preview, dan pdf -->
-  <script defer src="getalinzicht.js?v=basis1"></script>
-  <script defer src="gi-basis.js?v=5"></script>
-  <link rel="stylesheet" href="gi-basis.css?v=4">
+  <script defer src="getalinzicht.js?v=solutions4"></script>
+  <script defer src="gi-basis.js?v=20"></script>
+  <link rel="stylesheet" href="gi-basis.css?v=footer">
   <script defer src="gi-preview.js?v=range-freeze-fix-1"></script>
-  <script defer src="gi-pdf.js?v=basis2"></script>
+  <script defer src="gi-pdf.js?v=solutions1"></script>
 
   <link rel="stylesheet" href="getalinzicht.css?v=rekentaal-zinnen2">
   <link rel="stylesheet" href="getalinzicht-ui.css">
@@ -756,8 +756,10 @@
 
 
     <!-- ── FOOTER ──────────────────────────────────────────── -->
-    <div class="sidebar-footer">
+    <div class="sidebar-footer basis-footer">
       <button class="btn-pdf"    id="btnDownloadPdf">🖨️ Download PDF</button>
+      <button class="btn-pdf btn-solutions" id="btnToggleSolutions" data-gi-basis aria-pressed="false">Toon oplossingen</button>
+      <button class="btn-pdf btn-solutions" id="btnDownloadSolutions">PDF oplossingen</button>
       <button class="btn-wissen" id="btnClearSheet">🗑️ Leegmaken</button>
     </div>
 
