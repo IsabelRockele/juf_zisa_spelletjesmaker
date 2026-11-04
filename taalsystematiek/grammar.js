@@ -45,6 +45,13 @@ const synonyms=[
 const types=[
  ['dimin-choice','Verkleinwoorden','Kies het verkleinwoord','support'],['dimin-write','Verkleinwoorden','Maak een verkleinwoord','basic'],['dimin-sentence','Verkleinwoorden','Gebruik een verkleinwoord in een zin','challenge'],
  ['subject-who','Onderwerp en persoonsvorm','Onderwerp: beantwoord de wie-vraag','support'],['subject-ask','Onderwerp en persoonsvorm','Onderwerp: maak zelf de wie-vraag','basic'],['subject-text','Onderwerp en persoonsvorm','Onderwerp: zoek met wie-vragen in een tekst','challenge'],
+ ['alphabet-gap','Alfabetiseren','Vul de ontbrekende letters in','support'],
+ ['alphabet-neighbors','Alfabetiseren','Schrijf de letterburen','support'],
+ ['alphabet-pair','Alfabetiseren','Welk woord komt eerst?','support'],
+ ['alphabet-sort','Alfabetiseren','Sorteer op de eerste letter','basic'],
+ ['alphabet-insert','Alfabetiseren','Welk woord past ertussen?','basic'],
+ ['alphabet-error','Alfabetiseren','Zoek de fout in de alfabetische rij','challenge'],
+ ['alphabet-second','Alfabetiseren','Sorteer op de tweede letter','challenge'],
  ['verb-words','Werkwoorden','Omkring het werkwoord tussen de woorden','support'],
  ['verb-find','Werkwoorden','Zoek het werkwoord in de zin','basic'],
  ['verb-choose','Werkwoorden','Kies het werkwoord dat past','basic'],
@@ -54,7 +61,7 @@ const types=[
  ['syn-match','Synoniemen','Verbind de synoniemen','support'],['syn-replace','Synoniemen','Vervang door een synoniem','basic'],['syn-sentence','Synoniemen','Schrijf met een synoniem','challenge']
 ].map(([id,topic,name,level])=>({id,topic,name,level,description:name}));
 TaalData.types.push(...types);
-const limits=Object.fromEntries(types.map(t=>[t.id,t.id.startsWith('verb-')?8:t.id==='syntax-text'?stories.length:t.id.startsWith('syntax-')?sentences.length:t.id.startsWith('dimin-')?dimin.length:synonyms.length]));
+const limits=Object.fromEntries(types.map(t=>[t.id,t.id.startsWith('alphabet-')?12:t.id.startsWith('verb-')?8:t.id==='syntax-text'?stories.length:t.id.startsWith('syntax-')?sentences.length:t.id.startsWith('dimin-')?dimin.length:synonyms.length]));
 Object.assign(limits,{'subject-who':subjectSentences.length,'subject-ask':subjectSentences.length,'subject-text':subjectStories.length});
 const inversionByTheme={
  autumn:[['Onder de boom liggen kastanjes.','Liggen er kastanjes onder de boom?','kastanjes','liggen'],['Na de regen springt Noor in de plassen.','Springt Noor na de regen in de plassen?','Noor','springt']],
@@ -140,6 +147,14 @@ const verbExamples={
   ['Milan','zoekt','zocht','een dennenappel onder de boom','zingt','dennenappel','boom']
  ]
 };
+const alphabetExtra={
+ neutral:['beker blok brug','doos deur draad','kat kip koe','laars lepel lint','melk mier moer','sok sap surfplank'],
+ autumn:['appel akker avond','blad beek bol','den draad doos','eikel emmer egel','paddenstoel pet pompoen','sjaal sloop spin'],
+ halloween:['bezem bot bril','cape clown circus','deur dolk draak','ketel kip kraai','nacht neus noot','pak pompoen pruik'],
+ christmas:['bal beker boom','doos den draad','geschenk glans goud','kaart kerstkaart klok','muts melk maan','slinger sneeuwpop ster'],
+ saint:['brief boek beker','dak deur doos','geit goud griffel','koek ketel klomp','staf schip suiker','wortel wind want'],
+ forest:['bos blad beek','den das dijk','egel eikel emmer','haas hert hond','kever kikker krab','regen riet rots']
+};
 const grammarExamples={
  neutral:['Noor','rent','rende','naar de bus'],
  autumn:['Lina','veegt','veegde','de bladeren bij elkaar'],
@@ -147,6 +162,15 @@ const grammarExamples={
  christmas:['Noor','plakt','plakte','een ster op haar kerstkaart'],
  saint:['Mila','legt','legde','een tekening bij haar schoen'],
  forest:['Sam','luistert','luisterde','naar de vogels in het bos']
+};
+const alphabet='abcdefghijklmnopqrstuvwxyz';
+const alphabetSecond={
+ neutral:['bal boek bus','raam rekenrek ring','jas jojo juf','map mes muts','pan pen pot','tas tent trap'],
+ autumn:['kastanje kegel korf','tak thermos trui','regen roest rugzak','laars licht loof','blad boom bui','mand mist muts'],
+ halloween:['kaars ketel kostuum','masker mist monster','lamp licht lucht','snoep spook suikerspin','griezel gedaante gordijn','heks hoed huis'],
+ christmas:['kaars kerstbal klok','pakje piek poeder','slee sneeuw ster','lichtje luik lamp','krans kerstboom koek','rendier rood ruit'],
+ saint:['pakje pen piet','mantel mijter muts','schoen staf suiker','boot brief banket','koek kast klomp','lantaarn licht lont'],
+ forest:['blad beek boswachter','den dier duizendpoot','tak tulp tonderzwam','mos mier muis','pad prent poel','eikel egel eekhoorn']
 };
 function model(item,s,solutions){
  const [exampleSubject,exampleVerb,examplePast,exampleRest]=grammarExamples[item.articleTheme]||grammarExamples.neutral;
@@ -164,7 +188,105 @@ function model(item,s,solutions){
  const chosen=pool=>G.shuffle(pool,r).slice(0,item.count).map((value,i)=>({value,key:'row-'+i})).filter(x=>!removed.has(x.key));
  const add=(html,key)=>blocks.push('<div class="question-block"'+(key?' data-question-key="'+key+'"':'')+'>'+html+'</div>');
  const mark=(text,subject,verb)=>{const pattern=new RegExp('(\\b'+subject+'\\b|\\b'+verb+'\\b)','gi');return text.split(pattern).map(w=>w.toLowerCase()===subject.toLowerCase()?'<u class="subject-answer">'+e(w)+'</u>':w.toLowerCase()===verb.toLowerCase()?'<b class="marked">'+e(w)+'</b>':e(w)).join('')};
- let instruction='',hint='',example='';
+ let instruction='',hint='',example='',exampleHtml='';
+ if(item.type.startsWith('alphabet-')){
+  const theme=item.articleTheme;
+  const alphabetTopics=theme==='all'?[...Object.values(alphabetSecond).flat(),...Object.values(alphabetExtra).flat()]:[...(alphabetSecond[theme]||alphabetSecond.neutral),...(alphabetExtra[theme]||alphabetExtra.neutral)];
+  const words=[...new Set([...TaalData.themedNouns(theme).map(n=>n.word),...alphabetTopics.flatMap(row=>row.split(' '))])];
+  const sorted=values=>[...values].sort((a,b)=>a.localeCompare(b,'nl'));
+  const scramble=values=>{
+   const shuffled=G.shuffle(values,r);
+   if(shuffled.every((word,i)=>word===values[i]))shuffled.push(shuffled.shift());
+   return shuffled;
+  };
+  const alphabetHelp='Alfabet\n'+[...alphabet.slice(0,13)].join('\u2002')+'\n'+[...alphabet.slice(13)].join('\u2002');
+  const cards=[];
+  const card=(html,key)=>cards.push('<div class="alphabet-card" data-question-key="'+key+'">'+html+'</div>');
+  const gap=letter=>solutions?'<b class="marked">'+e(letter)+'</b>':'<span class="question-word-blank alphabet-letter">'+SpellingSchrijflijnen.htmlCanvas(s.lineType,s.lineHeight,46)+'</span>';
+  const isLetterTask=['alphabet-gap','alphabet-neighbors'].includes(item.type);
+  hint=isLetterTask?'Letters staan in een vaste volgorde. Zoek welke letter vlak vóór of vlak na een andere letter komt.':'Vergelijk de woorden letter voor letter, vanaf links. De letter die het eerst in het alfabet komt, bepaalt welk woord eerst staat.';
+  const prompts={
+   'alphabet-gap':'Vul de ontbrekende letters in. Schrijf één letter op elke lijn.',
+   'alphabet-neighbors':'Schrijf links de vorige letter en rechts de volgende letter.',
+   'alphabet-pair':'Kijk naar de eerste letter. Omkring het woord dat eerst komt in het alfabet.',
+   'alphabet-sort':'Kleur de eerste letter geel. Schrijf de woorden in alfabetische volgorde.',
+   'alphabet-insert':'Kies het woord dat op de lege plek past. De rij moet alfabetisch blijven.',
+   'alphabet-error':'Zoek het woord dat op de verkeerde plaats staat. Schrijf de hele rij in alfabetische volgorde op de schrijflijn.',
+   'alphabet-second':'Kleur de eerste letter geel en de tweede blauw. De eerste letter is gelijk. Gebruik de tweede letter om de woorden alfabetisch te sorteren.'
+  };
+  instruction=prompts[item.type];
+  if(item.type==='alphabet-gap')example='Voorbeeld: a · ___ · c → schrijf b.';
+  if(item.type==='alphabet-neighbors')example='Voorbeeld: ___ · d · ___ → schrijf c links en e rechts.';
+  if(item.type==='alphabet-pair')example='Voorbeeld: zon / fiets → Omkring fiets. De f komt vóór de z.';
+  if(item.type==='alphabet-sort')example='Voorbeeld: zon · fiets · appel → appel · fiets · zon.';
+  if(item.type==='alphabet-insert')example='Voorbeeld: appel · ___ · zon (fiets / aap) → fiets past ertussen.';
+  if(item.type==='alphabet-error'){
+   const [prompt,correct]=item.alphabetErrorMode==='same'?['roos · raam · ring','raam · ring · roos']:item.alphabetErrorMode==='distinct'?['zon · appel · fiets · peer','appel · fiets · peer · zon']:['zon · appel · raam · roos','appel · raam · roos · zon'];
+   example='Voorbeeld: '+prompt+'\nOp de schrijflijn: '+correct;
+  }
+  if(item.type==='alphabet-second')example='Voorbeeld: roos · ring · raam → raam · ring · roos. Vergelijk a, i en o.';
+  const distinctStarts=()=>[...new Map(G.shuffle(words,r).map(word=>[word[0],word])).values()];
+  const letterStarts=G.shuffle([...alphabet.slice(1,item.type==='alphabet-gap'?23:-1)],r);
+  const correctOnLeft=['alphabet-pair','alphabet-insert'].includes(item.type)?Array.from({length:6},()=>G.shuffle([true,false],r)).flat():[];
+  const secondGroups=G.shuffle(alphabetTopics,r).map(row=>{
+   const group=row.split(' ');
+   return [...new Map(group.map(word=>[word[1],word])).values()];
+  }).filter(group=>group.length>1).slice(0,item.count);
+  for(let i=0;i<(item.type==='alphabet-second'?secondGroups.length:item.count);i++){
+   const key='row-'+i;
+   if(removed.has(key))continue;
+   const letterIndex=alphabet.indexOf(letterStarts[i%letterStarts.length]);
+   if(item.type==='alphabet-gap'){
+    const start=Math.min(letterIndex-1,21);
+    const letters=[...alphabet.slice(start,start+5)];
+    card('<div class="alphabet-letter-row">'+letters.map((letter,index)=>'<div class="alphabet-stop">'+(index===1||index===3?gap(letter):e(letter))+'</div>').join('')+'</div>',key);
+   }else if(item.type==='alphabet-neighbors'){
+    card('<div class="alphabet-letter-row alphabet-houses"><div class="alphabet-stop">'+gap(alphabet[letterIndex-1])+'</div><div class="alphabet-stop"><b>'+alphabet[letterIndex]+'</b></div><div class="alphabet-stop">'+gap(alphabet[letterIndex+1])+'</div></div>',key);
+   }else if(item.type==='alphabet-pair'){
+    const pair=sorted(distinctStarts().slice(0,2));
+    const options=correctOnLeft[i]?pair:[...pair].reverse();
+    card('<p>'+options.map(word=>solutions&&word===pair[0]?'<b class="marked">'+e(word)+'</b>':e(word)).join(' / ')+'</p>',key);
+   }else if(item.type==='alphabet-insert'){
+    const [outside,first,middle,last]=sorted(distinctStarts().slice(0,4));
+    card('<p>'+e(first)+' · '+(solutions?'<b class="marked">'+e(middle)+'</b>':'<span class="alphabet-missing-word"></span>')+' · '+e(last)+'</p><p class="alphabet-choices"><small>Kies uit: '+(correctOnLeft[i]?[middle,outside]:[outside,middle]).map(word=>'<span>'+e(word)+'</span>').join(' / ')+'</small></p>',key);
+   }else if(item.type==='alphabet-error'){
+    const mode=item.alphabetErrorMode;
+    const sameStart=secondGroups[i%secondGroups.length];
+    const group=mode==='same'?sameStart:mode==='distinct'?distinctStarts().slice(0,4):[
+     ...sameStart.slice(0,2),
+     ...distinctStarts().filter(word=>word[0]!==sameStart[0][0]).slice(0,2)
+    ];
+    const correct=sorted(group);
+    const misplaced=correct.length>2?(r()<0.5?correct[0]:correct.at(-1)):correct[0];
+    const row=correct.filter(word=>word!==misplaced);
+    if(misplaced===correct[0])row.push(misplaced);
+    else row.unshift(misplaced);
+    const prompt=row.map(word=>solutions&&word===misplaced?'<b class="marked">'+e(word)+'</b>':e(word)).join(' · ');
+    add('<div class="alphabet-error-row"><p>'+prompt+'</p>'+answer(correct.map(e).join(' · '),1)+'</div>',key);
+   }else{
+    const group=sorted(item.type==='alphabet-second'?secondGroups[i]:distinctStarts().slice(0,Math.min(5,i+3)));
+    card('<p>'+scramble(group).map(e).join(' · ')+'</p>'+answer(group.map(e).join('<br>'),group.length),key);
+   }
+  }
+  if(item.alphabetHelp!=='write')example=alphabetHelp+'\n'+example;
+  if(['alphabet-sort','alphabet-second'].includes(item.type)){
+   const second=item.type==='alphabet-second';
+   const colorLetters=word=>'<span class="alphabet-first-letter">'+e(word[0])+'</span>'+
+    (second?'<span class="alphabet-second-letter">'+e(word[1])+'</span>':'')+e(word.slice(second?2:1));
+   const words=second?['roos','ring','raam']:['zon','fiets','appel'];
+   const colored=words.map(colorLetters).join(' · ');
+   const before=example.slice(0,example.lastIndexOf('Voorbeeld:'));
+   exampleHtml=e(before)+'Voorbeeld: '+colored+' → '+sorted(words).map(e).join(' · ')+'.';
+  }
+  if(item.alphabetHelp==='write'){
+   const alphabetAnswer=[alphabet.slice(0,13),alphabet.slice(13)].map(row=>[...row].join(' · ')).join('<br>');
+   exampleHtml='<div class="alphabet-write-help"><strong>Schrijf hier eerst het hele alfabet uit je hoofd.</strong>'+answer(alphabetAnswer,2)+'</div>'+(exampleHtml||e(example));
+  }
+  for(let i=0;i<cards.length;i+=2){
+   add('<div class="alphabet-card-grid">'+cards.slice(i,i+2).join('')+'</div>');
+  }
+
+ }
  if(item.type.startsWith('verb-')){
   hint='Een werkwoord zegt wat iemand of iets doet, wat er gebeurt of hoe iets is. Ook zijn en worden zijn werkwoorden.';
 
@@ -254,7 +376,7 @@ function model(item,s,solutions){
   else selected.forEach(({value:[word,syn,text],key})=>add(item.type==='syn-replace'?'<p>'+e(text).replace(word,'<b>'+e(word)+'</b>')+'</p>'+answer('Bijvoorbeeld: '+e(text.replace(word,syn)),2):'<p>Woord: <b>'+e(word)+'</b></p><div class="grammar-field"><span>Synoniem:</span><div>'+answer('Bijvoorbeeld: '+e(syn))+'</div></div><p>Mijn zin:</p>'+answer('Eigen zin met bijvoorbeeld '+e(syn)+'. Andere passende synoniemen zijn ook juist.',2),key));
  }
  const hintStructure=item.type.startsWith('syntax-')?{steps:['Maak een ja-neevraag van de zin. Het eerste woord is de persoonsvorm.','Vraag over wie of wat iets wordt gezegd. Het volledige antwoord is het onderwerp.'],example:[['Zin',exampleSentence],['Ja-neevraag',exampleVerb[0].toUpperCase()+exampleVerb.slice(1)+' '+exampleSubject+' '+exampleRest+'?'],['Persoonsvorm',exampleVerb],['Onderwerp',exampleSubject]]}:item.type.startsWith('subject-')?{steps:['Zoek over wie iets wordt gezegd.','Maak een vraag die begint met Wie.','Het volledige antwoord is het onderwerp.'],example:[['Zin',exampleSentence],['Wie-vraag','Wie '+exampleVerb+' '+exampleRest+'?'],['Onderwerp',exampleSubject]],note:'Bij dingen gebruik je een wat-vraag. Hier oefenen we met personen.'}:null;
- return {instruction,hint,example,blocks,hintStructure};
+ return {instruction,hint,example,exampleHtml,blocks,hintStructure};
 }
 window.TaalGrammar={model,limits,types,dimin,diminPool,normalizeEndings,sentences,stories,synonyms,subjectSentences,subjectStories};
 })();

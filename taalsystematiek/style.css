@@ -144,3 +144,43 @@
 
 .sort-grid-with-tips{grid-template-rows:auto auto 1fr}
 .sort-grid-with-tips>section{display:grid;grid-template-rows:subgrid;grid-row:span 3}
+
+.tab-alphabet{background:#f4e0bc;color:#704711}
+.alphabet-letter{width:1.6em}
+#sentenceKindOptions[hidden]{display:none}
+
+.alphabet-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.alphabet-card{position:relative;min-width:0;padding:8px 12px;border:1px solid #dbe2df;border-radius:8px}
+.alphabet-card p{margin:0;overflow-wrap:anywhere}
+.alphabet-card .question-remove{right:4px;top:-9px}
+.alphabet-letter-row{display:grid;grid-template-columns:repeat(5,minmax(0,2.35em));gap:4px;justify-content:start;text-align:center}
+.alphabet-stop{display:grid;place-items:center;min-height:2em;background:#f4f7f4;border-radius:4px}
+.alphabet-houses{grid-template-columns:repeat(3,minmax(0,2.35em))}
+.alphabet-houses .alphabet-stop{border-top:3px solid #85a496;border-radius:8px 8px 4px 4px}
+.alphabet-card .alphabet-letter{width:90%;max-width:2.5em}
+.alphabet-card .write-line canvas{max-width:100%}
+.alphabet-missing-word{display:inline-block;width:5em;border-bottom:1px solid currentColor}
+
+#alphabetHelpOptions[hidden]{display:none}
+
+.alphabet-card .alphabet-choices{margin-top:0.65em;color:#526b71}.alphabet-choices span{white-space:nowrap}
+
+#alphabetErrorOptions[hidden]{display:none}
+
+.alphabet-error-row{padding-bottom:0.55em}.alphabet-error-row p{margin:0 0 0.3em}
+
+.exercise-intro .hint{white-space:pre-line}
+.exercise-intro .hint,.exercise-intro .example,.exercise-intro .exercise-heading{position:relative}
+.help-controls{display:inline-flex;gap:3px;position:absolute;right:3px;top:-12px;z-index:1}
+.help-controls button{padding:0;width:21px;height:21px;line-height:1;background:#f2f7f4;border-color:#d5e2dc}
+.exercise-heading>.help-controls{position:static;margin-left:8px;vertical-align:middle}
+
+.help-controls .preview-alphabet-help{width:auto;margin:0;padding:4px 8px;font:14px Nunito,Arial,sans-serif}
+.preview-alphabet-help[hidden]{display:none}
+
+.alphabet-first-letter,.alphabet-second-letter{color:#192f40;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.alphabet-first-letter{background:#ffe477}.alphabet-second-letter{background:#a8d9ff}
+
+.exercise-intro .example:has(.alphabet-write-help){display:block}
+.alphabet-write-help{margin-bottom:.5em}
+.alphabet-write-help canvas{max-width:100%}
