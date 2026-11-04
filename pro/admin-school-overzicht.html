@@ -64,6 +64,15 @@
       margin-bottom: 20px;
     }
     .card h2 { font-size: 22px; margin-bottom: 6px; }
+    .kopers-tabel { width: 100%; border-collapse: collapse; }
+    .kopers-tabel th, .kopers-tabel td {
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--rand, #e7e0ef);
+    }
+    .kopers-tabel td:first-child { overflow-wrap: anywhere; }
+    .kopers-tabel td:nth-child(3), .kopers-tabel td:nth-child(4) { white-space: nowrap; }
     .beheer-knoppen, .kopers-totalen, .school-kop {
       display: flex;
       flex-wrap: wrap;
@@ -526,8 +535,8 @@
         <button type="button" id="kopers-kopieer" disabled>Kopieer getoonde e-mailadressen voor BCC</button>
         <p id="kopers-status" role="status"></p>
         <div style="overflow-x:auto">
-          <table>
-            <thead><tr><th>Koper</th><th>Aankoopverloop</th><th>Pro geldig tot</th><th>Laatste gefactureerde leesperiode tot</th><th>Geschiedenis</th></tr></thead>
+          <table class="kopers-tabel">
+            <thead><tr><th>Koper</th><th>Aankoopverloop</th><th>Pro tot</th><th>Lezen tot</th><th>Geschiedenis</th></tr></thead>
             <tbody id="kopers-rijen"></tbody>
           </table>
         </div>
