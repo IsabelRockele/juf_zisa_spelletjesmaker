@@ -105,7 +105,10 @@ export function setupBuyers(loadBuyers) {
   });
   refresh.addEventListener("click", refreshBuyers);
   search.addEventListener("input", render);
-  filter.addEventListener("change", render);
+  filter.addEventListener("change", () => {
+    if (filter.value === "reading") active.value = "";
+    render();
+  });
   active.addEventListener("change", render);
   order.addEventListener("change", render);
   for (const [button, field] of [[year, "yearEnd"], [month, "monthEnd"]]) {
