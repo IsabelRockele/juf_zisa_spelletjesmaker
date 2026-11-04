@@ -2691,6 +2691,12 @@ export const adminGetSchoolContext = onCall(
  *     ]
  *   }
  */
+const BUYER_OVERVIEW_EXCLUDED_EMAIL_HASHES = new Set([
+  "bf69f9af87f5d1cdf797a362acc62be19b0fa73b8f894c83f0a383fe23b7013b",
+  "c49cfdb92cad86e476a2c3aa7047c5deb4ddd456336df92cdc7b7bced9431793",
+  "5aab705ef9929322f0ec4753db82ff0d6bbf9a77ae1e354cf8e432b8d83b9464",
+]);
+
 export const adminListBuyers = onCall(
   { region: REGION, enforceAppCheck: true },
   async (req) => {
@@ -2709,7 +2715,7 @@ export const adminListBuyers = onCall(
     const buyers = new Map<string, { email: string; name: string; proEnd: number; monthEnd: number; yearEnd: number; readingEnd: number; purchases: Purchase[] }>();
     function buyerFor(value: unknown) {
       const address = typeof value === "string" ? value.trim().toLowerCase() : "";
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) return undefined;
+      if (BUYER_OVERVIEW_EXCLUDED_EMAIL_HASHES.has(createHash("sha256").update(address).digest("hex")) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) return undefined;
       const buyer = buyers.get(address) || { email: address, name: "", proEnd: 0, monthEnd: 0, yearEnd: 0, readingEnd: 0, purchases: [] };
       buyers.set(address, buyer);
       return buyer;
