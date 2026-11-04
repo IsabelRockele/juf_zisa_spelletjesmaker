@@ -26,9 +26,16 @@ export function setupBuyers(loadBuyers) {
       matchesPlan(buyer, active.value, now) &&
       `${buyer.name} ${buyer.email}`.toLowerCase().includes(query));
     const direction = order.value === "oldest" ? 1 : -1;
+    const expiry = buyer => {
+      if (active.value === "yearEnd" || active.value === "monthEnd") return buyer[active.value];
+      if (filter.value === "reading" || filter.value === "reading-only") return buyer.readingEnd;
+      return buyer.proEnd || buyer.readingEnd;
+    };
     visible.sort((a, b) => {
-      if (!a.firstPurchase || !b.firstPurchase) return Number(!a.firstPurchase) - Number(!b.firstPurchase);
-      return direction * (a.firstPurchase - b.firstPurchase);
+      const aEnd = expiry(a);
+      const bEnd = expiry(b);
+      if (!aEnd || !bEnd) return Number(!aEnd) - Number(!bEnd);
+      return direction * (aEnd - bEnd);
     });
     rows.replaceChildren();
     for (const buyer of visible) {
@@ -157,6 +164,5 @@ function describeBuyer(buyer) {
     if (!pro.length) labels.add("reading-only");
     summary.push(pro.length ? "Zisa Lezen apart" : "Alleen Zisa Lezen");
   }
-  const firstPurchase = buyer.purchases.find(purchase => purchase.date > 0)?.date;
-  return { ...buyer, firstPurchase, labels, summary: summary.join(" · ") };
+  return { ...buyer, labels, summary: summary.join(" · ") };
 }
