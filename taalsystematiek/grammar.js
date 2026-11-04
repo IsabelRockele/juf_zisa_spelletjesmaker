@@ -141,7 +141,7 @@ const verbExamples={
  ]
 };
 const grammarExamples={
- neutral:['Noor','fietst','fietste','naar school'],
+ neutral:['Noor','rent','rende','naar de bus'],
  autumn:['Lina','veegt','veegde','de bladeren bij elkaar'],
  halloween:['Sam','knipt','knipte','een spook uit papier'],
  christmas:['Noor','plakt','plakte','een ster op haar kerstkaart'],
@@ -167,9 +167,17 @@ function model(item,s,solutions){
  let instruction='',hint='',example='';
  if(item.type.startsWith('verb-')){
   hint='Een werkwoord zegt wat iemand of iets doet, wat er gebeurt of hoe iets is. Ook zijn en worden zijn werkwoorden.';
-  example='Nu: '+exampleSentence+'\nVroeger: '+exampleSubject+' '+examplePast+' '+exampleRest+'.';
+
   const theme=item.articleTheme;
   const pool=theme==='all'?Object.values(verbExamples).flat():verbExamples[theme]||verbExamples.neutral;
+  const [,,,,other,nounA,nounB]=pool[0];
+  const examples={
+   'verb-words':nounA+' / '+examplePast+' / '+nounB+' → Omkring '+examplePast+'.',
+   'verb-find':exampleSentence+' → Omkring '+exampleVerb+'.',
+   'verb-choose':exampleSubject+' '+other+' / '+exampleVerb+' '+exampleRest+'. → Kies '+exampleVerb+'.',
+   'verb-tense':'Nu: '+exampleSentence+' → Kleur '+exampleVerb+' blauw.\nVroeger: '+exampleSubject+' '+examplePast+' '+exampleRest+'. → Kleur '+examplePast+' rood.'
+  };
+  example=examples[item.type];
   const shuffled=G.shuffle(pool,r).slice(0,item.count);
   const pastFirst=r()<0.5;
   const highlighted=(word,css='marked')=>solutions?'<b class="'+css+'">'+e(word)+'</b>':e(word);

@@ -141,3 +141,6 @@
 .question-match .rhyme-match-row>span:first-child [data-match-left]{margin-left:auto}
 
 .exercise-intro .example{white-space:pre-line}
+
+.sort-grid-with-tips{grid-template-rows:auto auto 1fr}
+.sort-grid-with-tips>section{display:grid;grid-template-rows:subgrid;grid-row:span 3}

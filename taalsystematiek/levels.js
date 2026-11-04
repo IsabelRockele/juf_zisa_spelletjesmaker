@@ -44,7 +44,7 @@ TaalGenerator.model = function(item, settings, solutions) {
   const result = original(item, settings, solutions);
   if (item.level === 'support') {
     if (supportInstructions[item.type]) result.instruction = supportInstructions[item.type];
-    if (item.type === 'scene') result.instruction += ' Gebruik de woordenlijst als hulp.';
+    if (item.type === 'scene' && result.example.startsWith('Woorden om te kiezen:')) result.instruction += ' Gebruik de woordenlijst als hulp.';
   }
   if (item.level === 'challenge') {
     if (challengeAdditions[item.type]) result.instruction += ' ' + challengeAdditions[item.type];

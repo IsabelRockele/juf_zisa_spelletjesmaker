@@ -2,7 +2,7 @@
 (() => {
 const signs={
 '.':{name:'punt',article:'de',action:'vertellen',kind:'mededelende zin',purpose:'Je vertelt rustig iets.',stem:'Ik zie'},
-'?':{name:'vraagteken',article:'het',action:'vragen',kind:'vraag',purpose:'Je stelt een vraag.',stem:'Waar is'},
+'?':{name:'vraagteken',article:'het',action:'vragen',kind:'vraag',purpose:'Je stelt een vraag.',stem:'Zie jij …?'},
 '!':{name:'uitroepteken',article:'het',action:'roepen',kind:'uitroep',purpose:'Je roept luid of met veel gevoel.',stem:'Pas op voor'}
 };
 const data=[
@@ -156,7 +156,7 @@ function model(item,s,solutions){
  const themed=actions.flatMap(({text,question,subject})=>[
   {text:text.slice(0,-1),sign:'.',stem:subject,purpose:signs['.'].purpose},
   {text:question.slice(0,-1),sign:'?',stem:question.split(' ')[0],purpose:signs['?'].purpose},
-  {text:'Kijk, '+text[0].toLowerCase()+text.slice(1,-1).replace(/^(noor|milan|lina|sinterklaas) /,name=>name[0].toUpperCase()+name.slice(1)),sign:'!',stem:'Kijk,',purpose:signs['!'].purpose}
+  {text:'Kijk, '+(/^(De|Het) /.test(subject)?text[0].toLowerCase()+text.slice(1,-1):text.slice(0,-1)),sign:'!',stem:'Kijk,',purpose:signs['!'].purpose}
  ]);
  const source=actions.length?(item.articleTheme==='all'?[...data,...themed]:themed):data;
  const pools=Object.fromEntries(Object.keys(signs).map(sign=>[sign,G.shuffle(source.filter(x=>x.sign===sign),r)]));
@@ -166,8 +166,9 @@ function model(item,s,solutions){
  const lines=(n=2)=>Array.from({length:n},()=>'<div class="write-line">'+SpellingSchrijflijnen.htmlCanvas(s.lineType,s.lineHeight,640)+'</div>').join('');
  const answer=(text,n=2)=>solutions?'<div class="answer">'+text+'</div>':lines(n);
  const block=(html,key)=>blocks.push('<div class="question-block"'+(key?' data-question-key="'+key+'"':'')+'>'+html+'</div>');
- let instruction='',hint='Een punt sluit een gewone mededelende zin af. Een vraagteken hoort bij een vraag. Een uitroepteken gebruik je als je iets roept of met veel gevoel zegt.',example=support?'Ik lees een boek. · Lees jij ook? · Pas op!':'';
+ let instruction='',hint='Een punt sluit een gewone mededelende zin af. Een vraagteken hoort bij een vraag. Een uitroepteken gebruik je als je iets roept of met veel gevoel zegt.',example='';
  if(item.type==='punct-period-question'){
+  example='Ik lees graag → Ik lees graag.\nLees jij graag → Lees jij graag?';
   instruction='Lees de zinnen. Schrijf een punt achter elke mededelende zin en een vraagteken achter elke vraagzin.';
   hint='Een mededelende zin vertelt iets. Een vraagzin vraagt iets.';
   const pairCount=Math.ceil(item.count/2);
@@ -178,6 +179,7 @@ function model(item,s,solutions){
   });
  }
  if(item.type==='punct-find'){
+  if(support)example='Lees jij graag? → Omkring het vraagteken aan het einde.';
   instruction='Omkring het leesteken aan het einde van elke zin.'+(hard?' Schrijf ernaast: vertellen, vragen of roepen.':'');
   chosen.forEach(q=>block('<div class="punct-find-row"><p>'+esc(q.text)+(solutions?'<b class="marked">'+q.sign+'</b>':q.sign)+'</p>'+(hard?'<div class="punct-reason">'+answer(esc(signs[q.sign].action),1)+'</div>':'')+'</div>',q.key));
  }
@@ -188,7 +190,7 @@ function model(item,s,solutions){
  }
  if(item.type==='punct-complete'){
   instruction='Maak de zin af. Begin met de gegeven woorden en gebruik het aangegeven leesteken.';
-  chosen.forEach(q=>block('<p class="sentence-prompt"><span>Begin met: <b>'+esc(q.stem)+'</b></span><span>Gebruik het leesteken: <b>'+q.sign+'</b></span></p>'+(support?'<p class="support-note">Maak af met: '+esc(q.text.slice(q.stem.length).trim())+'</p>':'')+answer('Bijvoorbeeld: '+esc(q.text)+q.sign)+(hard?'<p>Schrijf een andere zin met hetzelfde leesteken.</p>'+answer('Eigen andere zin met '+esc(signs[q.sign].name)+'.'):''),q.key));
+  chosen.forEach(q=>block('<p class="sentence-prompt"><span>Begin met: <b>'+esc(q.stem)+'</b></span><span>Gebruik het leesteken: <b>'+q.sign+'</b></span></p>'+(support?'<p class="support-note">Maak af met: '+esc(q.text.slice(q.stem.length).trim()+q.sign)+'</p>':'')+answer('Bijvoorbeeld: '+esc(q.text)+q.sign)+(hard?'<p>Schrijf een andere zin met hetzelfde leesteken.</p>'+answer('Eigen andere zin met '+esc(signs[q.sign].name)+'.'):''),q.key));
  }
  if(item.type==='punct-write'){
   const words=G.shuffle(actions.length?TaalData.themedNouns(item.articleTheme).map(n=>n.word):['bal','hond','boek','fiets','taart','boom','kat','jas','bloem','trein','appel','deur'],r);
@@ -308,7 +310,7 @@ function model(item,s,solutions){
   }
   if(item.type==='punct-question-kind'){
    instruction='Lees de vraag. Omkring open vraag of gesloten vraag.';
-   rows.forEach((q,i)=>{
+   rows.forEach(({q},i)=>{
     const options=['open vraag','gesloten vraag'].map((label,index)=>solutions&&(q[0]==='open')===(index===0)?'<b class="marked">'+label+'</b>':label);
     taskRow('<p>'+esc(questionText(q))+'</p><p>'+options.join(' / ')+'</p>',i);
    });
@@ -322,7 +324,7 @@ function model(item,s,solutions){
   }
   if(item.type==='punct-question-write'){
    instruction='Lees het antwoord of de keuzes. Bedenk er een passende vraag bij. Eindig met een vraagteken.';
-   rows.forEach((q,i)=>{
+   rows.forEach(({q},i)=>{
     const prompt=q[3]?'A. '+q[3][0]+' · B. '+q[3][1]:q[2];
     taskRow('<p><strong>'+(q[3]?'Keuzes':'Antwoord')+'</strong> '+esc(prompt)+'</p>'+answer('Bijvoorbeeld: '+esc(questionText(q)),1),i);
    });

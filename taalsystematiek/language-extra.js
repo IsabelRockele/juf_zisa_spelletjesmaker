@@ -25,7 +25,7 @@ const themedStatements=actions.flatMap(a=>[[a.text.slice(0,-1),'.'],[a.question.
 const themedStarters=actions.map(a=>[a.subject,a.text]);
 const themedWordSets=actions.map(a=>[[a.subject,a.verb,a.rest,a.particle].filter(Boolean).join(' – '),a.text]);
 if(item.type.startsWith('tell-')){
-hint='Een mededelende zin vertelt iets. Begin met een hoofdletter en sluit af met een punt.';example=support?'Bijvoorbeeld: Mijn zus tekent een ster.':'';
+hint='Een mededelende zin vertelt iets. Begin met een hoofdletter en sluit af met een punt.';example=support&&item.type==='tell-recognize'?'Kruis “Mijn zus tekent een ster.” aan. “Tekent mijn zus een ster?” is een vraag.':'';
 if(item.type==='tell-recognize') {instruction='Kruis de mededelende zinnen aan: de zinnen die iets vertellen.';rows(actions.length?themedStatements:statements).forEach(({value:[text,sign],key})=>add('<p class="tell-choice"><span class="tick-box">'+(solutions&&sign==='.'?'×':'')+'</span><span>'+e(text)+sign+'</span></p>'+(hard?'<p class="support-note">Maak van deze zin ook '+(sign==='.'?'een vraag.':'een mededelende zin.')+'</p>'+answer('Eigen passende zin met hoofdletter en '+(sign==='.'?'vraagteken.':'punt.')):''),key));}
 if(item.type==='tell-complete'){instruction='Maak een mededelende zin. Begin met de gegeven woorden.';rows(actions.length?themedStarters:starters).forEach(({value:[start,solution],key})=>add('<p>Begin met: <b>'+e(start)+'</b></p>'+(support?'<p class="support-note">Maak af met: '+e(solution.slice(start.length).trim())+'</p>':'')+answer('Bijvoorbeeld: '+solution)+(hard?'<p class="support-note">Vertel ook waar of wanneer het gebeurt.</p>':''),key));}
 if(item.type==='tell-words'){
