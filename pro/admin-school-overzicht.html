@@ -471,6 +471,32 @@
 
     <div class="container">
 
+      <details class="card" id="kopers">
+        <summary>Kopers</summary>
+        <p>Bekijk particuliere Pro-aankopen en aparte aankopen van Zisa Lezen.</p>
+        <label>Zoeken <input id="kopers-zoek" type="search" placeholder="Naam of e-mailadres"></label>
+        <label>Filter
+          <select id="kopers-filter">
+            <option value="">Alle kopers</option>
+            <option value="new">Nieuwe koper</option>
+            <option value="renewal">Pro verlengd</option>
+            <option value="repeat">Opnieuw een maand gekocht</option>
+            <option value="upgrade">Van maand naar jaar</option>
+            <option value="reading">Zisa Lezen apart gekocht</option>
+            <option value="reading-only">Alleen Zisa Lezen gekocht</option>
+          </select>
+        </label>
+        <button type="button" id="kopers-vernieuw">Vernieuwen</button>
+        <button type="button" id="kopers-kopieer" disabled>Kopieer getoonde e-mailadressen voor BCC</button>
+        <p id="kopers-status" role="status"></p>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Koper</th><th>Aankoopverloop</th><th>Pro geldig tot</th><th>Laatste gefactureerde leesperiode tot</th><th>Geschiedenis</th></tr></thead>
+            <tbody id="kopers-rijen"></tbody>
+          </table>
+        </div>
+      </details>
+
       <div class="card">
         <div class="tabs">
           <button class="tab-btn active" data-tab="overzicht">🏫 Alle scholen</button>
@@ -545,6 +571,8 @@
     import { getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
+    import { setupBuyers } from "./admin-kopers.js";
+
     let alleSchoolData = []; // bewaar volledige dataset voor zoeken
 
     window.onProReady = async function ({ user }) {
@@ -555,6 +583,7 @@
       if (!app) { showToast('Fout: Firebase niet geïnitialiseerd.', 'error'); return; }
 
       const fns = getFunctions(app, "europe-west1");
+      setupBuyers(httpsCallable(fns, "adminListBuyers"));
       const adminListSchoolOrders = httpsCallable(fns, "adminListSchoolOrders");
       const adminResendPasswordReset = httpsCallable(fns, "adminResendPasswordReset");
       const adminExtendLicense = httpsCallable(fns, "adminExtendLicense");

@@ -2674,6 +2674,62 @@ export const adminGetSchoolContext = onCall(
  *     ]
  *   }
  */
+export const adminListBuyers = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+    const email = String(req.auth.token.email || "").toLowerCase();
+    if (!req.auth.token.email_verified || !SCHOOL_ADMIN_EMAILS.has(email)) {
+      throw new HttpsError("permission-denied", "Geen toegang tot het kopersoverzicht.");
+    }
+
+    const [orders, reading, licenses] = await Promise.all([
+      Promise.all(ORDER_COLLECTIONS.map(col => db.collection(col).where("status", "==", "betaald").get())),
+      db.collection("readingLiveInvoices").get(),
+      Promise.all(LICENSE_COLLECTIONS.map(col => db.collection(col).where("status", "==", "active").get())),
+    ]);
+    type Purchase = { product: string; date: number; number: string };
+    const buyers = new Map<string, { email: string; name: string; proEnd: number; readingEnd: number; purchases: Purchase[] }>();
+    function buyerFor(value: unknown) {
+      const address = typeof value === "string" ? value.trim().toLowerCase() : "";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) return undefined;
+      const buyer = buyers.get(address) || { email: address, name: "", proEnd: 0, readingEnd: 0, purchases: [] };
+      buyers.set(address, buyer);
+      return buyer;
+    }
+
+    const seen = new Set<string>();
+    for (const doc of orders.flatMap(result => result.docs)) {
+      const order = doc.data();
+      if (order.source === "school" || order.invoiceSeries !== "live") continue;
+      const key = String(order.paymentId || order.invoiceNumber || order.orderId || doc.id);
+      if (seen.has(key)) continue;
+      const buyer = buyerFor(order.email);
+      if (!buyer) continue;
+      seen.add(key);
+      const product = order.source === "monthly" || /\bmaand\b/i.test(order.description || "") ? "Maand"
+        : ["koop", "wachtlijst"].includes(order.source) || /jaar/i.test(order.description || "") ? "Jaar" : "Pro";
+      buyer.purchases.push({ product, date: order.paidAt?.toMillis?.() || order.invoiceAssignedAt?.toMillis?.() || 0, number: String(order.invoiceNumber || "") });
+    }
+    for (const doc of reading.docs) {
+      const invoice = doc.data();
+      const purchase = invoice.snapshot;
+      if (purchase?.environment !== "live") continue;
+      const buyer = buyerFor(purchase.customer?.email);
+      if (!buyer) continue;
+      buyer.name ||= String(purchase.customer?.name || "");
+      buyer.readingEnd = Math.max(buyer.readingEnd, Number(purchase.period?.end) || 0);
+      buyer.purchases.push({ product: "Zisa Lezen", date: Date.parse(purchase.issuedAt) || 0, number: String(invoice.number || "") });
+    }
+    for (const doc of licenses.flatMap(result => result.docs)) {
+      const license = doc.data();
+      const buyer = buyers.get(String(license.email || "").trim().toLowerCase());
+      if (buyer) buyer.proEnd = Math.max(buyer.proEnd, license.expiresAt?.toMillis?.() || 0);
+    }
+    return { buyers: [...buyers.values()] };
+  }
+);
+
 export const adminListSchoolOrders = onCall(
   { region: REGION, enforceAppCheck: true },
   async (req) => {
