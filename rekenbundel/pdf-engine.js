@@ -2087,7 +2087,7 @@ const onthoudH = c;
         const tekenBlok = blok.tot100Hulp === 'cirkelrekenen'
           ? {...blok, cirkelPdfLettergrootte: 14 * 25.4 / 72 * sw / breedte}
           : blok;
-        const png = await Tot100Hulp.png(tekenBlok, oef, _metAntwoorden || (blok.tot100Voorbeeld && i+k === 0));
+        const png = await Tot100Hulp.png(tekenBlok, {...oef, uitgewerktVoorbeeld: blok.tot100Voorbeeld && i+k === 0}, _metAntwoorden || (blok.tot100Voorbeeld && i+k === 0));
         doc.addImage(png, 'PNG', ML+k*(breedte+8), y, breedte, hoogte, undefined, 'FAST');
       }
       y += hoogte + 6;

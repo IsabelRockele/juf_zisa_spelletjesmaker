@@ -647,13 +647,14 @@ const Preview = (() => {
       const {hulpConfig,...som}=oef;
       // Behoud de echte index voor verwijderen, maar laat de renderer het voorbeeld als eerste oefening zien.
       const html=_oefeningHTML({...blok,...hulpConfig,id:blok.id},som,0);
-      return html.replaceAll(`App.verwijderOefening('${blok.id}',0)`,`App.verwijderOefening('${blok.id}',${idx})`);
+      const rij = hulpConfig.tot100Hulp?.startsWith('sprongen') ? '<div style="grid-column:1 / -1;min-width:0">'+html+'</div>' : html;
+      return rij.replaceAll(`App.verwijderOefening('${blok.id}',0)`,`App.verwijderOefening('${blok.id}',${idx})`);
     }
     if (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(blok)) {
       return `<div class="oefening-item tot20-oefening">${Tot20Hulp.svg(blok, oef, _toonOplossingen || (blok.metVoorbeeld && idx === 0))}<button class="btn-del-oef" onclick="App.verwijderOefening('${blok.id}',${idx})" title="Verwijder oefening">×</button></div>`;
     }
     if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok) && Tot100Hulp.gegevens(oef, blok)) {
-      return `<div class="oefening-item tot100-oefening">${Tot100Hulp.svg(blok, oef, _toonOplossingen || (blok.tot100Voorbeeld && idx === 0))}<button class="btn-del-oef" onclick="App.verwijderOefening('${blok.id}',${idx})" title="Verwijder oefening">×</button></div>`;
+      return `<div class="oefening-item tot100-oefening" ${blok.tot100Hulp.includes('duizend-splits') && blok.tot100Voorbeeld && idx === 0 ? 'style="outline:2px solid #3479b0;border-radius:10px;background:#e9f4ff"' : ''}>${Tot100Hulp.svg(blok, {...oef, uitgewerktVoorbeeld: blok.tot100Voorbeeld && idx === 0}, _toonOplossingen || (blok.tot100Voorbeeld && idx === 0))}<button class="btn-del-oef" onclick="App.verwijderOefening('${blok.id}',${idx})" title="Verwijder oefening">×</button></div>`;
     }
     const blokId        = blok.id;
     const isHerken      = blok.bewerking === 'herken-brug';

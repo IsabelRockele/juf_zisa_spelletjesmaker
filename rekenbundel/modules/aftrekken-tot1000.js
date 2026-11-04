@@ -25,7 +25,7 @@
 
 const AftrekkenTot1000 = (() => {
 
-  const ALLE_TYPES = ['T-T','TE-TE','H-H','H-T','H-TE','H-HT','HT-H','HT-T','HT-HT','HT-TE','HTE-H','HTE-HT','HTE-HTE','Gemengd'];
+  const ALLE_TYPES = ['HTE-E','HTE-T','T-T','TE-TE','H-H','H-T','H-TE','H-HT','HT-H','HT-T','HT-HT','HT-TE','HTE-H','HTE-HT','HTE-HTE','Gemengd'];
 
   // Gecorrigeerde matrix aftrekken: brugT = eB > eA (eenheden aftrekker > aftrektal)
   // T-T:      e=0 beide → nooit brugT; t aftrekker > t aftrektal mogelijk → alleen →H
@@ -61,18 +61,18 @@ const AftrekkenTot1000 = (() => {
   // HTE-HTE: eB>eA mogelijk → →T; tB>tA mogelijk → →H; beide mogelijk
   const TYPES_PER_BRUG = {
     'zonder':         ['T-T','TE-TE','H-H','HT-H','HT-T','HT-HT','HTE-H','HTE-HT','HTE-HTE','Gemengd'],
-    'naar-tiental':   ['TE-TE','HT-TE','HTE-HTE','Gemengd'],
-    'naar-honderdtal':['H-T','H-HT','HT-T','HT-HT','HTE-HT','HTE-HTE','Gemengd'],
-    'beide':          ['H-TE','HT-TE','HTE-HTE','Gemengd'],
+    'naar-tiental':   ['HTE-E','TE-TE','HT-TE','HTE-HTE','Gemengd'],
+    'naar-honderdtal':['HTE-T','H-T','H-HT','HT-T','HT-HT','HTE-HT','HTE-HTE','Gemengd'],
+    'beide':          ['HTE-E','H-TE','HT-TE','HTE-HTE','Gemengd'],
     'gemengd':        ALLE_TYPES,
   };
 
   const GEMENGD_TYPES = {
     'zonder':         ['T-T','TE-TE','H-H','HT-H','HT-T','HT-HT','HTE-H','HTE-HT','HTE-HTE'],
-    'naar-tiental':   ['TE-TE','HT-TE','HTE-HTE'],
-    'naar-honderdtal':['H-T','H-HT','HT-T','HT-HT','HTE-HT','HTE-HTE'],
-    'beide':          ['H-TE','HT-TE','HTE-HTE'],
-    'gemengd':        ['T-T','TE-TE','H-H','H-T','H-TE','H-HT','HT-H','HT-T','HT-HT','HT-TE','HTE-H','HTE-HT','HTE-HTE'],
+    'naar-tiental':   ['HTE-E','TE-TE','HT-TE','HTE-HTE'],
+    'naar-honderdtal':['HTE-T','H-T','H-HT','HT-T','HT-HT','HTE-HT','HTE-HTE'],
+    'beide':          ['HTE-E','H-TE','HT-TE','HTE-HTE'],
+    'gemengd':        ['HTE-E','HTE-T','T-T','TE-TE','H-H','H-T','H-TE','H-HT','HT-H','HT-T','HT-HT','HT-TE','HTE-H','HTE-HT','HTE-HTE'],
   };
 
   function rand(min, max) {
@@ -135,7 +135,7 @@ const AftrekkenTot1000 = (() => {
       case 'zonder':         return !brugT && !brugH;
       case 'naar-tiental':   return  brugT && !brugH;
       case 'naar-honderdtal':return !brugT &&  brugH;
-      case 'beide':          return  brugT &&  brugH;
+      case 'beide':          return (brugT || brugH);
       case 'gemengd':        return true;
       default:               return true;
     }
@@ -199,6 +199,12 @@ const AftrekkenTot1000 = (() => {
           b = randTE(1, Math.min(89, a - 1)); if (b === null) continue;
           break;
         }
+        case 'HTE-E':
+        case 'HTE-T': {
+          a = randHTE(101, 999); if (a === null) continue;
+          b = Math.floor(Math.random()*9+1) * (type.endsWith('T') ? 10 : 1);
+          break;
+        }
         case 'HTE-H': {
           a = randHTE(101, 999); if (a === null) continue;
           b = randH(100, Math.floor(a / 100) * 100); if (b === null) continue;
@@ -229,12 +235,13 @@ const AftrekkenTot1000 = (() => {
   }
 
   function getTypes(niveau, brug = 'zonder') {
+    if( brug === 'beide') return [...new Set([...TYPES_PER_BRUG['naar-tiental'], ...TYPES_PER_BRUG['naar-honderdtal'], ...TYPES_PER_BRUG.beide])].filter(type => type !== 'Gemengd').concat('Gemengd');
     return TYPES_PER_BRUG[brug] || TYPES_PER_BRUG['zonder'];
   }
 
   function genereer({ oefeningstypes, brug = 'zonder', aantalOefeningen }) {
     let actieveTypes = oefeningstypes.includes('Gemengd')
-      ? (GEMENGD_TYPES[brug] || GEMENGD_TYPES['zonder'])
+      ? (brug === 'beide' ? getTypes(niveau, brug).filter(type => type !== 'Gemengd') : GEMENGD_TYPES[brug] || GEMENGD_TYPES['zonder'])
       : oefeningstypes;
 
     const oefeningen = [];

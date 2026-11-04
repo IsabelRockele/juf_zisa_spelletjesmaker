@@ -2,6 +2,8 @@
 const Tot100Hulp = (() => {
   const modes = ['vakje', 'mab', 'sprongen', 'sprongen-leeg', 'lijnen'];
   function actief(blok) {
+    if(blok.tot100Hulp==='invullijn') return ['optellen','aftrekken'].includes(blok.bewerking);
+    if(blok.tot100Hulp?.includes('duizend-splits')) return true;
     if(blok.tot100Hulp==='cirkelrekenen') return true;
     if(blok.tot100Hulp?.includes('tiental'))return true;
     if (Number(blok.niveau) === 100 && blok.brug === 'met' && ['optellen','aftrekken'].includes(blok.bewerking) && blok.tot100Hulp?.includes('brug')) return true;
@@ -10,9 +12,11 @@ const Tot100Hulp = (() => {
       modes.slice(1).includes(blok.tot100Hulp);
   }
   function gegevens(oef, blok = {}) {
+    if(blok.tot100Hulp==='invullijn') return {a:'',b:'',op:''};
     const m = oef.vraag.match(/^(\d+)\s*([+−-])\s*(\d+)/);
     if (!m) return null;
     const a = Number(m[1]), b = Number(m[3]), min = m[2] !== '+';
+    if(blok.tot100Hulp?.includes('duizend-splits')) return {a,b,min,op:min?'−':'+'};
     if(blok.tot100Hulp==='cirkelrekenen') return {a,b,min,op:min?'−':'+'};
     if(blok.tot100Hulp?.includes('tiental'))return {a,b,op:'+',tiental:true};
     if (blok.tot100Hulp?.includes('brug')) {if(a<11 || b<1 || (min ? a<b || a%10>=b%10 : a+b>100 || a%10+b%10<=10))return null;const t=Math.floor(b/10)*10,e=b%10;return {a,b,t,e,tussen:a+(min?-t:t),uit:a+(min?-b:b),min,op:min?'−':'+',brug:true};}
@@ -21,7 +25,7 @@ const Tot100Hulp = (() => {
     const t = Math.floor(b / 10) * 10, e = b % 10, tussen = a + (min ? -t : t);
     return { a, b, min, t, e, tussen, uit: tussen + (min ? -e : e), op: min ? '−' : '+' };
   }
-  function maten(mode) { if(mode==='cirkelrekenen') return [520,112]; if(mode.startsWith('tiental-')) return [360,80]; if(mode.includes('brug')) return [mode.startsWith('sprongen')?740:360,mode.includes('splits')?240:180]; return mode.startsWith('sprongen') ? [740, 180] : [360, mode === 'mab' ? 350 : 140]; }
+  function maten(mode) { if(mode==='invullijn') return [360,55]; if(mode.includes('duizend-splits')) return [mode.startsWith('sprongen')?740:360,155]; if(mode==='cirkelrekenen') return [520,112]; if(mode.startsWith('tiental-')) return [360,80]; if(mode.includes('brug')) return [mode.startsWith('sprongen')?740:360,mode.includes('splits')?240:180]; return mode.startsWith('sprongen') ? [740, 180] : [360, mode === 'mab' ? 350 : 140]; }
   function svg(blok, oef, oplossing = false) {
     const d = gegevens(oef, blok);
     if (!d) return '';
@@ -30,6 +34,48 @@ const Tot100Hulp = (() => {
     const line = (x,y,X,Y,c='#b9bfc5') => { s += `<path d="M${x} ${y} L${X} ${Y}" fill="none" stroke="${c}" stroke-width="1"/>`; };
     const text = (x,y,v,c='#222',anchor='start',size=17) => { s += `<text x="${x}" y="${y}" fill="${c}" font-family="Arial, sans-serif" font-size="${size}" text-anchor="${anchor}">${v}</text>`; };
     const rect = (x,y,W,H,fill,stroke='#777',rx=0) => { s += `<rect x="${x}" y="${y}" width="${W}" height="${H}" rx="${rx}" fill="${fill}" stroke="${stroke}" stroke-width="0.8"/>`; };
+    if(mode==='invullijn'){
+      const veilig = waarde => String(waarde).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+      const som = oef.vraag.trim().replace(/\s*=$/,'')+' =';
+      const x = 18+som.length*9;
+      text(12,34,veilig(som),'#222','start',20);
+      line(x,39,x+62,39,'#555');
+      if(oplossing)text(x+3,34,veilig(oef.antwoord ?? ''),blauw,'start',20);
+      return s+'</svg>';
+    }
+    if(mode.includes('duizend-splits')){
+      if(oef.uitgewerktVoorbeeld) rect(2,2,w-4,h-4,'#e9f4ff','#3479b0',9);
+      else if(mode.startsWith('sprongen')) rect(2,2,w-4,h-4,'none','#c9ced5',9);
+      const rang=d.b<10?10:100, eenheden=d.b<10?0:d.a%10;
+      const rest=(d.a-eenheden)%rang;
+      const eerste=d.min?rest:rang-rest;
+      const tweede=d.b-eerste, richting=d.min?-1:1;
+      const midden=d.a+richting*eerste, uit=d.a+richting*d.b;
+      text(12,46,d.a+' '+d.op+' '+d.b+' =');
+      line(119,52,345,52);
+      if(oplossing)text(122,46,uit,blauw);
+      if(oplossing || !mode.endsWith('-zelf')) {
+        line(66,55,43,79);line(66,55,89,79);
+        line(25,104,60,104);line(72,104,107,104);
+      }
+      if(oplossing){text(43,100,eerste,blauw,'middle');text(89,100,tweede,blauw,'middle');}
+      if(mode.startsWith('sprongen')){
+        line(382,112,724,112,'#222');
+        if(oplossing){
+          const xs=d.min?[699,552,405]:[405,552,699];
+          const boog=(x,X,top,sprong,stippel)=>{
+            const cx=(x+X)/2,cy=(112+top)/2,staart=cx-6*richting;
+            s+='<path d="M'+x+' 112 Q'+cx+' '+top+' '+X+' 112" fill="none" stroke="'+blauw+'"'+(stippel?' stroke-dasharray="5 4"':'')+'/>';
+            line(staart,cy-5,cx,cy,blauw);line(cx,cy,staart,cy+5,blauw);
+            text(cx,cy-9,d.op+' '+sprong,blauw,'middle');
+          };
+          boog(xs[0],xs[2],-47,d.b,false);
+          if(eerste && tweede){boog(xs[0],xs[1],55,eerste,true);boog(xs[1],xs[2],55,tweede,true);}
+          xs.forEach((x,i)=>{if(i===1 && (!eerste || !tweede))return;line(x,109,x,115,blauw);text(x,136,[d.a,midden,uit][i],blauw,'middle');});
+        }
+      }
+      return s+'</svg>';
+    }
     if(mode==='cirkelrekenen'){
       const grootste=Math.max(d.a,d.b);
       const rangen=grootste===1000?[1000,100,10,1]:Number(blok.niveau)===1000?[100,10,1]:grootste===100?[100,10,1]:[10,1];

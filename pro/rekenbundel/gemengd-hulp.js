@@ -1,7 +1,18 @@
 /* Eigen hulpmiddelen per bewerking, met de bestaande generators en weergave. */
 const GemengdHulp = (() => {
   let niveau = 100, brug = 'zonder';
+  const weergaven = {
+    invullijn:'Alleen een invullijn', cirkelrekenen:'Cirkelrekenen',
+    'duizend-splits':'Splitsbenen en antwoordlijn',
+    'sprongen-duizend-splits':'Splitsbenen met lege getallenlijn',
+    'duizend-splits-zelf':'Zelf splitsbenen tekenen',
+    'sprongen-duizend-splits-zelf':'Zelf splitsbenen tekenen met lege getallenlijn'
+  };
+  function pastBijTypes(key, types) {
+    return !key?.includes('duizend-splits') || types.every(type => /^(HTE[+-][ET]|HT[+-]T)$/.test(type));
+  }
   const opties = [
+    ...Object.entries(weergaven),
     ['','Geen extra hulpmiddel'], ['splitsbeen','Splitsbeen'], ['schrijflijnen','Schrijflijnen'],
     ['splitsbeen+schrijflijnen','Splitsbeen en schrijflijnen'],
     ['aanvullen','Aanvullen'], ['compenseren','Compenseren'], ['transformeren','Transformeren'],
@@ -15,7 +26,8 @@ const GemengdHulp = (() => {
   function configuratie(op) {
     const kaart=document.getElementById('gem-hulp-'+op);
     const key=kaart?.querySelector('select').value || '';
-    const config={hulpmiddelen:key ? key.split('+') : []};
+    const config={hulpmiddelen:key && !weergaven[key] ? key.split('+') : []};
+    if(weergaven[key]) config.tot100Hulp=key;
     if (varianten[key]) config[key+'Variant']=kaart.querySelector('.gem-hulp-variant').value;
     config.tienraamStructuur=kaart?.querySelector('.gem-tienraam-structuur select')?.value || 'twee';
     config.metVoorbeeld=!!kaart?.querySelector('.gem-hulp-voorbeeld').checked;
@@ -27,7 +39,9 @@ const GemengdHulp = (() => {
   function toonVoorbeeld(kaart,op) {
     const details=kaart.querySelector('details'); if(!details.open)return;
     const cfg=configuratie(op), types=Generator.getTypes(op,niveau,brug,cfg.hulpmiddelen);
-    const blok=Generator.maakBlok({...cfg,bewerking:op,niveau,brug,oefeningstypes:[types.find(t=>t!=='Gemengd')||'Gemengd'],aantalOefeningen:2});
+    cfg.tot100Voorbeeld = !!cfg.tot100Hulp && cfg.metVoorbeeld;
+    const type = types.find(t=>t!=='Gemengd' && pastBijTypes(cfg.tot100Hulp,[t]));
+    const blok=Generator.maakBlok({...cfg,bewerking:op,niveau,brug,oefeningstypes:[type||'Gemengd'],aantalOefeningen:2});
     const host=kaart.querySelector('.hulp-voorbeeld-inhoud');host.replaceChildren();if(!blok)return;
     const vb=Preview.maakHulpmiddelVoorbeeld(blok);host.append(vb);
     requestAnimationFrame(()=>{vb.style.width='360px';vb.style.zoom=Math.min(1,(host.clientWidth-16)/360);Preview.positioneerBlok(vb);});
@@ -36,7 +50,7 @@ const GemengdHulp = (() => {
     niveau=Number(n);brug=b;
     const hoofd=document.getElementById('kaart-gem-hulpmiddelen');
     if(!hoofd)return;
-    const aan=niveau>=20 && brug!=='zonder'; hoofd.style.display=aan?'block':'none';
+    const aan=true; hoofd.style.display=aan?'block':'none';
     let paneel=document.getElementById('gem-hulp-extra');
     if(!paneel){
       paneel=document.createElement('div');paneel.id='gem-hulp-extra';
@@ -53,6 +67,10 @@ const GemengdHulp = (() => {
     for(const op of ['optellen','aftrekken']){
       const kaart=document.getElementById('gem-hulp-'+op),select=kaart.querySelector('select'),oud=select.value;
       const beschikbaar=opties.filter(([key])=>{
+        if(key==='invullijn' || !key)return true;
+        if(key==='cirkelrekenen')return [20,100,1000].includes(niveau);
+        if(key.includes('duizend-splits'))return niveau===1000 && ['naar-tiental','naar-honderdtal','beide'].includes(brug);
+        if( brug==='zonder')return false;
         if(Tot20Hulp.soorten[key])return niveau===20&&brug==='met'&&(key.startsWith('aftrek-')===(op==='aftrekken'));
         if(key==='aanvullen' && op!=='aftrekken')return false;
         if(['aanvullen','compenseren','transformeren'].includes(key))return niveau>=100;
@@ -73,9 +91,9 @@ const GemengdHulp = (() => {
     select.style.display=varianten[key]?'block':'none';
     kaart.querySelector('.gem-tienraam-structuur').style.display=key.includes('tienra')?'block':'none';
     const voorbeeld=kaart.querySelector('.gem-hulp-voorbeeld');
-    const kanVoorbeeld=!!Tot20Hulp.soorten[key] || key.includes('schrijflijnen') || ['compenseren','transformeren'].includes(key);
+    const kanVoorbeeld=!!weergaven[key] || !!Tot20Hulp.soorten[key] || key.includes('schrijflijnen') || ['compenseren','transformeren'].includes(key);
     voorbeeld.closest('label').style.setProperty('display',kanVoorbeeld?'flex':'none','important');
     if(!kanVoorbeeld)voorbeeld.checked=false;
   }
-  return {update,extra};
+  return {update,extra,pastBijTypes};
 })();

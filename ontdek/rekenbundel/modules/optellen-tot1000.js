@@ -25,7 +25,7 @@
 
 const OptellenTot1000 = (() => {
 
-  const ALLE_TYPES = ['T+T','TE+TE','H+H','H+T','H+TE','H+HT','HT+HT','HT+T','HT+TE','HTE+H','HTE+HT','HTE+HTE','Gemengd'];
+  const ALLE_TYPES = ['HTE+E','HTE+T','T+T','TE+TE','H+H','H+T','H+TE','H+HT','HT+HT','HT+T','HT+TE','HTE+H','HTE+HT','HTE+HTE','Gemengd'];
 
   // Gecorrigeerde matrix:
   // →T vereist eA≠0 ÉN eB≠0 (anders som eenheden max 9, nooit brug)
@@ -46,18 +46,18 @@ const OptellenTot1000 = (() => {
   // HTE+HTE   | 1+ | 1+ | 1+ | 1+ |  ✓ |  ✓ |  ✓
   const TYPES_PER_BRUG = {
     'zonder':         ['T+T','TE+TE','H+H','H+T','H+TE','H+HT','HT+T','HT+HT','HT+TE','HTE+H','HTE+HT','HTE+HTE','Gemengd'],
-    'naar-tiental':   ['TE+TE','HTE+HTE','Gemengd'],
-    'naar-honderdtal':['T+T','TE+TE','HT+T','HT+HT','HT+TE','HTE+HT','HTE+HTE','Gemengd'],
-    'beide':          ['TE+TE','HTE+HTE','Gemengd'],
+    'naar-tiental':   ['HTE+E','TE+TE','HTE+HTE','Gemengd'],
+    'naar-honderdtal':['HTE+T','T+T','TE+TE','HT+T','HT+HT','HT+TE','HTE+HT','HTE+HTE','Gemengd'],
+    'beide':          ['HTE+E','TE+TE','HTE+HTE','Gemengd'],
     'gemengd':        ALLE_TYPES,
   };
 
   const GEMENGD_TYPES = {
     'zonder':         ['T+T','TE+TE','H+H','H+T','H+TE','H+HT','HT+T','HT+HT','HT+TE','HTE+H','HTE+HT','HTE+HTE'],
-    'naar-tiental':   ['TE+TE','HTE+HTE'],
-    'naar-honderdtal':['T+T','TE+TE','HT+T','HT+HT','HT+TE','HTE+HT','HTE+HTE'],
-    'beide':          ['TE+TE','HTE+HTE'],
-    'gemengd':        ['T+T','TE+TE','H+H','H+T','H+TE','H+HT','HT+T','HT+HT','HT+TE','HTE+H','HTE+HT','HTE+HTE'],
+    'naar-tiental':   ['HTE+E','TE+TE','HTE+HTE'],
+    'naar-honderdtal':['HTE+T','T+T','TE+TE','HT+T','HT+HT','HT+TE','HTE+HT','HTE+HTE'],
+    'beide':          ['HTE+E','TE+TE','HTE+HTE'],
+    'gemengd':        ['HTE+E','HTE+T','T+T','TE+TE','H+H','H+T','H+TE','H+HT','HT+T','HT+HT','HT+TE','HTE+H','HTE+HT','HTE+HTE'],
   };
 
   const OMKEERBAAR = new Set(['H+T','H+TE','H+HT','HT+T','HT+TE','HTE+H','HTE+HT']);
@@ -127,7 +127,7 @@ const OptellenTot1000 = (() => {
       case 'zonder':         return !brugT && !brugH && !brugDuizend;
       case 'naar-tiental':   return  brugT && !brugH && !brugDuizend;
       case 'naar-honderdtal':return !brugT &&  brugH && !brugDuizend;
-      case 'beide':          return  brugT &&  brugH && !brugDuizend;
+      case 'beide':          return (brugT || brugH) && !brugDuizend;
       case 'gemengd':        return !brugDuizend;
       default:               return true;
     }
@@ -192,6 +192,15 @@ const OptellenTot1000 = (() => {
           [a, b] = omkeer ? [te, ht] : [ht, te];
           break;
         }
+        case 'HTE+E':
+        case 'HTE+T': {
+          a = randHTE(101, 999); if (a === null) continue;
+          const tientallen = type.endsWith('T');
+          b = Math.floor(Math.random()*9+1) * (tientallen ? 10 : 1);
+          const rang = tientallen ? 100 : 10;
+          if ((tientallen ? a-a%10 : a)%rang + b === rang) continue;
+          break;
+        }
         case 'HTE+H': {
           const hte = randHTE(101, 899); if (hte === null) continue;
           const h = randH(100, 999 - hte); if (h === null) continue;
@@ -224,12 +233,13 @@ const OptellenTot1000 = (() => {
   }
 
   function getTypes(niveau, brug = 'zonder') {
+    if( brug === 'beide') return [...new Set([...TYPES_PER_BRUG['naar-tiental'], ...TYPES_PER_BRUG['naar-honderdtal'], ...TYPES_PER_BRUG.beide])].filter(type => type !== 'Gemengd').concat('Gemengd');
     return TYPES_PER_BRUG[brug] || TYPES_PER_BRUG['zonder'];
   }
 
   function genereer({ oefeningstypes, brug = 'zonder', aantalOefeningen }) {
     let actieveTypes = oefeningstypes.includes('Gemengd')
-      ? (GEMENGD_TYPES[brug] || GEMENGD_TYPES['zonder'])
+      ? (brug === 'beide' ? getTypes(niveau, brug).filter(type => type !== 'Gemengd') : GEMENGD_TYPES[brug] || GEMENGD_TYPES['zonder'])
       : oefeningstypes;
 
     const oefeningen = [];

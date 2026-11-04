@@ -423,7 +423,7 @@ const Generator = (() => {
         oefeningen.push(...pool.slice(0,n).map(o=>({...o,hulpConfig:{...weergave,metVoorbeeld:false}})));
       }
       for(let i=oefeningen.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[oefeningen[i],oefeningen[j]]=[oefeningen[j],oefeningen[i]];}
-      for(const op of ['optellen','aftrekken']){const eerste=oefeningen.find(o=>o.hulpConfig.bewerking===op);if(eerste)eerste.hulpConfig.metVoorbeeld=!!hulpPerBewerking[op].metVoorbeeld;}
+      for(const op of ['optellen','aftrekken']){const eerste=oefeningen.find(o=>o.hulpConfig.bewerking===op);if(eerste){eerste.hulpConfig.metVoorbeeld=!!hulpPerBewerking[op].metVoorbeeld;eerste.hulpConfig.tot100Voorbeeld=eerste.hulpConfig.metVoorbeeld && !!eerste.hulpConfig.tot100Hulp;}}
       return {id:`blok-gemengd-${Date.now()}-${++_teller}`,bewerking:'gemengd',niveau,brug,opdrachtzin:opdrachtzin||'Kijk goed naar het teken. Reken uit.',hulpmiddelen:['per-bewerking'],oefeningen,config:{niveau,brug,typesOpt,typesAft,aantalOefeningen,opdrachtzin,verhouding,hulpPerBewerking}};
     }
     const brugVoorModule = niveau <= 100 ? _brugVoor100(brug) : brug;

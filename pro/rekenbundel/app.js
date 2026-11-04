@@ -416,6 +416,30 @@ const App = (() => {
   }
 
   /* ── Types UI opbouwen ───────────────────────────────────── */
+  const rangvolgorde = ['E','T','TE','H','HT','HTE','D','DH','DHT','DHTE','TD','TDD','TDDH','TDDHT','TDDHTE'];
+  function sorteerOefentypes(types) {
+    const rang = code => {
+      const index = rangvolgorde.indexOf(code);
+      return index < 0 ? rangvolgorde.length : index;
+    };
+    return [...types].sort((a,b) => {
+      if(a === 'Gemengd' || b === 'Gemengd') return Number(a === 'Gemengd')-Number(b === 'Gemengd');
+      const [a1,a2] = a.split(/[+-]/), [b1,b2] = b.split(/[+-]/);
+      return rang(a1)-rang(b1) || rang(a2)-rang(b2);
+    });
+  }
+
+  function voegTypevoorbeeldToe(label, type, bewerking, niveau, brug, hulpmiddelen) {
+    if(!['optellen','aftrekken'].includes(bewerking) || !/^[A-Z]+[+-][A-Z]+$/.test(type)) return;
+    const blok = Generator.maakBlok({bewerking,niveau,brug,hulpmiddelen,oefeningstypes:[type],aantalOefeningen:1});
+    const vraag = blok?.oefeningen[0]?.vraag;
+    if(!vraag) return;
+    const voorbeeld = document.createElement('small');
+    voorbeeld.style.cssText = 'display:block;font-size:11px;color:#52677d;margin-top:3px;white-space:nowrap';
+    voorbeeld.textContent = vraag.replace(/\s*=\s*$/, '').replaceAll(' - ', ' − ');
+    label.lastElementChild.append(voorbeeld);
+  }
+
   function _updateTypesUI(niveau, brug, resetSelectie = false) {
     if (!brug) brug = _getBrugWaarde();
 
@@ -445,7 +469,7 @@ const App = (() => {
       'T-TE':  (actieveBewerking === 'aftrekken' && Number(niveau) === 20) ? '20 − TE' : 'T − TE',
     };
 
-    beschikbaar.forEach((type) => {
+    sorteerOefentypes(beschikbaar).forEach((type) => {
       const wasGeselecteerd = vorigeSelectie.includes(type);
       const zichtbaarLabel  = TYPE_LABELS[type] || type;
 
@@ -456,6 +480,7 @@ const App = (() => {
         <span class="vink-box">${wasGeselecteerd ? '✓' : ''}</span>
         <input type="checkbox" name="types" value="${type}" ${wasGeselecteerd ? 'checked' : ''} style="display:none">
         <span>${zichtbaarLabel}</span>`;
+      voegTypevoorbeeldToe(label,type,actieveBewerking,niveau,brug,hulpmiddelen);
 
       label.onclick = (e) => {
         e.preventDefault();
@@ -612,9 +637,12 @@ const App = (() => {
     const toon100 = ['optellen', 'aftrekken'].includes(actieveBewerking) && niveau === 100 &&
       ((_getBrugWaarde() === 'zonder' && types.length === 1 && types[0] === type) || (['optellen','aftrekken'].includes(actieveBewerking) && _getBrugWaarde() === 'met' && types.length > 0 && types.every(t => (actieveBewerking === 'optellen' ? ['TE+E','TE+TE'] : ['TE-E','TE-TE']).includes(t))));
     const cirkels = ['optellen','aftrekken'].includes(actieveBewerking) && [20,100,1000].includes(niveau);
-    const toon = toon100 || cirkels;
+    const brug1000 = niveau === 1000 && _getBrugWaarde() !== 'zonder' &&
+      types.length > 0 && types.every(t => (actieveBewerking === 'optellen' ? ['HTE+E','HTE+T','HT+T'] : ['HTE-E','HTE-T','HT-T']).includes(t));
+    const invullijn = ['optellen','aftrekken'].includes(actieveBewerking);
+    const toon = toon100 || cirkels || brug1000 || invullijn;
     if(cirkels) document.getElementById('kaart-hulpmiddelen').style.display = 'block';
-    document.querySelectorAll('#tot100-hulp option').forEach(o => {o.hidden = o.value === 'cirkelrekenen' ? !cirkels : o.value !== 'vakje' && (!toon100 || (_getBrugWaarde() === 'met' ? !o.value.includes('brug') : o.value.includes('brug'))); if(o.hidden && o.selected) document.getElementById('tot100-hulp').value='vakje';});
+    document.querySelectorAll('#tot100-hulp option').forEach(o => {o.hidden = o.value === 'invullijn' ? !invullijn : o.value.includes('duizend-splits') ? !brug1000 : o.value === 'cirkelrekenen' ? !cirkels : o.value !== 'vakje' && (!toon100 || (_getBrugWaarde() === 'met' ? !o.value.includes('brug') : o.value.includes('brug'))); if(o.hidden && o.selected) document.getElementById('tot100-hulp').value='vakje';});
     const hoofd = document.getElementById('kaart-hulpmiddelen');
     const lijst = document.getElementById('cg-hulpmiddelen');
     if (kaart && lijst && !document.getElementById('tot100-hulp-opties')) {
@@ -670,7 +698,7 @@ const App = (() => {
         const option=[...document.getElementById('tot100-hulp').options].find(o=>o.value===input.value);
         label.parentElement.style.display=option.hidden?'none':'';
         const mode=input.value;const min=actieveBewerking==='aftrekken';
-        label.parentElement.querySelector('.hulp-voorbeeld-inhoud').innerHTML=mode==='cirkelrekenen' ? Tot100Hulp.svg({niveau,tot100Hulp:mode,cirkelLetters:document.getElementById('cirkel-letters')?.checked,cirkelKleuren:document.getElementById('cirkel-kleuren')?.checked},{vraag:_getBrugWaarde()==='zonder' ? (min ? (niveau===20?'16 − 4':niveau===100?'54 − 32':'432 − 121') : (niveau===20?'13 + 4':niveau===100?'35 + 24':'234 + 352')) : min ? (niveau===20?'13 − 8':niveau===100?'54 − 38':'432 − 147') : (niveau===20?'8 + 7':niveau===100?'35 + 27':'234 + 357')},true) : Tot100Hulp.svg({niveau:100,brug:mode.includes('brug')?'met':'zonder',bewerking:actieveBewerking,tot100Hulp:mode},{vraag:mode.includes('brug')?(min?'63 − 29':'37 + 29'):(min?'57 − 23':'23 + 14')},true);
+        label.parentElement.querySelector('.hulp-voorbeeld-inhoud').innerHTML=mode==='invullijn' ? Tot100Hulp.svg({tot100Hulp:mode},{vraag:min?'9 − 4 =':'4 + 5 =',antwoord:min?5:9}) : mode.includes('duizend-splits') ? Tot100Hulp.svg({tot100Hulp:mode},{vraag:types[0]?.endsWith('T') ? (min?'523 − 90':'566 + 50') : (min?'653 − 6':'326 + 5')},true) : mode==='cirkelrekenen' ? Tot100Hulp.svg({niveau,tot100Hulp:mode,cirkelLetters:document.getElementById('cirkel-letters')?.checked,cirkelKleuren:document.getElementById('cirkel-kleuren')?.checked},{vraag:_getBrugWaarde()==='zonder' ? (min ? (niveau===20?'16 − 4':niveau===100?'54 − 32':'432 − 121') : (niveau===20?'13 + 4':niveau===100?'35 + 24':'234 + 352')) : min ? (niveau===20?'13 − 8':niveau===100?'54 − 38':'432 − 147') : (niveau===20?'8 + 7':niveau===100?'35 + 27':'234 + 357')},true) : Tot100Hulp.svg({niveau:100,brug:mode.includes('brug')?'met':'zonder',bewerking:actieveBewerking,tot100Hulp:mode},{vraag:mode.includes('brug')?(min?'63 − 29':'37 + 29'):(min?'57 − 23':'23 + 14')},true);
         input.checked=document.getElementById('tot100-hulp').value===input.value;
         label.classList.toggle('geselecteerd',input.checked);
       });
@@ -699,7 +727,7 @@ const App = (() => {
     const isZonderTot1000 = brug === 'zonder' && niveau >= 1000;
     const isTussenstappenTot20 = brug === 'zonder' && niveau === 20 && actieveBewerking === 'aftrekken';
     _updateSchrijflijnenAantalUI(isTussenstappenTot20);
-    if (niveau < 20) { kaart.style.display = 'none'; return; }
+    if (niveau < 20 && !['optellen','aftrekken'].includes(actieveBewerking)) { kaart.style.display = 'none'; return; }
 
     // Toon bij brug (alle niveaus) of bij zonder+tot1000
     const toon = (document.getElementById('kaart-tot100-hulp')?.style.display === 'block' || isBrug || isZonderTot1000 || isTussenstappenTot20) && (actieveBewerking !== 'herken-brug');
@@ -850,7 +878,7 @@ const App = (() => {
       oefeningstypes: types,
       brug:      effectiefBrug,
       aantalOefeningen: effectiefAantal,
-      opdrachtzin: document.getElementById('tot100-hulp')?.value.startsWith('sprongen-brug') ? 'Los op.\nGebruik de getallenlijn als je ze nodig hebt.' : document.getElementById('tot100-hulp')?.value.startsWith('brug-') ? 'Schrijf de tussenstappen en de som.' : zin,
+      opdrachtzin: document.getElementById('tot100-hulp')?.value.includes('duizend-splits') ? (document.getElementById('tot100-hulp').value.startsWith('sprongen') ? 'Los op.\nTeken op de lege getallenlijn.\nSchrijf de tussenstappen.' : 'Los op met tussenstappen.') : document.getElementById('tot100-hulp')?.value.startsWith('sprongen-brug') ? 'Los op.\nGebruik de getallenlijn als je ze nodig hebt.' : document.getElementById('tot100-hulp')?.value.startsWith('brug-') ? 'Schrijf de tussenstappen en de som.' : zin,
       hulpmiddelen,
       splitspositie,
       aanvullenVariant,
@@ -2322,6 +2350,7 @@ function _getSplitsConfig() {
       container.appendChild(label);
     });
 
+    container.appendChild(labelGemengd);
     // Standaard: eerste type selecteren
     const eerste = container.querySelector('.vink-chip');
     if (eerste) eerste.click();
@@ -2361,6 +2390,11 @@ function _getSplitsConfig() {
 
     const typesOpt = _getGemengdTypes('cg-gem-opt-types', alleOpt);
     const typesAft = _getGemengdTypes('cg-gem-aft-types', alleAft);
+    if(!GemengdHulp.pastBijTypes(hulpPerBewerking.optellen.tot100Hulp, typesOpt) ||
+       !GemengdHulp.pastBijTypes(hulpPerBewerking.aftrekken.tot100Hulp, typesAft)){
+      toonToast('Kies voor dit hulpmiddel alleen HTE met E of T, of HT met T.', '#E74C3C');
+      return;
+    }
     if (typesOpt.length === 0) { toonToast('⚠️ Kies minstens één opteltype!', '#E74C3C'); return; }
     if (typesAft.length === 0) { toonToast('⚠️ Kies minstens één aftrekkingstype!', '#E74C3C'); return; }
 
