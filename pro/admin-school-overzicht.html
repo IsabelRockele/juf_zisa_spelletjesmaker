@@ -65,6 +65,24 @@
     }
     .card h2 { font-size: 22px; margin-bottom: 6px; }
     .kopers-tabel { width: 100%; border-collapse: collapse; }
+    .kopers-filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 205px), 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .kopers-filters label { display: grid; gap: 5px; font-weight: 600; }
+    .kopers-filters input, .kopers-filters select {
+      width: 100%;
+      min-width: 0;
+      padding: 9px 10px;
+      border: 1px solid #cfc4de;
+      border-radius: 8px;
+      background: var(--wit);
+      color: inherit;
+      font: inherit;
+    }
+    #kopers-status { margin-inline-start: auto; }
     .kopers-tabel th, .kopers-tabel td {
       padding: 10px 12px;
       text-align: left;
@@ -510,6 +528,7 @@
           <button type="button" class="beheer-knop" id="kopers-maand" disabled>Geldige maandabonnementen</button>
         </div>
         <p>Bekijk particuliere Pro-aankopen en aparte aankopen van Zisa Lezen.</p>
+        <div class="kopers-filters">
         <label>Zoeken <input id="kopers-zoek" type="search" placeholder="Naam of e-mailadres"></label>
         <label>Pro-abonnement
           <select id="kopers-geldig">
@@ -527,19 +546,21 @@
             <option value="renewal">Jaar verlengd</option>
             <option value="repeat">Maand opnieuw gekocht</option>
             <option value="upgrade">Van maand naar jaar</option>
-            <option value="reading">Zisa Lezen apart gekocht</option>
-            <option value="reading-only">Alleen Zisa Lezen gekocht</option>
+            <option value="reading">Zisa Lezen</option>
           </select>
         </label>
         <label>Vervaldatum
           <select id="kopers-sortering">
-            <option value="newest">Nieuw naar oud</option>
-            <option value="oldest">Oud naar nieuw</option>
+            <option value="newest">Laatste vervaldatum eerst</option>
+            <option value="oldest">Vroegste vervaldatum eerst</option>
           </select>
         </label>
-        <button type="button" id="kopers-vernieuw">Vernieuwen</button>
-        <button type="button" id="kopers-kopieer" disabled>Kopieer getoonde e-mailadressen voor BCC</button>
-        <p id="kopers-status" role="status"></p>
+        </div>
+        <div class="beheer-knoppen">
+          <button type="button" class="beheer-knop" id="kopers-vernieuw">Vernieuwen</button>
+          <button type="button" class="beheer-knop" id="kopers-kopieer" disabled>Kopieer e-mailadressen voor BCC</button>
+          <p id="kopers-status" role="status"></p>
+        </div>
         <div style="overflow-x:auto">
           <table class="kopers-tabel">
             <thead><tr><th>Koper</th><th>Aankoopverloop</th><th>Pro tot</th><th>Lezen tot</th><th>Geschiedenis</th></tr></thead>
@@ -626,7 +647,7 @@
     import { getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
-    import { setupBuyers } from "./admin-kopers.js?v=5";
+    import { setupBuyers } from "./admin-kopers.js?v=6";
 
     let alleSchoolData = []; // bewaar volledige dataset voor zoeken
 

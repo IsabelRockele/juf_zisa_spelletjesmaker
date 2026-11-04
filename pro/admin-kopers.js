@@ -28,7 +28,7 @@ export function setupBuyers(loadBuyers) {
     const direction = order.value === "oldest" ? 1 : -1;
     const expiry = buyer => {
       if (active.value === "yearEnd" || active.value === "monthEnd") return buyer[active.value];
-      if (filter.value === "reading" || filter.value === "reading-only") return buyer.readingEnd;
+      if (filter.value === "reading") return buyer.readingEnd;
       return buyer.proEnd || buyer.readingEnd;
     };
     visible.sort((a, b) => {
@@ -161,8 +161,7 @@ function describeBuyer(buyer) {
   }
   if (buyer.purchases.length > pro.length) {
     labels.add("reading");
-    if (!pro.length) labels.add("reading-only");
-    summary.push(pro.length ? "Zisa Lezen apart" : "Alleen Zisa Lezen");
+    summary.push("Zisa Lezen");
   }
   return { ...buyer, labels, summary: summary.join(" · ") };
 }
