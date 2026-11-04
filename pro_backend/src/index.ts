@@ -1861,6 +1861,32 @@ export const checkExpiringLicenses = onSchedule(
       return d.toISOString();
     };
 
+    async function queueLicenseReminder(id: string, email: string, cycle: string, days: 7 | 1, subject: string, html: string) {
+      const cycleField = days === 7 ? "reminder7Days_forExpiresAt" : "reminder1Day_forExpiresAt";
+      const sentField = days === 7 ? "reminder7Days_sentAt" : "reminder1Day_sentAt";
+      const refs = LICENSE_COLLECTIONS.map(col => db.collection(col).doc(id));
+      return db.runTransaction(async tx => {
+        const copies = await tx.getAll(...refs);
+        const current = copies.filter(copy => {
+          const data = copy.data();
+          return data?.expiresAt && expiresKey(data) === cycle &&
+            String(data.email || "").trim().toLowerCase() === email &&
+            ["active", "actief"].includes(String(data.status || "").toLowerCase());
+        });
+        if (!current.length || current.some(copy => copy.get(cycleField) === cycle)) return false;
+        for (const col of pickMailCollections(email)) {
+          tx.create(db.collection(col).doc(), {
+            to: [email],
+            message: { subject, html, text: "Klik op de knop in deze mail om verder te gaan.", attachments: [] },
+          });
+        }
+        for (const copy of current) {
+          tx.update(copy.ref, { [cycleField]: cycle, [sentField]: FieldValue.serverTimestamp() });
+        }
+        return true;
+      });
+    }
+
     // Doorloop alle licentie-collecties (licenses + Licenties)
     for (const col of LICENSE_COLLECTIONS) {
       // ── 7-DAGEN venster ──
@@ -1885,7 +1911,7 @@ export const checkExpiringLicenses = onSchedule(
 
           // Skip als geen email
           const email = (lic.email || "").toString().trim().toLowerCase();
-          if (!email) continue;
+          if (!email || OWNER_EMAILS.has(email)) continue;
 
           try {
             const eindDatum = lic.expiresAt?.toDate?.() ?? new Date(lic.expiresAt);
@@ -1894,8 +1920,8 @@ export const checkExpiringLicenses = onSchedule(
             });
             const verlengUrl = `${FRONTEND_REPO}/pro/verlopen.html?reason=expiring_soon&until=${encodeURIComponent(eindDatum.toISOString())}`;
 
-            await queueEmail(
-              email,
+            const queued = await queueLicenseReminder(
+              doc.id, email, huidigeKey, 7,
               "Even een seintje — je Zisa PRO loopt over een week af",
               reminderEmailHtml({
                 dagenResterend: 7,
@@ -1903,12 +1929,7 @@ export const checkExpiringLicenses = onSchedule(
                 verlengUrl,
               })
             );
-
-            // Markeer voor deze cyclus (niet opnieuw mailen tot expiresAt wijzigt)
-            await doc.ref.update({
-              reminder7Days_forExpiresAt: huidigeKey,
-              reminder7Days_sentAt: FieldValue.serverTimestamp(),
-            });
+            if (!queued) continue;
 
             totaal7++;
             logger.info("[reminder-7d] verzonden", { email, licId: doc.id });
@@ -1941,7 +1962,7 @@ export const checkExpiringLicenses = onSchedule(
           if (!isActive) continue;
 
           const email = (lic.email || "").toString().trim().toLowerCase();
-          if (!email) continue;
+          if (!email || OWNER_EMAILS.has(email)) continue;
 
           try {
             const eindDatum = lic.expiresAt?.toDate?.() ?? new Date(lic.expiresAt);
@@ -1950,8 +1971,8 @@ export const checkExpiringLicenses = onSchedule(
             });
             const verlengUrl = `${FRONTEND_REPO}/pro/verlopen.html?reason=expiring_soon&until=${encodeURIComponent(eindDatum.toISOString())}`;
 
-            await queueEmail(
-              email,
+            const queued = await queueLicenseReminder(
+              doc.id, email, huidigeKey, 1,
               "⚠️ Je Zisa PRO loopt morgen af",
               reminderEmailHtml({
                 dagenResterend: 1,
@@ -1959,11 +1980,7 @@ export const checkExpiringLicenses = onSchedule(
                 verlengUrl,
               })
             );
-
-            await doc.ref.update({
-              reminder1Day_forExpiresAt: huidigeKey,
-              reminder1Day_sentAt: FieldValue.serverTimestamp(),
-            });
+            if (!queued) continue;
 
             totaal1++;
             logger.info("[reminder-1d] verzonden", { email, licId: doc.id });
