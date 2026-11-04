@@ -22,11 +22,16 @@ const types=[
 {id:'punct-find',topic:'Leestekens',name:'Omkring de leestekens',description:'Herken de punt, het vraagteken en het uitroepteken.'},
 {id:'punct-fill',topic:'Leestekens',name:'Vul het leesteken in',description:'Schrijf . ? of ! in een klein vakje na de zin.'},
 {id:'punct-complete',topic:'Leestekens',name:'Maak de zin af',description:'Begin met de gegeven woorden en let op het leesteken.'},
-{id:'punct-write',topic:'Leestekens',name:'Schrijf zelf een zin',description:'Bedenk een mededelende zin, een vraag of een uitroep.'},
-{"id":"tell-recognize","topic":"Leestekens","name":"Herken mededelende zinnen","description":"Lees de volledige zinnen en kruis aan welke iets vertellen."},
-{"id":"tell-complete","topic":"Leestekens","name":"Maak een mededelende zin af","description":"Begin met de gegeven woorden en vertel iets."},
-{"id":"tell-words","topic":"Leestekens","name":"Maak een zin met woorden","description":"Gebruik de woorden in een mededelende zin."},
-{"id":"tell-picture","topic":"Leestekens","name":"Vertel bij de prent","description":"Schrijf een mededelende zin bij een duidelijke afbeelding."},
+{id:'punct-write',topic:'Soorten zinnen',name:'Schrijf zelf een zin',description:'Bedenk een mededelende zin, een vraag of een uitroep.'},
+{"id":"tell-recognize","topic":"Soorten zinnen","name":"Herken mededelende zinnen","description":"Lees de volledige zinnen en kruis aan welke iets vertellen."},
+{"id":"tell-complete","topic":"Soorten zinnen","name":"Maak een mededelende zin af","description":"Begin met de gegeven woorden en vertel iets."},
+{"id":"tell-words","topic":"Soorten zinnen","name":"Maak een zin met woorden","description":"Gebruik de woorden in een mededelende zin."},
+{"id":"tell-picture","topic":"Soorten zinnen","name":"Vertel bij de prent","description":"Schrijf een mededelende zin bij een duidelijke afbeelding."},
+{"id":"punct-kind","topic":"Soorten zinnen","name":"Duid de soort zin aan"},
+{"id":"punct-rewrite","topic":"Leestekens","name":"Herschrijf met het juiste leesteken"},
+{"id":"punct-sort","topic":"Soorten zinnen","name":"Schrijf zinnen bij de juiste soort"},
+{"id":"punct-picture","topic":"Soorten zinnen","name":"Schrijf drie soorten zinnen bij een prent"},
+{"id":"punct-transform","topic":"Soorten zinnen","name":"Wissel tussen vraagzin en mededelende zin"},
 {"id":"rhyme-match","topic":"Rijmwoorden","name":"Verbind de rijmwoorden","description":"Zoek de rijmparen in twee kolommen."},
 {"id":"rhyme-color","topic":"Rijmwoorden","name":"Kleur de rijmparen","description":"Geef woorden die rijmen dezelfde kleur."},
 {"id":"rhyme-find","topic":"Rijmwoorden","name":"Zoek rijm in een tekstje","description":"Omkring rijmwoorden in korte versjes."},
@@ -40,5 +45,40 @@ const scenes=[
 {id:'klas',name:'In de klas',image:'assets/klas.png',words:[['juf','de','persoon'],['jongen','de','persoon'],['meisje','het','persoon'],['vis','de','dier'],['tafel','de','ding'],['stoel','de','ding'],['boek','het','ding'],['potlood','het','ding'],['rugzak','de','ding'],['klok','de','ding'],['bord','het','ding'],['raam','het','ding'],['wereldbol','de','ding']]},
 {id:'boerderij',name:'Op de boerderij',image:'assets/boerderij.png',words:[['boer','de','persoon'],['meisje','het','persoon'],['koe','de','dier'],['varken','het','dier'],['paard','het','dier'],['kip','de','dier'],['tractor','de','ding'],['schuur','de','ding'],['emmer','de','ding'],['kruiwagen','de','ding'],['boom','de','ding'],['hek','het','ding']]}
 ].map(scene=>({...scene,words:scene.words.map(([word,article,group])=>({word,article,group}))}));
-window.TaalData={scenes,nouns,sentences,capitals,types,levels:{support:{name:'Extra steun',symbol:'●',help:'Korte woorden, keuzemogelijkheden en voorbeelden.'},basic:{name:'Basis',symbol:'■',help:'Zelf toepassen in woorden en korte zinnen.'},challenge:{name:'Uitbreiding',symbol:'▲',help:'Zelf formuleren, combineren en uitleggen.'}}};
+
+const themeWords={
+ autumn:'de pompoen pompoenen pompoentje|het blad bladeren blaadje|de kastanje kastanjes kastanjetje|de eikel eikels eikeltje|de regenjas regenjassen regenjasje|de plas plassen plasje|de paddenstoel paddenstoelen paddenstoeltje|het bladhoopje bladhoopjes bladhoopje|de egel egels egeltje dier|de slak slakken slakje dier|de eekhoorn eekhoorns eekhoorntje dier|de wandelaar wandelaars wandelaartje persoon|de plukker plukkers plukkertje persoon|het kind kinderen kindje persoon',
+ halloween:'de pompoen pompoenen pompoentje|het masker maskers maskertje|de bezem bezems bezempje|de lantaarn lantaarns lantaarntje|het spook spoken spookje|het snoep snoepjes snoepje|de ketel ketels keteltje|de kaars kaarsen kaarsje|de spin spinnen spinnetje dier|de vleermuis vleermuizen vleermuisje dier|de kat katten katje dier|de heks heksen heksje persoon|de griezel griezels griezeltje persoon|het kind kinderen kindje persoon',
+ christmas:'de kerstbal kerstballen kerstballetje|de kerstboom kerstbomen kerstboompje|het pak pakken pakje|het lint linten lintje|de bel bellen belletje|de ster sterren sterretje|de kaars kaarsen kaarsje|de sneeuwpop sneeuwpoppen sneeuwpopje|het rendier rendieren rendiertje dier|de hond honden hondje dier|de roodborst roodborsten roodborstje dier|de kerstman kerstmannen kerstmannetje persoon|de helper helpers helpertje persoon|het kind kinderen kindje persoon',
+ saint:'de mijter mijters mijtertje|de staf staven stafje|de schoen schoenen schoentje|het paard paarden paardje dier|het pak pakken pakje|de wortel wortels worteltje|de brief brieven briefje|de zak zakken zakje|de pepernoot pepernoten pepernootje|het snoep snoepjes snoepje|de hond honden hondje dier|de schimmel schimmels schimmeltje dier|de helper helpers helpertje persoon|het kind kinderen kindje persoon|de bakker bakkers bakkertje persoon',
+ forest:'de boom bomen boompje|de tak takken takje|de den dennen dennetje|de eikel eikels eikeltje|het spoor sporen spoortje|de dennenappel dennenappels dennenappeltje|de paddenstoel paddenstoelen paddenstoeltje|het nest nesten nestje|de eekhoorn eekhoorns eekhoorntje dier|de specht spechten spechtje dier|het konijn konijnen konijntje dier|de boswachter boswachters boswachtertje persoon|de wandelaar wandelaars wandelaartje persoon|het kind kinderen kindje persoon'
+};
+const themeActions={
+ autumn:[
+ ['Noor','raapt','een kastanje','op'],['De egel','schuilt','onder een blad',''],['Milan','springt','in de plas',''],['Het kind','draagt','een regenjas',''],['De eekhoorn','zoekt','een eikel',''],['De wandelaar','ziet','een paddenstoel',''],['Lina','draagt','de pompoen',''],['De slak','kruipt','naar het blad','']],
+ halloween:[
+ ['Noor','draagt','een masker',''],['De heks','zoekt','de bezem',''],['De spin','kruipt','in de ketel',''],['Milan','draagt','een lantaarn',''],['Het kind','krijgt','snoep',''],['De kat','schrikt','van het spook',''],['Lina','tekent','een vleermuis',''],['De griezel','tilt','de pompoen','op']],
+ christmas:[
+ ['Noor','hangt','de kerstbal','op'],['Milan','pakt','het lint',''],['Het kind','ziet','de ster',''],['De helper','versiert','de kerstboom',''],['De hond','ruikt','aan het pak',''],['Lina','tekent','een rendier',''],['De kerstman','draagt','een bel',''],['De roodborst','zit','bij de sneeuwpop','']],
+ saint:[
+ ['Noor','zet','de schoen','klaar'],['Het paard','eet','de wortel',''],['Milan','schrijft','een brief',''],['Sinterklaas','draagt','een mijter',''],['De helper','tilt','de zak','op'],['Lina','vindt','een pepernoot',''],['Het kind','krijgt','een pak',''],['De bakker','tekent','een staf','']],
+ forest:[
+ ['Noor','zoekt','een dennenappel',''],['De eekhoorn','klimt','in de boom',''],['De boswachter','ziet','een spoor',''],['Milan','hoort','de specht',''],['Het konijn','springt','over de tak',''],['Lina','vindt','een paddenstoel',''],['De wandelaar','ziet','een nest',''],['Het kind','raapt','een eikel','op']]
+};
+const nounPools=Object.fromEntries(Object.entries(themeWords).map(([theme,list])=>[theme,list.split('|').map(entry=>{
+ const [article,word,plural,dimin,group='ding']=entry.split(' ');
+ return {article,word,plural,dimin,group};
+})]));
+function themePool(pools,theme,fallback=[]){
+ if(theme==='all')return [...fallback,...Object.values(pools).flat()];
+ return pools[theme]||fallback;
+}
+function themedActions(theme){
+ return themePool(themeActions,theme).map(([subject,verb,rest,particle])=>{
+  const tail=[rest,particle].filter(Boolean).join(' ');
+  const person=/^(De|Het) /.test(subject)?subject[0].toLowerCase()+subject.slice(1):subject;
+  return {subject,verb,rest,particle,text:subject+' '+verb+' '+tail+'.',question:verb[0].toUpperCase()+verb.slice(1)+' '+person+' '+tail+'?'};
+ });
+}
+window.TaalData={themePool,themedActions,themedNouns:theme=>[...new Map(themePool(nounPools,theme,nouns).map(noun=>[noun.word,noun])).values()],scenes,nouns,sentences,capitals,types,levels:{support:{name:'Extra steun',symbol:'●',help:'Korte woorden, keuzemogelijkheden en voorbeelden.'},basic:{name:'Basis',symbol:'■',help:'Zelf toepassen in woorden en korte zinnen.'},challenge:{name:'Uitbreiding',symbol:'▲',help:'Zelf formuleren, combineren en uitleggen.'}}};
 })();

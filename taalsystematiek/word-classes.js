@@ -57,6 +57,23 @@ TaalData.types.push(...types);
 const limits=Object.fromEntries(types.map(t=>[t.id,t.id==='adj-guided'?guidedStories.length:t.id==='adj-pictures'?pictureWords.length:t.id==='adj-guided-expand'?expansions.length:t.id==='adj-match'?matches.length:t.id==='adj-text'?stories.length:t.id==='adj-expand'?expansions.length:t.id.startsWith('adj-')?phrases.length:sentences.length]));
 const tokens=text=>text.split(' ').map(token=>{const [word,kind='']=token.split('|');return{word,kind}});
 function model(item,s,solutions){
+ const actions=TaalData.themedActions(item.articleTheme);
+ const nouns=TaalData.themedNouns(item.articleTheme);
+ const nounByWord=new Map(nouns.map(n=>[n.word,n]));
+ const names=new Set(['Noor','Milan','Lina','Sinterklaas']);
+ const adjectives=['mooie','kleine','grote','bijzondere'];
+ const themedPhrases=nouns.map((n,i)=>[n.article,adjectives[i%adjectives.length],n.word,'andere']);
+ const tag=(text,withAdjectives)=>text.split(' ').flatMap((word,i,words)=>{
+  const bare=word.replace(/[.!?]$/,'');
+  const lower=bare.toLowerCase();
+  if(names.has(bare))return [word+'|EN'];
+  if(['de','het','een'].includes(lower))return [word+'|LW'];
+  if(!nounByWord.has(lower))return [word];
+  const noun=word+'|ZN';
+  return withAdjectives&&['de','het','een'].includes(words[i-1]?.toLowerCase())?[(words[i-1].toLowerCase()==='een'&&nounByWord.get(lower).article==='het'?'mooi':'mooie')+'|BN',noun]:[noun];
+ }).join(' ');
+ const tagged=actions.map(a=>tag(a.text,false));
+ const taggedStories=actions.length?[actions.slice(0,4),actions.slice(4,8)].map(group=>group.map(a=>tag(a.text,true))):[];
  const G=TaalGenerator,e=G.esc,r=G.rng(item.seed),blocks=[],removed=new Set(item.removed||[]);
  const chosen=pool=>G.shuffle(pool,r).slice(0,item.count).map((value,i)=>({value,key:'row-'+i})).filter(x=>!removed.has(x.key));
  const answer=(text,n=1)=>solutions?'<div class="answer">'+text+'</div>':Array.from({length:n},()=>'<div class="write-line">'+SpellingSchrijflijnen.htmlCanvas(s.lineType,s.lineHeight,640)+'</div>').join('');
@@ -72,28 +89,43 @@ function model(item,s,solutions){
  let instruction='',hint='',example='';
  if(item.type.startsWith('adj-')){
   hint='Een bijvoeglijk naamwoord (BN) vertelt hoe iemand of iets is. Het zegt iets over een zelfstandig naamwoord (ZN). In de zachte trui is zachte het BN en trui het ZN.';
-  if(item.type==='adj-guided'){instruction='Lees het tekstje. De zelfstandige naamwoorden zijn onderstreept. Markeer de bijvoeglijke naamwoorden die erbij horen.';chosen(guidedStories).forEach(({value,key})=>add('<div class="grammar-story">'+value.map(t=>'<p>'+sentence(t,'guided')+'</p>').join('')+'</div>',key))}
-  if(item.type==='adj-pictures'){instruction='Schrijf bij elke prent een passend bijvoeglijk naamwoord met het lidwoord en het zelfstandig naamwoord.';const selected=chosen(pictureWords);for(let i=0;i<selected.length;i+=2)add('<div class="dimin-pair">'+selected.slice(i,i+2).map(({value:[article,noun,adj],key})=>'<div class="adj-picture" data-question-key="'+key+'"><img src="assets/'+noun+'.png" alt="'+e(noun)+'"><p>'+e(article+' '+noun)+'</p>'+answer('Bijvoorbeeld: '+e(article+' '+adj+' '+noun)+'. Andere passende antwoorden zijn ook juist.')+'</div>').join('')+'</div>')}
-  if(item.type==='adj-guided-expand'){instruction='Lees de onderstreepte zelfstandige naamwoorden. Schrijf elke zin opnieuw en voeg bij elk onderstreept woord een passend bijvoeglijk naamwoord toe.';chosen(expansions).forEach(({value:[text,solution],key})=>{const prompt=e(text).replace(/(De|de|Het|het|Een|een) (\w+)/g,(_,article,noun)=>article+' <u class="subject-answer">'+noun+'</u>').replace('verkoopt broodjes','verkoopt <u class="subject-answer">broodjes</u>');add('<p>'+prompt+'</p>'+answer('Bijvoorbeeld: '+e(solution)+' Andere passende antwoorden zijn ook juist.',2),key)})}
-  if(item.type==='adj-match'){instruction='Verbind elk zelfstandig naamwoord met een passend bijvoeglijk naamwoord. Gebruik elk woord rechts één keer. Soms zijn meerdere oplossingen mogelijk.';const selected=chosen(matches);for(let i=0;i<selected.length;i+=4){const group=selected.slice(i,i+4),right=G.shuffle(group,r);if(right.length>1&&right.every((x,j)=>x===group[j]))right.push(right.shift());add('<div class="rhyme-match'+(solutions?' match-solved':'')+'">'+group.map((x,j)=>'<div class="rhyme-match-row" data-question-key="'+x.key+'"><span>'+e(x.value[0])+' <b data-match-left="'+x.key+'">•</b></span><span><b data-match-right="'+right[j].key+'">•</b> '+e(right[j].value[1])+'</span></div>').join('')+'</div>'+(solutions?'<p class="answer">Voorbeeldoplossing. Andere passende verbindingen zijn ook juist.</p>':''))}}
-  if(item.type==='adj-find'){instruction='Omkring het bijvoeglijk naamwoord in elke woordgroep.';example='Vraag jezelf af: hoe is de persoon, het dier of het ding?';chosen(phrases).forEach(({value:[article,adj,noun],key})=>add('<p>'+e(article)+' '+(solutions?'<b class="marked">'+e(adj)+'</b>':e(adj))+' '+e(noun)+'</p>',key))}
+  if(item.type==='adj-guided'){instruction='Lees het tekstje. De zelfstandige naamwoorden zijn onderstreept. Markeer de bijvoeglijke naamwoorden die erbij horen.';chosen(actions.length?taggedStories:guidedStories).forEach(({value,key})=>add('<div class="grammar-story">'+value.map(t=>'<p>'+sentence(t,'guided')+'</p>').join('')+'</div>',key))}
+  if(item.type==='adj-pictures'){instruction='Schrijf bij elke prent een passend bijvoeglijk naamwoord met het lidwoord en het zelfstandig naamwoord.';const selected=chosen(actions.length?TaalPunctuation.picturePool(item.articleTheme).map(p=>[p.article,p.word,'mooie',p.image]):pictureWords);for(let i=0;i<selected.length;i+=2)add('<div class="dimin-pair">'+selected.slice(i,i+2).map(({value:[article,noun,adj,image],key})=>'<div class="adj-picture" data-question-key="'+key+'"><img src="'+e(image||'assets/'+noun+'.png')+'" alt="'+e(noun)+'"><p>'+e(article+' '+noun)+'</p>'+answer('Bijvoorbeeld: '+e(article+' '+adj+' '+noun)+'. Andere passende antwoorden zijn ook juist.')+'</div>').join('')+'</div>')}
+  if(item.type==='adj-guided-expand'){instruction='Lees de onderstreepte zelfstandige naamwoorden. Schrijf elke zin opnieuw en voeg bij elk onderstreept woord een passend bijvoeglijk naamwoord toe.';chosen(actions.length?actions.map(a=>[a.text,tag(a.text,true).replace(/\|[A-Z]+/g,'')]):expansions).forEach(({value:[text,solution],key})=>{const prompt=e(text).replace(/(De|de|Het|het|Een|een) (\w+)/g,(_,article,noun)=>article+' <u class="subject-answer">'+noun+'</u>').replace('verkoopt broodjes','verkoopt <u class="subject-answer">broodjes</u>');add('<p>'+prompt+'</p>'+answer('Bijvoorbeeld: '+e(solution)+' Andere passende antwoorden zijn ook juist.',2),key)})}
+  if(item.type==='adj-match'){instruction='Verbind elk zelfstandig naamwoord met een passend bijvoeglijk naamwoord. Gebruik elk woord rechts één keer. Soms zijn meerdere oplossingen mogelijk.';const selected=chosen(actions.length?themedPhrases.map(([article,adj,noun])=>[article+' '+noun,adj]):matches);for(let i=0;i<selected.length;i+=4){const group=selected.slice(i,i+4),right=G.shuffle(group,r);if(right.length>1&&right.every((x,j)=>x===group[j]))right.push(right.shift());add('<div class="rhyme-match'+(solutions?' match-solved':'')+'">'+group.map((x,j)=>'<div class="rhyme-match-row" data-question-key="'+x.key+'"><span>'+e(x.value[0])+' <b data-match-left="'+x.key+'">•</b></span><span><b data-match-right="'+right[j].key+'">•</b> '+e(right[j].value[1])+'</span></div>').join('')+'</div>'+(solutions?'<p class="answer">Voorbeeldoplossing. Andere passende verbindingen zijn ook juist.</p>':''))}}
+  if(item.type==='adj-find'){instruction='Omkring het bijvoeglijk naamwoord in elke woordgroep.';example='Vraag jezelf af: hoe is de persoon, het dier of het ding?';chosen(actions.length?themedPhrases:phrases).forEach(({value:[article,adj,noun],key})=>add('<p>'+e(article)+' '+(solutions?'<b class="marked">'+e(adj)+'</b>':e(adj))+' '+e(noun)+'</p>',key))}
   if(item.type==='adj-replace'||item.type==='adj-add'){
    instruction=item.type==='adj-replace'?'Schrijf de woordgroep opnieuw met een ander bijvoeglijk naamwoord.':'Voeg een passend bijvoeglijk naamwoord toe en schrijf de volledige woordgroep.';
-   const selected=chosen(phrases);for(let i=0;i<selected.length;i+=2)add('<div class="dimin-pair">'+selected.slice(i,i+2).map(({value:[article,adj,noun,other],key})=>'<div data-question-key="'+key+'"><p>'+e(article)+' '+(item.type==='adj-replace'?'<b>'+e(adj)+'</b> ':'')+e(noun)+'</p>'+answer('Bijvoorbeeld: '+e(article+' '+other+' '+noun))+'</div>').join('')+'</div>');
+   const selected=chosen(actions.length?themedPhrases:phrases);for(let i=0;i<selected.length;i+=2)add('<div class="dimin-pair">'+selected.slice(i,i+2).map(({value:[article,adj,noun,other],key})=>'<div data-question-key="'+key+'"><p>'+e(article)+' '+(item.type==='adj-replace'?'<b>'+e(adj)+'</b> ':'')+e(noun)+'</p>'+answer('Bijvoorbeeld: '+e(article+' '+other+' '+noun))+'</div>').join('')+'</div>');
   }
-  if(item.type==='adj-text'){instruction='Lees elk tekstje. Markeer alle bijvoeglijke naamwoorden.';chosen(stories).forEach(({value,key})=>add('<div class="grammar-story">'+value.map(t=>'<p>'+sentence(t,'adj')+'</p>').join('')+'</div>',key))}
+  if(item.type==='adj-text'){instruction='Lees elk tekstje. Markeer alle bijvoeglijke naamwoorden.';chosen(actions.length?taggedStories:stories).forEach(({value,key})=>add('<div class="grammar-story">'+value.map(t=>'<p>'+sentence(t,'adj')+'</p>').join('')+'</div>',key))}
   if(item.type==='adj-expand'){instruction='Schrijf elke zin opnieuw. Voeg minstens twee passende bijvoeglijke naamwoorden toe.';chosen(expansions).forEach(({value:[text,solution],key})=>add('<p>'+e(text)+'</p>'+answer('Bijvoorbeeld: '+e(solution)+' Andere passende bijvoeglijke naamwoorden zijn ook juist.',2),key))}
  }
  if(item.type.startsWith('classes-')){
   hint='LW = lidwoord: de, het, een. ZN = zelfstandig naamwoord: een persoon, dier, ding of naam. BN = bijvoeglijk naamwoord: het zegt hoe iemand of iets is. Een eigennaam, zoals Noor of Gent, telt ook als ZN. Niet elk woord is een LW, ZN of BN.';
   instruction=item.type==='classes-color'?'Kleur de lidwoorden blauw, de zelfstandige naamwoorden groen en de bijvoeglijke naamwoorden oranje. Eigennamen krijgen ook groen.':'Schrijf LW onder de lidwoorden, ZN onder de zelfstandige naamwoorden en BN onder de bijvoeglijke naamwoorden. Schrijf bij eigennamen ook ZN. Laat de andere plaatsen leeg.';
   if(item.type==='classes-color')add('<div class="word-legend"><span class="word-color word-color-LW">LW · blauw</span><span class="word-color word-color-ZN">ZN · groen</span><span class="word-color word-color-BN">BN · oranje</span></div>');
-  chosen(sentences).forEach(({value,key})=>add('<p class="'+(item.type==='classes-label'?'tagged-sentence':'')+'">'+sentence(value,item.type==='classes-label'?'label':'color')+'</p>',key));
+  chosen(actions.length?tagged:sentences).forEach(({value,key})=>add('<p class="'+(item.type==='classes-label'?'tagged-sentence':'')+'">'+sentence(value,item.type==='classes-label'?'label':'color')+'</p>',key));
  }
  if(item.type.startsWith('proper-')){
   hint='Een eigennaam is een zelfstandig naamwoord dat een specifieke persoon, dier of plaats noemt: Noor, Minoes, Gent. Je schrijft een eigennaam met een hoofdletter. Soortnamen zoals meisje, kat en stad zijn ook zelfstandige naamwoorden. Een hoofdletter aan het begin van een zin maakt een woord nog geen eigennaam.';
   instruction=item.type==='proper-find'?'Omkring de eigennamen. Niet elke zin bevat een eigennaam. Let op: niet elk woord met een hoofdletter is een eigennaam.':'Schrijf de eigennamen en de soortnamen uit elke zin op de juiste lijn. Noteer de zelfstandige naamwoorden zonder lidwoord.';
-  chosen(sentences).forEach(({value,key})=>{const ts=tokens(value);add('<p>'+sentence(value,item.type==='proper-find'?'proper':'plain')+'</p>'+(item.type==='proper-sort'?['EN','ZN'].map(kind=>'<div class="grammar-field"><span>'+(kind==='EN'?'Eigennamen':'Soortnamen')+':</span><div>'+answer(ts.filter(t=>t.kind===kind).map(t=>e(t.word)).join(', ')||'Geen.')+'</div></div>').join(''):''),key)});
+  const extraNames={
+   autumn:['In de|LW regen|ZN geeft Noor|EN een|LW kastanje|ZN aan Lina.|EN','Onder het|LW blad|ZN vindt Milan|EN een|LW eikel.|ZN','De|LW regenjas|ZN van Sam|EN hangt aan de|LW kapstok.|ZN'],
+   halloween:['Bij de|LW voordeur krijgt Noor|EN snoep.|ZN','De|LW pompoen|ZN van Sam|EN geeft licht.|ZN','Lina|EN maakt een|LW masker|ZN voor Milan.|EN'],
+   christmas:['Onder de|LW kerstboom|ZN ligt een|LW pak|ZN voor Sam.|EN','Milan|EN hangt een|LW ster|ZN naast Noor.|EN','De|LW kerstbal|ZN van Lina|EN hangt bovenaan.'],
+   saint:['Naast de|LW schoen|ZN van Sam|EN ligt een|LW wortel.|ZN','Noor|EN schrijft een|LW brief|ZN aan Sinterklaas.|EN','Milan|EN geeft Lina|EN een|LW pepernoot.|ZN'],
+   forest:['Op het|LW bospad|ZN ziet Lina|EN een|LW konijn.|ZN','De|LW boswachter|ZN wijst Noor|EN een|LW nest.|ZN','Milan|EN zoekt een|LW dennenappel|ZN met Sam.|EN']
+  };
+  let pool=actions.length?[...tagged,...TaalData.themePool(extraNames,item.articleTheme)]:sentences;
+  if(item.type==='proper-find'){
+   const hasName=text=>tokens(text).some(token=>token.kind==='EN');
+   const named=G.shuffle(pool.filter(hasName),r),unnamed=G.shuffle(pool.filter(text=>!hasName(text)),r);
+   const count=Math.min(item.count,pool.length);
+   const plainCount=Math.min(unnamed.length,Math.max(count>=4?1:0,Math.floor(count/4),count-named.length));
+   pool=[...named.slice(0,count-plainCount),...unnamed.slice(0,plainCount)];
+  }
+  chosen(pool).forEach(({value,key})=>{const ts=tokens(value);add('<p>'+sentence(value,item.type==='proper-find'?'proper':'plain')+'</p>'+(item.type==='proper-sort'?['EN','ZN'].map(kind=>'<div class="grammar-field"><span>'+(kind==='EN'?'Eigennamen':'Soortnamen')+':</span><div>'+answer(ts.filter(t=>t.kind===kind).map(t=>e(t.word)).join(', ')||'Geen.')+'</div></div>').join(''):''),key)});
  }
  return{instruction,hint,example,blocks};
 }
