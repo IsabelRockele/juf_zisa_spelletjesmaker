@@ -531,6 +531,12 @@
             <option value="reading-only">Alleen Zisa Lezen gekocht</option>
           </select>
         </label>
+        <label>Eerste aankoop
+          <select id="kopers-sortering">
+            <option value="newest">Nieuw naar oud</option>
+            <option value="oldest">Oud naar nieuw</option>
+          </select>
+        </label>
         <button type="button" id="kopers-vernieuw">Vernieuwen</button>
         <button type="button" id="kopers-kopieer" disabled>Kopieer getoonde e-mailadressen voor BCC</button>
         <p id="kopers-status" role="status"></p>
@@ -620,7 +626,7 @@
     import { getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
-    import { setupBuyers } from "./admin-kopers.js?v=3";
+    import { setupBuyers } from "./admin-kopers.js?v=4";
 
     let alleSchoolData = []; // bewaar volledige dataset voor zoeken
 

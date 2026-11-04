@@ -4,6 +4,7 @@ export function setupBuyers(loadBuyers) {
   const search = element("-zoek");
   const filter = element("-filter");
   const active = element("-geldig");
+  const order = element("-sortering");
   const refresh = element("-vernieuw");
   const copy = element("-kopieer");
   const status = element("-status");
@@ -24,6 +25,11 @@ export function setupBuyers(loadBuyers) {
     visible = buyers.filter(buyer => (!filter.value || buyer.labels.has(filter.value)) &&
       matchesPlan(buyer, active.value, now) &&
       `${buyer.name} ${buyer.email}`.toLowerCase().includes(query));
+    const direction = order.value === "oldest" ? 1 : -1;
+    visible.sort((a, b) => {
+      if (!a.firstPurchase || !b.firstPurchase) return Number(!a.firstPurchase) - Number(!b.firstPurchase);
+      return direction * (a.firstPurchase - b.firstPurchase);
+    });
     rows.replaceChildren();
     for (const buyer of visible) {
       const row = rows.insertRow();
@@ -94,6 +100,7 @@ export function setupBuyers(loadBuyers) {
   search.addEventListener("input", render);
   filter.addEventListener("change", render);
   active.addEventListener("change", render);
+  order.addEventListener("change", render);
   for (const [button, field] of [[year, "yearEnd"], [month, "monthEnd"]]) {
     button.addEventListener("click", () => {
       active.value = field;
@@ -150,5 +157,6 @@ function describeBuyer(buyer) {
     if (!pro.length) labels.add("reading-only");
     summary.push(pro.length ? "Zisa Lezen apart" : "Alleen Zisa Lezen");
   }
-  return { ...buyer, labels, summary: summary.join(" · ") };
+  const firstPurchase = buyer.purchases.find(purchase => purchase.date > 0)?.date;
+  return { ...buyer, firstPurchase, labels, summary: summary.join(" · ") };
 }
