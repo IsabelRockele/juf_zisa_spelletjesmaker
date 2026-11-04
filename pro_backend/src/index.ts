@@ -2706,9 +2706,10 @@ export const adminListBuyers = onCall(
       throw new HttpsError("permission-denied", "Geen toegang tot het kopersoverzicht.");
     }
 
-    const [orders, reading, licenses] = await Promise.all([
+    const [orders, reading, readingOrders, licenses] = await Promise.all([
       Promise.all(ORDER_COLLECTIONS.map(col => db.collection(col).where("status", "==", "betaald").get())),
       db.collection("readingLiveInvoices").get(),
+      db.collection("readingLiveOrders").get(),
       Promise.all(LICENSE_COLLECTIONS.map(col => db.collection(col).where("status", "==", "active").get())),
     ]);
     type Purchase = { product: string; date: number; number: string };
@@ -2741,10 +2742,32 @@ export const adminListBuyers = onCall(
         if (!previous || purchase.date > previous.date) latestByLicense.set(key, purchase);
       }
     }
+    const readingInvoices = new Map<string, FirebaseFirestore.DocumentData>();
     for (const doc of reading.docs) {
       const invoice = doc.data();
       const purchase = invoice.snapshot;
       if (purchase?.environment !== "live") continue;
+      if (purchase.paymentId) readingInvoices.set(purchase.paymentId, invoice);
+    }
+    const recordedReadingPayments = new Set<string>();
+    for (const doc of readingOrders.docs) {
+      const order = doc.data();
+      if (order.environment !== "live") continue;
+      for (const [paymentId, entry] of Object.entries(order.entries || {}) as [string, { paid: boolean; reversed: boolean; period?: { start: number; end: number } }][]) {
+        if (recordedReadingPayments.has(paymentId)) continue;
+        recordedReadingPayments.add(paymentId);
+        if (!entry.paid || entry.reversed) continue;
+        const invoice = readingInvoices.get(paymentId);
+        const buyer = buyerFor(order.email || invoice?.snapshot?.customer?.email);
+        if (!buyer) continue;
+        buyer.name ||= String(order.billing?.name || invoice?.snapshot?.customer?.name || "");
+        buyer.readingEnd = Math.max(buyer.readingEnd, Number(entry.period?.end) || 0);
+        buyer.purchases.push({ product: "Zisa Lezen", date: Date.parse(invoice?.snapshot?.issuedAt) || entry.period?.start || 0, number: String(invoice?.number || "") });
+      }
+    }
+    for (const [paymentId, invoice] of readingInvoices) {
+      if (recordedReadingPayments.has(paymentId)) continue;
+      const purchase = invoice.snapshot;
       const buyer = buyerFor(purchase.customer?.email);
       if (!buyer) continue;
       buyer.name ||= String(purchase.customer?.name || "");
