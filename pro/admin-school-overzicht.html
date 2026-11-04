@@ -64,6 +64,28 @@
       margin-bottom: 20px;
     }
     .card h2 { font-size: 22px; margin-bottom: 6px; }
+    .beheer-knoppen, .kopers-totalen, .school-kop {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .school-kop { justify-content: space-between; }
+    .beheer-knop {
+      border: 1px solid var(--paars);
+      border-radius: 8px;
+      padding: 10px 15px;
+      color: var(--paars);
+      background: var(--wit);
+      font: inherit;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .beheer-knop[aria-pressed="true"], .school-kop .beheer-knop {
+      color: var(--wit);
+      background: var(--paars);
+    }
     .card-intro { color: var(--tekst-licht); font-size: 14.5px; margin-bottom: 22px; }
 
     /* Zoekveld + samenvatting */
@@ -461,30 +483,32 @@
     <header class="pro-header">
       <h1>📋 Beheer</h1>
       <div style="display:flex; gap:14px; align-items:center;">
-        <a href="./admin-school.html" class="terug-knop"
-           style="background:rgba(255,255,255,0.15); padding:7px 14px; border-radius:8px;">
-          🦓 Nieuwe activeren
-        </a>
         <a href="./app.html" class="terug-knop">← Terug naar app</a>
       </div>
     </header>
 
     <div class="container">
 
-      <nav class="tabs" aria-label="Beheeronderdelen">
-        <button type="button" class="tab-btn" id="toon-kopers" aria-controls="kopers" aria-pressed="false">Kopers</button>
-        <button type="button" class="tab-btn active" id="toon-scholen" aria-controls="schoolabonnementen" aria-pressed="true">Schoolabonnementen</button>
+      <nav class="beheer-knoppen" aria-label="Beheeronderdelen">
+        <button type="button" class="beheer-knop" id="toon-kopers" aria-controls="kopers" aria-pressed="true">Kopers</button>
+        <button type="button" class="beheer-knop" id="toon-scholen" aria-controls="schoolabonnementen" aria-pressed="false">Schoolaccounts</button>
       </nav>
 
       <section class="card" id="kopers" hidden aria-labelledby="kopers-titel">
         <h2 id="kopers-titel">Kopers</h2>
+        <div class="kopers-totalen" aria-label="Totalen geldige Pro-abonnementen">
+          <button type="button" class="beheer-knop" id="kopers-jaar" disabled>Geldige jaarabonnementen</button>
+          <button type="button" class="beheer-knop" id="kopers-maand" disabled>Geldige maandabonnementen</button>
+        </div>
         <p>Bekijk particuliere Pro-aankopen en aparte aankopen van Zisa Lezen.</p>
         <label>Zoeken <input id="kopers-zoek" type="search" placeholder="Naam of e-mailadres"></label>
-        <label>Geldig Pro-abonnement
+        <label>Pro-abonnement
           <select id="kopers-geldig">
             <option value="">Alle kopers</option>
             <option value="yearEnd">Geldig jaarabonnement</option>
             <option value="monthEnd">Geldig maandabonnement</option>
+            <option value="expiredYear">Verlopen jaarabonnement</option>
+            <option value="expiredMonth">Verlopen maandabonnement</option>
           </select>
         </label>
         <label>Aankoopverloop
@@ -509,7 +533,11 @@
         </div>
       </section>
 
-      <div class="card" id="schoolabonnementen">
+      <div class="card" id="schoolabonnementen" hidden>
+        <div class="school-kop">
+          <h2>Schoolaccounts</h2>
+          <a class="beheer-knop" href="./admin-school.html">+ Nieuw schoolaccount</a>
+        </div>
         <div class="tabs">
           <button class="tab-btn active" data-tab="overzicht">🏫 Alle scholen</button>
           <button class="tab-btn" data-tab="aanvragen">
@@ -583,7 +611,7 @@
     import { getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
-    import { setupBuyers } from "./admin-kopers.js";
+    import { setupBuyers } from "./admin-kopers.js?v=3";
 
     let alleSchoolData = []; // bewaar volledige dataset voor zoeken
 

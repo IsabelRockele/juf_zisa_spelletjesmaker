@@ -8,6 +8,8 @@ export function setupBuyers(loadBuyers) {
   const copy = element("-kopieer");
   const status = element("-status");
   const rows = element("-rijen");
+  const year = element("-jaar");
+  const month = element("-maand");
   const formatDate = date => date ? new Date(date).toLocaleDateString("nl-BE") : "—";
   let buyers = [];
   let visible = [];
@@ -15,8 +17,12 @@ export function setupBuyers(loadBuyers) {
   function render() {
     const query = search.value.trim().toLowerCase();
     const now = Date.now();
+    for (const [button, field, plan] of [[year, "yearEnd", "jaar"], [month, "monthEnd", "maand"]]) {
+      const count = buyers.filter(buyer => buyer[field] > now).length;
+      button.textContent = count === 1 ? `1 geldig ${plan}abonnement` : `${count} geldige ${plan}abonnementen`;
+    }
     visible = buyers.filter(buyer => (!filter.value || buyer.labels.has(filter.value)) &&
-      (!active.value || buyer[active.value] > now) &&
+      matchesPlan(buyer, active.value, now) &&
       `${buyer.name} ${buyer.email}`.toLowerCase().includes(query));
     rows.replaceChildren();
     for (const buyer of visible) {
@@ -48,12 +54,13 @@ export function setupBuyers(loadBuyers) {
 
   async function refreshBuyers() {
     if (refresh.disabled) return;
-    refresh.disabled = search.disabled = filter.disabled = active.disabled = copy.disabled = true;
+    refresh.disabled = search.disabled = filter.disabled = active.disabled = copy.disabled = year.disabled = month.disabled = true;
     status.textContent = "Kopers ophalen…";
     try {
       const { data } = await loadBuyers();
       buyers = data.buyers.map(describeBuyer).sort((a, b) => (a.name || a.email).localeCompare(b.name || b.email, "nl-BE"));
       render();
+      year.disabled = month.disabled = false;
     } catch {
       buyers = [];
       render();
@@ -87,6 +94,13 @@ export function setupBuyers(loadBuyers) {
   search.addEventListener("input", render);
   filter.addEventListener("change", render);
   active.addEventListener("change", render);
+  for (const [button, field] of [[year, "yearEnd"], [month, "monthEnd"]]) {
+    button.addEventListener("click", () => {
+      active.value = field;
+      filter.value = search.value = "";
+      render();
+    });
+  }
   copy.addEventListener("click", async () => {
     render();
     if (!visible.length) return;
@@ -97,7 +111,14 @@ export function setupBuyers(loadBuyers) {
       status.textContent = "Kopiëren is niet gelukt. Probeer opnieuw.";
     }
   });
-  showSection(location.hash === "#kopers");
+  showSection(location.hash !== "#schoolabonnementen");
+}
+
+function matchesPlan(buyer, selection, now) {
+  if (!selection) return true;
+  if (selection === "yearEnd" || selection === "monthEnd") return buyer[selection] > now;
+  const product = selection === "expiredYear" ? "Jaar" : "Maand";
+  return buyer.proEnd <= now && buyer.purchases.some(purchase => purchase.product === product);
 }
 
 function describeBuyer(buyer) {
