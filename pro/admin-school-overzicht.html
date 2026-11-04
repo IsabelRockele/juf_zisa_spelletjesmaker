@@ -475,12 +475,19 @@
         <summary>Kopers</summary>
         <p>Bekijk particuliere Pro-aankopen en aparte aankopen van Zisa Lezen.</p>
         <label>Zoeken <input id="kopers-zoek" type="search" placeholder="Naam of e-mailadres"></label>
-        <label>Filter
+        <label>Geldig Pro-abonnement
+          <select id="kopers-geldig">
+            <option value="">Alle kopers</option>
+            <option value="yearEnd">Geldig jaarabonnement</option>
+            <option value="monthEnd">Geldig maandabonnement</option>
+          </select>
+        </label>
+        <label>Aankoopverloop
           <select id="kopers-filter">
             <option value="">Alle kopers</option>
             <option value="new">Nieuwe koper</option>
-            <option value="renewal">Pro verlengd</option>
-            <option value="repeat">Opnieuw een maand gekocht</option>
+            <option value="renewal">Jaar verlengd</option>
+            <option value="repeat">Maand opnieuw gekocht</option>
             <option value="upgrade">Van maand naar jaar</option>
             <option value="reading">Zisa Lezen apart gekocht</option>
             <option value="reading-only">Alleen Zisa Lezen gekocht</option>

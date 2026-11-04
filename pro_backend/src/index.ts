@@ -2706,16 +2706,17 @@ export const adminListBuyers = onCall(
       Promise.all(LICENSE_COLLECTIONS.map(col => db.collection(col).where("status", "==", "active").get())),
     ]);
     type Purchase = { product: string; date: number; number: string };
-    const buyers = new Map<string, { email: string; name: string; proEnd: number; readingEnd: number; purchases: Purchase[] }>();
+    const buyers = new Map<string, { email: string; name: string; proEnd: number; monthEnd: number; yearEnd: number; readingEnd: number; purchases: Purchase[] }>();
     function buyerFor(value: unknown) {
       const address = typeof value === "string" ? value.trim().toLowerCase() : "";
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) return undefined;
-      const buyer = buyers.get(address) || { email: address, name: "", proEnd: 0, readingEnd: 0, purchases: [] };
+      const buyer = buyers.get(address) || { email: address, name: "", proEnd: 0, monthEnd: 0, yearEnd: 0, readingEnd: 0, purchases: [] };
       buyers.set(address, buyer);
       return buyer;
     }
 
     const seen = new Set<string>();
+    const latestByLicense = new Map<string, Purchase>();
     for (const doc of orders.flatMap(result => result.docs)) {
       const order = doc.data();
       if (order.source === "school" || order.invoiceSeries !== "live") continue;
@@ -2726,7 +2727,13 @@ export const adminListBuyers = onCall(
       seen.add(key);
       const product = order.source === "monthly" || /\bmaand\b/i.test(order.description || "") ? "Maand"
         : ["koop", "wachtlijst"].includes(order.source) || /jaar/i.test(order.description || "") ? "Jaar" : "Pro";
-      buyer.purchases.push({ product, date: order.paidAt?.toMillis?.() || order.invoiceAssignedAt?.toMillis?.() || 0, number: String(order.invoiceNumber || "") });
+      const purchase = { product, date: order.paidAt?.toMillis?.() || order.invoiceAssignedAt?.toMillis?.() || 0, number: String(order.invoiceNumber || "") };
+      buyer.purchases.push(purchase);
+      if (order.licenseCode) {
+        const key = JSON.stringify([buyer.email, order.licenseCode]);
+        const previous = latestByLicense.get(key);
+        if (!previous || purchase.date > previous.date) latestByLicense.set(key, purchase);
+      }
     }
     for (const doc of reading.docs) {
       const invoice = doc.data();
@@ -2741,7 +2748,13 @@ export const adminListBuyers = onCall(
     for (const doc of licenses.flatMap(result => result.docs)) {
       const license = doc.data();
       const buyer = buyers.get(String(license.email || "").trim().toLowerCase());
-      if (buyer) buyer.proEnd = Math.max(buyer.proEnd, license.expiresAt?.toMillis?.() || 0);
+      if (!buyer || license.source === "school" || license.archived) continue;
+      const purchase = latestByLicense.get(JSON.stringify([buyer.email, license.code || doc.id]));
+      if (!purchase) continue;
+      const end = license.expiresAt?.toMillis?.() || 0;
+      buyer.proEnd = Math.max(buyer.proEnd, end);
+      if (purchase.product === "Maand") buyer.monthEnd = Math.max(buyer.monthEnd, end);
+      if (purchase.product === "Jaar") buyer.yearEnd = Math.max(buyer.yearEnd, end);
     }
     return { buyers: [...buyers.values()] };
   }

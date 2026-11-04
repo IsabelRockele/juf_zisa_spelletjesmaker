@@ -3,6 +3,7 @@ export function setupBuyers(loadBuyers) {
   const panel = element("");
   const search = element("-zoek");
   const filter = element("-filter");
+  const active = element("-geldig");
   const refresh = element("-vernieuw");
   const copy = element("-kopieer");
   const status = element("-status");
@@ -13,7 +14,9 @@ export function setupBuyers(loadBuyers) {
 
   function render() {
     const query = search.value.trim().toLowerCase();
+    const now = Date.now();
     visible = buyers.filter(buyer => (!filter.value || buyer.labels.has(filter.value)) &&
+      (!active.value || buyer[active.value] > now) &&
       `${buyer.name} ${buyer.email}`.toLowerCase().includes(query));
     rows.replaceChildren();
     for (const buyer of visible) {
@@ -45,7 +48,7 @@ export function setupBuyers(loadBuyers) {
 
   async function refreshBuyers() {
     if (refresh.disabled) return;
-    refresh.disabled = search.disabled = filter.disabled = copy.disabled = true;
+    refresh.disabled = search.disabled = filter.disabled = active.disabled = copy.disabled = true;
     status.textContent = "Kopers ophalen…";
     try {
       const { data } = await loadBuyers();
@@ -56,7 +59,7 @@ export function setupBuyers(loadBuyers) {
       render();
       status.textContent = "Het kopersoverzicht kon niet worden geladen. Controleer je beheerderstoegang of probeer opnieuw.";
     } finally {
-      refresh.disabled = search.disabled = filter.disabled = false;
+      refresh.disabled = search.disabled = filter.disabled = active.disabled = false;
     }
   }
 
@@ -64,7 +67,10 @@ export function setupBuyers(loadBuyers) {
   refresh.addEventListener("click", refreshBuyers);
   search.addEventListener("input", render);
   filter.addEventListener("change", render);
+  active.addEventListener("change", render);
   copy.addEventListener("click", async () => {
+    render();
+    if (!visible.length) return;
     try {
       await navigator.clipboard.writeText(visible.map(buyer => buyer.email).join(", "));
       status.textContent = "E-mailadressen gekopieerd. Plak ze in het BCC-veld.";
