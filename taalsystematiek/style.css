@@ -124,3 +124,20 @@
   }
 }
 .tab-sentence-types{background:#f7dcd5;color:#883e31}
+
+.tab-question-types{background:#e1ebc9;color:#40571e}
+
+.tab-verbs{background:#dce8f8;color:#314b78}
+
+.verb-present{color:#14589a}.verb-past{color:#a82732}
+
+.question-word-blank{display:inline-block;width:7em;vertical-align:middle}.question-word-blank canvas{display:block;width:100%}.question-word-clue{font-size:.8em;color:#526b71}
+
+.question-match{max-width:none;margin:8px 24px 8px 0}
+.question-match .rhyme-match-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(96px,19%,160px);align-items:center}
+.question-match .rhyme-match-row>span{min-width:0;align-items:center;gap:12px}
+.question-match .rhyme-match-row>span:nth-of-type(2){justify-content:flex-start}
+.question-match [data-match-left],.question-match [data-match-right]{display:block;flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:currentColor;font-size:0;line-height:0}
+.question-match .rhyme-match-row>span:first-child [data-match-left]{margin-left:auto}
+
+.exercise-intro .example{white-space:pre-line}

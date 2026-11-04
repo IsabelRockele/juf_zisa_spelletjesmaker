@@ -45,15 +45,117 @@ const synonyms=[
 const types=[
  ['dimin-choice','Verkleinwoorden','Kies het verkleinwoord','support'],['dimin-write','Verkleinwoorden','Maak een verkleinwoord','basic'],['dimin-sentence','Verkleinwoorden','Gebruik een verkleinwoord in een zin','challenge'],
  ['subject-who','Onderwerp en persoonsvorm','Onderwerp: beantwoord de wie-vraag','support'],['subject-ask','Onderwerp en persoonsvorm','Onderwerp: maak zelf de wie-vraag','basic'],['subject-text','Onderwerp en persoonsvorm','Onderwerp: zoek met wie-vragen in een tekst','challenge'],
+ ['verb-words','Werkwoorden','Omkring het werkwoord tussen de woorden','support'],
+ ['verb-find','Werkwoorden','Zoek het werkwoord in de zin','basic'],
+ ['verb-choose','Werkwoorden','Kies het werkwoord dat past','basic'],
+ ['verb-tense','Werkwoorden','Kleur het werkwoord: nu of vroeger','challenge'],
+ ['syntax-yes-no','Onderwerp en persoonsvorm','Herken ja-neevragen en vind de persoonsvorm','support'],
  ['syntax-steps','Onderwerp en persoonsvorm','Zoek met een ja-neevraag','support'],['syntax-mark','Onderwerp en persoonsvorm','Duid onderwerp en persoonsvorm aan','basic'],['syntax-question','Onderwerp en persoonsvorm','Maak een ja-neevraag','basic'],['syntax-text','Onderwerp en persoonsvorm','Zoek onderwerp en persoonsvorm in een tekst','challenge'],
  ['syn-match','Synoniemen','Verbind de synoniemen','support'],['syn-replace','Synoniemen','Vervang door een synoniem','basic'],['syn-sentence','Synoniemen','Schrijf met een synoniem','challenge']
 ].map(([id,topic,name,level])=>({id,topic,name,level,description:name}));
 TaalData.types.push(...types);
-const limits=Object.fromEntries(types.map(t=>[t.id,t.id==='syntax-text'?stories.length:t.id.startsWith('syntax-')?sentences.length:t.id.startsWith('dimin-')?dimin.length:synonyms.length]));
+const limits=Object.fromEntries(types.map(t=>[t.id,t.id.startsWith('verb-')?8:t.id==='syntax-text'?stories.length:t.id.startsWith('syntax-')?sentences.length:t.id.startsWith('dimin-')?dimin.length:synonyms.length]));
 Object.assign(limits,{'subject-who':subjectSentences.length,'subject-ask':subjectSentences.length,'subject-text':subjectStories.length});
+const inversionByTheme={
+ autumn:[['Onder de boom liggen kastanjes.','Liggen er kastanjes onder de boom?','kastanjes','liggen'],['Na de regen springt Noor in de plassen.','Springt Noor na de regen in de plassen?','Noor','springt']],
+ halloween:[['Aan de deur hangt een papieren spook.','Hangt er een papieren spook aan de deur?','een papieren spook','hangt'],['Vanavond draagt Milan een masker.','Draagt Milan vanavond een masker?','Milan','draagt']],
+ christmas:[['Onder de boom ligt een groot pak.','Ligt er een groot pak onder de boom?','een groot pak','ligt'],['Na school versiert Noor de kerstboom.','Versiert Noor na school de kerstboom?','Noor','versiert']],
+ saint:[['Naast de schoen ligt een wortel.','Ligt er een wortel naast de schoen?','een wortel','ligt'],['Morgen schrijft Lina een brief aan Sinterklaas.','Schrijft Lina morgen een brief aan Sinterklaas?','Lina','schrijft']],
+ forest:[['Hoog in de boom zit een specht.','Zit er hoog in de boom een specht?','een specht','zit'],['Bij het bospad ziet Milan een konijn.','Ziet Milan bij het bospad een konijn?','Milan','ziet']]
+};
+const practiceStories={
+ autumn:[[['Noor wandelt met haar laarzen door het park.','Noor','wandelt'],['Onder een boom liggen veel kastanjes.','veel kastanjes','liggen'],['Noor stopt de grootste kastanje in haar jaszak.','Noor','stopt'],['Thuis toont ze haar vondst aan mama.','ze','toont']]],
+ halloween:[[['Lina zet een pompoen aan de voordeur.','Lina','zet'],['In de pompoen brandt een klein lampje.','een klein lampje','brandt'],['Even later bellen twee verklede kinderen aan.','twee verklede kinderen','bellen'],['Lina geeft hun een handvol snoep.','Lina','geeft']]],
+ christmas:[[['Milan en Noor versieren de kerstboom.','Milan en Noor','versieren'],['Aan de onderste tak hangt een rode bal.','een rode bal','hangt'],['Plots valt de bal op het tapijt.','de bal','valt'],['Noor hangt hem weer in de boom.','Noor','hangt']]],
+ saint:[[['Lina zet haar schoen bij de deur.','Lina','zet'],['In de schoen ligt een wortel voor het paard.','een wortel','ligt'],['De volgende ochtend loopt Lina naar de deur.','Lina','loopt'],['Naast haar schoen staat een pakje.','een pakje','staat']]],
+ forest:[[['Milan wandelt met zijn zus door het bos.','Milan','wandelt'],['Hoog in een boom klopt een specht op de stam.','een specht','klopt'],['De kinderen blijven even staan.','de kinderen','blijven'],['Even later vliegt de specht naar een andere boom.','de specht','vliegt']]]
+};
+const openQuestions={
+ neutral:['Wat doe je graag op de speelplaats?','Waarom speel je graag buiten?','Hoe zou je een nieuw spel uitleggen?','Wat vind je leuk aan de klas?'],
+ autumn:['Wat verzamel je graag in de herfst?','Waarom vallen de bladeren?','Hoe ziet het park er in de herfst uit?','Wat doe je graag als het regent?'],
+ halloween:['Waarom kies je dat masker?','Hoe zou jij een pompoen versieren?','Wat vind je spannend aan Halloween?','Wat gebeurt er op het griezelfeest?'],
+ christmas:['Hoe versier jij de kerstboom?','Wat zou je op een kerstkaart schrijven?','Waarom kies je die versiering?','Wat doe je graag in de kerstvakantie?'],
+ saint:['Wat schrijf jij in een brief aan Sinterklaas?','Waarom zet je je schoen klaar?','Hoe zou jij het paard verzorgen?','Wat vind je leuk aan het sinterklaasfeest?'],
+ forest:['Wat ontdek je graag in het bos?','Waarom klimt de eekhoorn in de boom?','Hoe herken je het spoor van een dier?','Wat hoor je tijdens een boswandeling?']
+};
+const verbExamples={
+ neutral:[
+  ['Mila','leest','las','een boek','blaft','boek','tafel'],
+  ['De bal','rolt','rolde','over het plein','leest','plein','bal'],
+  ['De hond','slaapt','sliep','in zijn mand','rekent','hond','mand'],
+  ['De soep','is','was','warm','fietst','soep','pan'],
+  ['De kamer','wordt','werd','donker','drinkt','kamer','lamp'],
+  ['Sam','fietst','fietste','naar school','blaft','school','helm'],
+  ['Noor','tekent','tekende','een boot','drinkt','boot','potlood'],
+  ['Het kind','eet','at','een boterham','leest','brood','kind']
+ ],
+ autumn:[
+  ['De eekhoorn','zoekt','zocht','een eikel','zingt','eikel','tak'],
+  ['Een blad','valt','viel','van de boom','leest','blad','boom'],
+  ['Noor','raapt','raapte','een kastanje op','proeft','kastanje','mand'],
+  ['De plas','is','was','diep','danst','plas','laars'],
+  ['Het park','wordt','werd','nat','eet','park','regenjas'],
+  ['De wind','blaast','blies','de muts weg','drinkt','muts','wind'],
+  ['Milan','springt','sprong','over de plas','schrijft','regen','plas'],
+  ['De egel','schuilt','schuilde','onder de bladeren','fietst','egel','blad']
+ ],
+ halloween:[
+  ['De spin','maakt','maakte','een web','drinkt','spin','web'],
+  ['Milan','draagt','droeg','een masker','eet','masker','mantel'],
+  ['De kaars','brandt','brandde','in de pompoen','schrijft','kaars','pompoen'],
+  ['Het spokenpak','is','was','wit','fietst','spokenpak','lantaarn'],
+  ['De straat','wordt','werd','donker','tekent','straat','schaduw'],
+  ['Noor','vult','vulde','de zak met snoep','leest','zak','snoep'],
+  ['De kat','springt','sprong','over de pompoen','bakt','kat','pompoen'],
+  ['De heks','zoekt','zocht','haar bezem','drinkt','heks','bezem']
+ ],
+ christmas:[
+  ['Noor','hangt','hing','een ster in de boom','leest','ster','boom'],
+  ['De kerstbal','valt','viel','op het tapijt','drinkt','kerstbal','tapijt'],
+  ['Milan','pakt','pakte','het cadeau uit','zingt','cadeau','papier'],
+  ['De sneeuw','is','was','koud','leest','sneeuw','want'],
+  ['De klas','wordt','werd','gezellig met de kerstlichtjes','schrijft','klas','kerstlichtje'],
+  ['De hond','trekt','trok','aan het lint','bakt','hond','lint'],
+  ['Lina','bakt','bakte','kerstkoekjes in de oven','tekent','koekje','oven'],
+  ['Het rendier','loopt','liep','door de sneeuw','leest','rendier','sneeuw']
+ ],
+ saint:[
+  ['Het paard','eet','at','een wortel','schrijft','paard','wortel'],
+  ['Lina','schrijft','schreef','een brief aan Sinterklaas','drinkt','brief','papier'],
+  ['De helper','tilt','tilde','de zware zak op','leest','zak','pakje'],
+  ['De mijter','is','was','rood','rent','mijter','staf'],
+  ['De schoen','wordt','werd','nat in de regen','danst','schoen','wortel'],
+  ['Noor','zet','zette','haar schoen bij de deur','eet','deur','schoen'],
+  ['Een pepernoot','rolt','rolde','onder de kast','schrijft','pepernoot','kast'],
+  ['Sinterklaas','zwaait','zwaaide','naar de kinderen','drinkt','kind','mijter']
+ ],
+ forest:[
+  ['Het konijn','springt','sprong','over een tak','schrijft','konijn','tak'],
+  ['De specht','tikt','tikte','met zijn snavel op de stam','leest','specht','stam'],
+  ['De eekhoorn','klimt','klom','in een hoge boom','bakt','eekhoorn','boom'],
+  ['Het bospad','is','was','smal','drinkt','bospad','blad'],
+  ['Het bos','wordt','werd','stil','fietst','bos','den'],
+  ['De kikker','zwemt','zwom','in de vijver','leest','kikker','vijver'],
+  ['De boswachter','vindt','vond','een spoor in de modder','drinkt','spoor','modder'],
+  ['Milan','zoekt','zocht','een dennenappel onder de boom','zingt','dennenappel','boom']
+ ]
+};
+const grammarExamples={
+ neutral:['Noor','fietst','fietste','naar school'],
+ autumn:['Lina','veegt','veegde','de bladeren bij elkaar'],
+ halloween:['Sam','knipt','knipte','een spook uit papier'],
+ christmas:['Noor','plakt','plakte','een ster op haar kerstkaart'],
+ saint:['Mila','legt','legde','een tekening bij haar schoen'],
+ forest:['Sam','luistert','luisterde','naar de vogels in het bos']
+};
 function model(item,s,solutions){
+ const [exampleSubject,exampleVerb,examplePast,exampleRest]=grammarExamples[item.articleTheme]||grammarExamples.neutral;
+ const exampleSentence=exampleSubject+' '+exampleVerb+' '+exampleRest+'.';
  const actions=TaalData.themedActions(item.articleTheme);
- const syntax=actions.map(a=>[a.text,a.question,a.subject,a.verb]);
+ const syntax=[
+  ...actions.map(a=>[a.text,a.question,a.subject,a.verb]),
+  ...TaalData.themePool(inversionByTheme,item.articleTheme)
+ ];
  const subjects=actions.map(a=>[a.text,'Wie '+a.verb+' '+[a.rest,a.particle].filter(Boolean).join(' ')+'?',a.subject]);
  const storiesOf=rows=>Array.from({length:Math.ceil(rows.length/4)},(_,i)=>rows.slice(i*4,i*4+4));
  const G=TaalGenerator,e=G.esc,r=G.rng(item.seed),removed=new Set(item.removed||[]),blocks=[];
@@ -61,8 +163,41 @@ function model(item,s,solutions){
  const answer=(text,n=1)=>solutions?'<div class="answer">'+text+'</div>':lines(n);
  const chosen=pool=>G.shuffle(pool,r).slice(0,item.count).map((value,i)=>({value,key:'row-'+i})).filter(x=>!removed.has(x.key));
  const add=(html,key)=>blocks.push('<div class="question-block"'+(key?' data-question-key="'+key+'"':'')+'>'+html+'</div>');
- const mark=(text,subject,verb)=>{const pattern=new RegExp('('+subject+'|\\b'+verb+'\\b)','gi');return text.split(pattern).map(w=>w.toLowerCase()===subject.toLowerCase()?'<u class="subject-answer">'+e(w)+'</u>':w.toLowerCase()===verb.toLowerCase()?'<b class="marked">'+e(w)+'</b>':e(w)).join('')};
+ const mark=(text,subject,verb)=>{const pattern=new RegExp('(\\b'+subject+'\\b|\\b'+verb+'\\b)','gi');return text.split(pattern).map(w=>w.toLowerCase()===subject.toLowerCase()?'<u class="subject-answer">'+e(w)+'</u>':w.toLowerCase()===verb.toLowerCase()?'<b class="marked">'+e(w)+'</b>':e(w)).join('')};
  let instruction='',hint='',example='';
+ if(item.type.startsWith('verb-')){
+  hint='Een werkwoord zegt wat iemand of iets doet, wat er gebeurt of hoe iets is. Ook zijn en worden zijn werkwoorden.';
+  example='Nu: '+exampleSentence+'\nVroeger: '+exampleSubject+' '+examplePast+' '+exampleRest+'.';
+  const theme=item.articleTheme;
+  const pool=theme==='all'?Object.values(verbExamples).flat():verbExamples[theme]||verbExamples.neutral;
+  const shuffled=G.shuffle(pool,r).slice(0,item.count);
+  const pastFirst=r()<0.5;
+  const highlighted=(word,css='marked')=>solutions?'<b class="'+css+'">'+e(word)+'</b>':e(word);
+  const instructions={
+   'verb-words':'Omkring in elke rij het werkwoord. Sommige werkwoorden staan in de verleden tijd.',
+   'verb-find':'Lees de zinnen. Omkring in elke zin het werkwoord.',
+   'verb-choose':'Omkring het werkwoord dat het best in de zin past.',
+   'verb-tense':'Kleur het werkwoord blauw als het over nu gaat en rood als het over vroeger gaat.'
+  };
+  instruction=instructions[item.type];
+  shuffled.forEach(([subject,present,past,rest,other,nounA,nounB],i)=>{
+   const key='row-'+i;
+   if(removed.has(key))return;
+   const earlier=(i%2===0)===pastFirst;
+   const verb=earlier?past:present;
+   if(item.type==='verb-words'){
+    const words=G.shuffle([verb,nounA,nounB],r);
+    add('<p class="word-row">'+words.map(word=>word===verb?highlighted(word):e(word)).join(' / ')+'</p>',key);
+   }else if(item.type==='verb-choose'){
+    const choices=G.shuffle([present,other],r).map(word=>word===present?highlighted(word):e(word));
+    add('<p>'+e(subject)+' '+choices.join(' / ')+' '+e(rest)+'.</p>',key);
+   }else{
+    const css=item.type==='verb-tense'?'verb-'+(earlier?'past':'present'):'marked';
+    const tense=solutions&&item.type==='verb-tense'?' <small class="support-note">('+ (earlier?'verleden tijd':'tegenwoordige tijd')+')</small>':'';
+    add('<p>'+e(subject)+' '+highlighted(verb,css)+' '+e(rest)+'.'+tense+'</p>',key);
+   }
+  });
+ }
  if(item.type.startsWith('dimin-')){
   hint='Een verkleinwoord maakt iets klein. '+normalizeEndings(item.diminEndings).map(end=>({je:'-je: de boot → het bootje.',tje:'-tje: de steen → het steentje.',pje:'-pje: de duim → het duimpje.',etje:'-etje: de bal → het balletje.',kje:'-kje: de koning → het koninkje. De g valt weg.'}[end])).join(' ')+' Bij één verkleinwoord gebruik je het.';
   instruction=item.type==='dimin-choice'?'Omkring het juiste verkleinwoord.':item.type==='dimin-write'?'Maak van elk woord een verkleinwoord. Schrijf ook het lidwoord het.':'Maak een verkleinwoord en gebruik het in een volledige zin.';
@@ -82,7 +217,20 @@ function model(item,s,solutions){
  if(item.type.startsWith('syntax-')){
   hint='Maak een ja-neevraag van de zin. De persoonsvorm komt dan vooraan. Vraag: wie of wat doet iets of over wie of wat wordt iets gezegd? Dat is het onderwerp. Voorbeeld: De poes slaapt. → Slaapt de poes? Persoonsvorm: slaapt. Onderwerp: de poes.';
   instruction=item.type==='syntax-steps'?'Maak een ja-neevraag. Schrijf daarna de persoonsvorm en het volledige onderwerp op.':item.type==='syntax-question'?'Maak een ja-neevraag. Onderstreep in beide zinnen het volledige onderwerp en omkring de persoonsvorm.':'Onderstreep het volledige onderwerp en omkring de persoonsvorm in elke zin.';
-  if(item.type==='syntax-text')chosen(actions.length?storiesOf(actions.map(a=>[a.text,a.subject,a.verb])):stories).forEach(({value,key})=>add('<div class="grammar-story">'+value.map(([text,subject,verb])=>'<p>'+(solutions?mark(text,subject,verb):e(text))+'</p>').join('')+'</div>',key));
+  if(item.type==='syntax-yes-no'){
+   instruction='Lees de vragen. Kruis de ja-neevragen aan. Omkring in die vragen de persoonsvorm.';
+   const open=G.shuffle(TaalData.themePool(openQuestions,item.articleTheme,openQuestions.neutral),r);
+   const yes=G.shuffle(syntax.length?syntax:sentences,r);
+   const count=Math.min(item.count,yes.length+open.length);
+   const yesCount=Math.min(yes.length,Math.max(Math.ceil(count/2),count-open.length));
+   const questions=[...yes.slice(0,yesCount).map(([,question])=>({question,yes:true})),...open.slice(0,count-yesCount).map(question=>({question,yes:false}))];
+   chosen(questions).forEach(({value:{question,yes},key})=>{
+    const space=question.indexOf(' ');
+    const text=solutions&&yes?'<b class="marked">'+e(question.slice(0,space))+'</b>'+e(question.slice(space)):e(question);
+    add('<p class="tell-choice"><span class="tick-box">'+(solutions&&yes?'×':'')+'</span><span>'+text+'</span></p>',key);
+   });
+  }
+  else if(item.type==='syntax-text')chosen(TaalData.themePool(practiceStories,item.articleTheme,stories)).forEach(({value,key})=>add('<div class="grammar-story">'+value.map(([text,subject,verb])=>'<p>'+(solutions?mark(text,subject,verb):e(text))+'</p>').join('')+'</div>',key));
   else chosen(actions.length?syntax:sentences).forEach(({value:[text,question,subject,verb],key})=>{
    if(item.type==='syntax-steps')add('<div class="grammar-card"><p>'+e(text)+'</p><span class="support-note">Zet het werkwoord vooraan om een ja-neevraag te maken. Zoek daarna over wie of wat iets wordt gezegd.</span>'+['Ja-neevraag','Persoonsvorm','Onderwerp'].map((label,i)=>'<div class="grammar-field"><span>'+label+':</span><div>'+answer(e([question,verb,subject][i]))+'</div></div>').join('')+'</div>',key);
    else add('<p>'+(solutions?mark(text,subject,verb):e(text))+'</p>'+(item.type==='syntax-question'?answer(mark(question,subject,verb),2):''),key);
@@ -97,7 +245,7 @@ function model(item,s,solutions){
   if(item.type==='syn-match')for(let i=0;i<selected.length;i+=4){const group=selected.slice(i,i+4);let right=G.shuffle(group,r);if(right.length>1&&right.every((x,j)=>x===group[j]))right.push(right.shift());add('<div class="rhyme-match'+(solutions?' match-solved':'')+'">'+group.map((x,j)=>'<div class="rhyme-match-row" data-question-key="'+x.key+'"><span>'+e(x.value[0])+' <b data-match-left="'+x.key+'">•</b></span><span><b data-match-right="'+right[j].key+'">•</b> '+e(right[j].value[1])+'</span></div>').join('')+'</div>')}
   else selected.forEach(({value:[word,syn,text],key})=>add(item.type==='syn-replace'?'<p>'+e(text).replace(word,'<b>'+e(word)+'</b>')+'</p>'+answer('Bijvoorbeeld: '+e(text.replace(word,syn)),2):'<p>Woord: <b>'+e(word)+'</b></p><div class="grammar-field"><span>Synoniem:</span><div>'+answer('Bijvoorbeeld: '+e(syn))+'</div></div><p>Mijn zin:</p>'+answer('Eigen zin met bijvoorbeeld '+e(syn)+'. Andere passende synoniemen zijn ook juist.',2),key));
  }
- const hintStructure=item.type.startsWith('subject-')?{steps:['Zoek over wie iets wordt gezegd.','Maak een vraag die begint met Wie.','Het volledige antwoord is het onderwerp.'],example:[['Zin','De nieuwe buurman fietst naar huis.'],['Wie-vraag','Wie fietst naar huis?'],['Onderwerp','De nieuwe buurman']],note:'Bij dingen gebruik je een wat-vraag. Hier oefenen we met personen.'}:null;
+ const hintStructure=item.type.startsWith('syntax-')?{steps:['Maak een ja-neevraag van de zin. Het eerste woord is de persoonsvorm.','Vraag over wie of wat iets wordt gezegd. Het volledige antwoord is het onderwerp.'],example:[['Zin',exampleSentence],['Ja-neevraag',exampleVerb[0].toUpperCase()+exampleVerb.slice(1)+' '+exampleSubject+' '+exampleRest+'?'],['Persoonsvorm',exampleVerb],['Onderwerp',exampleSubject]]}:item.type.startsWith('subject-')?{steps:['Zoek over wie iets wordt gezegd.','Maak een vraag die begint met Wie.','Het volledige antwoord is het onderwerp.'],example:[['Zin',exampleSentence],['Wie-vraag','Wie '+exampleVerb+' '+exampleRest+'?'],['Onderwerp',exampleSubject]],note:'Bij dingen gebruik je een wat-vraag. Hier oefenen we met personen.'}:null;
  return {instruction,hint,example,blocks,hintStructure};
 }
 window.TaalGrammar={model,limits,types,dimin,diminPool,normalizeEndings,sentences,stories,synonyms,subjectSentences,subjectStories};
