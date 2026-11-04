@@ -459,7 +459,7 @@
   <div id="app" style="display:none;">
 
     <header class="pro-header">
-      <h1>📋 Overzicht schoolbestellingen</h1>
+      <h1>📋 Beheer</h1>
       <div style="display:flex; gap:14px; align-items:center;">
         <a href="./admin-school.html" class="terug-knop"
            style="background:rgba(255,255,255,0.15); padding:7px 14px; border-radius:8px;">
@@ -471,8 +471,13 @@
 
     <div class="container">
 
-      <details class="card" id="kopers">
-        <summary>Kopers</summary>
+      <nav class="tabs" aria-label="Beheeronderdelen">
+        <button type="button" class="tab-btn" id="toon-kopers" aria-controls="kopers" aria-pressed="false">Kopers</button>
+        <button type="button" class="tab-btn active" id="toon-scholen" aria-controls="schoolabonnementen" aria-pressed="true">Schoolabonnementen</button>
+      </nav>
+
+      <section class="card" id="kopers" hidden aria-labelledby="kopers-titel">
+        <h2 id="kopers-titel">Kopers</h2>
         <p>Bekijk particuliere Pro-aankopen en aparte aankopen van Zisa Lezen.</p>
         <label>Zoeken <input id="kopers-zoek" type="search" placeholder="Naam of e-mailadres"></label>
         <label>Geldig Pro-abonnement
@@ -502,9 +507,9 @@
             <tbody id="kopers-rijen"></tbody>
           </table>
         </div>
-      </details>
+      </section>
 
-      <div class="card">
+      <div class="card" id="schoolabonnementen">
         <div class="tabs">
           <button class="tab-btn active" data-tab="overzicht">🏫 Alle scholen</button>
           <button class="tab-btn" data-tab="aanvragen">
@@ -963,10 +968,10 @@
       $('toggle-archived').addEventListener('change', () => loadOrders());
 
       // ─── TABS ─────────────────────────────────────────────────────────
-      document.querySelectorAll('.tab-btn').forEach(btn => {
+      document.querySelectorAll('[data-tab]').forEach(btn => {
         btn.addEventListener('click', () => {
           const target = btn.dataset.tab;
-          document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+          document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b === btn));
           document.querySelectorAll('.tab-content').forEach(c => {
             c.classList.toggle('active', c.id === `tab-${target}`);
           });

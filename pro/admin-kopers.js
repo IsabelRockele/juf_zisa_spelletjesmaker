@@ -63,7 +63,26 @@ export function setupBuyers(loadBuyers) {
     }
   }
 
-  panel.addEventListener("toggle", () => { if (panel.open) refreshBuyers(); });
+  const schools = document.getElementById("schoolabonnementen");
+  const showBuyers = document.getElementById("toon-kopers");
+  const showSchools = document.getElementById("toon-scholen");
+  function showSection(buyersSelected) {
+    panel.hidden = !buyersSelected;
+    schools.hidden = buyersSelected;
+    showBuyers.classList.toggle("active", buyersSelected);
+    showSchools.classList.toggle("active", !buyersSelected);
+    showBuyers.setAttribute("aria-pressed", String(buyersSelected));
+    showSchools.setAttribute("aria-pressed", String(!buyersSelected));
+    if (buyersSelected) refreshBuyers();
+  }
+  showBuyers.addEventListener("click", () => {
+    history.replaceState(null, "", "#kopers");
+    showSection(true);
+  });
+  showSchools.addEventListener("click", () => {
+    history.replaceState(null, "", "#schoolabonnementen");
+    showSection(false);
+  });
   refresh.addEventListener("click", refreshBuyers);
   search.addEventListener("input", render);
   filter.addEventListener("change", render);
@@ -78,7 +97,7 @@ export function setupBuyers(loadBuyers) {
       status.textContent = "Kopiëren is niet gelukt. Probeer opnieuw.";
     }
   });
-  if (panel.open) refreshBuyers();
+  showSection(location.hash === "#kopers");
 }
 
 function describeBuyer(buyer) {
