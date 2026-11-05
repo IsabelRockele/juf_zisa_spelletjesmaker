@@ -222,8 +222,8 @@ function makeLicenseCode(): string {
   for (let i = 0; i < 16; i++) out += s[Math.floor(Math.random() * s.length)];
   return out.replace(/(.{4})/g, "$1-").replace(/-$/, "");
 }
-function calcExpiry(): Timestamp {
-  const d = new Date();
+function calcExpiry(prev?: Timestamp): Timestamp {
+  const d = (prev && prev.toMillis() > Date.now()) ? new Date(prev.toMillis()) : new Date();
   d.setFullYear(d.getFullYear() + 1);
   return Timestamp.fromDate(d);
 }
@@ -536,8 +536,10 @@ async function completeOrderByPayment(payment: MolliePayment) {
   const email = String(order.email);
   const uid   = await ensureUser(email);
 
-  const licenseCode = makeLicenseCode();
-  const expiresAt   = calcExpiry();
+  // Verleng de bestaande toegang, zodat een vroege aankoop geen betaalde tijd kost.
+  const latest = pickLatest(await fetchLicensesBy("uid", uid));
+  const licenseCode = latest?.code ? String(latest.code) : makeLicenseCode();
+  const expiresAt   = calcExpiry(latest?.expiresAt);
 
   const licenseDoc = {
     code: licenseCode,
@@ -546,7 +548,7 @@ async function completeOrderByPayment(payment: MolliePayment) {
     entitlement: ENTITLEMENT_ID,
     productId: "zisa-pro-jaarlijks",
     deviceLimit: DEVICE_LIMIT,
-    createdAt: FieldValue.serverTimestamp(),
+    createdAt: latest?.createdAt || FieldValue.serverTimestamp(),
     expiresAt,
     orderId,
     status: "active",
