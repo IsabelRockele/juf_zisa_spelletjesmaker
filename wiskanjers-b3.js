@@ -67,13 +67,11 @@ function renderScene(){$('feedback').textContent='';const previous=$('scene-ink'
  if(e.type==='mabModel'){const g=svg('g');scene.append(g);txt(g,550,25,`${formula(e)} = …`,30);const t=modelState.t,u=modelState.u;txt(g,360,52,'T · tientallen',20);txt(g,855,52,'E · eenheden',20);line(g,710,42,710,205);for(let i=0;i<t;i++){const r=svg('g');rod(r,145+i*47,72,modelState.removedT.includes(i));tap(r,'Tiental '+(i+1)+' wegnemen of terugleggen',()=>changed(()=>{const a=modelState.removedT;const p=a.indexOf(i);p<0?a.push(i):a.splice(p,1);}));g.append(r);}for(let i=0;i<u;i++){const q=svg('g');cube(q,760+i%5*43,82+Math.floor(i/5)*48,modelState.removedE.includes(i));tap(q,'Eenheid '+(i+1)+' wegnemen of terugleggen',()=>changed(()=>{const a=modelState.removedE,p=a.indexOf(i);p<0?a.push(i):a.splice(p,1);}));g.append(q);}
   if(side){
    g.replaceChildren();const x=30,w=440,split=330;
-   rect(g,x,15,w,325,'#fff','#7d9a90');rect(g,x,15,300,34,'#87c951');rect(g,split,15,140,34,'#ffdb55');txt(g,180,40,'T',23);txt(g,400,40,'E',23);
-   line(g,split,49,split,340);line(g,x,194,x+w,194);
+   const bottom=e.op==='-'?194:340;rect(g,x,15,w,bottom-15,'#fff','#7d9a90');rect(g,x,15,300,34,'#87c951');rect(g,split,15,140,34,'#ffdb55');txt(g,180,40,'T',23);txt(g,400,40,'E',23);
+   line(g,split,49,split,bottom);if(e.op==='+')line(g,x,194,x+w,194);
    const baseT=modelState.t-modelState.addedT,baseE=modelState.u-modelState.addedE;
    for(let i=0;i<baseT;i++){const q=svg('g');rod(q,45+i*27,66,modelState.removedT.includes(i));if(e.op==='-')tap(q,'Tiental '+(i+1)+' wegnemen of terugleggen',()=>changed(()=>{const a=modelState.removedT,p=a.indexOf(i);p<0?a.push(i):a.splice(p,1);}));g.append(q);}
-   if(e.op==='-'){txt(g,55,214,'Weggenomen',16,{'text-anchor':'start'});modelState.removedT.forEach((id,i)=>{const q=svg('g');rod(q,45+i*27,225);tap(q,'Weggenomen tiental '+(id+1)+' terugleggen',()=>changed(()=>modelState.removedT.splice(modelState.removedT.indexOf(id),1)));g.append(q);});}
    for(let i=0;i<baseE;i++){const q=svg('g');cube(q,347+(i%4)*28,67+Math.floor(i/4)*31,modelState.removedE.includes(i));if(e.op==='-')tap(q,'Eenheid '+(i+1)+' wegnemen of terugleggen',()=>changed(()=>{const a=modelState.removedE,p=a.indexOf(i);p<0?a.push(i):a.splice(p,1);}));g.append(q);}
-   if(e.op==='-')modelState.removedE.forEach((id,i)=>{const q=svg('g');cube(q,347+(i%4)*28,225+Math.floor(i/4)*31);tap(q,'Weggenomen eenheid '+(id+1)+' terugleggen',()=>changed(()=>modelState.removedE.splice(modelState.removedE.indexOf(id),1)));g.append(q);});
    for(let i=0;i<modelState.addedT;i++){const q=svg('g');rod(q,45+i*27,211);tap(q,'Bijgelegd tiental '+(i+1)+' terugnemen',()=>changed(()=>{modelState.addedT--;modelState.t--;}));g.append(q);}
    for(let i=0;i<modelState.addedE;i++){const q=svg('g');cube(q,347+(i%4)*28,212+Math.floor(i/4)*31);tap(q,'Bijgelegde eenheid '+(i+1)+' terugnemen',()=>changed(()=>{modelState.addedE--;modelState.u--;}));g.append(q);}
    txt(g,535,95,formula(e)+' =',35,{'text-anchor':'start'});inlineField(790,58,245,e.op==='-'?'Noteer het verschil':'Noteer de som',0);

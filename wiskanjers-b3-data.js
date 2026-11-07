@@ -94,6 +94,24 @@ window.WIKA_B3 = {
         "a": 20,
         "b": 46,
         "op": "+"
+      },
+      {
+        "kind": "Extra voorbeeld",
+        "prompt": "Leg en reken: 40 + 30. Schrijf samen.",
+        "type": "mabModel",
+        "ref": "",
+        "a": 40,
+        "b": 30,
+        "op": "+"
+      },
+      {
+        "kind": "Extra voorbeeld",
+        "prompt": "Leg en reken: 53 + 20. Schrijf samen.",
+        "type": "mabModel",
+        "ref": "",
+        "a": 53,
+        "b": 20,
+        "op": "+"
       }
     ],
     "practice": [
@@ -488,6 +506,33 @@ window.WIKA_B3 = {
         "a": 78,
         "b": 40,
         "op": "-"
+      },
+      {
+        "kind": "Extra voorbeeld",
+        "prompt": "Leg en reken: 70 − 20. Schrijf samen.",
+        "type": "mabModel",
+        "ref": "",
+        "a": 70,
+        "b": 20,
+        "op": "-"
+      },
+      {
+        "kind": "Extra voorbeeld",
+        "prompt": "Leg en reken: 96 − 50. Schrijf samen.",
+        "type": "mabModel",
+        "ref": "",
+        "a": 96,
+        "b": 50,
+        "op": "-"
+      },
+      {
+        "kind": "Extra voorbeeld",
+        "prompt": "Leg en reken: 65 − 30. Schrijf samen.",
+        "type": "mabModel",
+        "ref": "",
+        "a": 65,
+        "b": 30,
+        "op": "-"
       }
     ],
     "practice": [
@@ -859,6 +904,15 @@ window.WIKA_B3 = {
         "a": 70,
         "b": 3,
         "op": "-"
+      },
+      {
+        "kind": "Extra voorbeeld",
+        "prompt": "Leg en reken: 80 − 6. Schrijf samen.",
+        "type": "mabModel",
+        "ref": "",
+        "a": 80,
+        "b": 6,
+        "op": "-"
       }
     ],
     "practice": [
@@ -1161,6 +1215,24 @@ window.WIKA_B3 = {
         "a": 62,
         "b": 16,
         "op": "+"
+      },
+      {
+        "kind": "Extra voorbeeld",
+        "prompt": "Leg en reken: 41 + 36. Schrijf samen.",
+        "type": "mabModel",
+        "ref": "",
+        "a": 41,
+        "b": 36,
+        "op": "+"
+      },
+      {
+        "kind": "Extra voorbeeld",
+        "prompt": "Leg en reken: 23 + 54. Schrijf samen.",
+        "type": "mabModel",
+        "ref": "",
+        "a": 23,
+        "b": 54,
+        "op": "+"
       }
     ],
     "practice": [
@@ -1438,6 +1510,24 @@ window.WIKA_B3 = {
         "ref": "",
         "a": 96,
         "b": 24,
+        "op": "-"
+      },
+      {
+        "kind": "Extra voorbeeld",
+        "prompt": "Leg en reken: 87 − 52. Schrijf samen.",
+        "type": "mabModel",
+        "ref": "",
+        "a": 87,
+        "b": 52,
+        "op": "-"
+      },
+      {
+        "kind": "Extra voorbeeld",
+        "prompt": "Leg en reken: 69 − 27. Schrijf samen.",
+        "type": "mabModel",
+        "ref": "",
+        "a": 69,
+        "b": 27,
         "op": "-"
       }
     ],
@@ -2209,6 +2299,13 @@ window.WIKA_B3 = {
         "ref": "",
         "op": "*",
         "answer": "0 × 10 = 0\n1 × 10 = 10\n2 × 10 = 20\n3 × 10 = 30\n4 × 10 = 40\n5 × 10 = 50\n6 × 10 = 60\n7 × 10 = 70\n8 × 10 = 80\n9 × 10 = 90\n10 × 10 = 100"
+      },
+      {
+        "kind": "Extra groepen",
+        "prompt": "Neem telkens een groep van tien. Schrijf samen de bewerking.",
+        "type": "orangesModel",
+        "ref": "",
+        "groups": 4
       }
     ],
     "practice": [
@@ -2592,6 +2689,13 @@ window.WIKA_B3 = {
         "ref": "",
         "op": "/",
         "answer": "0 : 10 = 0\n10 : 10 = 1\n20 : 10 = 2\n30 : 10 = 3\n40 : 10 = 4\n50 : 10 = 5\n60 : 10 = 6\n70 : 10 = 7\n80 : 10 = 8\n90 : 10 = 9\n100 : 10 = 10"
+      },
+      {
+        "kind": "Extra groepen",
+        "prompt": "Geef telkens tien sinaasappels weg. Hoeveel groepen kun je maken?",
+        "type": "orangesModel",
+        "ref": "",
+        "groups": 6
       }
     ],
     "practice": [
@@ -2939,6 +3043,24 @@ window.WIKA_B3 = {
         "top": ": 10",
         "bottom": "× 10",
         "answer": "40 : 10 = 4\n4 × 10 = 40"
+      },
+      {
+        "kind": "Extra groepen",
+        "prompt": "Maak groepen van tien. Schrijf de deling en de omgekeerde vermenigvuldiging.",
+        "type": "orangesModel",
+        "ref": "",
+        "groups": 5
+      },
+      {
+        "kind": "Extra pijlen",
+        "prompt": "Vul aan. Schrijf de deling en de omgekeerde vermenigvuldiging.",
+        "type": "arrows",
+        "ref": "",
+        "a": 70,
+        "b": 7,
+        "top": ": 10",
+        "bottom": "× 10",
+        "answer": "70 : 10 = 7\n7 × 10 = 70"
       }
     ],
     "practice": [
@@ -3243,6 +3365,27 @@ window.WIKA_B3 = {
         "type": "freeMaterial",
         "ref": "",
         "answer": "6 groepjes van 3. 18 : 3 = 6."
+      },
+      {
+        "kind": "Extra blokjes",
+        "prompt": "Leg 20 blokjes. Maak groepjes van 5. Hoeveel groepjes krijg je?",
+        "type": "freeMaterial",
+        "ref": "",
+        "answer": "4 groepjes van 5. 20 : 5 = 4."
+      },
+      {
+        "kind": "Extra stokjes",
+        "prompt": "Leg drie driehoeken los van elkaar. Hoeveel stokjes heb je nodig?",
+        "type": "freeMaterial",
+        "ref": "",
+        "answer": "3 + 3 + 3 = 9. Je hebt 9 stokjes nodig."
+      },
+      {
+        "kind": "Samen onderzoeken",
+        "prompt": "Leg 16 blokjes. Verdeel ze eerlijk over twee kinderen.",
+        "type": "freeMaterial",
+        "ref": "",
+        "answer": "Elk kind krijgt 8 blokjes. Controle: 8 + 8 = 16."
       }
     ],
     "practice": [
@@ -3329,6 +3472,30 @@ window.WIKA_B3 = {
         "ref": "",
         "story": "In de kast liggen 24 schriften. Er komen 3 schriften bij. Hoeveel schriften liggen er nu?",
         "answer": "24 + 3 = 27\nEr liggen nu 27 schriften in de kast."
+      },
+      {
+        "kind": "Extra optellen",
+        "prompt": "Lees. Duid de vraag en de gegevens aan. Schrijf samen.",
+        "type": "text",
+        "ref": "",
+        "story": "Er liggen 36 boeken. We leggen er 20 bij. Hoeveel boeken liggen er nu?",
+        "answer": "36 + 20 = 56\nEr liggen nu 56 boeken."
+      },
+      {
+        "kind": "Extra vermenigvuldigen",
+        "prompt": "Lees. Duid de vraag en de gegevens aan. Schrijf samen.",
+        "type": "text",
+        "ref": "",
+        "story": "Er zijn 5 doosjes. In elk doosje zitten 10 kralen. Hoeveel kralen zijn er samen?",
+        "answer": "5 × 10 = 50\nEr zijn samen 50 kralen."
+      },
+      {
+        "kind": "Extra delen",
+        "prompt": "Lees. Duid de vraag en de gegevens aan. Schrijf samen.",
+        "type": "text",
+        "ref": "",
+        "story": "We hebben 40 potloden. We stoppen telkens 10 potloden in een doos. Hoeveel dozen vullen we?",
+        "answer": "40 : 10 = 4\nWe vullen 4 dozen."
       }
     ],
     "practice": [
@@ -3445,6 +3612,30 @@ window.WIKA_B3 = {
         "ref": "",
         "story": "Mila had 12 knikkers. Zij kreeg er enkele bij en heeft nu 18 knikkers.",
         "answer": "Er kwamen 6 knikkers bij. Controle: 12 + 6 = 18."
+      },
+      {
+        "kind": "Extra terugzoeken",
+        "prompt": "Lees. Schrijf de bewerking, de antwoordzin en de controle.",
+        "type": "text",
+        "ref": "",
+        "story": "Lina geeft 6 kaarten weg. Ze heeft er nog 32. Hoeveel kaarten had Lina eerst?",
+        "answer": "32 + 6 = 38\nLina had eerst 38 kaarten.\nControle: 38 − 6 = 32."
+      },
+      {
+        "kind": "Extra erbij zoeken",
+        "prompt": "Lees. Schrijf de bewerking, de antwoordzin en de controle.",
+        "type": "text",
+        "ref": "",
+        "story": "Er lagen 24 blokjes. Er komen blokjes bij. Nu liggen er 57. Hoeveel blokjes kwamen erbij?",
+        "answer": "57 − 24 = 33\nEr kwamen 33 blokjes bij.\nControle: 24 + 33 = 57."
+      },
+      {
+        "kind": "Extra verschil zoeken",
+        "prompt": "Lees. Schrijf de bewerking, de antwoordzin en de controle.",
+        "type": "text",
+        "ref": "",
+        "story": "Amir heeft 26 stickers. Noor heeft 48 stickers. Hoeveel stickers heeft Noor meer?",
+        "answer": "48 − 26 = 22\nNoor heeft 22 stickers meer.\nControle: 26 + 22 = 48."
       }
     ],
     "practice": [
@@ -3598,6 +3789,33 @@ window.WIKA_B3 = {
           48
         ],
         "answer": "34, 43, 48"
+      },
+      {
+        "kind": "Extra MAB",
+        "prompt": "Hoeveel tientallen en eenheden zie je? Schrijf het getal.",
+        "type": "numberMab",
+        "ref": "",
+        "a": 82,
+        "answer": "8 T en 2 E: 82."
+      },
+      {
+        "kind": "Extra getallenas",
+        "prompt": "Schrijf het getal bij elk vlaggetje.",
+        "type": "numberLine",
+        "ref": "",
+        "start": 60,
+        "end": 80,
+        "given": [
+          60,
+          70,
+          80
+        ],
+        "targets": [
+          63,
+          72,
+          79
+        ],
+        "answer": "63, 72, 79"
       }
     ],
     "practice": [
