@@ -17,6 +17,11 @@
     frame.addEventListener('load',()=>{
       try{
         const w=frame.contentWindow,d=w.document;
+        // Andere pagina's horen buiten de cijferen-omhulling te openen.
+        if(w.location.pathname!==new URL('./rekenbundel/index.html',location.href).pathname){
+          location.replace(w.location.href);
+          return;
+        }
         const stijl=d.createElement('style');
         stijl.textContent=`
           .sidebar-tabs .sidebar-tab:not(.tab-cijferen),.tabs-scroll-hint,#tab-hoofdrekenen,
@@ -45,7 +50,8 @@
           });
         });
         const toevoegen=d.querySelector('#tab-cijferen .btn-toevoegen');
-        if(toevoegen){toevoegen.textContent='▶ Voeg werkblad toe aan preview';toevoegen.onclick=()=>{w.App.voegCijferenBlokToe();w.App.genereerPreview();};}
+        // De bestaande knopactie voegt het blok toe en rendert de preview.
+        if(toevoegen)toevoegen.textContent='▶ Voeg werkblad toe aan preview';
         const preview=d.getElementById('btn-genereer');if(preview)preview.textContent='↻ Nieuwe oefeningen';
       }catch(fout){console.error('Cijferweergave kon niet worden ingericht.',fout);}
     });
