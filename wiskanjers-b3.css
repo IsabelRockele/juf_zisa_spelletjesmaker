@@ -16,3 +16,5 @@
 @media(max-width:760px){.write-beside #scene{height:auto;min-height:220px}}
 
 .inline-result{pointer-events:none}body.typing .inline-result{pointer-events:auto}
+
+.compact-field .inline-result{height:32px;font-size:25px;padding:0 6px}

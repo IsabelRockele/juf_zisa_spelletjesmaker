@@ -38,14 +38,31 @@ function render(){const exercises=list();current=exercises[index];revealed=false
 function inlineField(x,y,width,label,i){
  const f=svg('foreignObject',{x,y,width,height:52});const input=document.createElement('input');input.className='inline-result';input.setAttribute('aria-label',label);input.placeholder='';const key=notesKey()+':inline';input.value=(typed[key]||[])[i]||'';input.oninput=()=>{if(!typed[key])typed[key]=[];typed[key][i]=input.value;};f.append(input);scene.append(f);
 }
+function fillRows(e){
+ if(e.type==='calc')return [formula(e)+' = …'];
+ if(e.type!=='text'||e.story||['Optelling → maal','Aftrekking → deling'].includes(e.kind))return null;
+ if(e.lines)return e.lines.includes('…')?e.lines.split('\n'):null;
+ if(!e.prompt.includes('…'))return null;
+ return [e.prompt.replace(/^(Vul aan:|Vul het teken in:)\s*/,'').replace(/\.\s*Vul aan\.$/,'').replace(/\.$/,'')];
+}
+function renderFillRows(rows){
+ let field=0;const gap=Math.min(95,300/rows.length);
+ rows.forEach((row,i)=>{
+  const parts=row.split('…'),count=parts.length-1,width=count>1?115:row.includes('=')?190:110;
+  const labels=parts.map(part=>{const t=svg('text',{'font-size':38,'text-anchor':'start','xml:space':'preserve'},part);scene.append(t);return t;});
+  const total=labels.reduce((sum,t)=>sum+t.getComputedTextLength(),0)+count*(width+24);
+  const scale=Math.min(1,960/total);let x=70;const y=85+i*gap;
+  labels.forEach((t,j)=>{t.setAttribute('font-size',38*scale);t.setAttribute('x',x);t.setAttribute('y',y);x+=t.getComputedTextLength();if(j<count){x+=12;inlineField(x,y-39,width*scale,'Invulplek '+(field+1)+' bij '+row,field++);x+=width*scale+12;}});
+ });
+}
 function renderScene(){$('feedback').textContent='';const previous=$('scene-ink');if(previous)drawings[notesKey()+':scene']=previous.innerHTML;scene.replaceChildren();$('actions').replaceChildren();const e=current;scene.removeAttribute('hidden');
- const side=[3,4,5].includes(lesson.number)&&e.type==='mabModel';const inline=[3,4,5].includes(lesson.number)&&(e.type==='calc'||e.kind==='Kleine som → tientallen'||(lesson.number===5&&!!e.lines));
- const pair=e.type==='swapModel';document.body.classList.toggle('write-beside',side||inline||pair);scene.setAttribute('viewBox',side||inline||pair?'0 0 1100 350':'0 0 1100 220');
- $('prompts').hidden=inline;$('paper').style.display=side||inline||pair?'none':'';$('typed').hidden=side||inline||pair;
+ const side=[3,4,5].includes(lesson.number)&&e.type==='mabModel';const rows=fillRows(e),inline=!!rows;
+ const pair=e.type==='swapModel';const direct=['sequence','numberLine','table'].includes(e.type);document.body.classList.toggle('write-beside',side||inline||pair);scene.setAttribute('viewBox',side||inline||pair?'0 0 1100 350':'0 0 1100 220');
+ $('prompts').hidden=inline;$('paper').style.display=side||inline||pair||direct?'none':'';$('typed').hidden=side||inline||pair||direct;
  if(inline){
-  if(e.type==='calc')$('question').textContent=e.op==='-'?'Schrijf het verschil.':'Schrijf de som.';
-  const rows=e.lines?e.lines.split('\n'):[formula(e)+' = …'];
-  rows.forEach((row,i)=>{const [prefix,suffix='']=row.split('…');const text=svg('text',{x:90,y:85+i*95,'font-size':38,'text-anchor':'start'},prefix);scene.append(text);const x=110+text.getComputedTextLength();inlineField(x,46+i*95,190,'Oplossing bij '+row,i);if(suffix)txt(scene,x+205,85+i*95,suffix,38,{'text-anchor':'start'});});
+  if(e.type==='calc')$('question').textContent='Reken uit.';
+  else if(!e.lines)$('question').textContent=e.kind==='Vergelijken'?'Schrijf <, > of =.':'Vul aan.';
+  renderFillRows(rows);
  }else
  if(e.type==='mabModel'){const g=svg('g');scene.append(g);txt(g,550,25,`${formula(e)} = …`,30);const t=modelState.t,u=modelState.u;txt(g,360,52,'T · tientallen',20);txt(g,855,52,'E · eenheden',20);line(g,710,42,710,205);for(let i=0;i<t;i++){const r=svg('g');rod(r,145+i*47,72,modelState.removedT.includes(i));tap(r,'Tiental '+(i+1)+' wegnemen of terugleggen',()=>changed(()=>{const a=modelState.removedT;const p=a.indexOf(i);p<0?a.push(i):a.splice(p,1);}));g.append(r);}for(let i=0;i<u;i++){const q=svg('g');cube(q,760+i%5*43,82+Math.floor(i/5)*48,modelState.removedE.includes(i));tap(q,'Eenheid '+(i+1)+' wegnemen of terugleggen',()=>changed(()=>{const a=modelState.removedE,p=a.indexOf(i);p<0?a.push(i):a.splice(p,1);}));g.append(q);}
   if(side){
@@ -79,12 +96,12 @@ function renderScene(){$('feedback').textContent='';const previous=$('scene-ink'
  }else if(e.type==='tableLine'){const n=e.n||10;numberline(scene,0,100,[e.op==='-'?n*10:0],revealed?Array.from({length:n},(_,i)=>e.op==='-'?[(n-i)*10,(n-i-1)*10,'− 10']:[i*10,(i+1)*10,'+ 10']):[],false);
  }else if(e.type==='arrows'){const a=e.a,b=e.b;txt(scene,260,120,a,42);txt(scene,840,120,revealed?b:'…',42);scene.append(svg('path',{d:'M320 85 Q550 -10 780 85 M770 72L780 85L760 86 M780 155Q550 240 320 155 M330 168L320 155L340 154',stroke:'#164bd6','stroke-width':3,fill:'none'}));txt(scene,550,48,e.top,28);txt(scene,550,200,e.bottom,28);
  }else if(e.type==='family'){rect(scene,200,15,700,70);txt(scene,550,62,e.a+e.b,35);rect(scene,200,85,470,85);rect(scene,670,85,230,85);txt(scene,435,140,e.a,35);txt(scene,785,140,e.b,35);
- }else if(e.type==='numberLine'){numberline(scene,e.start,e.end,e.given||[],[],false);for(const n of e.targets){const x=70+(n-e.start)/(e.end-e.start)*960;line(scene,x,147,x,105,'#164bd6',2);rect(scene,x-28,58,56,43);txt(scene,x,88,revealed?n:'?',24);}
- }else if(e.type==='sequence'){const seq=e.seq;seq.forEach((n,i)=>{const x=60+i*145;scene.append(svg('path',{d:`M${x} 45h125l-62 120z`,fill:'#f7f9e9',stroke:'#8ea89c','stroke-width':2}));txt(scene,x+62,94,n===null?(revealed?e.values[i]:'…'):n,29);});
+ }else if(e.type==='numberLine'){numberline(scene,e.start,e.end,e.given||[],[],false);for(const n of e.targets){const x=70+(n-e.start)/(e.end-e.start)*960;line(scene,x,147,x,105,'#164bd6',2);rect(scene,x-28,58,56,43);inlineField(x-28,51,56,'Getal bij vlaggetje '+(e.targets.indexOf(n)+1),e.targets.indexOf(n));}
+ }else if(e.type==='sequence'){const seq=e.seq;seq.forEach((n,i)=>{const x=60+i*145;scene.append(svg('path',{d:`M${x} 45h125l-62 120z`,fill:'#f7f9e9',stroke:'#8ea89c','stroke-width':2}));if(n===null)inlineField(x+20,57,85,'Ontbrekend getal op plaats '+(i+1),i);else txt(scene,x+62,94,n,29);});
  }else if(e.type==='sceneCount'){for(let i=0;i<e.a;i++){const x=130+i%8*110,y=60+Math.floor(i/8)*70;scene.append(svg('circle',{cx:x,cy:y,r:20,fill:'#e87d23'}));scene.append(svg('ellipse',{cx:x+10,cy:y-20,rx:12,ry:5,fill:'#4b8a2e'}));}
- }else if(e.type==='table'){for(let k=0;k<=10;k++){const col=k<6?0:1,row=k<6?k:k-6;txt(scene,200+col*550,28+row*35,e.op==='*'?`${k} × 10 =`:`${k*10} : 10 =`,25);line(scene,275+col*550,32+row*35,460+col*550,32+row*35);}}else if(e.type==='match'){const cards=e.cards;cards.forEach((s,i)=>{const x=30+(i%3)*355,y=12+Math.floor(i/3)*65;const q=svg('g');rect(q,x,y,335,56,['#fff','#dbe8ff','#ffe0b1','#eadcff'][modelState['c'+i]||0]);txt(q,x+168,y+36,s,22);tap(q,'Kleur kaart: '+s,()=>{modelState['c'+i]=((modelState['c'+i]||0)+1)%4;renderScene();});scene.append(q);});button('Controleer kleuren',()=>{const colors=e.sets.map(set=>set.map(i=>modelState['c'+i]||0));const ok=colors.every(cs=>cs[0]>0&&cs.every(c=>c===cs[0]))&&new Set(colors.map(c=>c[0])).size===colors.length;$('feedback').textContent=ok?'Deze kaarten horen inderdaad samen.':'Geef elke familie één eigen kleur. Tik nog eens om van kleur te wisselen.';});
+ }else if(e.type==='table'){for(let k=0;k<=10;k++){const col=k<6?0:1,row=k<6?k:k-6;txt(scene,200+col*550,28+row*35,e.op==='*'?`${k} × 10 =`:`${k*10} : 10 =`,25);inlineField(275+col*550,row*35,170,'Uitkomst van '+(e.op==='*'?k+' × 10':k*10+' : 10'),k);scene.lastChild.classList.add('compact-field');}}else if(e.type==='match'){const cards=e.cards;cards.forEach((s,i)=>{const x=30+(i%3)*355,y=12+Math.floor(i/3)*65;const q=svg('g');rect(q,x,y,335,56,['#fff','#dbe8ff','#ffe0b1','#eadcff'][modelState['c'+i]||0]);txt(q,x+168,y+36,s,22);tap(q,'Kleur kaart: '+s,()=>{modelState['c'+i]=((modelState['c'+i]||0)+1)%4;renderScene();});scene.append(q);});button('Controleer kleuren',()=>{const colors=e.sets.map(set=>set.map(i=>modelState['c'+i]||0));const ok=colors.every(cs=>cs[0]>0&&cs.every(c=>c===cs[0]))&&new Set(colors.map(c=>c[0])).size===colors.length;$('feedback').textContent=ok?'Deze kaarten horen inderdaad samen.':'Geef elke familie één eigen kleur. Tik nog eens om van kleur te wisselen.';});
  }else{scene.setAttribute('hidden','');}
- if(help&&['calc','steps','words','missing'].includes(e.type)){scene.removeAttribute('hidden');operationLine(e,false);}
+ if(help&&!inline&&['calc','steps','words','missing'].includes(e.type)){scene.removeAttribute('hidden');operationLine(e,false);}
  const overlay=svg('g',{id:'scene-ink','pointer-events':'none'});overlay.innerHTML=drawings[notesKey()+':scene']||'';scene.append(overlay);
  if(revealed){$('answer').textContent=solution(e);$('answer').hidden=false;}
 }
