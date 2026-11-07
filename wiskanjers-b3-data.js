@@ -922,6 +922,14 @@ window.WIKA_B3 = {
         "answer": "70 − 5 = 65\n42 + 7 = 49"
       },
       {
+        "kind": "Denk aan 10",
+        "prompt": "Schrijf het verschil. Gebruik de eerste oefening om de volgende op te lossen.",
+        "type": "text",
+        "lines": "10 − 4 = …\n20 − 4 = …\n60 − 4 = …",
+        "answer": "10 − 4 = 6\n20 − 4 = 16\n60 − 4 = 56",
+        "ref": "p. 18 · oef. 4"
+      },
+      {
         "kind": "T + E",
         "prompt": "60 + 7 = …",
         "type": "calc",
@@ -981,6 +989,14 @@ window.WIKA_B3 = {
         "answer": "70 − 5 = 65\n42 + 7 = 49"
       },
       {
+        "kind": "Denk aan 10",
+        "prompt": "Schrijf het verschil. Gebruik de eerste oefening om de volgende op te lossen.",
+        "type": "text",
+        "lines": "10 − 6 = …\n20 − 6 = …\n80 − 6 = …",
+        "answer": "10 − 6 = 4\n20 − 6 = 14\n80 − 6 = 74",
+        "ref": "p. 18 · oef. 4"
+      },
+      {
         "kind": "T + E",
         "prompt": "80 + 5 = …",
         "type": "calc",
@@ -1038,6 +1054,14 @@ window.WIKA_B3 = {
         "ref": "p. 19 · oef. 9",
         "lines": "… − 5 = 65\n42 + … = 49",
         "answer": "70 − 5 = 65\n42 + 7 = 49"
+      },
+      {
+        "kind": "Denk aan 10",
+        "prompt": "Schrijf het verschil. Gebruik de eerste oefening om de volgende op te lossen.",
+        "type": "text",
+        "lines": "10 − 3 = …\n20 − 3 = …\n50 − 3 = …",
+        "answer": "10 − 3 = 7\n20 − 3 = 17\n50 − 3 = 47",
+        "ref": "p. 18 · oef. 4"
       }
     ],
     "self": [
