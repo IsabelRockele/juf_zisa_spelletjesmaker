@@ -38,7 +38,9 @@
         const banner=d.querySelector('.pro-banner span:nth-child(2)');if(banner)banner.textContent='Werkblad Cijferen — Juf Zisa PRO';
         const toolbar=d.querySelector('.toolbar-titel');if(toolbar)toolbar.textContent='📄 Werkblad preview';
         const toevoegen=d.querySelector('#tab-cijferen .btn-toevoegen');
-        if(toevoegen){toevoegen.textContent='▶ Voeg werkblad toe aan preview';toevoegen.onclick=()=>{w.App.voegCijferenBlokToe();w.App.genereerPreview();};}
+        // Behoud de knopactie van de rekenbundel: App is daar een globale
+        // const, geen eigenschap van contentWindow. Toevoegen rendert zelf de preview.
+        if(toevoegen)toevoegen.textContent='▶ Voeg werkblad toe aan preview';
         const preview=d.getElementById('btn-genereer');if(preview)preview.textContent='↻ Nieuwe oefeningen';
       }catch(fout){console.error('Cijferweergave kon niet worden ingericht.',fout);}
     });
