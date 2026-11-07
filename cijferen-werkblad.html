@@ -18,6 +18,15 @@
     frame.addEventListener('load',()=>{
       try{
         const w=frame.contentWindow,d=w.document;
+        // Menu en andere tools horen buiten deze cijferen-omhulling te openen.
+        // Richt uitsluitend de oorspronkelijke rekenbundelpagina in.
+        if(w.location.pathname!==new URL(bron,location.href).pathname){
+          location.replace(w.location.href);
+          return;
+        }
+        d.querySelectorAll('a[href="../app.html"],a.menu-knop').forEach(link=>{
+          link.target='_top';
+        });
         const stijl=d.createElement('style');
         stijl.textContent=`
           .sidebar-tabs .sidebar-tab:not(.tab-cijferen),.tabs-scroll-hint,#tab-hoofdrekenen,
