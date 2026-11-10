@@ -1,0 +1,70 @@
+.klasposter { display: none; }
+
+@media print {
+  @page klasposter { size: A4 portrait; margin: 10mm; }
+  body.klasposter-print { margin: 0; background: white; }
+  body.klasposter-print > :not(.klasposter) { display: none !important; }
+  body.klasposter-print > .klasposter {
+    --accent: #a71d59;
+    --pastel: #fce8f0;
+    page: klasposter;
+    display: block !important;
+    box-sizing: border-box;
+    min-height: 267mm;
+    border: 2mm solid var(--accent);
+    border-radius: 9mm;
+    padding: 12mm 8mm 10mm;
+    background: white;
+    color: #172841;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    print-color-adjust: exact;
+    break-inside: avoid;
+  }
+  body.klasposter-print > .klasposter--spelen {
+    --accent: #175690;
+    --pastel: #e1f0ff;
+  }
+  .klasposter-brand {
+    color: var(--accent);
+    font-size: 11pt;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .klasposter-brand span { padding: 0 .35em; }
+  .klasposter-mascots {
+    margin: 4mm auto;
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    gap: 4mm;
+  }
+  .klasposter-mascots:empty { display: none; }
+  .klasposter-mascots figure { margin: 0; width: 35mm; }
+  .klasposter-mascots img { display: block; width: 100%; height: 33mm; object-fit: contain; }
+  .klasposter--lezen .klasposter-mascots img { width: 54mm; height: 41mm; }
+  .klasposter-mascots figcaption {
+    margin-top: 1mm;
+    border-radius: 5mm;
+    background: var(--pastel);
+    color: var(--accent);
+    font-size: 10pt;
+    font-weight: 800;
+    line-height: 6mm;
+  }
+  .klasposter h1 { margin: 0; color: var(--accent); font-size: 44pt; line-height: 1.1; }
+  .klasposter p { color: inherit; line-height: 1.2; }
+  .klasposter .klasposter-subtitle { margin: 3mm 0 7mm; font-size: 20pt; }
+  .klasposter-code {
+    box-sizing: border-box;
+    width: 111mm;
+    margin: 0 auto;
+    border: .6mm solid var(--accent);
+    border-radius: 6mm;
+    background: white;
+  }
+  .klasposter-code svg { display: block; width: 100%; height: auto; }
+  .klasposter .klasposter-instruction { margin: 7mm 0 2mm; font-size: 25pt; font-weight: 800; }
+  .klasposter .klasposter-caption { margin: 0; font-size: 15pt; }
+}
