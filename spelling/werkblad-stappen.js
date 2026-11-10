@@ -129,6 +129,7 @@
 
     [categorie, woorden, oefeningen, opmaak].forEach(el => el?.classList.add("wb-stap-verborgen"));
     if (acties) acties.classList.add("wb-stap-verborgen");
+    $("#wb-preview-acties")?.classList.toggle("wb-resultaat-verborgen", stap !== 4);
     if (resultaat) resultaat.hidden = true;
     if (intro) intro.classList.toggle("wb-compact", stap > 1);
 
@@ -149,15 +150,11 @@
       if (oefeningen) oefeningen.open = true;
       $("#bundel-voeg-toe")?.classList.remove("wb-resultaat-verborgen");
       $("#bewerken-toggle")?.classList.add("wb-resultaat-verborgen");
-      $("#modus-werkblad .download-groep")?.classList.add("wb-resultaat-verborgen");
-      $("#bundel-wis")?.classList.add("wb-resultaat-verborgen");
     } else if (stap === 4) {
       acties?.classList.remove("wb-stap-verborgen");
       if (resultaat) resultaat.hidden = false;
       $("#bundel-voeg-toe")?.classList.add("wb-resultaat-verborgen");
       $("#bewerken-toggle")?.classList.remove("wb-resultaat-verborgen");
-      $("#modus-werkblad .download-groep")?.classList.remove("wb-resultaat-verborgen");
-      $("#bundel-wis")?.classList.remove("wb-resultaat-verborgen");
     }
 
     updateKnoppen();
@@ -172,7 +169,7 @@
     $("#wb-resultaat-paneel")?.setAttribute("hidden", "");
     $("#bundel-voeg-toe")?.classList.remove("wb-resultaat-verborgen");
     $("#bewerken-toggle")?.classList.remove("wb-resultaat-verborgen");
-    $("#modus-werkblad .download-groep")?.classList.remove("wb-resultaat-verborgen");
+    $("#wb-preview-acties")?.classList.remove("wb-resultaat-verborgen");
   }
 
   function synchroniseerModus() {

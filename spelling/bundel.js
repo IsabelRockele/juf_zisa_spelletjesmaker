@@ -608,6 +608,8 @@ window.SpellingBundel = {
   /* === Update download/wis knoppen op basis van bundel-status === */
   _updateUI: function() {
     const heeftItems = this.items.length > 0;
+    const actiebalk = document.querySelector("#wb-preview-acties");
+    if (actiebalk) actiebalk.hidden = !heeftItems;
     
     const dlAlles = document.querySelector("#download-alles");
     const dlOpl = document.querySelector("#download-oplossingen-alles");
@@ -757,7 +759,7 @@ window.SpellingBundel = {
         };
 
         window.SpellingPDF.bereidAfbeeldingenVoor(kloon)
-          .then(() => html2pdf().set(pdfOpties).from(kloon).save()).then(() => {
+          .then(() => window.SpellingPDF.bewaarPDF(kloon, pdfOpties)).then(() => {
           tijdelijk.remove();
           knoppen.forEach(k => k.disabled = false);
           this._sluitPDFVoortgang(voortgang, true);

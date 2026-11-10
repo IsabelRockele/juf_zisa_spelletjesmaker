@@ -247,7 +247,12 @@
       ['een / roei / boot. / Ik / in','Ik roei in een boot.'],['de / Ik / bal. / gooi','Ik gooi de bal.']];
     return b;
   }
-  function afbeelding(w) { return window.SpellingAfbHelper.html(w,{grootte:90,graad:1}); }
+  function afbeelding(w) { return window.SpellingAfbHelper.html(w,{grootte:112,graad:1}); }
+  function lossePrent(src, alt) {
+    const prenten = window.SpellingAfbeeldingen;
+    const img = `<img src="${esc(prenten?.prentbron(src) || src)}" alt="${esc(alt)}">`;
+    return prenten?.metPrentbijschrift(src, img) || img;
+  }
   function lijn(antwoord,opl,cfg,breedte=400) {
     const sl=window.SpellingSchrijflijnen;
     const h=sl ? sl.hoogteInPx(cfg.lijnhoogte) : 20;
@@ -303,8 +308,8 @@
       case 'klankzin': case 'woordzin': return vragen(b.rijen.map(([k,z,a])=>[`${k} — ${z}`,a]),opl,cfg);
       case 'invulzin': return bank(b.bank)+vragen(b.rijen,opl,cfg);
       case 'prenten': return `<div class="to-prenten">${ws.map(w=>`<div>${afbeelding(w)}${lijn(`${w.lidwoord} ${w.tekst}`,opl,cfg)}</div>`).join('')}</div>`;
-      case 'tafereel': return (b.lossePrenten ? b.vragen.map(([q,a,src],i)=>`<div class="to-prentvraag"><img src="${esc(src)}" alt="Prent ${i+1}"><div>${vragen([[q,a]],opl,cfg)}</div></div>`).join('') : `<img class="to-tafereel" src="${esc(b.src)}" alt="${esc(b.naam)}">${vragen(b.vragen,opl,cfg)}`)+(opl?'<small>Voorbeeldantwoorden; een andere juiste zin mag ook.</small>':'');
-      case 'zelfzin': return [0,3].map(start=>`<div class="to-zinrij"><div class="to-zinprenten">${b.prenten.slice(start,start+3).map((p,i)=>`<img src="${esc(p.src)}" alt="Keuze ${i+1}">`).join('')}</div>${lijn(b.prenten[start].antwoord,opl,cfg)}${lijn('',false,cfg)}</div>`).join('')+(opl?'<small>Voorbeeldzin bij de eerste prent van elke rij. Een andere juiste zin bij een gekozen prent mag ook.</small>':'');
+      case 'tafereel': return (b.lossePrenten ? b.vragen.map(([q,a,src],i)=>`<div class="to-prentvraag">${lossePrent(src, `Prent ${i+1}`)}<div>${vragen([[q,a]],opl,cfg)}</div></div>`).join('') : `<img class="to-tafereel" src="${esc(b.src)}" alt="${esc(b.naam)}">${vragen(b.vragen,opl,cfg)}`)+(opl?'<small>Voorbeeldantwoorden; een andere juiste zin mag ook.</small>':'');
+      case 'zelfzin': return [0,3].map(start=>`<div class="to-zinrij"><div class="to-zinprenten">${b.prenten.slice(start,start+3).map((p,i)=>lossePrent(p.src, `Keuze ${i+1}`)).join('')}</div>${lijn(b.prenten[start].antwoord,opl,cfg)}${lijn('',false,cfg)}</div>`).join('')+(opl?'<small>Voorbeeldzin bij de eerste prent van elke rij. Een andere juiste zin bij een gekozen prent mag ook.</small>':'');
       case 'leestekens': return b.vragen.map(([q,a])=>`<div class="to-tekenzin">${esc(q)} <span class="to-tekenvak">${opl?esc(a):''}</span></div>`).join('');
       case 'dialoog': return [['Een zin die iets vertelt','.'],['Een zin die iets vraagt','?'],['Een zin die iets roept','!']].map(([q,a])=>`<div class="to-tekenzin">${q} <span class="to-tekenvak">${opl?a:''}</span></div>`).join('')+'<p>Vul de eindtekens in.</p>'+[['Mila: Dag Noor','!'],['Noor: Ga je mee naar het park','?'],['Mila: Ja, dat is leuk','!']].map(([q,a])=>`<div class="to-tekenzin">${q} <span class="to-tekenvak">${opl?a:''}</span></div>`).join('')+(opl?'<small>Bij “Dag Noor” en “Ja, dat is leuk” kan ook een punt.</small>':'');
       case 'volgorde': return vragen(b.vragen,opl,cfg);

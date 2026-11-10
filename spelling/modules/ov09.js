@@ -182,7 +182,7 @@
         const markeer1 = (metAntwoorden && juisteIsOptie1) ? "ov09-keuze-juist" : "";
         const markeer2 = (metAntwoorden && !juisteIsOptie1) ? "ov09-keuze-juist" : "";
 
-        const afbHTML = this._visueleSteun(w, helper, 90);
+        const afbHTML = this._visueleSteun(w, helper, 112);
 
         const canvas = sl
           ? sl.htmlCanvas(cfg.lijntype, cfg.lijnhoogte, 220)
@@ -218,7 +218,7 @@
       let rijenHTML = "";
       woorden.forEach((w, idx) => {
         const meervoud = this._geefMeervoud(w);
-        const afbHTML = this._visueleSteun(w, helper, 90);
+        const afbHTML = this._visueleSteun(w, helper, 108);
         const canvas = sl
           ? sl.htmlCanvas(cfg.lijntype, cfg.lijnhoogte, 220)
           : `<div class="ov07-fallback-lijn ov09-fallback-lijn"></div>`;
@@ -248,7 +248,7 @@
       let afbHTML = "";
       const dezesWoorden = this._schud([...woorden]);
       for (const w of dezesWoorden) {
-        const afbHTML2 = this._visueleSteun(w, helper, 100);
+        const afbHTML2 = this._visueleSteun(w, helper, 112);
         afbHTML += `
           <div class="ov09-verdieping-cel" data-woord="${w.tekst}">
             <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord" type="button">✕</button>

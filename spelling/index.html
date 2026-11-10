@@ -7,9 +7,9 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Spellinggenerator – Juf Zisa</title>
-  <link rel="stylesheet" href="style.css?v=20260924a">
-  <link rel="stylesheet" href="modules/graad2-ov01.css">
-  <link rel="stylesheet" href="thema-oefeningen.css?v=20261015a">
+  <link rel="stylesheet" href="style.css?v=20261110l">
+  <link rel="stylesheet" href="modules/graad2-ov01.css?v=20261110f">
+  <link rel="stylesheet" href="thema-oefeningen.css?v=20261110f">
   <style>
     /* === Woordenkiezer: afbeelding-icoon + filter (mei 2026) === */
     .wk-info-balk {
@@ -295,39 +295,26 @@
         </button>
         <button id="bewerken-toggle" class="secundair" type="button">✏️ Bewerken: uit</button>
 
-        <div class="download-groep">
-          <h3 class="download-groep-titel">Download je materiaal</h3>
-          <div class="download-keuzekaart download-keuzekaart-leerling">
-            <div class="download-keuzekop">
-              <span class="download-keuze-icoon">📄</span>
-              <span><strong>Werkbladen voor de leerlingen</strong><small>Zonder ingevulde antwoorden</small></span>
-            </div>
-            <button id="download-alles" class="primair download-knop verborgen" type="button">⬇ Download alle werkbladen als pdf</button>
-            <div class="download-niveaus">
-              <span class="download-niveaus-label">Of kies één niveau:</span>
-              <button id="download-basis" class="secundair download-niveau-knop verborgen" type="button">⬇ Veel hulp</button>
-              <button id="download-kern" class="secundair download-niveau-knop verborgen" type="button">⬇ Beetje hulp</button>
-              <button id="download-verdieping" class="secundair download-niveau-knop verborgen" type="button">⬇ Zelfstandig</button>
-              <button id="download-uitbreiding" class="secundair download-niveau-knop verborgen" type="button">⬇ Uitdaging</button>
-            </div>
-          </div>
-          <div class="download-keuzekaart download-keuzekaart-oplossingen">
-            <div class="download-keuzekop">
-              <span class="download-keuze-icoon">✅</span>
-              <span><strong>Oplossingen voor de leerkracht</strong><small>Alle bladen met antwoorden ingevuld</small></span>
-            </div>
-            <button id="download-oplossingen-alles" class="download-oplossingen-knop download-knop verborgen" type="button">⬇ Download oplossingen als pdf</button>
-          </div>
-        </div>
-
-        <button id="bundel-wis" class="secundair-rood verborgen" type="button">🗑️ Wis bundel</button>
       </div>
-      <button id="preview-oplossingen-toggle" class="preview-oplossingen-knop verborgen" type="button">👁 Toon oplossingen</button>
-
     </aside>
 
-    <!-- RECHTS: preview -->
-    <main class="preview-paneel" style="min-width:0;width:100%;max-width:100%;overflow-x:hidden;">
+    <!-- RECHTS: preview en vaste acties -->
+    <main class="preview-paneel">
+      <div id="wb-preview-acties" class="wb-preview-acties" role="group" aria-label="Acties voor het werkblad" hidden>
+        <button id="download-alles" class="primair download-knop verborgen" type="button">⬇ Werkbladen als pdf</button>
+        <button id="download-oplossingen-alles" class="download-oplossingen-knop download-knop verborgen" type="button">⬇ Oplossingen als pdf</button>
+        <button id="preview-oplossingen-toggle" class="preview-oplossingen-knop verborgen" type="button" aria-pressed="false">👁 Toon oplossingen</button>
+        <details class="wb-download-niveaus">
+          <summary class="secundair">Pdf per niveau</summary>
+          <div class="wb-download-niveaus-menu">
+            <button id="download-basis" class="secundair download-niveau-knop verborgen" type="button">⬇ Veel hulp</button>
+            <button id="download-kern" class="secundair download-niveau-knop verborgen" type="button">⬇ Beetje hulp</button>
+            <button id="download-verdieping" class="secundair download-niveau-knop verborgen" type="button">⬇ Zelfstandig</button>
+            <button id="download-uitbreiding" class="secundair download-niveau-knop verborgen" type="button">⬇ Uitdaging</button>
+          </div>
+        </details>
+        <button id="bundel-wis" class="secundair-rood verborgen" type="button">🗑️ Wis bundel</button>
+      </div>
       <div id="preview" class="preview-modus"></div>
     </main>
 
@@ -661,8 +648,8 @@
 
   <!-- Volgorde: eerst woordenbibliotheek + graad-bestanden, dan modules -->
   <script src="modus-storage.js"></script>
-  <script src="afbeeldingen.js?v=20260803c"></script>
-  <script src="afbeeldingen-helper.js?v=20260810a"></script>
+  <script src="afbeeldingen.js?v=20261110i"></script>
+  <script src="afbeeldingen-helper.js?v=20261110f"></script>
   <script src="schrijflijnen.js?v=20260803a"></script>
   <script src="afleiders.js?v=20260802i"></script>
   <script src="klank-helper.js"></script>
@@ -683,10 +670,10 @@
   <script src="modules/ov03.js"></script>
   <script src="modules/ov04.js?v=20260803a"></script>
   <script src="modules/ov05.js?v=20260803d"></script>
-  <script src="modules/ov06.js"></script>
+  <script src="modules/ov06.js?v=20261110k"></script>
   <script src="modules/ov07.js?v=20260802m"></script>
   <script src="modules/ov08.js?v=20260802o"></script>
-  <script src="modules/ov09.js?v=20260810d"></script>
+  <script src="modules/ov09.js?v=20261110f"></script>
   <script src="modules/ov10.js?v=20260810a"></script>
   <script src="modules/ov11.js?v=20260802h"></script>
   <script src="modules/ov12.js?v=20260803f"></script>
@@ -702,17 +689,17 @@
   <script src="modules/graad2-ov01.js?v=20260810a"></script>
   <script src="generator.js?v=20260802i"></script>
   <script src="preview.js?v=20260802h"></script>
-  <script src="pdf-engine.js?v=20261015a"></script>
-  <script src="bundel.js?v=20261015a"></script>
+  <script src="pdf-engine.js?v=20261110l"></script>
+  <script src="bundel.js?v=20261110l"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="herhalingsbundel-pdf.js?v=20260924a"></script>
+<script src="herhalingsbundel-pdf.js?v=20261110k"></script>
 <script src="herhalingsbundel.js?v=20260802a"></script>
-  <script src="thema-oefeningen.js?v=20260923i"></script>
-  <script src="zijbalk.js?v=20260923i"></script>
+  <script src="thema-oefeningen.js?v=20261110f"></script>
+  <script src="zijbalk.js?v=20261110e"></script>
   <script src="app.js?v=20260801g"></script>
   <script src="weekdictee-paneel.js?v=20260803i"></script>
   <script src="modus.js?v=20260803a"></script>
-  <script src="werkblad-stappen.js?v=20260923i"></script>
+  <script src="werkblad-stappen.js?v=20261110j"></script>
   <script src="shared.js?v=8"></script>
 
 </body>

@@ -82,10 +82,33 @@ window.SpellingAfbeeldingen = {
     }
     
     // <img> met onerror fallback naar emoji-span
-    return `<img class="woord-afbeelding"
-      src="${pad}"
+    const prent = `<img class="woord-afbeelding"
+      src="${this.prentbron(pad)}"
       alt="${tekst}"
       onerror="this.outerHTML='<span class=&quot;woord-emoji&quot;>${emoji}</span>'">`;
+    return this.metPrentbijschrift(pad, prent);
+  },
+
+  prentbijschrift: function(pad) {
+    return spellingPrentbijschriften.get(pad);
+  },
+
+  prentbron: function(pad) {
+    const bijschrift = this.prentbijschrift(pad);
+    return bijschrift && !bijschrift.beeldverhouding ? `${bijschrift.bron || pad}?v=20261110f` : pad;
+  },
+
+  metPrentbijschrift: function(pad, prent) {
+    const bijschrift = this.prentbijschrift(pad);
+    if (!bijschrift) return prent;
+
+    const { beeldverhouding, zin } = bijschrift;
+    const uitsnede = beeldverhouding ? " woord-prent-uitsnede" : "";
+    const verhouding = beeldverhouding ? ` style="--prent-verhouding:1 / ${beeldverhouding}"` : "";
+    return `<div class="woord-prent-met-tekst">
+      <div class="woord-prent-beeld${uitsnede}"${verhouding}>${prent}</div>
+      <div class="woord-prent-bijschrift">${zin}</div>
+    </div>`;
   },
 
   /* Geef alleen de emoji voor een woord (geen img-tag) — gebruikt door OV01 */
@@ -93,3 +116,50 @@ window.SpellingAfbeeldingen = {
     return this.emojiFallback[woord] || "📷";
   }
 };
+
+// De oude prenten met een invulzin hebben een vierkant beeld met daaronder tekst.
+// Gebruik dezelfde zin als leesbare tekst naast het vierkante beeld.
+const spellingPrentbijschriften = new Map();
+for (const [map, woorden, zin, beeldverhouding = 1, gedeeldBestand] of [
+  ["cht-woorden", ["dicht"], "De deur is _____."],
+  ["cht-woorden", ["nicht"], "neef en _____", 1045 / 1254],
+  ["cht-woorden", ["hij vecht", "hij wacht", "hij zucht"], "hij _____"],
+  ["df-en", ["drinken", "eten", "fluiten", "geven", "kijken", "lezen", "lopen", "praten", "slapen", "spelen", "vragen", "wonen"], "wij _____."],
+  ["df-voorvoegsel", ["vergeet"], "ik _____"],
+  ["gt-woorden", ["hij buigt", "hij jaagt", "hij klaagt", "hij legt", "hij ligt", "hij veegt", "hij vliegt", "hij vraagt", "hij zegt"], "hij _____"],
+  ["lk-ee", ["leeg"], "het glas is _____."],
+  ["lk-uu", ["uur"], "Het is 4 _____.", 950 / 1254],
+  ["meervoud-verenkel", ["uur"], "Een dag telt 24 _____.", 800 / 1402],
+  ["ng-woorden", ["hang"], "ik _____ de jas aan de kapstok."],
+  ["ng-woorden", ["hangt"], "De rugzak _____ aan de kapstok."],
+  ["ng-woorden", ["spring", "zing"], "ik _____"],
+  ["ng-woorden", ["springt", "zingt"], "hij _____"],
+  ["nk-woorden", ["denk", "drink", "schenk"], "ik _____"],
+  ["nk-woorden", ["drinkt", "schenkt"], "hij _____"],
+  ["nk-woorden", ["stinkt"], "Het afval _____."],
+  ["sch-woorden", ["scheef"], "het kader hangt _____."],
+  ["stukjes-verdubbelen", ["bakken", "rennen", "stoppen", "tikken", "vallen", "zitten", "zwemmen"], "Ik wil _____."],
+  ["stukjes-verenkelen", ["eten", "lopen", "slapen"], "Ik wil _____."],
+  ["stukjes-verenkelen", ["uur"], "Een dag telt 24 _____.", 800 / 1402],
+  ["tw-aai", ["maait"], "hij _____ het gras."],
+  ["tw-aai", ["naait"], "zij _____"],
+  ["tw-aai", ["zaai"], "ik _____ zaadjes.", 0],
+  ["tw-aai", ["zaait"], "hij _____ zaadjes."],
+  ["tw-eu", ["kreun"], "ik _____"],
+  ["tw-eu", ["kreunt"], "hij _____"],
+  ["tw-ij", ["kijk", "schrijf"], "ik _____"],
+  ["tw-oei", ["knoei", "stoei"], "ik _____"],
+  ["tw-oei", ["knoeit", "roeit", "stoeit"], "hij _____"],
+  ["tw-oei", ["loeit"], "De koe _____."],
+  ["tw-ooi", ["gooi"], "ik _____"],
+  ["tw-ooi", ["mooi"], "De vlinder is niet lelijk. Hij is _____.", 0],
+  ["tw-ooi", ["strooi"], "Ik ____________ zout op mijn ei.", 0],
+  ["tw-ooi", ["gooit"], "hij _____"],
+  ["tw-ooi", ["strooit"], "Hij __________ zout op zijn ei.", 0, "strooi.png"],
+]) {
+  for (const woord of woorden) {
+    const mapPad = `afbeeldingen/graad1/${map}`;
+    const bron = gedeeldBestand ? `${mapPad}/${gedeeldBestand}` : null;
+    spellingPrentbijschriften.set(`${mapPad}/${woord}.png`, { zin, beeldverhouding, bron });
+  }
+}

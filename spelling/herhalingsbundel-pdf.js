@@ -678,7 +678,8 @@ window.SpellingHerhalingsbundelPDF = (function() {
         try {
           const canvas = document.createElement("canvas");
           canvas.width = img.naturalWidth;
-          canvas.height = img.naturalHeight;
+          const beeldverhouding = window.SpellingAfbeeldingen?.prentbijschrift(pad)?.beeldverhouding;
+          canvas.height = beeldverhouding ? Math.round(img.naturalWidth * beeldverhouding) : img.naturalHeight;
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0);
           
@@ -699,7 +700,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
         console.log("[PDF] ✗ PNG niet gevonden:", pad);
         resolve(null);
       };
-      img.src = pad;
+      img.src = window.SpellingAfbeeldingen?.prentbron(pad) || pad;
     });
   }
   
@@ -809,6 +810,8 @@ window.SpellingHerhalingsbundelPDF = (function() {
       try {
         const dataURL = _afbeeldingCache[pad];
         const dims = _afbeeldingAfm[pad];
+        const bijschrift = window.SpellingAfbeeldingen?.prentbijschrift(pad);
+        const prentBreedte = bijschrift ? maxBreedte * 0.48 : maxBreedte;
         
         // Bereken breedte op basis van vaste hoogte + aspect ratio
         let plaatsH = grootteMM;
@@ -819,18 +822,35 @@ window.SpellingHerhalingsbundelPDF = (function() {
           plaatsW = plaatsH * ratio;
           
           // Als breedte de maxBreedte overschrijdt: schaal beide terug
-          if (plaatsW > maxBreedte) {
-            const schaal = maxBreedte / plaatsW;
-            plaatsW = maxBreedte;
+          if (plaatsW > prentBreedte) {
+            const schaal = prentBreedte / plaatsW;
+            plaatsW = prentBreedte;
             plaatsH = plaatsH * schaal;
           }
         }
         
         // Horizontaal centreren binnen maxBreedte; verticaal centreren binnen grootteMM-zone
-        const offsetX = (maxBreedte - plaatsW) / 2;
+        const offsetX = (prentBreedte - plaatsW) / 2;
         const offsetY = (grootteMM - plaatsH) / 2;
         
         pdf.addImage(dataURL, "PNG", x + offsetX, y + offsetY, plaatsW, plaatsH);
+        if (bijschrift) {
+          const tussenruimte = 1.5;
+          const tekstBreedte = maxBreedte - prentBreedte - tussenruimte;
+          const tekstX = x + prentBreedte + tussenruimte + tekstBreedte / 2;
+          pdf.setFont(FONT_FAMILIE, "bold");
+          let grootte = 11;
+          let regels;
+          do {
+            pdf.setFontSize(grootte);
+            regels = pdf.splitTextToSize(bijschrift.zin, tekstBreedte);
+            if (tekstHoogte(grootte, regels.length) <= grootteMM || grootte === 8) break;
+            grootte--;
+          } while (true);
+          const eersteBasislijn = y + (grootteMM - tekstHoogte(grootte, regels.length)) / 2 + grootte * 0.3528;
+          pdf.setTextColor(...KLEUR_TEKST);
+          pdf.text(regels, tekstX, eersteBasislijn, { align: "center" });
+        }
         console.log(`[PDF]   → PNG geplaatst voor '${woord.tekst}' (${plaatsW.toFixed(1)}×${plaatsH.toFixed(1)}mm)`);
         return;
       } catch (e) {
@@ -1082,7 +1102,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     else if (lijnhoogte === "groot") L = 7.5;
     
     const PADDING_CEL = 4;
-    const AFBEELDING_HOOGTE = 26;
+    const AFBEELDING_HOOGTE = 30;
     const EMOJI_RUIMTE = AFBEELDING_HOOGTE + 3;
     const KEUZE_RUIMTE = niveau === "basis" ? 11 : 0;
     const SCHRIJFLIJN_HOOGTE = 3 * L;
@@ -1420,7 +1440,10 @@ window.SpellingHerhalingsbundelPDF = (function() {
     const RIJ_HOOGTE = SCHRIJFLIJN_HOOGTE + 4;
     const RIJ_SPACING = 3;
     
-    const PLAATJE_BREEDTE = metPlaatje ? 12 : 0;
+    const metPrentbijschrift = metPlaatje && rijen.some(rij =>
+      window.SpellingAfbeeldingen?.prentbijschrift(afbeeldingPad(rij.woordObj))
+    );
+    const PLAATJE_BREEDTE = metPrentbijschrift ? 44 : metPlaatje ? 18 : 0;
     const PLAATJE_SPACING = metPlaatje ? 3 : 0;
     const WOORD_BREEDTE = 24;  // korter — woorden zijn meestal 4-7 letters
     const WOORD_SPACING = 2;
@@ -1587,7 +1610,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     
     const celBreedte = (state.contentBreedte - (CELLEN_PER_RIJ - 1) * CEL_SPACING) / CELLEN_PER_RIJ;
     
-    const PLAATJE_HOOGTE = metPlaatje ? 16 : 0;
+    const PLAATJE_HOOGTE = metPlaatje ? 22 : 0;
     const PLAATJE_SPACING = metPlaatje ? 3 : 0;
     const HOKJE_GROOTTE = 8;       // 8mm × 8mm hokje
     const HOKJE_SPACING = 1.5;     // mm tussen hokjes
@@ -2367,7 +2390,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     
     // Bereken kaart-hoogte op basis van wat erin moet
     const PAD_KAART = 4;         // mm padding binnen kaart
-    const PLAATJE_HOOGTE = 12;   // mm — camera-emoji of PNG
+    const PLAATJE_HOOGTE = 19;
     const PLAATJE_SPACING_ONDER = 2.5;
     const HOKJES_HOOGTE = 7.5;   // mm
     const HOKJES_SPACING_ONDER = 3;
@@ -2740,8 +2763,8 @@ window.SpellingHerhalingsbundelPDF = (function() {
       : 0;
     
     // Reserveer voor opdracht + bank + eerste zin
-    const eersteZinHoogte = niveau === "basis" 
-      ? (SCHRIJFLIJN_HOOGTE + 14) 
+    const eersteZinHoogte = niveau === "basis"
+      ? _meetOV06ZinBasis(pdf, zinnen[0], state.contentBreedte, L).hoogte
       : (SCHRIJFLIJN_HOOGTE + 4);
     reserveerRuimte(state, opdrachtHoogte + 4 + bankHoogte + 4 + eersteZinHoogte);
     
@@ -2882,159 +2905,77 @@ window.SpellingHerhalingsbundelPDF = (function() {
     state.cursorY = y + bankHoogte;
   }
   
-  /* Teken één zin op basis-niveau:
-     [nr.] [keuze1] / [keuze2]   voor-tekst [schrijflijn] na-tekst
-     
-     Layout: links 30% voor nummer + keuzes, rechts 70% voor zin.
-     De zin loopt inline met de schrijflijn: voor-tekst staat náást
-     de lijn, na-tekst eveneens. Past na-tekst niet meer? Dan komt
-     hij op een nieuwe regel onder de lijn, met een paar mm spacing
-     zodat hij niet tegen de rode onderlijn plakt.
-  */
-  function _tekenOV06ZinBasis(state, zin, lijntype, lijnhoogte, L, metOplossingen) {
-    const pdf = state.pdf;
-    const x = state.contentX;
-    const breedte = state.contentBreedte;
-    const SCHRIJFLIJN_HOOGTE = 3 * L;
-    
-    const LINKER_KOLOM = 55;  // mm voor nr + keuzes
-    const SPACING_KOLOMMEN = 6;
-    const rechtsX = x + LINKER_KOLOM + SPACING_KOLOMMEN;
-    const rechtsBreedte = breedte - LINKER_KOLOM - SPACING_KOLOMMEN;
-    
+  /* Meet de zin op de volle breedte onder de keuzewoorden. */
+  function _meetOV06ZinBasis(pdf, zin, breedte, L) {
     pdf.setFont(FONT_FAMILIE, "normal");
     pdf.setFontSize(FONT_GROOTTE_INHOUD);
-    
-    const voorTekst = zin.voor || "";
-    const naTekst = zin.na || "";
-    
-    // Bereken benodigde plaats op één regel: 
-    //   voor-tekst + spacing + schrijflijn (min. 50mm) + spacing + na-tekst
-    const voorBreedte = voorTekst ? pdf.getTextWidth(voorTekst) : 0;
-    const naBreedte = naTekst ? pdf.getTextWidth(naTekst) : 0;
-    const MIN_LIJN_BREEDTE = 50;
-    const SPACING_TEKST_LIJN = 3;
-    
-    const benodigdVoorEenRegel = voorBreedte + (voorTekst ? SPACING_TEKST_LIJN : 0)
-                               + MIN_LIJN_BREEDTE 
-                               + (naTekst ? SPACING_TEKST_LIJN + naBreedte : 0);
-    
-    const naPastAchterLijn = (benodigdVoorEenRegel <= rechtsBreedte);
-    
-    // Hoogte: schrijflijn-rij + evt. extra regel voor na-tekst
-    const VERTICAAL_PAD = 3;
-    const EXTRA_REGEL_HOOGTE = 7;  // 7mm voor na-tekst onder de lijn, met ademruimte
-    
-    let blokHoogte = SCHRIJFLIJN_HOOGTE + 2 * VERTICAAL_PAD;
-    if (!naPastAchterLijn && naTekst) blokHoogte += EXTRA_REGEL_HOOGTE;
-    
-    reserveerRuimte(state, blokHoogte + 4);
-    const yStart = state.cursorY;
-    
-    // --- Linker kolom: nummer + keuzes (verticaal gecentreerd op de schrijflijn-rij) ---
-    const lijnY = yStart + VERTICAAL_PAD;
-    const tekstBaseline = lijnY + 2 * L - 0.5;
-    
-    tekenTekst(pdf, x, tekstBaseline, zin.nr, {
-      size: FONT_GROOTTE_INHOUD,
-      kleur: KLEUR_TEKST,
-      vet: true
-    });
-    
-    if (zin.keuzes && zin.keuzes.length > 0) {
-      const KEUZE_HOOGTE = 8;
-      const KEUZE_PAD = 3;
-      const KEUZE_MIDDEN_Y = lijnY + SCHRIJFLIJN_HOOGTE / 2;
-      let kx = x + 10;  // na het nummer
-      
-      for (let i = 0; i < zin.keuzes.length; i++) {
-        const keuze = zin.keuzes[i];
-        const tekstBreedte = pdf.getTextWidth(keuze.tekst);
-        const pilBreedte = tekstBreedte + 2 * KEUZE_PAD;
-        const isJuistGetoond = metOplossingen && keuze.isJuist;
-        
-        const pilY = KEUZE_MIDDEN_Y - KEUZE_HOOGTE / 2;
-        tekenKader(pdf, kx, pilY, pilBreedte, KEUZE_HOOGTE, {
-          vulKleur: isJuistGetoond ? [230, 245, 230] : null,
-          randKleur: isJuistGetoond ? [47, 154, 68] : KLEUR_TEKST,
-          randDikte: isJuistGetoond ? 1.0 : 0.4,
-          rondeHoeken: 4   // ovale pil-stijl
-        });
-        
-        tekenTekst(pdf, kx + pilBreedte / 2, KEUZE_MIDDEN_Y + 1.5, keuze.tekst, {
-          size: 13,
-          kleur: KLEUR_TEKST,
-          vet: isJuistGetoond,
-          gecentreerd: true
-        });
-        
-        kx += pilBreedte;
-        
-        // " / " separator
-        if (i < zin.keuzes.length - 1) {
-          tekenTekst(pdf, kx + 2, KEUZE_MIDDEN_Y + 1.5, "/", {
-            size: 13,
-            kleur: KLEUR_TEKST
-          });
-          kx += 6;
-        }
-      }
-    }
-    
-    // --- Rechter kolom: zin met inline schrijflijn ---
-    let curX = rechtsX;
-    
-    // Voor-tekst (bv. "De")
-    if (voorTekst) {
-      tekenTekst(pdf, curX, tekstBaseline, voorTekst, {
-        size: FONT_GROOTTE_INHOUD,
-        kleur: KLEUR_TEKST
-      });
-      curX += voorBreedte + SPACING_TEKST_LIJN;
-    }
-    
-    // Schrijflijn — past na-tekst nog achter, dan korter; anders rest-breedte
-    let lijnBreedte;
-    if (naPastAchterLijn && naTekst) {
-      // Lijn neemt ruimte tussen voor-tekst en na-tekst
-      lijnBreedte = (rechtsX + rechtsBreedte) - curX - SPACING_TEKST_LIJN - naBreedte;
-    } else {
-      // Lijn pakt alle resterende breedte; na-tekst komt eronder (of bestaat niet)
-      lijnBreedte = (rechtsX + rechtsBreedte) - curX;
-    }
-    
-    tekenSchrijflijn(pdf, curX, lijnY, lijnBreedte, lijntype, lijnhoogte);
-    
-    if (metOplossingen && zin.antwoord) {
-      tekenTekst(pdf, curX + 2, tekstBaseline, zin.antwoord, {
-        size: FONT_GROOTTE_INHOUD,
-        kleur: KLEUR_TEKST
-      });
-    }
-    
-    curX += lijnBreedte;
-    
-    // Na-tekst
-    if (naTekst) {
-      if (naPastAchterLijn) {
-        // Inline na de lijn
-        tekenTekst(pdf, curX + SPACING_TEKST_LIJN, tekstBaseline, naTekst, {
-          size: FONT_GROOTTE_INHOUD,
-          kleur: KLEUR_TEKST
-        });
-      } else {
-        // Onder de lijn, met ademruimte vanaf rode onderlijn
-        const onderY = lijnY + SCHRIJFLIJN_HOOGTE + 5;  // 5mm spacing
-        tekenTekst(pdf, rechtsX, onderY, naTekst, {
-          size: FONT_GROOTTE_INHOUD,
-          kleur: KLEUR_TEKST
-        });
-      }
-    }
-    
-    state.cursorY = yStart + blokHoogte + 4;
+
+    const zinBreedte = breedte - 10;
+    const afstand = 2;
+    const minLijn = 45;
+    const voorBreedte = zin.voor ? pdf.getTextWidth(zin.voor) + afstand : 0;
+    const naBreedte = zin.na ? pdf.getTextWidth(zin.na) + afstand : 0;
+    const voorRegels = voorBreedte + minLijn > zinBreedte ? pdf.splitTextToSize(zin.voor, zinBreedte) : [];
+    const inlineVoor = voorRegels.length ? 0 : voorBreedte;
+    const naRegels = inlineVoor + minLijn + naBreedte > zinBreedte ? pdf.splitTextToSize(zin.na, zinBreedte) : [];
+    const lijnBreedte = Math.min(54, zinBreedte - inlineVoor - (naRegels.length ? 0 : naBreedte));
+    const lijnOffset = 11 + voorRegels.length * 7;
+    const hoogte = lijnOffset + 3 * L + naRegels.length * 7 + 7;
+
+    return { afstand, inlineVoor, voorRegels, naRegels, lijnBreedte, lijnOffset, hoogte };
   }
-  
+
+  function _tekenOV06ZinBasis(state, zin, lijntype, lijnhoogte, L, metOplossingen) {
+    const { pdf, contentX: x, contentBreedte: breedte } = state;
+    const layout = _meetOV06ZinBasis(pdf, zin, breedte, L);
+    reserveerRuimte(state, layout.hoogte);
+    const y = state.cursorY;
+    const zinX = x + 10;
+
+    tekenTekst(pdf, x, y + 5.5, zin.nr, { vet: true });
+    let keuzeX = zinX;
+    for (const keuze of zin.keuzes) {
+      const juist = metOplossingen && keuze.isJuist;
+      pdf.setFont(FONT_FAMILIE, juist ? "bold" : "normal");
+      pdf.setFontSize(13);
+      const keuzeBreedte = pdf.getTextWidth(keuze.tekst) + 6;
+      tekenKader(pdf, keuzeX, y, keuzeBreedte, 8, {
+        vulKleur: juist ? [230, 245, 230] : null,
+        randKleur: juist ? [47, 154, 68] : [103, 118, 132],
+        randDikte: juist ? 0.6 : 0.3,
+        rondeHoeken: 4
+      });
+      tekenTekst(pdf, keuzeX + keuzeBreedte / 2, y + 5.5, keuze.tekst, {
+        size: 13, vet: juist, gecentreerd: true
+      });
+      keuzeX += keuzeBreedte + 3;
+    }
+
+    const lijnX = zinX + layout.inlineVoor;
+    const lijnY = y + layout.lijnOffset;
+    const tekstBaseline = lijnY + 2 * L - 0.5;
+
+    if (layout.voorRegels.length) {
+      tekenTekst(pdf, zinX, y + 16, layout.voorRegels);
+    } else if (zin.voor) {
+      tekenTekst(pdf, zinX, tekstBaseline, zin.voor);
+    }
+
+    tekenSchrijflijn(pdf, lijnX, lijnY, layout.lijnBreedte, lijntype, lijnhoogte);
+    if (metOplossingen && zin.antwoord) {
+      tekenTekst(pdf, lijnX + 2, tekstBaseline, zin.antwoord);
+    }
+
+    if (layout.naRegels.length) {
+      tekenTekst(pdf, zinX, lijnY + 3 * L + 5, layout.naRegels);
+    } else if (zin.na) {
+      const afstand = /^[.,!?;:]/.test(zin.na) ? 0.5 : layout.afstand;
+      tekenTekst(pdf, lijnX + layout.lijnBreedte + afstand, tekstBaseline, zin.na);
+    }
+
+    state.cursorY = y + layout.hoogte;
+  }
+
   /* Teken één zin op kern/verdieping-niveau:
      [nr.]  Tekst vóór [schrijflijn] tekst na.
      
@@ -4393,7 +4334,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     const celBreedte = (breedte - (KOLOMMEN - 1) * KOL_SPACING) / KOLOMMEN;
     
     const PAD = 4;
-    const PLAATJE_HOOGTE = 16;
+    const PLAATJE_HOOGTE = 23;
     const SPACING_PLAATJE_KEUZES = 3;
     const KEUZE_HOOGTE = 7;
     const SPACING_KEUZES_LIJN = 4;
@@ -4542,7 +4483,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     const celBreedte = (breedte - (KOLOMMEN - 1) * KOL_SPACING) / KOLOMMEN;
     
     const PAD = 4;
-    const PLAATJE_HOOGTE = 14;
+    const PLAATJE_HOOGTE = 22;
     const SPACING_PLAATJE_LIJN = 3;
     
     const celHoogte = PAD + PLAATJE_HOOGTE + SPACING_PLAATJE_LIJN + SCHRIJFLIJN_HOOGTE + PAD;
@@ -5067,7 +5008,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     const AFB_SPACING = 3;
     const AFB_BREEDTE_CEL = (breedte - (AFB_KOLOMMEN - 1) * AFB_SPACING) / AFB_KOLOMMEN;
     // Lagere afbeeldingskaders houden ook de onderste schrijflijnen binnen A4.
-    const AFB_HOOGTE_CEL = 18;
+    const AFB_HOOGTE_CEL = 24;
     const afbRijen = Math.ceil(afbeeldingen.length / AFB_KOLOMMEN);
     const afbSectieHoogte = afbRijen * AFB_HOOGTE_CEL + (afbRijen - 1) * AFB_SPACING;
     
@@ -5506,8 +5447,9 @@ window.SpellingHerhalingsbundelPDF = (function() {
     // === Noteer-lijnen — per rij splitsbaar ===
     // We tekenen rij voor rij; rij i bevat noteer[i] uit mini 1 én noteer[i] uit mini 2 
     // (als die bestaan).
+    const noteerRijTussenruimte = 4;
     for (let i = 0; i < maxNoteer; i++) {
-      reserveerRuimte(state, noteerRijHoogte + 2);
+      reserveerRuimte(state, noteerRijHoogte + noteerRijTussenruimte);
       const rijY = state.cursorY;
       
       for (let m = 0; m < mini.length; m++) {
@@ -5538,7 +5480,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
         }
       }
       
-      state.cursorY = rijY + noteerRijHoogte + 2;
+      state.cursorY = rijY + noteerRijHoogte + noteerRijTussenruimte;
     }
     
     state.cursorY += 4;

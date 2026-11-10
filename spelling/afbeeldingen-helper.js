@@ -49,15 +49,18 @@
       }
 
       const src = this.pad(woord, graad);
+      const prenten = window.SpellingAfbeeldingen;
+      const bijschrift = prenten?.prentbijschrift(src);
       // <img> met onerror naar emoji-fallback — gebruik data-attribuut zodat
       // de string-escape niet door HTML-quotes gebroken wordt.
-      return `<img src="${src}" class="${klas} ${klas}-img" 
+      const prent = `<img src="${prenten?.prentbron(src) || src}" class="${klas} ${klas}-img"
               data-fallback-emoji="${emoji}"
               data-fallback-style="${emojiStyle.replace(/"/g, "&quot;")}"
               data-fallback-klas="${klas}"
-              style="width:${grootte}px;height:${grootte}px;object-fit:contain;"
+              ${bijschrift ? "" : `style="width:${grootte}px;max-width:100%;height:${grootte}px;object-fit:contain;"`}
               onerror="(function(img){var s=document.createElement('span');s.className=img.dataset.fallbackKlas+' '+img.dataset.fallbackKlas+'-emoji';s.style.cssText=img.dataset.fallbackStyle;s.textContent=img.dataset.fallbackEmoji;img.replaceWith(s);})(this)"
               alt="${woord.tekst}">`;
+      return bijschrift ? prenten.metPrentbijschrift(src, prent) : prent;
     },
 
     /* Filter een woordenlijst: alleen woorden met afbeelding=true. */

@@ -947,6 +947,9 @@ window.SpellingZijbalk = (function() {
   function renderOefenvormen() {
     const container = document.querySelector("#oefenvorm-selector");
     if (!container) return;
+    const openOefeningen = new Set(
+      Array.from(container.querySelectorAll("details.zb-oefenvorm[open]"), blok => blok.dataset.oef)
+    );
     
     let html = "";
     let verborgenKeuzeGewijzigd = false;
@@ -982,7 +985,7 @@ window.SpellingZijbalk = (function() {
       const beschikbareNiveaus = oef.niveaus;
       
       html += `
-        <details class="zb-oefenvorm ${aan ? 'aan' : ''}" data-oef="${oef.id}" ${aan ? 'open' : ''}>
+        <details class="zb-oefenvorm ${aan ? 'aan' : ''}" data-oef="${oef.id}" ${openOefeningen.has(oef.id) ? 'open' : ''}>
           <summary class="zb-oef-titel">
             <input type="checkbox" class="zb-oef-checkbox" data-oef="${oef.id}" ${aan ? 'checked' : ''}>
             <span class="zb-oef-tekst"><span class="zb-oef-label">${oefLabel}</span><span class="zb-oef-kort">${oefUitleg}</span></span>
@@ -1246,6 +1249,7 @@ window.SpellingZijbalk = (function() {
           // bijvoorbeeld eerst een OTT-basisregel en daarna een gerichte
           // toepassing met dezelfde werkwoorden te laten maken.
           state.aangevinkt = e.target.checked;
+          if (e.target.checked) e.target.closest("details.zb-oefenvorm").open = true;
           // Na een nieuwe doelkeuze zijn oude niveaus bewust gewist. Als de
           // leerkracht nu een oefenvorm aanvinkt, start die vanzelf op het
           // eerste niveau. Zo kan de vorm nooit actief lijken terwijl er
@@ -1271,7 +1275,7 @@ window.SpellingZijbalk = (function() {
             if (!state.aangevinkt) {
               state.aangevinkt = true;
               bewaarState();
-              renderOefenvormen();  // re-render om het hele blok geopend te tonen
+              renderOefenvormen();
               return;
             }
           } else {

@@ -154,8 +154,8 @@
 }
 
 .g2-ov01-plaatje-klein {
-  max-width: 50px;
-  max-height: 50px;
+  max-width: min(100%, 72px);
+  max-height: 72px;
   display: block;
   margin: 0 auto;
 }
@@ -250,8 +250,8 @@
 }
 
 .g2-ov01-plaatje {
-  max-width: 60px;
-  max-height: 60px;
+  max-width: 76px;
+  max-height: 76px;
 }
 
 .g2-ov01-kern-lijn {
@@ -296,8 +296,8 @@
 }
 
 .g2-ov01-zin-plaatje {
-  max-width: 40px;
-  max-height: 40px;
+  max-width: 52px;
+  max-height: 52px;
   vertical-align: middle;
 }
 

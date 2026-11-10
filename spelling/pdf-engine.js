@@ -7,6 +7,37 @@
 
 window.SpellingPDF = {
 
+  bewaarPDF: function(element, opties) {
+    let canvas;
+    let paginaHoogte;
+    return html2pdf().set(opties).from(element).toCanvas()
+      .get("canvas", resultaat => { canvas = resultaat; })
+      .get("pageSize", pagina => { paginaHoogte = Math.floor(canvas.width * pagina?.inner?.ratio); })
+      .toPdf()
+      .get("pdf", pdf => {
+        if (!(paginaHoogte > 0)) return;
+        const ctx = canvas.getContext("2d");
+        // Een rasterrest na de laatste bedrukte pagina kan volledig wit zijn.
+        for (let nummer = pdf.getNumberOfPages(); nummer > 1; nummer--) {
+          const y = (nummer - 1) * paginaHoogte;
+          const hoogte = Math.min(paginaHoogte, canvas.height - y);
+          if (hoogte > 0) {
+            const pixels = ctx.getImageData(0, y, canvas.width, hoogte).data;
+            let wit = true;
+            for (let i = 0; i < pixels.length; i += 4) {
+              if (pixels[i + 3] && (pixels[i] < 255 || pixels[i + 1] < 255 || pixels[i + 2] < 255)) {
+                wit = false;
+                break;
+              }
+            }
+            if (!wit) break;
+          }
+          pdf.deletePage(nummer);
+        }
+      })
+      .save();
+  },
+
   // Wacht op echte afbeeldingsmaten voordat html2pdf pagina-einden berekent.
   bereidAfbeeldingenVoor: async function(element) {
     await Promise.all(Array.from(element.querySelectorAll("img"), img => {
@@ -21,7 +52,7 @@ window.SpellingPDF = {
 
     // Een html2pdf-pagebreak-spacer mag geen losse gridcel worden.
     // Groepeer complete rijen binnen de exportkloon in verplaatsbare blokken.
-    element.querySelectorAll(".ov03-rooster-2kol, .to-prenten").forEach(grid => {
+    element.querySelectorAll(".ov03-rooster-2kol, .to-prenten, .to-codewoorden").forEach(grid => {
       const stijl = getComputedStyle(grid);
       if (stijl.display !== "grid") return;
       const kolommen = stijl.gridTemplateColumns;
@@ -215,7 +246,7 @@ window.SpellingPDF = {
     }
 
     this.bereidAfbeeldingenVoor(element)
-      .then(() => html2pdf().set(pdfOpties).from(element).save())
+      .then(() => this.bewaarPDF(element, pdfOpties))
       .then(() => {
         if (knop) {
           knop.textContent = oudeTekst;

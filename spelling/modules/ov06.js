@@ -403,7 +403,7 @@ window.SpellingModules.ov06 = {
           ? "ov06-keuze-woord ov06-keuze-juist" 
           : "ov06-keuze-woord";
         return `<span class="${klasse}">${o.tekst}</span>`;
-      }).join(" / ");
+      }).join("");
       
       // Zin met streep — gebruik canvas-schrijflijn
       const canvas = sl
