@@ -1,3 +1,472 @@
+const LEES_MEDIA_PATHS = {
+  "images/boot-stil-awake.png": "images/boot-stil-awake.webp",
+  "images/boot-stil-closed.png": "images/boot-stil-closed.webp",
+  "images/boot-stil-cups.png": "images/boot-stil-cups.webp",
+  "images/boot-stil-kajuit.png": "images/boot-stil-kajuit.webp",
+  "images/boot-stil-marbles.png": "images/boot-stil-marbles.webp",
+  "images/boot-stil-music.png": "images/boot-stil-music.webp",
+  "images/boot-stil-oil.png": "images/boot-stil-oil.webp",
+  "images/boot-stil-table.png": "images/boot-stil-table.webp",
+  "images/boot-stil-wrapped.png": "images/boot-stil-wrapped.webp",
+  "images/e4-kapitein-kat/storyboard-remade.png": "images/e4-kapitein-kat/storyboard-remade.webp",
+  "images/e4-molen/storyboard-remade.png": "images/e4-molen/storyboard-remade.webp",
+  "images/e6-kompas/01.png": "images/e6-kompas/01.webp",
+  "images/e6-kompas/02.png": "images/e6-kompas/02.webp",
+  "images/e6-kompas/03.png": "images/e6-kompas/03.webp",
+  "images/e6-kompas/04.png": "images/e6-kompas/04.webp",
+  "images/e6-kompas/05.png": "images/e6-kompas/05.webp",
+  "images/e6-kompas/06.png": "images/e6-kompas/06.webp",
+  "images/e6-kompas/07.png": "images/e6-kompas/07.webp",
+  "images/e6-kompas/08.png": "images/e6-kompas/08.webp",
+  "images/e6-kompas/09.png": "images/e6-kompas/09.webp",
+  "images/e6-kompas/10.png": "images/e6-kompas/10.webp",
+  "images/e6-kompas/11.png": "images/e6-kompas/11.webp",
+  "images/e6-kompas/12.png": "images/e6-kompas/12.webp",
+  "images/e6-kompas/13.png": "images/e6-kompas/13.webp",
+  "images/e6-kompas/14.png": "images/e6-kompas/14.webp",
+  "images/e6-kompas/15.png": "images/e6-kompas/15.webp",
+  "images/e6-kompas/16.png": "images/e6-kompas/16.webp",
+  "images/e6-marsbasis/01.png": "images/e6-marsbasis/01.webp",
+  "images/e6-marsbasis/02.png": "images/e6-marsbasis/02.webp",
+  "images/e6-marsbasis/03.png": "images/e6-marsbasis/03.webp",
+  "images/e6-marsbasis/04.png": "images/e6-marsbasis/04.webp",
+  "images/e6-marsbasis/05.png": "images/e6-marsbasis/05.webp",
+  "images/e6-marsbasis/06.png": "images/e6-marsbasis/06.webp",
+  "images/e6-marsbasis/07.png": "images/e6-marsbasis/07.webp",
+  "images/e6-marsbasis/08.png": "images/e6-marsbasis/08.webp",
+  "images/e6-marsbasis/09.png": "images/e6-marsbasis/09.webp",
+  "images/e6-marsbasis/10.png": "images/e6-marsbasis/10.webp",
+  "images/e6-marsbasis/11.png": "images/e6-marsbasis/11.webp",
+  "images/e6-marsbasis/12.png": "images/e6-marsbasis/12.webp",
+  "images/e6-marsbasis/13.png": "images/e6-marsbasis/13.webp",
+  "images/e6-marsbasis/14.png": "images/e6-marsbasis/14.webp",
+  "images/e6-marsbasis/15.png": "images/e6-marsbasis/15.webp",
+  "images/e6-marsbasis/16.png": "images/e6-marsbasis/16.webp",
+  "images/huizen-leesspel/huis-0.png": "images/huizen-leesspel/huis-0.webp",
+  "images/huizen-leesspel/huis-1.png": "images/huizen-leesspel/huis-1.webp",
+  "images/huizen-leesspel/huis-10.png": "images/huizen-leesspel/huis-10.webp",
+  "images/huizen-leesspel/huis-11.png": "images/huizen-leesspel/huis-11.webp",
+  "images/huizen-leesspel/huis-2.png": "images/huizen-leesspel/huis-2.webp",
+  "images/huizen-leesspel/huis-3.png": "images/huizen-leesspel/huis-3.webp",
+  "images/huizen-leesspel/huis-4.png": "images/huizen-leesspel/huis-4.webp",
+  "images/huizen-leesspel/huis-5.png": "images/huizen-leesspel/huis-5.webp",
+  "images/huizen-leesspel/huis-6.png": "images/huizen-leesspel/huis-6.webp",
+  "images/huizen-leesspel/huis-7.png": "images/huizen-leesspel/huis-7.webp",
+  "images/huizen-leesspel/huis-8.png": "images/huizen-leesspel/huis-8.webp",
+  "images/huizen-leesspel/huis-9.png": "images/huizen-leesspel/huis-9.webp",
+  "images/leesspel-m6/draak-buigt.png": "images/leesspel-m6/draak-buigt.webp",
+  "images/leesspel-m6/draak.png": "images/leesspel-m6/draak.webp",
+  "images/leesspel-m6/kat-duikt.png": "images/leesspel-m6/kat-duikt.webp",
+  "images/leesspel-m6/kat.png": "images/leesspel-m6/kat.webp",
+  "images/leesspel-m6/nar-aai.png": "images/leesspel-m6/nar-aai.webp",
+  "images/leesspel-m6/nar-zwaait.png": "images/leesspel-m6/nar-zwaait.webp",
+  "images/leesspel-m6/nar.png": "images/leesspel-m6/nar.webp",
+  "images/leesspellen/amber.png": "images/leesspellen/amber.webp",
+  "images/leesspellen/ben.png": "images/leesspellen/ben.webp",
+  "images/leesspellen/bob.png": "images/leesspellen/bob.webp",
+  "images/leesspellen/fien.png": "images/leesspellen/fien.webp",
+  "images/leesspellen/glijbanen.png": "images/leesspellen/glijbanen.webp",
+  "images/leesspellen/grijs.png": "images/leesspellen/grijs.webp",
+  "images/leesspellen/lien.png": "images/leesspellen/lien.webp",
+  "images/leesspellen/luna.png": "images/leesspellen/luna.webp",
+  "images/leesspellen/mies-groen.png": "images/leesspellen/mies-groen.webp",
+  "images/leesspellen/mies.png": "images/leesspellen/mies.webp",
+  "images/leesspellen/mo.png": "images/leesspellen/mo.webp",
+  "images/leesspellen/mok.png": "images/leesspellen/mok.webp",
+  "images/leesspellen/noor.png": "images/leesspellen/noor.webp",
+  "images/leesspellen/pip.png": "images/leesspellen/pip.webp",
+  "images/leesspellen/pluis.png": "images/leesspellen/pluis.webp",
+  "images/leesspellen/puk.png": "images/leesspellen/puk.webp",
+  "images/leesspellen/raf.png": "images/leesspellen/raf.webp",
+  "images/leesspellen/roet-groen.png": "images/leesspellen/roet-groen.webp",
+  "images/leesspellen/roet.png": "images/leesspellen/roet.webp",
+  "images/leesspellen/roos.png": "images/leesspellen/roos.webp",
+  "images/leesspellen/sam.png": "images/leesspellen/sam.webp",
+  "images/leesspellen/snor-groen.png": "images/leesspellen/snor-groen.webp",
+  "images/leesspellen/snor.png": "images/leesspellen/snor.webp",
+  "images/leesspellen/stip.png": "images/leesspellen/stip.webp",
+  "images/leesspellen/tik.png": "images/leesspellen/tik.webp",
+  "images/leesspellen/vlek.png": "images/leesspellen/vlek.webp",
+  "images/leesspellen/wolk.png": "images/leesspellen/wolk.webp",
+  "images/leesspellen/yas.png": "images/leesspellen/yas.webp",
+  "images/m4-deur/storyboard-remade.png": "images/m4-deur/storyboard-remade.webp",
+  "images/m4-wolkenwolf/storyboard-remade.png": "images/m4-wolkenwolf/storyboard-remade.webp",
+  "images/m6-boomhut/01.png": "images/m6-boomhut/01.webp",
+  "images/m6-boomhut/02.png": "images/m6-boomhut/02.webp",
+  "images/m6-boomhut/03.png": "images/m6-boomhut/03.webp",
+  "images/m6-boomhut/04.png": "images/m6-boomhut/04.webp",
+  "images/m6-boomhut/05.png": "images/m6-boomhut/05.webp",
+  "images/m6-boomhut/06.png": "images/m6-boomhut/06.webp",
+  "images/m6-boomhut/07.png": "images/m6-boomhut/07.webp",
+  "images/m6-boomhut/08.png": "images/m6-boomhut/08.webp",
+  "images/m6-boomhut/09.png": "images/m6-boomhut/09.webp",
+  "images/m6-boomhut/10.png": "images/m6-boomhut/10.webp",
+  "images/m6-boomhut/11.png": "images/m6-boomhut/11.webp",
+  "images/m6-boomhut/12.png": "images/m6-boomhut/12.webp",
+  "images/m6-boomhut/13.png": "images/m6-boomhut/13.webp",
+  "images/m6-boomhut/14.png": "images/m6-boomhut/14.webp",
+  "images/m6-boomhut/15.png": "images/m6-boomhut/15.webp",
+  "images/m6-boomhut/16.png": "images/m6-boomhut/16.webp",
+  "images/m6-nachtcamera/01.png": "images/m6-nachtcamera/01.webp",
+  "images/m6-nachtcamera/02.png": "images/m6-nachtcamera/02.webp",
+  "images/m6-nachtcamera/03.png": "images/m6-nachtcamera/03.webp",
+  "images/m6-nachtcamera/04.png": "images/m6-nachtcamera/04.webp",
+  "images/m6-nachtcamera/05.png": "images/m6-nachtcamera/05.webp",
+  "images/m6-nachtcamera/06.png": "images/m6-nachtcamera/06.webp",
+  "images/m6-nachtcamera/07.png": "images/m6-nachtcamera/07.webp",
+  "images/m6-nachtcamera/08.png": "images/m6-nachtcamera/08.webp",
+  "images/m6-nachtcamera/09.png": "images/m6-nachtcamera/09.webp",
+  "images/m6-nachtcamera/10.png": "images/m6-nachtcamera/10.webp",
+  "images/m6-nachtcamera/11.png": "images/m6-nachtcamera/11.webp",
+  "images/m6-nachtcamera/12.png": "images/m6-nachtcamera/12.webp",
+  "images/m6-nachtcamera/13.png": "images/m6-nachtcamera/13.webp",
+  "images/m6-nachtcamera/14.png": "images/m6-nachtcamera/14.webp",
+  "images/m6-nachtcamera/15.png": "images/m6-nachtcamera/15.webp",
+  "images/m6-nachtcamera/16.png": "images/m6-nachtcamera/16.webp",
+  "images/pakjeslift-spel/blokken.png": "images/pakjeslift-spel/blokken.webp",
+  "images/pakjeslift-spel/boeken.png": "images/pakjeslift-spel/boeken.webp",
+  "images/pakjeslift-spel/kookpiet.png": "images/pakjeslift-spel/kookpiet.webp",
+  "images/pakjeslift-spel/pakjespiet.png": "images/pakjeslift-spel/pakjespiet.webp",
+  "images/pakjeslift-spel/pannen.png": "images/pakjeslift-spel/pannen.webp",
+  "images/pakjeslift-spel/poppenhuis.png": "images/pakjeslift-spel/poppenhuis.webp",
+  "images/pakjeslift-spel/schip.png": "images/pakjeslift-spel/schip.webp",
+  "images/pakjestrein-spel/keuken.png": "images/pakjestrein-spel/keuken.webp",
+  "images/pakjestrein-spel/kostuumkamer.png": "images/pakjestrein-spel/kostuumkamer.webp",
+  "images/pakjestrein-spel/lading-0.png": "images/pakjestrein-spel/lading-0.webp",
+  "images/pakjestrein-spel/lading-1.png": "images/pakjestrein-spel/lading-1.webp",
+  "images/pakjestrein-spel/lading-2.png": "images/pakjestrein-spel/lading-2.webp",
+  "images/pakjestrein-spel/lading-3.png": "images/pakjestrein-spel/lading-3.webp",
+  "images/pakjestrein-spel/lading-4.png": "images/pakjestrein-spel/lading-4.webp",
+  "images/pakjestrein-spel/lading-5.png": "images/pakjestrein-spel/lading-5.webp",
+  "images/pakjestrein-spel/locomotief-boven.png": "images/pakjestrein-spel/locomotief-boven.webp",
+  "images/pakjestrein-spel/pakjesloods.png": "images/pakjestrein-spel/pakjesloods.webp",
+  "images/pakjestrein-spel/trein.png": "images/pakjestrein-spel/trein.webp",
+  "images/pakjestrein-spel/wagon-boven.png": "images/pakjestrein-spel/wagon-boven.webp",
+  "images/pakjestrein-spel/werkplaats.png": "images/pakjestrein-spel/werkplaats.webp",
+  "images/seizoenen-v2/e3-niezende-zak/01.png": "images/seizoenen-v2/e3-niezende-zak/01.webp",
+  "images/seizoenen-v2/e3-niezende-zak/02.png": "images/seizoenen-v2/e3-niezende-zak/02.webp",
+  "images/seizoenen-v2/e3-niezende-zak/03.png": "images/seizoenen-v2/e3-niezende-zak/03.webp",
+  "images/seizoenen-v2/e3-niezende-zak/04.png": "images/seizoenen-v2/e3-niezende-zak/04.webp",
+  "images/seizoenen-v2/e3-niezende-zak/05.png": "images/seizoenen-v2/e3-niezende-zak/05.webp",
+  "images/seizoenen-v2/e3-niezende-zak/06.png": "images/seizoenen-v2/e3-niezende-zak/06.webp",
+  "images/seizoenen-v2/e3-niezende-zak/07.png": "images/seizoenen-v2/e3-niezende-zak/07.webp",
+  "images/seizoenen-v2/e3-niezende-zak/08.png": "images/seizoenen-v2/e3-niezende-zak/08.webp",
+  "images/seizoenen-v2/e3-niezende-zak/09.png": "images/seizoenen-v2/e3-niezende-zak/09.webp",
+  "images/seizoenen-v2/e3-niezende-zak/10.png": "images/seizoenen-v2/e3-niezende-zak/10.webp",
+  "images/seizoenen-v2/e3-niezende-zak/11.png": "images/seizoenen-v2/e3-niezende-zak/11.webp",
+  "images/seizoenen-v2/e3-niezende-zak/12.png": "images/seizoenen-v2/e3-niezende-zak/12.webp",
+  "images/seizoenen-v2/e3-spook-kat/01.png": "images/seizoenen-v2/e3-spook-kat/01.webp",
+  "images/seizoenen-v2/e3-spook-kat/02.png": "images/seizoenen-v2/e3-spook-kat/02.webp",
+  "images/seizoenen-v2/e3-spook-kat/03.png": "images/seizoenen-v2/e3-spook-kat/03.webp",
+  "images/seizoenen-v2/e3-spook-kat/04.png": "images/seizoenen-v2/e3-spook-kat/04.webp",
+  "images/seizoenen-v2/e3-spook-kat/05.png": "images/seizoenen-v2/e3-spook-kat/05.webp",
+  "images/seizoenen-v2/e3-spook-kat/06.png": "images/seizoenen-v2/e3-spook-kat/06.webp",
+  "images/seizoenen-v2/e3-spook-kat/07.png": "images/seizoenen-v2/e3-spook-kat/07.webp",
+  "images/seizoenen-v2/e3-spook-kat/08.png": "images/seizoenen-v2/e3-spook-kat/08.webp",
+  "images/seizoenen-v2/e3-spook-kat/09.png": "images/seizoenen-v2/e3-spook-kat/09.webp",
+  "images/seizoenen-v2/e3-spook-kat/10.png": "images/seizoenen-v2/e3-spook-kat/10.webp",
+  "images/seizoenen-v2/e3-spook-kat/11.png": "images/seizoenen-v2/e3-spook-kat/11.webp",
+  "images/seizoenen-v2/e3-spook-kat/12.png": "images/seizoenen-v2/e3-spook-kat/12.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/01.png": "images/seizoenen-v2/e4-dansende-pompoen/01.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/02.png": "images/seizoenen-v2/e4-dansende-pompoen/02.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/03.png": "images/seizoenen-v2/e4-dansende-pompoen/03.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/04.png": "images/seizoenen-v2/e4-dansende-pompoen/04.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/05.png": "images/seizoenen-v2/e4-dansende-pompoen/05.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/06.png": "images/seizoenen-v2/e4-dansende-pompoen/06.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/07.png": "images/seizoenen-v2/e4-dansende-pompoen/07.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/08.png": "images/seizoenen-v2/e4-dansende-pompoen/08.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/09.png": "images/seizoenen-v2/e4-dansende-pompoen/09.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/10.png": "images/seizoenen-v2/e4-dansende-pompoen/10.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/11.png": "images/seizoenen-v2/e4-dansende-pompoen/11.webp",
+  "images/seizoenen-v2/e4-dansende-pompoen/12.png": "images/seizoenen-v2/e4-dansende-pompoen/12.webp",
+  "images/seizoenen-v2/e4-sint-rust/01.png": "images/seizoenen-v2/e4-sint-rust/01.webp",
+  "images/seizoenen-v2/e4-sint-rust/02.png": "images/seizoenen-v2/e4-sint-rust/02.webp",
+  "images/seizoenen-v2/e4-sint-rust/03.png": "images/seizoenen-v2/e4-sint-rust/03.webp",
+  "images/seizoenen-v2/e4-sint-rust/04.png": "images/seizoenen-v2/e4-sint-rust/04.webp",
+  "images/seizoenen-v2/e4-sint-rust/05.png": "images/seizoenen-v2/e4-sint-rust/05.webp",
+  "images/seizoenen-v2/e4-sint-rust/06.png": "images/seizoenen-v2/e4-sint-rust/06.webp",
+  "images/seizoenen-v2/e4-sint-rust/07.png": "images/seizoenen-v2/e4-sint-rust/07.webp",
+  "images/seizoenen-v2/e4-sint-rust/08.png": "images/seizoenen-v2/e4-sint-rust/08.webp",
+  "images/seizoenen-v2/e4-sint-rust/09.png": "images/seizoenen-v2/e4-sint-rust/09.webp",
+  "images/seizoenen-v2/e4-sint-rust/10.png": "images/seizoenen-v2/e4-sint-rust/10.webp",
+  "images/seizoenen-v2/e4-sint-rust/11.png": "images/seizoenen-v2/e4-sint-rust/11.webp",
+  "images/seizoenen-v2/e4-sint-rust/12.png": "images/seizoenen-v2/e4-sint-rust/12.webp",
+  "images/seizoenen-v2/e5-pakjeslift/01.png": "images/seizoenen-v2/e5-pakjeslift/01.webp",
+  "images/seizoenen-v2/e5-pakjeslift/02.png": "images/seizoenen-v2/e5-pakjeslift/02.webp",
+  "images/seizoenen-v2/e5-pakjeslift/03.png": "images/seizoenen-v2/e5-pakjeslift/03.webp",
+  "images/seizoenen-v2/e5-pakjeslift/04.png": "images/seizoenen-v2/e5-pakjeslift/04.webp",
+  "images/seizoenen-v2/e5-pakjeslift/05.png": "images/seizoenen-v2/e5-pakjeslift/05.webp",
+  "images/seizoenen-v2/e5-pakjeslift/06.png": "images/seizoenen-v2/e5-pakjeslift/06.webp",
+  "images/seizoenen-v2/e5-pakjeslift/07.png": "images/seizoenen-v2/e5-pakjeslift/07.webp",
+  "images/seizoenen-v2/e5-pakjeslift/08.png": "images/seizoenen-v2/e5-pakjeslift/08.webp",
+  "images/seizoenen-v2/e5-pakjeslift/09.png": "images/seizoenen-v2/e5-pakjeslift/09.webp",
+  "images/seizoenen-v2/e5-pakjeslift/10.png": "images/seizoenen-v2/e5-pakjeslift/10.webp",
+  "images/seizoenen-v2/e5-pakjeslift/11.png": "images/seizoenen-v2/e5-pakjeslift/11.webp",
+  "images/seizoenen-v2/e5-pakjeslift/12.png": "images/seizoenen-v2/e5-pakjeslift/12.webp",
+  "images/seizoenen-v2/e5-pakjeslift/13.png": "images/seizoenen-v2/e5-pakjeslift/13.webp",
+  "images/seizoenen-v2/e5-pakjeslift/14.png": "images/seizoenen-v2/e5-pakjeslift/14.webp",
+  "images/seizoenen-v2/e5-pakjeslift/15.png": "images/seizoenen-v2/e5-pakjeslift/15.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/01.png": "images/seizoenen-v2/e5-verkeerde-deuren/01.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/02.png": "images/seizoenen-v2/e5-verkeerde-deuren/02.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/03.png": "images/seizoenen-v2/e5-verkeerde-deuren/03.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/04.png": "images/seizoenen-v2/e5-verkeerde-deuren/04.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/05.png": "images/seizoenen-v2/e5-verkeerde-deuren/05.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/06.png": "images/seizoenen-v2/e5-verkeerde-deuren/06.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/07.png": "images/seizoenen-v2/e5-verkeerde-deuren/07.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/08.png": "images/seizoenen-v2/e5-verkeerde-deuren/08.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/09.png": "images/seizoenen-v2/e5-verkeerde-deuren/09.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/10.png": "images/seizoenen-v2/e5-verkeerde-deuren/10.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/11.png": "images/seizoenen-v2/e5-verkeerde-deuren/11.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/12.png": "images/seizoenen-v2/e5-verkeerde-deuren/12.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/13.png": "images/seizoenen-v2/e5-verkeerde-deuren/13.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/14.png": "images/seizoenen-v2/e5-verkeerde-deuren/14.webp",
+  "images/seizoenen-v2/e5-verkeerde-deuren/15.png": "images/seizoenen-v2/e5-verkeerde-deuren/15.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/01.png": "images/seizoenen-v2/e6-brief-zonder-naam/01.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/02.png": "images/seizoenen-v2/e6-brief-zonder-naam/02.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/03.png": "images/seizoenen-v2/e6-brief-zonder-naam/03.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/04.png": "images/seizoenen-v2/e6-brief-zonder-naam/04.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/05.png": "images/seizoenen-v2/e6-brief-zonder-naam/05.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/06.png": "images/seizoenen-v2/e6-brief-zonder-naam/06.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/07.png": "images/seizoenen-v2/e6-brief-zonder-naam/07.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/08.png": "images/seizoenen-v2/e6-brief-zonder-naam/08.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/09.png": "images/seizoenen-v2/e6-brief-zonder-naam/09.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/10.png": "images/seizoenen-v2/e6-brief-zonder-naam/10.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/11.png": "images/seizoenen-v2/e6-brief-zonder-naam/11.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/12.png": "images/seizoenen-v2/e6-brief-zonder-naam/12.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/13.png": "images/seizoenen-v2/e6-brief-zonder-naam/13.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/14.png": "images/seizoenen-v2/e6-brief-zonder-naam/14.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/15.png": "images/seizoenen-v2/e6-brief-zonder-naam/15.webp",
+  "images/seizoenen-v2/e6-brief-zonder-naam/16.png": "images/seizoenen-v2/e6-brief-zonder-naam/16.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/01.png": "images/seizoenen-v2/e6-museum-middernacht/01.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/02.png": "images/seizoenen-v2/e6-museum-middernacht/02.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/03.png": "images/seizoenen-v2/e6-museum-middernacht/03.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/04.png": "images/seizoenen-v2/e6-museum-middernacht/04.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/05.png": "images/seizoenen-v2/e6-museum-middernacht/05.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/06.png": "images/seizoenen-v2/e6-museum-middernacht/06.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/07.png": "images/seizoenen-v2/e6-museum-middernacht/07.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/08.png": "images/seizoenen-v2/e6-museum-middernacht/08.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/09.png": "images/seizoenen-v2/e6-museum-middernacht/09.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/10.png": "images/seizoenen-v2/e6-museum-middernacht/10.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/11.png": "images/seizoenen-v2/e6-museum-middernacht/11.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/12.png": "images/seizoenen-v2/e6-museum-middernacht/12.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/13.png": "images/seizoenen-v2/e6-museum-middernacht/13.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/14.png": "images/seizoenen-v2/e6-museum-middernacht/14.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/15.png": "images/seizoenen-v2/e6-museum-middernacht/15.webp",
+  "images/seizoenen-v2/e6-museum-middernacht/16.png": "images/seizoenen-v2/e6-museum-middernacht/16.webp",
+  "images/seizoenen-v2/m4-monster-feest/01.png": "images/seizoenen-v2/m4-monster-feest/01.webp",
+  "images/seizoenen-v2/m4-monster-feest/02.png": "images/seizoenen-v2/m4-monster-feest/02.webp",
+  "images/seizoenen-v2/m4-monster-feest/03.png": "images/seizoenen-v2/m4-monster-feest/03.webp",
+  "images/seizoenen-v2/m4-monster-feest/04.png": "images/seizoenen-v2/m4-monster-feest/04.webp",
+  "images/seizoenen-v2/m4-monster-feest/05.png": "images/seizoenen-v2/m4-monster-feest/05.webp",
+  "images/seizoenen-v2/m4-monster-feest/06.png": "images/seizoenen-v2/m4-monster-feest/06.webp",
+  "images/seizoenen-v2/m4-monster-feest/07.png": "images/seizoenen-v2/m4-monster-feest/07.webp",
+  "images/seizoenen-v2/m4-monster-feest/08.png": "images/seizoenen-v2/m4-monster-feest/08.webp",
+  "images/seizoenen-v2/m4-monster-feest/09.png": "images/seizoenen-v2/m4-monster-feest/09.webp",
+  "images/seizoenen-v2/m4-monster-feest/10.png": "images/seizoenen-v2/m4-monster-feest/10.webp",
+  "images/seizoenen-v2/m4-monster-feest/11.png": "images/seizoenen-v2/m4-monster-feest/11.webp",
+  "images/seizoenen-v2/m4-monster-feest/12.png": "images/seizoenen-v2/m4-monster-feest/12.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/01.png": "images/seizoenen-v2/m4-pakjesglijbaan/01.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/02.png": "images/seizoenen-v2/m4-pakjesglijbaan/02.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/03.png": "images/seizoenen-v2/m4-pakjesglijbaan/03.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/04.png": "images/seizoenen-v2/m4-pakjesglijbaan/04.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/05.png": "images/seizoenen-v2/m4-pakjesglijbaan/05.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/06.png": "images/seizoenen-v2/m4-pakjesglijbaan/06.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/07.png": "images/seizoenen-v2/m4-pakjesglijbaan/07.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/08.png": "images/seizoenen-v2/m4-pakjesglijbaan/08.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/09.png": "images/seizoenen-v2/m4-pakjesglijbaan/09.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/10.png": "images/seizoenen-v2/m4-pakjesglijbaan/10.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/11.png": "images/seizoenen-v2/m4-pakjesglijbaan/11.webp",
+  "images/seizoenen-v2/m4-pakjesglijbaan/12.png": "images/seizoenen-v2/m4-pakjesglijbaan/12.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/01.png": "images/seizoenen-v2/m5-heks-rolschaatsen/01.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/02.png": "images/seizoenen-v2/m5-heks-rolschaatsen/02.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/03.png": "images/seizoenen-v2/m5-heks-rolschaatsen/03.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/04.png": "images/seizoenen-v2/m5-heks-rolschaatsen/04.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/05.png": "images/seizoenen-v2/m5-heks-rolschaatsen/05.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/06.png": "images/seizoenen-v2/m5-heks-rolschaatsen/06.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/07.png": "images/seizoenen-v2/m5-heks-rolschaatsen/07.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/08.png": "images/seizoenen-v2/m5-heks-rolschaatsen/08.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/09.png": "images/seizoenen-v2/m5-heks-rolschaatsen/09.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/10.png": "images/seizoenen-v2/m5-heks-rolschaatsen/10.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/11.png": "images/seizoenen-v2/m5-heks-rolschaatsen/11.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/12.png": "images/seizoenen-v2/m5-heks-rolschaatsen/12.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/13.png": "images/seizoenen-v2/m5-heks-rolschaatsen/13.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/14.png": "images/seizoenen-v2/m5-heks-rolschaatsen/14.webp",
+  "images/seizoenen-v2/m5-heks-rolschaatsen/15.png": "images/seizoenen-v2/m5-heks-rolschaatsen/15.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/01.png": "images/seizoenen-v2/m5-pakjes-drift/01.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/02.png": "images/seizoenen-v2/m5-pakjes-drift/02.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/03.png": "images/seizoenen-v2/m5-pakjes-drift/03.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/04.png": "images/seizoenen-v2/m5-pakjes-drift/04.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/05.png": "images/seizoenen-v2/m5-pakjes-drift/05.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/06.png": "images/seizoenen-v2/m5-pakjes-drift/06.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/07.png": "images/seizoenen-v2/m5-pakjes-drift/07.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/08.png": "images/seizoenen-v2/m5-pakjes-drift/08.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/09.png": "images/seizoenen-v2/m5-pakjes-drift/09.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/10.png": "images/seizoenen-v2/m5-pakjes-drift/10.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/11.png": "images/seizoenen-v2/m5-pakjes-drift/11.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/12.png": "images/seizoenen-v2/m5-pakjes-drift/12.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/13.png": "images/seizoenen-v2/m5-pakjes-drift/13.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/14.png": "images/seizoenen-v2/m5-pakjes-drift/14.webp",
+  "images/seizoenen-v2/m5-pakjes-drift/15.png": "images/seizoenen-v2/m5-pakjes-drift/15.webp",
+  "images/seizoenen-v2/m6-pakjestrein/01.png": "images/seizoenen-v2/m6-pakjestrein/01.webp",
+  "images/seizoenen-v2/m6-pakjestrein/02.png": "images/seizoenen-v2/m6-pakjestrein/02.webp",
+  "images/seizoenen-v2/m6-pakjestrein/03.png": "images/seizoenen-v2/m6-pakjestrein/03.webp",
+  "images/seizoenen-v2/m6-pakjestrein/04.png": "images/seizoenen-v2/m6-pakjestrein/04.webp",
+  "images/seizoenen-v2/m6-pakjestrein/05.png": "images/seizoenen-v2/m6-pakjestrein/05.webp",
+  "images/seizoenen-v2/m6-pakjestrein/06.png": "images/seizoenen-v2/m6-pakjestrein/06.webp",
+  "images/seizoenen-v2/m6-pakjestrein/07.png": "images/seizoenen-v2/m6-pakjestrein/07.webp",
+  "images/seizoenen-v2/m6-pakjestrein/08.png": "images/seizoenen-v2/m6-pakjestrein/08.webp",
+  "images/seizoenen-v2/m6-pakjestrein/09.png": "images/seizoenen-v2/m6-pakjestrein/09.webp",
+  "images/seizoenen-v2/m6-pakjestrein/10.png": "images/seizoenen-v2/m6-pakjestrein/10.webp",
+  "images/seizoenen-v2/m6-pakjestrein/11.png": "images/seizoenen-v2/m6-pakjestrein/11.webp",
+  "images/seizoenen-v2/m6-pakjestrein/12.png": "images/seizoenen-v2/m6-pakjestrein/12.webp",
+  "images/seizoenen-v2/m6-pakjestrein/13.png": "images/seizoenen-v2/m6-pakjestrein/13.webp",
+  "images/seizoenen-v2/m6-pakjestrein/14.png": "images/seizoenen-v2/m6-pakjestrein/14.webp",
+  "images/seizoenen-v2/m6-pakjestrein/15.png": "images/seizoenen-v2/m6-pakjestrein/15.webp",
+  "images/seizoenen-v2/m6-pakjestrein/16.png": "images/seizoenen-v2/m6-pakjestrein/16.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/01.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/01.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/02.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/02.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/03.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/03.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/04.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/04.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/05.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/05.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/06.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/06.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/07.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/07.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/08.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/08.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/09.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/09.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/10.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/10.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/11.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/11.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/12.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/12.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/13.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/13.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/14.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/14.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/15.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/15.webp",
+  "images/seizoenen-v2/m6-schaduw-ontsnapt/16.png": "images/seizoenen-v2/m6-schaduw-ontsnapt/16.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/01.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/01.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/02.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/02.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/03.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/03.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/04.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/04.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/05.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/05.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/06.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/06.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/07.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/07.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/08.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/08.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/09.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/09.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/10.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/10.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/11.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/11.webp",
+  "images/seizoenen/m3-sint-schoen-van-mo-v2/12.png": "images/seizoenen/m3-sint-schoen-van-mo-v2/12.webp",
+  "images/seizoenen/start-sint-bal-v2/01.png": "images/seizoenen/start-sint-bal-v2/01.webp",
+  "images/seizoenen/start-sint-bal-v2/02.png": "images/seizoenen/start-sint-bal-v2/02.webp",
+  "images/seizoenen/start-sint-bal-v2/03.png": "images/seizoenen/start-sint-bal-v2/03.webp",
+  "images/seizoenen/start-sint-bal-v2/04.png": "images/seizoenen/start-sint-bal-v2/04.webp",
+  "images/seizoenen/start-sint-bal-v2/05.png": "images/seizoenen/start-sint-bal-v2/05.webp",
+  "images/seizoenen/start-sint-bal-v2/06.png": "images/seizoenen/start-sint-bal-v2/06.webp",
+  "images/seizoenen/start-sint-bal-v2/07.png": "images/seizoenen/start-sint-bal-v2/07.webp",
+  "images/seizoenen/start-sint-bal-v2/08.png": "images/seizoenen/start-sint-bal-v2/08.webp",
+  "images/speldecor/halloweentuin.png": "images/speldecor/halloweentuin.webp",
+  "images/start-eigen/aap.png": "images/start-eigen/aap.webp",
+  "images/start-eigen/beer.png": "images/start-eigen/beer.webp",
+  "images/start-eigen/boom.png": "images/start-eigen/boom.webp",
+  "images/start-eigen/boot.png": "images/start-eigen/boot.webp",
+  "images/start-eigen/bus.png": "images/start-eigen/bus.webp",
+  "images/start-eigen/doek.png": "images/start-eigen/doek.webp",
+  "images/start-eigen/doos.png": "images/start-eigen/doos.webp",
+  "images/start-eigen/fiets.png": "images/start-eigen/fiets.webp",
+  "images/start-eigen/gaas.png": "images/start-eigen/gaas.webp",
+  "images/start-eigen/geit.png": "images/start-eigen/geit.webp",
+  "images/start-eigen/hout.png": "images/start-eigen/hout.webp",
+  "images/start-eigen/huis.png": "images/start-eigen/huis.webp",
+  "images/start-eigen/ijs.png": "images/start-eigen/ijs.webp",
+  "images/start-eigen/jas.png": "images/start-eigen/jas.webp",
+  "images/start-eigen/kaas.png": "images/start-eigen/kaas.webp",
+  "images/start-eigen/kat.png": "images/start-eigen/kat.webp",
+  "images/start-eigen/kinderen.png": "images/start-eigen/kinderen.webp",
+  "images/start-eigen/kip.png": "images/start-eigen/kip.webp",
+  "images/start-eigen/koe.png": "images/start-eigen/koe.webp",
+  "images/start-eigen/muis.png": "images/start-eigen/muis.webp",
+  "images/start-eigen/neus.png": "images/start-eigen/neus.webp",
+  "images/start-eigen/pen.png": "images/start-eigen/pen.webp",
+  "images/start-eigen/raam.png": "images/start-eigen/raam.webp",
+  "images/start-eigen/riem.png": "images/start-eigen/riem.webp",
+  "images/start-eigen/roos.png": "images/start-eigen/roos.webp",
+  "images/start-eigen/saus.png": "images/start-eigen/saus.webp",
+  "images/start-eigen/schaar.png": "images/start-eigen/schaar.webp",
+  "images/start-eigen/schip.png": "images/start-eigen/schip.webp",
+  "images/start-eigen/spin.png": "images/start-eigen/spin.webp",
+  "images/start-eigen/spoor.png": "images/start-eigen/spoor.webp",
+  "images/start-eigen/stoel.png": "images/start-eigen/stoel.webp",
+  "images/start-eigen/trein.png": "images/start-eigen/trein.webp",
+  "images/start-eigen/uil.png": "images/start-eigen/uil.webp",
+  "images/start-eigen/vis.png": "images/start-eigen/vis.webp",
+  "images/start-eigen/vos.png": "images/start-eigen/vos.webp",
+  "images/start-eigen/vuur.png": "images/start-eigen/vuur.webp",
+  "images/start-eigen/zak.png": "images/start-eigen/zak.webp",
+  "images/start-eigen/zee.png": "images/start-eigen/zee.webp",
+  "images/toverhuis-spel/draak.png": "images/toverhuis-spel/draak.webp",
+  "images/toverhuis-spel/kat.png": "images/toverhuis-spel/kat.webp",
+  "images/toverhuis-spel/pompoen.png": "images/toverhuis-spel/pompoen.webp",
+  "images/toverhuis-spel/spookje.png": "images/toverhuis-spel/spookje.webp",
+  "images/toverhuis-spel/toverhal.png": "images/toverhuis-spel/toverhal.webp",
+  "images/toverhuis-spel/uil.png": "images/toverhuis-spel/uil.webp",
+  "images/woordenschat-m6-e6/adresregel.png": "images/woordenschat-m6-e6/adresregel.webp",
+  "images/woordenschat-m6-e6/doorgang.png": "images/woordenschat-m6-e6/doorgang.webp",
+  "images/woordenschat-m6-e6/draaiboek.png": "images/woordenschat-m6-e6/draaiboek.webp",
+  "images/woordenschat-m6-e6/kier.png": "images/woordenschat-m6-e6/kier.webp",
+  "images/woordenschat-m6-e6/kozijn.png": "images/woordenschat-m6-e6/kozijn.webp",
+  "images/woordenschat-m6-e6/locomotief.png": "images/woordenschat-m6-e6/locomotief.webp",
+  "images/woordenschat-m6-e6/miniatuurschip.png": "images/woordenschat-m6-e6/miniatuurschip.webp",
+  "images/woordenschat-m6-e6/nar.png": "images/woordenschat-m6-e6/nar.webp",
+  "images/woordenschat-m6-e6/sokkel.png": "images/woordenschat-m6-e6/sokkel.webp",
+  "images/woordenschat-m6-e6/verouderd.png": "images/woordenschat-m6-e6/verouderd.webp",
+  "images/woordenschat-m6-e6/vitrine.png": "images/woordenschat-m6-e6/vitrine.webp",
+  "images/woordenschat-m6-e6/wissel.png": "images/woordenschat-m6-e6/wissel.webp",
+  "images/woordenschat-seizoenen/beeft.png": "images/woordenschat-seizoenen/beeft.webp",
+  "images/woordenschat-seizoenen/bestelbon.png": "images/woordenschat-seizoenen/bestelbon.webp",
+  "images/woordenschat-seizoenen/bestemming.png": "images/woordenschat-seizoenen/bestemming.webp",
+  "images/woordenschat-seizoenen/boot-anker.png": "images/woordenschat-seizoenen/boot-anker.webp",
+  "images/woordenschat-seizoenen/boot-maan.png": "images/woordenschat-seizoenen/boot-maan.webp",
+  "images/woordenschat-seizoenen/boot-ster.png": "images/woordenschat-seizoenen/boot-ster.webp",
+  "images/woordenschat-seizoenen/boot-vis.png": "images/woordenschat-seizoenen/boot-vis.webp",
+  "images/woordenschat-seizoenen/bootshaak.png": "images/woordenschat-seizoenen/bootshaak.webp",
+  "images/woordenschat-seizoenen/deinst.png": "images/woordenschat-seizoenen/deinst.webp",
+  "images/woordenschat-seizoenen/drempel.png": "images/woordenschat-seizoenen/drempel.webp",
+  "images/woordenschat-seizoenen/geknakt.png": "images/woordenschat-seizoenen/geknakt.webp",
+  "images/woordenschat-seizoenen/geleider.png": "images/woordenschat-seizoenen/geleider.webp",
+  "images/woordenschat-seizoenen/geruisloos.png": "images/woordenschat-seizoenen/geruisloos.webp",
+  "images/woordenschat-seizoenen/glazuur.png": "images/woordenschat-seizoenen/glazuur.webp",
+  "images/woordenschat-seizoenen/gluurt.png": "images/woordenschat-seizoenen/gluurt.webp",
+  "images/woordenschat-seizoenen/haven.png": "images/woordenschat-seizoenen/haven.webp",
+  "images/woordenschat-seizoenen/klepel.png": "images/woordenschat-seizoenen/klepel.webp",
+  "images/woordenschat-seizoenen/luik.png": "images/woordenschat-seizoenen/luik.webp",
+  "images/woordenschat-seizoenen/ranken.png": "images/woordenschat-seizoenen/ranken.webp",
+  "images/woordenschat-seizoenen/ruim.png": "images/woordenschat-seizoenen/ruim.webp",
+  "images/woordenschat-seizoenen/serre.png": "images/woordenschat-seizoenen/serre.webp",
+  "images/woordenschat-seizoenen/steiger.png": "images/woordenschat-seizoenen/steiger.webp",
+  "images/woordenschat-seizoenen/stoet.png": "images/woordenschat-seizoenen/stoet.webp",
+  "images/woordenschat-seizoenen/vensterbank.png": "images/woordenschat-seizoenen/vensterbank.webp",
+  "images/woordenschat-seizoenen/verklaring.png": "images/woordenschat-seizoenen/verklaring.webp",
+  "images/woordenschat-seizoenen/vertraagt.png": "images/woordenschat-seizoenen/vertraagt.webp",
+  "images/woordenschat-seizoenen/wal.png": "images/woordenschat-seizoenen/wal.webp",
+  "images/woordenschat-seizoenen/wielas.png": "images/woordenschat-seizoenen/wielas.webp",
+  "images/woordenschat-seizoenen/zeil.png": "images/woordenschat-seizoenen/zeil.webp",
+  "images/woorduitleg/afdichting.png": "images/woorduitleg/afdichting.webp",
+  "images/woorduitleg/afvoerrooster.png": "images/woorduitleg/afvoerrooster.webp",
+  "images/woorduitleg/condens.png": "images/woorduitleg/condens.webp",
+  "images/woorduitleg/dassenburcht.png": "images/woorduitleg/dassenburcht.webp",
+  "images/woorduitleg/grijpstok.png": "images/woorduitleg/grijpstok.webp",
+  "images/woorduitleg/inspectiedeur.png": "images/woorduitleg/inspectiedeur.webp",
+  "images/woorduitleg/inspectieluik.png": "images/woorduitleg/inspectieluik.webp",
+  "images/woorduitleg/legenda.png": "images/woorduitleg/legenda.webp",
+  "images/woorduitleg/nachtcamera.png": "images/woorduitleg/nachtcamera.webp",
+  "images/woorduitleg/simulatie.png": "images/woorduitleg/simulatie.webp",
+  "images/woorduitleg/tijdlijn.png": "images/woorduitleg/tijdlijn.webp",
+  "images/woorduitleg/veiligheidsharnas.png": "images/woorduitleg/veiligheidsharnas.webp",
+  "images/woorduitleg/windroos.png": "images/woorduitleg/windroos.webp",
+  "images/woorduitleg/zuurstofsensoren.png": "images/woorduitleg/zuurstofsensoren.webp",
+  "images/zisa-leest.png": "images/zisa-leest.webp",
+  "images/zisa-zebra.png": "images/zisa-zebra.webp"
+};
+function leesMedia(src){
+  if(typeof src!=="string"||!src.startsWith("images/"))return src;
+  return "https://zisa-leesprenten.pages.dev/"+(LEES_MEDIA_PATHS[src]||src);
+}
+
 
 const app = document.querySelector("#app");
 const allBooks = window.ZISA_BOOKS || [];
@@ -306,11 +775,11 @@ function isDiscoverLocked(book){
   return books.find(candidate=>candidate.level===book.level)?.id!==book.id;
 }
 
-function spriteStyle(src){return `background-image:url('${src.src}');--sprite-x:${src.x}%;--sprite-y:${src.y}%;--sprite-w:${src.w||300}%;--sprite-h:${src.h||400}%`}
+function spriteStyle(src){return `background-image:url('${leesMedia(src.src)}');--sprite-x:${src.x}%;--sprite-y:${src.y}%;--sprite-w:${src.w||300}%;--sprite-h:${src.h||400}%`}
 function imageBlock(src, alt){
-  if(typeof src==="string"&&/^images\/(?:seizoenen(?:-v2)?|woordenschat-seizoenen|woordenschat-m6-e6)\//.test(src))return `<img class="seasonal-illustration" src="${escapeAttr(src)}" alt="${escapeAttr(alt)}" decoding="async">`;
+  if(typeof src==="string"&&/^images\/(?:seizoenen(?:-v2)?|woordenschat-seizoenen|woordenschat-m6-e6)\//.test(src))return `<img class="seasonal-illustration" src="${escapeAttr(leesMedia(src))}" alt="${escapeAttr(alt)}" decoding="async">`;
   if(src&&typeof src==="object")return `<div class="story-sprite" role="img" aria-label="${escapeAttr(alt)}" style="${spriteStyle(src)}"></div>`;
-  return `<div class="story-image" role="img" aria-label="${escapeAttr(alt)}" style="background-image:url('${src}')"></div>`;
+  return `<div class="story-image" role="img" aria-label="${escapeAttr(alt)}" style="background-image:url('${leesMedia(src)}')"></div>`;
 }
 
 function renderLibrary(){
@@ -322,7 +791,7 @@ function renderLibrary(){
   currentBook = null;
   app.innerHTML = `
     <section class="hero">
-      <div class="z"><img src="images/zisa-leest.png" alt="Zisa leest in een boek"></div>
+      <div class="z"><img src="${leesMedia("images/zisa-leest.png")}" alt="Zisa leest in een boek"></div>
       <div>
         <h1>Zisa Lezen</h1>
         <p>Kies een niveau en een boek. Lees rustig, kijk goed naar de prenten en voer onderweg kleine leesmissies uit.</p>
@@ -342,7 +811,7 @@ function renderLibrary(){
 
   const grid = document.querySelector("#bookGrid");
   if(!currentLevel){
-    grid.innerHTML=`<section class="choose-level"><img src="images/zisa-leest.png" alt="Zisa leest"><div><h2>Kies eerst je AVI-niveau</h2><p>Daarna verschijnen de boeken die bij jouw leesniveau horen.</p></div></section>`;
+    grid.innerHTML=`<section class="choose-level"><img src="${leesMedia("images/zisa-leest.png")}" alt="Zisa leest"><div><h2>Kies eerst je AVI-niveau</h2><p>Daarna verschijnen de boeken die bij jouw leesniveau horen.</p></div></section>`;
     return;
   }
   if(currentLevel==="START"){
@@ -374,7 +843,7 @@ function renderLibrary(){
       <div class="cover">
         <span class="badge">${book.level}</span>
         ${locked?`<span class="pro-lock">🔒 Enkel in Pro</span>`:""}
-        ${book.startBook?`<div class="start-card-cover tone-${book.coverTone||"blue"}">${book.coverEmoji?`<span class="start-cover-icon" aria-hidden="true">${book.coverEmoji}</span>`:`<img src="${book.coverImage}" alt="">`}<strong>${book.title}</strong><small>AVI START</small></div>`:book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="${spriteStyle(book.cover)}"></div>`:`<img class="cover-image" src="${book.cover}" alt="Voorkaft van ${escapeAttr(book.title)}">`}
+        ${book.startBook?`<div class="start-card-cover tone-${book.coverTone||"blue"}">${book.coverEmoji?`<span class="start-cover-icon" aria-hidden="true">${book.coverEmoji}</span>`:`<img src="${leesMedia(book.coverImage)}" alt="">`}<strong>${book.title}</strong><small>AVI START</small></div>`:book.cover&&typeof book.cover==="object"?`<div class="cover-sprite" role="img" aria-label="Cover van ${escapeAttr(book.title)}" style="${spriteStyle(book.cover)}"></div>`:`<img class="cover-image" src="${leesMedia(book.cover)}" alt="Voorkaft van ${escapeAttr(book.title)}">`}
       </div>
       <div class="cardtext">
         ${book.theme?`<small class="seasonal-label">${book.theme==='sint'?'🎁 Sint':'🎃 Halloween'}</small>`:''}
@@ -409,7 +878,7 @@ function renderBookCover(){
   app.innerHTML=`<div class="reader cover-reader">
     <aside class="rail">
       <span class="lvl">${currentBook.level}</span><small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
-      <div class="book-thumbs">${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="${spriteStyle(book.cover)}"></span>`:`<img class="thumb-image" src="${book.cover}" alt="">`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}</div>
+      <div class="book-thumbs">${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="${spriteStyle(book.cover)}"></span>`:`<img class="thumb-image" src="${leesMedia(book.cover)}" alt="">`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}</div>
     </aside>
     <div><section class="book book-cover-stage">
       <div class="bookhead"><h2>${currentBook.title}</h2><div class="count">Voorkaft</div></div>
@@ -440,7 +909,7 @@ function renderWordStart(){
   if(!game){renderReader();return}
   app.innerHTML=`<section class="mission-stage wordstart-stage">
     <header class="mission-progress"><button id="wordStartBack" aria-label="Terug naar de voorkaft">‹ Voorkaft</button><div><b>Woordstart vóór het verhaal</b><span>Oefen de woorden die straks in het boek staan.</span></div><div class="mission-bar"><i style="width:0"></i></div></header>
-    <div class="mission-card"><img class="mission-zebra" src="images/zisa-leest.png" alt="Zisa leest"><div class="mission-icon">⏱️</div><h2>Tempolezen</h2><div class="mission-question-row"><p class="mission-question">Lees drie keer één minuut en probeer jezelf te verslaan.</p></div><div id="missionActivity"></div><p id="missionFeedback" class="mission-feedback" aria-live="polite"></p><button class="wordstart-skip">Sla over en start het verhaal ›</button></div>
+    <div class="mission-card"><img class="mission-zebra" src="${leesMedia("images/zisa-leest.png")}" alt="Zisa leest"><div class="mission-icon">⏱️</div><h2>Tempolezen</h2><div class="mission-question-row"><p class="mission-question">Lees drie keer één minuut en probeer jezelf te verslaan.</p></div><div id="missionActivity"></div><p id="missionFeedback" class="mission-feedback" aria-live="polite"></p><button class="wordstart-skip">Sla over en start het verhaal ›</button></div>
   </section>`;
   document.querySelector("#wordStartBack").onclick=renderBookCover;
   document.querySelector(".wordstart-skip").onclick=renderReader;
@@ -454,7 +923,7 @@ function renderWordStart(){
 function inlineTaskMarkup(task){
   const answers=task.a.map((answer,index)=>({answer,index}));
   return `<section class="inline-task">
-    <div class="inline-task-head"><img src="images/zisa-zebra.png" alt=""><div><b>Leesvraag</b><span>${task.q}</span></div>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(task.q)}" aria-label="Lees de vraag voor">🔊</button>`:""}</div>
+    <div class="inline-task-head"><img src="${leesMedia("images/zisa-zebra.png")}" alt=""><div><b>Leesvraag</b><span>${task.q}</span></div>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(task.q)}" aria-label="Lees de vraag voor">🔊</button>`:""}</div>
     <div class="inline-answers">${answers.map(({answer,index})=>hasAudioSupport()?`<div class="inline-answer-wrap"><button class="inline-answer" data-answer="${index}">${answer}</button><button class="mini-listen" data-say="${escapeAttr(answer)}" aria-label="Lees ${escapeAttr(answer)} voor">🔊</button></div>`:`<button class="inline-answer" data-answer="${index}">${answer}</button>`).join("")}</div>
     <div class="inline-feedback" aria-live="polite">Kies een antwoord om door te gaan.</div>
   </section>`;
@@ -476,7 +945,7 @@ function renderReader(){
         <span class="lvl">${currentBook.level}</span>
         <small>Boek ${bookNumber} van ${booksAtLevel.length}</small>
         <div class="book-thumbs">
-          ${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="${spriteStyle(book.cover)}"></span>`:`<img class="thumb-image" src="${book.cover}" alt="">`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}
+          ${booksAtLevel.map(book=>{const locked=isDiscoverLocked(book);return `<button class="book-thumb ${book.id===currentBook.id?"on":""} ${locked?"pro-locked":""}" data-book="${book.id}" ${locked?'aria-disabled="true"':`aria-label="Open ${book.title}"`}>${book.cover&&typeof book.cover==="object"?`<span class="cover-sprite" role="img" aria-label="" style="${spriteStyle(book.cover)}"></span>`:`<img class="thumb-image" src="${leesMedia(book.cover)}" alt="">`}<span>${locked?"🔒 Enkel in Pro":book.title}</span></button>`}).join("")}
         </div>
       </aside>
 
@@ -592,7 +1061,7 @@ function renderTask(task, onCorrect, title){
   slot.innerHTML = `
     <section class="task">
       <div class="taskhead">
-        <img class="task-zebra" src="images/zisa-zebra.png" alt="Zisa de zebra">
+        <img class="task-zebra" src="${leesMedia("images/zisa-zebra.png")}" alt="Zisa de zebra">
         <div><h3>${title}</h3><p>${task.q}</p></div>
       </div>
       <div class="answers"></div>
@@ -636,7 +1105,7 @@ function renderMission(){
   const game=games[missionIndex];
   app.innerHTML=`<section class="mission-stage ${currentBook.theme?`seasonal-mission theme-${currentBook.theme}`:""}">
     <header class="mission-progress"><button id="missionBack" aria-label="Terug naar het boek">‹ Boek</button><div><b>Taalreis na het verhaal</b><span>${missionIndex+1} van ${games.length}</span></div><button id="missionFullscreen" class="mission-fullscreen" type="button" aria-label="Open volledig scherm">⛶ <span>Volledig scherm</span></button><div class="mission-bar"><i style="width:${missionIndex/games.length*100}%"></i></div></header>
-    <div class="mission-card"><img class="mission-zebra" src="images/zisa-zebra.png" alt=""><div class="mission-icon">${game.icon||"⭐"}</div><h2>${game.title||"Leesmissie"}</h2>${game.showBookTitle?`<div class="question-book-title"><small>Titel van het verhaal</small><strong>${escapeAttr(currentBook.title)}</strong></div>`:""}${game.context?`<blockquote class="meaning-context">${escapeAttr(game.context)}</blockquote>`:""}<div class="mission-question-row"><p class="mission-question">${game.q}</p>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(`${game.context?`${game.context} `:""}${game.q}`)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="missionActivity"></div><p id="missionFeedback" class="mission-feedback" aria-live="polite"></p></div>
+    <div class="mission-card"><img class="mission-zebra" src="${leesMedia("images/zisa-zebra.png")}" alt=""><div class="mission-icon">${game.icon||"⭐"}</div><h2>${game.title||"Leesmissie"}</h2>${game.showBookTitle?`<div class="question-book-title"><small>Titel van het verhaal</small><strong>${escapeAttr(currentBook.title)}</strong></div>`:""}${game.context?`<blockquote class="meaning-context">${escapeAttr(game.context)}</blockquote>`:""}<div class="mission-question-row"><p class="mission-question">${game.q}</p>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(`${game.context?`${game.context} `:""}${game.q}`)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="missionActivity"></div><p id="missionFeedback" class="mission-feedback" aria-live="polite"></p></div>
   </section>`;
   document.querySelector("#missionBack").textContent="📖 Zoek op in het verhaal";
   document.querySelector("#missionBack").setAttribute("aria-label","Zoek op in het verhaal");
@@ -943,7 +1412,7 @@ function renderFluencyBook(){
   app.innerHTML=`<section class="fluency-shell">
     <header class="fluency-head"><button id="fluencyBack">‹ Taalreis</button><div><b>${currentBook.startBook?"Mijn leesstartboekje":"Mijn vlotleesboekje"}</b><span>${cover?"Voorkaft":`${fluencyIndex+1} van ${pages.length}`}</span></div><div class="fluency-dots">${pages.map((_,i)=>`<i class="${i===fluencyIndex?"on":""}"></i>`).join("")}</div></header>
     <div class="mini-book ${cover?"mini-cover":(page.focus?.length>45||page.a?.some(answer=>answer.length>65))?"fluency-long":""}">
-      <div class="mini-left">${cover&&currentBook.startBook?`<div class="start-mini-cover tone-${currentBook.coverTone||"blue"}"><img src="${currentBook.coverImage}" alt=""><strong>${currentBook.title}</strong><span>AVI START</span></div>`:cover?`<img src="images/zisa-leest.png" alt="Zisa leest"><span>AVI ${currentBook.level}</span>`:currentBook.startBook?`<img class="fluency-illustration" src="${currentBook.method&&(page.pictures||page.imageSrc)?"images/zisa-leest.png":page.iconImage||currentBook.coverImage}" alt=""><h2>${page.title}</h2><p>${currentBook.stage||currentBook.title}</p>`:`<div class="fluency-side-art">${imageBlock(sidePage.image,`Prent uit ${currentBook.title}`)}</div><h2>${page.title}</h2><p>${currentBook.title}</p>`}</div>
+      <div class="mini-left">${cover&&currentBook.startBook?`<div class="start-mini-cover tone-${currentBook.coverTone||"blue"}"><img src="${leesMedia(currentBook.coverImage)}" alt=""><strong>${currentBook.title}</strong><span>AVI START</span></div>`:cover?`<img src="${leesMedia("images/zisa-leest.png")}" alt="Zisa leest"><span>AVI ${currentBook.level}</span>`:currentBook.startBook?`<img class="fluency-illustration" src="${leesMedia(currentBook.method&&(page.pictures||page.imageSrc)?"images/zisa-leest.png":page.iconImage||currentBook.coverImage)}" alt=""><h2>${page.title}</h2><p>${currentBook.stage||currentBook.title}</p>`:`<div class="fluency-side-art">${imageBlock(sidePage.image,`Prent uit ${currentBook.title}`)}</div><h2>${page.title}</h2><p>${currentBook.title}</p>`}</div>
       <article class="mini-right">${cover?`<small>${currentBook.startBook?"AVI START":"BONUSBOEKJE"}</small><h1>${currentBook.startBook?currentBook.title:"Lees vlot<br>en mooi"}</h1><p>${currentBook.startBook?currentBook.blurb:`${pages.length} korte oefenbladzijden die aansluiten bij jouw verhaal.`}</p><small>${pages.length} oefenbladzijden</small><button class="fluency-next" id="fluencyStart">Open het boekje ›</button>`:`<h2>${page.title}</h2>${page.context?`<blockquote class="meaning-context">${escapeAttr(page.context)}</blockquote>`:""}<div class="fluency-question-row"><p class="fluency-question">${page.q}</p>${hasAudioSupport()?`<button class="listen-btn" data-say="${escapeAttr(`${page.context?`${page.context} `:""}${page.q}`)}" aria-label="Lees de opdracht voor">🔊</button>`:""}</div><div id="fluencyActivity"></div><p id="fluencyFeedback" aria-live="polite"></p>`}</article>
     </div></section>`;
   document.querySelector("#fluencyBack").textContent=currentBook.startBook?"‹ Bibliotheek":"‹ Taalreis";
@@ -966,7 +1435,7 @@ function orderedFluencyChoices(entries,correctIndex){
 function renderFluencyPage(page,total){
   const activity=document.querySelector("#fluencyActivity");
   if(page.audioPrompt){const listen=makeListenButton(page.audioPrompt,"Beluister het woord");listen.textContent="🔊 Luister naar het woord";listen.classList.add("start-audio-prompt");activity.append(listen)}
-  if(page.imageSrc){const prompt=document.createElement("img");prompt.className="start-picture-prompt start-picture-img";prompt.src=page.imageSrc;prompt.alt=page.imageAlt||"Prent bij de vraag";activity.append(prompt)}
+  if(page.imageSrc){const prompt=document.createElement("img");prompt.className="start-picture-prompt start-picture-img";prompt.src=leesMedia(page.imageSrc);prompt.alt=page.imageAlt||"Prent bij de vraag";activity.append(prompt)}
   if(page.imagePrompt){const prompt=document.createElement("div");prompt.className="start-picture-prompt";prompt.setAttribute("role","img");prompt.setAttribute("aria-label","Prent bij de vraag");prompt.textContent=page.imagePrompt;activity.append(prompt)}
   if(page.text&&!page.pictures&&page.a){const sentence=document.createElement("div");sentence.className="fluency-read main";sentence.textContent=page.text;activity.append(sentence)}
   if(page.focus){
@@ -1019,7 +1488,7 @@ function renderFluencyPage(page,total){
     const listen=makeListenButton(page.text,"Lees de zin voor");listen.classList.add("fluency-listen");listen.onclick=event=>{event.stopPropagation();speak(page.text,text)};activity.append(listen);
     const choices=document.createElement("div");choices.className="fluency-picture-choices";activity.append(choices);
     orderedFluencyChoices(page.pictures.map((picture,index)=>({picture,index})),page.correct).forEach(({picture,index})=>{
-      const button=document.createElement("button");button.innerHTML=picture.icon?`<span class="start-picture-choice" aria-hidden="true">${picture.icon}</span>`:`<img src="${picture.src}" alt="${escapeAttr(picture.alt)}">`;button.setAttribute("aria-label",picture.alt);button.onclick=()=>{
+      const button=document.createElement("button");button.innerHTML=picture.icon?`<span class="start-picture-choice" aria-hidden="true">${picture.icon}</span>`:`<img src="${leesMedia(picture.src)}" alt="${escapeAttr(picture.alt)}">`;button.setAttribute("aria-label",picture.alt);button.onclick=()=>{
         if(index!==page.correct){button.classList.add("wrong");document.querySelector("#fluencyFeedback").textContent=page.hint||"Lees de zin nog eens en kijk heel goed.";setTimeout(()=>button.classList.remove("wrong"),550);return}
         button.classList.add("correct");choices.querySelectorAll("button").forEach(item=>item.disabled=true);fluencyScore++;document.querySelector("#fluencyFeedback").textContent=page.good||"Juist! Deze prent past bij de zin.";addFluencyNext(total)
       };choices.append(button)
