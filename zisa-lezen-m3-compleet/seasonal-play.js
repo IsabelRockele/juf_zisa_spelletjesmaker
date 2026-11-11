@@ -20,14 +20,14 @@ function renderSeasonalPlay(game,activity){
     const status=document.createElement('span');status.textContent=`${step} / ${count}`;progress.append(status);
     for(let i=0;i<count;i++){
       const mark=document.createElement('span');mark.className='compact-mark'+(i<step?' filled':'');
-      if(comic&&i<step){const img=document.createElement('img');img.src=game.frames[i].image;img.alt=`Prent ${i+1} geplaatst`;mark.append(img);}else mark.textContent=i<step?'✓':String(i+1);
+      if(comic&&i<step){const img=document.createElement('img');img.src=leesMedia(game.frames[i].image);img.alt=`Prent ${i+1} geplaatst`;mark.append(img);}else mark.textContent=i<step?'✓':String(i+1);
       progress.append(mark);
     }
     if(step===count){const win=document.createElement('div');win.className='compact-win';win.textContent='Gelukt!';stage.append(win);return;}
     if(comic){
       order.forEach(i=>{
         const button=document.createElement('button');button.type='button';button.className='compact-frame';button.dataset.frame=i;button.disabled=i<step;button.setAttribute('aria-label',game.frames[i].text);
-        const img=document.createElement('img');img.src=game.frames[i].image;img.alt='';
+        const img=document.createElement('img');img.src=leesMedia(game.frames[i].image);img.alt='';
         const text=document.createElement('span');text.textContent=i<step?'✓':game.frames[i].text.split(/(?<=[.!?])\s+|\n/)[0];
         button.append(img,text);button.onclick=()=>accept(i,button);stage.append(button);
       });
@@ -73,7 +73,7 @@ function renderPictureSorting(game,root){
   function piece(index){
     const button=document.createElement('button');button.type='button';button.className='sorting-piece';button.dataset.frame=index;button.draggable=true;
     button.setAttribute('aria-label',game.frames[index].text);button.setAttribute('aria-pressed',String(selected===index));
-    const img=document.createElement('img');img.src=game.frames[index].image;img.alt=game.frames[index].text;img.draggable=false;button.append(img);
+    const img=document.createElement('img');img.src=leesMedia(game.frames[index].image);img.alt=game.frames[index].text;img.draggable=false;button.append(img);
     if(selected===index)button.classList.add('selected');
     button.ondragstart=e=>{selected=index;e.dataTransfer.setData('text/plain',String(index));e.dataTransfer.effectAllowed='move';};
     button.onclick=e=>{e.stopPropagation();if(selected!==null&&selected!==index&&placed.includes(index)){move(selected,placed.indexOf(index));return;}selected=selected===index?null:index;draw();};
