@@ -11,6 +11,7 @@
     .reading{margin-top:18px;padding:14px 22px;background:linear-gradient(120deg,#dff4fb,#fff4c9);border:1px solid #b7dcea;border-radius:22px;display:flex;align-items:center;gap:18px;box-shadow:0 12px 34px #23496d12}.reading .icon{width:104px;height:104px;flex:0 0 104px;border-radius:24px;overflow:hidden}.reading .icon img{display:block;width:100%;height:100%;object-fit:cover}.reading h2{margin:0 0 5px}.reading p{margin:0;color:var(--muted);line-height:1.45}.reading .btn{margin-left:auto;min-width:170px}@media(max-width:720px){.reading{align-items:center;flex-wrap:wrap}.reading .icon{width:82px;height:82px;flex-basis:82px;border-radius:19px}.reading .btn{margin-left:0;width:100%}}
   </style>
 <script src="spelen/oefenlinks.js?v=1"></script>
+<link rel="stylesheet" href="assets/klasposter.css?v=20261111-poster1"><script src="assets/vendor/qrcode.min.js" defer></script>
 </head>
 <body>
   <header class="top"><strong>🎮 Zisa Spelen</strong><a href="index.html">← Terug naar de gratis tools</a></header>
@@ -24,14 +25,15 @@
         <label class="check"><input type="checkbox" value="3" checked><div><b>Derde leerjaar (groep 5)</b><span>Tafelspellen, Fizz Rekenrun en geld</span></div></label>
         <label class="check"><input type="checkbox" value="4" checked><div><b>Vierde leerjaar (groep 6)</b><span>Rekenkern, Fizz Rekenrun en breuken</span></div></label>
       </div><div style="margin-top:16px"><label for="exercise"><b>Waar moet de link openen?</b></label><select id="exercise" style="display:block;width:100%;margin-top:8px;padding:12px;border:1px solid #aac1d4;border-radius:10px;font:inherit"><option value="">Alle spellen van de gekozen leerjaren</option></select><p class="muted">Kies een oefenvorm en kopieer de link of druk de bijbehorende QR af. Leerlingen openen meteen dat spel.</p></div><div class="note"><b>Geen leerlinglimiet</b><br>Er worden geen leerlingnamen of toestellen geregistreerd. Dezelfde QR mag door de hele klas gebruikt worden.</div></section>
-      <section class="card"><h2>QR-code voor de kinderen</h2><p class="muted">Kinderen krijgen alleen de spellen te zien, nooit de leerkrachtomgeving.</p><div class="qr" id="qr"></div><div class="url" id="url"></div><div class="actions"><a class="btn" id="open" target="_blank" rel="noopener">Zelf openen</a><button class="btn secondary" id="copy" type="button">Link kopiëren</button><button class="btn secondary" id="print" type="button">QR afdrukken</button></div><div class="feedback" id="feedback"></div></section>
+      <section class="card"><h2>QR-code voor de kinderen</h2><p class="muted">Kinderen krijgen alleen de spellen te zien, nooit de leerkrachtomgeving.</p><div class="qr" id="qr"></div><div class="url" id="url"></div><div class="actions"><a class="btn" id="open" target="_blank" rel="noopener">Zelf openen</a><button class="btn secondary" id="copy" type="button">Link kopiëren</button><button class="btn secondary" id="print" type="button">Klasposter afdrukken</button></div><div class="feedback" id="feedback"></div></section>
     </div>
   </main>
-  <script>
+  <script type="module">
+    import { printClassPoster } from "./assets/klasposter.js?v=20261111-poster1";
     const checks=[...document.querySelectorAll('.check input')],qr=document.getElementById('qr'),urlText=document.getElementById('url'),openButton=document.getElementById('open'),feedback=document.getElementById('feedback');
     function makeUrl(){const grades=checks.filter(input=>input.checked).map(input=>input.value).join('')||'1';const url=new URL('spelen/',location.href);url.searchParams.set('gratis','1');url.searchParams.set('leerjaren',grades);return ZisaPlayLinks.url(url.href,document.getElementById('exercise').value)}
     function render(){if(!checks.some(input=>input.checked))checks[0].checked=true;ZisaPlayLinks.fill(document.getElementById('exercise'),checks.filter(input=>input.checked).map(input=>Number(input.value)));const url=makeUrl();urlText.textContent=url;openButton.href=url;qr.replaceChildren();if(window.QRCode)new QRCode(qr,{text:url,width:220,height:220,colorDark:'#17324d',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M})}
-    document.getElementById('exercise').addEventListener('change',render);checks.forEach(input=>input.addEventListener('change',render));window.addEventListener('load',render);document.getElementById('copy').onclick=async()=>{await navigator.clipboard.writeText(makeUrl());feedback.textContent='De leerlinglink is gekopieerd.'};document.getElementById('print').onclick=()=>window.print();
+    document.getElementById('exercise').addEventListener('change',render);checks.forEach(input=>input.addEventListener('change',render));window.addEventListener('load',render);document.getElementById('copy').onclick=async()=>{await navigator.clipboard.writeText(makeUrl());feedback.textContent='De leerlinglink is gekopieerd.'};document.getElementById('print').onclick=()=>printClassPoster(makeUrl(),'spelen',checks.filter(input=>input.checked).map(input=>Number(input.value)));
   </script>
 </body>
 </html>

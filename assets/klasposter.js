@@ -38,12 +38,12 @@ export async function printClassPoster(url, theme, grades = []) {
 
   const row = poster.querySelector('.klasposter-mascots');
   if (theme === 'lezen') {
-    row.innerHTML = '<img src="../zisa-lezen-m3-compleet/images/zisa-leest.png" alt="Zisa leest een boek">';
+    row.innerHTML = `<img src="${new URL("../zisa-lezen-m3-compleet/images/zisa-leest.png", import.meta.url).href}" alt="Zisa leest een boek">`;
   } else {
     row.innerHTML = mascots.map(([name, file], index) => {
       const grade = index + 1;
       if (!grades.includes(grade)) return '';
-      return `<figure><img src="../spelen/games/start_afbeeldingen/${file}" alt="${name}">
+      return `<figure><img src="${new URL("../spelen/games/start_afbeeldingen/" + file, import.meta.url).href}" alt="${name}">
         <figcaption>Leerjaar ${grade}</figcaption></figure>`;
     }).join('');
   }
