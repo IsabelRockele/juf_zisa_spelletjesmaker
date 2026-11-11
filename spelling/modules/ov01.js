@@ -290,7 +290,7 @@ window.SpellingModules.ov01 = {
 
       const aantalLijnen = this._lijnenPerNiveau[niveau] || 1;
 
-      const stappenHTML = this._renderStappen(niveau, woorden);
+      const stappenHTML = this._renderStappen(niveau, woorden, gekozenWoorden);
       const plaatjesHTML = this._renderPlaatjesRooster(woorden, niveau, aantalLijnen, lijnhoogte, lijntype, metAntwoorden);
       let verdiepingHTML = "";
       if (niveau === "verdieping") {
@@ -343,7 +343,46 @@ window.SpellingModules.ov01 = {
   },
 
   /* ----- 3 stappen per niveau, met aanvinkrechthoekjes ----- */
-  _renderStappen: function(niveau, woorden = []) {
+  _prentOpdracht: function(woorden) {
+    const snapshot = window._spellingCategorieIdsSnapshot;
+    const categorieIds = snapshot?.length
+      ? snapshot
+      : [...new Set(woorden.map(w => w.categorie).filter(Boolean))];
+    const categorieen = window.SpellingWoordenbibliotheek?.graad1 || {};
+    const benoemdeKlanken = new Set(["aai", "ooi", "oei", "eeuw", "ieuw", "uw"]);
+    const doelen = [];
+    const tweetekenklanken = [];
+    for (const id of categorieIds) {
+      const groep = categorieen[id]?.groep;
+      const klank = window.SpellingKlank?.CATEGORIE_NAAR_KLANK[id]?.klank;
+      if (groep === "korte-klanken" || /^mkm-[aeiou]$/.test(id)) {
+        doelen.push("een korte klank");
+      } else if (groep === "lange-klanken" || /^lk-/.test(id)) {
+        doelen.push("een lange klank");
+      } else if (id.startsWith("tw-")) {
+        const letters = id.slice(3);
+        if (benoemdeKlanken.has(letters)) doelen.push(letters);
+        else tweetekenklanken.push(letters);
+      } else if (klank) {
+        doelen.push(klank);
+      } else {
+        // Bij een gemengde selectie mag de hint geen categorie uitsluiten.
+        return "Bekijk de prent.";
+      }
+    }
+    const verbind = lijst => lijst.length < 2
+      ? lijst.join("")
+      : lijst.slice(0, -1).join(", ") + " of " + lijst[lijst.length - 1];
+    if (tweetekenklanken.length) {
+      doelen.push("een tweetekenklank (" + verbind([...new Set(tweetekenklanken)]) + ")");
+    }
+    const uniekeDoelen = [...new Set(doelen)];
+    return uniekeDoelen.length
+      ? "Zoek bij elke prent een woord met " + verbind(uniekeDoelen) + "."
+      : "Bekijk de prent.";
+  },
+
+  _renderStappen: function(niveau, woorden = [], gekozenWoorden = woorden) {
     let stappen, opdrachtLabel;
     if (niveau === "basis") {
       opdrachtLabel = "Opdracht:";
@@ -375,6 +414,13 @@ window.SpellingModules.ov01 = {
       ];
     }
     
+    const prentOpdracht = this._prentOpdracht(gekozenWoorden);
+    if (niveau === "basis" && prentOpdracht !== "Bekijk de prent.") {
+      stappen[0] = prentOpdracht + " Kleur het juiste woord.";
+    } else {
+      stappen = stappen.map(stap => stap === "Bekijk de prent." ? prentOpdracht : stap);
+    }
+
     if (woorden.some(w => w.lidwoord)) {
       const schrijfOpdracht = woorden.every(w => w.lidwoord)
         ? "Schrijf het woord met de of het op."
