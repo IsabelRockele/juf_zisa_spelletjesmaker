@@ -1047,6 +1047,15 @@ window.SpellingZijbalk = (function() {
       const heeftVastePlafonds = !!window.SpellingModules?.[oef.id]?._maxPerNiveau;
       if (oef.thema) {
         html += window.SpellingThemaOefeningen.instellingen(oef.thema, state);
+      } else if (!inHerhalingsModusCheck && oef.id === "ov01") {
+        const aantal = [3, 6, 9].includes(state.aantal) ? state.aantal : 9;
+        html += `<div class="zb-oef-rij">
+          <label for="zb-ov01-aantal">Aantal woorden:</label>
+          <select id="zb-ov01-aantal" class="zb-oef-aantal" data-oef="ov01">
+            ${[3, 6, 9].map(n => `<option value="${n}" ${n === aantal ? "selected" : ""}>${n} woorden</option>`).join("")}
+          </select>
+        </div>
+        <div class="zb-oef-rij zb-oef-info"><small>3 woorden per rij. Standaard 9 woorden.</small></div>`;
       } else if (!inHerhalingsModusCheck && oef.id !== "weekdictee" && !heeftVastePlafonds) {
         html += `
           <div class="zb-oef-rij">

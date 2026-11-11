@@ -1826,13 +1826,6 @@ window.SpellingHerhalingsbundelPDF = (function() {
       return;
     }
     
-    // OV04 is een groot werkblad — start op een nieuwe pagina als er al 
-    // andere oefeningen op de huidige pagina staan. Het eerste item van de 
-    // bundel begint gewoon na de doc-header.
-    if (state.itemIndex > 0) {
-      nieuwePagina(state);
-    }
-    
     // --- 1. Opdracht-kader ---
     const stappen = _haalOpdrachtStappen(itemEl, "ov04");
     const opdrachtStappen = stappen.length > 0 ? stappen :
@@ -5801,7 +5794,6 @@ window.SpellingHerhalingsbundelPDF = (function() {
     const items = opties.items || [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      state.itemIndex = i;
       const ovId = item.ovId || "onbekend";
       const renderer = ovRenderers[ovId];
       if (renderer) {

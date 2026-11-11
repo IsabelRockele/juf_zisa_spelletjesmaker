@@ -182,7 +182,9 @@ window.SpellingBundel = {
     // op de zijbalk-keuze (oef.aantal).
     const moduleVoorMax = window.SpellingModules?.[oef.id];
     const maxVoorNiveau = moduleVoorMax?._maxPerNiveau?.[niveau];
-    const initieelAantal = (typeof maxVoorNiveau === "number") ? maxVoorNiveau : oef.aantal;
+    const initieelAantal = oef.id === "ov01"
+      ? ([3, 6, 9].includes(oef.aantal) ? oef.aantal : 9)
+      : (typeof maxVoorNiveau === "number") ? maxVoorNiveau : oef.aantal;
     
     // Per-oefenvorm sub-object dat module verwacht (oef01, ov06 etc)
     const subOpties = {
