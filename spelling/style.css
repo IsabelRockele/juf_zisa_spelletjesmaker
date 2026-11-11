@@ -444,6 +444,13 @@ body {
 }
 
 /* ===== Actie knoppen ===== */
+.spelling-opdracht-doel {
+  margin: 0 0 8px;
+  color: #203b55;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 .actie-knoppen {
   display: flex;
   flex-direction: column;

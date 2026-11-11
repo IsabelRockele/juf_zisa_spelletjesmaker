@@ -5,6 +5,53 @@
 
 window.SpellingKlank = {
 
+  voegOpdrachtDoelToe: function(html, opties, woorden = [], categorieIds) {
+    const ids = categorieIds?.length ? categorieIds
+      : window._spellingCategorieIdsSnapshot?.length ? window._spellingCategorieIdsSnapshot
+      : [...new Set(woorden.map(w => w.categorie).filter(Boolean))];
+    if (!ids.length) return html;
+    const prentOpdracht = opties.categorie === "ov01"
+      ? window.SpellingModules?.ov01?._prentOpdracht?.(woorden) : null;
+    if (prentOpdracht && prentOpdracht !== "Bekijk de prent.") return html;
+    const bibliotheek = window.SpellingWoordenbibliotheek?.["graad" + (opties.graad || 1)] || {};
+    const doelen = [];
+    const lettergroepen = [];
+    const tweetekenklanken = [];
+    const losBenoemen = new Set(["aai", "ooi", "oei", "eeuw", "ieuw", "uw"]);
+    for (const id of ids) {
+      const cat = bibliotheek[id];
+      if (!cat) continue;
+      const letters = id.startsWith("tw-") ? id.slice(3)
+        : cat.naam.match(/^([a-z]+)-woorden$/)?.[1];
+      if (cat.groep === "korte-klanken") doelen.push("woorden met een korte klank");
+      else if (cat.groep === "lange-klanken") doelen.push("woorden met een lange klank");
+      else if (letters && losBenoemen.has(letters)) lettergroepen.push(letters);
+      else if (id.startsWith("tw-")) tweetekenklanken.push(letters);
+      else if (letters) doelen.push("woorden met " + letters);
+      else doelen.push(cat.naam.charAt(0).toLowerCase() + cat.naam.slice(1));
+    }
+    const verbind = lijst => lijst.length < 2 ? lijst.join("")
+      : lijst.slice(0, -1).join(", ") + " en " + lijst[lijst.length - 1];
+    if (lettergroepen.length) doelen.push("woorden met " + verbind([...new Set(lettergroepen)]));
+    if (tweetekenklanken.length) doelen.push("woorden met de tweetekenklanken " + verbind([...new Set(tweetekenklanken)]));
+    const tekst = verbind([...new Set(doelen)]);
+    if (!tekst) return html;
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    container.querySelectorAll(".werkblad").forEach(blad => {
+      if (blad.querySelector(".spelling-opdracht-doel")) return;
+      const stappen = blad.querySelector(".ov01-stappen, .g2-ov01-stappen, .opdracht");
+      if (!stappen) return;
+      const doel = document.createElement(stappen.tagName === "OL" ? "li" : "div");
+      doel.className = "spelling-opdracht-doel";
+      doel.textContent = "Je oefent " + tekst + ".";
+      const label = stappen.querySelector(".ov01-stappen-label");
+      if (label) label.after(doel);
+      else stappen.prepend(doel);
+    });
+    return container.innerHTML;
+  },
+
   CATEGORIE_NAAR_KLANK: {
     "mkm-a": { klank: "a", soort: "kort", specifiek: "kort-a" },
     "mkm-i": { klank: "i", soort: "kort", specifiek: "kort-i" },

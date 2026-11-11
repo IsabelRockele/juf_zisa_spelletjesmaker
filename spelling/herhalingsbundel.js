@@ -363,6 +363,9 @@ window.SpellingHerhalingsbundel = (function() {
         }
       };
       werkbladHTML = mod.genereerBlad(opties, item.metAntwoorden || false);
+      werkbladHTML = window.SpellingKlank.voegOpdrachtDoelToe(werkbladHTML,
+        { categorie: item.ovId, graad: item.graad }, item.gekozenWoordenSnapshot || [],
+        item.gekozenCategorieIdsSnapshot);
     } catch (e) {
       werkbladHTML = `<div class="hb-item-fout">Fout bij renderen: ${e.message}</div>`;
     } finally {
@@ -813,6 +816,7 @@ window.SpellingHerhalingsbundel = (function() {
       niveau: niveau,
       graad: graad,
       aantal: aantal || null,
+      gekozenCategorieIdsSnapshot: zb?.getAangevinkteCategorieIds?.() || [],
       gekozenWoordenSnapshot: JSON.parse(JSON.stringify(gededupliceerd)),  // hele pool, ontdubbeld
       actieveWoorden: null,    // wordt na eerste render gevuld met de daadwerkelijk getoonde woorden
       extraWoorden: [],         // woorden via ➕ toegevoegd

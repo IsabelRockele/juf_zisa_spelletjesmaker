@@ -600,7 +600,9 @@ window.SpellingBundel = {
       : null;
     
     try {
-      return module.genereerBlad(item.opties, metAntwoorden);
+      const html = module.genereerBlad(item.opties, metAntwoorden);
+      return window.SpellingKlank.voegOpdrachtDoelToe(html, item.opties,
+        window._weekdictee_gekozenWoorden || [], item.gekozenCategorieIdsSnapshot);
     } finally {
       window._weekdictee_gekozenWoorden = origineel;
       window._spellingCategorieIdsSnapshot = origineleCategorieIds;

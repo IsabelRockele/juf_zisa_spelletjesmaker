@@ -1002,6 +1002,8 @@ window.SpellingHerhalingsbundelPDF = (function() {
       });
     }
     
+    const doel = opdrachtBlok.querySelector(".spelling-opdracht-doel")?.textContent.trim();
+    if (doel && !stappen.includes(doel)) stappen.unshift(doel);
     return stappen;
   }
   

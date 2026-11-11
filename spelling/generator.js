@@ -299,7 +299,7 @@ window.SpellingGenerator = {
         window._weekdictee_gekozenWoorden = origPool;
       }
     }
-    return resultaat;
+    return window.SpellingKlank.voegOpdrachtDoelToe(resultaat, opties, origPool || []);
   },
 
   _laatsteSeed: null
