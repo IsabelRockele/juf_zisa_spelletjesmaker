@@ -1,7 +1,7 @@
 const $ = id => document.getElementById(id);
 const colors = ['#df784f', '#4b9dc5', '#65aa79', '#a48ad6'];
 const defaults = ['Vuurridders', 'Waterridders', 'Bosridders', 'Sterrenridders'];
-const knightImages = ['ridder.png', 'ridder-water.png', 'ridder-bos.png', 'ridder-ster.png'];
+const knightImages = ['https://zisa-drakenprenten.pages.dev/drakeneiland/ridder.png', 'https://zisa-drakenprenten.pages.dev/drakeneiland/ridder-water.png', 'https://zisa-drakenprenten.pages.dev/drakeneiland/ridder-bos.png', 'https://zisa-drakenprenten.pages.dev/drakeneiland/ridder-ster.png'];
 let state = null, sound = false, audioContext, lastTick = 0;
 const names = [...defaults];
 let setupWorld = 'dragon';
@@ -35,8 +35,8 @@ function refreshWorld() {
   $('movementOn').textContent=`Aan — doe de ${movementCharacter(id).label} na`;
   $('movementPreload').replaceChildren();
   const moveKey=movementCharacter(id).key;
-  if(moveKey!=='knight') for(const motion of ['jump','knees','squat']) {const img=document.createElement('img');img.src=`werelden/bewegen-${moveKey}-${motion}.png`;img.alt='';$('movementPreload').append(img);}
-  if(tug) for(const side of ['left','right']) for(const pose of ['won','rest']) {const img=document.createElement('img');img.src=`werelden/tug-${side}-${pose}.png`;img.alt='';$('movementPreload').append(img);}
+  if(moveKey!=='knight') for(const motion of ['jump','knees','squat']) {const img=document.createElement('img');img.src=`https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/bewegen-${moveKey}-${motion}.png`;img.alt='';$('movementPreload').append(img);}
+  if(tug) for(const side of ['left','right']) for(const pose of ['won','rest']) {const img=document.createElement('img');img.src=`https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/tug-${side}-${pose}.png`;img.alt='';$('movementPreload').append(img);}
   for(const card of $('worldCards').children) card.setAttribute('aria-pressed',card.dataset.world===id);
   renderNames();
 }
@@ -76,9 +76,9 @@ function renderNames() {
 $('operation').onchange = updateSettings; $('range').onchange = updateSettings; $('teamCount').onchange = renderNames;
 $('movement').onchange = () => { $('movementIntervalLabel').hidden = $('movementDurationLabel').hidden = $('movement').value !== 'on'; };
 const movementExercises = [
-  { motion: 'jump', image: 'bewegen-springen-v2.png', crops: [[0,512],[512,508],[1020,516]], title: 'Spring mee!', instruction: 'Buig even door je knieën, spring en land zacht.', frames: [0, 1, 2, 2], cues: ['Klaar…', 'Spring!', 'Land zacht', 'En nog eens!'], beat: .4 },
-  { motion: 'knees', image: 'bewegen-knieheffen-v2.png', crops: [[0,512],[512,512],[1024,512]], title: 'Knieën omhoog!', instruction: 'Til om de beurt je ene en je andere knie op.', frames: [0, 1, 2, 1], cues: ['Eén knie omhoog', 'Voet neer', 'Andere knie omhoog', 'Voet neer'], beat: .6 },
-  { motion: 'squat', image: 'bewegen-squaten-v2.png', crops: [[0,550],[550,490],[1040,496]], title: 'Zak en strek!', instruction: 'Armen vooruit. Buig je knieën en kom rustig weer recht.', frames: [0, 1, 2, 1], cues: ['Sta recht', 'Zak rustig', 'Even laag', 'Kom omhoog'], beat: .6 }
+  { motion: 'jump', image: 'https://zisa-drakenprenten.pages.dev/drakeneiland/bewegen-springen-v2.png', crops: [[0,512],[512,508],[1020,516]], title: 'Spring mee!', instruction: 'Buig even door je knieën, spring en land zacht.', frames: [0, 1, 2, 2], cues: ['Klaar…', 'Spring!', 'Land zacht', 'En nog eens!'], beat: .4 },
+  { motion: 'knees', image: 'https://zisa-drakenprenten.pages.dev/drakeneiland/bewegen-knieheffen-v2.png', crops: [[0,512],[512,512],[1024,512]], title: 'Knieën omhoog!', instruction: 'Til om de beurt je ene en je andere knie op.', frames: [0, 1, 2, 1], cues: ['Eén knie omhoog', 'Voet neer', 'Andere knie omhoog', 'Voet neer'], beat: .6 },
+  { motion: 'squat', image: 'https://zisa-drakenprenten.pages.dev/drakeneiland/bewegen-squaten-v2.png', crops: [[0,550],[550,490],[1040,496]], title: 'Zak en strek!', instruction: 'Armen vooruit. Buig je knieën en kom rustig weer recht.', frames: [0, 1, 2, 1], cues: ['Sta recht', 'Zak rustig', 'Even laag', 'Kom omhoog'], beat: .6 }
 ];
 function movementCharacter(world) {
   return ({tug:{key:'sport',label:'sporter'},space:{key:'astronaut',label:'astronaut'},ocean:{key:'diver',label:'duiker'},animals:{key:'ranger',label:'dierenverzorger'},cake:{key:'baker',label:'bakker'}})[world] || {key:'knight',label:'ridder'};
@@ -110,7 +110,7 @@ function beginMovement() {
   const character = movementCharacter(state.config.world);
   const exercise = {...movementExercises[state.movementIndex % movementExercises.length],character:character.label}; state.movementIndex++;
   if(character.key!=='knight') {
-    exercise.image=`werelden/bewegen-${character.key}-${exercise.motion}.png`;
+    exercise.image=`https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/bewegen-${character.key}-${exercise.motion}.png`;
     exercise.crops=[[0,512],[512,512],[1024,512]];
     const cuts=movementCuts[`${character.key}-${exercise.motion}`];
     if(cuts) exercise.crops=[[0,cuts[0]],[cuts[0],cuts[1]-cuts[0]],[cuts[1],1536-cuts[1]]];
@@ -161,7 +161,7 @@ function start() {
   $('teams').replaceChildren(); $('race').replaceChildren(); $('knights').replaceChildren(); $('spellEffects').replaceChildren(); $('shieldPieces').replaceChildren(); $('arenaResult').hidden = true;
   $('tugScene').hidden=config.world!=='tug'; $('tugScene').dataset.winner='';
   $('tugScene').dataset.ending='';
-  $('tugLeftPlayers').src='werelden/tug-left.png'; $('tugRightPlayers').src='werelden/tug-right.png';
+  $('tugLeftPlayers').src='https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/tug-left.png'; $('tugRightPlayers').src='https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/tug-right.png';
   $('tugLeftPlayers').alt='Oranje team trekt naar links';$('tugRightPlayers').alt='Blauw team trekt naar rechts';
   $('tugRopePath').setAttribute('d','M280 98 C420 98 580 98 720 98');
   $('battle').setAttribute('aria-label',config.world==='tug'?'Twee teams trekken aan een touw':world.title);
@@ -179,7 +179,7 @@ function start() {
     const actor = ['dragon','tug'].includes(config.world) ? document.createElement('div') : AdventureWorlds.create(team,config);
     if(config.world==='tug') actor.innerHTML='<span class="knight-name"></span>';
     if(config.world==='dragon') { actor.className = 'knight'; actor.style.setProperty('--team', colors[i]);
-    actor.innerHTML = '<div class="knight-name"></div><div class="duel"><div class="knight-figure"><img src="ridder.png" alt="De ridder van dit team"><div class="cast-word"></div></div><div class="personal-dragon"><img src="vargos-strijd.png" alt="De eigen draak van dit team"><div class="personal-shield"></div><span class="dragon-health"></span></div></div><div class="place-label" hidden></div><div class="crystal-count"></div><div class="crystal-treasury" aria-label="Gewonnen kristallen"></div>';
+    actor.innerHTML = '<div class="knight-name"></div><div class="duel"><div class="knight-figure"><img src="https://zisa-drakenprenten.pages.dev/drakeneiland/ridder.png" alt="De ridder van dit team"><div class="cast-word"></div></div><div class="personal-dragon"><img src="https://zisa-drakenprenten.pages.dev/drakeneiland/vargos-strijd.png" alt="De eigen draak van dit team"><div class="personal-shield"></div><span class="dragon-health"></span></div></div><div class="place-label" hidden></div><div class="crystal-count"></div><div class="crystal-treasury" aria-label="Gewonnen kristallen"></div>';
     actor.querySelector('.knight-figure img').src = knightImages[i];
     }
     actor.querySelector('.knight-name').textContent = team.name; $('knights').append(actor); team.actor = actor;
@@ -257,7 +257,7 @@ function releaseTug() {
   $('tugScene').dataset.ending='released';
   for(const [i,id] of ['tugLeftPlayers','tugRightPlayers'].entries()) {
     const won=i===state.tugWinner;
-    $(id).src=`werelden/tug-${i===0?'left':'right'}-${won?'won':'rest'}.png`;
+    $(id).src=`https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/tug-${i===0?'left':'right'}-${won?'won':'rest'}.png`;
     $(id).alt=won?'Het winnende team juicht met de handen omhoog':'Het andere team laat los en klapt mee';
   }
   $('tugRopePath').setAttribute('d','M280 180 C340 154 385 197 440 182 S550 165 595 182 S675 198 720 180');
@@ -273,7 +273,7 @@ function finishTug() {
   }
   showOverlay('',`${state.teams[state.tugWinner].name} wint!`,'De tegenstanders zijn over de middenlijn getrokken. Goed gerekend en gestreden, allebei!');
   $('overlay').dataset.outcome='won';
-  $('overlayIcon').style.backgroundImage=`url("werelden/tug-${state.tugWinner===0?'left':'right'}-won.png")`;
+  $('overlayIcon').style.backgroundImage=`url("https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/tug-${state.tugWinner===0?'left':'right'}-won.png")`;
   $('results').replaceChildren();
   for(const team of state.order) {const row=document.createElement('div');row.className='result-row';const name=document.createElement('span'),score=document.createElement('span');name.textContent=`${team.place}. ${team.name}`;score.textContent=`${team.score} goede antwoorden`;row.append(name,score);$('results').append(row);}
   $('resume').hidden=true;$('again').hidden=false;
@@ -282,13 +282,13 @@ function celebrateTeam(team) {
   if(state.config.world!=='dragon') {AdventureWorlds.celebrate(team,state);return;}
   team.actor.classList.add('defeated');
   const dragon = team.actor.querySelector('.personal-dragon');
-  const surrendered = document.createElement('img'); surrendered.src = 'vargos-verslagen.png'; surrendered.alt = 'De verslagen draak geeft zich over met een witte vlag'; surrendered.className = 'surrendered-dragon'; dragon.append(surrendered);
+  const surrendered = document.createElement('img'); surrendered.src = 'https://zisa-drakenprenten.pages.dev/drakeneiland/vargos-verslagen.png'; surrendered.alt = 'De verslagen draak geeft zich over met een witte vlag'; surrendered.className = 'surrendered-dragon'; dragon.append(surrendered);
   const burst = document.createElement('div'); burst.className = 'victory-burst'; burst.setAttribute('aria-hidden', 'true');
   for (let n = 0; n < 12; n++) { const piece = document.createElement('span'); piece.className = n < 6 ? 'victory-shard' : 'victory-gem'; piece.style.setProperty('--angle', `${n * 30}deg`); piece.style.setProperty('--delay', `${(n % 3) * .12}s`); burst.append(piece); }
   team.actor.append(burst);
   team.panel.querySelector('.answers').replaceChildren();
   const scene = document.createElement('div'); scene.className = 'winner-scene';
-  scene.innerHTML = `<img class="winner-knight" src="${knightImages[team.number]}" alt="Juichende ridder"><img class="winner-dragon" src="vargos-verslagen.png" alt="Draak met witte vlag"><strong>Gewonnen!</strong>`;
+  scene.innerHTML = `<img class="winner-knight" src="${knightImages[team.number]}" alt="Juichende ridder"><img class="winner-dragon" src="https://zisa-drakenprenten.pages.dev/drakeneiland/vargos-verslagen.png" alt="Draak met witte vlag"><strong>Gewonnen!</strong>`;
   team.panel.querySelector('.answers').append(scene);
 }
 function castSpell(team, points) {
@@ -316,7 +316,7 @@ function updateDragonExpression(image, progress) {
   const stage = progress >= 2 / 3 ? 'beduusd' : progress >= 1 / 3 ? 'verbaasd' : 'strijd';
   if (image.dataset.expression === stage) return;
   image.dataset.expression = stage;
-  image.src = `vargos-${stage}.png`;
+  image.src = `https://zisa-drakenprenten.pages.dev/drakeneiland/vargos-${stage}.png`;
   image.alt = stage === 'beduusd' ? 'Vargos kijkt beduusd: bijna verslagen!' : stage === 'verbaasd' ? 'Vargos kijkt verbaasd: zijn schild breekt!' : 'Vargos bewaakt zelfverzekerd de lichtkristallen';
 }
 function updateProgress(team) {
@@ -375,7 +375,7 @@ function finish(reached) {
     const w=AdventureWorlds.get(state.config.world);
     $('overlayTitle').textContent=reached?'Missie geslaagd!':'De tijd is om!';
     $('overlayText').textContent=reached?state.config.coop?`Samen gelukt! ${w.ending}`:`${state.order[0].name} was het snelst. ${w.ending}`:state.config.coop?`Samen verzamelden jullie ${state.teams.reduce((n,t)=>n+t.score,0)} van de ${state.config.target*state.config.count} ${w.plural}. Probeer het nog eens!`:`Jullie hebben hard gewerkt. ${state.order.length} teams zijn klaar. De andere teams kunnen het nog eens proberen.`;
-  } else if(reached) $('overlayIcon').style.backgroundImage='url("vargos-verslagen.png")';
+  } else if(reached) $('overlayIcon').style.backgroundImage='url("https://zisa-drakenprenten.pages.dev/drakeneiland/vargos-verslagen.png")';
   const ranked = state.config.coop ? [...state.teams].sort((a,b) => b.score-a.score) : [...state.order, ...state.teams.filter(t => !t.done).sort((a,b) => b.score-a.score)];
   $('results').replaceChildren(); ranked.forEach(team => { const row = document.createElement('div'); row.className = 'result-row'; const name = document.createElement('span'), score = document.createElement('span'); name.textContent = `${team.place ? team.place + '. ' : ''}${team.name}`; score.textContent = team.done ? `${formatTime(team.finishTime)} · ${AdventureWorlds.get(state.config.world).complete}` : state.config.coop ? `${team.score} ${AdventureWorlds.get(state.config.world).plural}` : `${team.score}/${state.config.target} · nog niet klaar`; row.append(name, score); $('results').append(row); });
   $('resume').hidden = true; $('again').hidden = false; tone(880, .4);

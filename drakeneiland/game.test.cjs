@@ -74,13 +74,13 @@ assert.equal(run('state.phase'),'playing','No time limit lets every team finish'
 assert.equal(elements.get('knights').children.length,4);
 assert.equal(run('state.teams[0].actor.querySelector(".crystal-treasury").children.length'),10);
 console.log('Spelbesturing geslaagd: eigen draken, kristallen, doorlopend spel na winst, plaatsen 1–4, eindanimatie, pauze, storm, samenwerken, tijdslimiet en onbeperkt spelen.');
-assert.equal(run('state.teams[1].actor.querySelector(".knight-figure img").src'),'ridder-water.png');
-assert.equal(run('state.teams[2].actor.querySelector(".knight-figure img").src'),'ridder-bos.png');
-assert.equal(run('state.teams[3].actor.querySelector(".knight-figure img").src'),'ridder-ster.png');
+assert.equal(run('state.teams[1].actor.querySelector(".knight-figure img").src'),'https://zisa-drakenprenten.pages.dev/drakeneiland/ridder-water.png');
+assert.equal(run('state.teams[2].actor.querySelector(".knight-figure img").src'),'https://zisa-drakenprenten.pages.dev/drakeneiland/ridder-bos.png');
+assert.equal(run('state.teams[3].actor.querySelector(".knight-figure img").src'),'https://zisa-drakenprenten.pages.dev/drakeneiland/ridder-ster.png');
 elements.get('movement').value='on';run('start();state.phase="playing";state.elapsed=59.9;tick(250)');
 assert.equal(run('state.phase'),'movement');
 assert.equal(elements.get('movementDemo').dataset.motion,'jump');
-assert.ok(elements.get('movementSprite').style.backgroundImage.includes('bewegen-springen-v2.png'));
+assert.ok(elements.get('movementSprite').style.backgroundImage.includes('https://zisa-drakenprenten.pages.dev/drakeneiland/bewegen-springen-v2.png'));
 run('state.movementLeft=9.5;updateMovementPose()');
 assert.equal(elements.get('movementSprite').style.backgroundPosition,`${512 / (1536 - 508) * 100}% center`);
 assert.equal(elements.get('movementCue').textContent,'Spring!');
@@ -172,14 +172,14 @@ assert.ok(run('state.teams.every(t=>t.done)'));
 const scoreBefore=run('state.teams[0].score');correct(0);assert.equal(run('state.teams[0].score'),scoreBefore);
 assert.equal(run('state.tugReleased'),false);
 run('for(let n=0;n<12;n++)tick(10000+n*250)');
-assert.equal(run('state.tugReleased'),true);assert.equal(elements.get('tugRightPlayers').src,'werelden/tug-right-won.png');assert.equal(elements.get('tugLeftPlayers').src,'werelden/tug-left-rest.png');assert.ok(elements.get('tugRopePath').d.includes('180'));
+assert.equal(run('state.tugReleased'),true);assert.equal(elements.get('tugRightPlayers').src,'https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/tug-right-won.png');assert.equal(elements.get('tugLeftPlayers').src,'https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/tug-left-rest.png');assert.ok(elements.get('tugRopePath').d.includes('180'));
 run('for(let n=12;n<30;n++)tick(10000+n*250)');assert.equal(run('state.phase'),'finished');assert.ok(elements.get('overlayTitle').textContent.includes('wint'));
 assert.equal(elements.get('results').children.length,2);
 // A clock tie continues until the next correct answer, also when neither team scored.
 elements.get('duration').value='120';run('start();state.phase="playing";state.elapsed=120;tick(100)');assert.equal(run('state.tugOvertime'),true);assert.equal(run('state.phase'),'playing');
-correct(0);assert.equal(run('state.phase'),'ending');assert.equal(run('state.tugWinner'),0);run('releaseTug()');assert.equal(elements.get('tugLeftPlayers').src,'werelden/tug-left-won.png');assert.equal(elements.get('tugRightPlayers').src,'werelden/tug-right-rest.png');
+correct(0);assert.equal(run('state.phase'),'ending');assert.equal(run('state.tugWinner'),0);run('releaseTug()');assert.equal(elements.get('tugLeftPlayers').src,'https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/tug-left-won.png');assert.equal(elements.get('tugRightPlayers').src,'https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/tug-right-rest.png');
 // A timed lead gets the same physical winning animation.
-run('start();state.phase="playing"');assert.equal(elements.get('tugScene').dataset.ending,'');assert.equal(elements.get('tugLeftPlayers').src,'werelden/tug-left.png');assert.ok(elements.get('tugRopePath').d.endsWith('720 98'));correct(1);run('state.elapsed=120;tick(100)');assert.equal(run('state.tugWinner'),1);
+run('start();state.phase="playing"');assert.equal(elements.get('tugScene').dataset.ending,'');assert.equal(elements.get('tugLeftPlayers').src,'https://zisa-drakenprenten.pages.dev/drakeneiland/werelden/tug-left.png');assert.ok(elements.get('tugRopePath').d.endsWith('720 98'));correct(1);run('state.elapsed=120;tick(100)');assert.equal(run('state.tugWinner'),1);
 // Returning to another world allows normal settings again.
 elements.get('world').value='ocean';run('refreshWorld()');assert.equal(elements.get('teamCount').disabled,false);assert.equal(elements.get('mode').disabled,false);
 // Pearls 11 and 21 start new layers; none exceed their chest opening.
@@ -196,7 +196,7 @@ for(const [world,character] of Object.entries({dragon:'ridder',castle:'ridder',s
   const before=run('state.elapsed');run('beginMovement()');
   assert.ok(elements.get('movementInstruction').textContent.includes(`de ${character} na`));
   assert.ok(elements.get('movementSprite')['aria-label'].startsWith(character));
-  assert.ok(fs.existsSync(`${__dirname}/${run('state.movementExercise.image')}`));
+  assert.match(run('state.movementExercise.image'), /^https:\/\/zisa-drakenprenten\.pages\.dev\/drakeneiland\/(?:werelden\/bewegen-[a-z]+-(?:jump|knees|squat)|bewegen-(?:springen|knieheffen|squaten)-v2)\.png$/);
   run('state.movementLeft=.1;tick(10000)');assert.equal(run('state.phase'),'playing');assert.equal(run('state.elapsed'),before);
  }
 }
@@ -213,11 +213,11 @@ run('AdventureAccess={edition:"pro",ready:true}');
 elements.get('world').value='dragon';elements.get('mode').value='race';elements.get('target').value='15';elements.get('teamCount').value='3';run('refreshWorld();start()');
 for(const [score,expected] of [[0,'strijd'],[4,'strijd'],[5,'verbaasd'],[9,'verbaasd'],[10,'beduusd'],[15,'beduusd']]){
  run(`state.teams[0].score=${score};updateProgress(state.teams[0])`);
- assert.equal(run('state.teams[0].actor.querySelector(".personal-dragon > img").src'),`vargos-${expected}.png`);
- assert.equal(run('state.teams[1].actor.querySelector(".personal-dragon > img").src'),'vargos-strijd.png');
+ assert.equal(run('state.teams[0].actor.querySelector(".personal-dragon > img").src'),`https://zisa-drakenprenten.pages.dev/drakeneiland/vargos-${expected}.png`);
+ assert.equal(run('state.teams[1].actor.querySelector(".personal-dragon > img").src'),'https://zisa-drakenprenten.pages.dev/drakeneiland/vargos-strijd.png');
 }
-run('start()');assert.equal(run('state.teams[0].actor.querySelector(".personal-dragon > img").src'),'vargos-strijd.png');
+run('start()');assert.equal(run('state.teams[0].actor.querySelector(".personal-dragon > img").src'),'https://zisa-drakenprenten.pages.dev/drakeneiland/vargos-strijd.png');
 elements.get('mode').value='coop';run('start();state.teams[0].score=15;updateBoss()');
-assert.equal(elements.get('battle').querySelector('.dragon-portrait > img').src,'vargos-verbaasd.png');
-run('state.teams[1].score=15;updateBoss()');assert.equal(elements.get('battle').querySelector('.dragon-portrait > img').src,'vargos-beduusd.png');
+assert.equal(elements.get('battle').querySelector('.dragon-portrait > img').src,'https://zisa-drakenprenten.pages.dev/drakeneiland/vargos-verbaasd.png');
+run('state.teams[1].score=15;updateBoss()');assert.equal(elements.get('battle').querySelector('.dragon-portrait > img').src,'https://zisa-drakenprenten.pages.dev/drakeneiland/vargos-beduusd.png');
 console.log('Drakenuitdrukkingen getest: grenzen op 1/3 en 2/3, onafhankelijke teams, herstart en samen spelen.');
