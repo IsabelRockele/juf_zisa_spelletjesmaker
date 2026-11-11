@@ -21,7 +21,7 @@
       graad = woord.afbeelding_graad || graad || woord.graad || woord.leerjaar || 1;
       const map = woord.afbeelding_categorie || woord.categorie || "stukjes";
       const bestandsnaam = woord.afbeelding_bestand || `${woord.tekst}.png`;
-      return `afbeeldingen/graad${graad}/${map}/${bestandsnaam}`;
+      return window.SpellingPrentPad(`afbeeldingen/graad${graad}/${map}/${bestandsnaam}`);
     },
 
     /* Geeft HTML voor de afbeelding van een woord, met fallback.

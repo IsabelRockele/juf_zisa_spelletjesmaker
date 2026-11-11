@@ -12,7 +12,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-a/man.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-a/man.webp",
           "sentence": "Op de stoel zit een man."
         },
         {
@@ -21,7 +21,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-a/kat.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-a/kat.webp",
           "sentence": "De kat slaapt op de mat."
         },
         {
@@ -30,7 +30,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-a/bal.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-a/bal.webp",
           "sentence": "Ik speel met de bal."
         },
         {
@@ -39,7 +39,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-a/tas.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-a/tas.webp",
           "sentence": "Mijn tas is zwaar."
         },
         {
@@ -48,7 +48,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-a/pan.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-a/pan.webp",
           "sentence": "In de pan ligt een ei."
         },
         {
@@ -57,7 +57,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-a/dak.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-a/dak.webp",
           "sentence": "De kat zit op het dak."
         },
         {
@@ -66,7 +66,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-a/kam.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-a/kam.webp",
           "sentence": "Ik kam mijn haar met een kam."
         },
         {
@@ -75,7 +75,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-e/bel.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-e/bel.webp",
           "sentence": "De bel gaat."
         },
         {
@@ -84,7 +84,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-e/pet.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-e/pet.webp",
           "sentence": "Papa draagt een pet."
         },
         {
@@ -93,7 +93,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-e/hek.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-e/hek.webp",
           "sentence": "De kip zit bij het hek."
         },
         {
@@ -102,7 +102,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-e/pen.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-e/pen.webp",
           "sentence": "Ik schrijf met een pen."
         },
         {
@@ -111,7 +111,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-e/mes.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-e/mes.webp",
           "sentence": "Pas op met het mes."
         },
         {
@@ -120,7 +120,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-i/kip.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-i/kip.webp",
           "sentence": "De kip pikt op het zand."
         },
         {
@@ -129,7 +129,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-i/vis.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-i/vis.webp",
           "sentence": "Ik zie een vis."
         },
         {
@@ -138,7 +138,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-i/lip.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-i/lip.webp",
           "sentence": "Mijn lip is rood."
         },
         {
@@ -147,7 +147,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-o/rok.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-o/rok.webp",
           "sentence": "Saar draagt een rok."
         },
         {
@@ -156,7 +156,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-o/zon.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-o/zon.webp",
           "sentence": "De zon is geel."
         },
         {
@@ -165,7 +165,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-o/pot.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-o/pot.webp",
           "sentence": "In de pot zit soep."
         },
         {
@@ -174,7 +174,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-u/bus.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-u/bus.webp",
           "sentence": "Ik zit op de bus."
         },
         {
@@ -183,7 +183,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-u/mus.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-u/mus.webp",
           "sentence": "De mus zit op het dak."
         }
       ]
@@ -199,7 +199,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-aa/maan.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-aa/maan.webp",
           "sentence": "De maan staat hoog."
         },
         {
@@ -208,7 +208,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-aa/haan.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-aa/haan.webp",
           "sentence": "De haan kraait luid."
         },
         {
@@ -217,7 +217,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-aa/kaas.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-aa/kaas.webp",
           "sentence": "Ik eet kaas."
         },
         {
@@ -226,7 +226,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-aa/vaas.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-aa/vaas.webp",
           "sentence": "Op tafel staat een vaas."
         },
         {
@@ -235,7 +235,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-ee/been.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-ee/been.webp",
           "sentence": "Mijn been doet pijn."
         },
         {
@@ -244,7 +244,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-ee/veer.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-ee/veer.webp",
           "sentence": "De vogel verliest een veer."
         },
         {
@@ -253,7 +253,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-ee/beek.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-ee/beek.webp",
           "sentence": "Daar is een beek."
         },
         {
@@ -262,7 +262,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-ee/meer.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-ee/meer.webp",
           "sentence": "Ik zie het meer."
         },
         {
@@ -271,7 +271,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-oo/boom.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-oo/boom.webp",
           "sentence": "De boom is hoog."
         },
         {
@@ -280,7 +280,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-oo/boot.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-oo/boot.webp",
           "sentence": "De boot vaart op zee."
         },
         {
@@ -289,7 +289,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-oo/doos.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-oo/doos.webp",
           "sentence": "De doos is zwaar."
         },
         {
@@ -298,7 +298,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-oo/rook.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-oo/rook.webp",
           "sentence": "Boven het vuur stijgt rook."
         },
         {
@@ -307,7 +307,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-uu/vuur.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-uu/vuur.webp",
           "sentence": "Steek het vuur aan."
         },
         {
@@ -316,7 +316,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-uu/muur.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-uu/muur.webp",
           "sentence": "De muur is hoog."
         }
       ]
@@ -332,7 +332,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ie/bier.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ie/bier.webp",
           "sentence": "Papa drinkt bier."
         },
         {
@@ -341,7 +341,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ie/mier.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ie/mier.webp",
           "sentence": "Op het pad loopt een mier."
         },
         {
@@ -350,7 +350,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ie/wiel.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ie/wiel.webp",
           "sentence": "Het wiel van mijn fiets is plat."
         },
         {
@@ -359,7 +359,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-oe/boek.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-oe/boek.webp",
           "sentence": "Ik lees een boek."
         },
         {
@@ -368,7 +368,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-oe/koek.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-oe/koek.webp",
           "sentence": "Ik eet een koek."
         },
         {
@@ -377,7 +377,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-oe/doek.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-oe/doek.webp",
           "sentence": "Op de tafel ligt een doek."
         },
         {
@@ -386,7 +386,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-oe/voet.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-oe/voet.webp",
           "sentence": "Hij trapt op mijn voet."
         },
         {
@@ -395,7 +395,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-eu/neus.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-eu/neus.webp",
           "sentence": "Mijn neus is koud."
         },
         {
@@ -404,7 +404,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-eu/deur.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-eu/deur.webp",
           "sentence": "De deur staat open."
         },
         {
@@ -413,7 +413,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-eu/reus.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-eu/reus.webp",
           "sentence": "In het boek staat een reus."
         },
         {
@@ -422,7 +422,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ui/huis.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ui/huis.webp",
           "sentence": "Mijn huis is groot."
         },
         {
@@ -431,7 +431,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ui/muis.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ui/muis.webp",
           "sentence": "De muis loopt weg."
         },
         {
@@ -440,7 +440,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ui/tuin.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ui/tuin.webp",
           "sentence": "In de tuin staat een boom."
         }
       ]
@@ -457,7 +457,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-aai/haai.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-aai/haai.webp",
           "sentence": "In de zee zwemt een haai."
         },
         {
@@ -466,7 +466,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-aai/kraai.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-aai/kraai.webp",
           "sentence": "Op het dak zit een kraai."
         },
         {
@@ -475,7 +475,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-aai/draai.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-aai/draai.webp",
           "sentence": "Maak een draai."
         },
         {
@@ -484,7 +484,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-aai/zwaai.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-aai/zwaai.webp",
           "sentence": "Ik zwaai naar mijn juf."
         },
         {
@@ -493,7 +493,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-aai/maai.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-aai/maai.webp",
           "sentence": "Ik maai het gras."
         },
         {
@@ -502,7 +502,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-aai/zaai.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-aai/zaai.webp",
           "sentence": "Ik zaai bloemen in de tuin."
         }
       ]
@@ -519,7 +519,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ooi/kooi.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ooi/kooi.webp",
           "sentence": "De kraai zit in een kooi."
         },
         {
@@ -528,7 +528,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ooi/hooi.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ooi/hooi.webp",
           "sentence": "In de stal ligt hooi."
         },
         {
@@ -537,7 +537,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ooi/mooi.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ooi/mooi.webp",
           "sentence": "De jurk is mooi."
         },
         {
@@ -546,7 +546,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ooi/gooi.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ooi/gooi.webp",
           "sentence": "Gooi de bal naar het doel."
         },
         {
@@ -555,7 +555,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ooi/strooi.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ooi/strooi.webp",
           "sentence": "Ik strooi zout op mijn ei."
         },
         {
@@ -564,7 +564,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ooi/prooi.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ooi/prooi.webp",
           "sentence": null
         }
       ]
@@ -581,7 +581,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-oei/boei.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-oei/boei.webp",
           "sentence": "In het water drijft een boei."
         },
         {
@@ -590,7 +590,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-oei/groei.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-oei/groei.webp",
           "sentence": "Ik groei elke dag."
         },
         {
@@ -599,7 +599,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-oei/bloei.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-oei/bloei.webp",
           "sentence": "Die bloem staat in bloei."
         },
         {
@@ -608,7 +608,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-oei/knoei.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-oei/knoei.webp",
           "sentence": "Knoei niet met die verf!"
         },
         {
@@ -617,7 +617,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-oei/roei.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-oei/roei.webp",
           "sentence": "Wij roeien in een boot."
         },
         {
@@ -626,7 +626,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-oei/loeit.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-oei/loeit.webp",
           "sentence": "De koe loeit."
         }
       ]
@@ -642,7 +642,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/stip.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/stip.webp",
           "sentence": "Zet een stip."
         },
         {
@@ -651,7 +651,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/brug.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/brug.webp",
           "sentence": "Wij lopen over de brug."
         },
         {
@@ -660,7 +660,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/kruk.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/kruk.webp",
           "sentence": "Op de kruk zit een kind."
         },
         {
@@ -669,7 +669,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/klok.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/klok.webp",
           "sentence": "Op de muur hangt een klok."
         },
         {
@@ -678,7 +678,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/knop.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/knop.webp",
           "sentence": "Druk op de knop."
         },
         {
@@ -687,7 +687,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/klas.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/klas.webp",
           "sentence": "Onze klas is leuk."
         },
         {
@@ -696,7 +696,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/slot.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/slot.webp",
           "sentence": "Op de deur zit een slot."
         },
         {
@@ -705,7 +705,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/blok.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/blok.webp",
           "sentence": "Ik speel met een blok."
         },
         {
@@ -714,7 +714,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/vlam.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/vlam.webp",
           "sentence": "De vlam is heet."
         },
         {
@@ -723,7 +723,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/snor.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/snor.webp",
           "sentence": "Papa heeft een snor."
         },
         {
@@ -732,7 +732,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/trap.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/trap.webp",
           "sentence": "Wij lopen de trap op."
         },
         {
@@ -741,7 +741,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/vlag.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/vlag.webp",
           "sentence": "De vlag hangt op."
         }
       ]
@@ -757,7 +757,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/melk.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/melk.webp",
           "sentence": "Ik zie de melk."
         },
         {
@@ -766,7 +766,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/wolf.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/wolf.webp",
           "sentence": "De wolf huilt naar de maan."
         },
         {
@@ -775,7 +775,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/hark.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/hark.webp",
           "sentence": "Ik hark in de tuin."
         },
         {
@@ -784,7 +784,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/balk.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/balk.webp",
           "sentence": "Ik zie de balk."
         },
         {
@@ -793,7 +793,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/helm.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/helm.webp",
           "sentence": "Ik zet mijn helm op."
         },
         {
@@ -802,7 +802,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/hals.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/hals.webp",
           "sentence": "Ik zie de hals."
         },
         {
@@ -811,7 +811,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/kalf.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/kalf.webp",
           "sentence": "De koe kreeg een kalf."
         },
         {
@@ -820,7 +820,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/lamp.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/lamp.webp",
           "sentence": "Doe de lamp aan."
         },
         {
@@ -829,7 +829,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/harp.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/harp.webp",
           "sentence": "Op de harp speelt een lied."
         },
         {
@@ -838,7 +838,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/kerk.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/kerk.webp",
           "sentence": "Ik zie de kerk."
         },
         {
@@ -847,7 +847,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/golf.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/golf.webp",
           "sentence": "Die golf was heel groot."
         },
         {
@@ -856,7 +856,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmm/lift.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmm/lift.webp",
           "sentence": "Ik zie de lift."
         }
       ]
@@ -872,7 +872,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmmkm/straat.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmmkm/straat.webp",
           "sentence": "Op de straat rijden auto's."
         },
         {
@@ -881,7 +881,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmmkm/strik.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmmkm/strik.webp",
           "sentence": "Op mijn pakje zit een strik."
         },
         {
@@ -890,7 +890,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmmkm/straal.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmmkm/straal.webp",
           "sentence": "Ik zie de straal."
         },
         {
@@ -899,7 +899,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmmkm/stroop.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmmkm/stroop.webp",
           "sentence": "Ik eet graag stroop."
         },
         {
@@ -908,7 +908,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmmkm/spreuk.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmmkm/spreuk.webp",
           "sentence": "De heks zegt de spreuk."
         },
         {
@@ -917,7 +917,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmmkm/spraak.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmmkm/spraak.webp",
           "sentence": "Ik zie de spraak."
         },
         {
@@ -926,7 +926,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmmkm/streep.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmmkm/streep.webp",
           "sentence": "Zet een streep onder de fout."
         },
         {
@@ -935,7 +935,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmmkm/struik.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmmkm/struik.webp",
           "sentence": "Wat een mooie struik."
         }
       ]
@@ -951,7 +951,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmmm/worst.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmmm/worst.webp",
           "sentence": "Papa bakt de worst."
         },
         {
@@ -960,7 +960,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmmm/kerst.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmmm/kerst.webp",
           "sentence": "Wij vieren kerst."
         },
         {
@@ -969,7 +969,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmmm/dorst.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmmm/dorst.webp",
           "sentence": "Ik heb dorst."
         },
         {
@@ -978,7 +978,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmmm/borst.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmmm/borst.webp",
           "sentence": "Mijn borst doet pijn."
         },
         {
@@ -987,7 +987,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmmm/kunst.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmmm/kunst.webp",
           "sentence": "Ik zie de kunst."
         },
         {
@@ -996,7 +996,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmmm/markt.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmmm/markt.webp",
           "sentence": "Wij gaan naar de markt."
         },
         {
@@ -1005,7 +1005,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkmmm/herfst.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkmmm/herfst.webp",
           "sentence": "In de herfst is het fris."
         }
       ]
@@ -1022,7 +1022,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-eeuw/leeuw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-eeuw/leeuw.webp",
           "sentence": "De leeuw brult hard."
         },
         {
@@ -1031,7 +1031,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-eeuw/sneeuw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-eeuw/sneeuw.webp",
           "sentence": "Op het dak ligt sneeuw."
         },
         {
@@ -1040,7 +1040,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-eeuw/eeuw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-eeuw/eeuw.webp",
           "sentence": "Hij is al een eeuw."
         },
         {
@@ -1049,7 +1049,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-eeuw/spreeuw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-eeuw/spreeuw.webp",
           "sentence": "Op de tak zit een spreeuw."
         },
         {
@@ -1058,7 +1058,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-eeuw/meeuw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-eeuw/meeuw.webp",
           "sentence": "Aan zee vliegt een meeuw."
         },
         {
@@ -1067,7 +1067,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-eeuw/geeuw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-eeuw/geeuw.webp",
           "sentence": "Ik ben heel moe en geeuw."
         }
       ]
@@ -1084,7 +1084,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ieuw/kieuw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ieuw/kieuw.webp",
           "sentence": "De vis heeft een kieuw."
         },
         {
@@ -1093,7 +1093,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ieuw/nieuw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ieuw/nieuw.webp",
           "sentence": "Mijn jas is nieuw."
         },
         {
@@ -1102,7 +1102,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ieuw/opnieuw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ieuw/opnieuw.webp",
           "sentence": "Ik schrijf het opnieuw."
         },
         {
@@ -1111,7 +1111,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ieuw/nieuws.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ieuw/nieuws.webp",
           "sentence": "Ik zie het nieuws."
         }
       ]
@@ -1128,7 +1128,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-uw/duw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-uw/duw.webp",
           "sentence": null
         },
         {
@@ -1137,7 +1137,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-uw/sluw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-uw/sluw.webp",
           "sentence": null
         },
         {
@@ -1146,7 +1146,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-uw/ruw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-uw/ruw.webp",
           "sentence": null
         }
       ]
@@ -1166,7 +1166,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/ch-woorden/lach.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/ch-woorden/lach.webp",
           "sentence": "mama heeft een mooie lach."
         },
         {
@@ -1175,7 +1175,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/ch-woorden/pech.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/ch-woorden/pech.webp",
           "sentence": "Papa heeft pech met de auto"
         },
         {
@@ -1184,7 +1184,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/brug.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/brug.webp",
           "sentence": "Wij lopen over de brug."
         },
         {
@@ -1193,7 +1193,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mmkm/vlag.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mmkm/vlag.webp",
           "sentence": "De vlag hangt op."
         }
       ]
@@ -1213,7 +1213,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/cht-woorden/acht.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/cht-woorden/acht.webp",
           "sentence": "Ik ben acht jaar."
         },
         {
@@ -1222,7 +1222,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/cht-woorden/nacht.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/cht-woorden/nacht.webp",
           "sentence": "Het is donker in de nacht."
         },
         {
@@ -1231,7 +1231,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/cht-woorden/licht.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/cht-woorden/licht.webp",
           "sentence": "Doe het licht aan."
         },
         {
@@ -1240,7 +1240,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/cht-woorden/lucht.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/cht-woorden/lucht.webp",
           "sentence": "De lucht is blauw."
         },
         {
@@ -1249,7 +1249,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/cht-woorden/recht.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/cht-woorden/recht.webp",
           "sentence": "Ga recht zitten."
         },
         {
@@ -1258,7 +1258,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/gt-woorden/hij zegt.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/gt-woorden/hij zegt.webp",
           "sentence": "Hij zegt iets grappigs."
         },
         {
@@ -1267,7 +1267,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/gt-woorden/hij legt.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/gt-woorden/hij legt.webp",
           "sentence": "Hij legt zijn boek op tafel."
         },
         {
@@ -1276,7 +1276,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/gt-woorden/hij vliegt.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/gt-woorden/hij vliegt.webp",
           "sentence": "Hij vliegt naar het zuiden."
         },
         {
@@ -1285,7 +1285,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/gt-woorden/hij veegt.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/gt-woorden/hij veegt.webp",
           "sentence": "Hij veegt de vloer schoon."
         },
         {
@@ -1294,7 +1294,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/gt-woorden/hij ligt.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/gt-woorden/hij ligt.webp",
           "sentence": "Hij ligt in zijn bed."
         }
       ]
@@ -1314,7 +1314,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ei/geit.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ei/geit.webp",
           "sentence": "De geit eet gras."
         },
         {
@@ -1323,7 +1323,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ei/trein.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ei/trein.webp",
           "sentence": "De trein komt aan."
         },
         {
@@ -1332,7 +1332,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ei/zeil.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ei/zeil.webp",
           "sentence": "Op de boot hangt een zeil."
         },
         {
@@ -1341,7 +1341,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ei/plein.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ei/plein.webp",
           "sentence": "Op het plein spelen kinderen."
         },
         {
@@ -1350,7 +1350,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ei/klein.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ei/klein.webp",
           "sentence": "Een mier is een klein dier."
         },
         {
@@ -1359,7 +1359,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ij/tijd.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ij/tijd.webp",
           "sentence": "Ik heb geen tijd."
         },
         {
@@ -1368,7 +1368,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ij/vijf.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ij/vijf.webp",
           "sentence": "Mijn kleine zus is vijf jaar."
         },
         {
@@ -1377,7 +1377,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ij/lijn.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ij/lijn.webp",
           "sentence": "Ik teken een lijn."
         },
         {
@@ -1386,7 +1386,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ij/rijst.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ij/rijst.webp",
           "sentence": "Wij eten vaak rijst."
         },
         {
@@ -1395,7 +1395,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ij/pijp.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ij/pijp.webp",
           "sentence": "Mijn opa rookt een pijp."
         }
       ]
@@ -1415,7 +1415,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-au/pauw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-au/pauw.webp",
           "sentence": "De pauw heeft mooie veren."
         },
         {
@@ -1424,7 +1424,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-au/klauw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-au/klauw.webp",
           "sentence": "Ik zie de scherpe klauw."
         },
         {
@@ -1433,7 +1433,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-au/saus.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-au/saus.webp",
           "sentence": "Op de pasta zit saus."
         },
         {
@@ -1442,7 +1442,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-au/blauw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-au/blauw.webp",
           "sentence": "De zee is blauw."
         },
         {
@@ -1451,7 +1451,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ou/goud.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ou/goud.webp",
           "sentence": "De ring is van goud."
         },
         {
@@ -1460,7 +1460,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ou/hout.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ou/hout.webp",
           "sentence": "Die bank is van hout."
         },
         {
@@ -1469,7 +1469,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ou/touw.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ou/touw.webp",
           "sentence": "Ik zie het touw."
         },
         {
@@ -1478,7 +1478,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ou/koud.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ou/koud.webp",
           "sentence": "Het water is koud."
         }
       ]
@@ -1498,7 +1498,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/sch-woorden/school.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/sch-woorden/school.webp",
           "sentence": "Ik ga naar school."
         },
         {
@@ -1507,7 +1507,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/sch-woorden/schoen.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/sch-woorden/schoen.webp",
           "sentence": "Mijn schoen is groen."
         },
         {
@@ -1516,7 +1516,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/sch-woorden/schip.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/sch-woorden/schip.webp",
           "sentence": "Het schip vaart op zee."
         },
         {
@@ -1525,7 +1525,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/sch-woorden/schaar.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/sch-woorden/schaar.webp",
           "sentence": "Ik knip met de schaar."
         },
         {
@@ -1534,7 +1534,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/sch-woorden/schaap.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/sch-woorden/schaap.webp",
           "sentence": "Het schaap loopt in de wei."
         },
         {
@@ -1543,7 +1543,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/sch-woorden/schaal.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/sch-woorden/schaal.webp",
           "sentence": "Op de schaal liggen koeken."
         },
         {
@@ -1552,7 +1552,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/sch-woorden/schat.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/sch-woorden/schat.webp",
           "sentence": "Jij bent mijn schat."
         },
         {
@@ -1561,7 +1561,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/sch-woorden/schop.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/sch-woorden/schop.webp",
           "sentence": "Ik graaf met een schop."
         }
       ]
@@ -1581,7 +1581,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/ng-woorden/ring.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/ng-woorden/ring.webp",
           "sentence": "Aan haar vinger zit een ring."
         },
         {
@@ -1590,7 +1590,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/ng-woorden/tong.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/ng-woorden/tong.webp",
           "sentence": "Steek je tong eens uit."
         },
         {
@@ -1599,7 +1599,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/ng-woorden/slang.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/ng-woorden/slang.webp",
           "sentence": "Ik ben bang van een slang."
         },
         {
@@ -1608,7 +1608,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/ng-woorden/wang.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/ng-woorden/wang.webp",
           "sentence": "Mijn wang is rood."
         },
         {
@@ -1617,7 +1617,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/ng-woorden/bang.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/ng-woorden/bang.webp",
           "sentence": "Ik ben niet bang."
         },
         {
@@ -1626,7 +1626,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/nk-woorden/bank.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/nk-woorden/bank.webp",
           "sentence": "Wij zitten op de bank."
         },
         {
@@ -1635,7 +1635,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/nk-woorden/pink.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/nk-woorden/pink.webp",
           "sentence": "Ik heb pijn aan mijn pink."
         },
         {
@@ -1644,7 +1644,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/nk-woorden/plank.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/nk-woorden/plank.webp",
           "sentence": "Op de plank staat een boek."
         },
         {
@@ -1653,7 +1653,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/nk-woorden/vink.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/nk-woorden/vink.webp",
           "sentence": "Op de tak zit een vink."
         },
         {
@@ -1662,7 +1662,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/nk-woorden/flink.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/nk-woorden/flink.webp",
           "sentence": "Wees heel flink!"
         }
       ]
@@ -1683,7 +1683,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "handen",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/hand.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/hand.webp",
           "sentence": "Geef elkaar een hand."
         },
         {
@@ -1692,7 +1692,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "hoeden",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/hoed.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/hoed.webp",
           "sentence": "Mijn mama heeft een nieuwe hoed."
         },
         {
@@ -1701,7 +1701,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "tanden",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/tand.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/tand.webp",
           "sentence": "Mij tand doet pijn."
         },
         {
@@ -1710,7 +1710,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "bedden",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/bed.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/bed.webp",
           "sentence": "Ik lig in mijn bed."
         },
         {
@@ -1719,7 +1719,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "honden",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/hond.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/hond.webp",
           "sentence": "De hond blaft."
         },
         {
@@ -1728,7 +1728,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "monden",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/mond.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/mond.webp",
           "sentence": "Doe je mond eens open."
         },
         {
@@ -1737,7 +1737,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "poorten",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/poort.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/poort.webp",
           "sentence": "Sluit de poort."
         },
         {
@@ -1746,7 +1746,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "taarten",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/taart.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/taart.webp",
           "sentence": "Ik eet graag taart."
         },
         {
@@ -1755,7 +1755,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "paarden",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/paard.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/paard.webp",
           "sentence": "In de wei loopt een paard."
         },
         {
@@ -1764,7 +1764,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "beurten",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/beurt.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/beurt.webp",
           "sentence": null
         }
       ]
@@ -1785,7 +1785,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "krabben",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/krab.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/krab.webp",
           "sentence": "Ik zie een krab op het strand."
         },
         {
@@ -1794,7 +1794,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "webben",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/web.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/web.webp",
           "sentence": "Ik zie een spin in het web."
         },
         {
@@ -1803,7 +1803,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "ribben",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/rib.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/rib.webp",
           "sentence": "In mijn lijf zit een rib."
         },
         {
@@ -1812,7 +1812,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "trappen",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/trap.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/trap.webp",
           "sentence": "Loop voorzichtig de trap af."
         },
         {
@@ -1821,7 +1821,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "steppen",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/step.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/step.webp",
           "sentence": "Mijn step heeft twee wielen."
         },
         {
@@ -1830,7 +1830,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "klappen",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/klap.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/klap.webp",
           "sentence": "Pas op, niet zo'n klap geven!"
         },
         {
@@ -1839,7 +1839,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "poppen",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/pop.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/pop.webp",
           "sentence": "Mijn zus speelt met een pop."
         },
         {
@@ -1848,7 +1848,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": "kippen",
-          "image": "../../../spelling/afbeeldingen/graad1/verlengingsregel/kip.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verlengingsregel/kip.webp",
           "sentence": "De kip legt een ei."
         }
       ]
@@ -1865,7 +1865,7 @@ window.SpellingData = {
           "small": "stoeltje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-tje/stoel.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-tje/stoel.webp",
           "sentence": "In de kamer staat een stoeltje."
         },
         {
@@ -1874,7 +1874,7 @@ window.SpellingData = {
           "small": "deurtje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-tje/deur.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-tje/deur.webp",
           "sentence": "In de muur zit een deurtje."
         },
         {
@@ -1883,7 +1883,7 @@ window.SpellingData = {
           "small": "schoentje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-tje/schoen.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-tje/schoen.webp",
           "sentence": "De pop draagt een schoentje."
         },
         {
@@ -1892,7 +1892,7 @@ window.SpellingData = {
           "small": "treintje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-tje/trein.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-tje/trein.webp",
           "sentence": "Op de mat ligt een treintje."
         },
         {
@@ -1901,7 +1901,7 @@ window.SpellingData = {
           "small": "kraantje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-tje/kraan.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-tje/kraan.webp",
           "sentence": "In de keuken staat een kraantje."
         },
         {
@@ -1910,7 +1910,7 @@ window.SpellingData = {
           "small": "tuintje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-tje/tuin.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-tje/tuin.webp",
           "sentence": "Achter ons huis ligt een tuintje."
         },
         {
@@ -1919,7 +1919,7 @@ window.SpellingData = {
           "small": "muurtje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-tje/muur.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-tje/muur.webp",
           "sentence": "In het huis staat een muurtje."
         },
         {
@@ -1928,7 +1928,7 @@ window.SpellingData = {
           "small": "broertje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-tje/broer.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-tje/broer.webp",
           "sentence": "Ik heb een lief broertje."
         }
       ]
@@ -1945,7 +1945,7 @@ window.SpellingData = {
           "small": "boekje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-je/boek.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-je/boek.webp",
           "sentence": "Ik lees een boekje."
         },
         {
@@ -1954,7 +1954,7 @@ window.SpellingData = {
           "small": "huisje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-je/huis.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-je/huis.webp",
           "sentence": "Wij wonen in een huisje."
         },
         {
@@ -1963,7 +1963,7 @@ window.SpellingData = {
           "small": "muisje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-je/muis.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-je/muis.webp",
           "sentence": "In de hoek loopt een muisje."
         },
         {
@@ -1972,7 +1972,7 @@ window.SpellingData = {
           "small": "neusje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-je/neus.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-je/neus.webp",
           "sentence": "De pop heeft een klein neusje."
         },
         {
@@ -1981,7 +1981,7 @@ window.SpellingData = {
           "small": "voetje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-je/voet.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-je/voet.webp",
           "sentence": "De baby heeft een voetje."
         },
         {
@@ -1990,7 +1990,7 @@ window.SpellingData = {
           "small": "fietsje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-je/fiets.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-je/fiets.webp",
           "sentence": "Mijn kleine broer krijgt een fietsje."
         },
         {
@@ -1999,7 +1999,7 @@ window.SpellingData = {
           "small": "handje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-je/hand.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-je/hand.webp",
           "sentence": "Mijn kleine zus heeft een lief handje."
         },
         {
@@ -2008,7 +2008,7 @@ window.SpellingData = {
           "small": "plantje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-je/plant.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-je/plant.webp",
           "sentence": "In de pot staat een plantje."
         }
       ]
@@ -2025,7 +2025,7 @@ window.SpellingData = {
           "small": "boompje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-pje/boom.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-pje/boom.webp",
           "sentence": "In de pot staat een boompje."
         },
         {
@@ -2034,7 +2034,7 @@ window.SpellingData = {
           "small": "raampje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-pje/raam.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-pje/raam.webp",
           "sentence": "In het huis staat een raampje."
         },
         {
@@ -2043,7 +2043,7 @@ window.SpellingData = {
           "small": "bloempje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-pje/bloem.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-pje/bloem.webp",
           "sentence": "In de vaas staat een bloempje."
         },
         {
@@ -2052,7 +2052,7 @@ window.SpellingData = {
           "small": "duimpje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-pje/duim.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-pje/duim.webp",
           "sentence": "Mijn duimpje doet pijn."
         },
         {
@@ -2061,7 +2061,7 @@ window.SpellingData = {
           "small": "armpje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-pje/arm.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-pje/arm.webp",
           "sentence": "De pop heeft een armpje."
         },
         {
@@ -2070,7 +2070,7 @@ window.SpellingData = {
           "small": "droompje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-pje/droom.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-pje/droom.webp",
           "sentence": "Ik had een mooi droompje."
         },
         {
@@ -2079,7 +2079,7 @@ window.SpellingData = {
           "small": "riempje",
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/verklein-pje/riem.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/verklein-pje/riem.webp",
           "sentence": "Om de pop zit een riempje."
         }
       ]
@@ -2096,7 +2096,7 @@ window.SpellingData = {
           "small": null,
           "plural": "boeken",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-en/boek.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-en/boek.webp",
           "sentence": "Op de plank liggen boeken."
         },
         {
@@ -2105,7 +2105,7 @@ window.SpellingData = {
           "small": null,
           "plural": "broeken",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-en/broek.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-en/broek.webp",
           "sentence": "In de kast hangen broeken."
         },
         {
@@ -2114,7 +2114,7 @@ window.SpellingData = {
           "small": null,
           "plural": "deuren",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-en/deur.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-en/deur.webp",
           "sentence": "Aan het huis zitten deuren."
         },
         {
@@ -2123,7 +2123,7 @@ window.SpellingData = {
           "small": null,
           "plural": "neuzen",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-en/neus.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-en/neus.webp",
           "sentence": "De kinderen snuiten hun neuzen."
         },
         {
@@ -2132,7 +2132,7 @@ window.SpellingData = {
           "small": null,
           "plural": "voeten",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-en/voet.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-en/voet.webp",
           "sentence": "Veeg je voeten af."
         },
         {
@@ -2141,7 +2141,7 @@ window.SpellingData = {
           "small": null,
           "plural": "treinen",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-en/trein.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-en/trein.webp",
           "sentence": "Op het spoor rijden treinen."
         },
         {
@@ -2150,7 +2150,7 @@ window.SpellingData = {
           "small": null,
           "plural": "katten",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-verdubbel/kat.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-verdubbel/kat.webp",
           "sentence": "De katten zitten op het dak."
         },
         {
@@ -2159,7 +2159,7 @@ window.SpellingData = {
           "small": null,
           "plural": "ballen",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-verdubbel/bal.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-verdubbel/bal.webp",
           "sentence": "Onder de bank liggen ballen."
         },
         {
@@ -2168,7 +2168,7 @@ window.SpellingData = {
           "small": null,
           "plural": "kippen",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-verdubbel/kip.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-verdubbel/kip.webp",
           "sentence": "Op de boerderij lopen kippen."
         },
         {
@@ -2177,7 +2177,7 @@ window.SpellingData = {
           "small": null,
           "plural": "bomen",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-verenkel/boom.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-verenkel/boom.webp",
           "sentence": "In de tuin staan twee bomen."
         },
         {
@@ -2186,7 +2186,7 @@ window.SpellingData = {
           "small": null,
           "plural": "ramen",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-verenkel/raam.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-verenkel/raam.webp",
           "sentence": "In het huis zijn grote ramen."
         },
         {
@@ -2195,7 +2195,7 @@ window.SpellingData = {
           "small": null,
           "plural": "manen",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-verenkel/maan.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-verenkel/maan.webp",
           "sentence": "In het verhaal zien wij manen."
         }
       ]
@@ -2212,7 +2212,7 @@ window.SpellingData = {
           "small": null,
           "plural": "tafels",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-s/tafel.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-s/tafel.webp",
           "sentence": "In de klas staan tafels."
         },
         {
@@ -2221,7 +2221,7 @@ window.SpellingData = {
           "small": null,
           "plural": "tijgers",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-s/tijger.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-s/tijger.webp",
           "sentence": "Ik zie de tijgers."
         },
         {
@@ -2230,7 +2230,7 @@ window.SpellingData = {
           "small": null,
           "plural": "bekers",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-s/beker.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-s/beker.webp",
           "sentence": "Op de plank staan bekers."
         },
         {
@@ -2239,7 +2239,7 @@ window.SpellingData = {
           "small": null,
           "plural": "wortels",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-s/wortel.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-s/wortel.webp",
           "sentence": "Op het bord liggen wortels."
         },
         {
@@ -2248,7 +2248,7 @@ window.SpellingData = {
           "small": null,
           "plural": "vlinders",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-s/vlinder.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-s/vlinder.webp",
           "sentence": "Zie jij de vlinders?"
         },
         {
@@ -2257,7 +2257,7 @@ window.SpellingData = {
           "small": null,
           "plural": "winkels",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-s/winkel.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-s/winkel.webp",
           "sentence": "In deze straat staan veel winkels."
         },
         {
@@ -2266,7 +2266,7 @@ window.SpellingData = {
           "small": null,
           "plural": "sleutels",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-s/sleutel.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-s/sleutel.webp",
           "sentence": "Heb jij mijn sleutels gezien?."
         },
         {
@@ -2275,7 +2275,7 @@ window.SpellingData = {
           "small": null,
           "plural": "appels",
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-s/appel.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-s/appel.webp",
           "sentence": "Ik zie de appels."
         }
       ]
@@ -2292,7 +2292,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-a/kat.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-a/kat.webp",
           "sentence": "De kat slaapt op de mat."
         },
         {
@@ -2301,7 +2301,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-a/bal.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-a/bal.webp",
           "sentence": "Ik speel met de bal."
         },
         {
@@ -2310,7 +2310,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-a/dak.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-a/dak.webp",
           "sentence": "De kat zit op het dak."
         },
         {
@@ -2319,7 +2319,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-e/hek.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-e/hek.webp",
           "sentence": "De kip zit bij het hek."
         },
         {
@@ -2328,7 +2328,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-e/mes.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-e/mes.webp",
           "sentence": "Pas op met het mes."
         },
         {
@@ -2337,7 +2337,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/mkm-i/vis.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/mkm-i/vis.webp",
           "sentence": "Ik zie een vis."
         },
         {
@@ -2346,7 +2346,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-aa/maan.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-aa/maan.webp",
           "sentence": "De maan staat hoog."
         },
         {
@@ -2355,7 +2355,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/lk-oo/boom.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/lk-oo/boom.webp",
           "sentence": "De boom is hoog."
         },
         {
@@ -2364,7 +2364,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-oe/boek.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-oe/boek.webp",
           "sentence": "Ik lees een boek."
         },
         {
@@ -2373,7 +2373,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ui/huis.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ui/huis.webp",
           "sentence": "Mijn huis is groot."
         },
         {
@@ -2382,7 +2382,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/sch-woorden/schip.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/sch-woorden/schip.webp",
           "sentence": "Het schip vaart op zee."
         },
         {
@@ -2391,7 +2391,7 @@ window.SpellingData = {
           "small": null,
           "plural": null,
           "long": null,
-          "image": "../../../spelling/afbeeldingen/graad1/sch-woorden/schaap.png",
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/sch-woorden/schaap.webp",
           "sentence": "Het schaap loopt in de wei."
         }
       ]
@@ -2411,7 +2411,7 @@ window.SpellingData = {
           "word": "plant",
           "sentence": "De plant krijgt water.",
           "article": "de",
-          "image": "../../../spelling/afbeeldingen/graad1/meervoud-en/plant.png"
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/meervoud-en/plant.webp"
         },
         {
           "word": "klomp",
@@ -2447,7 +2447,7 @@ window.SpellingData = {
           "word": "plank",
           "sentence": "De plank is van hout.",
           "article": "de",
-          "image": "../../../spelling/afbeeldingen/graad1/nk-woorden/plank.png"
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/nk-woorden/plank.webp"
         }
       ]
     },
@@ -2482,7 +2482,7 @@ window.SpellingData = {
           "word": "schrijf",
           "sentence": "Ik schrijf in mijn schrift.",
           "article": null,
-          "image": "../../../spelling/afbeeldingen/graad1/tw-ij/schrijf.png"
+          "image": "https://zisa-spellingprenten.pages.dev/afbeeldingen/graad1/tw-ij/schrijf.webp"
         },
         {
           "word": "schrift",
