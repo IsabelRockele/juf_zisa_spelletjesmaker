@@ -7,8 +7,8 @@
 const KlokLezen = (() => {
 
   // ── Afbeelding laden ──────────────────────────────────────────
-  const wekkerImg = new Image();
-  wekkerImg.src = 'klok_afbeeldingen/wekker.png';
+  const wekkerImg = Object.assign(new Image(), {crossOrigin: 'anonymous'});
+  wekkerImg.src = 'https://zisa-klokprenten.pages.dev/klok_afbeeldingen/wekker.png';
 
   // ── Hulpfuncties tijd genereren ───────────────────────────────
 

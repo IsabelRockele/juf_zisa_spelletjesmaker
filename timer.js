@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.title = 'Klastimer';
             const stylesheet = doc.createElement('link');
             stylesheet.rel = 'stylesheet';
-            stylesheet.href = new URL('timer-floating.css?v=20260922-12', new URL('.', document.querySelector('script[src*="timer.js"]').src)).href;
+            stylesheet.href = new URL('timer-floating.css?v=20260922-12', new URL('.', document.querySelector('script[src*="timer.js?v=20261111-klokmedia1"]').src)).href;
             doc.head.appendChild(stylesheet);
             doc.body.innerHTML = '<main><div id="miniTheme" class="mini-theme"></div><div id="miniTime"></div><progress id="miniProgress" max="1" aria-label="Resterende werktijd"></progress><p id="miniState" role="status"></p><div class="mini-controls"><button id="miniToggle"></button><button id="miniAdd">+ 1 min</button><button id="miniReset" aria-label="Opnieuw instellen">↻</button></div></main>';
             floatingWorld = window.TimerWorld.create(doc.querySelector('main'), true);
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const slots = Array.from({ length: 60 }, (_, index) => index).sort(() => Math.random() - .5);
         for (let index = 0; index < 60; index++) {
             const fish = document.createElement('img');
-            fish.src = `klok_afbeeldingen/vis${(index % 10) + 1}.png`;
+            fish.src = `https://zisa-klokprenten.pages.dev/klok_afbeeldingen/vis${(index % 10) + 1}.png`;
             fish.alt = '';
             fish.className = 'fish';
             const slot = slots[index];
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createStar() {
         const star = document.createElement('img');
-        star.src = 'afbeeldingen klok/ster.png';
+        star.src = 'https://zisa-klokprenten.pages.dev/afbeeldingen%20klok/ster.png';
         star.alt = '';
         star.className = 'growing-star';
         starContainer.appendChild(star);

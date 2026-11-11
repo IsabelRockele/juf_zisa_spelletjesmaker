@@ -1,7 +1,7 @@
 /* Shared story timeline: every duration reaches the same completed scene. */
 const TimerWorld = (() => {
     let sceneSerial = 0;
-    const root = typeof document === 'undefined' ? '' : new URL('timer_assets/worlds/', document.currentScript.src).href;
+    const root = typeof document === 'undefined' ? '' : new URL('https://zisa-klokprenten.pages.dev/timer_assets/worlds/', document.currentScript.src).href;
     const asset = name => `${root}optimized/${name}.webp?v=1`;
     const clamp = value => Math.max(0, Math.min(1, value));
     const reveal = (p, start, end = start + .08) => clamp((p-start)/(end-start));

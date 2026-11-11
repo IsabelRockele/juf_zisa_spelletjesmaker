@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Ster Specifiek ---
     function createNewStar() {
         const star = document.createElement('img');
-        star.src = 'afbeeldingen klok/ster.png';
+        star.src = 'https://zisa-klokprenten.pages.dev/afbeeldingen%20klok/ster.png';
         star.className = 'growing-star';
 
         const starCount = growingStars.length;
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (let i = 0; i < 60; i++) {
             const fish = document.createElement('img');
-            fish.src = `klok_afbeeldingen/vis${(i % 10) + 1}.png`;
+            fish.src = `https://zisa-klokprenten.pages.dev/klok_afbeeldingen/vis${(i % 10) + 1}.png`;
             fish.className = 'fish';
             fish.id = `fish-${i}`;
             const scale = Math.random() * 0.7 + 0.5, direction = Math.random() > 0.5 ? 1 : -1;
