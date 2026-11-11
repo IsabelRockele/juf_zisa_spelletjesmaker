@@ -23,8 +23,8 @@ function add(id,label,group,sources,list,extra={}){
   const original=candidates.find(w=>w.tekst===word);
   if(!original)throw Error('Woord ontbreekt: '+id+' '+word);
   const {tekst,lidwoord,verklein,meervoud,verlengd,source}=original;
-  const preferred=path.join(root,'spelling/afbeeldingen/graad1',source,tekst+'.png');
-  return {word:tekst,article:lidwoord||null,small:verklein||null,plural:meervoud||null,long:verlengd||null,image:fs.existsSync(preferred)?path.relative(__dirname,preferred).replaceAll('\\','/'):images[tekst]||null,sentence:sentences[library[source].groep+'|'+tekst]||null};
+  const preferred='afbeeldingen/graad1/'+source+'/'+(original.afbeelding_bestand||tekst+'.png');
+  return {word:tekst,article:lidwoord||null,small:verklein||null,plural:meervoud||null,long:verlengd||null,image:media.includes(preferred)?'https://zisa-spellingprenten.pages.dev/'+preferred.replace(/\.png$/,'.webp'):images[tekst]||null,sentence:sentences[library[source].groep+'|'+tekst]||null};
  });
  categories.push({id,label,group,...extra,words});
 }
