@@ -182,7 +182,7 @@ document.querySelectorAll('a.img-link').forEach((link) => {
   const img = link.querySelector('.drukknop-afbeelding');
   if (img) {
     const filename = (img.getAttribute('src').split('/').pop() || '').replace(/\.webp$/i, '');
-    if (VERNIEUWDE_KNOPPEN.has(filename)) img.src = `../drukknop_afbeeldingen_v3/${filename}.png`;
+    if (VERNIEUWDE_KNOPPEN.has(filename)) img.src = `https://zisa-drukknopprenten.pages.dev/drukknop_afbeeldingen_v3/${filename}.png`;
   }
   if (img && !img.parentElement.classList.contains('tool-image-stage')) {
     const stage = document.createElement('span');

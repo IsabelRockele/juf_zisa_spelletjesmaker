@@ -14,7 +14,7 @@
    ['Bibi’s dagenavontuur','bibi-dagen/index.html','https://zisa-speelprenten.pages.dev/spelen/games/bibi-dagen/tegel-dagenavontuur.png','Oefen de dagen van de week met Bibi. Vandaag, gisteren en morgen. In level twee ook eergisteren en overmorgen.'],
    ['Bibi’s rekenbrug · tot 20','rekenbrug-proef/index.html?leerjaar=1','https://zisa-speelprenten.pages.dev/spelen/games/bibi-wereld/bibi-rekenbrug.png','Oefen met Bibi plus en min tot twintig. Herken de brug en leer de stappen.']]},
   {id:'puzzelen',name:'Puzzelen',title:'De puzzelweide',speech:'Hier kun je puzzelen. Leg de stukken op hun plek.',box:[4,48,39,38],mobile:[3,48],games:[
-   ['Puzzelstukken','../../pentomino_studio_volledige_tool.html?play=1&leerjaar=1','../../drukknop_afbeeldingen/pentomino-studio.png','Kies een figuur en leg de puzzelstukken op hun plek.']]},
+   ['Puzzelstukken','../../pentomino_studio_volledige_tool.html?play=1&leerjaar=1','https://zisa-drukknopprenten.pages.dev/drukknop_afbeeldingen/pentomino-studio.png','Kies een figuur en leg de puzzelstukken op hun plek.']]},
   {id:'spelling',name:'Spelling',title:'Het letterhuis',speech:'Hier komt het letterhuis. Er wordt nog aan gebouwd. Kies nu een ander plekje.',box:[57,48,39,38],mobile:[54,48],games:[]}
  ];
  const sums={id:'rekenen',name:'Plus en min',title:'Plus en min',games:[
