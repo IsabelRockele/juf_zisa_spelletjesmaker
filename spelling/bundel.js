@@ -473,6 +473,12 @@ window.SpellingBundel = {
     preview.querySelectorAll(".bundel-item-wrap").forEach(wrap => {
       const itemId = wrap.dataset.itemId;
       wrap.addEventListener("click", (e) => {
+        const vervang = e.target.closest(".prent-vervang-knop");
+        if (vervang) {
+          e.stopPropagation();
+          this.vervangPrentVanItem(itemId, vervang.dataset.woord);
+          return;
+        }
         const knop = e.target.closest(".rij-verwijder-knop");
         if (!knop) return;
         e.stopPropagation();
@@ -482,6 +488,37 @@ window.SpellingBundel = {
         }
       });
     });
+  },
+
+  vervangPrentVanItem: function(itemId, woordTekst) {
+    const item = this.items.find(i => i.id === itemId);
+    if (!item || item.categorie !== "ov01") return;
+    const blad = document.createElement("div");
+    blad.innerHTML = item.html;
+    const volgorde = Array.from(blad.querySelectorAll(".ov01-cel[data-woord]"), cel => cel.dataset.woord);
+    const index = volgorde.indexOf(woordTekst);
+    if (index < 0) return;
+    const graad = item.opties.graad || 1;
+    const bibliotheek = window.SpellingWoordenbibliotheek?.["graad" + graad] || {};
+    const alleWoorden = Object.entries(bibliotheek).flatMap(([categorie, cat]) =>
+      (cat.woorden || []).map(w => ({ ...w, categorie, graad })));
+    const pool = [...(item.gekozenWoordenSnapshot || []), ...alleWoorden];
+    const huidigeWoorden = volgorde.map(tekst => pool.find(w => w.tekst === tekst));
+    const huidig = huidigeWoorden[index];
+    if (!huidig || huidigeWoorden.some(w => !w)) return;
+    const kandidaten = pool.filter(w => w.afbeelding && w.categorie === huidig.categorie);
+    const uniek = window.SpellingDedup
+      ? window.SpellingDedup.ontdubbel(window.SpellingDedup.verschilt(kandidaten, huidigeWoorden))
+      : kandidaten.filter(w => !volgorde.includes(w.tekst));
+    if (!uniek.length) {
+      alert("Er is geen andere prent beschikbaar binnen deze spellingcategorie.");
+      return;
+    }
+    huidigeWoorden[index] = uniek[Math.floor(Math.random() * uniek.length)];
+    item.gekozenWoordenSnapshot = JSON.parse(JSON.stringify(huidigeWoorden));
+    item.opties.ov01.woordVolgorde = huidigeWoorden.map(w => w.tekst);
+    item.html = this._renderItemHTML(item, false);
+    this._renderPreview();
   },
 
   /* === Voeg 1 woord/zin toe aan een specifiek bundel-item === */

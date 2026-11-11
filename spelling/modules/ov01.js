@@ -274,17 +274,21 @@ window.SpellingModules.ov01 = {
     // Zo zien alle niveaus dezelfde "eerste" woorden — pedagogisch
     // coherent voor differentiatie in dezelfde klas.
     let gedeeldeKeuze = null;
+    const vasteVolgorde = Array.isArray(o.woordVolgorde)
+      ? o.woordVolgorde.map(tekst => gekozenWoorden.find(w => w.tekst === tekst)).filter(Boolean)
+        .concat(gekozenWoorden.filter(w => !o.woordVolgorde.includes(w.tekst)))
+      : null;
     if (zelfdeWoorden) {
       const grootsteMax = Math.max(...niveaus.map(n => aantalVoor(n)));
       const gemeenschappelijkeSeed = this._seed;
       this._seed = gemeenschappelijkeSeed;
-      gedeeldeKeuze = this._kiesWoorden(gekozenWoorden, grootsteMax);
+      gedeeldeKeuze = vasteVolgorde || this._kiesWoorden(gekozenWoorden, grootsteMax);
     }
 
     // WERKBLADEN: één per niveau (eventueel met antwoorden)
     return niveaus.map((niveau, idx) => {
       const aantalDitNiveau = aantalVoor(niveau);
-      const woorden = zelfdeWoorden
+      const woorden = vasteVolgorde ? vasteVolgorde.slice(0, aantalDitNiveau) : zelfdeWoorden
         ? gedeeldeKeuze.slice(0, aantalDitNiveau)
         : this._kiesWoorden(gekozenWoorden, aantalDitNiveau);
 
@@ -492,6 +496,7 @@ window.SpellingModules.ov01 = {
         html += `
           <div class="ov01-cel" data-woord="${w.tekst}">
             <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord van het werkblad" type="button">✕</button>
+            <button class="prent-vervang-knop" data-woord="${w.tekst}" title="Vervang door een ander woord uit dezelfde spellingcategorie" type="button">↻ Vervangen</button>
             <div class="ov01-cel-plaatje">${plaatjeHtml}</div>
             ${onderHtml}
             <div class="ov01-cel-lijnen">${lijnen}</div>
