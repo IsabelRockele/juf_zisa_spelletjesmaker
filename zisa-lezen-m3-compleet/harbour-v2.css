@@ -1,5 +1,5 @@
 /* The illustrated water stays behind the interactive, clearly numbered jetties. */
-.dock{background:#68c6d4 url('images/woordenschat-seizoenen/haven.png') center 30% / cover no-repeat;justify-content:flex-end;padding:20px;gap:16px;isolation:isolate}
+.dock{background:#68c6d4 url("https://zisa-leesprenten.pages.dev/images/woordenschat-seizoenen/haven.webp") center 30% / cover no-repeat;justify-content:flex-end;padding:20px;gap:16px;isolation:isolate}
 .dock:before{background:linear-gradient(transparent 20%,#1a7b9522 50%,#07526866)}
 .dock .instruction{align-self:center;margin:0 0 auto;max-width:92%;font-size:16px;background:#fffcf0f5;box-shadow:0 3px 12px #16394320;padding:10px 18px}
 .dock .slots{padding:0 12px 24px;gap:22px;position:relative;flex-shrink:0}

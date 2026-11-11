@@ -38,7 +38,7 @@ export async function printClassPoster(url, theme, grades = []) {
 
   const row = poster.querySelector('.klasposter-mascots');
   if (theme === 'lezen') {
-    row.innerHTML = `<img src="${new URL("../zisa-lezen-m3-compleet/images/zisa-leest.png", import.meta.url).href}" alt="Zisa leest een boek">`;
+    row.innerHTML = `<img src="https://zisa-leesprenten.pages.dev/images/zisa-leest.webp" alt="Zisa leest een boek">`;
   } else {
     row.innerHTML = mascots.map(([name, file], index) => {
       const grade = index + 1;

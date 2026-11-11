@@ -1,4 +1,4 @@
-.house{background:#54394a url('images/toverhuis-spel/toverhal.png') center/cover;justify-content:space-between;gap:14px;padding:24px;isolation:isolate}
+.house{background:#54394a url("https://zisa-leesprenten.pages.dev/images/toverhuis-spel/toverhal.webp") center/cover;justify-content:space-between;gap:14px;padding:24px;isolation:isolate}
 .house:before{background:linear-gradient(#35204215,#30203f38)}
 .house .inventory{margin:0;font-size:16px;box-shadow:0 3px 12px #1b142655;flex-shrink:0}
 .house .doors{align-items:center;flex:1;gap:28px;min-height:0;padding:18px 12px 8px}

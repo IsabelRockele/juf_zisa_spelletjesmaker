@@ -18,16 +18,16 @@ function chooseTools(){
  const excluded=correct==='cloth'?'towel':correct==='towel'?'cloth':null;
  const distractors=mix(toolChoices.filter(t=>t.id!==correct&&t.id!==excluded)).slice(0,3);
  const choices=mix([toolChoices.find(t=>t.id===correct),...distractors]);
- document.querySelector('.inventory').innerHTML='<div><b>Wat helpt hier?</b><small>Kies en tik, of sleep naar de prent.</small></div>'+choices.map(t=>`<button draggable="true" data-item="${t.id}" aria-pressed="false">${t.id==='oil'?'<img class="inventory-oil" src="images/boot-stil-oil.png" alt="">':`<span>${t.icon}</span>`}${t.label}</button>`).join('');
+ document.querySelector('.inventory').innerHTML='<div><b>Wat helpt hier?</b><small>Kies en tik, of sleep naar de prent.</small></div>'+choices.map(t=>`<button draggable="true" data-item="${t.id}" aria-pressed="false">${t.id==='oil'?'<img class="inventory-oil" src="https://zisa-leesprenten.pages.dev/images/boot-stil-oil.webp" alt="">':`<span>${t.icon}</span>`}${t.label}</button>`).join('');
  selected=null;bindTools();
 }
 let step=0,selected=null,solved=new Set(),sound=true,ctx=null,busy=false,running=false,tick=0;
 let noiseTimer;const timers=new Set();const picture=document.querySelector('.picture');
 const firstScene=picture.innerHTML,firstTools=document.querySelector('.inventory').innerHTML;
-const tableImages=['table','cups','music','marbles'].map(name=>{const img=new Image();img.src=`images/boot-stil-${name}.png`;return img});
+const tableImages=['table','cups','music','marbles'].map(name=>{const img=new Image();img.src=`https://zisa-leesprenten.pages.dev/images/boot-stil-${name}.webp`;return img});
 function showTable(){
  picture.classList.add('table-scene');picture.classList.remove('awake');
- picture.innerHTML='<img src="images/boot-stil-table.png" alt="Sint rust achter de tafel. Links staan kopjes, in het midden een open muziekdoosje en rechts losse knikkers.">'+['cups','music','marbles'].map(place=>`<img class="scene-layer ${place}-motion" src="images/boot-stil-table.png" alt=""><img class="scene-layer ${place}-fixed" src="images/boot-stil-${place}.png" alt="">`).join('')+'<div id="wakeMessage" hidden>Sssst… Sint wil rusten.</div>'+[['cups','kopjes','TIK!'],['music','muziekdoos','TING!'],['marbles','knikkers','KLIK!']].map(([p,label,noise])=>`<button class="spot ${p} noisy" data-place="${p}" aria-label="${label}"><span class="noise">${noise}</span><span class="label">${label}</span></button>`).join('')+'<div id="sleep" hidden>💤 Heerlijk stil…</div>';
+ picture.innerHTML='<img src="https://zisa-leesprenten.pages.dev/images/boot-stil-table.webp" alt="Sint rust achter de tafel. Links staan kopjes, in het midden een open muziekdoosje en rechts losse knikkers.">'+['cups','music','marbles'].map(place=>`<img class="scene-layer ${place}-motion" src="https://zisa-leesprenten.pages.dev/images/boot-stil-table.webp" alt=""><img class="scene-layer ${place}-fixed" src="https://zisa-leesprenten.pages.dev/images/boot-stil-${place}.webp" alt="">`).join('')+'<div id="wakeMessage" hidden>Sssst… Sint wil rusten.</div>'+[['cups','kopjes','TIK!'],['music','muziekdoos','TING!'],['marbles','knikkers','KLIK!']].map(([p,label,noise])=>`<button class="spot ${p} noisy" data-place="${p}" aria-label="${label}"><span class="noise">${noise}</span><span class="label">${label}</span></button>`).join('')+'<div id="sleep" hidden>💤 Heerlijk stil…</div>';
  document.querySelector('.inventory').innerHTML='<div><b>Wat helpt hier?</b><small>Kies en tik, of sleep naar de prent.</small></div><button draggable="true" data-item="towel"><span>▧</span>theedoek</button><button draggable="true" data-item="hand"><span>✋</span>hand</button><button draggable="true" data-item="pouch"><span>👝</span>stoffen zakje</button>';
  bindTools();
 }

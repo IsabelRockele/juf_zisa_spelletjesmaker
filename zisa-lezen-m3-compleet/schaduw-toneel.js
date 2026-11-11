@@ -5,10 +5,10 @@ window.ZisaShadowShow={stop(){active++;},async play(screen,mission,done){
  screen.querySelector('.performance')?.remove();screen.classList.add('performing');
  const layer=document.createElement('div');layer.className='performance';screen.append(layer);
  const caption=document.createElement('p');caption.className='stage-caption';caption.setAttribute('role','status');layer.append(caption);
- const actors={};mission.chars.forEach((name,i)=>{const a=document.createElement('div');a.className='performer '+name;a.style.width=i===mission.small?'21%':'30%';a.style.left=(mission.pos[i]*33.333+16.667)+'%';a.style.bottom='4%';a.innerHTML=`<img draggable="false" src="images/leesspel-m6/${name}.png" alt="${name}">`;layer.append(a);actors[name]=a;});
+ const actors={};mission.chars.forEach((name,i)=>{const a=document.createElement('div');a.className='performer '+name;a.style.width=i===mission.small?'21%':'30%';a.style.left=(mission.pos[i]*33.333+16.667)+'%';a.style.bottom='4%';a.innerHTML=`<img draggable="false" src="https://zisa-leesprenten.pages.dev/images/leesspel-m6/${name}.webp" alt="${name}">`;layer.append(a);actors[name]=a;});
  const n=actors.nar,k=actors.kat,d=actors.draak;
  const say=t=>caption.textContent=t;
- const pose=(a,name)=>{a.querySelector('img').src='images/leesspel-m6/'+name+'.png';};
+ const pose=(a,name)=>{a.querySelector('img').src='https://zisa-leesprenten.pages.dev/images/leesspel-m6/'+name+'.webp';};
  const face=(a,x)=>{const left=parseFloat(a.style.left),normalLeft=a.classList.contains('draak');a.querySelector('img').style.scale=(normalLeft?(x<left?1:-1):(x>left?1:-1))+' 1';};
  const move=async(a,x,ms=1400)=>{face(a,x);const start=parseFloat(a.style.left);a.animate([{left:start+'%'},{left:x+'%'}],{duration:ms,easing:'ease-in-out'});a.style.left=x+'%';await wait(ms);};
  const hideCat=async()=>{const nx=parseFloat(n.style.left),dx=parseFloat(d.style.left);k.style.zIndex='1';n.style.zIndex='3';pose(k,'kat-duikt');await move(k,nx+(dx>nx?-4:4),1100);};

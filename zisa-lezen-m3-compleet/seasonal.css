@@ -55,7 +55,7 @@
 .sorting-piece.dragging{opacity:.5;outline:4px solid #edab2b}
 .empty-picture-slot{width:100%;border:0;background:transparent;color:#c8b7dd;font-size:40px;cursor:pointer;min-height:44px}
 .picture-slot.try-again{border-color:#e18b2d;background:#fff1d5}
-.theme-halloween .compact-play{background:#35396d url('images/speldecor/halloweentuin.png') center/cover no-repeat;border-color:#8e64b8;box-shadow:inset 0 0 0 3px #c4a6ed,0 14px 30px #24304b44}
+.theme-halloween .compact-play{background:#35396d url("https://zisa-leesprenten.pages.dev/images/speldecor/halloweentuin.webp") center/cover no-repeat;border-color:#8e64b8;box-shadow:inset 0 0 0 3px #c4a6ed,0 14px 30px #24304b44}
 .theme-halloween .compact-play h2{color:#fff5d8;text-shadow:0 2px 3px #27204a}
 .theme-halloween .compact-play .mission-question-row{align-self:center;background:#fff8e9f2;border-radius:18px;padding:3px 12px}
 .theme-halloween .compact-play .mission-feedback{color:white;text-shadow:0 1px 3px #151a33}

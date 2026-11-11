@@ -2,7 +2,7 @@ window.ZisaLift = (() => {
   const names=['poppenhuis','pannen','boeken','blokken'];
   const floors=['dek','keuken','ruim'];
   const shuffle=a=>[...a].sort(()=>Math.random()-.5);
-  const art=n=>`images/pakjeslift-spel/${n}.png`;
+  const art=n=>`https://zisa-leesprenten.pages.dev/images/pakjeslift-spel/${n}.webp`;
   let token=0,round=0,order,stock,slots,selected,busy,config;
   const q=s=>document.querySelector(s);
   function stop(){token++;}

@@ -17,7 +17,7 @@
   <header class="top"><strong>🎮 Zisa Spelen</strong><a href="index.html">← Terug naar de gratis tools</a></header>
   <main class="wrap">
     <section class="hero"><div><small>GRATIS COLLEGA-VERSIE</small><h1>Laat je leerlingen spelen</h1><p>Kies de leerjaren, toon de QR en laat kinderen zelfstandig oefenen op een tablet of computer.</p></div><span class="pill">Onbeperkt aantal leerlingen</span></section>
-    <section class="reading"><div class="icon"><img src="zisa-lezen-m3-compleet/images/zisa-leest.png" alt="Zisa leest in een boek"></div><div><h2>Zisa Lezen</h2><p>Blader door digitale leesboekjes van AVI Start tot en met E6 en los onderweg leesvragen op.</p></div><a class="btn" href="zisa-lezen-m3-compleet/?gratis=1">Open de boekenkast</a></section>
+    <section class="reading"><div class="icon"><img src="https://zisa-leesprenten.pages.dev/images/zisa-leest.webp" alt="Zisa leest in een boek"></div><div><h2>Zisa Lezen</h2><p>Blader door digitale leesboekjes van AVI Start tot en met E6 en los onderweg leesvragen op.</p></div><a class="btn" href="zisa-lezen-m3-compleet/?gratis=1">Open de boekenkast</a></section>
     <div class="grid">
       <section class="card"><h2>Welke leerjaren mogen kiezen?</h2><p class="muted">De QR past meteen mee aan wanneer je een vinkje wijzigt.</p><div class="checks">
         <label class="check"><input type="checkbox" value="1" checked><div><b>Eerste leerjaar (groep 3)</b><span>Bibi’s Splitsmachine, splitsen en hoofdrekenen</span></div></label>
@@ -29,7 +29,7 @@
     </div>
   </main>
   <script type="module">
-    import { printClassPoster } from "./assets/klasposter.js?v=20261111-poster1";
+    import { printClassPoster } from "./assets/klasposter.js?v=20261111-media2";
     const checks=[...document.querySelectorAll('.check input')],qr=document.getElementById('qr'),urlText=document.getElementById('url'),openButton=document.getElementById('open'),feedback=document.getElementById('feedback');
     function makeUrl(){const grades=checks.filter(input=>input.checked).map(input=>input.value).join('')||'1';const url=new URL('spelen/',location.href);url.searchParams.set('gratis','1');url.searchParams.set('leerjaren',grades);return ZisaPlayLinks.url(url.href,document.getElementById('exercise').value)}
     function render(){if(!checks.some(input=>input.checked))checks[0].checked=true;ZisaPlayLinks.fill(document.getElementById('exercise'),checks.filter(input=>input.checked).map(input=>Number(input.value)));const url=makeUrl();urlText.textContent=url;openButton.href=url;qr.replaceChildren();if(window.QRCode)new QRCode(qr,{text:url,width:220,height:220,colorDark:'#17324d',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M})}
