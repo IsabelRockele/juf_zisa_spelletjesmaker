@@ -1,3 +1,10 @@
+window.SpellingPrentPad = function(pad) {
+  if (typeof pad !== "string") return pad;
+  const lokaal = pad.replace(/^https:\/\/zisa-spellingprenten\.pages\.dev\//, "").replace(/\.webp(?=\?|$)/i, ".png");
+  if (!lokaal.startsWith("afbeeldingen/")) return pad;
+  return "https://zisa-spellingprenten.pages.dev/" + lokaal.replace(/\.png(?=\?|$)/i, ".webp");
+};
+
 /* ==========================================================
    afbeeldingen.js
    Centrale helper voor woord → afbeelding mapping.
@@ -90,12 +97,14 @@ window.SpellingAfbeeldingen = {
   },
 
   prentbijschrift: function(pad) {
-    return spellingPrentbijschriften.get(pad);
+    const lokaal = pad.replace(/^https:\/\/zisa-spellingprenten\.pages\.dev\//, "").replace(/\.webp(?=\?|$)/i, ".png").split("?")[0];
+    return spellingPrentbijschriften.get(lokaal);
   },
 
   prentbron: function(pad) {
     const bijschrift = this.prentbijschrift(pad);
-    return bijschrift && !bijschrift.beeldverhouding ? `${bijschrift.bron || pad}?v=20261110f` : pad;
+    const bron = bijschrift && !bijschrift.beeldverhouding ? `${bijschrift.bron || pad}?v=20261110f` : pad;
+    return window.SpellingPrentPad(bron);
   },
 
   metPrentbijschrift: function(pad, prent) {

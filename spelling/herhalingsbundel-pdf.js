@@ -654,7 +654,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     // (nul, con, aux, prn, ...) of andere uitzonderingen.
     // Valt terug op {tekst}.png als afbeelding_bestand niet gezet is.
     const bestandsnaam = woord.afbeelding_bestand || `${woord.tekst}.png`;
-    return `afbeeldingen/graad${graadNr}/${afbeeldingCategorie}/${bestandsnaam}`;
+    return window.SpellingPrentPad(`afbeeldingen/graad${graadNr}/${afbeeldingCategorie}/${bestandsnaam}`);
   }
   
   /* Laad één PNG via fetch + canvas → dataURL.
@@ -671,9 +671,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     
     return new Promise((resolve) => {
       const img = new Image();
-      // GEEN crossOrigin: lokale bestanden krijgen anders CORS-fouten 
-      // bij sommige browsers/servers, met als gevolg dat canvas "tainted" 
-      // wordt en toDataURL faalt.
+      img.crossOrigin = "anonymous";
       img.onload = () => {
         try {
           const canvas = document.createElement("canvas");

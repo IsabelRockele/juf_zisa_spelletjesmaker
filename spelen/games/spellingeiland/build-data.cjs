@@ -9,8 +9,13 @@ for (const file of ['graad1.js','dictee-zinnen-graad1.js']) vm.runInContext(fs.r
 const library=context.window.SpellingWoordenbibliotheek[1];
 const sentences=context.window.SpellingDicteeZinnen.graad1;
 const images={};
-function walk(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){const full=path.join(dir,entry.name);if(entry.isDirectory())walk(full);else if(entry.name.endsWith('.png')){const word=entry.name.slice(0,-4);images[word]??=path.relative(__dirname,full).replaceAll('\\','/');}}}
-walk(path.join(root,'spelling/afbeeldingen/graad1'));
+// Behoud de bestaande prentkeuze wanneer hetzelfde woord in meerdere mappen staat.
+const curated={window:{}};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,'data.js'),'utf8'),curated);
+for(const category of curated.window.SpellingData.categories)for(const word of category.words)if(word.image)images[word.word]=word.image;
+
+const media = JSON.parse(fs.readFileSync(path.join(root,'spelling/prentpaden.json'),'utf8'));
+for(const rel of media.filter(p=>p.startsWith('afbeeldingen/graad1/'))){const word=path.basename(rel,'.png');images[word]??='https://zisa-spellingprenten.pages.dev/'+rel.replace(/\.png$/,'.webp');}
 const categories=[];
 function add(id,label,group,sources,list,extra={}){
  const candidates=sources.flatMap(source=>library[source].woorden.map(w=>({...w,source})));
@@ -18,8 +23,8 @@ function add(id,label,group,sources,list,extra={}){
   const original=candidates.find(w=>w.tekst===word);
   if(!original)throw Error('Woord ontbreekt: '+id+' '+word);
   const {tekst,lidwoord,verklein,meervoud,verlengd,source}=original;
-  const preferred=path.join(root,'spelling/afbeeldingen/graad1',source,tekst+'.png');
-  return {word:tekst,article:lidwoord||null,small:verklein||null,plural:meervoud||null,long:verlengd||null,image:fs.existsSync(preferred)?path.relative(__dirname,preferred).replaceAll('\\','/'):images[tekst]||null,sentence:sentences[library[source].groep+'|'+tekst]||null};
+  const preferred='afbeeldingen/graad1/'+source+'/'+(original.afbeelding_bestand||tekst+'.png');
+  return {word:tekst,article:lidwoord||null,small:verklein||null,plural:meervoud||null,long:verlengd||null,image:media.includes(preferred)?'https://zisa-spellingprenten.pages.dev/'+preferred.replace(/\.png$/,'.webp'):images[tekst]||null,sentence:sentences[library[source].groep+'|'+tekst]||null};
  });
  categories.push({id,label,group,...extra,words});
 }
@@ -59,5 +64,6 @@ custom('schr','schr',[
 // The source library occasionally stores "hij ..."; retain it as context, not as the answer.
 for(const c of categories)for(const w of c.words){if(w.word.startsWith('hij ')){w.sentence??=w.word[0].toUpperCase()+w.word.slice(1)+'.';w.word=w.word.slice(4);}if(c.transform&&!w[c.transform])throw Error('Vorm ontbreekt '+w.word);}
 const pairs=[{"cats": ["kort", "lang"], "words": ["man", "maan"], "sentences": ["De … draagt een jas.", "De … schijnt aan de hemel."]}, {"cats": ["kort", "lang"], "words": ["ram", "raam"], "sentences": ["De … is een mannelijk schaap.", "Ik kijk door het … naar buiten."]}, {"cats": ["kort", "lang"], "words": ["bom", "boom"], "sentences": ["De … ontploft met een knal.", "Aan de … groeien bladeren."]}, {"cats": ["kort", "lang"], "words": ["rok", "rook"], "sentences": ["Ik draag een … met stippen.", "Uit de schoorsteen komt … ."]}, {"cats": ["kort", "lang"], "words": ["tak", "taak"], "sentences": ["De vogel zit op een … .", "Ik maak mijn … voor school."]}, {"cats": ["kort", "lang"], "words": ["zak", "zaak"], "sentences": ["Ik stop de knikkers in een … .", "In die … verkoopt de bakker brood."]}, {"cats": ["kort", "lang"], "words": ["pen", "peen"], "sentences": ["Ik schrijf met een … .", "Het konijn knabbelt aan een … ."]}, {"cats": ["kort", "lang"], "words": ["bek", "beek"], "sentences": ["De vogel houdt een worm in zijn … .", "In de … stroomt helder water."]}, {"cats": ["kort", "lang"], "words": ["bos", "boos"], "sentences": ["We wandelen tussen de bomen in het … .", "Hij is … omdat zijn fiets stuk is."]}, {"cats": ["kort", "lang"], "words": ["pot", "poot"], "sentences": ["De soep zit in een grote … .", "De hond geeft mij een … ."]}, {"cats": ["kort", "lang"], "words": ["bot", "boot"], "sentences": ["De hond knaagt op een … .", "De … vaart op het water."]}, {"cats": ["kort", "lang"], "words": ["kop", "koop"], "sentences": ["Er zit thee in mijn … .", "Ik … een brood bij de bakker."]}, {"cats": ["kort", "lang"], "words": ["bal", "baal"], "sentences": ["Ik schop de … in het doel.", "In de stal ligt een … stro."]}, {"cats": ["kort", "lang"], "words": ["mat", "maat"], "sentences": ["Veeg je voeten op de … .", "Welke … schoenen draag jij?"]}, {"cats": ["kort", "lang"], "words": ["kas", "kaas"], "sentences": ["De tomaten groeien in een glazen … .", "Ik leg een plak … op mijn brood."]}, {"cats": ["kort", "lang"], "words": ["gas", "gaas"], "sentences": ["Het fornuis werkt op … .", "Rond het kippenhok zit … ."]}, {"cats": ["kort", "lang"], "words": ["vel", "veel"], "sentences": ["Ik teken op een … papier.", "In de doos zitten heel … blokken."]}, {"cats": ["kort", "lang"], "words": ["wet", "weet"], "sentences": ["Je moet je aan de … houden.", "Ik … het antwoord op de vraag."]}, {"cats": ["kort", "lang"], "words": ["zon", "zoon"], "sentences": ["De … maakt de dag warm en licht.", "Hun … is een jongen van zeven jaar."]}];
+for(const category of categories)for(const word of category.words){const previous=curated.window.SpellingData.categories.find(c=>c.id===category.id)?.words.find(w=>w.word===word.word);if(previous?.image)word.image=previous.image;}
 fs.writeFileSync(path.join(__dirname,'data.js'),'// Curated snapshot. Rebuild with node build-data.cjs.\nwindow.SpellingData = '+JSON.stringify({categories,pairs},null,2)+';\n');
 console.log(categories.length+' categorieën, '+categories.reduce((n,c)=>n+c.words.length,0)+' woorden');

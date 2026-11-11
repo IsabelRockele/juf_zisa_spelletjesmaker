@@ -3,15 +3,15 @@
   'use strict';
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const scenes = {
-    tuin: { naam: 'In de tuin', src: 'afbeeldingen/taferelen/tuin.png', vragen: [
+    tuin: { naam: 'In de tuin', src: window.SpellingPrentPad("afbeeldingen/taferelen/tuin.png"), vragen: [
       ['Waar staat de kip?', 'De kip staat op het hok.'],
       ['Waar zit de mus?', 'De mus zit in de boom.'],
       ['Waar zit de kat?', 'De kat zit voor de deur.']] },
-    park: { naam: 'Bij de bank', src: 'afbeeldingen/taferelen/park.png', vragen: [
+    park: { naam: 'Bij de bank', src: window.SpellingPrentPad("afbeeldingen/taferelen/park.png"), vragen: [
       ['Waar zit de kat?', 'De kat zit op de bank.'],
       ['Waar zit de mus?', 'De mus zit in de boom.'],
       ['Waar is de kip?', 'De kip staat voor het hek.']] },
-    huis: { naam: 'Bij het huis', src: 'afbeeldingen/taferelen/huis.png', vragen: [
+    huis: { naam: 'Bij het huis', src: window.SpellingPrentPad("afbeeldingen/taferelen/huis.png"), vragen: [
       ['Waar zit de kat?', 'De kat zit in de doos.'],
       ['Waar zit de mus?', 'De mus zit op het hek.'],
       ['Waar is de kip?', 'De kip staat voor de deur.']] }
@@ -66,7 +66,7 @@
     'aai-ooi-oei': 'aai, ooi en oei'
   };
   const zinGroep = waarde => Object.hasOwn(zinKlanken,waarde) ? waarde : 'kort-lang-twee';
-  const prentPad = (groep,woord) => `afbeeldingen/graad1/${groep}/${woord}.png`;
+  const prentPad = (groep,woord) => window.SpellingPrentPad(`afbeeldingen/graad1/${groep}/${woord}.png`);
   const zinPrenten = {
     'kort-lang': [
       ['mkm-a','kat','De kat zit op de mat.'],['lk-aa','maan','De maan is rond.'],['mkm-a','bal','De bal is rond.'],
