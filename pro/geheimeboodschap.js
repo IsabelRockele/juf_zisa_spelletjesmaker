@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const imageLoadPromises = ALFABET.split('').map(letter => {
             return new Promise((resolve) => {
-                const imageUrl = `thema_afbeeldingen/${thema}/${letter}.png`;
+                const imageUrl = `https://zisa-lenteproef.pages.dev/thema_afbeeldingen/${thema}/${letter}.webp`;
                 const img = new Image();
                 img.onload = () => {
                     document.getElementById(`preview-thema-upload-grid-${letter}`).src = imageUrl;
