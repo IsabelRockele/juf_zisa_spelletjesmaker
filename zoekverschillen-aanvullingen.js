@@ -197,17 +197,17 @@
             ["patch",1422.5,169,0,"De trainer draagt een pet.",101,106,null,null]
         ]}
     };
-    const baseUrl=new URL('assets/zoekverschillen-herwerkt/',document.currentScript.src);
+    const baseUrl=new URL('https://zisa-zoekverschillen.pages.dev/assets/zoekverschillen-herwerkt/');
     const images=new Map(), pending=new Map();
     function prepare(name) {
         return Promise.all([...new Set([name,...scenes[name].changes.map(c=>c[8]).filter(Boolean)])].map(load));
     }
     function load(name) {
         if(!pending.has(name)) pending.set(name,new Promise((resolve,reject)=>{
-            const img=new Image();
+            const img=new Image();img.crossOrigin='anonymous';
             img.onload=()=>{images.set(name,img);resolve();};
             img.onerror=()=>{pending.delete(name);reject(new Error('Kleurplaat kon niet worden geladen.'));};
-            img.src=new URL(name+'.png?v=20261010d',baseUrl).href;
+            img.src=new URL(name+'.webp?v=20261111-media1',baseUrl).href;
         }));
         return pending.get(name);
     }

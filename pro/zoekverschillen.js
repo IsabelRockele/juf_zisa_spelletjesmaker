@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const catalogMedia = source => /^(?:\.\.\/)?zoekverschillen_catalogus\//.test(source)
+        ? source.replace(/^(?:\.\.\/)?zoekverschillen_catalogus\//, 'https://zisa-zoekverschillen.pages.dev/zoekverschillen_catalogus/').replace(/\.png(?=[?#]|$)/, '.webp')
+        : source;
+
     // --- ELEMENTEN KOPPELEN ---
     const uploadBtn = document.getElementById('uploadImageBtn');
     const fileInput = document.getElementById('fileInput');
@@ -167,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToolExplanation(tool){const info=toolInfo[tool];if(info)toolExplanation.innerHTML=`<strong>${info.name}</strong><span>${info.text}</span>`;}
     const automaticThemes=new Set(['naar-school','herfst','sinterklaas','kerst','pasen','lente','carnaval','winter','zomer','valentijn','dieren','ruimte','de-zee']);
     catalog.forEach(([theme,,names]) => { if (names.every(name => window.ZoekVerschillenAanvullingen?.scenes[name])) automaticThemes.add(theme); });
-    function renderCatalog(activeSlug){catalogThemes.innerHTML=catalog.map(([slug,label])=>`<button class="catalog-theme ${slug===activeSlug?'active':''}" data-theme="${slug}">${label}</button>`).join('');const[,label,images]=catalog.find(item=>item[0]===activeSlug),automaticAvailable=automaticThemes.has(activeSlug),automaticStatus=automaticAvailable?'<em class="catalog-status available">Automatisch beschikbaar</em>':'<em class="catalog-status pending">Zelf bewerken · automatisch binnenkort</em>';catalogImages.innerHTML=images.map((name,index)=>`<button class="catalog-image" data-theme="${activeSlug}" data-name="${name}" data-src="../zoekverschillen_catalogus/${activeSlug}/${name}.png"><img src="../zoekverschillen_catalogus/${activeSlug}/${name}.png" alt="Voorbeeld ${index+1}: ${label}" loading="lazy"><span>${label} – kleurplaat ${index+1}</span>${automaticStatus}</button>`).join('');catalogThemes.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>renderCatalog(btn.dataset.theme)));catalogImages.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{currentCatalogSelection={theme:btn.dataset.theme,name:btn.dataset.name,src:btn.dataset.src};loadImageSource(btn.dataset.src,'Kleurplaat geladen. Maak nu verschillen in de rechterafbeelding.');autoDifferencesPanel.classList.toggle('hidden',!automaticThemes.has(btn.dataset.theme));solutionActions.classList.add('hidden');hideSolution();differenceSummary.hidden=true;catalogOverlay.classList.add('hidden');}));}
+    function renderCatalog(activeSlug){catalogThemes.innerHTML=catalog.map(([slug,label])=>`<button class="catalog-theme ${slug===activeSlug?'active':''}" data-theme="${slug}">${label}</button>`).join('');const[,label,images]=catalog.find(item=>item[0]===activeSlug),automaticAvailable=automaticThemes.has(activeSlug),automaticStatus=automaticAvailable?'<em class="catalog-status available">Automatisch beschikbaar</em>':'<em class="catalog-status pending">Zelf bewerken · automatisch binnenkort</em>';catalogImages.innerHTML=images.map((name,index)=>`<button class="catalog-image" data-theme="${activeSlug}" data-name="${name}" data-src="../zoekverschillen_catalogus/${activeSlug}/${name}.png"><img src="${catalogMedia(`../zoekverschillen_catalogus/${activeSlug}/${name}.png`)}" alt="Voorbeeld ${index+1}: ${label}" loading="lazy"><span>${label} – kleurplaat ${index+1}</span>${automaticStatus}</button>`).join('');catalogThemes.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>renderCatalog(btn.dataset.theme)));catalogImages.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{currentCatalogSelection={theme:btn.dataset.theme,name:btn.dataset.name,src:btn.dataset.src};loadImageSource(btn.dataset.src,'Kleurplaat geladen. Maak nu verschillen in de rechterafbeelding.');autoDifferencesPanel.classList.toggle('hidden',!automaticThemes.has(btn.dataset.theme));solutionActions.classList.add('hidden');hideSolution();differenceSummary.hidden=true;catalogOverlay.classList.add('hidden');}));}
     initialiseGuidance();
     const automaticDifferenceDescriptions={'klas-met-kinderen':['Op het bord staat ABC.','De klok wijst een ander uur aan.','De juf draagt een bril.','Op de wereldbol ontbreekt een werelddeel.','In de potloodbeker zit nog maar één potlood.','De plant op de tafel heeft minder bladeren.','De linker boekentas heeft een ster.','De rechter boekentas heeft een ronde knop.','Uit het boek steekt een boekenlegger.','De wolk aan het raam is een zon geworden.'],'speelplaats':['De bal heeft minder strepen.','De ruit op de linker boekentas is een cirkel geworden.','De ster op de rechter boekentas is een hart geworden.','In het ronde schoolraam ontbreekt een lijn.','De bank heeft minder poten.','In het hinkelspel staat het getal 5.','De bloem linksonder heeft minder bloemblaadjes.','Onder een wolk hangt een regendruppel.','Eén deurknop van de school is verdwenen.','Het meisje met het springtouw draagt een strik.'],'dieren-in-het-bos':['Het konijn heeft één slap oor.','De eekhoorn houdt twee eikels vast.','De uil knipoogt.','Het hert heeft minder vlekken.','De vos heeft een streep op zijn staart.','Een paddenstoel is verdwenen.','Er ligt een dennenappel bij de boomstam.','De boomstam heeft een extra knoest.','De egel draagt een appel.','Het boomhol heeft een andere vorm.'],'boswandeling':['De eekhoorn houdt twee eikels vast.','De kleinste paddenstoel is verdwenen.','De egel draagt een appel.','De pompon van de muts heeft een andere vorm.','In de mand liggen minder kastanjes.','De laars heeft een extra streep.','Een kastanjebolster is verdwenen.','De grote paddenstoel heeft minder stippen.','Er zit een vogel in de boom.','Een dwarrelend blad is een dennenappel geworden.']};
     const automaticDifferencePoints={'klas-met-kinderen':[[.54,.22,.11],[.277,.16,.06],[.797,.235,.06],[.925,.282,.06],[.425,.675,.05],[.33,.47,.05],[.126,.90,.045],[.758,.92,.045],[.412,.525,.04],[.132,.188,.055]],'speelplaats':[[.203,.515,.055],[.785,.75,.05],[.886,.79,.05],[.506,.188,.045],[.69,.48,.07],[.596,.763,.055],[.073,.895,.04],[.328,.14,.035],[.50,.335,.04],[.804,.285,.04]],'dieren-in-het-bos':[[.58,.73,.075],[.78,.62,.07],[.76,.15,.065],[.58,.42,.09],[.10,.52,.08],[.39,.59,.06],[.70,.91,.06],[.72,.865,.055],[.12,.82,.065],[.12,.20,.075]],'boswandeling':[[.14,.48,.065],[.16,.87,.06],[.84,.80,.065],[.30,.30,.06],[.75,.59,.08],[.70,.70,.055],[.50,.87,.06],[.87,.63,.065],[.53,.18,.06],[.40,.18,.055]]};
@@ -314,6 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadImageSource(source, message) {
             const version = ++imageLoadVersion;
             originalImage = new Image();
+            originalImage.crossOrigin = 'anonymous';
             originalImage.onload = () => {
                 if (version !== imageLoadVersion) return;
                 const aspectRatio = originalImage.width / originalImage.height;
@@ -327,12 +332,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusText.textContent = message;
             };
             originalImage.onerror = () => { statusText.textContent = 'Deze kleurplaat kon niet worden geladen. Probeer een andere.'; };
-            originalImage.src = source;
+            originalImage.src = catalogMedia(source);
     }
     async function loadImagePair(originalSource, differentSource, message, directedName = null, count = 0) {
         const version = ++imageLoadVersion;
         const load = source => new Promise((resolve, reject) => {
-            const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = source;
+            const img = new Image(); img.crossOrigin = 'anonymous'; img.onload = () => resolve(img); img.onerror = reject; img.src = catalogMedia(source);
         });
         try {
             const [left, right] = await Promise.all([load(originalSource), load(differentSource), directedName ? window.ZoekVerschillenAanvullingen.prepare(directedName) : Promise.resolve()]);

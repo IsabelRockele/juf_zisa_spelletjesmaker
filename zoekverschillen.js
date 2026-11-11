@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const catalogMedia = source => /^(?:\.\.\/)?zoekverschillen_catalogus\//.test(source)
+        ? source.replace(/^(?:\.\.\/)?zoekverschillen_catalogus\//, 'https://zisa-zoekverschillen.pages.dev/zoekverschillen_catalogus/').replace(/\.png(?=[?#]|$)/, '.webp')
+        : source;
+
     // --- ELEMENTEN KOPPELEN ---
     const uploadBtn = document.getElementById('uploadImageBtn');
     const fileInput = document.getElementById('fileInput');
@@ -214,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const [,label,images] = catalog.find(item => item[0] === activeSlug);
         const automaticAvailable = automaticThemes.has(activeSlug);
         const automaticStatus = automaticAvailable ? '<em class="catalog-status available">Automatisch beschikbaar</em>' : '<em class="catalog-status pending">Zelf bewerken · automatisch binnenkort</em>';
-        catalogImages.innerHTML = images.map((name,index) => `<button class="catalog-image" data-theme="${activeSlug}" data-name="${name}" data-src="zoekverschillen_catalogus/${activeSlug}/${name}.png"><img src="zoekverschillen_catalogus/${activeSlug}/${name}.png" alt="Voorbeeld ${index+1}: ${label}" loading="lazy"><span>${label} – kleurplaat ${index+1}</span>${automaticStatus}</button>`).join('');
+        catalogImages.innerHTML = images.map((name,index) => `<button class="catalog-image" data-theme="${activeSlug}" data-name="${name}" data-src="zoekverschillen_catalogus/${activeSlug}/${name}.png"><img src="${catalogMedia(`zoekverschillen_catalogus/${activeSlug}/${name}.png`)}" alt="Voorbeeld ${index+1}: ${label}" loading="lazy"><span>${label} – kleurplaat ${index+1}</span>${automaticStatus}</button>`).join('');
         catalogThemes.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => renderCatalog(btn.dataset.theme)));
         catalogImages.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
             currentCatalogSelection = { theme:btn.dataset.theme, name:btn.dataset.name, src:btn.dataset.src };
@@ -385,6 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadImageSource(source, message) {
             const version = ++imageLoadVersion;
             originalImage = new Image();
+            originalImage.crossOrigin = 'anonymous';
             originalImage.onload = () => {
                 if (version !== imageLoadVersion) return;
                 const aspectRatio = originalImage.width / originalImage.height;
@@ -398,13 +403,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusText.textContent = message;
             };
             originalImage.onerror = () => { statusText.textContent = 'Deze kleurplaat kon niet worden geladen. Probeer een andere.'; };
-            originalImage.src = source;
+            originalImage.src = catalogMedia(source);
     }
 
     async function loadImagePair(originalSource, differentSource, message, directedName = null, count = 0) {
         const version = ++imageLoadVersion;
         const load = source => new Promise((resolve, reject) => {
-            const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = source;
+            const img = new Image(); img.crossOrigin = 'anonymous'; img.onload = () => resolve(img); img.onerror = reject; img.src = catalogMedia(source);
         });
         try {
             const [left, right] = await Promise.all([load(originalSource), load(differentSource), directedName ? window.ZoekVerschillenAanvullingen.prepare(directedName) : Promise.resolve()]);
