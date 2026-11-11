@@ -14,7 +14,7 @@
   };
 
   const root = document.getElementById('moneyGame');
-  const assetRoot = '../../geldrekenen/assets/';
+  const assetRoot = 'https://zisa-geldprenten.pages.dev/assets/';
   const products = ['appelen','choco','eieren','kaas','koekjes','melk','pasta','sap','trosbananen'];
   const euroDenoms = [500,200,100,50,20,10,5,2,1];
   const centDenoms = [50,20,10,5];

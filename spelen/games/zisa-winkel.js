@@ -15,7 +15,7 @@
   };
 
   const root = document.getElementById('moneyGame');
-  const assetRoot = '../../geldrekenen/assets/';
+  const assetRoot = 'https://zisa-geldprenten.pages.dev/assets/';
   const catalog={appelen:[3,'supermarkt'],choco:[4,'supermarkt'],eieren:[3,'supermarkt'],kaas:[4,'supermarkt'],koekjes:[2,'supermarkt'],melk:[1,'supermarkt'],pasta:[2,'supermarkt'],sap:[2,'supermarkt'],trosbananen:[2,'supermarkt'],springtouw:[5,'speelgoed'],strip:[8,'speelgoed'],voetbal:[12,'speelgoed'],knuffel:[15,'speelgoed'],gezelschapsspel:[25,'speelgoed'],robot:[30,'speelgoed'],skates:[40,'speelgoed'],step:[60,'speelgoed']};
   const products=Object.keys(catalog);
   let nextTimer=null,collected=[];

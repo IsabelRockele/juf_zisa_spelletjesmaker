@@ -1,6 +1,6 @@
 /* Whole euros, one purchase at a time. All feedback can be heard. */
 (() => {
- const main=document.querySelector('#bee-shop'),root='../../geldrekenen/assets/',speaker='spellingeiland/assets/luidspreker.png';
+ const main=document.querySelector('#bee-shop'),root='https://zisa-geldprenten.pages.dev/assets/',speaker='spellingeiland/assets/luidspreker.png';
  const products=[['appelen','appelen',3],['koekjes','koekjes',2],['sap','sap',2],['melk','melk',1],['bananen','trosbananen',2],['kaas','kaas',4],['brood','../bakker/bruinbrood',3],['eieren','eieren',3]];
  const image=p=>root+'producten/supermarkt/'+p[1]+'.png',money=v=>root+v+'euro.png';
  let firstWay=null,hadError=false,mode="pay",basketItems=[],max=10,rounds=[],index=0,picked=[],locked=false,timer=null,success=false;

@@ -446,7 +446,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     gap: 10px;
     height: 80px; /* Iets verhoogd voor betere schaling */
     
-    background-image: url('assets/producten/winkel.png');
+    background-image: url('https://zisa-geldprenten.pages.dev/assets/producten/winkel.png');
     background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
@@ -979,7 +979,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 }
 
     .plank-rij {
-        background-image: url('assets/producten/winkel.png') !important;
+        background-image: url('https://zisa-geldprenten.pages.dev/assets/producten/winkel.png') !important;
         background-size: 100% 100% !important;
     }
 }

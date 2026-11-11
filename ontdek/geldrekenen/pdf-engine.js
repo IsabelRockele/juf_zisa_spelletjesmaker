@@ -273,7 +273,7 @@ function drawWorkbookLabelAndLine(label, x, yText, lineStartX, lineEndX, fontSiz
     for (const row of rows) {
       const rr = relRect(row, posterEl, scale, x, y0);
 
-      const shelfSrc = "assets/producten/winkel.png";
+      const shelfSrc = "https://zisa-geldprenten.pages.dev/assets/producten/winkel.png";
 const shelfDataUrl = await toDataUrl(shelfSrc);
 
 if (shelfDataUrl) {

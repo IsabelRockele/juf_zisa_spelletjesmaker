@@ -262,12 +262,12 @@ function genereerPosterItemHtml(item, centen, nummer) {
     return `
         <div class="poster-item" onclick="toonAanpasPanel(this)" title="Klik om grootte/positie aan te passen">
             ${nummerHtml}
-            <img src="assets/producten/${item.submap || 'supermarkt'}/${item.img}" 
+            <img src="https://zisa-geldprenten.pages.dev/assets/producten/${item.submap || 'supermarkt'}/${item.img}" 
                  class="poster-img" 
                  data-scale="${scale}"
                  data-movey="${moveY}"
                  style="transform: scale(${scale}) translateY(${moveY}px); transform-origin: bottom center;"
-                 onerror="this.src='assets/producten/${item.img}'">
+                 onerror="this.src='https://zisa-geldprenten.pages.dev/assets/producten/${item.img}'">
             <div class="prijskaartje">€ ${item.prijs.toFixed(centen ? 2 : 0).replace('.',',')}</div>
         </div>`;
 }
@@ -644,7 +644,7 @@ const totaal = rondBedrag(
                                         ${items.map(i => {
                                             const s = i.scale || 1.0, my = i.moveY || 0;
                                             return `<div class="mandje-item-terug">
-                                                <img src="assets/producten/${i.submap || 'supermarkt'}/${i.img}" class="product-img-mandje" style="transform: scale(${s}) translateY(${my}px);" onerror="this.src='assets/producten/' + (this.dataset.submap||'supermarkt') + '/${i.img}'">
+                                                <img src="https://zisa-geldprenten.pages.dev/assets/producten/${i.submap || 'supermarkt'}/${i.img}" class="product-img-mandje" style="transform: scale(${s}) translateY(${my}px);" onerror="this.src='https://zisa-geldprenten.pages.dev/assets/producten/' + (this.dataset.submap||'supermarkt') + '/${i.img}'">
                                                 <span class="mandje-prijs-tag">${prijsStr(i.prijs)}</span>
                                             </div>`;
                                         }).join('')}
@@ -659,7 +659,7 @@ const totaal = rondBedrag(
                                 <td class="terug-td-betaal">
                                     <div class="betaal-combo">
                                         ${betaalCombinatie.map(m => `
-                                            <img src="assets/${m.img}" class="betaal-biljet-img" style="--scale: ${m.scale}">
+                                            <img src="https://zisa-geldprenten.pages.dev/assets/${m.img}" class="betaal-biljet-img" style="--scale: ${m.scale}">
                                         `).join('')}
                                     </div>
                                 </td>
@@ -853,7 +853,7 @@ const totaal = rondBedrag(
         const fmt = (p) => `€ ${p.toFixed(centen ? 2 : 0).replace('.', ',')}`;
         const s = product.scale || 1.0, my = product.moveY || 0;
         const submap = product.submap || 'supermarkt';
-        const imgHtml = `<img src="assets/producten/${submap}/${product.img}" class="korting-product-img" style="transform:scale(${s}) translateY(${my}px);" onerror="this.style.display='none'">`;
+        const imgHtml = `<img src="https://zisa-geldprenten.pages.dev/assets/producten/${submap}/${product.img}" class="korting-product-img" style="transform:scale(${s}) translateY(${my}px);" onerror="this.style.display='none'">`;
         const kortingTag = kortingSubtype !== 'korting_hoeveel'
             ? `<div class="korting-tag">-${kortingPercent}%</div>`
             : '';
@@ -950,7 +950,7 @@ const totaal = rondBedrag(
         const prijsStr = (p) => `€ ${p.toFixed(centen ? 2 : 0).replace('.', ',')}`;
         const submap = product.submap || 'supermarkt';
         const s = product.scale || 1.0, my = product.moveY || 0;
-        const imgHtml = `<img src="assets/producten/${submap}/${product.img}" class="vergelijk-img" onerror="this.style.display='none'" style="transform:scale(${s}) translateY(${my}px);">`;
+        const imgHtml = `<img src="https://zisa-geldprenten.pages.dev/assets/producten/${submap}/${product.img}" class="vergelijk-img" onerror="this.style.display='none'" style="transform:scale(${s}) translateY(${my}px);">`;
 
         // Winkelnaam voor headers — kort label voor de keuzerondjes
         const winkelNamen = { supermarkt: 'Supermarkt', bakker: 'Bakker', speelgoed: 'winkel', snoepwinkel: 'winkel', elektronica: 'winkel', schoolwinkel: 'winkel', kledingwinkel: 'winkel' };
@@ -1047,7 +1047,7 @@ const totaal = rondBedrag(
                                     const scale = i.scale || 1.0;
                                     const moveY = i.moveY || 0;
                                     return `<div class="mandje-item-wrap">
-                                        <img src="assets/producten/${i.submap || 'supermarkt'}/${i.img}" 
+                                        <img src="https://zisa-geldprenten.pages.dev/assets/producten/${i.submap || 'supermarkt'}/${i.img}" 
                                              class="product-img-mandje" 
                                              style="transform: scale(${scale}) translateY(${moveY}px);"
                                              onerror="this.style.display='none'">
@@ -1107,7 +1107,7 @@ function renderMoneyGroepen(units) {
     return groepen.map(groep => {
         const unit = groep[0];
         return `<span class="money-group" data-value="${unit.value}" data-count="${groep.length}">`
-            + groep.map(() => `<img src="assets/${unit.img}" class="money-img" style="--scale: ${unit.scale}">`).join('')
+            + groep.map(() => `<img src="https://zisa-geldprenten.pages.dev/assets/${unit.img}" class="money-img" style="--scale: ${unit.scale}">`).join('')
             + `</span>`;
     }).join('');
 }
@@ -1169,7 +1169,7 @@ function genereerWisselgeldMix(wisselgeld, max, centen, klein) {
     ].sort(() => 0.5 - Math.random());
 
     return alleItems.map(({ u, correct }) =>
-        `<img src="assets/${u.img}" class="money-img omcirkel-item${correct ? ' correct-wisselgeld' : ''}" style="--scale: ${u.scale}" title="${correct ? 'wisselgeld' : ''}">`
+        `<img src="https://zisa-geldprenten.pages.dev/assets/${u.img}" class="money-img omcirkel-item${correct ? ' correct-wisselgeld' : ''}" style="--scale: ${u.scale}" title="${correct ? 'wisselgeld' : ''}">`
     ).join('');
 }
 
