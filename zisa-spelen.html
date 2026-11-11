@@ -29,7 +29,7 @@
     </div>
   </main>
   <script type="module">
-    import { printClassPoster } from "./assets/klasposter.js?v=20261111-media2";
+    import { printClassPoster } from "./assets/klasposter.js?v=20261111-playmedia1";
     const checks=[...document.querySelectorAll('.check input')],qr=document.getElementById('qr'),urlText=document.getElementById('url'),openButton=document.getElementById('open'),feedback=document.getElementById('feedback');
     function makeUrl(){const grades=checks.filter(input=>input.checked).map(input=>input.value).join('')||'1';const url=new URL('spelen/',location.href);url.searchParams.set('gratis','1');url.searchParams.set('leerjaren',grades);return ZisaPlayLinks.url(url.href,document.getElementById('exercise').value)}
     function render(){if(!checks.some(input=>input.checked))checks[0].checked=true;ZisaPlayLinks.fill(document.getElementById('exercise'),checks.filter(input=>input.checked).map(input=>Number(input.value)));const url=makeUrl();urlText.textContent=url;openButton.href=url;qr.replaceChildren();if(window.QRCode)new QRCode(qr,{text:url,width:220,height:220,colorDark:'#17324d',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M})}

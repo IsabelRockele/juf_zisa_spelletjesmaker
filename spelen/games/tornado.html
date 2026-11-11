@@ -6,8 +6,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tornado Tafels</title>
-  <link rel="stylesheet" href="tornado.css">
-  <script type="module" src="./zisa-play-guard.js"></script>
+  <link rel="stylesheet" href="tornado.css?v=20261111-playmedia1">
+  <script type="module" src="./zisa-play-guard.js?v=20261111-playmedia1"></script>
 </head>
 <body>
   <div class="spel-container">
@@ -18,11 +18,11 @@
         </div>
         <div id="scorebord">
             <div class="score-kolom">
-                <img src="leerjaar3_afbeeldingen/karl_blij.png" alt="Juist">
+                <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_blij.png" alt="Juist">
                 <span id="scoreJuist">0</span>
             </div>
             <div class="score-kolom">
-                <img src="leerjaar3_afbeeldingen/karl_droevig.png" alt="Fout">
+                <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_droevig.png" alt="Fout">
                 <span id="scoreFout">0</span>
             </div>
         </div>
@@ -30,7 +30,7 @@
 
     <div class="tornado-zone">
       <div id="cactus-container">
-        <img src="leerjaar3_afbeeldingen/karl_cactus.png" alt="Karl" class="karl" id="karl-afbeelding">
+        <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_cactus.png" alt="Karl" class="karl" id="karl-afbeelding">
       </div>
       </div>
     <div class="oefening" id="oefening-tekst">3 × 4 = ?</div>
@@ -41,7 +41,7 @@
 
   <div id="eind-feedback" class="hidden">
      <div class="feedback-content">
-        <img id="feedback-afbeelding" src="" alt="Feedback">
+        <img crossorigin=anonymous id="feedback-afbeelding" src="" alt="Feedback">
         <p id="feedback-tekst"></p>
         <div class="knoppen-container">
             <button id="eind-opnieuw" class="btn-actie btn-opnieuw">Opnieuw Spelen</button>
@@ -50,6 +50,6 @@
     </div>
   </div>
 
-  <script src="tornado.js?v=tafelvolgorde1"></script>
+  <script src="tornado.js?v=20261111-playmedia1"></script>
 </body>
 </html>

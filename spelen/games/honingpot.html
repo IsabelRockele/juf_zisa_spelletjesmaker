@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Bibi's Honingpot Spel</title>
-    <link rel="stylesheet" href="honingpot.css">
-  <script type="module" src="./zisa-play-guard.js"></script>
+    <link rel="stylesheet" href="honingpot.css?v=20261111-playmedia1">
+  <script type="module" src="./zisa-play-guard.js?v=20261111-playmedia1"></script>
 <script src="eiland-navigatie.js?v=6" defer></script></head>
 <body>
 
@@ -14,7 +14,7 @@
         <div id="selection-screen">
             <a href="splits_spelletjes.html" class="btn-actie btn-terug" style="position:absolute; top:40px; left:40px;">Terug</a>
             <div class="keuze-blok">
-                <img src="leerjaar1_afbeeldingen/honingpotspel.png" alt="Honingpot Spel" class="menu-afbeelding" />
+                <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/honingpotspel.png" alt="Honingpot Spel" class="menu-afbeelding" />
                 <h2>Kies welke splitsing je wil oefenen</h2>
                 <div class="opties" id="level-options">
                     <button class="keuze" data-level="5">Splitsen tot 5</button>
@@ -38,11 +38,11 @@
                 </div>
                 <div id="scorebord">
                     <div class="score-kolom">
-                        <img src="leerjaar1_afbeeldingen/bibi_blij.png" alt="Juist">
+                        <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bibi_blij.png" alt="Juist">
                         <span id="scoreJuist">0</span>
                     </div>
                     <div class="score-kolom">
-                        <img src="leerjaar1_afbeeldingen/bibi_droevig.png" alt="Fout">
+                        <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bibi_droevig.png" alt="Fout">
                         <span id="scoreFout">0</span>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
             <div id="game-area">
                 <div id="splitsing-container"></div>
                 <div id="player-container">
-                    <img src="leerjaar1_afbeeldingen/bibi_zak.png" id="player" alt="Bibi">
+                    <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bibi_zak.png" id="player" alt="Bibi">
                     <div id="speech-bubble" class="hidden">Joepie!</div>
                 </div>
             </div>
@@ -64,7 +64,7 @@
         
         <div id="eind-feedback" class="hidden">
              <div class="feedback-content">
-                <img id="feedback-afbeelding" src="" alt="Feedback">
+                <img crossorigin=anonymous id="feedback-afbeelding" src="" alt="Feedback">
                 <p id="feedback-tekst"></p>
                 <div class="knoppen-container">
                     <button id="eind-opnieuw" class="btn-actie btn-opnieuw">Opnieuw Spelen</button>
@@ -75,6 +75,6 @@
 
     </div>
 
-    <script src="honingpot.js"></script>
+    <script src="honingpot.js?v=20261111-playmedia1"></script>
 </body>
 </html>

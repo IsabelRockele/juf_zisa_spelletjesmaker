@@ -99,8 +99,8 @@ function toonWinnendeSlotfase(kleur) {
     console.log('toonWinnendeSlotfase aangeroepen met kleur:', kleur);
     document.querySelector(".spel-inhoud").style.display = "none";
 
-    const zisa = document.createElement("img");
-    zisa.src = "tafels_afbeeldingen/zisa_wint.png";
+    const zisa = Object.assign(document.createElement("img"), {crossOrigin: 'anonymous'});
+    zisa.src = "https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/zisa_wint.png";
     zisa.style.position = "fixed";
     zisa.style.top = "50%";
     zisa.style.left = "50%";

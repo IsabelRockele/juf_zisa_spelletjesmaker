@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
             bloemDiv.style.transform = 'translate(-50%, 0)';
 
             bloemDiv.innerHTML = `
-                <img src="leerjaar1_afbeeldingen/bloem.png" class="bloem-afbeelding" alt="Bloem">
+                <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bloem.png" class="bloem-afbeelding" alt="Bloem">
                 <span class="bloem-getal">${antwoord}</span>
             `;
             bloemDiv.addEventListener('click', handleBloemKlik);
@@ -296,8 +296,8 @@ document.addEventListener('DOMContentLoaded', () => {
         oefeningenGemaakt++;
         updateScore();
         
-        const feedbackBibi = document.createElement('img');
-        feedbackBibi.src = 'leerjaar1_afbeeldingen/bibi_blij.png';
+        const feedbackBibi = Object.assign(document.createElement('img'), {crossOrigin: 'anonymous'});
+        feedbackBibi.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bibi_blij.png';
         feedbackBibi.classList.add('feedback-bibi-juist');
         
         const bibiRect = bibiVliegt.getBoundingClientRect();
@@ -335,8 +335,8 @@ document.addEventListener('DOMContentLoaded', () => {
         scoreFout++;
         updateScore();
         
-        const feedbackBibi = document.createElement('img');
-        feedbackBibi.src = 'leerjaar1_afbeeldingen/bibi_droevig.png';
+        const feedbackBibi = Object.assign(document.createElement('img'), {crossOrigin: 'anonymous'});
+        feedbackBibi.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bibi_droevig.png';
         feedbackBibi.classList.add('feedback-bibi-fout');
 
         const bibiRect = bibiVliegt.getBoundingClientRect();
@@ -365,11 +365,11 @@ document.addEventListener('DOMContentLoaded', () => {
             feedbackBibi.remove();
 
             const origineleBloemAfbeelding = bloemElement.querySelector('.bloem-afbeelding');
-            origineleBloemAfbeelding.src = 'leerjaar1_afbeeldingen/bloem_zonder_blaadjes.png';
+            origineleBloemAfbeelding.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bloem_zonder_blaadjes.png';
             
             for (let i = 0; i < 4; i++) {
-                const blaadje = document.createElement('img');
-                blaadje.src = 'leerjaar1_afbeeldingen/bloemblaadje.png';
+                const blaadje = Object.assign(document.createElement('img'), {crossOrigin: 'anonymous'});
+                blaadje.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bloemblaadje.png';
                 blaadje.classList.add('bloemblaadje');
                 blaadje.style.left = `${Math.random() * bloemElement.offsetWidth * 0.6 + bloemElement.offsetWidth * 0.2}px`;
                 blaadje.style.top = `${Math.random() * bloemElement.offsetHeight * 0.3}px`;
@@ -419,10 +419,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Logica voor eindfeedback afbeelding en tekst
         if (scoreJuist >= MIN_OEFENINGEN_VOOR_SUCCES && scoreFout === 0) {
-            feedbackAfbeelding.src = 'leerjaar1_afbeeldingen/bibi_met_bloemen.png';
+            feedbackAfbeelding.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bibi_met_bloemen.png';
             feedbackTekst.textContent = 'GEWELDIG! Je hebt alle oefeningen perfect opgelost! Jij bent een echte bloemenweide-expert!';
         } else { // In alle andere gevallen (minder dan 20 juist, en/of fouten)
-            feedbackAfbeelding.src = 'leerjaar1_afbeeldingen/juf_bibi.png';
+            feedbackAfbeelding.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/juf_bibi.png';
             feedbackTekst.textContent = `Blijven oefenen, je kunt het! Je hebt ${scoreJuist} oefeningen correct en ${scoreFout} fout. Probeer het nog een keer!`;
         }
     }

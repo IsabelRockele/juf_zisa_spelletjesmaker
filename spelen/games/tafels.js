@@ -74,7 +74,7 @@ function isKleinScherm() {
       bel.className = 'bel';
       
       bel.innerHTML = `
-        <img src="tafels_afbeeldingen/zeepbel.png" alt="zeepbel">
+        <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/zeepbel.png" alt="zeepbel">
         <span class="getal">${antwoord}</span>
         <span class="spetter" style="--x: ${Math.random() * 2 - 1}; --y: ${Math.random() * 2 - 1};"></span>
         <span class="spetter" style="--x: ${Math.random() * 2 - 1}; --y: ${Math.random() * 2 - 1};"></span>

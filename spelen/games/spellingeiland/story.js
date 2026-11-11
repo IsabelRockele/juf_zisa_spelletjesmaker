@@ -7,8 +7,8 @@
     constructor(options){
       super(options);
       this.storyFound=0;this.storyStep=-1;
-      const art=new Image();art.src='assets/pip-verhaal.png';this.images.story=art;art.onload=()=>this.measureStory();
-      const pip=new Image();pip.src='assets/pip-beweging.png';this.images.pipCycle=pip;pip.onload=()=>this.measurePip();
+      const art=Object.assign(new Image(), {crossOrigin: 'anonymous'});art.src='https://zisa-speelprenten.pages.dev/spelen/games/spellingeiland/assets/pip-verhaal.png';this.images.story=art;art.onload=()=>this.measureStory();
+      const pip=Object.assign(new Image(), {crossOrigin: 'anonymous'});pip.src='https://zisa-speelprenten.pages.dev/spelen/games/spellingeiland/assets/pip-beweging.png';this.images.pipCycle=pip;pip.onload=()=>this.measurePip();
       const route=['bridge','bridge','boat','balloon','bridge','boat','bridge','balloon','bridge','boat','balloon','bridge','boat','bridge','balloon','boat','bridge','balloon','boat','bridge'];
       const titles={bridge:'Herstel het pad',chest:'Zoek de aanwijzing',boat:'Volg het spoor over water',gate:'Open het bospad',balloon:'Kijk boven de bomen'};
       this.gates.forEach((g,i)=>{g.type=route[i];g.title=titles[g.type];});

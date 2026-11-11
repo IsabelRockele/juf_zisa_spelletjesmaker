@@ -3,7 +3,7 @@ body {
     margin: 0;
     font-family: 'Arial', sans-serif;
     background-color: #f0f0f0; /* Fallback kleur */
-    background-image: url('leerjaar3_afbeeldingen/achtergrond_woestijn.png');
+    background-image: url('https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/achtergrond_woestijn.png');
     background-size: cover;
     background-position: center bottom; /* Zorgt dat het zand altijd onderaan is */
     background-repeat: no-repeat;
@@ -188,7 +188,7 @@ body {
     position: absolute;
     width: 180px; /* Breedte van de cactus afbeelding */
     height: 250px; /* Hoogte van de cactus afbeelding */
-    background-image: url('leerjaar3_afbeeldingen/cactus_woestijn.png');
+    background-image: url('https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/cactus_woestijn.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;

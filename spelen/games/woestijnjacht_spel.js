@@ -190,18 +190,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (scoreFout === 0 && scoreJuist >= 25) {
             feedbackBericht = `GEWELDIG! Je hebt ${scoreJuist} oefeningen perfect gemaakt zonder één fout! Jij bent een echte woestijnheld!`;
-            feedbackImgSrc = 'leerjaar3_afbeeldingen/trofee.png'; // Een speciale afbeelding voor succes
+            feedbackImgSrc = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/trofee.png'; // Een speciale afbeelding voor succes
         } else if (scoreFout === 0 && scoreJuist < 25) {
             feedbackBericht = `Bijna! Je had ${scoreJuist} juiste antwoorden zonder fouten, maar je kunt er nog meer binnen de tijd. Probeer het opnieuw!`;
-            feedbackImgSrc = 'leerjaar3_afbeeldingen/karl_normaal.png';
+            feedbackImgSrc = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_normaal.png';
         }
         else if (scoreFout > 0 && scoreJuist >= 25) {
             feedbackBericht = `Knap gedaan! Je hebt ${scoreJuist} oefeningen gemaakt, maar probeer de volgende keer geen fouten te maken! Concentreer je extra goed.`;
-            feedbackImgSrc = 'leerjaar3_afbeeldingen/karl_normaal.png';
+            feedbackImgSrc = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_normaal.png';
         }
         else {
             feedbackBericht = `Blijven oefenen, woestijnrover! Je had ${scoreJuist} juiste antwoorden en ${scoreFout} foute. De woestijn is pittig, maar jij kan het! Probeer het nog een keer!`;
-            feedbackImgSrc = 'tafels_afbeeldingen/droevig.png';
+            feedbackImgSrc = 'https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/droevig.png';
         }
 
         feedbackText.textContent = feedbackBericht;

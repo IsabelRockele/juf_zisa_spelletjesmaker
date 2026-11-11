@@ -43,7 +43,7 @@ export async function printClassPoster(url, theme, grades = []) {
     row.innerHTML = mascots.map(([name, file], index) => {
       const grade = index + 1;
       if (!grades.includes(grade)) return '';
-      return `<figure><img src="${new URL("../spelen/games/start_afbeeldingen/" + file, import.meta.url).href}" alt="${name}">
+      return `<figure><img crossorigin=anonymous src="${new URL("https://zisa-speelprenten.pages.dev/spelen/games/start_afbeeldingen/" + file, import.meta.url).href}" alt="${name}">
         <figcaption>Leerjaar ${grade}</figcaption></figure>`;
     }).join('');
   }

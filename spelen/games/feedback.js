@@ -23,8 +23,8 @@ function showFiche(row, col) {
 function showWinner(player) {
   feedback.style.display = "block";
   feedback.innerHTML = `<h2>Speler ${player} heeft gewonnen!</h2>`;
-  const winnerImg = document.createElement("img");
-  winnerImg.src = "tafels_afbeeldingen/zisa_wint.png";
+  const winnerImg = Object.assign(document.createElement("img"), {crossOrigin: 'anonymous'});
+  winnerImg.src = "https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/zisa_wint.png";
   winnerImg.alt = "Zisa wint";
   feedback.appendChild(winnerImg);
 }

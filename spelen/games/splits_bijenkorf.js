@@ -106,7 +106,7 @@ if (tweedeRonde) {
     <div class="feedback-tekst">
       Juiste antwoord: <span id="antwoordTekst"></span>
     </div>
-    <img src="leerjaar1_afbeeldingen/juf_bibi.png" alt="Juf Bibi" class="juf-bibi-afbeelding">`;
+    <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/juf_bibi.png" alt="Juf Bibi" class="juf-bibi-afbeelding">`;
   splitsingEl.appendChild(feedbackDiv);
 }
 
@@ -136,7 +136,7 @@ function toonBijen(juisteAntwoord) {
     const bij = document.createElement("div");
     bij.className = "bij";
     bij.innerHTML = `
-      <img src="leerjaar1_afbeeldingen/bijtje.png" alt="bij" />
+      <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bijtje.png" alt="bij" />
       <span class="getal">${antwoord}</span>
     `;
     bij.addEventListener("click", () => controleerAntwoord(bij, antwoord === juisteAntwoord, juisteAntwoord));
@@ -236,7 +236,7 @@ function toonFeedback() {
 
   if (!tweedeRonde && fouteOefeningen.length > 0) {
     feedbackText.textContent = "We gaan je foutjes nog eens opnieuw maken.";
-    feedbackImg.src = "leerjaar1_afbeeldingen/juf_bibi.png";
+    feedbackImg.src = "https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/juf_bibi.png";
     setTimeout(() => startTweedeRonde(), 3000);
     return;
   }
@@ -245,10 +245,10 @@ function toonFeedback() {
     feedbackText.textContent = tweedeRonde
       ? "Goed gedaan! Probeer de volgende keer alles in ronde 1 juist te hebben."
       : "Dikke proficiat!";
-    feedbackImg.src = "leerjaar1_afbeeldingen/juichende_bibi.png";
+    feedbackImg.src = "https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/juichende_bibi.png";
   } else {
     feedbackText.textContent = "Je bent goed aan het oefenen. Probeer nog eens tot je het zonder fouten kan.";
-    feedbackImg.src = "leerjaar1_afbeeldingen/juf_bibi.png";
+    feedbackImg.src = "https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/juf_bibi.png";
   }
 }
 

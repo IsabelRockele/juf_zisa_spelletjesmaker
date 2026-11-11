@@ -35,7 +35,7 @@ button.keuze:hover, button.keuze.active { background-color: #0077b6; color: whit
 #game-container-spel {
     width: 100%;
     height: 100%;
-    background: url('leerjaar1_afbeeldingen/achtergrond_honingpotspel.png') no-repeat center bottom;
+    background: url('https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/achtergrond_honingpotspel.png') no-repeat center bottom;
     background-size: cover;
     border: 5px solid #d4a373;
     position: relative;

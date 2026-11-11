@@ -22,7 +22,7 @@ body {
     overflow: hidden;
 
     /* NIEUW: Achtergrondafbeelding voor het spelgebied */
-    background-image: url('leerjaar1_afbeeldingen/achtergrond_bijenrace.png');
+    background-image: url('https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/achtergrond_bijenrace.png');
     background-size: cover; /* Zorgt ervoor dat de afbeelding de hele container vult */
     background-position: center; /* Centreert de afbeelding */
     background-repeat: no-repeat; /* Voorkomt dat de afbeelding herhaald wordt */

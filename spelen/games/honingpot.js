@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const object = document.createElement('div');
         object.className = 'falling-object';
         object.dataset.number = nummer;
-        object.innerHTML = `<img src="leerjaar1_afbeeldingen/honingpot.png" alt="honingpot"><span class="getal">${nummer}</span>`;
+        object.innerHTML = `<img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/honingpot.png" alt="honingpot"><span class="getal">${nummer}</span>`;
 
         const speelBreedte = gameArea.clientWidth * 0.95;
         const margeLinks = (gameArea.clientWidth - speelBreedte) / 2;
@@ -351,10 +351,10 @@ document.addEventListener('DOMContentLoaded', () => {
         eindFeedback.classList.remove('hidden');
 
         if (scoreFout === 0) {
-            feedbackAfbeelding.src = 'leerjaar1_afbeeldingen/juichende_bibi.png';
+            feedbackAfbeelding.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/juichende_bibi.png';
             feedbackTekst.textContent = 'Dikke proficiat!';
         } else {
-            feedbackAfbeelding.src = 'leerjaar1_afbeeldingen/juf_bibi.png';
+            feedbackAfbeelding.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/juf_bibi.png';
             feedbackTekst.textContent = 'Goed geoefend. Probeer het volgende keer zonder fouten.';
         }
     }

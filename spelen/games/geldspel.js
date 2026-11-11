@@ -5,11 +5,11 @@
   const discoverMode = new URLSearchParams(location.search).get('ontdek') === '1' || sessionStorage.getItem('zisa_discover_preview') === '1';
   const theme = grade === 2 ? {
     title: "Zisa's Zebrawinkel", subtitle: 'Speel met euro’s en centen',
-    mascot: 'tafels_afbeeldingen/speel_zisa.png', happy: 'tafels_afbeeldingen/zisa_wint.png',
+    mascot: 'https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/speel_zisa.png', happy: 'https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/zisa_wint.png',
     levels: [20, 50, 100], gradeLabel: 'Tweede leerjaar'
   } : {
     title: 'Karls Cactusmarkt', subtitle: 'Speel met grotere geldbedragen',
-    mascot: 'leerjaar3_afbeeldingen/speel_karl.png', happy: 'leerjaar3_afbeeldingen/karl_juichend.png',
+    mascot: 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/speel_karl.png', happy: 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_juichend.png',
     levels: [100, 500, 1000], gradeLabel: 'Derde leerjaar'
   };
 
@@ -45,7 +45,7 @@
 
   function shell(content){
     root.className = 'money-shell';
-    root.innerHTML = `<header class="money-header"><img src="${theme.mascot}" alt=""><div><h1>${theme.title}</h1><p>${theme.subtitle}</p></div></header>${content}`;
+    root.innerHTML = `<header class="money-header"><img crossorigin=anonymous src="${theme.mascot}" alt=""><div><h1>${theme.title}</h1><p>${theme.subtitle}</p></div></header>${content}`;
   }
 
   function showSetup(focusPayLevels=false){
@@ -160,15 +160,15 @@
 
   function taskContent(round){
     if(round.type === 'direct'){
-      return `<div class="shop-card"><img src="${productImage(round.product)}" alt="Product"><div class="price-tag">Te betalen: ${round.target} euro</div></div>`;
+      return `<div class="shop-card"><img crossorigin=anonymous src="${productImage(round.product)}" alt="Product"><div class="price-tag">Te betalen: ${round.target} euro</div></div>`;
     }
     if(round.type === 'shop' || round.type === 'centShop'){
-      return `<div class="shop-card product-pair"><strong>Wat kosten ze samen?</strong><div class="two-products"><div><img src="${productImage(round.product)}" alt="Product"><span class="price-tag">${round.prices[0]} ${unitText(round.unit)}</span></div><b>+</b><div><img src="${productImage(round.secondProduct)}" alt="Product"><span class="price-tag">${round.prices[1]} ${unitText(round.unit)}</span></div></div></div>`;
+      return `<div class="shop-card product-pair"><strong>Wat kosten ze samen?</strong><div class="two-products"><div><img crossorigin=anonymous src="${productImage(round.product)}" alt="Product"><span class="price-tag">${round.prices[0]} ${unitText(round.unit)}</span></div><b>+</b><div><img crossorigin=anonymous src="${productImage(round.secondProduct)}" alt="Product"><span class="price-tag">${round.prices[1]} ${unitText(round.unit)}</span></div></div></div>`;
     }
     if(round.type === 'makeEuro'){
-      return `<div class="shop-card"><img src="${moneyImage(1,'euro')}" alt="Munt van 1 euro"><div class="price-tag">Maak 1 euro</div></div>`;
+      return `<div class="shop-card"><img crossorigin=anonymous src="${moneyImage(1,'euro')}" alt="Munt van 1 euro"><div class="price-tag">Maak 1 euro</div></div>`;
     }
-    return `<div class="shop-card change-card"><strong>De klant koopt dit:</strong><img src="${productImage(round.product)}" alt="Product"><div class="price-tag">Prijs: ${round.price} ${unitText(round.unit)}</div><div class="customer-paid">De klant betaalt met <b>${round.paid} ${round.paidUnit}</b></div></div>`;
+    return `<div class="shop-card change-card"><strong>De klant koopt dit:</strong><img crossorigin=anonymous src="${productImage(round.product)}" alt="Product"><div class="price-tag">Prijs: ${round.price} ${unitText(round.unit)}</div><div class="customer-paid">De klant betaalt met <b>${round.paid} ${round.paidUnit}</b></div></div>`;
   }
 
   function instruction(round){
@@ -201,7 +201,7 @@
     const trayTitle = round.type==='change'||round.type==='centChange' ? 'Wisselgeld voor de klant:' : 'Jouw geld:';
     const shownAnswer = round.type==='direct' ? `${round.target} euro` : '?';
     const quickLevelButton = round.type==='direct' ? '<button class="secondary" id="changePayLevel">↕ Ander niveau</button>' : '';
-    shell(`<section class="panel"><div class="game-top"><div class="game-choice-actions"><button class="secondary" id="changeGame">← Andere keuze</button>${quickLevelButton}</div><div class="progress"><span style="width:${roundIndex/8*100}%"></span></div><div class="round-label">Opdracht ${roundIndex+1} van 8</div></div><div class="task-layout">${taskContent(round)}<section class="task-card"><div class="task-text">${instruction(round)}</div><div class="amount-display"><div class="amount-box answer-question"><small>${answerHeading(round)}</small><strong>${shownAnswer}</strong></div><div class="amount-box" id="currentBox"><small id="currentLabel">Jouw totaal</small><strong id="currentAmount">?</strong></div></div><div class="money-bank" id="moneyBank">${availableDenoms(round).map(value=>`<button class="money-choice ${round.unit==='cent'||value<=2?'coin':''}" data-value="${value}" aria-label="${value} ${unitText(round.unit)}"><img src="${moneyImage(value,round.unit)}" alt=""><b>${value} ${unitText(round.unit)}</b></button>`).join('')}</div><div class="tray-title">${trayTitle}</div><div class="payment-tray" id="paymentTray"><span class="empty-tray">Tik hierboven op het geld.</span></div><div class="payment-actions"><button class="secondary" id="undoMoney">↶ Laatste weg</button><button class="danger" id="clearMoney">Alles weg</button><button class="primary" id="checkMoney">✓ Controleer</button><button class="secondary" id="listenTask">🔊 Luister</button></div><div class="feedback" id="moneyFeedback"></div></section></div></section>`);
+    shell(`<section class="panel"><div class="game-top"><div class="game-choice-actions"><button class="secondary" id="changeGame">← Andere keuze</button>${quickLevelButton}</div><div class="progress"><span style="width:${roundIndex/8*100}%"></span></div><div class="round-label">Opdracht ${roundIndex+1} van 8</div></div><div class="task-layout">${taskContent(round)}<section class="task-card"><div class="task-text">${instruction(round)}</div><div class="amount-display"><div class="amount-box answer-question"><small>${answerHeading(round)}</small><strong>${shownAnswer}</strong></div><div class="amount-box" id="currentBox"><small id="currentLabel">Jouw totaal</small><strong id="currentAmount">?</strong></div></div><div class="money-bank" id="moneyBank">${availableDenoms(round).map(value=>`<button class="money-choice ${round.unit==='cent'||value<=2?'coin':''}" data-value="${value}" aria-label="${value} ${unitText(round.unit)}"><img crossorigin=anonymous src="${moneyImage(value,round.unit)}" alt=""><b>${value} ${unitText(round.unit)}</b></button>`).join('')}</div><div class="tray-title">${trayTitle}</div><div class="payment-tray" id="paymentTray"><span class="empty-tray">Tik hierboven op het geld.</span></div><div class="payment-actions"><button class="secondary" id="undoMoney">↶ Laatste weg</button><button class="danger" id="clearMoney">Alles weg</button><button class="primary" id="checkMoney">✓ Controleer</button><button class="secondary" id="listenTask">🔊 Luister</button></div><div class="feedback" id="moneyFeedback"></div></section></div></section>`);
     document.getElementById('changeGame').onclick = () => showSetup(false);
     document.getElementById('changePayLevel')?.addEventListener('click',()=>showSetup(true));
     root.querySelectorAll('[data-value]').forEach(button => button.onclick = () => addMoney(Number(button.dataset.value)));
@@ -222,7 +222,7 @@
   function renderTray(){
     const round = rounds[roundIndex];
     const tray = document.getElementById('paymentTray');
-    tray.innerHTML = picked.length ? picked.map(value=>`<img class="tray-money" src="${moneyImage(value,round.unit)}" alt="${value} ${unitText(round.unit)}">`).join('') : '<span class="empty-tray">Tik hierboven op het geld.</span>';
+    tray.innerHTML = picked.length ? picked.map(value=>`<img crossorigin=anonymous class="tray-money" src="${moneyImage(value,round.unit)}" alt="${value} ${unitText(round.unit)}">`).join('') : '<span class="empty-tray">Tik hierboven op het geld.</span>';
     document.getElementById('currentAmount').textContent = helpActive ? `${picked.reduce((sum,value)=>sum+value,0)} ${unitText(round.unit)}` : '?';
   }
 
@@ -307,13 +307,13 @@
     renderTray();
     const solution = solutionFor(round);
     feedback.className = 'feedback solution-card';
-    feedback.innerHTML = `<strong>Stap 4: kijk naar een juiste oplossing.</strong><div class="solution-money">${solution.map(value=>`<img src="${moneyImage(value,round.unit)}" alt="${value} ${unitText(round.unit)}">`).join('')}</div><span>${solution.join(' + ')} = ${round.target} ${unitText(round.unit)}</span><div><button class="primary" id="nextMoneyRound" type="button">Volgende opdracht →</button></div>`;
+    feedback.innerHTML = `<strong>Stap 4: kijk naar een juiste oplossing.</strong><div class="solution-money">${solution.map(value=>`<img crossorigin=anonymous src="${moneyImage(value,round.unit)}" alt="${value} ${unitText(round.unit)}">`).join('')}</div><span>${solution.join(' + ')} = ${round.target} ${unitText(round.unit)}</span><div><button class="primary" id="nextMoneyRound" type="button">Volgende opdracht →</button></div>`;
     document.getElementById('nextMoneyRound').onclick = () => { roundIndex++; roundIndex>=8 ? showFinish() : renderRound(); };
     speak(`Kijk naar een juiste oplossing. ${solution.join(' plus ')} is ${round.target} ${unitText(round.unit)}.`);
   }
 
   function showFinish(){
-    shell(`<section class="panel finish"><span class="eyebrow">KLAAR!</span><h2>Alle acht opdrachten zijn gelukt</h2><div class="stars">⭐ ⭐ ⭐</div><img src="${theme.happy}" alt="Blije mascotte"><div><button class="primary" id="againMoney">▶ Nog eens spelen</button> <button class="secondary" id="newMoneyChoice">Andere keuze</button></div></section>`);
+    shell(`<section class="panel finish"><span class="eyebrow">KLAAR!</span><h2>Alle acht opdrachten zijn gelukt</h2><div class="stars">⭐ ⭐ ⭐</div><img crossorigin=anonymous src="${theme.happy}" alt="Blije mascotte"><div><button class="primary" id="againMoney">▶ Nog eens spelen</button> <button class="secondary" id="newMoneyChoice">Andere keuze</button></div></section>`);
     document.getElementById('againMoney').onclick = startGame;
     document.getElementById('newMoneyChoice').onclick = () => showSetup(false);
     speak('Knap gedaan! Alle opdrachten zijn gelukt.');

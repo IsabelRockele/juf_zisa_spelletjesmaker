@@ -13,9 +13,9 @@
    this.parts.push(...EXTRA.map(([name,kit,x,y,w,h])=>({name,kit,x,y,w,h,bolt:false})));
    this.gates=Array.from({length:this.count},(_,i)=>({title:'Bouw '+this.parts[i].name}));
    this.root.classList.add('racing-workshop');
-   const side=new Image();side.src='assets/voertuigen-zijaanzicht.png';this.images.sideCars=side;side.onload=()=>this.drawChoices();
-   const im=new Image();im.src='assets/race-onderdelen.png';this.images.raceKit=im;im.onload=()=>{this.measureRace();this.drawChoices();this.drawTray();};
-   for(const [key,file] of Object.entries({driver:'zisa-in-boot',rival:'pip-beweging',robotDriver:'ro-robot',scenery:'avontuur-landschap'})){const img=new Image();img.src='assets/'+file+'.png';this.images[key]=img;}
+   const side=Object.assign(new Image(), {crossOrigin: 'anonymous'});side.src='https://zisa-speelprenten.pages.dev/spelen/games/spellingeiland/assets/voertuigen-zijaanzicht.png';this.images.sideCars=side;side.onload=()=>this.drawChoices();
+   const im=Object.assign(new Image(), {crossOrigin: 'anonymous'});im.src='https://zisa-speelprenten.pages.dev/spelen/games/spellingeiland/assets/race-onderdelen.png';this.images.raceKit=im;im.onload=()=>{this.measureRace();this.drawChoices();this.drawTray();};
+   for(const [key,file] of Object.entries({driver:'zisa-in-boot',rival:'pip-beweging',robotDriver:'ro-robot',scenery:'avontuur-landschap'})){const img=Object.assign(new Image(), {crossOrigin: 'anonymous'});img.src='https://zisa-speelprenten.pages.dev/spelen/games/spellingeiland/assets/'+file+'.png';this.images[key]=img;}
    const choice=document.createElement('section');choice.id='vehicle-choice';choice.innerHTML='<h2>Wat ga jij bouwen?</h2><p>Kies jouw wagen voor de race.</p><div>'+VEHICLES.map((name,i)=>'<button data-vehicle="'+i+'"><canvas width="220" height="130"></canvas><strong>'+name+'</strong></button>').join('')+'</div>';this.root.append(choice);
    choice.querySelectorAll('button').forEach(b=>b.onclick=()=>this.choose(Number(b.dataset.vehicle)));
    const controls=document.createElement('div');controls.id='race-controls';controls.hidden=true;controls.innerHTML='<button data-lane="-1" aria-label="Een baan omhoog">↑ Omhoog</button><span id="race-status" role="status"></span><button data-lane="1" aria-label="Een baan omlaag">Omlaag ↓</button>';this.root.append(controls);

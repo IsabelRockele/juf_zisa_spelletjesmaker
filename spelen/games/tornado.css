@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  background: url('leerjaar3_afbeeldingen/achtergrond_woestijn.png') no-repeat center center fixed;
+  background: url('https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/achtergrond_woestijn.png') no-repeat center center fixed;
   background-size: cover;
   font-family: sans-serif;
   overflow: hidden;
@@ -69,7 +69,7 @@ body {
   transform: translate(-50%, -50%); /* Houdt de inhoud van de cactus div gecentreerd */
   width: 160px; /* Grootte van individuele cactussen */
   height: 160px; /* Grootte van individuele cactussen */
-  background: url('leerjaar3_afbeeldingen/cactus_woestijn.png') no-repeat center/contain;
+  background: url('https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/cactus_woestijn.png') no-repeat center/contain;
   text-align: center;
   font-weight: bold;
   font-size: 1.8rem;

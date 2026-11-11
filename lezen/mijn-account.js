@@ -1,4 +1,4 @@
-import { printClassPoster } from '../assets/klasposter.js';
+import { printClassPoster } from '../assets/klasposter.js?v=20261111-playmedia1';
 import { renderClassQr } from './klas-qr.js?v=1';
 import { createAccountLayout } from './account-layout.js?v=3';
 import { readingConfig } from './config.js?v=live-1';

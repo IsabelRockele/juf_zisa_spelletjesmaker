@@ -76,8 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
         blueFlowersContainer.innerHTML = '';
 
         redFlowerPositions.forEach((pos, index) => {
-            const flower = document.createElement('img');
-            flower.src = 'leerjaar1_afbeeldingen/bloemenpad.png';
+            const flower = Object.assign(document.createElement('img'), {crossOrigin: 'anonymous'});
+            flower.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bloemenpad.png';
             flower.classList.add('flower');
             flower.id = `red-flower-${index}`;
             flower.style.left = pos.left;
@@ -86,8 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         blueFlowerPositions.forEach((pos, index) => {
-            const flower = document.createElement('img');
-            flower.src = 'leerjaar1_afbeeldingen/bloemenpad.png';
+            const flower = Object.assign(document.createElement('img'), {crossOrigin: 'anonymous'});
+            flower.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bloemenpad.png';
             flower.classList.add('flower');
             flower.id = `blue-flower-${index}`;
             flower.style.right = pos.right;
@@ -208,14 +208,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (currentPlayer === 'red') {
             turnIndicatorText.textContent = 'Rood is aan de beurt!';
-            turnIndicatorImage.src = 'leerjaar1_afbeeldingen/bijenrace_rood.png';
+            turnIndicatorImage.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bijenrace_rood.png';
         } else {
             if (isComputerOpponent) {
                 turnIndicatorText.textContent = 'Blauw (Computer) is aan de beurt!';
             } else {
                 turnIndicatorText.textContent = 'Blauw is aan de beurt!';
             }
-            turnIndicatorImage.src = 'leerjaar1_afbeeldingen/bijenrace_blauw.png';
+            turnIndicatorImage.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bijenrace_blauw.png';
         }
         turnIndicatorScreen.style.display = 'flex';
 
@@ -440,9 +440,9 @@ numpad.addEventListener('pointerup', (event) => {
 
     function showWinnerScreen(winner) {
         if (winner === 'red') {
-            winnerImage.src = 'leerjaar1_afbeeldingen/bijenrace_rood_wint.png';
+            winnerImage.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bijenrace_rood_wint.png';
         } else {
-            winnerImage.src = 'leerjaar1_afbeeldingen/bijenrace_blauw_wint.png';
+            winnerImage.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bijenrace_blauw_wint.png';
         }
         winnerScreen.style.display = 'flex';
     }

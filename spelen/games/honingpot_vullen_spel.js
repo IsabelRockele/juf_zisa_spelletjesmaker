@@ -101,8 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function laatHoningdruppelVallen() {
         console.log("laatHoningdruppelVallen aangeroepen.");
-        const druppel = document.createElement('img');
-        druppel.src = 'leerjaar1_afbeeldingen/honingdruppel.png';
+        const druppel = Object.assign(document.createElement('img'), {crossOrigin: 'anonymous'});
+        druppel.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/honingdruppel.png';
         druppel.classList.add('honingdruppel');
 
         if (!honingpotContainer || !legePotImg) {
@@ -401,11 +401,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (foutenTeller === 0 && juisteAntwoordenTeller === MAX_JUISTE_ANTWOORDEN) {
             feedbackMessage.textContent = "Fantastisch! Je bent een echte rekenkanjer, alles in één keer juist en de pot is vol!";
-            feedbackImage.src = "leerjaar1_afbeeldingen/bibi_eet_honing.png";
+            feedbackImage.src = "https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bibi_eet_honing.png";
             feedbackRestartButton.textContent = "Speel nog eens!";
         } else {
             feedbackMessage.textContent = `Goed gedaan! Je hebt ${juisteAntwoordenTeller} oefeningen correct en ${foutenTeller} fouten gemaakt. Probeer het nog eens en vul de pot zonder fouten!`;
-            feedbackImage.src = "leerjaar1_afbeeldingen/juf_bibi.png";
+            feedbackImage.src = "https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/juf_bibi.png";
             feedbackRestartButton.textContent = "Nog eens proberen!";
         }
         feedbackRestartButton.dataset.action = 'reset_game';

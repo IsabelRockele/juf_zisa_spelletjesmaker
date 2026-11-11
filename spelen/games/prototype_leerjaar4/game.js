@@ -1,8 +1,8 @@
 (() => {
   const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
-  const backgroundFiles=['assets/rekenkern-vallei.png','assets/level2-tafelrivier.png','assets/level3-draairuines.png','assets/level4-kristalberg.png','assets/level5-rekenkern.png'];
-  const backgrounds=backgroundFiles.map(src=>{const image=new Image();image.src=src;return image});
-  const lanaBody=new Image();lanaBody.src='assets/lana-full.png';
+  const backgroundFiles=['https://zisa-speelprenten.pages.dev/spelen/games/prototype_leerjaar4/assets/rekenkern-vallei.png','https://zisa-speelprenten.pages.dev/spelen/games/prototype_leerjaar4/assets/level2-tafelrivier.png','https://zisa-speelprenten.pages.dev/spelen/games/prototype_leerjaar4/assets/level3-draairuines.png','https://zisa-speelprenten.pages.dev/spelen/games/prototype_leerjaar4/assets/level4-kristalberg.png','https://zisa-speelprenten.pages.dev/spelen/games/prototype_leerjaar4/assets/level5-rekenkern.png'];
+  const backgrounds=backgroundFiles.map(src=>{const image=Object.assign(new Image(), {crossOrigin: 'anonymous'});image.src=src;return image});
+  const lanaBody=Object.assign(new Image(), {crossOrigin: 'anonymous'});lanaBody.src='https://zisa-speelprenten.pages.dev/spelen/games/prototype_leerjaar4/assets/lana-full.png';
   const levelNames=['Energiebos','Tafelrivier','Draairuïnes','Kristalberg','De Rekenkern'];
   function q(text,correct,answers,hint){return{text,correct,answers,hint}}
   const QUESTIONS_PER_LEVEL=10;

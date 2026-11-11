@@ -219,7 +219,7 @@
             z-index: -1; border-bottom-right-radius: 3px;
         }
     </style>
-  <script type="module" src="./zisa-play-guard.js"></script>
+  <script type="module" src="./zisa-play-guard.js?v=20261111-playmedia1"></script>
 </head>
 <body>
     <div class="spel-container">
@@ -230,15 +230,15 @@
         <div class="ganzenbord-container">
             <div id="ganzenbord"></div>
             <div id="pionnen-container">
-                <img src="leerjaar3_afbeeldingen/pion_rood.png" id="pionRood" class="pion">
-                <img src="leerjaar3_afbeeldingen/pion_blauw.png" id="pionBlauw" class="pion">
+                <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/pion_rood.png" id="pionRood" class="pion">
+                <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/pion_blauw.png" id="pionBlauw" class="pion">
             </div>
         </div>
         <div class="spel-info">
             <div id="statusVak" class="status-vak">Rood is aan de beurt.</div>
             <div id="rad-container" class="wheel-container">
-                <img src="leerjaar1_afbeeldingen/pijl_rad.png" alt="Pijl" class="wheel-arrow">
-                <img src="leerjaar1_afbeeldingen/rad.png" alt="Draaiwiel" class="wheel" id="wheel">
+                <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/pijl_rad.png" alt="Pijl" class="wheel-arrow">
+                <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/rad.png" alt="Draaiwiel" class="wheel" id="wheel">
                 <button id="spin-btn" class="spin-btn-style">Draai</button>
             </div>
             <div id="feedback-area" class="feedback-vak">Draai aan het rad om te beginnen!</div>
@@ -248,7 +248,7 @@
     <div id="karlCactusModal" class="hidden">
         <div class="modal-content" id="karlMessageBox">
             <div id="karlSpeechBubble"></div>
-            <img src="leerjaar3_afbeeldingen/karl_cactus.png" alt="Karl Cactus" id="karlCactusImage">
+            <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_cactus.png" alt="Karl Cactus" id="karlCactusImage">
         </div>
     </div>
 
@@ -284,7 +284,7 @@
 
     <div id="win-screen" class="hidden">
         <div class="win-content">
-            <img id="win-image" src="" alt="Winnaar!">
+            <img crossorigin=anonymous id="win-image" src="" alt="Winnaar!">
             <div class="win-buttons">
                 <button id="win-play-again" class="btn-actie btn-opnieuw">Opnieuw spelen</button>
                 <button id="win-back-to-menu" class="btn-actie btn-terug">Terug naar keuze</button>
@@ -405,7 +405,7 @@
                 const oaseVak = document.createElement('div');
                 oaseVak.id = `vak-${TOTAAL_VAKJES}`;
                 oaseVak.classList.add('vakje', 'eind-vak-groot');
-                oaseVak.innerHTML = `<img src="leerjaar3_afbeeldingen/oase.png" class="vak-afbeelding" alt="Oase">`;
+                oaseVak.innerHTML = `<img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/oase.png" class="vak-afbeelding" alt="Oase">`;
                 bord.appendChild(oaseVak);
             }
 
@@ -626,8 +626,8 @@
                 const winScreen = document.getElementById('win-screen');
                 const winImage = document.getElementById('win-image');
                 winImage.src = player === 'rood'
-                    ? 'leerjaar3_afbeeldingen/rood_wint.png'
-                    : 'leerjaar3_afbeeldingen/blauw_wint.png';
+                    ? 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/rood_wint.png'
+                    : 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/blauw_wint.png';
                 winScreen.classList.remove('hidden');
             }
 

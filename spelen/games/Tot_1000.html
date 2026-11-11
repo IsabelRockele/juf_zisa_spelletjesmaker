@@ -22,7 +22,7 @@
 
         /* --- Startscherm Styling --- */
         #start-screen {
-            background-image: url('start_afbeeldingen/achtergrond.png');
+            background-image: url('https://zisa-speelprenten.pages.dev/spelen/games/start_afbeeldingen/achtergrond.png');
             background-size: cover;
             background-position: center;
             flex-grow: 1;
@@ -272,21 +272,21 @@
 
         .drag-clone { position: absolute; pointer-events: none; z-index: 1000; opacity: 0.8; }
     </style>
-  <script type="module" src="./zisa-play-guard.js"></script>
+  <script type="module" src="./zisa-play-guard.js?v=20261111-playmedia1"></script>
 </head>
 <body>
 
     <div id="start-screen">
          <button class="btn-actie btn-terug" onclick="window.location.href='start_leerjaar3.html'">
-            <img src="tafels_afbeeldingen/pijl.png" alt="pijl" style="height: 24px;" />
+            <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/pijl.png" alt="pijl" style="height: 24px;" />
             Terug
         </button>
       
         <div id="start-screen-container">
             <h1>Kies hier je schema</h1>
             <div class="keuzescherm">
-                <div class="keuzeblok"><img class="zisa-icoon" src="leerjaar3_afbeeldingen/karl_plus.png" alt="Plus tot 1000"><button id="btn-start-plus" class="knop-keuze plus">+ tot 1000</button></div>
-                <div class="keuzeblok"><img class="zisa-icoon" src="leerjaar3_afbeeldingen/karl_min.png" alt="Min tot 1000"><button id="btn-start-min" class="knop-keuze min">– tot 1000</button></div>
+                <div class="keuzeblok"><img crossorigin=anonymous class="zisa-icoon" src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_plus.png" alt="Plus tot 1000"><button id="btn-start-plus" class="knop-keuze plus">+ tot 1000</button></div>
+                <div class="keuzeblok"><img crossorigin=anonymous class="zisa-icoon" src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_min.png" alt="Min tot 1000"><button id="btn-start-min" class="knop-keuze min">– tot 1000</button></div>
             </div>
         </div>
     </div>
@@ -296,7 +296,7 @@
             <button id="reset" class="knop opnieuw">Opnieuw</button>
             <button id="terug" class="knop ander-schema">Ander schema</button>
             <div id="vuilbak-container" style="display: none;">
-                <img id="vuilbak" src="afbeeldingen/vuilbak.png" alt="vuilbak">
+                <img crossorigin=anonymous id="vuilbak" src="https://zisa-speelprenten.pages.dev/spelen/games/afbeeldingen/vuilbak.png" alt="vuilbak">
                 <div id="vuilbak-teller"><div><span>H</span><span>T</span><span>E</span></div><div><span id="h-count">0</span><span id="t-count">0</span><span id="e-count">0</span></div></div>
             </div>
         </div>
@@ -363,7 +363,7 @@
         let trashCounts = { 100: 0, 10: 0, 1: 0 };
         let droppedInTrash = false;
 
-        const dragImage = document.createElement('img');
+        const dragImage = Object.assign(document.createElement('img'), {crossOrigin: 'anonymous'});
         dragImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
         const toolDefinitions = {

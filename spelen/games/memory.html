@@ -6,7 +6,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Memoryspel Tafels</title>
-<link href="tafels.css" rel="stylesheet"/>
+<link href="tafels.css?v=20261111-playmedia1" rel="stylesheet"/>
 <link href="memory.css" rel="stylesheet"/>
 <style>
     body {
@@ -156,7 +156,7 @@
     }
     .kaart .achterkant {
       background-color: #eaf7ff;
-      background-image: url('tafels_afbeeldingen/memory_zisa.png');
+      background-image: url('https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/memory_zisa.png');
       background-size: contain;
       background-position: center;
       background-repeat: no-repeat;
@@ -187,7 +187,7 @@
       box-sizing: border-box;
       padding: 5px;
       background-color: #eaf7ff;
-      background-image: url('tafels_afbeeldingen/memory_zisa.png');
+      background-image: url('https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/memory_zisa.png');
       background-size: contain;
       background-position: center;
       background-repeat: no-repeat;
@@ -197,7 +197,7 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 </style>
-  <script type="module" src="./zisa-play-guard.js"></script>
+  <script type="module" src="./zisa-play-guard.js?v=20261111-playmedia1"></script>
 <script src="eiland-navigatie.js?v=6" defer></script></head>
 <body>
 <div class="container">
@@ -207,11 +207,11 @@
 <div class="kies-scherm" id="keuzeScherm">
   <div class="pijl-links-boven">
   <button onclick="location.href='tafel_spelletjes.html'" class="btn-actie btn-terug">
-    <img src="tafels_afbeeldingen/pijl.png" alt="pijl" style="height: 24px;" />
+    <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/pijl.png" alt="pijl" style="height: 24px;" />
     Terug
   </button>
 </div>
-  <img alt="Juf Zisa memory" class="zisa-afbeelding" src="tafels_afbeeldingen/memory_spel.png"/>
+  <img crossorigin=anonymous alt="Juf Zisa memory" class="zisa-afbeelding" src="https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/memory_spel.png"/>
   <div class="keuze-blok">
     <h2>Kies soort oefeningen</h2>
     <div class="aanduiding" id="meldingType" style="color: red;">Nog niet gekozen</div>
@@ -254,19 +254,19 @@
   <div class="spel-links">
     <button id="btn-opnieuw" class="btn-actie btn-opnieuw">Opnieuw</button>
     <button onclick="terugNaarKeuzeScherm()" class="btn-actie btn-terug">
-      <img alt="Terug" src="tafels_afbeeldingen/pijl.png" style="height: 30px;"/>
+      <img crossorigin=anonymous alt="Terug" src="https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/pijl.png" style="height: 30px;"/>
       Terug
     </button>
   </div>
   <div id="feedback" style="display: none; text-align: center;">
-    <img alt="Juf Zisa" src="start_afbeeldingen/juf_zisa.png" style="max-width: 200px; display: block; margin: 20px auto;"/>
+    <img crossorigin=anonymous alt="Juf Zisa" src="https://zisa-speelprenten.pages.dev/spelen/games/start_afbeeldingen/juf_zisa.png" style="max-width: 200px; display: block; margin: 20px auto;"/>
     <div id="feedback-tekst" style="font-size: 1.4em; color: #003049;"></div>
   </div>
   <div class="spelbord" id="spelbord"></div>
   <div id="score-container"></div>
 </div>
 </div>
-<script src="memory.js?v=tafelvolgorde1"></script>
+<script src="memory.js?v=20261111-playmedia1"></script>
 <script src="force-start.js"></script>
 </body>
 </html>

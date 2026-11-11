@@ -243,7 +243,7 @@ function toonFeedbackBijSpeler(speler, juist) {
   const img = zone.querySelector("img");
   const tekst = zone.querySelector(".zisa-tekst");
 
-  img.src = juist ? "tafels_afbeeldingen/blij.png" : "tafels_afbeeldingen/droevig.png";
+  img.src = juist ? "https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/blij.png" : "https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/droevig.png";
   tekst.textContent = juist ? "Joepie!!" : "Oeps...";
   img.style.display = "block";
 
@@ -402,8 +402,8 @@ function plaatsComputerFiche() {
 
 function toonWinnendeSlotfase(kleur) {
   document.querySelector(".spel-inhoud").style.display = "none";
-  const zisa = document.createElement("img");
-  zisa.src = "tafels_afbeeldingen/zisa_wint.png";
+  const zisa = Object.assign(document.createElement("img"), {crossOrigin: 'anonymous'});
+  zisa.src = "https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/zisa_wint.png";
   zisa.style.cssText = "position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:1001; height:350px;";
   zisa.id = "zisaWin";
   document.body.appendChild(zisa);

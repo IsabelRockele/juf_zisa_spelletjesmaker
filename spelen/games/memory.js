@@ -234,7 +234,7 @@ spelbord.style.gridTemplateColumns = `repeat(${kolommen}, 160px)`;
     feedback.style.margin = "30px auto";
     feedback.style.maxWidth = "500px";
     feedback.innerHTML = `
-      <img src="tafels_afbeeldingen/zisa_wint.png" alt="Juf Zisa" style="max-width: 150px; height: auto; display: block; margin: 10px auto;">
+      <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/zisa_wint.png" alt="Juf Zisa" style="max-width: 150px; height: auto; display: block; margin: 10px auto;">
       <div id="feedback-tekst" style="font-size: 1.4em; color: #003049; text-align: center; margin-top: 15px;"></div>
     `;
     const feedbackTekst = document.getElementById("feedback-tekst");

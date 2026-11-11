@@ -1,6 +1,6 @@
 (()=>{
   const canvas=document.getElementById('foodCanvas'),ctx=canvas.getContext('2d');
-  const foods={pizza:load('assets/pizza.png'),taart:load('assets/taart.png'),chocolade:load('assets/chocolade.png')};
+  const foods={pizza:load('https://zisa-speelprenten.pages.dev/spelen/games/prototype_breuken4/assets/pizza.png'),taart:load('https://zisa-speelprenten.pages.dev/spelen/games/prototype_breuken4/assets/taart.png'),chocolade:load('https://zisa-speelprenten.pages.dev/spelen/games/prototype_breuken4/assets/chocolade.png')};
   const modes={
     parts:{title:'Verdeel & tik',rounds:[
       {food:'pizza',num:3,den:4},{food:'taart',num:5,den:6},{food:'chocolade',num:9,den:12},
@@ -21,7 +21,7 @@
   let mode='parts',rounds=modes.parts.rounds,index=0,score=0,locked=true,W=650,H=600;
   let selected=new Set(),selectedChoice=-1,droppedTray=-1,dragging=false,dragPos=null,tokenX=null,lineTouched=false;
   let foodRect={},choiceRects=[],trayRects=[],lineGeom={};
-  function load(src){const image=new Image();image.src=src;image.onload=draw;return image}
+  function load(src){const image=Object.assign(new Image(), {crossOrigin: 'anonymous'});image.src=src;image.onload=draw;return image}
   function choice(num,den,options,food){return{num,den,options:shuffle(options.map(x=>({num:x[0],den:x[1]}))),food}}
   function dragRound(num,den,labels,food){return{num,den,labels:shuffle(labels.map(x=>({num:x[0],den:x[1]}))),food}}
   function shuffle(a){return a.sort(()=>Math.random()-.5)}

@@ -424,10 +424,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let feedbackBericht = '';
         if (scoreJuist >= 25 && scoreFout === 0) {
             feedbackBericht = `Fantastisch gedaan! Je hebt ${scoreJuist} vragen correct beantwoord en geen fouten gemaakt!`;
-            feedbackImage.src = 'leerjaar3_afbeeldingen/sombrero_feest.png';
+            feedbackImage.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/sombrero_feest.png';
         } else {
             feedbackBericht = `Goed geprobeerd! Je had ${scoreJuist} correcte antwoorden en ${scoreFout} foute. Blijf oefenen, dan lukt het de volgende keer vast beter!`;
-            feedbackImage.src = 'leerjaar3_afbeeldingen/karl_normaal.png';
+            feedbackImage.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_normaal.png';
         }
         feedbackText.textContent = feedbackBericht;
     }

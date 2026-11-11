@@ -252,13 +252,13 @@ function eindEvaluatie() {
   juf.style.display = "none";
   if (scoreFout === 0 && scoreJuist >= totaalOefeningen) {
     feedback.innerHTML = `
-      <img id="dansZisa" src="tafels_afbeeldingen/zisa_danst1.png" style="max-width:300px;"><br>Fantastisch gedaan!`;
+      <img crossorigin=anonymous id="dansZisa" src="https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/zisa_danst1.png" style="max-width:300px;"><br>Fantastisch gedaan!`;
     animatieZisaDans();
     vuurwerkEffect();
   } else {
     feedback.innerHTML = `
       <div style="background-color: #d0ecff; border: 2px solid #a3d3f5; border-radius: 12px; padding: 20px; max-width: 500px; margin: 0 auto;">
-        <img src="tafels_afbeeldingen/zisa_twijfel.png" alt="Juf Zisa twijfelend" style="max-width: 120px; display: block; margin: 0 auto 15px auto;" />
+        <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/zisa_twijfel.png" alt="Juf Zisa twijfelend" style="max-width: 120px; display: block; margin: 0 auto 15px auto;" />
         <p style="font-size: 1.3em; color: #065a82;">Goed geprobeerd!<br>Probeer het later nog eens of oefen eerst wat extra in Level 2.</p>
       </div>`;
   }
@@ -269,7 +269,7 @@ function animatieZisaDans() {
   const dansFrames = ["zisa_danst1.png", "zisa_danst2.png", "zisa_danst3.png"];
   dansAnimatieInterval = setInterval(() => {
     dansIndex = (dansIndex + 1) % dansFrames.length;
-    zisa.src = `tafels_afbeeldingen/${dansFrames[dansIndex]}`;
+    zisa.src = `https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/${dansFrames[dansIndex]}`;
   }, 400);
 }
 

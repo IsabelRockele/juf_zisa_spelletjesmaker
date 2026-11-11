@@ -51,10 +51,10 @@
     document.body.className = grade === 1 ? 'bee-theme' : 'zebra-theme';
     $('backLink').href = grade === 1 ? '../splits_spelletjes.html' : '../start_leerjaar2.html';
     $('themeMascot').src = grade === 1
-      ? 'bibi-splitsmachine.png'
-      : 'zisa-splitsmachine.png';
+      ? 'https://zisa-speelprenten.pages.dev/spelen/games/splitsmachine/bibi-splitsmachine.png'
+      : 'https://zisa-speelprenten.pages.dev/spelen/games/splitsmachine/zisa-splitsmachine.png';
     $('themeMascot').alt = grade === 1 ? 'Bibi het bijtje' : 'Zisa de zebra';
-    $('finishMascot').src = grade === 1 ? '../leerjaar1_afbeeldingen/juichende_bibi.png' : '../tafels_afbeeldingen/juf_zisa.png';
+    $('finishMascot').src = grade === 1 ? 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/juichende_bibi.png' : 'https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/juf_zisa.png';
     $('levelChoices').innerHTML = grade === 1
       ? `<label><input type="radio" name="level" value="5"><span><b>tot 5</b><small>eerste splitsingen</small></span></label><label><input type="radio" name="level" value="10" checked><span><b>tot 10</b><small>vriendjes van 10</small></span></label><label><input type="radio" name="level" value="20"><span><b>tot 20</b><small>met of zonder brug</small></span></label>`
       : `<label><input type="radio" name="level" value="10" checked><span><b>tot 10</b><small>splitsingen herhalen</small></span></label><label><input type="radio" name="level" value="20"><span><b>tot 20</b><small>met of zonder brug</small></span></label><label><input type="radio" name="level" value="100"><span><b>tot 100</b><small>tientallen en brug</small></span></label>`;

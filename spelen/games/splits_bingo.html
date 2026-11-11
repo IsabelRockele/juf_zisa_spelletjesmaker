@@ -107,19 +107,19 @@
             .player-area h2 { font-size: 1.5em; }
         }
     </style>
-  <script type="module" src="./zisa-play-guard.js"></script>
+  <script type="module" src="./zisa-play-guard.js?v=20261111-playmedia1"></script>
 <script src="eiland-navigatie.js?v=6" defer></script></head>
 <body>
     <div class="pijl-links-boven">
         <a href="splits_spelletjes.html" class="btn-actie btn-terug">
-            <img src="tafels_afbeeldingen/pijl.png" alt="Pijl" class="terug-pijl"> Terug
+            <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/pijl.png" alt="Pijl" class="terug-pijl"> Terug
         </a>
     </div>
 
     <div id="game-container">
         <div id="selection-screen">
             <div class="keuze-blok">
-                <img src="leerjaar1_afbeeldingen/bingo.png" alt="Bingo" class="bingo-afbeelding" />
+                <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bingo.png" alt="Bingo" class="bingo-afbeelding" />
                 
                 <h2>Aantal Spelers</h2>
                 <div class="opties" id="player-count-options">
@@ -148,7 +148,7 @@
             <div class="game-actions">
                 <button id="btn-opnieuw" class="btn-actie btn-opnieuw">Opnieuw</button>
                 <button id="btn-terug" class="btn-actie btn-terug">
-                    <img src="tafels_afbeeldingen/pijl.png" alt="Pijl" class="terug-pijl"> Terug
+                    <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/tafels_afbeeldingen/pijl.png" alt="Pijl" class="terug-pijl"> Terug
                 </button>
             </div>
             <div id="game-board"></div>
@@ -157,7 +157,7 @@
         <div id="win-screen" class="hidden">
             <div id="fireworks-container"></div>
             <div class="win-content">
-                <img id="win-image" src="" alt="Winnaar!">
+                <img crossorigin=anonymous id="win-image" src="" alt="Winnaar!">
                 <div class="win-buttons">
                     <button id="win-play-again" class="btn-actie btn-opnieuw">Opnieuw spelen</button>
                     <button id="win-back-to-menu" class="btn-actie btn-terug">Terug naar keuze</button>
@@ -271,16 +271,16 @@
             const player2Name = playerCount === 1 ? 'Computer' : 'Speler 2';
             const boardContent = `
                 <div class="player-area" id="player1-area">
-                    <h2>Speler 1 <img src="leerjaar1_afbeeldingen/pion1.png" class="header-pawn" alt="Pion 1"></h2>
+                    <h2>Speler 1 <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/pion1.png" class="header-pawn" alt="Pion 1"></h2>
                     <div class="honeycomb-grid" id="grid-player1"></div>
                 </div>
                 <div class="player-area" id="player2-area">
-                    <h2>${player2Name} <img src="leerjaar1_afbeeldingen/pion2.png" class="header-pawn" alt="Pion 2"></h2>
+                    <h2>${player2Name} <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/pion2.png" class="header-pawn" alt="Pion 2"></h2>
                     <div class="honeycomb-grid" id="grid-player2"></div>
                 </div>
                 <div class="wheel-container">
-                    <img src="leerjaar1_afbeeldingen/pijl_rad.png" alt="Pijl" class="wheel-arrow">
-                    <img src="leerjaar1_afbeeldingen/rad.png" alt="Draaiwiel" class="wheel" id="wheel">
+                    <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/pijl_rad.png" alt="Pijl" class="wheel-arrow">
+                    <img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/rad.png" alt="Draaiwiel" class="wheel" id="wheel">
                     <button id="spin-btn" class="spin-btn-style">Draai</button>
                 </div>
                 <div id="controls"><div id="feedback-area"></div></div>`;
@@ -289,12 +289,12 @@
             const pawn1 = document.createElement('div');
             pawn1.id = 'pawn-1';
             pawn1.className = 'player-pawn';
-            pawn1.innerHTML = `<img src="leerjaar1_afbeeldingen/pion1.png" alt="Pion 1">`;
+            pawn1.innerHTML = `<img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/pion1.png" alt="Pion 1">`;
 
             const pawn2 = document.createElement('div');
             pawn2.id = 'pawn-2';
             pawn2.className = 'player-pawn';
-            pawn2.innerHTML = `<img src="leerjaar1_afbeeldingen/pion2.png" alt="Pion 2">`;
+            pawn2.innerHTML = `<img crossorigin=anonymous src="https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/pion2.png" alt="Pion 2">`;
 
             gameBoard.appendChild(pawn1);
             gameBoard.appendChild(pawn2);
@@ -588,7 +588,7 @@
         }
 
         function showWinScreen(player) {
-            winImage.src = player === 1 ? 'leerjaar1_afbeeldingen/bibi_rood.png' : 'leerjaar1_afbeeldingen/bibi_blauw.png';
+            winImage.src = player === 1 ? 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bibi_rood.png' : 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar1_afbeeldingen/bibi_blauw.png';
             winScreen.classList.remove('hidden');
             createFireworks(player);
         }

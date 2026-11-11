@@ -1,6 +1,6 @@
 (()=>{
 const stage=$('stage'),menu=$('menu'),done=$('done'),feedback=()=>$('feedback');
-const imgs={pizza:img('assets/pizza.png'),taart:img('assets/taart.png'),chocolade:img('assets/chocolade.png')};
+const imgs={pizza:img('https://zisa-speelprenten.pages.dev/spelen/games/prototype_breuken4/assets/pizza.png'),taart:img('https://zisa-speelprenten.pages.dev/spelen/games/prototype_breuken4/assets/taart.png'),chocolade:img('https://zisa-speelprenten.pages.dev/spelen/games/prototype_breuken4/assets/chocolade.png')};
 const localHost=['localhost','::1','0.0.0.0'].includes(location.hostname)||location.hostname.startsWith('127.')||location.hostname.startsWith('192.168.')||location.hostname.startsWith('10.')||(/^172\.(1[6-9]|2\d|3[01])\./).test(location.hostname);
 const colleagueMode=sessionStorage.getItem('zisa_colleague_play')==='1'||localHost;
 const modes=[

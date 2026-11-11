@@ -365,13 +365,13 @@ function toonEindFeedback() {
     // Laten we de CSS aanpassen voor een algemene positionering van de feedback.
     
     if (scoreFout === 0) {
-        feedbackAfbeelding.src = 'leerjaar3_afbeeldingen/karl_juichend.png';
+        feedbackAfbeelding.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_juichend.png';
         feedbackTekst.textContent = 'Dikke proficiat! Geen enkele fout!';
     } else if (scoreFout < TOTAAL_OEFENINGEN / 4) {
-        feedbackAfbeelding.src = 'leerjaar3_afbeeldingen/karl_normaal.png';
+        feedbackAfbeelding.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_normaal.png';
         feedbackTekst.textContent = `Goed gedaan! Je had ${scoreJuist} juiste antwoorden en ${scoreFout} foute.`;
     } else {
-        feedbackAfbeelding.src = 'leerjaar3_afbeeldingen/karl_normaal.png';
+        feedbackAfbeelding.src = 'https://zisa-speelprenten.pages.dev/spelen/games/leerjaar3_afbeeldingen/karl_normaal.png';
         feedbackTekst.textContent = `Blijf oefenen! Je had ${scoreJuist} juiste antwoorden en ${scoreFout} foute.`;
     }
 }
