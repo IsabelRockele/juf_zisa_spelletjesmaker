@@ -96,7 +96,7 @@ y += 5;
   }
 
   /* ── Gewone oefeningen rij ───────────────────────────────── */
-  function _tekenRij(oefeningen, aantalKolommen = KOLOMMEN, niveau = 100) {
+  function _tekenRij(oefeningen, aantalKolommen = KOLOMMEN, niveau = 100, cel) {
     const kolB = CW / aantalKolommen;
     const kadW = kolB - 4;
     const kadH = RIJHOOGTE - 1;
@@ -110,7 +110,7 @@ y += 5;
     const vakMax = niveau >= 10000 ? 22 : niveau >= 1000 ? 18 : niveau >= 100 ? 16 : 14;
 
     oefeningen.forEach((oef, kol) => {
-      const ox = ML + kol * kolB + 2;
+      const ox = ML + (cel?.kolom ?? kol) * kolB + 2;
       const oy = y;
 
       doc.setFillColor(255, 255, 255);
@@ -304,7 +304,7 @@ y += 5;
     } catch(e) { return { d1:'', d2:'', sl1:'', sl2:'' }; }
   }
 
-  function _tekenHulpRij(oefeningen, heeftSplits, heeftLijnen, bewerking, splitspositie, schrijflijnenAantal = 2, blokBrug = 'zonder', blokNiveau = 100, metVoorbeeld = false, startIndex = 0) {
+  function _tekenHulpRij(oefeningen, heeftSplits, heeftLijnen, bewerking, splitspositie, schrijflijnenAantal = 2, blokBrug = 'zonder', blokNiveau = 100, metVoorbeeld = false, startIndex = 0, cel) {
     const kolB   = CW / 2;
     const kadW   = kolB - 6;
     const marge  = 3;
@@ -315,7 +315,7 @@ y += 5;
     oefeningen.forEach((oef, kol) => {
       const isVoorbeeld = metVoorbeeld && (startIndex + kol === 0);
       const oy     = y;
-      const ox     = ML + kol * kolB + 3;   // kader altijd op vaste positie
+      const ox     = ML + (cel?.kolom ?? kol) * kolB + 3;   // kader altijd op vaste positie
       const kadEindX = ox + kadW;
 
       // Bereken centreX voor splitsbeen — moet vóór somMarge want doelGetal nodig
@@ -521,15 +521,15 @@ const somTekst = (delen.length >= 3)
     return AANV_KAD_H_ZONDER;
   }
 
-  function _tekenAanvullenRij(oefeningen, variant, niveau = 100) {
-    const aantalKol = variant === 'met-schijfjes' ? AANV_KOLOMMEN_SCHIJF : AANV_KOLOMMEN;
+  function _tekenAanvullenRij(oefeningen, variant, niveau = 100, cel) {
+    const aantalKol = cel ? 2 : variant === 'met-schijfjes' ? AANV_KOLOMMEN_SCHIJF : AANV_KOLOMMEN;
     const kolB  = CW / aantalKol;
     const kadW  = kolB - 6;
     const marge = 3;
     const kadH  = _aanvulKadH(variant, niveau);
 
     oefeningen.forEach((oef, kol) => {
-      const ox = ML + kol * kolB + 3;
+      const ox = ML + (cel?.kolom ?? kol) * kolB + 3;
       const oy = y;
 
       // Kader
@@ -780,7 +780,7 @@ const somTekst = (delen.length >= 3)
 
 
   /* ── Compenseren blok ───────────────────────────────────────── */
-  function _tekenCompenserenBlok(blok) {
+  function _tekenCompenserenBlok(blok, cel) {
     const variant     = blok.compenserenVariant || 'met-tekens';
     const metVoorbeeld = blok.metVoorbeeld !== false;
 
@@ -792,18 +792,21 @@ const somTekst = (delen.length >= 3)
       const kadW     = kolB - 6;
       const marge    = 3;
       const aantalRijen = Math.ceil(blok.oefeningen.length / 2);
-      checkRuimte(ZINRUIMTE + KAAL_RIJ + 4);
-      y += VOOR_ZIN;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      doc.setTextColor(26, 58, 92);
-      doc.text(blok.opdrachtzin, ML, y);
-      y += ZINRUIMTE;
+      if (cel?.meten) return KAAL_RIJ;
+      if (!cel) {
+        checkRuimte(ZINRUIMTE + KAAL_RIJ + 4);
+        y += VOOR_ZIN;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(26, 58, 92);
+        doc.text(blok.opdrachtzin, ML, y);
+        y += ZINRUIMTE;
+      }
       for (let rij = 0; rij < aantalRijen; rij++) {
         if (rij > 0) checkRuimte(KAAL_RIJ);
         blok.oefeningen.slice(rij * 2, (rij + 1) * 2).forEach((oef, kol) => {
           const isVb = metVoorbeeld && rij === 0 && kol === 0;
-          const oy = y, ox = ML + kol * kolB + 3;
+          const oy = y, ox = ML + (cel?.kolom ?? kol) * kolB + 3;
           doc.setFillColor(isVb ? 255 : 255, isVb ? 248 : 255, isVb ? 220 : 255);
           doc.setDrawColor(isVb ? 240 : 180, isVb ? 192 : 200, isVb ? 80 : 225);
           doc.setLineWidth(isVb ? 1 : 0.5);
@@ -846,8 +849,10 @@ const somTekst = (delen.length >= 3)
         });
         y += KAAL_RIJ;
       }
-      y += NABLOK + 4;
-      lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+      if (!cel) {
+        y += NABLOK + 4;
+        lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+      }
       return;
     }
 
@@ -859,14 +864,17 @@ const somTekst = (delen.length >= 3)
     const marge       = 3;
 
     const aantalRijen = Math.ceil(blok.oefeningen.length / 2);
-    checkRuimte(ZINRUIMTE + COMP_RIJ_H + 4);
+    if (cel?.meten) return COMP_RIJ_H;
+    if (!cel) {
+      checkRuimte(ZINRUIMTE + COMP_RIJ_H + 4);
 
-    y += VOOR_ZIN;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-doc.setTextColor(26, 58, 92);
-    doc.text(blok.opdrachtzin, ML, y);
-    y += ZINRUIMTE;
+      y += VOOR_ZIN;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(26, 58, 92);
+      doc.text(blok.opdrachtzin, ML, y);
+      y += ZINRUIMTE;
+    }
 
     for (let rij = 0; rij < aantalRijen; rij++) {
       if (rij > 0) checkRuimte(COMP_RIJ_H);
@@ -875,7 +883,7 @@ doc.setTextColor(26, 58, 92);
       rijOef.forEach((oef, kol) => {
         const isVoorbeeld = metVoorbeeld && (rij === 0) && (kol === 0);
         const oy = y;
-        const ox = ML + kol * kolB + 3;
+        const ox = ML + (cel?.kolom ?? kol) * kolB + 3;
 
         // Kader
         doc.setFillColor(isVoorbeeld ? 255 : 255, isVoorbeeld ? 243 : 255, isVoorbeeld ? 205 : 255);
@@ -1123,8 +1131,10 @@ const avX = somX + somTotaalB + 4.5;
 
       y += COMP_RIJ_H;
     }
-    y += NABLOK + 4;  // extra marge na compenseer-blok
-    lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+    if (!cel) {
+      y += NABLOK + 4;  // extra marge na compenseer-blok
+      lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -2026,72 +2036,82 @@ const onthoudH = c;
     }
   }
 
-  async function _tekenTot20HulpBlok(blok) {
+  async function _tekenTot20HulpBlok(blok, cel) {
     const [sw,sh] = Tot20Hulp.maten(blok);
     const breedte = (CW - 8) / 2, hoogte = breedte * sh / sw;
-    checkRuimte(VOOR_ZIN + ZINRUIMTE + hoogte + 6);
-    y += VOOR_ZIN;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(26,58,92);
-    doc.text(blok.opdrachtzin, ML, y); y += ZINRUIMTE;
+    if (cel?.meten) return hoogte + 6;
+    if (!cel) {
+      checkRuimte(VOOR_ZIN + ZINRUIMTE + hoogte + 6);
+      y += VOOR_ZIN;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(26,58,92);
+      doc.text(blok.opdrachtzin, ML, y); y += ZINRUIMTE;
+    }
     for (let i = 0; i < blok.oefeningen.length; i += 2) {
-      checkRuimte(hoogte + 6);
+      if (!cel) checkRuimte(hoogte + 6);
       for (let k = 0; k < 2 && i+k < blok.oefeningen.length; k++) {
         const png = await Tot20Hulp.png(blok, blok.oefeningen[i+k], _metAntwoorden || (blok.metVoorbeeld && i+k === 0));
-        doc.addImage(png, 'PNG', ML+k*(breedte+8), y, breedte, hoogte, undefined, 'FAST');
+        doc.addImage(png, 'PNG', ML+(cel?.kolom ?? k)*(breedte+8), y, breedte, hoogte, undefined, 'FAST');
       }
       y += hoogte + 6;
     }
-    y += NABLOK;
+    if (!cel) {
+      y += NABLOK;
+    }
   }
 
-  async function _tekenTot100HulpBlok(blok) {
+  async function _tekenTot100HulpBlok(blok, cel) {
     const [sw, sh] = Tot100Hulp.maten(blok.tot100Hulp);
     const kolommen = blok.tot100Hulp.startsWith('sprongen') ? 1 : 2;
     const breedte = blok.tot100Hulp === 'cirkelrekenen' ? (CW - 8) / 2 : (CW - (kolommen - 1) * 8) / kolommen;
     const hoogte = breedte * sh / sw;
     const fiche = blok.tot100Hulp === 'cirkelrekenen' && blok.cirkelFiche;
-    const zinnen=blok.opdrachtzin.split('\n');
-    checkRuimte(VOOR_ZIN + ZINRUIMTE*zinnen.length + hoogte + 6 + (fiche ? hoogte + 22 : 0));
-    y += VOOR_ZIN;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(26,58,92);
-    zinnen.forEach(zin=>{doc.text(zin, ML, y); y += ZINRUIMTE;});
-    if(fiche) {
-      const kaderY = y;
-      doc.setDrawColor(132,170,202);
-      doc.setLineWidth(0.5);
-      doc.roundedRect(ML, kaderY, CW, hoogte + 17, 3, 3, 'S');
-      doc.text('Zisa legt uit · Cirkelrekenen', ML + 6, kaderY + 6);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.text('Ik reken per rang. Onder elke cirkel zie je mijn berekening.', ML + 6, kaderY + 12);
-      const png = await Tot100Hulp.png(blok, Tot100Hulp.fiche(blok), true);
-      doc.addImage(png, 'PNG', ML + 6, kaderY + 14, breedte, hoogte, undefined, 'FAST');
-      const zisa = new Image();
-      zisa.src = '/afbeeldingen_hoofdrekenen/zisa-whiteboard.png';
-      try {
-        await zisa.decode();
-        const hoogteZisa = 20;
-        const breedteZisa = hoogteZisa * zisa.naturalWidth / zisa.naturalHeight;
-        doc.addImage(zisa, 'PNG', ML + CW - breedteZisa - 6, kaderY + 4, breedteZisa, hoogteZisa);
-      } catch (error) {
-        console.warn('Zisa kon niet worden geladen voor de hulpfiche.', error);
+    if (cel?.meten) return hoogte + 6;
+    if (!cel) {
+      const zinnen=blok.opdrachtzin.split('\n');
+      checkRuimte(VOOR_ZIN + ZINRUIMTE*zinnen.length + hoogte + 6 + (fiche ? hoogte + 22 : 0));
+      y += VOOR_ZIN;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(26,58,92);
+      zinnen.forEach(zin=>{doc.text(zin, ML, y); y += ZINRUIMTE;});
+      if(fiche) {
+        const kaderY = y;
+        doc.setDrawColor(132,170,202);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(ML, kaderY, CW, hoogte + 17, 3, 3, 'S');
+        doc.text('Zisa legt uit · Cirkelrekenen', ML + 6, kaderY + 6);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text('Ik reken per rang. Onder elke cirkel zie je mijn berekening.', ML + 6, kaderY + 12);
+        const png = await Tot100Hulp.png(blok, Tot100Hulp.fiche(blok), true);
+        doc.addImage(png, 'PNG', ML + 6, kaderY + 14, breedte, hoogte, undefined, 'FAST');
+        const zisa = new Image();
+        zisa.src = '/afbeeldingen_hoofdrekenen/zisa-whiteboard.png';
+        try {
+          await zisa.decode();
+          const hoogteZisa = 20;
+          const breedteZisa = hoogteZisa * zisa.naturalWidth / zisa.naturalHeight;
+          doc.addImage(zisa, 'PNG', ML + CW - breedteZisa - 6, kaderY + 4, breedteZisa, hoogteZisa);
+        } catch (error) {
+          console.warn('Zisa kon niet worden geladen voor de hulpfiche.', error);
+        }
+        y += hoogte + 22;
       }
-      y += hoogte + 22;
     }
     for (let i = 0; i < blok.oefeningen.length; i += kolommen) {
-      checkRuimte(hoogte + 6);
+      if (!cel) checkRuimte(hoogte + 6);
       for (let k = 0; k < kolommen && i + k < blok.oefeningen.length; k++) {
         const oef = blok.oefeningen[i+k];
         const tekenBlok = blok.tot100Hulp === 'cirkelrekenen'
           ? {...blok, cirkelPdfLettergrootte: 14 * 25.4 / 72 * sw / breedte}
           : blok;
         const png = await Tot100Hulp.png(tekenBlok, {...oef, uitgewerktVoorbeeld: blok.tot100Voorbeeld && i+k === 0}, _metAntwoorden || (blok.tot100Voorbeeld && i+k === 0));
-        doc.addImage(png, 'PNG', ML+k*(breedte+8), y, breedte, hoogte, undefined, 'FAST');
+        doc.addImage(png, 'PNG', ML+(cel?.kolom ?? k)*(breedte+8), y, breedte, hoogte, undefined, 'FAST');
       }
       y += hoogte + 6;
     }
-    y += NABLOK;
-    lijn(ML, y-4, ML+CW, y-4, [210,220,230], 0.4);
+    if (!cel) {
+      y += NABLOK;
+      lijn(ML, y-4, ML+CW, y-4, [210,220,230], 0.4);
+    }
   }
 
  async function _tekenHalverenBlok(blok) {
@@ -2113,6 +2133,57 @@ const onthoudH = c;
     }
     y+=NABLOK;
   }
+  function _tekenGemengdHulpCel(blok, cel) {
+    if (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(blok)) return _tekenTot20HulpBlok(blok, cel);
+    if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok)) return _tekenTot100HulpBlok(blok, cel);
+    const hulp = blok.hulpmiddelen || [];
+    if (hulp.includes('aanvullen')) return _tekenAanvullenBlok(blok, cel);
+    if (hulp.includes('compenseren')) return _tekenCompenserenBlok(blok, cel);
+    if (hulp.includes('transformeren')) return _tekenTransformerenBlok(blok, cel);
+    const heeftSplits = hulp.includes('splitsbeen');
+    const heeftLijnen = hulp.includes('schrijflijnen');
+    const aantal = blok.schrijflijnenAantal || 2;
+    if (heeftSplits || heeftLijnen) {
+      if (cel.meten) return _hulpKadH(aantal) + 6;
+      return _tekenHulpRij(blok.oefeningen, heeftSplits, heeftLijnen, blok.bewerking,
+        blok.splitspositie || 'aftrekker', aantal, blok.brug || 'zonder', blok.niveau || 100,
+        blok.metVoorbeeld === true && heeftLijnen, 0, cel);
+    }
+    if (cel.meten) return RIJHOOGTE + RIJ_GAP;
+    return _tekenRij(blok.oefeningen, 2, blok.niveau || 100, cel);
+  }
+
+  async function _tekenGemengdHulpBlok(blok) {
+    const cellen = blok.oefeningen.map(({hulpConfig, ...oefening}) => ({
+      ...hulpConfig, oefeningen: [oefening],
+    }));
+    const isBreed = cel => cel.tot100Hulp?.startsWith('sprongen');
+    for (let i = 0; i < cellen.length;) {
+      const rij = [cellen[i]];
+      if (!isBreed(cellen[i]) && cellen[i + 1] && !isBreed(cellen[i + 1])) rij.push(cellen[i + 1]);
+      const hoogtes = await Promise.all(rij.map(cel => _tekenGemengdHulpCel(cel, {meten: true})));
+      const rijH = Math.max(...hoogtes);
+      checkRuimte(rijH + (i === 0 ? VOOR_ZIN + ZINRUIMTE + 4 : 0));
+      if (i === 0) {
+        y += VOOR_ZIN;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(26, 58, 92);
+        doc.text(blok.opdrachtzin, ML, y);
+        y += ZINRUIMTE;
+      }
+      const rijY = y;
+      for (let kolom = 0; kolom < rij.length; kolom++) {
+        y = rijY;
+        await _tekenGemengdHulpCel(rij[kolom], {kolom});
+      }
+      y = rijY + rijH;
+      i += rij.length;
+    }
+    y += NABLOK;
+    lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+  }
+
  async function _tekenBlok(blok) {
   if(blok.config?.eersteVoorbeeld && ['tafels','tafels-inzicht','tafels-getallenlijn'].includes(blok.bewerking) && blok.oefeningen.length) {
     const config={...blok.config,eersteVoorbeeld:false};
@@ -2132,15 +2203,7 @@ const onthoudH = c;
   }
     if(blok.bewerking==='halveren-verdubbelen'){await _tekenHalverenBlok(blok);return;}
   blok = Generator.normaliseerGemengdBlok(blok);
-  if(blok.config?.hulpPerBewerking) {
-    for(let i=0;i<blok.oefeningen.length;) {
-      const {hulpConfig,...oef}=blok.oefeningen[i];
-      const eerste=i, oefeningen=[oef]; i++;
-      while(i<blok.oefeningen.length && blok.oefeningen[i].hulpConfig.bewerking===hulpConfig.bewerking && !blok.oefeningen[i].hulpConfig.metVoorbeeld){const {hulpConfig:_,...volgende}=blok.oefeningen[i++];oefeningen.push(volgende);}
-      await _tekenBlok({...hulpConfig,opdrachtzin:eerste===0?blok.opdrachtzin:'',oefeningen});
-    }
-    return;
-  }
+  if (blok.config?.hulpPerBewerking) { await _tekenGemengdHulpBlok(blok); return; }
   if (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(blok)) { await _tekenTot20HulpBlok(blok); return; }
   if (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(blok)) { await _tekenTot100HulpBlok(blok); return; }
   if (blok.bewerking === 'breuken')                                  { _tekenBreukenBlok(blok); return; }
@@ -2736,7 +2799,7 @@ const onthoudH = c;
   }
 
   /* ── Transformeren (optellingswip) PDF-renderer ──────────── */
-  function _tekenTransformerenBlok(blok) {
+  function _tekenTransformerenBlok(blok, cel) {
     const variant      = blok.transformerenVariant || 'schema';
     const metVb        = blok.metVoorbeeld !== false;
 
@@ -2751,14 +2814,17 @@ const onthoudH = c;
     const mg       = 4;
 
     const aantalRijen = Math.ceil(blok.oefeningen.length / 2);
-    checkRuimte(ZINRUIMTE + RIJ_H + 4);
+    if (cel?.meten) return RIJ_H;
+    if (!cel) {
+      checkRuimte(ZINRUIMTE + RIJ_H + 4);
 
-    y += VOOR_ZIN;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(26, 58, 92);
-    doc.text(blok.opdrachtzin, ML, y);
-    y += ZINRUIMTE;
+      y += VOOR_ZIN;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(26, 58, 92);
+      doc.text(blok.opdrachtzin, ML, y);
+      y += ZINRUIMTE;
+    }
 
     for (let rij = 0; rij < aantalRijen; rij++) {
       if (rij > 0) checkRuimte(RIJ_H);
@@ -2768,7 +2834,7 @@ const onthoudH = c;
         const isVbStijl = metVb && rij === 0 && kol === 0;  // voor gele achtergrond
         const isVb     = isVbStijl || _metAntwoorden;  // voor data tonen
         const oy       = y;
-        const ox       = ML + kol * kolB + 3;
+        const ox       = ML + (cel?.kolom ?? kol) * kolB + 3;
         const isAftrek = blok.bewerking === 'aftrekken';
         const tg       = oef.transformeerGetal;
         const ag       = oef.andereGetal;
@@ -3045,28 +3111,33 @@ const onthoudH = c;
   }
 
 
-  function _tekenAanvullenBlok(blok) {
+  function _tekenAanvullenBlok(blok, cel) {
     const variant     = blok.aanvullenVariant || 'zonder-schema';
     const aantalKol   = variant === 'met-schijfjes' ? AANV_KOLOMMEN_SCHIJF : AANV_KOLOMMEN;
     const kadH        = _aanvulKadH(variant, blok?.niveau || 100);
     const rijH        = kadH + 5;
     const aantalRijen = Math.ceil(blok.oefeningen.length / aantalKol);
-   checkRuimte(ZINRUIMTE + rijH + 4);
+    if (cel?.meten) return rijH;
+    if (!cel) {
+      checkRuimte(ZINRUIMTE + rijH + 4);
 
-    y += VOOR_ZIN;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-doc.setTextColor(26, 58, 92);
-    doc.text(blok.opdrachtzin, ML, y);
-    y += ZINRUIMTE;
+      y += VOOR_ZIN;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(26, 58, 92);
+      doc.text(blok.opdrachtzin, ML, y);
+      y += ZINRUIMTE;
+    }
 
     for (let rij = 0; rij < aantalRijen; rij++) {
       if (rij > 0) checkRuimte(rijH);
       const rijOef = blok.oefeningen.slice(rij * aantalKol, (rij + 1) * aantalKol);
-      _tekenAanvullenRij(rijOef, variant, blok.niveau || 100);
+      _tekenAanvullenRij(rijOef, variant, blok.niveau || 100, cel);
     }
-    y += NABLOK;
-    lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
+    if (!cel) {
+      y += NABLOK;
+      lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
+    }
   }
 
   function _wachtOpLamp(timeout = 1500) {

@@ -53,3 +53,96 @@ vm.runInContext(dispatcher, context);
   }
   console.log('Gemengd raster: preview 4 kolommen, PDF 4 x 4 in dezelfde volgorde; hulpmiddelen behouden.');
 })().catch(error => { console.error(error); process.exitCode = 1; });
+
+async function controleerHulpmiddelen() {
+  const calls = [];
+  const mockDoc = new Proxy({}, {
+    get(_, name) {
+      if (name === 'getTextWidth') return value => String(value).length * 2;
+      if (name === 'getNumberOfPages') return () => 1;
+      if (name === 'addPage') return () => calls.push(['pagina']);
+      if (name === 'addImage' || name === 'roundedRect') return (...args) => calls.push([name, ...args]);
+      return () => {};
+    },
+  });
+  const sandbox = vm.createContext({ window: {}, mockDoc });
+  vm.runInContext(read('generator') + '\n' + read('tot20-hulp') + '\n' + read('tot100-hulp'), sandbox);
+  vm.runInContext(`
+    Tot20Hulp.png = async () => 'tienraam';
+    Tot100Hulp.png = async () => 'weergave';
+  `, sandbox);
+  vm.runInContext(pdf.replace(/return \{\s*genereer[^}]*\};/, `return {
+    async test(blok, startY) {
+      doc = mockDoc;
+      y = startY;
+      await _tekenBlok(blok);
+    },
+  };`), sandbox);
+
+  const normaal = hulpmiddel => ({ hulpmiddelen: hulpmiddel ? hulpmiddel.split('+') : [] });
+  const afbeelding = tot100Hulp => ({ hulpmiddelen: [], tot100Hulp });
+  const opties = [
+    [normaal('splitsbeen'), normaal('splitsbeen')],
+    [normaal('schrijflijnen'), normaal('splitsbeen+schrijflijnen')],
+    [normaal('schrijflijnen'), normaal('')],
+    [normaal('compenseren'), normaal('aanvullen')],
+    [{...normaal('compenseren'), compenserenVariant:'zonder-hulp'}, {...normaal('aanvullen'), aanvullenVariant:'met-schijfjes'}],
+    [{...normaal('transformeren'), transformerenVariant:'schema'}, {...normaal('transformeren'), transformerenVariant:'kaal'}],
+    [{...normaal('transformeren'), transformerenVariant:'pijltjes'}, {...normaal('aanvullen'), aanvullenVariant:'met-schema'}],
+    [afbeelding('invullijn'), afbeelding('cirkelrekenen')],
+    [afbeelding('duizend-splits'), afbeelding('duizend-splits-zelf')],
+    ...[
+      ['tienramen-kleur', 'aftrek-tienramen-kringen'],
+      ['tienraam-start', 'aftrek-tienramen'],
+      ['zelf-splitsbenen', 'aftrek-zelf-splitsbenen'],
+    ].map(pair => pair.map(key => ({ ...normaal(key), niveau: 20 }))),
+  ];
+
+  async function teken(opt, aft, aantal, startY = 15) {
+    calls.length = 0;
+    sandbox.blok = {
+      bewerking: 'gemengd', opdrachtzin: 'Reken uit.',
+      config: { hulpPerBewerking: { optellen: opt, aftrekken: aft } },
+      oefeningen: Array.from({length: aantal}, (_, index) => ({
+        vraag: index % 2 ? '47 - 19 =' : '27 + 19 =',
+        antwoord: index % 2 ? 28 : 46, andereGetal: index % 2 ? 47 : 27,
+        compenseerGetal: 19, tiental: 20, compenseerDelta: 1,
+        transformeerGetal: 19, transformeerDelta: 1,
+        hulpConfig: {
+          bewerking: index % 2 ? 'aftrekken' : 'optellen',
+          niveau: 100, brug: 'met', metVoorbeeld: index < 2,
+          ...(index % 2 ? aft : opt),
+        },
+      })),
+    };
+    await vm.runInContext(`PdfEngine.test(blok, ${startY})`, sandbox);
+    const posities = calls.flatMap(([naam, ...args]) => {
+      if (naam === 'addImage') return [{ x: args[2], y: args[3], breedte: args[4], hoogte: args[5] }];
+      if (naam === 'roundedRect' && [85, 87].includes(args[2])) {
+        return [{ x: args[0], y: args[1], breedte: args[2], hoogte: args[3] }];
+      }
+      return [];
+    });
+    assert.equal(posities.length, aantal, JSON.stringify({opt, aft, posities}));
+    return posities;
+  }
+
+  for (const [opt, aft] of opties) {
+    const [a, b, c] = await teken(opt, aft, 3);
+    assert.equal(a.y, b.y, JSON.stringify([opt, aft]));
+    assert.ok(a.x < b.x && c.x === a.x);
+    assert.ok(c.y >= a.y + Math.max(a.hoogte, b.hoogte));
+  }
+  for (const variant of ['sprongen-duizend-splits', 'sprongen-duizend-splits-zelf']) {
+    const [a, b, c] = await teken(normaal('splitsbeen'), afbeelding(variant), 3);
+    assert.equal(b.breedte, 182);
+    assert.ok(a.y < b.y && b.y < c.y);
+  }
+  const [a, b] = await teken(normaal('splitsbeen'), normaal('schrijflijnen'), 2, 250);
+  assert.equal(calls.filter(([naam]) => naam === 'pagina').length, 1);
+  assert.equal(a.y, b.y);
+  assert.ok(a.y < 100);
+  console.log('Gemengde hulpmiddelen: twee per rij, brede getallenlijnen apart, pagina-einde behoudt het paar.');
+}
+
+controleerHulpmiddelen().catch(error => { console.error(error); process.exitCode = 1; });
