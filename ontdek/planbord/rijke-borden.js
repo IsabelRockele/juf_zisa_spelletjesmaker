@@ -12,7 +12,7 @@
 
   function icoon(doc, naam, alt = '') {
     const img = node(doc, 'img', 'rijk-icoon');
-    img.src = PAD + naam + '.png?schoon=34';
+    PlanbordMedia.setImage(img, PAD + naam + '.png?schoon=34');
     img.alt = alt;
     return img;
   }
@@ -598,7 +598,7 @@
     data.vrijeElementen.forEach((item,index)=>{
       const el=node(doc,'div',`vrij-element vrij-element-${item.type}${item.type==='timer'?' vrij-timer':''}`); el.dataset.id=item.id;
       Object.assign(el.style,{left:`${item.x}px`,top:`${item.y}px`,width:`${item.w}px`,height:`${item.h}px`,transform:`rotate(${item.rotatie||0}deg)`});
-      if(item.type==='afbeelding'){const img=node(doc,'img');img.src=item.bron;img.alt=item.naam||'Afbeelding';el.appendChild(img);}
+      if(item.type==='afbeelding'){const img=node(doc,'img');PlanbordMedia.setImage(img,item.bron);img.alt=item.naam||'Afbeelding';el.appendChild(img);}
       if(item.type==='tekst'){
         el.style.fontSize=`${item.lettergrootte||30}px`;
         const tekst=node(doc,'div','vrije-tekst',item.tekst||'Typ hier je tekst');

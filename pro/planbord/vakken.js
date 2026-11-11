@@ -141,7 +141,7 @@ function _maakChecklistRegelHTML(regel) {
 
 function _maakChecklistItemHTML(afbeelding, tekst) {
   const afbHTML = afbeelding
-    ? `<img class="item-afbeelding" src="afbeeldingen/${_escape(afbeelding)}" alt="" onerror="this.style.display='none';" />`
+    ? `<img class="item-afbeelding" src="${_escape(PlanbordMedia.url("afbeeldingen/" + afbeelding))}" crossorigin="anonymous" alt="" onerror="this.style.display='none';" />`
     : '';
   return `
     <div class="checklist-item" data-type="item" data-afbeelding="${_escape(afbeelding)}">
@@ -305,7 +305,7 @@ function _maakDropTarget(item) {
     // Nieuwe afbeelding tussen vinkje en tekst plaatsen
     const img = document.createElement('img');
     img.className = 'item-afbeelding';
-    img.src = 'afbeeldingen/' + bestand;
+    PlanbordMedia.setImage(img, 'afbeeldingen/' + bestand);
     img.alt = '';
     img.onerror = () => { img.style.display = 'none'; };
     img.title = 'Klik om afbeelding te verwijderen';
@@ -339,7 +339,7 @@ function voegAfbeeldingToe(bestand, naam) {
   afb.style.top = y + 'px';
   afb.style.width = standaardGrootte + 'px';
   afb.style.height = standaardGrootte + 'px';
-  afb.innerHTML = `<img src="afbeeldingen/${_escape(bestand)}" alt="${_escape(naam)}" onerror="this.parentElement.style.background='#e5e2d8'; this.parentElement.innerHTML='<span style=&quot;display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;&quot;>🖼️</span>';" />`;
+  afb.innerHTML = `<img src="${_escape(PlanbordMedia.url("afbeeldingen/" + bestand))}" crossorigin="anonymous" alt="${_escape(naam)}" onerror="this.parentElement.style.background='#e5e2d8'; this.parentElement.innerHTML='<span style=&quot;display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;&quot;>🖼️</span>';" />`;
 
   canvas.appendChild(afb);
   _koppelAfbeeldingInteractie(afb);

@@ -122,7 +122,7 @@ function voegAfbeeldingToe(bestand, naam) {
   img.onerror = () => {
     alert(`Afbeelding "${bestand}" niet gevonden. Plaats het bestand in de map afbeeldingen/.`);
   };
-  img.src = `afbeeldingen/${bestand}`;
+  PlanbordMedia.setImage(img, `afbeeldingen/${bestand}`);
 }
 
 // === TEKST TOEVOEGEN ===
@@ -229,7 +229,7 @@ function importeerBord(data) {
         _maakSelecteerbaar(node);
         laag.draw();
       };
-      img.src = `afbeeldingen/${el.bestand}`;
+      PlanbordMedia.setImage(img, `afbeeldingen/${el.bestand}`);
     } else if (el.type === 'tekst') {
       const node = new Konva.Text({
         text: el.tekst,

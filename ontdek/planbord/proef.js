@@ -204,7 +204,7 @@
       item.dataset.naam = naam;
       item.draggable = true;
       const img = win.document.createElement('img');
-      img.src = `afbeeldingen/${bestand}`;
+      PlanbordMedia.setImage(img, `afbeeldingen/${bestand}`);
       img.alt = naam;
       img.draggable = false;
       const label = win.document.createElement('span');
@@ -226,7 +226,7 @@
     grid.querySelectorAll('.eigen-bib-item').forEach(el=>el.remove());
     (set.eigenBibliotheek||[]).forEach(item=>{
       const kaart=win.document.createElement('div');kaart.className='bib-item eigen-bib-item';kaart.title='Klik om op het huidige bord te zetten';
-      const img=win.document.createElement('img');img.src=item.bron;img.alt=item.naam;img.draggable=false;
+      const img=win.document.createElement('img');PlanbordMedia.setImage(img,item.bron);img.alt=item.naam;img.draggable=false;
       const label=win.document.createElement('span');label.className='naam';label.textContent=item.naam;
       const wis=win.document.createElement('button');wis.type='button';wis.textContent='×';wis.title='Uit mijn bibliotheek verwijderen';
       wis.style.cssText='position:absolute;right:3px;top:3px;width:24px;height:24px;border:0;border-radius:50%;color:#8b3348;background:#ffe5ec;font-weight:900;';
@@ -429,7 +429,7 @@
       afb.style.width = '200px';
       afb.style.height = '200px';
       const img = win.document.createElement('img');
-      img.src = bestand;
+      PlanbordMedia.setImage(img, bestand);
       img.alt = naam || 'Eigen afbeelding';
       afb.appendChild(img);
       canvas.appendChild(afb);

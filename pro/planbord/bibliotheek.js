@@ -39,7 +39,7 @@ function _toonBibliotheek() {
     div.dataset.naam = item.naam;
     div.draggable = true;
     div.innerHTML = `
-      <img src="afbeeldingen/${item.bestand}" alt="${item.naam}" onerror="this.outerHTML='<span style=\\'font-size:24px;\\'>🖼️</span>';" draggable="false" />
+      <img src="${PlanbordMedia.url(`afbeeldingen/${item.bestand}`)}" crossorigin="anonymous" alt="${item.naam}" onerror="this.outerHTML='<span style=\\'font-size:24px;\\'>🖼️</span>';" draggable="false" />
       <span class="naam">${item.naam}</span>
     `;
     div.addEventListener('click', () => {

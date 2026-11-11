@@ -34,7 +34,7 @@ function _maakWerkstijlVakHTML(opties = {}) {
     <div class="werkstijl-inhoud">
       <div class="werkstijl-visueel" data-werkstijl="${huidigId}">
         <img class="werkstijl-afbeelding"
-             src="afbeeldingen/${huidig.afbeelding}"
+             src="${PlanbordMedia.url(`afbeeldingen/${huidig.afbeelding}`)}" crossorigin="anonymous"
              alt="${huidig.label}"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
         <span class="werkstijl-emoji" style="display:none;">${huidig.emoji}</span>
@@ -78,7 +78,7 @@ function zetWerkstijl(vak, niveauId) {
 
   if (visueel) visueel.dataset.werkstijl = niveauId;
   if (img) {
-    img.src = `afbeeldingen/${niveau.afbeelding}`;
+    PlanbordMedia.setImage(img, `afbeeldingen/${niveau.afbeelding}`);
     img.style.display = ''; // reset; onerror zal hem opnieuw verbergen indien nodig
     img.alt = niveau.label;
   }
