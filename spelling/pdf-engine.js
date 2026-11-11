@@ -8,9 +8,22 @@
 window.SpellingPDF = {
 
   bewaarPDF: function(element, opties) {
+    // De PDF-marge geldt op iedere pagina, ook na een automatische rijovergang.
+    const margeMM = 10;
+    const margePx = margeMM * 96 / 25.4;
+    element.querySelectorAll(".werkblad").forEach(blad => {
+      const stijl = getComputedStyle(blad);
+      const hoogte = parseFloat(stijl.minHeight);
+      const boven = parseFloat(stijl.paddingTop);
+      const onder = parseFloat(stijl.paddingBottom);
+      if (hoogte > 0) blad.style.setProperty("min-height", Math.max(0, hoogte - 2 * margePx) + "px", "important");
+      blad.style.setProperty("padding-top", Math.max(0, boven - margePx) + "px", "important");
+      blad.style.setProperty("padding-bottom", Math.max(0, onder - margePx) + "px", "important");
+    });
+    const exportOpties = { ...opties, margin: [margeMM, 0, margeMM, 0] };
     let canvas;
     let paginaHoogte;
-    return html2pdf().set(opties).from(element).toCanvas()
+    return html2pdf().set(exportOpties).from(element).toCanvas()
       .get("canvas", resultaat => { canvas = resultaat; })
       .get("pageSize", pagina => { paginaHoogte = Math.floor(canvas.width * pagina?.inner?.ratio); })
       .toPdf()
