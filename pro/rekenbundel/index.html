@@ -242,6 +242,10 @@
               <label class="radio-chip" onclick="App.selecteerRadio('niveau','5',this)">
                 <input type="radio" name="niveau" value="5">Tot 5
               </label>
+              <label class="radio-chip" onclick="App.selecteerRadio('niveau','6',this)"><input type="radio" name="niveau" value="6">Tot 6</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('niveau','7',this)"><input type="radio" name="niveau" value="7">Tot 7</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('niveau','8',this)"><input type="radio" name="niveau" value="8">Tot 8</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('niveau','9',this)"><input type="radio" name="niveau" value="9">Tot 9</label>
               <label class="radio-chip" onclick="App.selecteerRadio('niveau','10',this)">
                 <input type="radio" name="niveau" value="10">Tot 10
               </label>
@@ -551,6 +555,10 @@
             <label class="radio-chip geselecteerd" onclick="App.selecteerSplitsNiveau('tot',5,this)">
               <input type="radio" name="splits-niveau" value="tot-5" checked>Tot 5
             </label>
+            <label class="radio-chip" onclick="App.selecteerSplitsNiveau('tot',6,this)"><input type="radio" name="splits-niveau" value="tot-6">Tot 6</label>
+            <label class="radio-chip" onclick="App.selecteerSplitsNiveau('tot',7,this)"><input type="radio" name="splits-niveau" value="tot-7">Tot 7</label>
+            <label class="radio-chip" onclick="App.selecteerSplitsNiveau('tot',8,this)"><input type="radio" name="splits-niveau" value="tot-8">Tot 8</label>
+            <label class="radio-chip" onclick="App.selecteerSplitsNiveau('tot',9,this)"><input type="radio" name="splits-niveau" value="tot-9">Tot 9</label>
             <label class="radio-chip" onclick="App.selecteerSplitsNiveau('tot',10,this)">
               <input type="radio" name="splits-niveau" value="tot-10">Tot 10
             </label>
@@ -689,6 +697,10 @@
               <label class="radio-chip" onclick="App.selecteerGemengdNiveau(5,this)">
                 <input type="radio" name="gem-niveau" value="5">Tot 5
               </label>
+              <label class="radio-chip" onclick="App.selecteerGemengdNiveau('6',this)"><input type="radio" name="gem-niveau" value="6">Tot 6</label>
+              <label class="radio-chip" onclick="App.selecteerGemengdNiveau('7',this)"><input type="radio" name="gem-niveau" value="7">Tot 7</label>
+              <label class="radio-chip" onclick="App.selecteerGemengdNiveau('8',this)"><input type="radio" name="gem-niveau" value="8">Tot 8</label>
+              <label class="radio-chip" onclick="App.selecteerGemengdNiveau('9',this)"><input type="radio" name="gem-niveau" value="9">Tot 9</label>
               <label class="radio-chip" onclick="App.selecteerGemengdNiveau(10,this)">
                 <input type="radio" name="gem-niveau" value="10">Tot 10
               </label>
@@ -769,7 +781,7 @@
 
       <!-- Hulpmiddelen (enkel bij met/beide brug) -->
       <div class="config-kaart" id="kaart-gem-hulpmiddelen" style="display:none">
-        <div class="kaart-titel"><div class="icon">🛠️</div>Hulpmiddelen</div>
+        <div class="kaart-titel"><div class="icon">🛠️</div>Hulpmiddelen voor gewone sommen</div>
         <div class="form-rij">
           <label>Hulpmiddelen toevoegen</label>
           <div class="checkbox-groep">
@@ -2393,14 +2405,14 @@
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="modules/splitsingen.js?v=2"></script>
+<script src="modules/splitsingen.js?v=rekenverhalen-20261112"></script>
 <script src="modules/cijferen.js?v=99"></script>
 <script src="modules/tafels.js?v=1"></script>
 <script src="modules/tafels-inzicht.js?v=1"></script>
 <script src="modules/tafels-getallenlijn.js?v=1"></script>
-<script src="modules/optellen-tot20.js?v=3"></script>
+<script src="modules/optellen-tot20.js?v=rekenverhalen-20261112"></script>
 <script src="modules/optellen-tot100.js?v=3"></script>
-<script src="modules/aftrekken-tot20.js?v=3"></script>
+<script src="modules/aftrekken-tot20.js?v=rekenverhalen-20261112"></script>
 <script src="modules/aftrekken-tot100.js?v=3"></script>
 <script src="modules/herken-brug-tot100.js?v=3"></script>
 <script src="modules/aanvullen-tot1000.js?v=1"></script>
@@ -2438,10 +2450,13 @@
 <script src="tot100-hulp.js?v=invullijn-1"></script>
 <script src="tot20-hulp.js?v=vijfstructuur-20260924"></script>
 <script src="modules/tafels-aanvulling.js?v=1"></script>
-<script src="generator.js?v=gemengd-hulp-20261104"></script>
-<script src="gemengd-hulp.js?v=gemengd-hulp-20261104"></script>
-<script src="preview.js?v=gemengd-hulp-20261104"></script>
-<script src="pdf-engine.js?v=gemengde-hulpmiddelen-rijen"></script>
+<script src="generator.js?v=rekenverhalen-20261112"></script>
+<script src="gemengd-hulp.js?v=rekenverhalen-20261112"></script>
+<script src="getalbeelden.js?v=rekenverhalen-20261112"></script>
+<script src="rekenverhalen-data.js?v=rekenverhalen-20261112"></script>
+<script src="rekenverhalen.js?v=rekenverhalen-20261112"></script>
+<script src="preview.js?v=rekenverhalen-20261112"></script>
+<script src="pdf-engine.js?v=rekenverhalen-20261112"></script>
 <script src="vraagstukken.js?v=39"></script>
 
 <script src="modules/rekentaal.js?v=16"></script>
@@ -2449,7 +2464,7 @@
 <link rel="stylesheet" href="halveren-verdubbelen.css?v=2">
 <script src="modules/halveren-verdubbelen.js?v=3"></script>
 <script>document.getElementById('gem-tiental-visueel').innerHTML=Tot100Hulp.svg({tot100Hulp:'sprongen-tiental',keuzeVoorbeeld:true},{vraag:'88 + 0'},true);</script>
-<script src="app.js?v=typevoorbeelden-1"></script>
+<script src="app.js?v=rekenverhalen-20261112"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {

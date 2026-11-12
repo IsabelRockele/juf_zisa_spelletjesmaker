@@ -47,7 +47,7 @@ const Splitsingen = (() => {
 
   function _getallen(niveau) {
     if (niveau <= 5)  return [3, 4, 5];
-    if (niveau <= 10) return [3, 4, 5, 6, 7, 8, 9, 10];
+    if (niveau <= 10) return Array.from({ length: niveau - 2 }, (_, i) => i + 3);
     if (niveau <= 20) return [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
     // Tot 100: alle getallen van 11 t/m 100
     return Array.from({ length: 90 }, (_, i) => i + 11);
@@ -134,7 +134,7 @@ const Splitsingen = (() => {
       const kandidaten2 = [];
       for (const n of _shuffle(pool)) {
         for (const [a, b] of _shuffle(_splits(n))) {
-          const heeftBrug = (a % 10) + (b % 10) >= 10;
+          const heeftBrug = niveau > 10 && (a % 10) + (b % 10) >= 10;
           if (brug === 'met-brug'     && !heeftBrug) continue;
           if (brug === 'naar-tiental' && !heeftBrug) continue;
           if (brug === 'zonder'       &&  heeftBrug) continue;

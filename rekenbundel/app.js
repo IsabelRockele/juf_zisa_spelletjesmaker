@@ -36,6 +36,8 @@ const App = (() => {
       }
     }
     actieveBewerking = bewerking;
+    Getalbeelden.kies(bewerking);
+    Rekenverhalen.kies(bewerking);
 
     // Reset alle keuzes bij tab wissel
     // 0. Alle radio-chips in brug-sub en brug-hoofd weer zichtbaar maken
@@ -919,6 +921,8 @@ const App = (() => {
     const blok = bundelData.find(b => b.id === blokId);
     if (!blok) return;
 
+    if(blok.config?.getalbeelden){const kandidaten=Getalbeelden.maakBlok(blok.config,blok.bewerking,100).oefeningen;const nieuw=kandidaten.find(o=>!blok.oefeningen.some(v=>v.a===o.a&&v.b===o.b));if(nieuw){blok.oefeningen.push(nieuw);Preview.render(bundelData);}else toonToast('Geen nieuwe unieke oefening beschikbaar');return;}
+    if(blok.config?.rekenverhalen){if(blok.oefeningen.length>=6){toonToast('Maximaal 6 verhaalprenten per blok');return;}const nieuw=Rekenverhalen.kiesPrenten(blok.niveau,blok.bewerking,1,blok.oefeningen.map(o=>o.id))[0];if(nieuw&&!blok.oefeningen.some(o=>o.id===nieuw.id)){blok.oefeningen.push({...nieuw});Preview.render(bundelData);}return;}
     if(blok.bewerking==='kommagetallen'){
       const teken=blok.config.bewerking==='aftrekken'?'-':'+';
       const sleutel=o=>o.rooster?o.sleutel:`${o.a}${teken}${o.b}`;
@@ -2019,6 +2023,10 @@ function _getSplitsConfig() {
 
   /* ── Rekentaal: blok toevoegen ─────────────────────────────── */
   /* ── Vraagstukken: blok toevoegen vanuit VraagstukkenModule ── */
+  function voegGetalbeeldenBlokToe(blok) {
+    bundelData.push(blok); Preview.render(bundelData);
+    toonToast('Getalbeelden toegevoegd aan de bundel.');
+  }
   function voegVraagstukBlokToe(blok) {
     bundelData.push(blok);
     Preview.render(bundelData);
@@ -2874,7 +2882,7 @@ function _getSplitsConfig() {
     toggleCijferTafel, selecteerCijferVermPositie,
     selecteerCijferInvulling, selecteerCijferStartpijl, selecteerCijferSchatting,
     voegCijferenBlokToe,
-    voegVraagstukBlokToe,
+    voegVraagstukBlokToe, voegGetalbeeldenBlokToe,
     voegRekentaalBlokToe, voegHalverenBlokToe,
     selecteerSchattenType, selecteerSchattenNiveau, selecteerSchattenBewerking, selecteerSchattenAfronden,
     voegSchattenBlokToe,

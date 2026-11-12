@@ -213,7 +213,7 @@ const Preview = (() => {
       blok.bewerking === 'breuken' &&
       blok.config?.soort === 'vermenigvuldigen'
     );
-    if (_laatsteBundelData.some(b => b.bewerking === 'halveren-verdubbelen') || heeftCompZonderHulp || heeftBreukSchrapping || _laatsteBundelData.some(b => b.config?.hulpPerBewerking || (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(b)) || (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(b)))) {
+    if (_laatsteBundelData.some(b => b.config?.rekenverhalen || b.config?.getalbeelden || b.bewerking === 'halveren-verdubbelen') || heeftCompZonderHulp || heeftBreukSchrapping || _laatsteBundelData.some(b => b.config?.hulpPerBewerking || (typeof Tot20Hulp !== 'undefined' && Tot20Hulp.actief(b)) || (typeof Tot100Hulp !== 'undefined' && Tot100Hulp.actief(b)))) {
       render(_laatsteBundelData);
       // Toggle knop state behouden na re-render
       if (btn) {
@@ -538,6 +538,8 @@ const Preview = (() => {
   }
 
   function _maakBlokElement(blok) {
+    if (blok.config?.rekenverhalen) return Rekenverhalen.render(blok, _toonOplossingen);
+    if (blok.config?.getalbeelden) return Getalbeelden.render(blok, _toonOplossingen);
     if(blok.config?.eersteVoorbeeld && ['tafels','tafels-inzicht','tafels-getallenlijn','tafels-aanvulling'].includes(blok.bewerking)) {
       const el=_maakBlokElement({...blok,config:{...blok.config,eersteVoorbeeld:false}});
       return TafelsAanvulling.markeerVoorbeeld(el,blok.oefeningen[0]);
@@ -889,7 +891,7 @@ const Preview = (() => {
       return `
         <div class="oefening-item">
           <span class="oef-tekst">${esc(oef.vraag)}</span>
-          <span class="antwoord-vak" data-antwoord="${oef.antwoord ?? ''}"></span>
+          <span class="antwoord-vak" ${oef.antwoordLayout==='lijn'?'style="border:0;border-bottom:1.5px solid #365b80;border-radius:0;background:transparent"':''} data-antwoord="${oef.antwoord ?? ''}">${oef.layoutVoorbeeld?esc(oef.antwoord):''}</span>
           <button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>
         </div>`;
     }

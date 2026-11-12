@@ -128,7 +128,8 @@ y += 5;
       const vakH   = kadH - 5;
       const vakX   = ox + 3 + tekstB + 2;
       const vakY   = oy + (kadH - vakH) / 2;
-      _antwoordVak(vakX, vakY, vakW, vakH, oef.antwoord);
+      if(oef.antwoordLayout==='lijn'){lijn(vakX,vakY+vakH,vakX+vakW,vakY+vakH,[26,58,92],.35);if(_metAntwoorden||oef.layoutVoorbeeld){doc.setTextColor(0,100,0);doc.text(String(oef.antwoord),vakX+1,vakY+vakH-2);}}
+      else _antwoordVak(vakX, vakY, vakW, vakH, oef.antwoord);
     });
 
     y += RIJHOOGTE + RIJ_GAP;
@@ -2114,6 +2115,23 @@ const onthoudH = c;
     }
   }
 
+ async function _tekenGetalbeeldenBlok(blok) {
+    const kolommen=blok.niveau<=10&&blok.bewerking!=='rekenrelaties'?3:2;
+    const breedte=(CW-(kolommen-1)*8)/kolommen, hoogte=breedte*(blok.bewerking==='rekenrelaties'?390:235)/360;
+    doc.setFont('helvetica','bold');doc.setFontSize(12);
+    const regels=doc.splitTextToSize(blok.opdrachtzin,CW);
+    checkRuimte(regels.length*6+hoogte+8);
+    y+=3;doc.setTextColor(26,58,92);doc.text(regels,ML,y);y+=regels.length*6;
+    for(let i=0;i<blok.oefeningen.length;i+=kolommen){
+      checkRuimte(hoogte+6);
+      for(let k=0;k<kolommen&&i+k<blok.oefeningen.length;k++) {
+        const source=Getalbeelden.svg(blok,blok.oefeningen[i+k],_metAntwoorden||(blok.config.voorbeeld&&i+k===0));
+        doc.addImage(await HalverenVerdubbelen.png(source),'PNG',ML+k*(breedte+8),y,breedte,hoogte,undefined,'FAST');
+      }
+      y+=hoogte+6;
+    }
+    y+=NABLOK;
+  }
  async function _tekenHalverenBlok(blok) {
     const hv=HalverenVerdubbelen,[sw,sh]=hv.maten(blok.config.type);
     const breedte=(CW-8)/2,hoogte=breedte*sh/sw;
@@ -2201,6 +2219,8 @@ const onthoudH = c;
   if(blok.bewerking==='tafels-aanvulling') {
     y=TafelsAanvulling.tekenPdf(blok,doc,y,{ML,CW,MT,PH,MB,metAntwoorden:_metAntwoorden,nieuwePagina:nieuweBladzijde});return;
   }
+    if(blok.config?.rekenverhalen){y=await Rekenverhalen.tekenPdf(blok,doc,y,{ML,CW,metAntwoorden:_metAntwoorden,getY:()=>y,checkRuimte:(h,nieuwY)=>{if(nieuwY!==undefined)y=nieuwY;checkRuimte(h);}});return;}
+    if(blok.config?.getalbeelden){await _tekenGetalbeeldenBlok(blok);return;}
     if(blok.bewerking==='halveren-verdubbelen'){await _tekenHalverenBlok(blok);return;}
   blok = Generator.normaliseerGemengdBlok(blok);
   if (blok.config?.hulpPerBewerking) { await _tekenGemengdHulpBlok(blok); return; }

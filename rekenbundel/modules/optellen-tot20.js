@@ -15,6 +15,10 @@ const OptellenTot20 = (() => {
   // 'Gemengd' = alle beschikbare types door elkaar (UI-optie, geen echt type)
   const TYPES_PER_NIVEAU_BRUG = {
     5:  { zonder: ['E+E'],                     met: [],              gemengd: ['E+E'] },
+    6: { zonder: ['E+E'], met: [], gemengd: ['E+E'] },
+    7: { zonder: ['E+E'], met: [], gemengd: ['E+E'] },
+    8: { zonder: ['E+E'], met: [], gemengd: ['E+E'] },
+    9: { zonder: ['E+E'], met: [], gemengd: ['E+E'] },
     10: { zonder: ['E+E'],                     met: [],              gemengd: ['E+E'] },
     20: { zonder: ['E+E', 'T+E', 'TE+E', 'Maak eerst 10', 'Gemengd'], met: ['E+E'], gemengd: ['E+E', 'T+E', 'TE+E', 'Gemengd'] },
   };
@@ -22,6 +26,10 @@ const OptellenTot20 = (() => {
   // Wat "Gemengd" echt inhoudt per niveau
   const GEMENGD_TYPES = {
     5:  ['E+E'],
+    6: ['E+E'],
+    7: ['E+E'],
+    8: ['E+E'],
+    9: ['E+E'],
     10: ['E+E'],
     20: ['E+E', 'T+E', 'TE+E'],
   };

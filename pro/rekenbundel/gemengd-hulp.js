@@ -2,7 +2,7 @@
 const GemengdHulp = (() => {
   let niveau = 100, brug = 'zonder';
   const weergaven = {
-    invullijn:'Alleen een invullijn', cirkelrekenen:'Cirkelrekenen',
+    invullijn:'Schrijflijn', cirkelrekenen:'Cirkelrekenen',
     'duizend-splits':'Splitsbenen en antwoordlijn',
     'sprongen-duizend-splits':'Splitsbenen met lege getallenlijn',
     'duizend-splits-zelf':'Zelf splitsbenen tekenen',
@@ -13,7 +13,7 @@ const GemengdHulp = (() => {
   }
   const opties = [
     ...Object.entries(weergaven),
-    ['','Geen extra hulpmiddel'], ['splitsbeen','Splitsbeen'], ['schrijflijnen','Schrijflijnen'],
+    ['','Zonder rekenhulp'], ['splitsbeen','Splitsbeen'], ['schrijflijnen','Schrijflijnen'],
     ['splitsbeen+schrijflijnen','Splitsbeen en schrijflijnen'],
     ['aanvullen','Aanvullen'], ['compenseren','Compenseren'], ['transformeren','Transformeren'],
     ...Object.entries(Tot20Hulp.soorten).map(([k,v])=>[k,v[0]])
@@ -54,7 +54,7 @@ const GemengdHulp = (() => {
     let paneel=document.getElementById('gem-hulp-extra');
     if(!paneel){
       paneel=document.createElement('div');paneel.id='gem-hulp-extra';
-      paneel.innerHTML='<p style="font-size:12px;margin-bottom:12px">Kies voor plus- en minsommen afzonderlijk een hulpmiddel.</p>';
+      paneel.innerHTML='<p style="font-size:12px;margin-bottom:12px">Gewone sommen hebben standaard een invulvak en staan per vier op een rij. Hier kun je extra rekenhulp kiezen; die oefeningen krijgen meer ruimte. Deze keuzes gelden niet voor verhaalprenten.</p>';
       for(const op of ['optellen','aftrekken']){
         const kaart=document.createElement('div');kaart.id='gem-hulp-'+op;kaart.className='form-rij';
         kaart.innerHTML=`<label for="gem-hulp-keuze-${op}">${op==='optellen'?'Bij optellen':'Bij aftrekken'}</label><select id="gem-hulp-keuze-${op}"></select><select class="gem-hulp-variant" aria-label="Variant bij ${op}" style="display:none;margin-top:8px"></select><label class="gem-tienraam-structuur" style="display:none;margin-top:8px">Structuur van de tienramen<select><option value="twee">Twee-structuur (per kolom)</option><option value="vijf">Vijf-structuur (eerst de bovenste rij)</option></select></label><label class="hulp-eerste-voorbeeld"><input type="checkbox" class="gem-hulp-voorbeeld"> Eerste ${op==='optellen'?'plussom':'minsom'} uitwerken</label><details class="gem-hulp-detail"><summary>Voorbeeld</summary><div class="hulp-voorbeeld-inhoud"></div></details>`;
@@ -67,7 +67,8 @@ const GemengdHulp = (() => {
     for(const op of ['optellen','aftrekken']){
       const kaart=document.getElementById('gem-hulp-'+op),select=kaart.querySelector('select'),oud=select.value;
       const beschikbaar=opties.filter(([key])=>{
-        if(key==='invullijn' || !key)return true;
+        if(key==='invullijn')return false;
+        if(!key)return true;
         if(key==='cirkelrekenen')return [20,100,1000].includes(niveau);
         if(key.includes('duizend-splits'))return niveau===1000 && ['naar-tiental','naar-honderdtal','beide'].includes(brug);
         if( brug==='zonder')return false;
@@ -79,6 +80,8 @@ const GemengdHulp = (() => {
       select.replaceChildren(...beschikbaar.map(([v,t])=>new Option(t,v)));
       select.value=beschikbaar.some(([v])=>v===oud)?oud:'';
       if(!aan)select.value='';
+      hoofd.querySelector('.kaart-titel').lastChild.textContent='Rekenhulpmiddelen voor gewone sommen';
+      hoofd.style.display=niveau<=10?'none':'block';
       vulVarianten(kaart);toonVoorbeeld(kaart,op);
     }
     const configs=extra();

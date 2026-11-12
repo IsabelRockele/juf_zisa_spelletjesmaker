@@ -21,6 +21,10 @@ const AftrekkenTot20 = (() => {
 
   const TYPES_PER_NIVEAU_BRUG = {
     5:  { zonder: ['E-E'],         met: [],                        gemengd: ['E-E'] },
+    6: { zonder: ['E-E'], met: [], gemengd: ['E-E'] },
+    7: { zonder: ['E-E'], met: [], gemengd: ['E-E'] },
+    8: { zonder: ['E-E'], met: [], gemengd: ['E-E'] },
+    9: { zonder: ['E-E'], met: [], gemengd: ['E-E'] },
     10: { zonder: ['E-E'],         met: [],                        gemengd: ['E-E'] },
     20: {
       zonder:  ['E-E', 'T-E', 'T-TE', 'TE-E', 'TE-T', 'TE-TE', 'Maak eerst 10', 'Gemengd'],
@@ -31,6 +35,10 @@ const AftrekkenTot20 = (() => {
 
   const GEMENGD_TYPES = {
     5:  ['E-E'],
+    6: ['E-E'],
+    7: ['E-E'],
+    8: ['E-E'],
+    9: ['E-E'],
     10: ['E-E'],
     20: {
       zonder:  ['E-E', 'T-E', 'T-TE', 'TE-E', 'TE-T', 'TE-TE'],

@@ -430,7 +430,7 @@ const Generator = (() => {
         const deel=maakBlok({...hulpPerBewerking[op],bewerking:op,niveau,brug,oefeningstypes:types,aantalOefeningen:Math.max(2,n)});
         if(!deel)return null;
         const {oefeningen:pool,config,id,...weergave}=deel;
-        oefeningen.push(...pool.slice(0,n).map(o=>({...o,hulpConfig:{...weergave,metVoorbeeld:false}})));
+        oefeningen.push(...pool.slice(0,n).map(o=>({...o,hulpConfig:{...weergave,metVoorbeeld:false,tot100Voorbeeld:false}})));
       }
       for(let i=oefeningen.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[oefeningen[i],oefeningen[j]]=[oefeningen[j],oefeningen[i]];}
       for(const op of ['optellen','aftrekken']){const eerste=oefeningen.find(o=>o.hulpConfig.bewerking===op);if(eerste){eerste.hulpConfig.metVoorbeeld=!!hulpPerBewerking[op].metVoorbeeld;eerste.hulpConfig.tot100Voorbeeld=eerste.hulpConfig.metVoorbeeld && !!eerste.hulpConfig.tot100Hulp;}}
@@ -516,12 +516,12 @@ const Generator = (() => {
     if (blok.bewerking !== 'gemengd' || !blok.config?.hulpPerBewerking) return blok;
     const instellingen = [...Object.values(blok.config.hulpPerBewerking),
       ...blok.oefeningen.map(o => o.hulpConfig).filter(Boolean)];
-    if (instellingen.some(c => c.hulpmiddelen?.length || (c.tot100Hulp && c.tot100Hulp !== 'vakje'))) return blok;
+    if (instellingen.some(c => c.hulpmiddelen?.length || (c.tot100Hulp && !['vakje','invullijn'].includes(c.tot100Hulp)))) return blok;
     return {
       ...blok,
       hulpmiddelen: [],
       config: { ...blok.config, hulpPerBewerking: null },
-      oefeningen: blok.oefeningen.map(({ hulpConfig, ...oef }) => oef),
+      oefeningen: blok.oefeningen.map(({ hulpConfig, ...oef }) => ({...oef, antwoordLayout: hulpConfig?.tot100Hulp==='invullijn'?'lijn':'vak', layoutVoorbeeld: !!hulpConfig?.tot100Voorbeeld})),
     };
   }
 
