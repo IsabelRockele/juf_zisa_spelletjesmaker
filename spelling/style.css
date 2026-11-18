@@ -7306,3 +7306,31 @@ body.hb-bewerk-aan .hb-item-toevoeg-balk {
 .wd-type-keuzes{display:grid;gap:16px;margin-top:13px}.wd-type-keuze{padding:14px 14px 12px;border:1.5px solid #d3e1eb;border-radius:11px;background:#f8fbfd}.wd-type-keuze+.wd-type-keuze{margin-top:1px}.wd-type-keuze .wd-paneel-mini-label{display:block;margin:0;color:#173b5d;font-weight:750}.wd-type-keuze .wd-zinnen-select{margin-top:8px}.wd-type-keuze .wd-paneel-mini-uitleg{margin:9px 3px 0;color:#667b8e;line-height:1.45}
 #wd-paneel-lijntype{gap:8px;margin-top:10px}.wd-lijnkeuze{min-height:112px;padding:9px 6px;border-width:1.5px;border-radius:10px;background:#f8fbfd;color:#173b5d}.wd-lijnkeuze:hover{border-color:#3984bd;background:#f1f8fd}.wd-lijnkeuze.actief{background:#e6f3ff;color:#174f70;border:2px solid #2f78ac}.wd-lijn-preview{display:block;width:100%;max-width:110px;height:48px;border-radius:5px;background:#fff}.wd-lijnnaam{font-size:12px;font-weight:800;line-height:1.2}.wd-lijnkeuze small{font-size:10px;font-weight:500;color:#6d8192}.wd-lijnkeuze.actief small{color:#43677f}
 .wd-groep-alles{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid #b8ccda;border-radius:8px;background:#f7fbfd;color:#315a78;font-size:12px;cursor:pointer}.wd-groep-alles.aan{border-color:#62a76d;background:#e9f7ec;color:#176239}.wd-groep-alles input{margin:0}.wd-groep-alles small{color:#73899b}
+
+/* Drie rijen met keuzehulp passen ook bij een langere opdracht op A4.
+   Behoud de grootte van prenten, letters en schrijflijnen. */
+.ov01-blad[data-niveau="basis"] .ov01-cel {
+  padding: 4px 6px;
+}
+.ov01-blad[data-niveau="basis"] .ov01-cel-plaatje {
+  margin-bottom: 0;
+}
+.ov01-blad[data-niveau="basis"] .ov01-cel-keuze {
+  margin: 2px 0 4px;
+}
+.ov01-blad[data-niveau="basis"] .ov01-keuze-hokje {
+  padding: 4px;
+}
+.ov01-blad[data-niveau="basis"] .ov01-canvas-wrap {
+  margin-bottom: 0;
+}
+.ov01-blad[data-niveau="basis"] .ov01-rooster-rij {
+  margin-bottom: 8px;
+}
+.ov01-blad[data-niveau="basis"] .ov01-header {
+  margin-bottom: 10px;
+}
+.ov01-blad[data-niveau="basis"] .ov01-stappen {
+  padding: 8px 14px;
+  margin-bottom: 12px;
+}
