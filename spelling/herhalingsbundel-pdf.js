@@ -1101,15 +1101,19 @@ window.SpellingHerhalingsbundelPDF = (function() {
     if (lijnhoogte === "klein") L = 4.0;
     else if (lijnhoogte === "groot") L = 7.5;
     
-    const PADDING_CEL = 4;
+    const metKeuze = niveau === "basis";
+    // Compacte tussenruimte laat drie rijen met de gewone schrijflijn op A4 passen.
+    // Prenten, keuzeletters en schrijflijnen behouden hun oorspronkelijke grootte.
+    const PADDING_CEL = metKeuze ? 2 : 4;
+    const TUSSENRUIMTE = metKeuze ? 1 : 3;
     const AFBEELDING_HOOGTE = 30;
-    const EMOJI_RUIMTE = AFBEELDING_HOOGTE + 3;
-    const KEUZE_RUIMTE = niveau === "basis" ? 11 : 0;
+    const EMOJI_RUIMTE = AFBEELDING_HOOGTE + TUSSENRUIMTE;
+    const KEUZE_RUIMTE = metKeuze ? 8 + TUSSENRUIMTE : 0;
     const SCHRIJFLIJN_HOOGTE = 3 * L;
     const aantalLijnenInCel = cellen[0]?.aantalLijnen || 1;
     const LIJNEN_RUIMTE = aantalLijnenInCel * SCHRIJFLIJN_HOOGTE + (aantalLijnenInCel - 1) * 2;
     
-    const celHoogte = 2 * PADDING_CEL + EMOJI_RUIMTE + KEUZE_RUIMTE + LIJNEN_RUIMTE + 2;
+    const celHoogte = 2 * PADDING_CEL + EMOJI_RUIMTE + KEUZE_RUIMTE + LIJNEN_RUIMTE + (metKeuze ? 0 : 2);
     
     // --- 5. Page-flow: reserveer ruimte voor opdracht + eerste rij ---
     const eersteRijHoogte = celHoogte + RIJ_SPACING;
@@ -1135,6 +1139,8 @@ window.SpellingHerhalingsbundelPDF = (function() {
         const celX = state.contentX + idx * (celBreedte + CEL_SPACING);
         _tekenOV01Cel(pdf, celX, rijY, celBreedte, celHoogte, cel, {
           afbeeldingHoogte: AFBEELDING_HOOGTE,
+          paddingCel: PADDING_CEL,
+          tussenruimte: TUSSENRUIMTE,
           niveau,
           lijntype,
           lijnhoogte,
@@ -1167,7 +1173,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
       rondeHoeken: 2
     });
     
-    let cy = y + 4;  // cursor binnen cel
+    let cy = y + opties.paddingCel;  // cursor binnen cel
     
     // Afbeelding: vaste hoogte, gelijk aan de gereserveerde ruimte in de cel.
     // Brede afbeeldingen krijgen max bijna de hele celbreedte (met kleine marge).
@@ -1184,7 +1190,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
       const emojiX = x + (breedte - afbHoogte) / 2;
       tekenEmoji(pdf, emojiX, cy, afbHoogte, cel.emoji);
     }
-    cy += afbHoogte + 3;
+    cy += afbHoogte + opties.tussenruimte;
     
     // Bij basis-niveau: 3 keuze-vakjes met woordopties
     if (niveau === "basis" && cel.keuzeOpties.length > 0) {
@@ -1211,7 +1217,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
           kleur: KLEUR_TEKST
         });
       });
-      cy += vakjeHoogte + 3;
+      cy += vakjeHoogte + opties.tussenruimte;
     } else {
       // Geen keuze-vakjes → kleine spacing
       cy += 1;
