@@ -384,11 +384,8 @@ var RekentaalPdfRenderer = (() => {
     var FS = 13;
     var RIJ_H = 15;
 
-    // Vaste kolommen — altijd op dezelfde x, ongeacht zinlengte
-    var ZIN_MAX  = ML + CW * 0.42;  // zin mag max tot hier (dan breekt hij af)
-    var PIJL_VAN = ML + CW * 0.44;  // pijl begint altijd hier
-    var PIJL_TOT = ML + CW * 0.60;  // pijl eindigt altijd hier
-    var BEW_X    = ML + CW * 0.62;  // bewerkingslijn begint hier
+    // De pijl en schrijflijn sluiten aan op de gemeten zin.
+    var PIJL_VAN, PIJL_TOT, BEW_X;
     var BEW_EIND = ML + CW - 4;     // bewerkingslijn eindigt hier
 
     function checkPagina() {
@@ -409,36 +406,6 @@ var RekentaalPdfRenderer = (() => {
 
     (blok.oefeningen || []).forEach(function(oef) {
       checkPagina();
-      if (oef.schrijfruimte) {
-        var zin = oef.template.replace('{a}', oef.a).replace('{b}', oef.b)
-          .replace('{P}', oef.P).replace('{Q}', oef.Q).replace('{?}', '________');
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(FS);
-        var regels = doc.splitTextToSize(zin, CW - 4);
-        var hoogte = regels.length * 6 + 14;
-        if (y + hoogte > PH - MB) {
-          doc.addPage(); y = 15;
-          if (layout.tekenVoettekst) layout.tekenVoettekst();
-        }
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(FS);
-        doc.setTextColor(0, 0, 0);
-        regels.forEach(function(regel, index) { doc.text(regel, ML, y + index * 6); });
-        var lijnY = y + (regels.length - 1) * 6 + 9;
-        doc.setDrawColor(140, 140, 140);
-        doc.setLineWidth(0.4);
-        doc.line(ML, lijnY, ML + CW - 4, lijnY);
-        if (layout.metAntwoorden) {
-          var teken = { optellen:'+', aftrekken:'-', vermenigvuldigen:'×', delen:':' }[oef.cat];
-          var eerste = oef.cat === 'vermenigvuldigen' ? oef.P : oef.a;
-          var tweede = oef.cat === 'vermenigvuldigen' ? oef.Q : oef.b;
-          doc.setTextColor(0, 130, 0);
-          doc.text(eerste + ' ' + teken + ' ' + tweede + ' = ' + oef.antwoord, ML + 2, lijnY - 1);
-          doc.setTextColor(0, 0, 0);
-        }
-        y += hoogte;
-        return;
-      }
       var cy = y;
       var cx = ML;
 
@@ -471,19 +438,32 @@ var RekentaalPdfRenderer = (() => {
         }
       }
 
+      // Reserveer rechts ruimte voor de pijl en een ruime schrijflijn.
+      var zinBreedte = 0;
+      stukken.forEach(function(stuk) {
+        doc.setFont('helvetica', stuk.type === 'getal' ? 'bold' : 'normal');
+        doc.setFontSize(FS);
+        zinBreedte += stuk.type === 'lijn' ? 13 : doc.getTextWidth(stuk.val);
+      });
+      var zinSchaal = Math.min(1, (CW - 70) / zinBreedte);
+      var zinFS = FS * zinSchaal;
+      PIJL_VAN = ML + zinBreedte * zinSchaal + 3;
+      PIJL_TOT = PIJL_VAN + 10;
+      BEW_X = PIJL_TOT + 3;
+
       // Teken zin — kort invullijntje: 12mm, lichtgrijs, dun
-      var LIJN_INL = 12;
+      var LIJN_INL = 13 * zinSchaal - 1;
       for (var di = 0; di < stukken.length; di++) {
         var d = stukken[di];
         if (d.type === 'tekst') {
           doc.setFont('helvetica', 'normal');
-          doc.setFontSize(FS);
+          doc.setFontSize(zinFS);
           doc.setTextColor(0, 0, 0);
           doc.text(d.val, cx, cy);
           cx += doc.getTextWidth(d.val);
         } else if (d.type === 'getal') {
           doc.setFont('helvetica', 'bold');
-          doc.setFontSize(FS);
+          doc.setFontSize(zinFS);
           doc.setTextColor(0, 0, 0);
           doc.text(d.val, cx, cy);
           cx += doc.getTextWidth(d.val);
@@ -496,7 +476,7 @@ var RekentaalPdfRenderer = (() => {
         }
       }
 
-      // Pijl: altijd van PIJL_VAN tot PIJL_TOT, ongeacht zinlengte
+      // Pijl direct achter de zin
       var pijlY = cy - 1;
       doc.setDrawColor(80, 80, 80);
       doc.setLineWidth(0.5);
@@ -520,7 +500,7 @@ var RekentaalPdfRenderer = (() => {
         var rtA = String(oef.a !== undefined ? oef.a : (oef.P !== undefined ? oef.P : ''));
         var rtB = String(oef.b !== undefined ? oef.b : (oef.Q !== undefined ? oef.Q : ''));
         var rtAnt = String(oef.antwoord !== undefined ? oef.antwoord : '');
-        var rtBew = oef.bewerking || blok.bewerking || '';
+        var rtBew = oef.cat || oef.bewerking || blok.bewerking || '';
         var rtTeken = '';
         if (rtBew === 'optellen' || rtBew === '+') rtTeken = '+';
         else if (rtBew === 'aftrekken' || rtBew === '-') rtTeken = '−';
