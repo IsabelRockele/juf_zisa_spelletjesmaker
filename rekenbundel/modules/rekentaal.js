@@ -392,7 +392,7 @@ var RekentaalPdfRenderer = (() => {
 
     function checkPagina(ruimte = 10) {
       if (y + ruimte > PH - MB) {
-        doc.addPage(); y = 15;
+        doc.addPage(); y = 28; // Kader begint op 20 mm van de bovenrand.
         if (layout.tekenVoettekst) layout.tekenVoettekst();
       }
     }
@@ -412,7 +412,7 @@ var RekentaalPdfRenderer = (() => {
       doc.setDrawColor(195, 195, 195);
       doc.setLineWidth(0.2);
       doc.rect(ML, y - 8, CW, KADER_H, 'S');
-      var cy = y;
+      var cy = y + 3; // Tekst, pijl en schrijflijn lager binnen hetzelfde kader.
       var cx = ML + BINNENRUIMTE;
 
       // Vervang placeholders
