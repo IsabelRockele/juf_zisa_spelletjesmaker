@@ -382,32 +382,38 @@ var RekentaalPdfRenderer = (() => {
     var VOOR_ZIN=layout.VOOR_ZIN, ZINRUIMTE=layout.ZINRUIMTE, NABLOK=layout.NABLOK;
     var y = startY;
     var FS = 13;
-    var RIJ_H = 15;
+    var RIJ_H = 22; // 18 mm kader en 4 mm tussenruimte
+    var KADER_H = 18;
+    var BINNENRUIMTE = 4;
 
     // De pijl en schrijflijn sluiten aan op de gemeten zin.
     var PIJL_VAN, PIJL_TOT, BEW_X;
     var BEW_EIND = ML + CW - 4;     // bewerkingslijn eindigt hier
 
-    function checkPagina() {
-      if (y + RIJ_H * 2 > PH - MB) {
+    function checkPagina(ruimte = 10) {
+      if (y + ruimte > PH - MB) {
         doc.addPage(); y = 15;
         if (layout.tekenVoettekst) layout.tekenVoettekst();
       }
     }
 
     // Opdrachtzin
-    checkPagina();
+    checkPagina(VOOR_ZIN + 25);
     y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(FS);
     doc.setTextColor(0, 0, 0);
     doc.text(blok.opdrachtzin, ML, y);
-    y += RIJ_H;
+    y += 15;
 
     (blok.oefeningen || []).forEach(function(oef) {
       checkPagina();
+      // Eén lichtgrijs kader houdt zin, pijl en schrijflijn bij elkaar.
+      doc.setDrawColor(195, 195, 195);
+      doc.setLineWidth(0.2);
+      doc.rect(ML, y - 8, CW, KADER_H, 'S');
       var cy = y;
-      var cx = ML;
+      var cx = ML + BINNENRUIMTE;
 
       // Vervang placeholders
       var tmpl = oef.template || '';
@@ -445,9 +451,9 @@ var RekentaalPdfRenderer = (() => {
         doc.setFontSize(FS);
         zinBreedte += stuk.type === 'lijn' ? 13 : doc.getTextWidth(stuk.val);
       });
-      var zinSchaal = Math.min(1, (CW - 70) / zinBreedte);
+      var zinSchaal = Math.min(1, (CW - 70 - BINNENRUIMTE) / zinBreedte);
       var zinFS = FS * zinSchaal;
-      PIJL_VAN = ML + zinBreedte * zinSchaal + 3;
+      PIJL_VAN = ML + BINNENRUIMTE + zinBreedte * zinSchaal + 3;
       PIJL_TOT = PIJL_VAN + 10;
       BEW_X = PIJL_TOT + 3;
 
