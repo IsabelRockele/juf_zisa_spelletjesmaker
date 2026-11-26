@@ -1,6 +1,21 @@
 // Eigen AVI Start-opdrachten. De labels en lettervolgorde volgen Veilig leren lezen;
 // de teksten en opdrachten hieronder zijn nieuw geschreven voor Zisa Lezen.
 (()=>{
+  const parts=word=>word.match(/sch|ng|nk|ch|aa|ee|oo|uu|oe|eu|ie|ij|ei|ui|ou|au|[a-z]/g)||[];
+  const vowels=new Set('a e i o u aa ee oo uu oe eu ie ij ei ui ou au'.split(' '));
+  // Bron: kern 7 p.9/15/22/29 introduceert MKMM, MMKM, sch en ng.
+  // Anker 4/5: doelkaarten door gebruiker aangeleverd (26 november 2026).
+  const anker4Extra=new Set(['grap','klein','fiets']);
+  const anker5Compounds=new Set(['rugzak','zakdoek','voetbal','kapstok','fietsbel']);
+  window.ZISA_START_WORD_ALLOWED=(word,method,stage,letters)=>{
+    const anker5=method==='zoem'&&stage==='Anker 5';
+    if(word.length>1&&/[bd]$/.test(word)&&!anker5)return false;
+    const tokens=parts(word);if(tokens.join('')!==word||!tokens.every(t=>letters.includes(t)))return false;
+    const shape=tokens.map(t=>vowels.has(t)?'V':'C').join('');
+    if(anker5)return /^(C?VC?|CCVC|CVCC|CCVCC)$/.test(shape)||anker5Compounds.has(word);
+    if(method==='zoem'&&stage==='Anker 4'&&anker4Extra.has(word))return true;
+    return method==='kim'&&stage==='Kern 7'?/^(C?VC?|CCVC|CVCC)$/.test(shape):/^C?VC?$/.test(shape);
+  };
   const routes=[
     {method:"kim",stage:"Kern start",letters:"i k m s",title:"ik, kim en mik",cover:"images/start/sam.webp",pages:[
       {title:"Maak het woord",q:"Luister naar het woord. Welke letter ontbreekt?",audioPrompt:"mik",focus:"mi_",a:["s","k","m"],correct:1},
@@ -116,15 +131,15 @@
   const vocabulary={
     "kim|Kern 1":{pictures:["vis","kip","aap","kaas"],extra:["mis","sip","raas","paar"],gaps:[["vis","vi_","s"],["kip","ki_","p"]]},
     "kim|Kern 2":{pictures:["boom","boot","beer","raam","pen","roos"],extra:["been","maan","een","neem","bek","beet"],gaps:[["boom","boo_","m"],["pen","pe_","n"]]},
-    "kim|Kern 3":{pictures:["doos","koe","zee","ijs","doek","boot"],extra:["haar","de","zij","hij","doen","hoed"],gaps:[["doos","doo_","s"],["doek","doe_","k"]]},
+    "kim|Kern 3":{pictures:["doos","koe","zee","ijs","doek","boot"],extra:["haar","de","zij","hij","doen","hoek"],gaps:[["doos","doo_","s"],["doek","doe_","k"]]},
     "kim|Kern 4":{pictures:["kat","bus","zak","vos","jas","doos"],extra:["wat","was","jam","kop","pot","tak"],gaps:[["bus","bu_","s"],["kat","ka_","t"]]},
     "kim|Kern 5":{pictures:["stoel","riem","vuur","kat","boot","doek"],extra:["poes","wiel","leuk","neus","deur","toen"],gaps:[["stoel","stoe_","l"],["riem","rie_","m"]]},
-    "kim|Kern 6":{pictures:["muis","huis","geit","fiets","uil","jas"],extra:["tuin","goud","geur","feit","fout","mijn"],gaps:[["muis","mui_","s"],["geit","gei_","t"]]},
+    "kim|Kern 6":{pictures:["muis","huis","geit","fiets","uil","jas"],extra:["tuin","geel","geur","feit","fout","mijn"],gaps:[["muis","mui_","s"],["geit","gei_","t"]]},
     "kim|Kern 7":{pictures:["spin","spoor","schip","trein","fiets","zak"],extra:["schaar","plank","bank","stift","web","rugzak"],gaps:[["spin","spi_","n"],["schip","schi_","p"]]},
     "zoem|Anker 1":{pictures:["raam","pen","roos","vis","kip","beer","boom","aap"],extra:["mes","been","een","maan","reep","bek","neem","paar"],gaps:[["raam","raa_","m"],["pen","pe_","n"]]},
     "zoem|Anker 2":{pictures:["boot","zee","koe","doos","ijs","bus","zak","doek"],extra:["hek","haas","mus","boer","poes","dak","bak","zoon"],gaps:[["doos","doo_","s"],["boot","boo_","t"]]},
     "zoem|Anker 3":{pictures:["jas","neus","vos","riem","vuur","muis","huis","uil"],extra:["wip","lijm","wiel","leuk","buur","ruit","stoel","vuil"],gaps:[["neus","neu_","s"],["muis","mui_","s"]]},
-    "zoem|Anker 4":{pictures:["hout","geit","fiets","saus","roos"],extra:["gaas","juf","lang","lach","goud","touw","wei","geur","fout"],gaps:[["geit","gei_","t"],["hout","hou_","t"]]},
+    "zoem|Anker 4":{pictures:["hout","geit","fiets","saus","roos"],extra:["gaas","juf","lang","lach","geel","touw","wei","geur","fout"],gaps:[["geit","gei_","t"],["hout","hou_","t"]]},
     "zoem|Anker 5":{pictures:["schaar","schip","trein","fiets","spin","zak","stoel","muis"],extra:["kast","bank","bril","plank","stift","rugzak","web","staart"],gaps:[["schip","schi_","p"],["trein","trei_","n"]]}
   };
   const choose=(words,correct,offset)=>{
@@ -165,6 +180,13 @@
     }
     const set=vocabulary[key];
     if(!set)return;
+    const previous=routes.filter(r=>r.method===route.method&&r!==route&&!r.letters.startsWith('alle')).at(-1);
+    const learned=route.letters.startsWith('alle')?previous.letters.split(' '):route.letters.split(' ');
+    if(route.method==='kim'&&route.stage==='Kern 7')learned.push('sch','ng');
+    if(route.method==='zoem'&&route.stage==='Anker 5')learned.push('sch','nk');
+    const allowed=word=>window.ZISA_START_WORD_ALLOWED(word,route.method,route.stage,learned);
+    set.pictures=set.pictures.filter(allowed);set.extra=set.extra.filter(allowed);set.gaps=set.gaps.filter(g=>allowed(g[0]));
+    if(key==='kim|Kern 5')route.title='poes en riem';
     const words=set.pictures;
     route.pages=[];
     words.forEach((word,index)=>{
@@ -193,6 +215,7 @@
   window.ZISA_BOOKS=window.ZISA_BOOKS||[];
   routes.forEach((route,index)=>{
     const id=`start-${route.method}-${route.stage.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`;
+    if(route.method==='kim'&&route.stage==='Kern 5')coverWords[`${route.method}|${route.stage}`]='riem';
     window.ZISA_BOOKS.push({id,level:"START",method:route.method,stage:route.stage,letters:route.letters,title:route.title,blurb:`${route.stage} · letters: ${route.letters}`,coverImage:asset(coverWords[`${route.method}|${route.stage}`]),coverTone:["blue","pink","yellow","green"][index%4],startBook:true});
     window.ZISA_FLUENCY_BOOKS[id]=route.pages;
   });

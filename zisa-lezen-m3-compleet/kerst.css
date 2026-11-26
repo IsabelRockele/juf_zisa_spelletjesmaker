@@ -1,0 +1,37 @@
+/* Only the new Christmas books: room for text and questions on a landscape tablet. */
+@media(min-width:841px){
+ body.reading-mode .reader.christmas-reader .story{padding:34px 28px 18px;gap:8px}
+ body.reading-mode .reader.christmas-reader .m3-story .storytext{font-size:clamp(27px,2.4vw,34px);line-height:1.5}
+ body.reading-mode .reader.christmas-reader .story:not(.m3-story) .storytext{font-size:clamp(20px,1.8vw,25px);line-height:1.42}
+ body.reading-mode .reader.christmas-reader.upper-season-reader .story:not(.m3-story) .storytext{font-size:clamp(19px,1.6vw,23px);line-height:1.38}
+ body.reading-mode .reader.christmas-reader .inline-task{margin-top:7px;padding:10px}
+}
+@media(min-width:841px) and (max-width:1100px){
+ body.reading-mode .reader.christmas-reader{grid-template-columns:1fr}
+ .christmas-reader .rail{display:none}
+ body.reading-mode .reader.christmas-reader .story{padding:28px 20px 12px}
+ body.reading-mode .reader.christmas-reader .story:not(.m3-story) .storytext{font-size:20px;line-height:1.36}
+ body.reading-mode .reader.christmas-reader.upper-season-reader .story:not(.m3-story) .storytext{font-size:19.5px;line-height:1.36}
+}
+.theme-kerst .mission-zebra{bottom:0}
+.theme-kerst .mission-card{border-color:#548674;box-shadow:inset 0 0 0 3px #d4e6d2,0 12px 24px #2c445522}
+.theme-kerst .mission-icon{display:none}
+.theme-kerst .mission-card:not(.compact-play){gap:4px}
+.theme-kerst .mission-question-row{margin:4px auto 10px}
+.theme-kerst .word-picture-match .match-row{min-height:78px}
+.theme-kerst .word-picture-card .seasonal-illustration{height:clamp(65px,9vh,90px)}
+.theme-kerst .mission-bar i{background:#36815d}
+
+.christmas-game-book{height:calc(100dvh - 145px);min-height:650px;display:grid;grid-template-rows:60px minmax(0,1fr);gap:8px}.christmas-game-frame{width:100%;height:100%;border:0;border-radius:24px;background:#e5f0ed}.christmas-game-book .fluency-head{margin:0}.christmas-game-book .fluency-head [hidden]{display:none!important}
+.christmas-playing .topbar{display:none}
+body.reading-mode.christmas-playing main{height:100dvh;padding:8px}
+body.christmas-playing .christmas-game-book{height:100%;min-height:0;grid-template-rows:48px minmax(0,1fr)}
+.christmas-practice .fluency-long .mini-right{padding:12px 18px}
+.christmas-practice .fluency-long .fluency-focus{font-size:24px;line-height:1.24;padding:8px 12px}
+.christmas-practice .fluency-long .fluency-choices button{font-size:18px;min-height:42px;padding:7px 10px;line-height:1.2}
+.christmas-practice .fluency-long .fluency-question-row .fluency-question{font-size:19px}
+.christmas-practice .fluency-long .mini-right h2{font-size:27px}
+.christmas-practice .fluency-long .fluency-next-page{margin-top:5px}
+.christmas-practice .fluency-long .fluency-read.main{font-size:23px;line-height:1.3;margin:6px auto;padding:8px 12px}
+.christmas-practice .fluency-long .fluency-moods button,.christmas-practice .fluency-long .fluency-self button{font-size:16px;min-height:40px;padding:7px 10px}
+.christmas-practice .fluency-long .fluency-tip{font-size:15px!important;line-height:1.3;margin:5px 0!important}
