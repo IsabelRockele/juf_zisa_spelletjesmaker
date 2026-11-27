@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Leesbundels per leescategorie – Leesbooster</title>
+  <link rel="stylesheet" href="bundels.css?v=12">
+  <script defer src="vendor/html2canvas.min.js"></script>
+  <script defer src="vendor/jspdf.umd.min.js"></script>
+  <script defer src="../../spelling/schrijflijnen.js?v=20261127-type7"></script>
+  <script defer src="bundels-assets.js?v=3"></script>
+  <script defer src="bundels-data.js?v=5"></script>
+  <script defer src="bundels-spelbord.js?v=5"></script>
+  <script defer src="bundels-extra-spellen.js?v=9"></script>
+  <script defer src="bundels.js?v=17"></script>
+  <link rel="stylesheet" href="navigation.css?v=1">
+</head>
+<body>
+  <header class="topbar"><a class="leesbooster-back" href="index.html">← Terug naar Leesbooster</a><strong>Leesbundels per leescategorie</strong></header>
+  <main>
+    <section class="intro"><p class="eyebrow">LEZEN · BEGRIJPEN · SPELEN</p><h1>Een leesdoel. Een complete bundel.</h1><p>Begin met woordrijtjes en een verhaal met vragen. Pas de woorden aan en voeg daarna zelf spelletjes toe.</p></section>
+    <div class="workspace">
+      <aside class="settings" aria-label="Bundel samenstellen"><div class="settings-heading"><strong>Stel je leesbundel samen</strong><span id="stepLabel">Stap 1 van 4</span></div><div class="settings-tabs" role="tablist" aria-label="Bundelkeuzes"><button type="button" id="tab-category" role="tab" aria-controls="panel-category" aria-selected="true" tabindex="0">1 · Categorie</button><button type="button" id="tab-words" role="tab" aria-controls="panel-words" aria-selected="false" tabindex="-1">2 · Woorden</button><button type="button" id="tab-games" role="tab" aria-controls="panel-games" aria-selected="false" tabindex="-1">3 · Spelletjes</button><button type="button" id="tab-lines" role="tab" aria-controls="panel-lines" aria-selected="false" tabindex="-1">4 · Schrijflijnen</button></div><div id="panel-category" class="settings-panel" role="tabpanel" aria-labelledby="tab-category">
+        <label for="search">Zoek een leescategorie</label><input id="search" type="search" placeholder="Bijvoorbeeld ng, oei of schr" autocomplete="off">
+        <div id="categories" class="categories" aria-label="Leescategorieën"></div><p id="noResults" hidden>Geen categorie gevonden. Probeer een lettergroep zoals ng of sch.</p>
+        </div><div id="panel-words" class="settings-panel" role="tabpanel" aria-labelledby="tab-words" hidden><fieldset><legend>Pas je woordrijtjes aan</legend><p class="hint">De woordrijtjes en het verhaal staan al klaar. Kies eventueel minder woorden per kolom.</p>
+          <label for="wordCount">Woorden per kolom</label><select id="wordCount"><option value="auto">Zo veel mogelijk (5 tot 10)</option><option value="5">5 woorden</option><option value="8">Tot 8 woorden</option><option value="10">Tot 10 woorden</option></select>
+          <p class="hint">Bij een kleinere woordvoorraad blijft de kolom korter. Woorden worden niet herhaald om een kolom te vullen.</p>
+          <label for="readingSize">Lettergrootte verhaal en woordrijtjes</label><select id="readingSize"><option value="12">12 pt</option><option value="14" selected>14 pt</option><option value="16">16 pt</option></select><p class="hint">Altijd Arial. Dezelfde grootte geldt in het voorbeeld en op papier.</p>
+          <label class="check"><input type="checkbox" id="highlight" checked> Lettergroepen markeren in de woordrijtjes</label>
+
+        </fieldset>
+        </div><div id="panel-games" class="settings-panel" role="tabpanel" aria-labelledby="tab-games" hidden><fieldset><legend>Kies de spelletjes</legend><p class="hint">Vink de spelletjes aan die je wilt toevoegen. Er is niets vooraf aangevinkt bij een nieuwe categorie. Eerdere spelkeuzes voor deze categorie worden hier hersteld.</p><div id="gameChoices" class="game-choices"></div><div class="game-choice-actions"><button type="button" id="allGames">Alle spellen</button><button type="button" id="noGames">Alleen lezen</button></div></fieldset>
+        </div><div id="panel-lines" class="settings-panel" role="tabpanel" aria-labelledby="tab-lines" hidden><fieldset><legend>Schrijflijnen zoals in Spelling</legend><input type="checkbox" id="answers" hidden><div id="lineTypes" class="line-types"></div><p class="hint">Bij type 7: vrije opening van 4 mm (Klein) of 5 mm (Middel) op A4.</p><label for="lineHeight">Hoogte</label><select id="lineHeight"><option value="klein">Klein</option><option value="middel" selected>Middel</option></select></fieldset>
+        </div><div class="step-navigation"><button type="button" id="previousStep" disabled>← Vorige</button><span>Je voorbeeld past zich meteen aan.</span><button type="button" id="nextStep">Volgende →</button></div>
+      </aside>
+      <section class="preview-zone" aria-label="Bundelvoorbeeld">
+        <div class="toolbar"><div><strong id="selectedTitle"></strong><p id="summary" aria-live="polite"></p></div><button id="downloadPdf">↓ PDF downloaden</button><button id="showSolutions" aria-pressed="false">Oplossingen</button><button id="downloadSolutions">PDF oplossingen</button><button id="printPdf">Afdrukken</button></div>
+        <p id="status" role="status"></p><div id="pages"></div>
+      </section>
+    </div>
+  </main>
+  <script src="../device-id.js"></script><script type="module" src="../guard.js"></script>
+</body>
+</html>

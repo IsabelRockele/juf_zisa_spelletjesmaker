@@ -431,7 +431,9 @@ window.SpellingHerhalingsbundelPDF = (function() {
     // Type 7: twee parallelle lijnen
     if (type === "type7") {
       const middenY = y + 1.5 * L;
-      const xHoogte = Math.min(L, 1.5 * L);
+      // Vrije opening tussen de binnenranden: klein 4 mm, middel 5 mm.
+      const xHoogte = hoogteNaam === "groot" ? L
+        : (hoogteNaam === "klein" ? 4 : 5) + (0.4 + 0.5) / 2;
       tekenLijn(pdf, x, middenY - xHoogte / 2, x + breedte, { kleur: [0, 0, 0], dikte: 0.4 });
       tekenLijn(pdf, x, middenY + xHoogte / 2, x + breedte, { kleur: [0, 0, 0], dikte: 0.5 });
       return 3 * L;

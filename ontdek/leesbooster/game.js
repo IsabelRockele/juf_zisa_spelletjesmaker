@@ -79,9 +79,10 @@
   }
   function back(){clearTimeout(game.timer);clearTimeout(game.briefingTimer);$('#gameStage').hidden=true;$('#gameBriefing').hidden=true;$('#gameSetup').hidden=false;game.paused=false;$('#gameMessage').textContent='Pas je instellingen aan en start het spel opnieuw.'}
   function openMode(mode){
-    const play=mode==='spel';$('#boosterLauncher').hidden=true;$('.app-layout').hidden=play;$('#gameApp').hidden=!play;$('.header-actions').hidden=play;$('#homeButton').hidden=false;$('#currentMode').hidden=false;$('#currentMode').textContent=play?"Smartboardspel · Zisa's Flitsfeest":'Werkbladen maken';
+    $('.overview-link').hidden=true;const play=mode==='spel';$('#boosterLauncher').hidden=true;$('.app-layout').hidden=play;$('#gameApp').hidden=!play;$('.header-actions').hidden=play;$('#homeButton').hidden=false;$('#currentMode').hidden=false;$('#currentMode').textContent=play?"Smartboardspel · Zisa's Flitsfeest":'Werkbladen maken';
   }
   function showLauncher(){
+    $('.overview-link').hidden=false;
     clearTimeout(game.timer);clearTimeout(game.briefingTimer);game.paused=false;$('#boosterLauncher').hidden=false;$('.app-layout').hidden=true;$('#gameApp').hidden=true;$('.header-actions').hidden=true;$('#homeButton').hidden=true;$('#currentMode').hidden=true;$('#gameStage').hidden=true;$('#gameBriefing').hidden=true;$('#gameSetup').hidden=false;
   }
   function quickStart(){
@@ -100,5 +101,5 @@
   $('#gameStart').addEventListener('click',start);$('#skipBriefing').addEventListener('click',playNow);$('#nextBriefing').addEventListener('click',()=>{if(game.briefingIndex>=game.briefingMoves.length){playNow();return}game.briefingIndex++;showBriefingMove()});$('#gamePause').addEventListener('click',pause);$('#gameStop').addEventListener('click',back);$('#backSetup').addEventListener('click',back);$('#gameAgain').addEventListener('click',()=>{if(buildGame()){$('#finishStage').hidden=true;showEvent()}});
   $('#quickGame').addEventListener('click',quickStart);
   $('#homeButton').addEventListener('click',showLauncher);
-  $('.overview-link').textContent='← Terug naar menu';$('#homeButton').textContent='⇄ Wissel werkblad / smartboardspel';renderFamilies();renderGoals();renderMoves();updateQuickButton();
+  $('.overview-link').textContent='← Terug naar menu';$('#homeButton').textContent='← Terug naar Leesbooster';renderFamilies();renderGoals();renderMoves();updateQuickButton();
 })();

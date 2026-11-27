@@ -8,13 +8,14 @@
   <link rel="stylesheet" href="leesbooster-ontdek.css?v=1">
   <script defer src="vendor/html2canvas.min.js"></script>
   <script defer src="vendor/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="navigation.css?v=1">
 </head>
 <body>
   <div class="pro-banner"><span class="pro-badge">★ PRO</span><span>Leesbooster — Juf Zisa PRO</span><a href="../app.html">← Terug naar het Pro-menu</a></div>
   <header class="app-header">
     <div><strong>Leesbooster</strong><span>gericht technisch lezen</span></div>
     <a class="overview-link" href="../app.html">← Alle Pro-tools</a>
-    <button class="home-button" id="homeButton" hidden>← Terug naar startscherm</button>
+    <button class="home-button" id="homeButton" hidden>← Terug naar Leesbooster</button>
     <span class="current-mode" id="currentMode" hidden></span>
     <div class="header-actions" hidden>
       <span class="blok-teller" id="blokTeller">0 oefenblokken</span>
@@ -27,6 +28,8 @@
   <main class="booster-launcher" id="boosterLauncher">
     <div class="launcher-intro"><img src="afbeeldingen/zisa-leesbooster.png" alt="Zisa leest enthousiast"><div><h1>Wat wil je vandaag maken?</h1><p>Kies één onderdeel. Zo blijft het scherm rustig en zie je alleen wat je nodig hebt.</p></div></div>
     <div class="launcher-choices">
+      <a class="launcher-card worksheet-card" href="bundels.html" style="text-decoration:none;border-color:#28736d"><span class="launcher-icon">📚</span><span><b>Leesbundels per leescategorie</b><small>Woordrijtjes, een verhaal met vragen en papieren leesspelletjes. Met schrijflijnen naar keuze.</small><em>Kies je leescategorie →</em></span></a>
+
       <button class="launcher-card worksheet-card" data-open-mode="werkblad"><span class="launcher-icon">📄</span><span><b>Werkbladen maken</b><small>Maak leesbladen, verhalen, vragen en een bundel om af te drukken.</small><em>Open de werkbladmaker →</em></span></button>
       <button class="launcher-card game-launch-card" data-open-mode="spel"><span class="launcher-zebra"><img src="afbeeldingen/bewegen/springen.png" alt="Zisa springt"></span><span><b>Samen spelen op het smartboard</b><small>Lees klassikaal flitswoorden en beweeg samen met Zisa.</small><em>Open Zisa's Flitsfeest →</em></span></button>
     </div>
@@ -132,7 +135,7 @@
   <div class="pdf-progress" id="pdfProgress" hidden role="status" aria-live="polite"><div><h2>Je PDF wordt gemaakt…</h2><p id="pdfProgressText">Pagina's voorbereiden</p><div class="pdf-progress-track"><span id="pdfProgressBar"></span></div><small>Laat dit scherm even open. De download start vanzelf.</small></div></div>
   <script src="woorden.js?v=20260802-2"></script>
   <script src="app.js?v=20260802-7"></script>
-  <script src="game.js?v=20260802-4"></script>
+  <script src="game.js?v=20261127-nav1"></script>
   <script>window.ONTDEK_TAAL={toolId:'leesbooster',back:'../app.html',previewSelectors:['#pages'],pageSelector:'#pages .paper',pdfSelectors:['#downloadPdf','#downloadPdf2'],proSelectors:['#printPdf','#printPdf2'],demoStart:'#skipBriefing,#nextBriefing',demoStop:'#gameStop',demoLabelTarget:'.stage-top'};</script><script type="module" src="../taal-ontdek.js"></script>
 </body>
 </html>

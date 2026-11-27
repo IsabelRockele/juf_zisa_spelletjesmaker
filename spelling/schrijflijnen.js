@@ -77,9 +77,12 @@ window.SpellingSchrijflijnen = {
 
     // TYPE 7: twee parallelle lijnen, gecentreerd binnen canvas.
     if (type === "type7") {
-      // Bepaal x-hoogte op basis van ingestelde hoogte L, maar zorg dat lijnen
-      // binnen de canvas vallen.
-      const xHoogte = Math.min(L, h * 0.5);
+      // Klein/middel: 4/5 mm vrije opening tussen de binnenranden.
+      // CSS gebruikt 96 px per inch. Tel de halve lijndiktes erbij op
+      // om van de vrije opening naar de afstand tussen de hartlijnen te gaan.
+      const vrijeOpeningMm = hoogte === "klein" ? 4 : 5;
+      const xHoogte = hoogte === "groot" ? Math.min(L, h * 0.5)
+        : vrijeOpeningMm * 96 / 25.4 + (1.2 + 1.5) / 2;
       const middenY = h / 2;
       const topY = middenY - xHoogte / 2;
       const basisY = middenY + xHoogte / 2;
