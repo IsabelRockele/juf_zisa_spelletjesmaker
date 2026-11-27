@@ -99,20 +99,27 @@
     const size = Math.max(12,...words.map(word=>word.length+3)), grid = Array.from({length:size},()=>Array(size).fill('')), cells = new Set(), placed=[], paths=[];
     const directions=[[1,1],[1,-1],[1,0],[0,1]];
     for (const [wordIndex,word] of words.entries()) {
-      let done = false;
-      for (let attempt=0;attempt<300&&!done;attempt++) {
-        const [dx,dy]=directions[attempt<75?wordIndex%4:Math.floor(random()*directions.length)];
-        const x=Math.floor(random()*(size-Math.abs(dx)*(word.length-1)));
-        const y=(dy<0?word.length-1:0)+Math.floor(random()*(size-Math.abs(dy)*(word.length-1)));
-        if (Array.from(word).every((c,i)=>!grid[y+dy*i][x+dx*i]||grid[y+dy*i][x+dx*i]===c)) {
-          Array.from(word).forEach((c,i)=>{grid[y+dy*i][x+dx*i]=c;cells.add(`${y+dy*i},${x+dx*i}`);});
-          placed.push(word);paths.push({word,cells:Array.from(word,(_,i)=>[y+dy*i,x+dx*i]),dx,dy});done=true;
+      let best=null;
+      // Bekijk alle vrije plaatsen; kies pas een kruising als geen vrije plek past.
+      for(let direction=0;direction<4&&best?.overlap!==0;direction++){
+        const [dx,dy]=directions[(wordIndex+direction)%4];
+        const width=size-Math.abs(dx)*(word.length-1),height=size-Math.abs(dy)*(word.length-1);
+        const offset=Math.floor(random()*width*height);
+        for(let position=0;position<width*height;position++){
+          const index=(position+offset)%(width*height),x=index%width,y=Math.floor(index/width)+(dy<0?word.length-1:0);
+          if(!Array.from(word).every((c,i)=>!grid[y+dy*i][x+dx*i]||grid[y+dy*i][x+dx*i]===c))continue;
+          const overlap=Array.from(word).filter((_,i)=>grid[y+dy*i][x+dx*i]).length;
+          if(!best||overlap<best.overlap)best={x,y,dx,dy,overlap};
+          if(overlap===0)break;
         }
       }
-      if (!done) {
+      if(!best){
         if(retry<80)return puzzle(words,retry+1);
         throw new Error('Er kon geen volledige woordzoeker worden gemaakt.');
       }
+      const {x,y,dx,dy}=best;
+      Array.from(word).forEach((c,i)=>{grid[y+dy*i][x+dx*i]=c;cells.add(`${y+dy*i},${x+dx*i}`);});
+      placed.push(word);paths.push({word,cells:Array.from(word,(_,i)=>[y+dy*i,x+dx*i]),dx,dy});
     }
     const letters='abcdefghijklmnopqrstuvwxyz';
     grid.forEach(row=>row.forEach((c,x)=>{if(!c)row[x]=letters[Math.floor(random()*letters.length)];}));
