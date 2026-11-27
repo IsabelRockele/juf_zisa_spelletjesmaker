@@ -28,7 +28,7 @@ export default function Help(){
 
         <ol className="help-steps">
           <li><h2>Kies een leefwereld en druk de bladen af</h2>
-            <p>Open de tekenwereld op je computer en kies bovenaan <b>Aquarium, Bloementuin, Ruimtewereld of Fantasiebos</b>. Klik op <b>‘Bibliotheek’</b>. In Ontdek kun je Aquarium volledig testen, inclusief alle aquariumbladen, foto’s toevoegen en de klas-QR. De andere drie werelden horen bij Pro.</p>
+            <p>Open de tekenwereld op je computer en kies bovenaan <b>Aquarium, Bloementuin, Ruimtewereld, Fantasiebos, Sintdorp, Kerstwereld of Paastuin</b>. Klik op <b>‘Bibliotheek’</b>. In Ontdek kun je Aquarium volledig testen, inclusief alle aquariumbladen, foto’s toevoegen en de klas-QR. De andere werelden horen bij Pro.</p>
             <p>Kies een kleurplaat, een ontwerpblad of een vrij tekenblad. Klik bij één blad op <b>‘Print’</b>. Je kunt ook meerdere bladen aanvinken en <b>‘Print selectie’</b> kiezen, of alle bladen van de gekozen wereld afdrukken via <b>‘Print deze wereld’</b>.</p>
             <p>Druk nieuwe bladen af op wit A4-papier: die hebben een tekenkader met vier hoekcodes. Oudere afdrukken met één QR ondersteunen het automatisch uitknippen niet. Een blad uit het aquarium hoort straks in de klaswereld Aquarium.</p>
           </li>

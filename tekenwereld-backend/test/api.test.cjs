@@ -23,6 +23,24 @@ function setup(options={}){
   }
   return {request,docs,files,advance:n=>time+=n,afterSave:f=>afterSave=f};
 }
+test('seasonal class worlds start empty and each QR accepts only its own world',async()=>{
+ const {request}=setup();
+ assert.deepEqual((await request('creatures')).body,[]);
+ for(const world of ['sint','kerst','pasen']){
+  const session=await request('session','POST','alice',{world});
+  assert.equal(session.statusCode,200);
+  const code=session.body.code;
+  assert.equal((await request('session','GET',null,null,code)).body.world,world);
+  const figure={...drawing,world,template:world+'-01',name:'Feestfiguur',motion:'walk',zone:'ground'};
+  const saved=await request('creatures','POST',null,figure,code);
+  assert.equal(saved.statusCode,201);
+  assert.equal(saved.body.world,world);
+  assert.equal((await request('creatures','POST',null,{...figure,world:'forest'},code)).statusCode,400);
+  assert.equal((await request('creatures','GET','bob')).body.length,0);
+ }
+ assert.deepEqual((await request('creatures')).body.map(c=>c.world).sort(),['kerst','pasen','sint']);
+});
+
 test('teacher and child authentication is mandatory; invalid issuer/token is rejected',async()=>{
   const {request}=setup();
   assert.equal((await request('creatures','GET',null)).statusCode,401);
@@ -108,7 +126,7 @@ test('Ontdek can fully use Aquarium but cannot create another world or session',
  assert.equal((await request('creatures','POST','pro-alice',{...drawing,name:''})).statusCode,201);
  assert.equal((await request('creatures','POST',null,{...drawing,name:''},code)).statusCode,201);
  assert.equal((await request('creatures','GET','pro-alice')).body.length,2);
- for(const world of ['garden','space','forest']){
+ for(const world of ['garden','space','forest','sint','kerst','pasen']){
   assert.equal((await request('session','POST','pro-alice',{world})).statusCode,403);
   assert.equal((await request('creatures','POST','pro-alice',{...drawing,world})).statusCode,403);
   assert.equal((await request('creatures','POST',null,{...drawing,world},code)).statusCode,400);
@@ -118,8 +136,8 @@ test('Ontdek can fully use Aquarium but cannot create another world or session',
 
 test('expired Pro hides other worlds and invalidates cached list; QR expires with license',async()=>{
  let paid=true;
- const {request,advance}=setup({getAccess:async()=>({worlds:paid?['aqua','garden','space','forest']:['aqua'],expires:1000001000})});
- for(const world of ['aqua','garden','space','forest'])assert.equal((await request('creatures','POST','pro-alice',{...drawing,world})).statusCode,201);
+ const {request,advance}=setup({getAccess:async()=>({worlds:paid?['aqua','garden','space','forest','sint','kerst','pasen']:['aqua'],expires:1000001000})});
+ for(const world of ['aqua','garden','space','forest','sint','kerst','pasen'])assert.equal((await request('creatures','POST','pro-alice',{...drawing,world})).statusCode,201);
  const list=await request('creatures','GET','pro-alice');
  const session=await request('session','POST','pro-alice',{world:'space'});
  assert.equal(session.body.expires,1000001000);

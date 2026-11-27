@@ -1,3 +1,4 @@
+import {templateImage} from './assets';
 import QRCode from 'qrcode';
 import {Template,worlds} from './worlds';
 import {sheet,corners} from './sheet-scan';
@@ -12,7 +13,7 @@ export async function printSheets(list:Template[]){
  win.document.write('<html lang="nl"><title>Tekenbladen voorbereiden</title><body><p>De tekenbladen worden voorbereid…</p></body></html>');
  try{
   const pages=await Promise.all(list.map(async t=>{
-   const img=t.kind==='vrij'?'':await fetch('/tekenwereld/art/'+t.id+'.png').then(async r=>{if(!r.ok)throw Error('Een tekenblad kon niet geladen worden. Probeer opnieuw.');const blob=await r.blob();return await new Promise<string>(resolve=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result as string);fr.readAsDataURL(blob);});});
+   const img=t.kind==='vrij'?'':await fetch(templateImage(t.id)).then(async r=>{if(!r.ok)throw Error('Een tekenblad kon niet geladen worden. Probeer opnieuw.');const blob=await r.blob();return await new Promise<string>(resolve=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result as string);fr.readAsDataURL(blob);});});
    return sheetMarkup(t,img);
   }));
   win.document.open();win.document.write(`<!doctype html><html lang="nl"><head><title>Zisa Tekenbladen</title><style>${sheetStyles}</style></head><body><button onclick="window.print()">Afdrukken / bewaren als PDF</button>${pages.join('')}</body></html>`);win.document.close();

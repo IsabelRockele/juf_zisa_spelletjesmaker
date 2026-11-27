@@ -1,5 +1,5 @@
 const {createHash}=require('node:crypto');
-const worlds=new Set(['aqua','garden','space','forest']);
+const worlds=new Set(['aqua','garden','space','forest','sint','kerst','pasen']);
 class ApiError extends Error{constructor(status,message){super(message);this.status=status;}}
 const fail=(status,message)=>{throw new ApiError(status,message);};
 const ownerId=(uid,project='zisa-collegas')=>createHash('sha256').update(project+':'+uid).digest('hex');

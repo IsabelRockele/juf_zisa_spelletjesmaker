@@ -1,7 +1,7 @@
 import {removePaperPixels} from './paper';
 import type {Creature,Motion} from './worlds';
 import {wingWarp} from './wings';
-export function loadImage(src:string):Promise<HTMLImageElement>{return new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(new Error('De afbeelding kan niet geopend worden. Gebruik JPG of PNG.'));i.src=src;});}
+export function loadImage(src:string):Promise<HTMLImageElement>{return new Promise((resolve,reject)=>{const i=new Image();if(new URL(src,location.href).origin!==location.origin)i.crossOrigin='anonymous';i.onload=()=>resolve(i);i.onerror=()=>reject(new Error('De afbeelding kan niet geopend worden. Gebruik JPG of PNG.'));i.src=src;});}
 export function removePaper(input:HTMLCanvasElement,threshold=220){
  const ctx=input.getContext('2d',{willReadFrequently:true})!,d=ctx.getImageData(0,0,input.width,input.height);
  removePaperPixels(d.data,input.width,input.height,threshold);ctx.putImageData(d,0,0);return input;
