@@ -246,6 +246,13 @@ const TimerWorld = (() => {
                 refs.hand.setAttribute('d',`M340 320 L${f.x} ${f.y}`);
                 return quietModes[mode];
             }
+            if(typeof TimerSeasonal!=='undefined' && TimerSeasonal.themes.includes(nextTheme)) {
+                if(theme!==nextTheme) {
+                    theme=nextTheme; layer.dataset.theme=theme;
+                    refs=TimerSeasonal.create(layer);
+                }
+                return refs.render(theme,progress,running,duration);
+            }
             if(!backgrounds[nextTheme]) return '';
             if(theme!==nextTheme || (journeyThemes.includes(nextTheme)&&builtDuration!==duration)) {
                 theme=nextTheme; builtDuration=duration; layer.dataset.theme=theme; layer.innerHTML=build(theme,duration);

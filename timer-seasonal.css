@@ -1,0 +1,29 @@
+/* Full-screen PNG worlds with compact controls floating over the sky. */
+body:is(.theme-sint,.theme-christmas,.theme-easter) #timerScreen{background:#d8e9e2}
+.story-world:is([data-theme="sint"],[data-theme="christmas"],[data-theme="easter"]){inset:0;background:transparent}
+.story-world:is([data-theme="sint"],[data-theme="christmas"],[data-theme="easter"])>canvas{object-fit:cover!important;object-position:center bottom}
+body:is(.theme-sint,.theme-christmas,.theme-easter) .timer-topbar{top:16px;left:16px;right:auto;width:max-content;max-width:calc(100% - 230px);padding:9px 12px;gap:12px;border-radius:16px;align-items:center;background:#fffffff0}
+body:is(.theme-sint,.theme-christmas,.theme-easter) .timer-topbar .eyebrow{display:none}
+body:is(.theme-sint,.theme-christmas,.theme-easter) .current-theme-display{font-size:20px;white-space:nowrap}
+body:is(.theme-sint,.theme-christmas,.theme-easter) .side-controls{max-width:none;gap:5px;margin:0;justify-content:flex-start}
+body:is(.theme-sint,.theme-christmas,.theme-easter) .side-controls button{padding:7px 9px;font-size:12px}
+body:is(.theme-sint,.theme-christmas,.theme-easter) .time-panel{top:16px;right:16px;bottom:auto;left:auto;transform:none;min-width:0;width:190px;padding:10px 14px;border-radius:16px;background:#fffdf4ed}
+body:is(.theme-sint,.theme-christmas,.theme-easter) .countdown{font-size:58px;letter-spacing:0}
+body:is(.theme-sint,.theme-christmas,.theme-easter) .timer-state{font-size:12px}
+body:is(.theme-sint,.theme-christmas,.theme-easter) .timer-message{font-size:14px;min-height:0}
+body:is(.theme-sint,.theme-christmas,.theme-easter) .story-caption{left:16px;bottom:16px;max-width:calc(100% - 32px);padding:9px 13px}
+body:is(.theme-sint,.theme-christmas,.theme-easter) .floating-help{bottom:66px}
+@media(max-width:900px){
+ body:is(.theme-sint,.theme-christmas,.theme-easter) .timer-topbar{display:block;max-width:calc(100% - 190px)}
+ body:is(.theme-sint,.theme-christmas,.theme-easter) .side-controls{margin-top:7px}
+ body:is(.theme-sint,.theme-christmas,.theme-easter) .time-panel{width:155px}
+ body:is(.theme-sint,.theme-christmas,.theme-easter) .countdown{font-size:46px}
+}
+@media(max-width:620px){
+ body:is(.theme-sint,.theme-christmas,.theme-easter) .timer-topbar{top:8px;left:8px;max-width:calc(100% - 142px);padding:8px}
+ body:is(.theme-sint,.theme-christmas,.theme-easter) .current-theme-display{font-size:17px}
+ body:is(.theme-sint,.theme-christmas,.theme-easter) .side-controls button{font-size:10px;padding:5px 6px}
+ body:is(.theme-sint,.theme-christmas,.theme-easter) .time-panel{top:8px;right:8px;width:122px;padding:9px}
+ body:is(.theme-sint,.theme-christmas,.theme-easter) .countdown{font-size:36px}
+ body:is(.theme-sint,.theme-christmas,.theme-easter) .timer-state{font-size:10px}
+}

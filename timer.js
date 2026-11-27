@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const treasureOpen = document.getElementById('treasureChestOpen');
     const bigGoldCoin = document.getElementById('bigGoldCoin');
     const timeUpSound = new Audio('sounds/chime.mp3');
-    const themeNames = { rainbow: 'Regenboog', star: 'Groeiende ster', aquarium: 'Aquarium', balloon: 'Luchtballon', garden: 'Bloementuin', space: 'Ruimtereis', quiet: 'Zebra' };
+    const themeNames = { rainbow: 'Regenboog', star: 'Groeiende ster', aquarium: 'Aquarium', balloon: 'Luchtballon', garden: 'Bloementuin', space: 'Ruimtereis', quiet: 'Zebra', sint: 'Sint', christmas: 'Kerst', easter: 'Paas' };
 
     let selectedTheme = '';
     let quietMode = 'work';
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     progressBar.max = 1;
     progressBar.setAttribute('aria-label', 'Resterende werktijd');
     countdown.after(progressBar);
-    const themeIcons = { rainbow: '🌈', star: '⭐', aquarium: '🐠', balloon: '🎈', garden: '🌸', space: '🚀', quiet: '🦓' };
+    const themeIcons = { rainbow: '🌈', star: '⭐', aquarium: '🐠', balloon: '🎈', garden: '🌸', space: '🚀', quiet: '🦓', sint: '🎁', christmas: '🎄', easter: '🐰' };
     themeButtons.forEach(button => {
         const preview = document.createElement('span');
         preview.className = `theme-preview preview-${button.dataset.theme}`;
