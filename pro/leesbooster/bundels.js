@@ -96,12 +96,12 @@
   function puzzle(words,retry=0) {
     let seed = Array.from(selected.id).reduce((n,c)=>n+c.charCodeAt(0),7+retry*7919);
     const random = () => {seed = (seed*1664525+1013904223)>>>0;return seed/4294967296;};
-    const size = Math.max(12,...words.map(word=>word.length+3)), grid = Array.from({length:size},()=>Array(size).fill('')), cells = new Set(), placed=[], paths=[];
+    const size = Math.max(14,...words.map(word=>word.length+3)), grid = Array.from({length:size},()=>Array(size).fill('')), cells = new Set(), placed=[], paths=[];
     const directions=[[1,1],[1,-1],[1,0],[0,1]];
     for (const [wordIndex,word] of words.entries()) {
       let best=null;
-      // Bekijk alle vrije plaatsen; kies pas een kruising als geen vrije plek past.
-      for(let direction=0;direction<4&&best?.overlap!==0;direction++){
+      // Vermijd kruisingen en geef woorden zoveel mogelijk een lege cel rondom.
+      for(let direction=0;direction<(wordIndex<4?1:4)&&best?.score!==0;direction++){
         const [dx,dy]=directions[(wordIndex+direction)%4];
         const width=size-Math.abs(dx)*(word.length-1),height=size-Math.abs(dy)*(word.length-1);
         const offset=Math.floor(random()*width*height);
@@ -109,8 +109,16 @@
           const index=(position+offset)%(width*height),x=index%width,y=Math.floor(index/width)+(dy<0?word.length-1:0);
           if(!Array.from(word).every((c,i)=>!grid[y+dy*i][x+dx*i]||grid[y+dy*i][x+dx*i]===c))continue;
           const overlap=Array.from(word).filter((_,i)=>grid[y+dy*i][x+dx*i]).length;
-          if(!best||overlap<best.overlap)best={x,y,dx,dy,overlap};
-          if(overlap===0)break;
+          let neighbours=0;
+          Array.from(word).forEach((_,i)=>{
+            const cy=y+dy*i,cx=x+dx*i;
+            for(let oy=-1;oy<=1;oy++)for(let ox=-1;ox<=1;ox++){
+              if((ox||oy)&&grid[cy+oy]?.[cx+ox])neighbours++;
+            }
+          });
+          const score=overlap*10000+neighbours;
+          if(!best||score<best.score)best={x,y,dx,dy,overlap,score};
+          if(score===0)break;
         }
       }
       if(!best){
