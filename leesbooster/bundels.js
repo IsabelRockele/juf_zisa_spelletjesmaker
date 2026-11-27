@@ -93,28 +93,33 @@
   }
   function raceBoard(words) { return window.renderLeesbundelRace(words,escape); }
   // Een vaste puzzel per categorie houdt voorbeeld, afdruk en antwoordblad gelijk.
-  function puzzle(words) {
-    let seed = Array.from(selected.id).reduce((n,c)=>n+c.charCodeAt(0),7);
+  function puzzle(words,retry=0) {
+    let seed = Array.from(selected.id).reduce((n,c)=>n+c.charCodeAt(0),7+retry*7919);
     const random = () => {seed = (seed*1664525+1013904223)>>>0;return seed/4294967296;};
-    const size = 12, grid = Array.from({length:size},()=>Array(size).fill('')), cells = new Set(), placed=[];
-    for (const word of words) {
+    const size = Math.max(12,...words.map(word=>word.length+3)), grid = Array.from({length:size},()=>Array(size).fill('')), cells = new Set(), placed=[], paths=[];
+    const directions=[[1,1],[1,-1],[1,0],[0,1]];
+    for (const [wordIndex,word] of words.entries()) {
       let done = false;
       for (let attempt=0;attempt<300&&!done;attempt++) {
-        const vertical = random()>.5, dx=vertical?0:1, dy=vertical?1:0;
-        const x=Math.floor(random()*(size-dx*(word.length-1))), y=Math.floor(random()*(size-dy*(word.length-1)));
+        const [dx,dy]=directions[attempt<75?wordIndex%4:Math.floor(random()*directions.length)];
+        const x=Math.floor(random()*(size-Math.abs(dx)*(word.length-1)));
+        const y=(dy<0?word.length-1:0)+Math.floor(random()*(size-Math.abs(dy)*(word.length-1)));
         if (Array.from(word).every((c,i)=>!grid[y+dy*i][x+dx*i]||grid[y+dy*i][x+dx*i]===c)) {
           Array.from(word).forEach((c,i)=>{grid[y+dy*i][x+dx*i]=c;cells.add(`${y+dy*i},${x+dx*i}`);});
-          placed.push(word);done=true;
+          placed.push(word);paths.push({word,cells:Array.from(word,(_,i)=>[y+dy*i,x+dx*i]),dx,dy});done=true;
         }
       }
-      if (!done) throw new Error('Er kon geen volledige woordzoeker worden gemaakt.');
+      if (!done) {
+        if(retry<80)return puzzle(words,retry+1);
+        throw new Error('Er kon geen volledige woordzoeker worden gemaakt.');
+      }
     }
     const letters='abcdefghijklmnopqrstuvwxyz';
     grid.forEach(row=>row.forEach((c,x)=>{if(!c)row[x]=letters[Math.floor(random()*letters.length)];}));
-    return {grid,cells,placed};
+    return {grid,cells,placed,paths};
   }
   function gridHtml(p, solution=false) {
-    return `<table class="wordsearch ${solution?'solution-grid':''}" aria-label="${solution?'Oplossing':'Woordzoeker'}"><tbody>${p.grid.map((row,y)=>`<tr>${row.map((c,x)=>`<td${solution&&p.cells.has(`${y},${x}`)?' class="found"':''}>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    return `<table style="--search-cell:${Math.min(36,432/p.grid.length)}px" class="wordsearch ${solution?'solution-grid':''}" aria-label="${solution?'Oplossing':'Woordzoeker'}"><tbody>${p.grid.map((row,y)=>`<tr>${row.map((c,x)=>`<td${solution&&p.cells.has(`${y},${x}`)?' class="found"':''}>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   }
   function fitBoardWords(root=document) {
     root.querySelectorAll('.star-map,.connect-board').forEach(board=>{
@@ -211,7 +216,7 @@
     let html=page(1,'Lees de woordrijtjes',`<p class="instruction">${escape(selected.intro)}</p><div class="word-columns columns-${cols.length}">${cols.map(c=>`<section class="word-column"><h3>${escape(c.label)}</h3>${c.words.map(w=>`<p>${mark(w,c.label)}</p>`).join('')}</section>`).join('')}</div><div class="repeats"><b>Mijn leesmoment</b><br>Lees elke kolom rustig en duidelijk. Kies daarna drie woorden die je nog eens wilt oefenen.<br>Zo ging het: □ met hulp &nbsp; □ al wat vlotter &nbsp; □ helemaal zelf</div><h3>Mijn drie oefenwoorden</h3><div class="practice-boxes">${[1,2,3].map(n=>`<div><span>${n}</span>${writing()}</div>`).join('')}</div>`);
     html+=page(2,escape(selected.storyTitle),`<div class="story-layout"><div class="story">${selected.story.map(s=>`<p>${escape(s)}</p>`).join('')}</div><aside class="story-art">${storyImage()}</aside></div><h3>Wat heb je gelezen?</h3>${selected.questions.map((q,i)=>`<div class="question"><b>${i+1}. ${escape(q[0])}</b>${writing()}</div>`).join('')}`);
     let pageNumber=2;
-    if(included.includes('wordsearch'))html+=page(++pageNumber,'Zoek en lees',`<p class="instruction">Zoek van links naar rechts → of van boven naar beneden ↓. Lees elk gevonden woord hardop en streep het af in de lijst.</p><div class="wordbank">${bank}</div>${gridHtml(p)}<div class="repeats">Klaar? Kies drie gevonden woorden. Lees ze voor aan je maatje en gebruik elk woord in een mondelinge zin.</div>`);
+    if(included.includes('wordsearch'))html+=page(++pageNumber,'Zoek en lees',`<p class="instruction">Zoek van links naar rechts →, van boven naar beneden ↓, schuin van linksboven naar rechtsonder ↘ of van linksonder naar rechtsboven ↗. Lees elk gevonden woord hardop en streep het af in de lijst.</p><div class="wordbank">${bank}</div>${gridHtml(p)}<div class="repeats">Klaar? Kies drie gevonden woorden. Lees ze voor aan je maatje en gebruik elk woord in een mondelinge zin.</div>`);
     const storyLabels=Object.keys(selected.storyWords);
     const huntColors=[['geel','#fff0a6'],['blauw','#d6eafa'],['groen','#d9edcb'],['roze','#f7dbe9'],['oranje','#ffe0b8'],['paars','#e6dcf5']];
     const singleStoryLabel=storyLabels.length===1?storyLabels[0]:null;
@@ -257,7 +262,18 @@
     });
     root.querySelectorAll('.writing-set').forEach(set=>fill(set,'Eigen antwoord'));
     root.querySelectorAll('.question').forEach((q,i)=>fill(q.querySelector('.writing-set'),selected.questions[i][1]));
-    root.querySelectorAll('.wordsearch tr').forEach((row,y)=>[...row.children].forEach((cell,x)=>{if(p.cells.has(y+','+x))cell.classList.add('found');}));
+    const wordColors=['#ffe48b','#9cd8f5','#b8dfa0','#f4b4c9','#ffc18c','#c6b5ef','#91d9c9','#eca5a0','#d9dc89','#b7c9f0','#ddb4cd','#b6d6bc'];
+    root.querySelectorAll('.wordsearch').forEach(table=>{
+      const rows=table.querySelectorAll('tr');
+      const cellColors=new Map();
+      p.paths.forEach((path,i)=>path.cells.forEach(([y,x])=>{const key=y+','+x;if(!cellColors.has(key))cellColors.set(key,[]);cellColors.get(key).push(wordColors[i%wordColors.length]);}));
+      cellColors.forEach((colors,key)=>{
+        const [y,x]=key.split(',').map(Number),cell=rows[y].children[x];
+        cell.classList.add('found');cell.style.backgroundColor=colors[0];
+        if(colors.length>1)cell.style.backgroundImage='linear-gradient(135deg,'+colors.map((color,i)=>color+' '+(i*100/colors.length)+'% '+((i+1)*100/colors.length)+'%').join(',')+')';
+      });
+      table.closest('.paper').querySelectorAll('.wordbank span').forEach((word,i)=>{word.style.backgroundColor=wordColors[i%wordColors.length];word.style.borderRadius='6px';word.style.padding='3px';});
+    });
     if(included.includes('storyhunt')){
       const singles=root.querySelectorAll('.story-word-boxes .writing-set');
       singles.forEach((set,i)=>fill(set,selected.storyWords[storyLabels[0]][i]));
